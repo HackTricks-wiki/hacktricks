@@ -1,0 +1,67 @@
+---
+description: >-
+  Information from
+  http://hacking-printers.net/wiki/index.php/Cross-site_printing
+---
+
+# Cross-Site Printing
+
+You can make a user send HTTP POST request to the port 9100 of several IPs trying to reach an open raw print port open. If found, the **HTTP header is either printed as plain text or discarded** based on the printer's settings. The **POST data** however can **contain** arbitrary print jobs like **PostScript** or **PJL** commands to be **interpreted**.
+
+#### Enhanced cross-site printing
+
+You can use XMLHttpRequest \(XHR\) JavaScript objects as defined in to perform HTTP POST requests to internal printers. A limitation of the cross-site printing approach discussed so far is that **data can only be sent to the device**, **not received** because of the same-origin policy. To **bend** the **restrictions** of the same-origin policy, you can **make** the **server** responds with a fake but **valid HTTP response** allowing CORS requests \(including `Access-Control-Allow-Origin=*` \). A schematic overview of the attack is given below:
+
+![Advanced cross-site printing with CORS spoofing](http://hacking-printers.net/wiki/images/thumb/c/ce/Cross-site-printing.png/900px-Cross-site-printing.png)
+
+In such an enhanced variant of XSP – combined with CORS spoofing – a web attacker has full access to the HTTP response which allows him to extract arbitrary information like captured print jobs from the printer device. A proof-of-concept JavaScript snipplet is shown below:
+
+```javascript
+job = "\x1B%-12345X\r\n"
+    + "%!\r\n"
+    + "(HTTP/1.0 200 OK\\n) print\r\n"
+    + "(Server: PostScript HTTPD\\n) print\r\n"
+    + "(Access-Control-Allow-Origin: *\\n) print\r\n"
+    + "(Connection: close\\n) print\r\n"
+    + "(Content-Length: ) print\r\n"
+    + "product dup length dup string cvs print\r\n"
+    + "(\\n\\n) print\r\n"
+    + "print\r\n"
+    + "(\\n) print flush\r\n"
+    + "\x1B%-12345X\r\n";
+
+var x = new XMLHttpRequest();
+x.open("POST", "http://printer:9100");
+x.send(job);
+x.onreadystatechange = function() {
+  if (x.readyState == 4)
+    alert(x.responseText);
+};
+```
+
+#### Limitations of cross-site printing
+
+Note that **PCL** as page description language is **not applicable for CORS spoofing** because it only allows one **single number** to be **echoed**. **PJL likewise cannot** be used because unfortunately it prepends `@PJL ECHO` to all echoed strings, which makes it impossible to simulate a valid HTTP header. This however does **not** mean that **enhanced XSP attacks** are **limited** to **PostScript** jobs: PostScript can be used to respond with a spoofed HTTP header and **the** [**UEL** ](./#uel)**can further be invoked to switch the printer language**. This way a web attacker can also obtain the results for PJL commands. Two implementation pitfalls exist which deserve to be mentioned: First, a correct `Content-Length` for the data to be responded needs determined with PostScript. If the attacker cannot predict the overall size of the response and chunked encoding as well is not an option, she needs to set a very high value and use padding. Second, adding the `Connection: close` header field is important, otherwise HTTP/1.1 connections are kept alive until either the web client or the printer device triggers a timeout, which means the printer will not be accessible for some time.
+
+**If** the printer device supports **plain** **text printing** the **HTTP request** header of the XHR is printed out as hard copy – including the `Origin` header field containing the URL that invoked the malicious JavaScript, thus making it **hard** for an attacker to **stay silent**. This is unavoidable, as we do not gain control over the printer – and under some circumstances can disable printing functionality – until the HTTP body is processed and the HTTP header has already been interpreted as plain text by the printer device. If reducing noise is a priority, the attacker can however **try to first disable printing functionality** with proprietary PJL commands as proposed in [PJL jobmedia](http://hacking-printers.net/wiki/index.php/Document_processing#PJL_jobmedia) using other potential XSP channels like IPP, LPD, FTP or the printer's embedded web server. While all protocols could successfully be tested to deploy print jobs using variants of cross-protocol scripting they have some drawbacks beyond not providing feedback using spoofed CORS headers:
+
+* Cross-protocol access to LPD and FTP ports is blocked by various web browsers
+* Parameters for direct printing over the embedded web server are model-specific
+* The IPP standard requires the `Content-type` for HTTP POST requests being set to `application/ipp` which cannot be done with XHR objects – it is however up to the implementation to actually care about incorrect types
+
+A comparison of cross-site printing channels is given in below:
+
+| Channel | Port | No Feedback | Unsolicited printouts | Standardized | Blocked by |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Raw | 9100 | - | ✔ | ✔ | - |
+| Web | 80 | ✔ | - | - | - |
+| IPP | 631 | ✔ | - | ✔ | - |
+| LPD | 515 | ✔ | - | ✔ | FF, Ch, Op |
+| FTP | 21 | ✔ | - | ✔ | FF, Ch, Op, IE |
+
+One major problem of XSP is to **find** out the **correct address** or hostname of the **printer**. Our approach is to **abuse WebRTC** which is implemented in most modern browsers and has the feature to enumerate IP addresses for local network interfaces. Given the local IP address, XHR objects are further used to open connections to port **9100/tcp** for all 253 remaining addresses to retrieve the printer product name using PostScript and CORS spoofing which only takes seconds in our tests. If the printer is on the same subnet as the victim's host its address can be detected solely using JavaScript. WebRTC is in development for Safari and supported by current versions of Firefox, Chrome and Microsoft Edge. Internet Explorer has no WebRTC support, but VBScript and Java can likewise be used to leak the local IP address. If the address of the local interface cannot be retrieved, we apply an intelligent brute-force approach: We try to connect to port 80 of the victim's router using XHR objects. For this, a list of 115 default router addresses from various Internet-accessible resources was compiled. If a router is accessible, we scan the subnet for printers as described before.
+
+### Proof-of-concept
+
+A proof-of-concept implementation demonstrating that advanced cross-site printing attacks are practical and a real-world threat to companies and institutions is available at [hacking-printers.net/xsp/](http://hacking-printers.net/xsp/)
+

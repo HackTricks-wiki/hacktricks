@@ -1,0 +1,131 @@
+# Frida Tutorial 1
+
+**From**: [https://medium.com/infosec-adventures/introduction-to-frida-5a3f51595ca1](https://medium.com/infosec-adventures/introduction-to-frida-5a3f51595ca1)  
+**APK**: [https://github.com/t0thkr1s/frida-demo/releases](https://github.com/t0thkr1s/frida-demo/releases)  
+**Source Code**: [https://github.com/t0thkr1s/frida-demo](https://github.com/t0thkr1s/frida-demo)
+
+## Python
+
+Frida allows you to **insert JavaScript code** inside functions of a running application. But you can use **python** to **call** the hooks and even to **interact** with the **hooks**.
+
+This is a easy python script that you can use with all the proposed examples in this tutorial:
+
+```python
+#hooking.py
+import frida, sys
+
+with open(sys.argv[1], 'r') as f:
+        jscode = f.read()
+process = frida.get_usb_device().attach('infosecadventures.fridademo')
+script = process.create_script(jscode)
+print('[ * ] Running Frida Demo application')
+script.load()
+sys.stdin.read()
+```
+
+Call the script:
+
+```bash
+python hooking.py <hookN.js>
+```
+
+It is useful to know how to use python with frida, but for this examples you could also call directly Frida using command line frida tools:
+
+```text
+frida -U --no-pause -l hookN.js -f infosecadventures.fridademo
+```
+
+## Hook 1 - Boolean Bypass
+
+Here you can see how to **hook** a **boolean** method \(_checkPin_\) from the class: _infosecadventures.fridademo.utils.PinUtil_
+
+```javascript
+//hook1.js
+Java.perform(function() {
+ console.log("[ * ] Starting implementation override...")
+ var MainActivity = Java.use("infosecadventures.fridademo.utils.PinUtil");
+ MainActivity.checkPin.implementation = function(pin){
+     console.log("[ + ] PIN check successfully bypassed!")
+     return true;
+ }
+});
+```
+
+```text
+python hooking.py hook1.js
+```
+
+Mirar: La funcion recibe como parametro un String, no hace falta overload?
+
+## Hook 2 - Function Bruteforce
+
+### Non-Static Function
+
+If you want to call a non-static function of a class, you **first need a instance** of that class. Then, you can use that instance to call the function.  
+To do so, you could **find and existing instance** and use it:
+
+```javascript
+Java.perform(function() {
+ console.log("[ * ] Starting PIN Brute-force, please wait...");
+ Java.choose("infosecadventures.fridademo.utils.PinUtil", {
+  onMatch: function(instance) {
+   console.log("[ * ] Instance found in memory: " + instance);
+   for(var i = 1000; i < 9999; i++){
+    if(instance.checkPin(i + "") == true){
+     console.log("[ + ] Found correct PIN: " + i);
+     break;
+    }
+   }
+  },
+  onComplete: function() { }
+ });
+});
+```
+
+In this case this is not working as there isn't any instance and the function is Static
+
+### Static Function
+
+If the function is static, you could just call it:
+
+```javascript
+//hook2.js
+Java.perform(function () {
+    console.log("[ * ] Starting PIN Brute-force, please wait...")
+    var PinUtil = Java.use("infosecadventures.fridademo.utils.PinUtil");
+ 
+    for(var i=1000; i < 9999; i++)
+    {
+        if(PinUtil.checkPin(i+"") == true){
+            console.log("[ + ] Found correct PIN: " + i);
+        }
+    }
+});
+```
+
+## Hook 3 - Retrieving arguments and return value
+
+You could hook a function and make it **print** the value of the **passed arguments** and the value of the **return value:**
+
+```javascript
+//hook3.js
+Java.perform(function() {
+ console.log("[ * ] Starting implementation override...")
+  
+ var EncryptionUtil = Java.use("infosecadventures.fridademo.utils.EncryptionUtil");
+ EncryptionUtil.encrypt.implementation = function(key, value){
+     console.log("Key: " + key);
+     console.log("Value: " + value);
+     var encrypted_ret = this.encrypt(key, value); //Call the original function
+     console.log("Encrypted value: " + encrypted_ret);
+     return encrypted_ret;
+ }
+});
+```
+
+## Important
+
+In this tutorial you have hooked methods using the name of the mathod and _.implementation_. But if there were **more than one method** with the same name, you will need to **specify the method** that you want to hook **indicating the type of the arguments**.
+
+You can see that in [the next tutorial](frida-tutorial-2.md).
+

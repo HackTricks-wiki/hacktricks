@@ -1,0 +1,113 @@
+---
+description: 'Info from http://hacking-printers.net/wiki/index.php/Firmware_updates'
+---
+
+# Firmware updates
+
+ The dangers of malicious firmware updates are well-known and have been discussed early by [\[1\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-1) and [\[2\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-2). In contrast to other networked devices however, **it is common for printers to deploy firmware updates as ordinary print jobs**. This opens up a wide gateway for attackers because access to printing functionality is usually a low hurdle. One can only speculate about the motivation for such insecure design decisions but it seems logical that historic reasons play a role: Printers used to be connected by parallel or USB cable. Without network connectivity, security was less important and without a password-protected web server or similar functionality the printing channel was the only way to send data to the device.
+
+Firmware modification attacks against network printers have been demonstrated by [\[3\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-cui2011print-3) for HP devices, by [\[4\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-jordon2014wrestling-4) for the Canon PIXMA series and by [\[5\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-heiland2011patched-5) and [\[6\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-weidenbach2016pwn-6) for various Xerox models. As a countermeasure, printer manufacturer started to digitally sign their firmware [\[7\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-hp2012rfu-7).
+
+### Vendors
+
+To give an overview of firmware deployment procedures 1,400 firmware files for the top 10 printer manufacturers have been downloaded and systematically categorized by [\[8\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-8). The results are as follows.
+
+#### HP
+
+Firmware can be downloaded from [support.hp.com](http://support.hp.com/) or directly from [ftp.hp.com](ftp://ftp.hp.com/pub/networking/software/pfirmware/) via FTP. 419 files in HP's traditional remote firmware update \(`.rfu`\) format and 206 newer ‘HP FutureSmart’ binaries \(`.bdl`\) can be retrieved. The `.rfu` files contain proprietary PJL commands like `@PJL UPGRADE SIZE=…`, indicating that firmware updates are deployed as normal print jobs. This has been demonstrated by [\[3\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-cui2011print-3) and caused HP to digitally sign all their printer firmware since March 2012 [\[7\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-hp2012rfu-7).
+
+#### Canon
+
+Firmware is available at [www.canon.com/support](http://www.canon.com/support/). Canon however requires a valid device serial number to download any firmware. According to [\[4\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-jordon2014wrestling-4), who were able to modify firmware for the Canon PIXMA series, ‘there is no signing \(the correct way to do it\) but it does have very weak encryption’. According to email correspondence with a Canon technical support representative, ‘firmware does have to be digitally signed by Canon in order for it to be accepted by the printer’.
+
+#### Epson
+
+Firmware can be downloaded from [epson.com](http://epson.com/) and via FTP from [download.epson-europe.com](ftp://download.epson-europe.com/). Files come as WinZip self-extracting `.exe` files and can be unpacked using unp[\[9\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-9). The contained `.efu` files can be analyzed using Binwalk[\[10\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-10) which extracts the actual firmware. One can obtain 49 `.rcx` files of unknown format \(‘SEIKO EPSON EpsonNet Form’\) and nine `.prn` files containing PJL commands \(`@PJL ENTER LANGUAGE=DOWNLOAD`\). Epson has not published any information on protection mechanisms. Firmware released before 2016 did not apply code signing and could be manipulated as shown by [\[11\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-11). They ‘believe huge amounts of the devices produced since 1999 \[…\] could be vulnerable’.
+
+#### Dell
+
+Firmware can be obtained from [downloads.dell.com](http://downloads.dell.com/) and from [ftp.us.dell.com/printer](ftp://ftp.us.dell.com/printer). Files can be unpacked using unp and the included `.zip` files can be extracted with a variant of unzip. Dell does not produce any printing devices, but rebadges the products of other vendors. Therefore a wide variety of firmware files, including 18 `.hd` files containing `@PJL FIRMWARE=…`, 25 `.prn` files containing `@PJL ENTER LANGUAGE=DOWNLOAD` and 30 `.fls`/`.fly` files containing `@PJL LPROGRAMRIP` were found. Regarding protection mechanisms, Dell has not released any publicly available information.
+
+#### Brother
+
+Firmware cannot be easily downloaded. Instead a Windows binary needs to be run which checks for available printers and requests download links for the latest firmware from a web service. By guessing correct parameters one is able to get the links for 98 files. Firmware files do not need to be unpacked as they already come in raw format. 79 files have the extension `.djf` and contain `@PJL EXECUTE BRDOWNLOAD`, while 9 `.blf` files contain `@PJL ENTER LANGUAGE=PCL`. Brother has not released any publicly available information on protection mechanisms.
+
+#### Lexmark
+
+Firmware is available from [support.lexmark.com](http://support.lexmark.com/) and can be unpacked using unp. 63 `fls` files could be obtained containing the PJL header `@PJL LPROGRAMRIP` to install the firmware. Lexmark's security whitepaper claims ‘packages must be encrypted with a symmetric encryption algorithm through a key that is known only to Lexmark and is embedded securely in all devices. However, the strongest security measure comes from requiring that all firmware packages must include multiple digital 2048-bit RSA signatures from Lexmark. If these signatures are not valid \[...\] the firmware is discarded’ [\[12\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-12).
+
+#### Samsung
+
+Firmware can be downloaded from [www.samsung.com/us/support/download](http://www.samsung.com/us/support/download). Retrieved files either come as zip archives or Windows executables which can be run in wine and further unpacked using unp. This way, 33 `.hd` files starting with `@PJL FIRMWARE` and associated `.prn` files containing `@PJL DEFAULT SWUPGRADE=ON` could be obtained. Samsung has not released any publicly available information on protection mechanisms.
+
+#### Xerox
+
+Firmware is publicly available at [www.support.xerox.com](http://www.support.xerox.com/). Downloaded files come in zip format and can be unpacked using unzip. Firmware files are in different formats: 16 `.hd` files including `@PJL FIRMWARE=…`, 36 PostScript files for older devices and 35 `.dlm` files which is the format used by currently used by Xerox and includes digital signatures. A flaw in the deployment process however was found by [\[5\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-heiland2011patched-5) and extended by [\[6\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-weidenbach2016pwn-6), leading to remote code execution – the private key and the tool used for code signing was contained in the firmware itself.
+
+#### Ricoh
+
+The ‘Firmware Download Center’ at [support.ricoh.com](https://support.ricoh.com/) is not open to the general public. Fortunately the interweb contains direct links to a couple of driver/firmware download pages so one is able to obtain 31 firmware files using a simple Google search \(`site:support.ricoh.com firmware`\). Files can be unpacked using unp. 14 `.bin` files contain `@PJL RSYSTEMUPDATE SIZE=…` while 15 `.brn` files are associated with a `settings.ini`, including `@PJL FWDOWNLOAD` and `USERID=sysadm, PASSWORD=sysadm`. Ricoh does not provide any up-to-date information on protection mechanisms. In a whitepaper dating back to 2007, Ricoh claims that ‘only service technicians have a password and dedicated account for making firmware updates’ [\[13\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-13).
+
+#### Kyocera
+
+Kyocera does not release firmware to end-users. In a publicly available Kyocera dealer forum however, firmware downloads for various models are linked: [ftp.kdaconnect.com](ftp://ftp.kdaconnect.com/). Files can be unpacked using unp and contain mountable cramfs[\[14\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-14) and squashfs[\[15\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-15) images as well as proprietary binary formats. Firmware is deployed as a print job with `!R! UPGR'SYS';EXIT;` prepended – the upgrade command of the PRESCRIBE page description language [\[16\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-16). Kyocera has not released any publicly available information on protection mechanisms.
+
+#### Konica
+
+Although not actively promoted, firmware for Konica Minolta printers can be downloaded from [download6.konicaminolta.eu](http://download6.konicaminolta.eu/). Newer Internet-connected devices have the capability to perform firmware updates themselves. Compressed files come in different formats and can be unpacked using unp, unzip and tar which results in 38 proprietary `.bin` files, 20 PostScript based ‘softload printer modules’ for older devices and 14 files of different extensions containing PJL commands like `@PJL ENTER LANGUAGE=FIRMUPDATE`. The Konica Minolta security whitepaper claims that firmware is verified using a ‘hash value’ [\[17\]](http://hacking-printers.net/wiki/index.php/Firmware_updates#cite_note-17). It may be doubted that such a scheme is cryptographically secure.
+
+### Results
+
+Out of ten analyzed manufacturers, nine use [PJL](http://hacking-printers.net/wiki/index.php/PJL) commands for all or at least some of their firmware update procedures which is a strong indicator that updates are deployed as ordinary print jobs. The remaining manufacturer – Kyocera – applies the PRESCRIBE page description language. One can therefore claim that it is common in the printing industry to install new firmware over the printing channel itself and name a **major design flaw** present in almost any printer device: **data and code over the same channel**. Exploitation of this issue however is hard as for most manufacturers no reasoned statement on protection mechanisms can be made. An in-depth analysis of firmware modification attacks should therefore be part of future research. A summary of file headers or types for all obtained firmware files is given below:
+
+| Vendor | Extension | Quantity | File header or type |
+| :--- | :--- | :--- | :--- |
+| HP | rfu | 419 | @PJL UPGRADE SIZE=… |
+| bdl | 206 | FutureSmart binary format |  |
+| Epson | rcx | 49 | SEIKO EPSON EpsonNet Form |
+| prn | 9 | @PJL ENTER LANGUAGE=DOWNLOAD |  |
+| brn | 7 | Unknown binary, includes config file |  |
+| Dell | fls, fly | 30 | @PJL LPROGRAMRIP |
+| prn | 25 | @PJL ENTER LANGUAGE=DOWNLOAD |  |
+| hd | 18 | @PJL FIRMWARE=… |  |
+| brn | 3 | Unknown binary, includes config file |  |
+| ps | 2 | PostScript \(title: Firmware Update\) |  |
+| pjl | 1 | @PJL ENTER LANGUAGE=FLASH |  |
+| Brother | djf | 79 | @PJL EXECUTE BRDOWNLOAD |
+| blf | 9 | @PJL ENTER LANGUAGE=PCL |  |
+| Lexmark | fls | 63 | @PJL LPROGRAMRIP |
+| bin, fls | 6 | Unknown binary format |  |
+| Samsung | hd | 33 | @PJL FIRMWARE=… |
+| fls, hd0 | 4 | @PJL DEFAULT P1284VALUE=… |  |
+| Xerox | ps | 36 | PostScript \(title: Firmware Update\) |
+| dlm | 35 | Xerox Dynamic Loadable Module |  |
+| prn, bin | 20 | @PJL ENTER LANGUAGE=DOWNLOAD |  |
+| hd | 16 | @PJL FIRMWARE=… |  |
+| brn | 10 | Unknown binary, includes config file |  |
+| bin | 10 | @PJL SET JOBATTR="@SWDL" |  |
+| fls, hd, hde | 8 | @PJL DEFAULT P1284VALUE=… |  |
+| fls, xfc | 4 | @PJL ENTER LANGUAGE=XFLASH |  |
+| pjl | 3 | @PJL FSDOWNLOAD \[name\].rpm |  |
+| axf | 3 | RISC OS AIF executable |  |
+| Ricoh | brn | 15 | @PJL FWDOWNLOAD… |
+| bin | 14 | @PJL RSYSTEMUPDATE SIZE=… |  |
+| fls | 4 | @PJL LPROGRAMRIP |  |
+| Kyocera | cramfs, img | 98 | cramfs image |
+| bin, squashfs | 79 | squashfs image |  |
+| bin, kmmfp | 41 | u-boot legacy uImage |  |
+| efi, kmpanel | 13 | proprietary image format |  |
+| Konica Minolta | bin | 38 | unknown binary, additional checksum file |
+| ps | 20 | PostScript \(title: Softload printer modules\) |  |
+| ftp, prn | 11 | @PJL ENTER LANGUAGE=FIRMUPDATE |  |
+| upg | 1 | @PJL ENTER LANGUAGE=UPGRADE |  |
+
+**How to test for this attack?**
+
+The security of code signing is based on keeping the private key a long-term trade secret. There are however still printers in the wild which are potentially vulnerable to malicious firmware – either because they have not yet been updated or because proprietary checksum algorithms are sold as cryptographically secure digital signature schemes. It certainly must be pointed out that analyzing firmware can be hard if vendors do not document their firmware formats and update routines. Usually this requires some reverse engineering. Testing the feasibility of firmware modification attacks therefore is not trivial. In a simple test, one can **flip a single bit** and check if the modified firmware is still accepted by the printer device. If not, either a checksum or a digital signature is verfied by the printer. Finding the difference is not always easy and writing malicious firmware \(with a correct checksum\) can be a time-consuming project.
+
+Other attack scenarios include:
+
+* Even if the firmware is signed, one may be able to downgrade to a certain \(signed\) firmware version which has known security weaknesses.
+* Even if the firmware is signed, it can sometimes be mounted to gain further information \(especially Konica Minolta firmware is easly mountable\).
+* Just because firmware is signed doesn't mean its secure. Using binwalk/grep etc. one may find components with known vulnerabilities like [CVE-2015-7547](https://cve.mitre.org/cgi-bin/cvename.cgi?name=cve-2015-7547).
+

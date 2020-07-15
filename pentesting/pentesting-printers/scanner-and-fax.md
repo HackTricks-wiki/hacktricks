@@ -1,0 +1,55 @@
+---
+description: 'From http://hacking-printers.net/wiki/index.php/Fax_and_Scanner'
+---
+
+# Scanner and Fax
+
+## Scanner
+
+Access to scan functionality on MFPs \(multi-function printers/peripherals\) is not standardized and it seems only few vendors apply PJL commands for this task. Public documentation is missing, the [SANE project](http://www.sane-project.org/sane-backends.html#SCANNERS) managed to reverse engineer the protocols for various scanner devices. On Brother MFPs, the proprietary PostScript operator \_brpdfscan may possibly be used.
+
+**How to test for this attack?**
+
+Install the printer drivers for the specific model and \(ab\)use the scan function.
+
+**Who can perform this attack?**
+
+* Anyone who can print, if scanning functionality can be accessed through a [printer control](http://hacking-printers.net/wiki/index.php/Fundamentals#Printer_Control_Languages) or [page description](http://hacking-printers.net/wiki/index.php/Fundamentals#Page_Description_Languages) language
+* Anyone who can access the web interface, on MFPs where documents can be scanned using the web interface
+* Only attackers who can access certain network services, if a separate TCP port is used for scanning
+
+## Telefax
+
+Fax messages are transmitted in the form of audio-frequency tones. They can be sent to any telefax-capable device available over the telephone system. Therefore, they could potentially be used to bypass typical company protection mechanisms like TCP/IP firewalls or intrusion detection systems and execute malicious commands on printers or MFPs in internal networks. In the middle of 90s Adobe introduced ‘PostScript fax’ as a language supplement [\[1\]](http://hacking-printers.net/wiki/index.php/Fax_and_Scanner#cite_note-1), allowing compatible devices to receive PostScript files directly via fax. This enables an attacker to use ordinary telephone system as a channel to deploy malicious PostScript code to a printer. Unfortunately, PostScript fax never established itself and was only implemented in a handful of devices. Telefax messages instead are typically transmitted as graphical images like [TIFF](https://en.wikipedia.org/wiki/TIFF#TIFF_Compression_Tag). Nevertheless, it cannot be ruled out that other vendors implement proprietary fax extensions to **inbound** receive arbitrary PDL datastreams instead of raw fax images. Theoretically, a ‘fax virus’ could be created which would spread by infecting other devices based on numbers from the MFPs's address book or by traditional wardialing.
+
+Furthermore, **outbound** fax can often be controlled by proprietary PJL commands on today's MFPs. This can be used to cause financial loss to an institution by calling an 0900 number \(which may be registered by the attacker herself\) or as a backchannel to leak sensitive information. Vendor-specific examples to send fax via PDL datastreams are given below.
+
+#### HP
+
+According to [\[1\]](http://hplipopensource.com/) fax can be accessed using PML on HP devices.
+
+#### Xerox
+
+According to [\[2\]](http://www.office.xerox.com/support/dctips/dc02cc0280.pdf), Xerox uses proprietary PJL commands: `@PJL COMMENT OID_ATT_FAX_DESTINATION_PHONE "..."`
+
+#### Brother
+
+According to [\[3\]](http://brother-mfc.sourceforge.net/faxlanguage.txt), Brother uses the proprietary FCL \(Fax Control Language\): `<Esc>DIALNUM[ (...) ]`
+
+#### Lexmark
+
+According to [\[4\]](https://www.lexmark.com/publications/pdfs/techref_WB.pdf) Lexmark uses proprietary PJL commands: `@PJL LFAX PHONENUMBER="..."`
+
+#### Kyocera
+
+According to [\[5\]](http://material.karlov.mff.cuni.cz/people/hajek/bizhub/femperonpsc200mu.pl) Kyocera uses proprietary PJL commands: `@PJL SET FAXTEL = ...`
+
+#### Ricoh
+
+Accroding to [\[6\]](http://www.objectiflune.com/forum2/ubbthreads.php?ubb=showflat&Number=29462&page=1) Ricoh uses proprietary PJL commands: `@PJL ENTER LANGUAGE=RFAX`
+
+  
+**How to test for this attack?**
+
+Install the printer drivers for the specific model and \(ab\)use the fax function.
+
