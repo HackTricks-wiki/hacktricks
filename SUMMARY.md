@@ -224,7 +224,7 @@
 * [5432,5433 - Pentesting Postgresql](pentesting/pentesting-postgresql.md)
 * [5671,5672 - Pentesting AMQP](pentesting/5671-5672-pentesting-amqp.md)
 * [5800,5801,5900,5901 - Pentesting VNC](pentesting/pentesting-vnc.md)
-* [5984 - Pentesting CouchDB](pentesting/5984-pentesting-couchdb.md)
+* [5984,6984 - Pentesting CouchDB](pentesting/5984-pentesting-couchdb.md)
 * [5985,5986 - Pentesting WinRM](pentesting/5985-5986-pentesting-winrm.md)
 * [6000 - Pentesting X11](pentesting/6000-pentesting-x11.md)
 * [6379 - Pentesting Redis](pentesting/6379-pentesting-redis.md)
