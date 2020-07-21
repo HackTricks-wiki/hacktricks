@@ -10,7 +10,7 @@ import requests
 url = "http://example.com:80/some/path.php"
 params = {"p1":"value1", "p2":"value2"}
 headers = {"User-Agent": "fake User Agent", "Fake header": "True value"}
-cookies = {"PHPSESSION": "1234567890abcdef", "FakeCookie123": "456"}
+cookies = {"PHPSESSID": "1234567890abcdef", "FakeCookie123": "456"}
 proxies = {'http':'http://127.0.0.1:8080','https':'http://127.0.0.1:8080'}
 
 #Regular Get requests sending parameters (params)
