@@ -396,4 +396,5 @@
     * [Pickle Rick](ctf-write-ups/try-hack-me/pickle-rick.md)
 * [1911 - Pentesting fox](1911-pentesting-fox.md)
 * [Online Platforms with API](online-platforms-with-api.md)
+* [Phising Documents](phising-documents.md)
 
