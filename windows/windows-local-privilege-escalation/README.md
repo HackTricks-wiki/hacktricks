@@ -974,6 +974,10 @@ If you want to read an example of [**how to go from high integrity to System usi
 If you manages to **hijack a dll** being **loaded** by a **process** running as **SYSTEM** you will be able to execute arbitrary code with those permissions. Therefore Dll Hijacking is also useful to this kind of privilege escalation, and, moreover, if far **more easy to achieve from a high integrity process** as it will have **write permissions** on the folders used to load dlls.  
 **You can** [**learn more about Dll hijacking here**](dll-hijacking.md)**.**
 
+### **From Administrator or Network Service to System**
+
+\*\*\*\*[**https://github.com/sailay1996/RpcSsImpersonator**](https://github.com/sailay1996/RpcSsImpersonator)\*\*\*\*
+
 ## More help
 
 [Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)
