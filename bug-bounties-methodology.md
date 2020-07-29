@@ -94,6 +94,19 @@ There are some pages that let you search by these trackers and more:
 * \*\*\*\*[**Publicwww**](https://publicwww.com/)\*\*\*\*
 * \*\*\*\*[**SpyOnWeb**](http://spyonweb.com/)\*\*\*\*
 
+### **Favicon**
+
+Did you know that we can find related domains and sub domains to our target by looking for the same favicon icon hash? This is exactly what [favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py) tool made by [@m4ll0k2](https://twitter.com/m4ll0k2) does. Here’s how to use it:
+
+```text
+cat my_targets.txt | xargs -I %% bash -c 'echo "http://%%/favicon.ico"' > targets.txt
+python3 favihash.py -f https://target/favicon.ico -t targets.txt -s
+```
+
+![favihash - discover domains with the same favicon icon hash](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
+
+Simply said, favihash will allow us to discover domains that have the same favicon icon hash as our target.
+
 ### Other ways
 
 **Note that you can use this technique to discover more domain names every time you find a new domain.**
@@ -154,6 +167,19 @@ Another possibly interesting tool is [**gau**](https://github.com/lc/gau)**.** I
 This project offers for **free all the subdomains related to bug-bounty programs**. You can access this data also using [chaospy](https://github.com/dr-0x0x/chaospy) or even access the scope used by this project [https://github.com/projectdiscovery/chaos-public-program-list](https://github.com/projectdiscovery/chaos-public-program-list)
 
 You could also find subdomains scrapping the web pages and parsing them \(including JS files\) searching for subdomains using [SubDomainizer](https://github.com/nsonaniya2010/SubDomainizer) or [subscraper](https://github.com/Cillian-Collins/subscraper).
+
+#### RapidDNS
+
+Quickly find subdomains using [RapidDNS](https://rapiddns.io/) API \(from  [link](https://twitter.com/Verry__D/status/1282293265597779968)\):
+
+```text
+rapiddns(){
+curl -s "https://rapiddns.io/subdomain/$1?full=1" \
+ | grep -oP '_blank">\K[^<]*' \
+ | grep -v http \
+ | sort -u
+}
+```
 
 ### DNS Brute force
 
