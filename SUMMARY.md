@@ -275,6 +275,7 @@
 * [LDAP Injection](pentesting-web/ldap-injection.md)
 * [OAuth to Account takeover](pentesting-web/oauth-to-account-takeover.md)
 * [Open Redirect](pentesting-web/open-redirect.md)
+* [Parameter Pollution](pentesting-web/parameter-pollution.md)
 * [Race Condition](pentesting-web/race-condition.md)
 * [Rate Limit Bypass](pentesting-web/rate-limit-bypass.md)
 * [SQL Injection](pentesting-web/sql-injection/README.md)
@@ -398,5 +399,4 @@
 * [1911 - Pentesting fox](1911-pentesting-fox.md)
 * [Online Platforms with API](online-platforms-with-api.md)
 * [Phising Documents](phising-documents.md)
-* [Parameter Pollution](parameter-pollution.md)
 
