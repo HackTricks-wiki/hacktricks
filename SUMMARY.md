@@ -176,6 +176,7 @@
   * [Tomcat](pentesting/pentesting-web/tomcat.md)
   * [VMWare \(ESX, VCenter...\)](pentesting/pentesting-web/vmware-esx-vcenter....md)
   * [WebDav](pentesting/pentesting-web/put-method-webdav.md)
+  * [werkzeug](pentesting/pentesting-web/werkzeug.md)
   * [Wordpress](pentesting/pentesting-web/wordpress.md)
 * [88tcp/udp - Pentesting Kerberos](pentesting/pentesting-kerberos-88/README.md)
   * [Harvesting tickets from Windows](pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
