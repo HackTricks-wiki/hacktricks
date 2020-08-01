@@ -70,6 +70,10 @@ pip3 install azure-cis-scanner #Install
 azscan #Run, login before with `az login`
 ```
 
+### Attack Graph
+
+[**Stormspotter** ](https://github.com/Azure/Stormspotter)creates an “attack graph” of the resources in an Azure subscription. It enables red teams and pentesters to visualize the attack surface and pivot opportunities within a tenant, and supercharges your defenders to quickly orient and prioritize incident response work.
+
 ### More checks
 
 * Check for a **high number of Global Admin** \(between 2-4 are recommended\). Access it on: [https://portal.azure.com/\#blade/Microsoft\_AAD\_IAM/ActiveDirectoryMenuBlade/Overview](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Overview)
