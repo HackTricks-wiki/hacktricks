@@ -34,6 +34,7 @@
 
 * [Checklist - Local Windows Privilege Escalation](windows/checklist-windows-privilege-escalation.md)
 * [Windows Local Privilege Escalation](windows/windows-local-privilege-escalation/README.md)
+  * [Privilege Escalation with Autorun binaries](windows/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md)
   * [Dll Hijacking](windows/windows-local-privilege-escalation/dll-hijacking.md)
   * [From High Integrity to SYSTEM with Name Pipes](windows/windows-local-privilege-escalation/from-high-integrity-to-system-with-name-pipes.md)
   * [Named Pipe Client Impersonation](windows/windows-local-privilege-escalation/named-pipe-client-impersonation.md)
