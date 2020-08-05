@@ -1,5 +1,37 @@
 # Privilege Escalation with Autorun Registry
 
+## WMIC
+
+**Wmic** can be used to run programs on **startup**. See which binaries are programmed to run is startup with:
+
+```bash
+wmic startup get caption,command 2>nul & ^
+Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
+```
+
+## Scheduled Tasks
+
+**Tasks** can be schedules to run with **certain frequency**. See which binaries are scheduled to run with:
+
+```bash
+schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
+```
+
+## Folders
+
+All the binaries located in the **Startup folders are going to be executed on startup**. The common startup folders are the ones listed a continuation, but the startup folder is indicated in the registry. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+
+```bash
+dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
+dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
+dir /b "%programdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
+dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
+Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
+Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
+```
+
+## Registry
+
 {% hint style="info" %}
 Note: The **Wow6432Node** registry entry indicates that you are running a 64-bit Windows version. The operating system uses this key to display a separate view of HKEY\_LOCAL\_MACHINE\SOFTWARE for 32-bit applications that run on 64-bit Windows versions.
 {% endhint %}
@@ -267,6 +299,14 @@ reg query "HKLM\SOFTWARE\Classes\htmlfile\shell\open\command" /v ""
 reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
+```
+
+## SysInternals
+
+Note that all the sites where you can find autoruns are **already searched by**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). However, for a **more comprehensive list of auto-executed** file you could use [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)from systinternals:
+
+```text
+autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 
 ## More

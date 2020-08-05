@@ -189,37 +189,10 @@ Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 
 ### Run at startup
 
-Check if you can overwrite some binary that is going to be executed by other user.
+**Check if you can overwrite some registry or binary that is going to be executed by other user.  
+Read** the **following page** to learn more about interesting autoruns locations to escalate privileges:
 
-```bash
-wmic startup get caption,command 2>nul & ^
-reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run 2>nul & ^
-reg query HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce 2>nul & ^
-reg query HKCU\Software\Microsoft\Windows\CurrentVersion\Run 2>nul & ^
-reg query HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce 2>nul & ^
-dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul & ^
-dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul & ^
-dir /b "%programdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul & ^
-dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
-schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
-```
-
-```bash
-Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
-Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run'
-Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce'
-Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run'
-Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\RunOnce'
-Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
-Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
-```
-
-Check which files are executed when the computer is started. Components that are executed when a user logins can be exploited to execute malicious code when the administrator logins.  
-For a **more comprehensive list of auto-executed** file you could use [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)from systinternals:
-
-```text
-autorunsc.exe -m -nobanner -a * -ct /accepteula
-```
+{% page-ref page="privilege-escalation-with-autorun-binaries.md" %}
 
 ## Running processes
 
