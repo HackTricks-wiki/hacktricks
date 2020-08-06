@@ -247,6 +247,7 @@
 
 * [2FA Bypass](pentesting-web/2fa-bypass.md)
 * [Abusing hop-by-hop headers](pentesting-web/abusing-hop-by-hop-headers.md)
+* [Bypass Payment Process](pentesting-web/bypass-payment-process.md)
 * [Captcha Bypass](pentesting-web/captcha-bypass.md)
 * [Cache Poisoning and Cache Deception](pentesting-web/cache-deception.md)
 * [Clickjacking](pentesting-web/clickjacking.md)
