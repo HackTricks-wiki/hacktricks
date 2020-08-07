@@ -19,6 +19,7 @@
 
 * [Checklist - Linux Privilege Escalation](linux-unix/linux-privilege-escalation-checklist.md)
 * [Linux Privilege Escalation](linux-unix/privilege-escalation/README.md)
+  * [D-Bus Enumeration & Command Injection Privilege Escalation](linux-unix/privilege-escalation/d-bus-enumeration-and-command-injection-privilege-escalation.md)
   * [Interesting Groups - Linux PE](linux-unix/privilege-escalation/interesting-groups-linux-pe.md)
   * [NFS no\_root\_squash/no\_all\_squash misconfiguration PE](linux-unix/privilege-escalation/nfs-no_root_squash-misconfiguration-pe.md)
   * [lxc - Privilege escalation](linux-unix/privilege-escalation/lxd-privilege-escalation.md)

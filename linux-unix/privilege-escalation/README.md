@@ -195,7 +195,7 @@ If the socket **respond with a HTTP** request, then you can **communicate** with
 
 ## **D-Bus**
 
-D-BUS is an **interprocess communication \(IPC\) system**, providing a simple yet powerful mechanism **allowing applications to talk to one another**, communicate information and request services. D-BUS was designed from scratch to fulfil the needs of a modern Linux system.
+D-BUS is an **inter-process communication \(IPC\) system**, providing a simple yet powerful mechanism **allowing applications to talk to one another**, communicate information and request services. D-BUS was designed from scratch to fulfil the needs of a modern Linux system.
 
 D-BUS, as a full-featured IPC and object system, has several intended uses. First, D-BUS can perform basic application IPC, allowing one process to shuttle data to another—think **UNIX domain sockets on steroids**. Second, D-BUS can facilitate sending events, or signals, through the system, allowing different components in the system to communicate and ultimately to integrate better. For example, a Bluetooth dæmon can send an incoming call signal that your music player can intercept, muting the volume until the call ends. Finally, D-BUS implements a remote object system, letting one application request services and invoke methods from a different object—think CORBA without the complications. ****\(From [here](https://www.linuxjournal.com/article/7744)\).
 
@@ -203,7 +203,7 @@ D-Bus use an **allow/deny model**, where each message \(method call, signal emis
 
 Part of the policy of `/etc/dbus-1/system.d/wpa_supplicant.conf`:
 
-```bash
+```markup
 <policy user="root">
     <allow own="fi.w1.wpa_supplicant1"/>
     <allow send_destination="fi.w1.wpa_supplicant1"/>
@@ -216,6 +216,10 @@ Therefore, if a policy is allowing your user in anyway to **interact with the bu
 
 Note that a **policy** that **doesn't specify** any user or group affects everyone \(`<policy>`\).  
 Policies to the context "default" affects everyone not affected by other policies \(`<policy context="default"`\).
+
+**Learn how to enumerate and exploit a D-Bus communication here:**
+
+{% page-ref page="d-bus-enumeration-and-command-injection-privilege-escalation.md" %}
 
 ## Processes
 
