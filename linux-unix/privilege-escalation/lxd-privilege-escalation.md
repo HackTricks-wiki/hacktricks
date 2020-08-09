@@ -11,7 +11,7 @@ You can install in your machine this distro builder: [https://github.com/lxc/dis
 sudo apt update
 sudo apt install -y golang-go debootstrap rsync gpg squashfs-tools
 #Clone repo
-go get -d -v github.com/lxc/distrobuilder
+go get -d -v github.com/lxc/distrobuilder/distrobuilder
 #Make distrobuilder
 cd $HOME/go/src/github.com/lxc/distrobuilder
 make
@@ -19,9 +19,9 @@ cd
 #Prepare the creation of alpine
 mkdir -p $HOME/ContainerImages/alpine/
 cd $HOME/ContainerImages/alpine/
-cp $HOME/go/src/github.com/lxc/distrobuilder/doc/examples/alpine alpine.yaml
+wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 #Create the container
-sudo $HOME/go/bin/distrobuilder build-lxd ubuntu.yaml
+sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml
 ```
 
 Then, upload to the server the files **lxd.tar.xz** and **rootfs.squashfs**
