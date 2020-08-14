@@ -506,6 +506,10 @@ Capabilities are useful when you want to restrict your own processes after perfo
 You can force capabilities upon programs using `setcap`, and query these using `getcap`:
 
 ```bash
+#Set Capability
+setcap cap_net_raw+ep /sbin/ping
+
+#Get Capability
 getcap /sbin/ping
 /sbin/ping = cap_net_raw+ep
 ```
