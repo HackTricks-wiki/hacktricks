@@ -1,4 +1,4 @@
-# Privilege Escalation with Autorun Registry
+# Privilege Escalation with Autoruns
 
 ## WMIC
 
@@ -15,6 +15,9 @@ Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
+schtasks /query /fo LIST 2>nul | findstr TaskName
+schtasks /query /fo LIST /v > schtasks.txt; cat schtask.txt | grep "SYSTEM\|Task To Run" | grep -B 1 SYSTEM
+Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,TaskPath,State
 ```
 
 ## Folders

