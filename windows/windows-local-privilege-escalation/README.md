@@ -43,6 +43,7 @@ Get-Hotfix -description "Security update" #List only "Security Update" patches
 
 * \*\*\*\*[https://github.com/nomi-sec/PoC-in-GitHub](https://github.com/nomi-sec/PoC-in-GitHub)
 * [https://github.com/abatchy17/WindowsExploits](https://github.com/abatchy17/WindowsExploits)
+* [https://github.com/SecWiki/windows-kernel-exploits](https://github.com/SecWiki/windows-kernel-exploits)
 
 ### Vulnerable Drivers
 
