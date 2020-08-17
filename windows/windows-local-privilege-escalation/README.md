@@ -165,65 +165,10 @@ powershell -command "Get-Clipboard"
 
 ## Token manipulation
 
-**Learn more** about what is a **token** in this page: [Windows Tokens](../credentials.md#access-tokens).  
-Take a look to **available privileges**, some of them can give you SYSTEM privileges. Take a look to [this amazing paper](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt).
+**Learn more** about what is a **token** in this page: [**Windows Tokens**](../credentials.md#access-tokens).  
+Check the following page to **learn about interesting tokens** and how to abuse them:
 
-### SeImpersonatePrivilege \(3.1.1\)
-
-Any process holding this privilege can **impersonate** \(but not create\) any **token** for which it is able to gethandle. You can get a **privileged token** from a **Windows service** \(DCOM\) making it perform an **NTLM authentication** against the exploit, then execute a process as **SYSTEM**. Exploit it with [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM ](https://github.com/antonioCoco/RogueWinRM)\(needs winrm enabled\), [SweetPotato](https://github.com/CCob/SweetPotato), [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
-
-### SeAssignPrimaryPrivilege \(3.1.2\)
-
-It is very similar to **SeImpersonatePrivilege**, it will use the **same method** to get a privileged token.  
-Then, this privilege allows **to assign a primary token** to a new/suspended process. With the privileged impersonation token you can derivate a primary token \(DuplicateTokenEx\).  
-With the token, you can create a **new process** with 'CreateProcessAsUser' or create a process suspended and **set the token** \(in general, you cannot modify the primary token of a running process\).
-
-### SeTcbPrivilege \(3.1.3\)
-
-If you have enabled this token you can use **KERB\_S4U\_LOGON** to get an **impersonation token** for any other user without knowing the credentials, **add an arbitrary group** \(admins\) to the token, set the **integrity level** of the token to "**medium**", and assign this token to the **current thread** \(SetThreadToken\).
-
-### SeBackupPrivilege \(3.1.4\)
-
-This privilege causes the system to **grant all read access** control to any file \(only read\).  
-Use it to **read the password hashes of local Administrator** accounts from the registry and then use "**psexec**" or "**wmicexec**" with the hash \(PTH\).  
- This attack won't work if the Local Administrator is disabled, or if it is configured that a Local Admin isn't admin if he is connected remotely.  
-You can **abuse this privilege** with: [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1) or with [https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug](https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug)
-
-### SeRestorePrivilege \(3.1.5\)
-
-**Write access** control to any file on the system, regardless of the files ACL.  
-You can **modify services**, DLL Hijacking, set **debugger** \(Image File Execution Options\)… A lot of options to escalate.
-
-### SeCreateTokenPrivilege \(3.1.6\)
-
-This token **can be used** as EoP method **only** if the user **can impersonate** tokens \(even without SeImpersonatePrivilege\).  
- In a possible scenario, a user can impersonate the token if it is for the same user and the integrity level is less or equal to the current process integrity level.  
- In this case, the user could **create an impersonation token** and add to it a privileged group SID.
-
-### SeLoadDriverPrivilege \(3.1.7\)
-
-**Load and unload device drivers.**  
-You need to create an entry in the registry with values for ImagePath and Type.  
-As you don't have access to write to HKLM, you have to **use HKCU**. But HKCU doesn't mean anything for the kernel, the way to guide the kernel here and use the expected path for a driver config is to use the path: "\Registry\User\S-1-5-21-582075628-3447520101-2530640108-1003\System\CurrentControlSet\Services\DriverName" \(the ID is the **RID** of the current user\).  
- So, you have to **create all that path inside HKCU and set the ImagePath** \(path to the binary that is going to be executed\) **and Type** \(SERVICE\_KERNEL\_DRIVER 0x00000001\).  
-[**Learn how to exploit it here.**](../active-directory-methodology/privileged-accounts-and-token-privileges.md#seloaddriverprivilege)\*\*\*\*
-
-### SeTakeOwnershipPrivilege \(3.1.8\)
-
-This privilege is very similar to **SeRestorePrivilege**.  
-It allows a process to “**take ownership of an object** without being granted discretionary access” by granting the WRITE\_OWNER access right.  
-First, you have to **take ownership of the registry key** that you are going to write on and **modify the DACL** so you can write on it.
-
-### SeDebugPrivilege \(3.1.9\)
-
-It allows the holder to **debug another process**, this includes reading and **writing** to that **process' memory.**  
-There are a lot of various **memory injection** strategies that can be used with this privilege that evade a majority of AV/HIPS solutions.
-
-### Check privileges
-
-```text
-whoami /priv
-```
+{% page-ref page="privilege-escalation-abusing-tokens.md" %}
 
 ## Drives
 
@@ -1189,7 +1134,11 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 
 ### **From Administrator or Network Service to System**
 
-\*\*\*\*[**https://github.com/sailay1996/RpcSsImpersonator**](https://github.com/sailay1996/RpcSsImpersonator)\*\*\*\*
+{% embed url="https://github.com/sailay1996/RpcSsImpersonator" %}
+
+###  From LOCAL SERVICE or NETWORK SERVICE to full privs
+
+**Read:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)\*\*\*\*
 
 ## More help
 
@@ -1253,5 +1202,6 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 [https://github.com/frizb/Windows-Privilege-Escalation](https://github.com/frizb/Windows-Privilege-Escalation)  
 [https://pentest.blog/windows-privilege-escalation-methods-for-pentesters/](https://pentest.blog/windows-privilege-escalation-methods-for-pentesters/)  
 [https://github.com/frizb/Windows-Privilege-Escalation](https://github.com/frizb/Windows-Privilege-Escalation)  
-[http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html](http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html)
+[http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html](http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html)  
+[https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md\#antivirus--detections](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections)
 

