@@ -6,7 +6,7 @@ If you want to **know** about my **latest modifications**/**additions**, **join 
 If you want to **share some tricks with the community** you can also submit **pull requests** to ****[**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) ****that will be reflected in this book.  
 Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
 
-## Windows version
+## System Info
 
 ### Version info enumeration
 
@@ -578,6 +578,16 @@ Look for possible **third party weird/vulnerable** drivers
 driverquery
 driverquery.exe /fo table
 driverquery /SI
+```
+
+## PATH DLL Hijacking
+
+If you have **write permissions inside a folder present on PATH** you could be able to hijack a DLL loaded by a process and **escalate privileges**.
+
+Check permissions of all folders inside PATH:
+
+```bash
+for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
 
 ## Network

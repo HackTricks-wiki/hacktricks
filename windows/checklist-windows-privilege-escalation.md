@@ -2,41 +2,51 @@
 
 ### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)\*\*\*\*
 
-### [Vulnerable Kernel?](windows-local-privilege-escalation/#kernel-exploits)
+### [System Info](windows-local-privilege-escalation/#system-info)
 
-* [ ] Search for kernel **exploits using scripts** \(_post/windows/gather/enum\_patches, post/multi/recon/local\_exploit\_suggester, sherlock, watson_ \)
+* [ ] Obtain [**System information**](windows-local-privilege-escalation/#system-info)\*\*\*\*
+* [ ] Search for **kernel** [**exploits using scripts**](windows-local-privilege-escalation/#version-exploits)\*\*\*\*
 * [ ] Use **Google to search** for kernel **exploits**
 * [ ] Use **searchsploit to search** for kernel **exploits**
-* [ ] Any [**vulnerable Driver**](windows-local-privilege-escalation/#vulnerable-drivers)?
+* [ ] Interesting info in [**env vars**](windows-local-privilege-escalation/#environment)?
+* [ ] Passwords in [**PowerShell history**](windows-local-privilege-escalation/#powershell-history)?
+* [ ] Interesting info in [**Internet settings**](windows-local-privilege-escalation/#internet-settings)?
+* [ ] [**Drives**](windows-local-privilege-escalation/#drives)?
+* [ ] \*\*\*\*[**WSUS exploit**](windows-local-privilege-escalation/#wsus)?
+* [ ] \*\*\*\*[**AlwaysInstallElevated**](windows-local-privilege-escalation/#alwaysinstallelevated)?
 
 ### [Logging/AV enumeration](windows-local-privilege-escalation/#enumeration)
 
-* [ ] Check for **credentials** in[ **environment variables**](windows-local-privilege-escalation/#environment)\*\*\*\*
-* [ ] Check [**LAPS**](windows-local-privilege-escalation/#laps)\*\*\*\*
 * [ ] Check [**Audit** ](windows-local-privilege-escalation/#audit-settings)and [**WEF** ](windows-local-privilege-escalation/#wef)settings
+* [ ] Check [**LAPS**](windows-local-privilege-escalation/#laps)\*\*\*\*
+* [ ] Check if [**WDigest** ](windows-local-privilege-escalation/#wdigest)is active
+* [ ] [**LSA Protection**](windows-local-privilege-escalation/#lsa-protection)?
+* [ ] \*\*\*\*[**Credentials Guard**](windows-local-privilege-escalation/#credentials-guard)[?](windows-local-privilege-escalation/#cached-credentials)
+* [ ] [**Cached Credentials**](windows-local-privilege-escalation/#cached-credentials)?
 * [ ] Check if any [**AV**](windows-local-privilege-escalation/#av)\*\*\*\*
+* [ ] \*\*\*\*[**AppLocker Policy**](windows-local-privilege-escalation/#applocker-policy)?
+* [ ] [**UAC**](windows-local-privilege-escalation/#uac)?
 
 ### \*\*\*\*[**User Privileges**](windows-local-privilege-escalation/#users-and-groups)
 
 * [ ] Check [**current** user **privileges**](windows-local-privilege-escalation/#users-and-groups)\*\*\*\*
+* [ ] Are you [**member of any privileged group**](windows-local-privilege-escalation/#privileged-groups)?
 * [ ] Check if you have [any of these tokens enabled](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ? 
-* [ ] What is[ inside the Clipboard](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
+* [ ] [**Users Sessions**](windows-local-privilege-escalation/#logged-users-sessions)?
+* [ ] Check[ **users homes**](windows-local-privilege-escalation/#home-folders) \(access?\)
+* [ ] Check [**Password Policy**](windows-local-privilege-escalation/#password-policy)\*\*\*\*
+* [ ] What is[ **inside the Clipboard**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
 
 ### [Network](windows-local-privilege-escalation/#network)
 
 * [ ] Check **current** [network **information**](windows-local-privilege-escalation/#network)\*\*\*\*
 * [ ] Check **hidden local services** restricted to the outside
 
-### Vulnerable [Software ](windows-local-privilege-escalation/#software)or [Processes](windows-local-privilege-escalation/#running-processes)?
+### [Running Processes](windows-local-privilege-escalation/#running-processes)
 
-* [ ] Is any **unknown software running**?
-* [ ] Is any software with **more privileges that it should have running**?
-* [ ] Search for **exploits for running processes** \(specially if running of versions\)
-* [ ] Can you **read any** interesting **process memory** \(where passwords could be saved\)?
-* [ ] Have **write permissions** over the **binaries been** executed by the **processes**?
-* [ ] Have **write permissions** over the **folder** of a binary been executed to perform a **DLL Hijacking**?
-* [ ] What is[ **running** on **startup** or is **scheduled**](windows-local-privilege-escalation/#run-at-startup)? Can you **modify** the binary?
-* [ ] Can you [**dump** the **memory**](windows-local-privilege-escalation/#memory-password-mining) ****of any **process** to extract **passwords**?
+* [ ] Processes binaries [**file and folders permissions**](windows-local-privilege-escalation/#file-and-folder-permissions)\*\*\*\*
+* [ ] \*\*\*\*[**Memory Password mining**](windows-local-privilege-escalation/#memory-password-mining)\*\*\*\*
+* [ ] \*\*\*\*[**Insecure GUI apps**](windows-local-privilege-escalation/#insecure-gui-apps)\*\*\*\*
 
 ### [Services](windows-local-privilege-escalation/#services)
 
@@ -45,7 +55,13 @@
 * [ ] [Can you **modify** the **registry** of any **service**?](windows-local-privilege-escalation/#services-registry-permissions)
 * [ ] [Can you take advantage of any **unquoted service** binary **path**?](windows-local-privilege-escalation/#unquoted-service-paths)
 
-### [DLL Hijacking](windows-local-privilege-escalation/#dll-hijacking)
+### \*\*\*\*[**Applications**](windows-local-privilege-escalation/#applications)\*\*\*\*
+
+* [ ] **Write** [**permissions on installed applications**](windows-local-privilege-escalation/#write-permissions)\*\*\*\*
+* [ ] \*\*\*\*[**Startup Applications**](windows-local-privilege-escalation/#run-at-startup)\*\*\*\*
+* [ ] **Vulnerable** [**Drivers**](windows-local-privilege-escalation/#drivers)\*\*\*\*
+
+### [DLL Hijacking](windows-local-privilege-escalation/#path-dll-hijacking)
 
 * [ ] Can you **write in any folder inside PATH**?
 * [ ] Is there any known service binary that **tries to load any non-existant DLL**?
