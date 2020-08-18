@@ -1184,7 +1184,7 @@ A `pipe` is a block of shared memory that processes can use for communication an
 
 `Named Pipes` is a Windows mechanism that enables two unrelated processes to exchange data between themselves, even if the processes are located on two different networks. It's very similar to client/server architecture as notions such as `a named pipe server` and a named `pipe client` exist.
 
-When a **client writes on a pipe**, the **server** that created the pipe can **impersonate** the **client** if it has **SeImpersonate** privileges. Then, if you can find a **privileged process if going to write on any pipe that you can impersonate**, you could be able to **escalate privileges** impersonating that process after it writes inside your created pipe. [**You can read this to learn how to perform this attack**](named-pipe-client-impersonation.md)**.**
+When a **client writes on a pipe**, the **server** that created the pipe can **impersonate** the **client** if it has **SeImpersonate** privileges. Then, if you can find a **privileged process that is going to write on any pipe that you can impersonate**, you could be able to **escalate privileges** impersonating that process after it writes inside your created pipe. [**You can read this to learn how to perform this attack**](named-pipe-client-impersonation.md)**.**
 
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
@@ -1203,7 +1203,7 @@ sc start newservicename
 
 ### AlwaysInstallElevated
 
-From a High Integrity process you could try to e**nable the AlwaysInstallElevated registry entries** and **install** a reverse shell using a _**.msi**_ wrapper.   
+From a High Integrity process you could try to **enable the AlwaysInstallElevated registry entries** and **install** a reverse shell using a _**.msi**_ wrapper.   
 [More information about the registry keys involved and how to install a _.msi_ package here.](./#alwaysinstallelevated)
 
 ### From SeDebug + SeImpersonate to Full Token privileges
