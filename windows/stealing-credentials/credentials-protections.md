@@ -11,10 +11,18 @@ sekurlsa::wdigest
 This behaviour can be **deactivated/activated setting to 1** the value of _**UseLogonCredential**_ and _**Negotiate**_  in _**HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_.  
 If these registry keys **don't exist** or the value is **"0"**, then WDigest will be **deactivated**.
 
+```text
+reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
+```
+
 ## LSA Protection
 
 Microsoft in **Windows 8.1 and later** has provided additional protection for the LSA to **prevent** untrusted processes from being able to **read its memory** or to inject code. This will prevent regular `mimikatz.exe sekurlsa:logonpasswords` for working properly.  
 To **activate this protection** you need to set the value _**RunAsPPL**_ in _**HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ to 1.
+
+```text
+reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
+```
 
 ### Bypass
 
@@ -34,6 +42,10 @@ More information about ****[**SSP and how to do this here**](../active-directory
 Credentials Guard could be **enable in different ways**. To check if it was enabled using the registry you could check the value of the key _**LsaCfgFlags**_ in _**HKLM\System\CurrentControlSet\Control\LSA**_. If the value is **"1"** the it is active with UEFI lock, if **"2"** is active without lock and if **"0"** it's not enabled.  
 This is **not enough to enable Credentials Guard** \(but it's a strong indicator\).  
 More information and a PS1 script to enable Credential Guard [can be found here](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+
+```text
+reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
+```
 
 ## RDP RestrictedAdmin Mode
 
@@ -55,8 +67,8 @@ From [here](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
 **Windows stores the last ten domain login credentials in the event that the domain controller goes offline**. If the domain controller goes offline, a user will **still be able to log into their computer**. This feature is mainly for laptop users that do not regularly log into their company’s domain. The number of credentials that the computer stores can be controlled by the following **registry key, or via group policy**:
 
-```text
-HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\ CURRENTVERSION\WINLOGON\CACHEDLOGONSCOUNT
+```bash
+reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
 
 The credentials are hidden from normal users, even administrator accounts. The **SYSTEM** user is the only user that has **privileges** to **view** these **credentials**. In order for an administrator to view these credentials in the registry they must access the registry as a SYSTEM user.  
