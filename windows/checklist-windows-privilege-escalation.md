@@ -39,7 +39,7 @@
 
 ### [Network](windows-local-privilege-escalation/#network)
 
-* [ ] Check **current** [network **information**](windows-local-privilege-escalation/#network)\*\*\*\*
+* [ ] Check **current** [**network** **information**](windows-local-privilege-escalation/#network)\*\*\*\*
 * [ ] Check **hidden local services** restricted to the outside
 
 ### [Running Processes](windows-local-privilege-escalation/#running-processes)
@@ -80,7 +80,7 @@
 * [ ] Passwords of saved [**Wifi networks**](windows-local-privilege-escalation/#wifi)?
 * [ ] Interesting info in ****[**saved RDP Connections**](windows-local-privilege-escalation/#saved-rdp-connections)?
 * [ ] Passwords in [**recently run commands**](windows-local-privilege-escalation/#recently-run-commands)?
-* [ ] [**Remote Desktop Credentils Manager**](windows-local-privilege-escalation/#remote-desktop-credential-manager) passwords?
+* [ ] [**Remote Desktop Credentials Manager**](windows-local-privilege-escalation/#remote-desktop-credential-manager) passwords?
 * [ ] [**AppCmd.exe** exists](windows-local-privilege-escalation/#appcmd-exe)? Credentials?
 * [ ] [**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? DLL Side Loading?
 
