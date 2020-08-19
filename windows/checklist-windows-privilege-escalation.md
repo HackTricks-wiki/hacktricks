@@ -67,38 +67,50 @@
 * [ ] Is there any known service binary that **tries to load any non-existant DLL**?
 * [ ] Can you **write** in any **binaries folder**?
 
-### [Credentials](windows-local-privilege-escalation/#credentials)
+### [Network](windows-local-privilege-escalation/#network)
 
+* [ ] Enumerate the network\(shares, interfaces, routes, neighbours...\)
+* [ ] Take a special look to network services listing on local \(127.0.0.1\)
+
+### [Windows Credentials](windows-local-privilege-escalation/#windows-credentials)
+
+* [ ] \*\*\*\*[**Winlogon** ](windows-local-privilege-escalation/#winlogon-credentials)credentials
 * [ ] [**Windows Vault**](windows-local-privilege-escalation/#windows-vault) credentials that you could use?
 * [ ] Interesting [**DPAPI credentials**](windows-local-privilege-escalation/#dpapi)?
-* [ ] [**Wifi netoworks**](windows-local-privilege-escalation/#wifi)?
-* [ ] \*\*\*\*[**SSH keys in registry**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
-* [ ] [**Credentials inside "known files"**](windows-local-privilege-escalation/#credentials-inside-files)? Inside the Recycle Bin? At home?
-* [ ] [**Registry with credentials**](windows-local-privilege-escalation/#inside-the-registry)?
-* [ ] Inside [**Browser data**](windows-local-privilege-escalation/#browsers-history) \(dbs, history, bookmarks....\)?
+* [ ] Passwords of saved [**Wifi networks**](windows-local-privilege-escalation/#wifi)?
+* [ ] Interesting info in ****[**saved RDP Connections**](windows-local-privilege-escalation/#saved-rdp-connections)?
+* [ ] Passwords in [**recently run commands**](windows-local-privilege-escalation/#recently-run-commands)?
+* [ ] [**Remote Desktop Credentils Manager**](windows-local-privilege-escalation/#remote-desktop-credential-manager) passwords?
 * [ ] [**AppCmd.exe** exists](windows-local-privilege-escalation/#appcmd-exe)? Credentials?
 * [ ] [**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? DLL Side Loading?
+
+### [Files and Registry \(Credentials\)](windows-local-privilege-escalation/#files-and-registry-credentials)
+
+* [ ] **Putty:** [**Creds**](windows-local-privilege-escalation/#putty-creds) **and** [**SSH host keys**](windows-local-privilege-escalation/#putty-ssh-host-keys)\*\*\*\*
+* [ ] \*\*\*\*[**SSH keys in registry**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
+* [ ] Passwords in [**unattended files**](windows-local-privilege-escalation/#unattended-files)?
+* [ ] Any [**SAM & SYSTEM**](windows-local-privilege-escalation/#sam-and-system-backups) backup?
 * [ ] [**Cloud credentials**](windows-local-privilege-escalation/#cloud-credentials)?
+* [ ] \*\*\*\*[**McAfee SiteList.xml**](windows-local-privilege-escalation/#mcafee-sitelist-xml) file?
+* [ ] \*\*\*\*[**Cached GPP Password**](windows-local-privilege-escalation/#cached-gpp-pasword)?
+* [ ] Password in [**IIS Web config file**](windows-local-privilege-escalation/#iis-web-config)?
+* [ ] Interesting info in [**web** **logs**](windows-local-privilege-escalation/#logs)?
+* [ ] Do you want to [**ask for credentials**](windows-local-privilege-escalation/#ask-for-credentials) to the user?
+* [ ] Interesting [**files inside the Recycle Bin**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
+* [ ] Other [**registry containing credentials**](windows-local-privilege-escalation/#inside-the-registry)?
+* [ ] Inside [**Browser data**](windows-local-privilege-escalation/#browsers-history) \(dbs, history, bookmarks....\)?
+* [ ] \*\*\*\*[**Generic password search**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry) in files and registry
+* [ ] \*\*\*\*[**Tools**](windows-local-privilege-escalation/#tools-that-search-for-passwords) to automatically search for passwords
 
-### [AlwaysInstallElevated](windows-local-privilege-escalation/#alwaysinstallelevated)
+### [Leaked Handlers](windows-local-privilege-escalation/#leaked-handlers)
 
-* [ ] Is this **enabled**?
+* [ ] Have you access to any handler of a process run by administrator?
 
-### [Is vulnerable WSUS?](windows-local-privilege-escalation/#wsus)
+### [Pipe Client Impersonation](windows-local-privilege-escalation/#named-pipe-client-impersonation)
 
-* [ ] Is it **vulnerable**?
+* [ ] Check if you can abuse it
 
-### [Write Permissions](windows-local-privilege-escalation/#write-permissions)
-
-* [ ] Are you able to **write files that could grant you more privileges**?
-
-### Any [open handler of a privileged process or thread](windows-local-privilege-escalation/#leaked-handlers)?
-
-* [ ] Maybe the compromised process is vulnerable.
-
-### [UAC Bypass](windows-local-privilege-escalation/#check-uac)
-
-* [ ] There are several ways to bypass the UAC
+### And more...
 
 
 

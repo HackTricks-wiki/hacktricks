@@ -962,7 +962,7 @@ AppData\Roaming\gcloud\access_tokens.db
 .azure\azureProfile.json
 ```
 
-### McAffe SiteList.xml
+### McAfee SiteList.xml
 
 Search for a file called **SiteList.xml**
 
@@ -1131,19 +1131,6 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 
 [**Extract openssh keys from registry.**](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)\*\*\*\*
 
-### Tools that search for passwords
-
-[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **is a msf** plugin I have created this plugin to **automatically execute every metasploit POST module that searches for credentials** inside the victim.
-
-The tool [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) search for **sessions**, **usernames** and **passwords** of several tools that save this data in clear text \(PuTTY, WinSCP, FileZilla, SuperPuTTY, and RDP\)
-
-```bash
-Import-Module path\to\SessionGopher.ps1;
-Invoke-SessionGopher -Thorough
-Invoke-SessionGopher -AllDomain -o
-Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
-```
-
 ### Browsers History
 
 You should check for dbs where passwords from **Chrome or Firefox** are stored.  
@@ -1179,6 +1166,21 @@ REG QUERY HKLM /F "password" /t REG_SZ /S /K
 REG QUERY HKCU /F "password" /t REG_SZ /S /K
 REG QUERY HKLM /F "password" /t REG_SZ /S /d
 REG QUERY HKCU /F "password" /t REG_SZ /S /d
+```
+
+### Tools that search for passwords
+
+[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **is a msf** plugin I have created this plugin to **automatically execute every metasploit POST module that searches for credentials** inside the victim.  
+[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) automatically search for all the files containing passwords mentioned in this page.  
+[**Lazagne**](https://github.com/AlessandroZ/LaZagne) is another great tool to extract password from a system.
+
+The tool [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) search for **sessions**, **usernames** and **passwords** of several tools that save this data in clear text \(PuTTY, WinSCP, FileZilla, SuperPuTTY, and RDP\)
+
+```bash
+Import-Module path\to\SessionGopher.ps1;
+Invoke-SessionGopher -Thorough
+Invoke-SessionGopher -AllDomain -o
+Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ```
 
 ## Leaked Handlers
