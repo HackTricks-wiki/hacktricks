@@ -14,6 +14,7 @@
   * [MSFVenom - CheatSheet](shells/shells/untitled.md)
   * [Shells - Windows](shells/shells/windows.md)
   * [Shells - Linux](shells/shells/linux.md)
+  * [Full TTYs](shells/shells/full-ttys.md)
 
 ## Linux/Unix
 

