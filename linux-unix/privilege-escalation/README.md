@@ -42,13 +42,12 @@ searchsploit sudo
 You can check if the sudo version is vulnerable using this grep.
 
 ```bash
-sudo -V | grep "Sudo ver" | grep "1.6.8p9\|1.6.9p18\|1.8.14\|1.8.20\|1.6.9p21\|1.7.2p4\|1\.8\.[0123]$\|1\.3\.[^1]\|1\.4\.\d*\|1\.5\.\d*\|1\.6\.\d*\|1.5$\|1.6$"
+sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.2[01234567]"
 ```
 
 ## Software exploits
 
-Check for the **version of the installed packages and services**. Maybe there is some old Nagios version \(for example\) that could be exploited for gaining privileges…
-
+Check for the **version of the installed packages and services**. Maybe there is some old Nagios version \(for example\) that could be exploited for gaining privileges…  
 It is recommended to check manually the version of the more suspicious installed software.
 
 ```bash
@@ -60,7 +59,7 @@ If you have SSH access to the machine you could also use **openVAS** to check fo
 
 ## Users
 
-Check who are you, which privileges do you have, which users are in the systems, which ones can login and which ones have root privileges
+Check who you are, which privileges do you have, which users are in the systems, which ones can login and which ones have root privileges
 
 ```bash
 id || (whoami && groups) 2>/dev/null #Me?
@@ -78,13 +77,13 @@ Some Linux versions were affected by a bug that allow users with **UID &gt; INT\
 
 ### Known passwords
 
-If you have any password of the environment try to login as other user
+If you know any password of the environment try to login as each user using the password.
 
 ## Groups
 
 Check if you are in some group that could grant you root rights:
 
-[Check if you belong to any of these groups](interesting-groups-linux-pe.md)
+{% page-ref page="interesting-groups-linux-pe.md" %}
 
 ## Writable PATH abuses
 
