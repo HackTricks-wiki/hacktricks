@@ -26,7 +26,7 @@ description: Checklist for privilege escalation in Linux
 
 ### [Interesting Groups?](privilege-escalation/#groups)
 
-* [ ] Check **if** you [**belong** to any **group** that can grant you **root rights**](privilege-escalation/interesting-groups-linux-pe.md).
+* [ ] Check **if** you [**belong** to any **group** that can grant you **root rights**](privilege-escalation/interesting-groups-linux-pe/).
 
 ### [Weird scheduled jobs?](privilege-escalation/#scheduled-jobs)
 

