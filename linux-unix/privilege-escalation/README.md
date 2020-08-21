@@ -150,12 +150,37 @@ fi
 
 ```bash
 cat /proc/sys/kernel/randomize_va_space 2>/dev/null
-#If 0,not enabled
+#If 0, not enabled
 ```
 
-## Software exploits
+## Drives
 
-Check for the **version of the installed packages and services**. Maybe there is some old Nagios version \(for example\) that could be exploited for gaining privileges…  
+Check **what is mounted and unmounted**, where and why. If anything is unmounted you could try to mount it and check for private info
+
+```bash
+ls /dev 2>/dev/null | grep -i "sd"
+cat /etc/fstab 2>/dev/null | grep -v "^#" | grep -Pv "\W*\#" 2>/dev/null
+```
+
+## Installed Software
+
+### Useful software
+
+Enumerate useful binaries
+
+```bash
+which nmap aws nc ncat netcat nc.traditional wget curl ping gcc g++ make gdb base64 socat python python2 python3 python2.7 python2.6 python3.6 python3.7 perl php ruby xterm doas sudo fetch docker lxc rkt kubectl 2>/dev/null
+```
+
+Also, check if **any compiler is installed**. This is useful if you need to use some kernel exploit as it's recommended to compile it in the machine where you are going to use it \(or in one similar\)
+
+```bash
+(dpkg --list 2>/dev/null | grep "compiler" | grep -v "decompiler\|lib" 2>/dev/null || yum list installed 'gcc*' 2>/dev/null | grep gcc 2>/dev/null; which gcc g++ 2>/dev/null || locate -r "/gcc[0-9\.-]\+$" 2>/dev/null | grep -v "/doc/")
+```
+
+### Vulnerable Software Installed
+
+Check for the **version of the installed packages and services**. Maybe there is some old Nagios version \(for example\) that could be exploited for escalating privileges…  
 It is recommended to check manually the version of the more suspicious installed software.
 
 ```bash
@@ -164,6 +189,10 @@ rpm -qa #Centos
 ```
 
 If you have SSH access to the machine you could also use **openVAS** to check for outdated and vulnerable software installed inside the machine.
+
+{% hint style="info" %}
+_Note that these commands will show a lot of information that will mostly be useless, therefore it's recommended some application like OpenVAS or similar that will check if any installed software version is vulnerable to known exploits_
+{% endhint %}
 
 ## Users
 
