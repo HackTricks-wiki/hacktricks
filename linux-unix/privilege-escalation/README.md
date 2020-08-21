@@ -507,6 +507,10 @@ The project collects legitimate functions of Unix binaries that can be abused to
 
 {% embed url="https://gtfobins.github.io/" %}
 
+### FallOfSudo
+
+If you can access `sudo -l` you can use the tool [**FallOfSudo**](https://github.com/Critical-Start/FallofSudo) to check if it finds how to exploit any sudo rule.
+
 ### Reusing Sudo Tokens
 
 In the scenario where **you have a shell as a user with sudo privileges** but you don't know the password of the user, you can **wait him to execute some command using `sudo`**. Then, you can **access the token of the session where sudo was used and use it to execute anything as sudo** \(privilege escalation\).
