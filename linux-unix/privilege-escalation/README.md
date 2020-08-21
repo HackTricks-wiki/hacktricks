@@ -4,7 +4,34 @@ Do you want to **know** about my **latest modifications**/**additions or you hav
 If you want to **share some tricks with the community** you can also submit **pull requests** to ****[**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) ****that will be reflected in this book.  
 Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
 
-## Kernel exploits
+## System Information
+
+### OS info
+
+Let's starting gaining some knowledge of the OS running
+
+```bash
+(cat /proc/version || uname -a ) 2>/dev/null
+lsb_release -a 2>/dev/null
+```
+
+### Path
+
+If you **have write permissions on any folder inside the `PATH`** variable you may be able to hijacking some libraries or binaries:
+
+```bash
+echo $PATH
+```
+
+### Env info
+
+Interesting information, passwords or API keys in the environment variables?
+
+```bash
+(env || set) 2>/dev/null
+```
+
+### Kernel exploits
 
 Check the kernel version and if there is some exploit that can be used to escalate privileges
 
@@ -55,6 +82,75 @@ You can check if the sudo version is vulnerable using this grep.
 
 ```bash
 sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.2[01234567]"
+```
+
+### Date, system stats and CPU info
+
+```bash
+date 2>/dev/null #Date
+(df -h || lsblk) #System stats
+lscpu #CPU info
+```
+
+### Dmesg signature verification failed
+
+Check **smasher2 box of HTB** for an **example** of how this vuln could be exploited
+
+```bash
+dmesg 2>/dev/null | grep "signature"
+```
+
+### Printers
+
+```bash
+lpstat -a 2>/dev/null
+```
+
+### Enumerate possible defenses
+
+#### AppArmor
+
+```bash
+if [ `which aa-status 2>/dev/null` ]; then
+    aa-status
+  elif [ `which apparmor_status 2>/dev/null` ]; then
+    apparmor_status
+  elif [ `ls -d /etc/apparmor* 2>/dev/null` ]; then
+    ls -d /etc/apparmor*
+  else
+    echo "Not found AppArmor"
+fi
+```
+
+#### Grsecurity
+
+```bash
+((uname -r | grep "\-grsec" >/dev/null 2>&1 || grep "grsecurity" /etc/sysctl.conf >/dev/null 2>&1) && echo "Yes" || echo "Not found grsecurity")
+```
+
+#### PaX
+
+```bash
+(which paxctl-ng paxctl >/dev/null 2>&1 && echo "Yes" || echo "Not found PaX")
+```
+
+#### Execshield
+
+```bash
+(grep "exec-shield" /etc/sysctl.conf || echo "Not found Execshield")
+```
+
+#### SElinux
+
+```bash
+ (sestatus 2>/dev/null || echo "Not found sestatus")
+```
+
+#### ASLR
+
+```bash
+cat /proc/sys/kernel/randomize_va_space 2>/dev/null
+#If 0,not enabled
 ```
 
 ## Software exploits
