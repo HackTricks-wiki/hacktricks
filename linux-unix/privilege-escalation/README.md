@@ -336,7 +336,7 @@ for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; do
 
 You could also use [pspy](https://github.com/DominicBreuker/pspy/releases) \(this will monitor every started process\).
 
-## Commands with sudo and suid commands
+## SUDO and SUID
 
 You could be allowed to execute some command using sudo or they could have the suid bit. Check it using:
 
@@ -507,6 +507,50 @@ The project collects legitimate functions of Unix binaries that can be abused to
 
 {% embed url="https://gtfobins.github.io/" %}
 
+### Reusing Sudo Tokens
+
+In the scenario where **you have a shell as a user with sudo privileges** but you don't know the password of the user, you can **wait him to execute some command using `sudo`**. Then, you can **access the token of the session where sudo was used and use it to execute anything as sudo** \(privilege escalation\).
+
+Requirements to escalate privileges:
+
+* You already have a shell as user "_sampleuser_"
+* "_sampleuser_" have **used `sudo`** to execute something in the **last 15mins** \(by default that's the duration of the sudo token that allows to use `sudo` without introducing any password\)
+* `cat /proc/sys/kernel/yama/ptrace_scope` is 0
+* `gdb` is accessible \(you can be able to upload it\)
+
+If all these requirements are met, **you can escalate privileges using:** [**https://github.com/nongiach/sudo\_inject**](https://github.com/nongiach/sudo_inject)\*\*\*\*
+
+* The **first exploit** \(`exploit.sh`\) will create the binary `activate_sudo_token` in _/tmp_. You can use it to **activate the sudo token in your session**:
+
+```bash
+bash exploit.sh
+/tmp/activate_sudo_token
+sudo su
+```
+
+* The **second exploit** \(`exploit_v2.sh`\) will create a sh shell in _/tmp_ **owned by root with setuid**
+
+```bash
+bash exploit_v2.sh
+/tmp/sh -p
+```
+
+* The **third exploit** \(`exploit_v3.sh`\) will **create a sudoers file** that makes **sudo tokens eternal and allows all users to use sudo**
+
+```bash
+bash exploit_v3.sh
+sudo su
+```
+
+### /var/run/sudo/ts/&lt;Username&gt;
+
+If you have **write permissions** in the folder or on any of the created files inside the folder you can use the binary [**write\_sudo\_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) to **create a sudo token for a user and PID**.  
+For example if you can overwrite the file _/var/run/sudo/ts/sampleuser_ and you have a shell as that user with PID 1234, you can **obtain sudo privileges** without needing to know the password doing:
+
+```bash
+./write_sudo_token 1234 > /var/run/sudo/ts/sampleuser
+```
+
 ### /etc/sudoers, /etc/sudoers.d
 
 The file `/etc/sudoers` and the files inside `/etc/sudoers.d` configure who can use `sudo` and how. This files **by default can only be read by user root and group root**.  
@@ -522,6 +566,15 @@ If you can write you can abuse this permissions
 ```bash
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/README
+```
+
+Other way to abuse these permissions:
+
+```bash
+# makes it so every terminal can sudo  
+echo "Defaults !tty_tickets" > /etc/sudoers.d/win
+# makes it so sudo never times out
+echo "Defaults timestamp_timeout=-1" >> /etc/sudoers.d/win
 ```
 
 ### /etc/ld.so.conf.d/
