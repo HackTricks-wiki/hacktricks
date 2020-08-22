@@ -479,15 +479,30 @@ timeout 1 tcpdump
 
 ## Users
 
-Check who you are, which privileges do you have, which users are in the systems, which ones can login and which ones have root privileges
+### Generic Enumeration
+
+Check **who** you are, which **privileges** do you have, which **users** are in the systems, which ones can **login** and which ones have **root privileges:**
 
 ```bash
-id || (whoami && groups) 2>/dev/null #Me?
-cat /etc/passwd | cut -d: -f1 #All users
-cat /etc/passwd | grep "sh$" #Users with console
-awk -F: '($3 == "0") {print}' /etc/passwd #Superusers
-w #Currently login users
-last | tail #Login history
+#Info about me
+id || (whoami && groups) 2>/dev/null
+#List all users
+cat /etc/passwd | cut -d: -f1
+#List users with console
+cat /etc/passwd | grep "sh$"
+#List superusers
+awk -F: '($3 == "0") {print}' /etc/passwd
+#Currently logged users
+w
+#Login history
+last | tail
+#Last log of each user
+lastlog
+
+#List all users and their groups
+for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null | sort 
+#Current user PGP keys
+gpg --list-keys 2>/dev/null
 ```
 
 ### Big UID
@@ -495,23 +510,47 @@ last | tail #Login history
 Some Linux versions were affected by a bug that allow users with **UID &gt; INT\_MAX** to escalate privileges. More info: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74),  [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) and [here](https://twitter.com/paragonsec/status/1071152249529884674).  
 **Exploit it** using: **`systemd-run -t /bin/bash`**
 
-### Known passwords
+### Groups
 
-If you know any password of the environment try to login as each user using the password.
-
-## Groups
-
-Check if you are in some group that could grant you root rights:
+Check if you are a **member of some group** that could grant you root privileges:
 
 {% page-ref page="interesting-groups-linux-pe/" %}
+
+### Clipboard
+
+Check if anything interesting is located inside the clipboard \(if possible\)
+
+```bash
+if [ `which xclip 2>/dev/null` ]; then
+    echo "Clipboard: "`xclip -o -selection clipboard 2>/dev/null`
+    echo "Highlighted text: "`xclip -o 2>/dev/null`
+  elif [ `which xsel 2>/dev/null` ]; then
+    echo "Clipboard: "`xsel -ob 2>/dev/null`
+    echo "Highlighted text: "`xsel -o 2>/dev/null`
+  else echo "Not found xsel and xclip"
+  fi
+```
+
+### Password Policy
+
+```bash
+grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs
+```
+
+### Known passwords
+
+If you **know any password** of the environment **try to login as each user** using the password.
+
+### Su Brute
+
+If don't mind about doing a lot of noise and `su` and `timeout` binaries are present on the computer you can try to brute-force user using [su-bruteforce](https://github.com/carlospolop/su-bruteforce).  
+[**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) with `-a` parameter also try to brute-force users.
 
 ## Writable PATH abuses
 
 ### $PATH
 
 If you find that you can **write inside some folder of the $PATH** you may be able to escalate privileges by **creating a backdoor inside the writable folder** with the name of some command that is going to be executed by a different user \(root ideally\) and that is **not loaded from a folder that is located previous** to your writable folder in $PATH.
-
-## \*\*\*\*
 
 ## SUDO and SUID
 
@@ -860,7 +899,7 @@ int __libc_start_main(int (*main) (int, char **, char **), int argc, char ** ubp
 
 ## Capabilities
 
-[Capabilities](https://www.insecure.ws/linux/getcap_setcap.html) are a little obscure but similar in principle to SUID. Linux’s thread/process privilege checking is based on capabilities: flags to the thread that indicate what kind of additional privileges they’re allowed to use. By default, root has all of them.
+[**Capabilities**](https://www.insecure.ws/linux/getcap_setcap.html) ****are a little obscure but similar in principle to SUID. Linux’s thread/process privilege checking is based on capabilities: flags to the thread that indicate what kind of additional privileges they’re allowed to use. By default, root has all of them.
 
 | Capabilities name | Description |
 | :--- | :--- |
@@ -1171,15 +1210,6 @@ DEVICE=eth0
 \(_Note the black space between Network and /bin/id_\)
 
 **Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist\_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)\*\*\*\*
-
-## Internal Open Ports
-
-You should check if any undiscovered service is running in some port/interface. Maybe it is running with more privileges that it should or it is vulnerable to some kind of privilege escalation vulnerability.
-
-```bash
-netstat -punta
-ss -t; ss -u
-```
 
 ## Storage information
 
