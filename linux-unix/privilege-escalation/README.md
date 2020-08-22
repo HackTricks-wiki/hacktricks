@@ -448,16 +448,19 @@ dnsdomainname
 #Content of /etc/inetd.conf & /etc/xinetd.conf
 cat /etc/inetd.conf /etc/xinetd.conf
 
-#Networks and neighbours
+#Interfaces
 cat /etc/networks
 (ifconfig || ip a)
+
+#Neighbours
+(arp -e || arp -a)
 (route || ip n)
 
 #Iptables rules
 (timeout 1 iptables -L 2>/dev/null; cat /etc/iptables/* | grep -v "^#" | grep -Pv "\W*\#" 2>/dev/null)
 
-#Active Ports
-
+#Files used by network services
+lsof -i
 ```
 
 ### Open ports
@@ -964,6 +967,10 @@ Note that one can assign empty capability sets to a program file, and thus it is
 then that binary will run as root.
 
 Capabilities info was extracted from [here](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
+
+## ACLs
+
+
 
 ## Open shell sessions
 
