@@ -15,7 +15,7 @@ Main concepts of an Active Directory:
 1. **Directory** – Contains all the information about the objects of the Active directory
 2. **Object** – An object references almost anything inside the directory \(a user, group, shared folder...\)
 3. **Domain** – The objects of the directory are contained inside the domain. Inside a "forest" more than one domain can exist and each of them will have their own objects collection. 
-4. **Tree** – Group of domains with the same root. Example: _dom.local, email.com.local, www.dom.local_
+4. **Tree** – Group of domains with the same root. Example: _dom.local, email.dom.local, www.dom.local_
 5. **Forest** – The forest is the highest level of the organization hierarchy and is composed by a group of trees. The trees are connected by trust relationships.
 
 Active Directory provides several different services, which fall under the umbrella of "Active Directory Domain Services," or AD DS. These services include:
