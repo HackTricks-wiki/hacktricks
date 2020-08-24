@@ -1,4 +1,4 @@
-# Reset Password
+# Reset Password Bypass
 
 Sometimes in order to reset a password you contact an api endpoint and **send the email you want to reset the password**, like in the following example:
 
