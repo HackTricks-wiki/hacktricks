@@ -37,20 +37,51 @@ description: Checklist for privilege escalation in Linux
 * [ ] **Monitor processes** and check if any interesting process is running frequently
 * [ ] Can you **read** some interesting **process memory** \(where passwords could be saved\)?
 
-### [Known users/passwords?](privilege-escalation/#users)
+### [Scheduled/Cron jobs?](privilege-escalation/#scheduled-jobs)
 
+* [ ] Is the [**PATH** ](privilege-escalation/#cron-path)being modified by some cron and you can **write** in it?
+* [ ] Any [**wildcard** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)in a cron job?
+* [ ] Some [**modifiable script** ](privilege-escalation/#cron-script-overwriting-and-symlink)is being **executed** or is inside **modifiable folder**?
+* [ ] Have you detected that some **script** could be being [**executed** very **frequently**](privilege-escalation/#frequent-cron-jobs)? \(every 1, 2 or 5 minutes\)
+
+### [Services](privilege-escalation/#services)
+
+* [ ] Any **writable .service** file?
+* [ ] Any **writable binary** executed by a **service**?
+* [ ] Any **writable folder in systemd PATH**?
+
+### [Timers](privilege-escalation/#timers)
+
+* [ ] Any **writable timer**?
+
+### [Sockets](privilege-escalation/#sockets)
+
+* [ ] Any **writable .socket** file?
+* [ ] Can you **communicate with any socket**?
+* [ ] **HTTP sockets** with interesting info?
+
+### [D-Bus](privilege-escalation/#d-bus)
+
+* [ ] Can you **communicate with any D-Bus**?
+
+### [Network](privilege-escalation/#network)
+
+* [ ] Enumerate the network to know where you are
+* [ ] **Open ports you couldn't access before** getting a shell inside the machine?
+* [ ] Can you **sniff traffic** using `tcpdump`?
+
+### [Users](privilege-escalation/#users)
+
+* [ ] Generic users/groups **enumeration**
+* [ ] Do you have a **very big UID**? Is the **machine** **vulnerable**?
+* [ ] Can you [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/) you belong to?
+* [ ] **Clipboard** data?
+* [ ] Password Policy?
 * [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without password.
 
-### [Interesting Groups?](privilege-escalation/#groups)
+### [Writable PATH](privilege-escalation/#writable-path-abuses)
 
-* [ ] Check **if** you [**belong** to any **group** that can grant you **root rights**](privilege-escalation/interesting-groups-linux-pe/).
-
-### [Weird scheduled jobs?](privilege-escalation/#scheduled-jobs)
-
-* [ ] Is the **PATH** being modified by some cron and you can **write** in it?
-* [ ] Some **modifiable script** is being **executed** or is inside **modifiable folder**?
-* [ ] Is some cron **script calling other** script that is **modifiable** by you? or using **wildcards**?
-* [ ] Have you detected that some **script** could be being **executed** very **frequently**? \(every 1, 2 or 5 minutes\)
+* [ ] If you have **write privileges over some folder in PATH** you may be able to escalate privileges
 
 ### [Any sudo command?](privilege-escalation/#commands-with-sudo-and-suid-commands)
 
