@@ -1273,7 +1273,7 @@ DEVICE=eth0
 
 **Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist\_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)\*\*\*\*
 
-### **init, init.d and systemd**
+### **init, init.d, systemd, and rc.d**
 
 `/etc/init.d` contains **scripts** used by the System V init tools \(SysVinit\). This is the **traditional service management package for Linux**, containing the `init` program \(the first process that is run when the kernel has finished initializing¹\) as well as some infrastructure to start and stop services and configure them. Specifically, files in `/etc/init.d` are shell scripts that respond to `start`, `stop`, `restart`, and \(when supported\) `reload` commands to manage a particular service. These scripts can be invoked directly or \(most commonly\) via some other trigger \(typically the presence of a symbolic link in `/etc/rc?.d/`\). \(From [here](https://askubuntu.com/questions/5039/what-is-the-difference-between-etc-init-and-etc-init-d#:~:text=%2Fetc%2Finit%20contains%20configuration%20files,the%20status%20of%20a%20service.)\)  
 Other alternative to this folder is `/etc/rc.d/init.d` in Redhat
