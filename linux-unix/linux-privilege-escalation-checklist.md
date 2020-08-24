@@ -23,11 +23,18 @@ description: Checklist for privilege escalation in Linux
 * [ ] **Any unmounted drive?**
 * [ ] **Any creds in fstab?**
 
-### \*\*\*\*[Vulnerable Processes?](privilege-escalation/#processes)
+### \*\*\*\*[**Installed Software**](privilege-escalation/#installed-software)\*\*\*\*
+
+1. [ ] **Check for**[ **useful software**](privilege-escalation/#useful-software) **installed**
+2. [ ] **Check for** [**vulnerable software**](privilege-escalation/#vulnerable-software-installed) **installed**
+
+### \*\*\*\*[Processes](privilege-escalation/#processes)
 
 * [ ] Is  any **unknown software running**?
 * [ ] Is any software with **more privileges that it should have running**?
 * [ ] Search for **exploits for running processes** \(specially if running of versions\)
+* [ ] Can you **modify the binary** of any running process?
+* [ ] **Monitor processes** and check if any interesting process is running frequently
 * [ ] Can you **read** some interesting **process memory** \(where passwords could be saved\)?
 
 ### [Known users/passwords?](privilege-escalation/#users)

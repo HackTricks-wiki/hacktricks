@@ -229,6 +229,8 @@ To dump a process memory you could use:
 * [https://github.com/hajzer/bash-memory-dump](https://github.com/hajzer/bash-memory-dump) \(root is required\)
 * Script A.5 from [https://www.delaat.net/rp/2016-2017/p97/report.pdf](https://www.delaat.net/rp/2016-2017/p97/report.pdf) \(root is required\)
 
+#### /dev/mem
+
 ```text
 strings /dev/mem -n10 | grep -i PASS
 ```
