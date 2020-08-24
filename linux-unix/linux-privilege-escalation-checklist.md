@@ -135,12 +135,12 @@ description: Checklist for privilege escalation in Linux
 * [ ] **Modify python library** to execute arbitrary commands?
 * [ ] Can you **modify log files**? **Logtotten** exploit
 * [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
-* [ ] 
-### \*\*\*\*
+* [ ] Can you [**write in ini, int.d, systemd or rc.d files**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
 
-### 
+### \*\*\*\*[**Other tricks**](privilege-escalation/#other-tricks)\*\*\*\*
 
-
+* [ ] Can you [**abuse NFS to escalate privileges**](privilege-escalation/#nfs-privilege-escalation)?
+* [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?
 
 If you want to **know** about my **latest modifications**/**additions or you have any suggestion for HackTricks or PEASS**, **join the** [**PEASS & HackTricks telegram group here**](https://t.me/peass)**.**  
 If you want to **share some tricks with the community** you can also submit **pull requests** to ****[**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) ****that will be reflected in this book.  
