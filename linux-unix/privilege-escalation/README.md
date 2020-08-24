@@ -970,7 +970,18 @@ Capabilities info was extracted from [here](https://vulp3cula.gitbook.io/hackers
 
 ## ACLs
 
+ACLs are a second level of discretionary permissions, that **may override the standard ugo/rwx** ones. When used correctly they can grant you a **better granularity in setting access to a file or a directory**, for example by giving or denying access to a specific user that is neither the file owner, nor in the group owner \(from [**here**](https://linuxconfig.org/how-to-manage-acls-on-linux)\).  
+**Give** user "kali" read and write permissions over a file:
 
+```bash
+setfacl -m u:kali:rw file.txt
+```
+
+**Get** files with specific ACLs from the system:
+
+```bash
+getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
+```
 
 ## Open shell sessions
 
@@ -1262,6 +1273,11 @@ DEVICE=eth0
 \(_Note the black space between Network and /bin/id_\)
 
 **Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist\_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)\*\*\*\*
+
+### **/etc/init.d/**
+
+ The **init.d** directory contains a number of start/stop scripts for various services on your system.  
+****If you can **modify any service script located here**, next time the service is executed you will be able to **execute arbitrary commands** and escalate privileges.
 
 ## Other Tricks
 
