@@ -1273,10 +1273,15 @@ DEVICE=eth0
 
 **Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist\_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)\*\*\*\*
 
-### **/etc/init.d/**
+### **init, init.d and systemd**
 
- The **init.d** directory contains a number of start/stop scripts for various services on your system.  
-****If you can **modify any service script located here**, next time the service is executed you will be able to **execute arbitrary commands** and escalate privileges.
+`/etc/init.d` contains **scripts** used by the System V init tools \(SysVinit\). This is the **traditional service management package for Linux**, containing the `init` program \(the first process that is run when the kernel has finished initializing¹\) as well as some infrastructure to start and stop services and configure them. Specifically, files in `/etc/init.d` are shell scripts that respond to `start`, `stop`, `restart`, and \(when supported\) `reload` commands to manage a particular service. These scripts can be invoked directly or \(most commonly\) via some other trigger \(typically the presence of a symbolic link in `/etc/rc?.d/`\). \(From [here](https://askubuntu.com/questions/5039/what-is-the-difference-between-etc-init-and-etc-init-d#:~:text=%2Fetc%2Finit%20contains%20configuration%20files,the%20status%20of%20a%20service.)\)  
+Other alternative to this folder is `/etc/rc.d/init.d` in Redhat
+
+`/etc/init` contains **configuration** files used by **Upstart**. Upstart is a young **service management package** championed by Ubuntu. Files in `/etc/init` are configuration files telling Upstart how and when to `start`, `stop`, `reload` the configuration, or query the `status` of a service. As of lucid, Ubuntu is transitioning from SysVinit to Upstart, which explains why many services come with SysVinit scripts even though Upstart configuration files are preferred. In fact, the SysVinit scripts are processed by a compatibility layer in Upstart. \(From [here](https://askubuntu.com/questions/5039/what-is-the-difference-between-etc-init-and-etc-init-d#:~:text=%2Fetc%2Finit%20contains%20configuration%20files,the%20status%20of%20a%20service.)\)
+
+**systemd** is a **Linux initialization system and service manager that includes features like on-demand starting of daemons**, mount and automount point maintenance, snapshot support, and processes tracking using Linux control groups. systemd provides a logging daemon and other tools and utilities to help with common system administration tasks. \(From [here](https://www.linode.com/docs/quick-answers/linux-essentials/what-is-systemd/#:~:text=The%20%2Frun%2Fsystemd%2Fsystem,anywhere%20else%20in%20the%20system.)\)  
+ Files that ships in packages downloaded from distribution repository go into `/usr/lib/systemd/`. Modifications done by system administrator \(user\) go into `/etc/systemd/system/`.
 
 ## Other Tricks
 

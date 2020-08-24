@@ -83,50 +83,62 @@ description: Checklist for privilege escalation in Linux
 
 * [ ] If you have **write privileges over some folder in PATH** you may be able to escalate privileges
 
-### [Any sudo command?](privilege-escalation/#commands-with-sudo-and-suid-commands)
+### [SUDO and SUID commands](privilege-escalation/#sudo-and-suid)
 
-* [ ] Can you execute **any comand with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root?
-* [ ] Is some **wildcard used**?
-* [ ] Is the binary specified **without path**?
-* [ ] Is _**env\_keep+=LD\_PRELOAD**_?
+* [ ] Can you execute **any comand with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? \([**GTFOBins**](https://gtfobins.github.io/)\)
+* [ ] Is any **exploitable suid binary**? \([**GTFOBins**](https://gtfobins.github.io/)\)
+* [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/#sudo-execution-bypassing-paths)?
+* [ ] \*\*\*\*[**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
+* [ ] \*\*\*\*[**SUID binary specifying path**](privilege-escalation/#suid-binary-with-command-path)? Bypass
+* [ ] \*\*\*\*[**LD\_PRELOAD vuln**](privilege-escalation/#ld_preload)\*\*\*\*
+* [ ] \*\*\*\*[**Lack of .so library in SUID binary**](privilege-escalation/#suid-binary-so-injection) ****from a writable folder?
+* [ ] \*\*\*\*[**SUDO tokens available**](privilege-escalation/#reusing-sudo-tokens)? [**Can you create a SUDO token**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
+* [ ] Can you [**read or modify sudoers files**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
+* [ ] Can you [**modify /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
+* [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) ****command
 
-### [Any weird suid command?](privilege-escalation/#commands-with-sudo-and-suid-commands)
+### [Capabilities](privilege-escalation/#capabilities)
 
-* [ ] **SUID** any **interesting command**? Can you use it to READ, WRITE or EXECUTE anything as root?
-* [ ] Is some **wildcard used**?
-* [ ] Is the SUID binary **executing some other binary without specifying the path**? or specifying it?
-* [ ] Is it trying to **load .so from writable folders**?
+* [ ] Has any binary any **unexpected capability**?
 
-### [Weird capabilities?](privilege-escalation/#capabilities)
+### [ACLs](privilege-escalation/#acls)
 
-* [ ] Has any binary any **uncommon capability**?
+* [ ] Has any file any **unexpected ACL**?
 
-### [Open Shell sessions?](privilege-escalation/#open-shell-sessions)
+### [Open Shell sessions](privilege-escalation/#open-shell-sessions)
 
-* [ ] screen?
-* [ ] tmux?
+* [ ] **screen**?
+* [ ] **tmux**?
 
-### [Can you read some sensitive data?](privilege-escalation/#read-sensitive-data)
+### [SSH](privilege-escalation/#ssh)
 
-* [ ] Can you **read** some **interesting files**? \(files with passwords, \*\_history, backups...\)
+* [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)\*\*\*\*
+* [ ] \*\*\*\*[**SSH Interesting configuration values**](privilege-escalation/#ssh-interesting-configuration-values)\*\*\*\*
 
-### [Can you write important files?](privilege-escalation/#writable-files)
+### [Interesting Files](privilege-escalation/#interesting-files)
 
-* [ ] Are you able to **write files that could grant you more privileges**? \(service conf files, shadow,a script that is executed by other users, libraries...\)
+* [ ] **Profile files** - Read sensitive data? Write to privesc?
+* [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
+* [ ] **Check commonly interesting folders** for sensitive data
+* [ ] **Weird Localtion/Owned files,** you may have access or alter executable files
+* [ ] **Modified** in last mins
+* [ ] **Sqlite DB files**
+* [ ] **Hidden files**
+* [ ] **Script/Binaries in PATH**
+* [ ] **Web files** \(passwords?\)
+* [ ] **Backups**?
+* [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
+* [ ] **Generic search**
 
-### [Internal open ports?](privilege-escalation/#internal-open-ports)
+### \*\*\*\*[**Writable Files**](privilege-escalation/#writable-files)\*\*\*\*
 
-* [ ] You should check if any undiscovered service is running in some port/interface. Maybe it is running with more privileges that it should or it is vulnerable to some kind of privilege escalation vulnerability.
+* [ ] **Modify python library** to execute arbitrary commands?
+* [ ] Can you **modify log files**? **Logtotten** exploit
+* [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
+* [ ] 
+### \*\*\*\*
 
-### [Can you sniff some passwords in the network?](privilege-escalation/#sniffing)
-
-* [ ] Can you **sniff** and get **passwords** from the **network**?
-
-### [Any service missconfigurated? NFS? belongs to docker or lxd?](privilege-escalation/#privesc-exploiting-service-misconfigurations)
-
-1. [ ] Any well known missconfiguration? \([**NFS no\_root\_squash**](privilege-escalation/nfs-no_root_squash-misconfiguration-pe.md)\)
-
-### [Any weird executable in path?](privilege-escalation/#check-for-weird-executables)
+### 
 
 
 
