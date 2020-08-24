@@ -155,6 +155,8 @@ Check **what is mounted and unmounted**, where and why. If anything is unmounted
 ```bash
 ls /dev 2>/dev/null | grep -i "sd"
 cat /etc/fstab 2>/dev/null | grep -v "^#" | grep -Pv "\W*\#" 2>/dev/null
+#Check if credentials in fstab
+grep -E "(user|username|login|pass|password|pw|credentials)[=:]" /etc/fstab /etc/mtab 2>/dev/null
 ```
 
 ## Installed Software

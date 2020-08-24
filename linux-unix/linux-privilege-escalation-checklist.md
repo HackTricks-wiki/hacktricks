@@ -14,8 +14,16 @@ description: Checklist for privilege escalation in Linux
 * [ ] Search for [**kernel exploits**](privilege-escalation/#kernel-exploits) **using scripts** \(DirtyCow?\)
 * [ ] **Check** if the [**sudo version** is vulnerable](privilege-escalation/#sudo-version)
 * [ ] \*\*\*\*[**Dmesg** signature verification failed](privilege-escalation/#dmesg-signature-verification-failed) error?
+* [ ] More system enum \([date, system stats, cpu info, printers](privilege-escalation/#more-system-enumeration)\)
+* [ ] [Enumerate more defenses](privilege-escalation/#enumerate-possible-defenses)
 
-### [Vulnerable Processes?](privilege-escalation/#processes)
+### [Drives](privilege-escalation/#drives)
+
+* [ ] **List mounted** drives
+* [ ] **Any unmounted drive?**
+* [ ] **Any creds in fstab?**
+
+### \*\*\*\*[Vulnerable Processes?](privilege-escalation/#processes)
 
 * [ ] Is  any **unknown software running**?
 * [ ] Is any software with **more privileges that it should have running**?
