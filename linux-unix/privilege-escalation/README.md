@@ -84,14 +84,6 @@ You can check if the sudo version is vulnerable using this grep.
 sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.2[01234567]"
 ```
 
-### Date, system stats and CPU info
-
-```bash
-date 2>/dev/null #Date
-(df -h || lsblk) #System stats
-lscpu #CPU info
-```
-
 ### Dmesg signature verification failed
 
 Check **smasher2 box of HTB** for an **example** of how this vuln could be exploited
@@ -100,10 +92,13 @@ Check **smasher2 box of HTB** for an **example** of how this vuln could be explo
 dmesg 2>/dev/null | grep "signature"
 ```
 
-### Printers
+### More system enumeration
 
 ```bash
-lpstat -a 2>/dev/null
+date 2>/dev/null #Date
+(df -h || lsblk) #System stats
+lscpu #CPU info
+lpstat -a 2>/dev/null #Printers info
 ```
 
 ### Enumerate possible defenses

@@ -6,12 +6,14 @@ description: Checklist for privilege escalation in Linux
 
 ### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)\*\*\*\*
 
-### [Vulnerable Kernel?](privilege-escalation/#kernel-exploits)
+### [System Information](privilege-escalation/#system-information)
 
-* [ ] Search for kernel **exploits using scripts** \(linux.exploit-suggester.sh, inux-exploit-suggester2.pl, linuxprivcheckser.py\)
-* [ ] Use **Google to search** for kernel **exploits**
-* [ ] Use **searchsploit to search** for kernel **exploits**
+* [ ] Get **OS information**
+* [ ] Check the [**PATH**](privilege-escalation/#path), any **writable folder**?
+* [ ] Check [**env variables**](privilege-escalation/#env-info), any sensitive detail?
+* [ ] Search for [**kernel exploits**](privilege-escalation/#kernel-exploits) **using scripts** \(DirtyCow?\)
 * [ ] **Check** if the [**sudo version** is vulnerable](privilege-escalation/#sudo-version)
+* [ ] \*\*\*\*[**Dmesg** signature verification failed](privilege-escalation/#dmesg-signature-verification-failed) error?
 
 ### [Vulnerable Processes?](privilege-escalation/#processes)
 
