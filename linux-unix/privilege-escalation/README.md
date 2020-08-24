@@ -1063,7 +1063,17 @@ The file `/etc/sshd_config` can **allow** or **denied** ssh-agent forwarding wit
 
 If you Forward Agent configured in an environment ****[**check here how to exploit it to escalate privileges**](ssh-forward-agent-exploitation.md).
 
-## Read sensitive data
+## Interesting Files
+
+### Profiles files
+
+The file `/etc/profile` and the files under `/etc/profile.d/` are **scripts that are executed when a user run a new shell**. Therefore, if you can **write or modify any of the you can escalate privileges**.
+
+```bash
+ls -l /etc/profile /etc/profile.d/
+```
+
+If any weird profile script is found you should check it for **sensitive details**.
 
 ### Passwd/Shadow Files
 
@@ -1076,63 +1086,13 @@ cat /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 cat /etc/shadow /etc/shadow- /etc/shadow~ /etc/gshadow /etc/gshadow- /etc/master.passwd /etc/spwd.db /etc/security/opasswd 2>/dev/null
 ```
 
-### Interesting Folders
-
-The following folders may contain backups or interesting information: **/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports**
+In some occasions you can find **password hashes** inside the `/etc/passwd` \(or equivalent\) file
 
 ```bash
-ls -a /tmp /var/tmp /var/backups /var/mail/ /var/spool/mail/
+grep -v '^[^:]*:[x\*]' /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 ```
 
-### \*\_history, .sudo\_as\_admin\_successful, profile, bashrc, httpd.conf, .plan, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml files
-
-```bash
-fils=`find / -type f \( -name "*_history" -o -name ".sudo_as_admin_successful" -o -name ".profile" -o -name "*bashrc" -o -name "httpd.conf" -o -name "*.plan" -o -name ".htpasswd" -o -name ".git-credentials" -o -name "*.rhosts" -o -name "hosts.equiv" -o -name "Dockerfile" -o -name "docker-compose.yml" \) 2>/dev/null`Hidden files
-```
-
-```bash
-find / -type f -iname ".*" -ls 2>/dev/null
-```
-
-### **Web files**
-
-```bash
-ls -alhR /var/www/ 2>/dev/null
-ls -alhR /srv/www/htdocs/ 2>/dev/null
-ls -alhR /usr/local/www/apache22/data/
-ls -alhR /opt/lampp/htdocs/ 2>/dev/null
-```
-
-### **Backups**
-
-```bash
-find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/games /usr/sbin /root /tmp -type f \( -name "*backup*" -o -name "*\.bak" -o -name "*\.bck" -o -name "*\.bk" \) 2>/dev/nulll
-```
-
-### Known files containing passwords
-
-Read the code of [**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS), it searches for several possible files that could contain passwords.
-
-Other interesting tool that you can use to do so is: [**LaZagne**](https://github.com/AlessandroZ/LaZagne)\*\*\*\*
-
-### R**egexp** or **strings** inside files \(It could be also useful to check [**log files**](https://www.thegeekstuff.com/2011/08/linux-var-log-files/)\)
-
-```bash
-grep -lRi "password" /home /var/www /var/log 2>/dev/null | sort | uniq #Find string password (no cs) in those directories
-grep -a -R -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' /var/log/ 2>/dev/null | sort | uniq #IPs inside logs
-```
-
-### E**nvironment**, there could be interesting data
-
-```text
-set
-env
-cat /proc/self/environ
-```
-
-## Writable files
-
-### /etc/passwd
+#### Writable /etc/passwd
 
 First generate a password with one of the following commands.
 
@@ -1179,6 +1139,91 @@ Group=root
 
 Your backdoor will be executed the next time that tomcat is started.
 
+### Check Folders
+
+The following folders may contain backups or interesting information: **/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports, /root** \(Probably you won't be able to read the last one but try\)
+
+```bash
+ls -a /tmp /var/tmp /var/backups /var/mail/ /var/spool/mail/ /root
+```
+
+### Weird Location/Owned files
+
+```bash
+#root owned files in /home folders
+find /home -user root 2>/dev/null
+#Files owned by other users in folders owned by me
+for d in `find /var /etc /home /root /tmp /usr /opt /boot /sys -type d -user $(whoami) 2>/dev/null`; do find $d ! -user `whoami` -exec ls -l {} \; 2>/dev/null; done
+#Files owned by root, readable by me but no world readable
+find / -type f -user root ! -perm -o=r 2>/dev/null
+#Files owned by me or world writable
+find / '(' -type f -or -type d ')' '(' '(' -user $USER ')' -or '(' -perm -o=w ')' ')' ! -path "/proc/*" ! -path "/sys/*" ! -path "$HOME/*" 2>/dev/null
+#Writable files by each group I belong to
+for g in `groups`; 
+      do printf "  Group $g:\n";
+      find / '(' -type f -or -type d ')' -group $g -perm -g=w ! -path "/proc/*" ! -path "/sys/*" ! -path "$HOME/*" 2>/dev/null
+      done
+done
+```
+
+### Modified files in last mins
+
+```bash
+find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -path "/dev/*" ! -path "/var/lib/*" 2>/dev/null
+```
+
+### Sqlite DB files
+
+```bash
+find / -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' 2>/dev/null
+```
+
+### \*\_history, .sudo\_as\_admin\_successful, profile, bashrc, httpd.conf, .plan, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml files
+
+```bash
+fils=`find / -type f \( -name "*_history" -o -name ".sudo_as_admin_successful" -o -name ".profile" -o -name "*bashrc" -o -name "httpd.conf" -o -name "*.plan" -o -name ".htpasswd" -o -name ".git-credentials" -o -name "*.rhosts" -o -name "hosts.equiv" -o -name "Dockerfile" -o -name "docker-compose.yml" \) 2>/dev/null`Hidden files
+```
+
+### Hidden files
+
+```bash
+find / -type f -iname ".*" -ls 2>/dev/null
+```
+
+### **Script/Binaries in PATH**
+
+```bash
+for d in `echo $PATH | tr ":" "\n"`; do find $d -name "*.sh" 2>/dev/null; done
+for d in `echo $PATH | tr ":" "\n"`; do find $d -type -f -executable 2>/dev/null; done
+```
+
+### **Web files**
+
+```bash
+ls -alhR /var/www/ 2>/dev/null
+ls -alhR /srv/www/htdocs/ 2>/dev/null
+ls -alhR /usr/local/www/apache22/data/
+ls -alhR /opt/lampp/htdocs/ 2>/dev/null
+```
+
+### **Backups**
+
+```bash
+find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/games /usr/sbin /root /tmp -type f \( -name "*backup*" -o -name "*\.bak" -o -name "*\.bck" -o -name "*\.bk" \) 2>/dev/nulll
+```
+
+### Known files containing passwords
+
+Read the code of [**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS), it searches for **several possible files that could contain passwords**.  
+**Other interesting tool** that you can use to do so is: [**LaZagne**](https://github.com/AlessandroZ/LaZagne)\*\*\*\*
+
+### Generic Creds Search/Regex
+
+You should also check for files containing the word "**password**" in it's **name** or inside the **content**, also check for IPs and emails inside logs, or hashes regexps.  
+I'm not going to list here how to do all of this but if you are interested you can check the last checks that [**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh) perform.
+
+## Writable files
+
 ### Python library hijacking
 
 If you know from **where** a python script is going to be executed and you **can write inside** that folder or you can **modify python libraries**, you can modify the os library and backdoor it \(if you can write where python script is going to be executed, copy and paste the os.py library\).
@@ -1218,73 +1263,15 @@ DEVICE=eth0
 
 **Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist\_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)\*\*\*\*
 
-## Storage information
-
-You can check the **storage information** using:
-
-```text
-df -h
-```
-
-There could be some **disks** that are **not mounted**
-
-```bash
-ls /dev | grep -i "sd"
-cat /etc/fstab
-lpstat -a# Check if there is any printer
-```
-
-## Check for weird executables
-
-Just check the name of the binaries inside **/bin, /usr/bin, /sbin, /usr/sbin…** \(directories inside **$PATH**\)
-
 ## Other Tricks
 
-### Exploiting services
+### NFS Privilege escalation
 
-[**NFS no\_root\_squash misconfiguration PE**](nfs-no_root_squash-misconfiguration-pe.md)
+{% page-ref page="nfs-no\_root\_squash-misconfiguration-pe.md" %}
 
-### **Searching added software without package manager**
+## Escaping from restricted Shells
 
-```bash
-for i in /sbin/* /; do dpkg --search $i >/dev/null; done #Use ir inside each folder of the path
-```
-
-## More linux enumeration
-
-### Useful Software
-
-```bash
-which nc ncat netcat wget curl ping gcc make gdb base64 socat python python2 python3 perl php ruby xterm doas sudo fetch 2>/dev/null #Check for some interesting software
-```
-
-### Network information
-
-```bash
-cat /etc/hostname /etc/hosts /etc/resolv.conf 2>/dev/null #Known hosts and DNS
-dnsdomainname 2>/dev/null
-cat /etc/networks 2>/dev/null
-ifconfig 2>/dev/null || ip a 2>/dev/null #Info about interfaces
-iptables -L 2>/dev/null #Some iptables rules? access??
-arp -e 2>/dev/null #Known neightbours
-route 2>/dev/null #Network routes
-netstat -punta 2>/dev/null #Ports
-lsof -i #Files used by network services
-```
-
-### Users
-
-```bash
-gpg --list-keys #Do I have any PGP key?
-```
-
-### Files
-
-```bash
-ls -la $HOME #Files in $HOME
-find /home -type f 2>/dev/null | column -t | grep -v -i "/"$USER #Files in home by not in my $HOME
-find  /home /root -name .ssh 2>/dev/null -exec ls -laR {} \; #Check for .ssh directories and their content
-```
+{% page-ref page="escaping-from-limited-bash.md" %}
 
 ## More help
 
