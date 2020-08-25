@@ -303,6 +303,19 @@ Now that we have built the list of assets of our scope it's time to search for s
 
 **Dorks**:  _AWS\_SECRET\_ACCESS\_KEY, API KEY, API SECRET, API TOKEN… ROOT PASSWORD, ADMIN PASSWORD, COMPANYNAME SECRET, COMPANYNAME ROOT, GCP SECRET, AWS SECRET, “username password” extension:sql, “private” extension:pgp..._
 
+#### More Github Dorks
+
+* extension:pem private
+* extension:ppk private
+* extension:sql mysql dump password
+* extension:json api.forecast.io
+* extension:json mongolab.com
+* extension:yaml mongolab.com
+* extension:ica \[WFClient\] Password=
+* extension:avastlic “support.avast.com”
+* extension:js jsforce conn.login
+* extension:json googleusercontent client\_secret
+
 ## [**Pentesting Web Methodology**](pentesting/pentesting-web/)\*\*\*\*
 
 Anyway, the **majority of the vulnerabilities** found by bug hunters resides inside **web applications**, so at this point I would like to talk about a **web application testing methodology**, and you can [**find this information here**](pentesting/pentesting-web/).
