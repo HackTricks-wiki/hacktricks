@@ -259,7 +259,7 @@ To dump a process memory you could use:
 * \*\*\*\*[**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) \(root\) - _You can manually remove root requirements and dump process owned by you_
 * Script A.5 from [**https://www.delaat.net/rp/2016-2017/p97/report.pdf**](https://www.delaat.net/rp/2016-2017/p97/report.pdf) \(root is required\)
 
-### Credentials from Process memory
+### Credentials from Process Memory
 
 The tool [**https://github.com/huntergregal/mimipenguin**](https://github.com/huntergregal/mimipenguin) will **steal clear text credentials from memory** and from some **well known files**. It requires root privileges to work properly.
 
