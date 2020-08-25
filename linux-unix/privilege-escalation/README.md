@@ -432,6 +432,12 @@ _Note that the system must be using that socket file configuration or the backdo
 
 If you **identify any writable socket** \(_now where are talking about Unix Sockets, not about the config `.socket` files_\), then, **you can communicate** with that socket and maybe exploit a vulnerability.
 
+### Enumerate Unix Sockets
+
+```bash
+netstat -a -p --unix
+```
+
 ### HTTP sockets
 
 Note that there may be some **sockets listening for HTTP** requests \(_I'm not talking about .socket files but about the files acting as unix sockets_\). You can check this with:
