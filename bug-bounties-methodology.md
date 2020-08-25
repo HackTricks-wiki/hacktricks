@@ -181,6 +181,13 @@ curl -s "https://rapiddns.io/subdomain/$1?full=1" \
 }
 ```
 
+#### Shodan
+
+ You found **dev-int.bigcompanycdn.com**, make a Shodan query like the following:
+
+* http.html:”dev-int.bigcompanycdn.com”
+* http.html:”https://dev-int-bigcompanycdn.com”
+
 ### DNS Brute force
 
 Let's try to find new **subdomains** brute-forcing DNS servers using possible subdomain names.  
