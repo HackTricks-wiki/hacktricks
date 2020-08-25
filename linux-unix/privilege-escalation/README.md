@@ -209,7 +209,13 @@ You can use tools like [**pspy**](https://github.com/DominicBreuker/pspy) to mon
 
 ### Process memory
 
-Some services of a server save **credentials in clear text inside the memory**. If you have access to the memory of a FTP service \(for example\) you could get the Heap and search inside of it the credentials.
+Some services of a server save **credentials in clear text inside the memory**.  
+Normally you will need **root privileges** to read the memory of processes that belong to other users, therefore this is usually more useful when you are already root and want to discover more credentials.  
+However, remember that **as a regular user you can read the memory of the processes you own**.
+
+#### GDB
+
+If you have access to the memory of a FTP service \(for example\) you could get the Heap and search inside of it the credentials.
 
 ```bash
 gdb -p <FTP_PROCESS_PID>
@@ -222,18 +228,49 @@ strings /tmp/mem_ftp #User and password
 
 #### /proc/$pid/maps &  /proc/$pid/mem
 
-For a given process ID, **maps shows how memory is mapped within that processes'** virtual address space; it also shows the **permissions of each mapped region**. The **mem** psuedo file **exposes the processes memory itself**. From the **maps** file we know which **memory regions are readable** and their offsets. We use this information to **seek into the mem file and dump all readable regions** to a file.
+For a given process ID, **maps shows how memory is mapped within that processes'** virtual address space; it also shows the **permissions of each mapped region**. The **mem** pseudo file **exposes the processes memory itself**. From the **maps** file we know which **memory regions are readable** and their offsets. We use this information to **seek into the mem file and dump all readable regions** to a file.
 
-To dump a process memory you could use:
-
-* [https://github.com/hajzer/bash-memory-dump](https://github.com/hajzer/bash-memory-dump) \(root is required\)
-* Script A.5 from [https://www.delaat.net/rp/2016-2017/p97/report.pdf](https://www.delaat.net/rp/2016-2017/p97/report.pdf) \(root is required\)
+```bash
+procdump()
+( 
+    cat /proc/$1/maps | grep -Fv ".so" | grep " 0 " | awk '{print $1}' | ( IFS="-"
+    while read a b; do
+        dd if=/proc/$1/mem bs=$( getconf PAGESIZE ) iflag=skip_bytes,count_bytes \
+           skip=$(( 0x$a )) count=$(( 0x$b - 0x$a )) of="$1_mem_$a.bin"
+    done )
+    cat $1*.bin > $1.dump
+    rm $1*.bin
+)
+```
 
 #### /dev/mem
+
+ `/dev/mem` provides access to the system's **physical** memory, not the virtual memory. The kernels virtual address space can be accessed using /dev/kmem.  
+Typically, `/dev/mem` is only readable by **root** and **kmem** group.
 
 ```text
 strings /dev/mem -n10 | grep -i PASS
 ```
+
+#### Tools
+
+To dump a process memory you could use:
+
+* \*\*\*\*[**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) \(root\) - _You can manually remove root requirements and dump process owned by you_
+* Script A.5 from [**https://www.delaat.net/rp/2016-2017/p97/report.pdf**](https://www.delaat.net/rp/2016-2017/p97/report.pdf) \(root is required\)
+
+### Credentials from Process memory
+
+The tool [**https://github.com/huntergregal/mimipenguin**](https://github.com/huntergregal/mimipenguin) will **steal clear text credentials from memory** and from some **well known files**. It requires root privileges to work properly.
+
+| Feature | Process Name |
+| :--- | :--- |
+| GDM password \(Kali Desktop, Debian Desktop\) | gdm-password |
+| Gnome Keyring \(Ubuntu Desktop, ArchLinux Desktop\) | gnome-keyring-daemon |
+| LightDM \(Ubuntu Desktop\) | lightdm |
+| VSFTPd \(Active FTP Connections\) | vsftpd |
+| Apache2 \(Active HTTP Basic Auth Sessions\) | apache2 |
+| OpenSSH \(Active SSH Sessions - Sudo Usage\) | sshd: |
 
 ## Scheduled/Cron jobs
 
