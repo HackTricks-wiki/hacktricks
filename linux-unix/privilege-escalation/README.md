@@ -1293,6 +1293,10 @@ Other alternative to this folder is `/etc/rc.d/init.d` in Redhat
 
 {% page-ref page="escaping-from-limited-bash.md" %}
 
+### Cisco - vmanage
+
+{% page-ref page="cisco-vmanage.md" %}
+
 ## More help
 
 [Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)

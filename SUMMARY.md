@@ -20,6 +20,7 @@
 
 * [Checklist - Linux Privilege Escalation](linux-unix/linux-privilege-escalation-checklist.md)
 * [Linux Privilege Escalation](linux-unix/privilege-escalation/README.md)
+  * [Cisco - vmanage](linux-unix/privilege-escalation/cisco-vmanage.md)
   * [D-Bus Enumeration & Command Injection Privilege Escalation](linux-unix/privilege-escalation/d-bus-enumeration-and-command-injection-privilege-escalation.md)
   * [Interesting Groups - Linux PE](linux-unix/privilege-escalation/interesting-groups-linux-pe/README.md)
     * [lxd/lxc Group - Privilege escalation](linux-unix/privilege-escalation/interesting-groups-linux-pe/lxd-privilege-escalation.md)
