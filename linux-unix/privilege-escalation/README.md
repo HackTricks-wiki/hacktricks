@@ -438,6 +438,21 @@ If you **identify any writable socket** \(_now where are talking about Unix Sock
 netstat -a -p --unix
 ```
 
+### Raw connection
+
+```bash
+#apt-get install netcat-openbsd
+nc -U /tmp/socket  #Connect to UNIX-domain stream socket
+nc -uU /tmp/socket #Connect to UNIX-domain datagram socket
+
+#apt-get install socat
+socat - UNIX-CLIENT:/dev/socket #connect to UNIX-domain socket, irrespective of its type
+```
+
+**Exploitation example:**
+
+{% page-ref page="socket-command-injection.md" %}
+
 ### HTTP sockets
 
 Note that there may be some **sockets listening for HTTP** requests \(_I'm not talking about .socket files but about the files acting as unix sockets_\). You can check this with:
