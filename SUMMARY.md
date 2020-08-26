@@ -20,6 +20,7 @@
 
 * [Checklist - Linux Privilege Escalation](linux-unix/linux-privilege-escalation-checklist.md)
 * [Linux Privilege Escalation](linux-unix/privilege-escalation/README.md)
+  * [Escaping from a Docker container](linux-unix/privilege-escalation/escaping-from-a-docker-container.md)
   * [Cisco - vmanage](linux-unix/privilege-escalation/cisco-vmanage.md)
   * [D-Bus Enumeration & Command Injection Privilege Escalation](linux-unix/privilege-escalation/d-bus-enumeration-and-command-injection-privilege-escalation.md)
   * [Escaping from restricted shells - Jails](linux-unix/privilege-escalation/escaping-from-limited-bash.md)

