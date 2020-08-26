@@ -343,7 +343,8 @@ for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; do
 
 ### Writable _.service_ files
 
-Check if you can write any `.service` file, if you can, you **could modify it** so it **executes** your **backdoor when** the service is **started**, **restarted** or **stopped** \(maybe you will need to wait until the machine is rebooted\).
+Check if you can write any `.service` file, if you can, you **could modify it** so it **executes** your **backdoor when** the service is **started**, **restarted** or **stopped** \(maybe you will need to wait until the machine is rebooted\).  
+For example create your backdoor inside the .service file with **`ExecStart=/tmp/script.sh`**
 
 ### Writable service binaries
 
