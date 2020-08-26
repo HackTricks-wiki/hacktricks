@@ -25,7 +25,7 @@ red /bin/bash
 
 ### Get bash from SSH
 
-If you are accessing via ssh you can trick this trick to execute a bash shell:
+If you are accessing via ssh you can use this trick to execute a bash shell:
 
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
