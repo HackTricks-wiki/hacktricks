@@ -816,7 +816,7 @@ Requirements to escalate privileges:
 
 If all these requirements are met, **you can escalate privileges using:** [**https://github.com/nongiach/sudo\_inject**](https://github.com/nongiach/sudo_inject)\*\*\*\*
 
-* The **first exploit** \(`exploit.sh`\) will create the binary `activate_sudo_token` in _/tmp_. You can use it to **activate the sudo token in your session**:
+* The **first exploit** \(`exploit.sh`\) will create the binary `activate_sudo_token` in _/tmp_. You can use it to **activate the sudo token in your session** \(you won't get automatically a root shell, do `sudo su`\):
 
 ```bash
 bash exploit.sh
