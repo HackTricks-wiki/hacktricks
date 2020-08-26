@@ -1107,6 +1107,8 @@ tmux attach -d -t myname #First detach the sessinos from the other console and t
 tmux -S /tmp/dev_sess attach -t 0 #Attach using a non-default tmux socket
 ```
 
+Check **valentine box from HTB** for an example.
+
 ## SSH
 
 ### Debian OpenSSL Predictable PRNG - CVE-2008-0166
