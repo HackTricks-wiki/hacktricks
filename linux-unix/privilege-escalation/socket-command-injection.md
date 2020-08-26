@@ -16,6 +16,7 @@ if os.path.exists("/tmp/socket_test.s"):
 
 server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 server.bind("/tmp/socket_test.s")
+os.system("chmod o+w /tmp/socket_test.s")
 while True:
   server.listen(1)
   conn, addr = server.accept()
