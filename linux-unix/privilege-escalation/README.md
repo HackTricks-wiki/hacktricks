@@ -1066,7 +1066,8 @@ getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 
 ## Open shell sessions
 
-Maybe you have access to some root unprotected shell session.
+In **old versions** you may **hijack** some **shell** session of a different user \(**root**\).  
+In **newest versions** you will be able to **connect** to screen sessions only of **your own user**. However, you could find **interesting information inside of the session**.
 
 ### screen sessions hijacking
 
