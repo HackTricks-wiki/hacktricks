@@ -1068,7 +1068,7 @@ getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 
 Maybe you have access to some root unprotected shell session.
 
-### screen sessions
+### screen sessions hijacking
 
 **List screen sessions**
 
@@ -1085,7 +1085,9 @@ screen -dr <session> #The -d is to detacche whoeevr is attached to it
 screen -dr 3350.foo #In the example of the image
 ```
 
-### tmux sessions
+### tmux sessions hijacking
+
+Apparently this was a problem with **old tmux versions**. I wasn't able to hijack a tmux \(v2.1\) session created by root from a non-privileged user.
 
 **List tmux sessions** 
 
