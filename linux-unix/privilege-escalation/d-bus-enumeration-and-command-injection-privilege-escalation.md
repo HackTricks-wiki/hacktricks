@@ -393,6 +393,5 @@ finish:
 
         return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
-
 ```
 
