@@ -30,14 +30,14 @@ Find all suid binaries and check if there is the binary **Pkexec**:
 find / -perm -4000 2>/dev/null
 ```
 
-If you find that the binary pkexec is a SUID binary and you belong to sudo or admin, you could probably execute binaries as sudo using pkexec.  
-Check the contents of:
+If you find that the binar**y pkexec is a SUID** binary and you belong to **sudo** or **admin**, you could probably execute binaries as sudo using `pkexec`.  
+This is because typically those are the groups inside the **polkit policy**. This policy basically identifies which groups can use `pkexec`. Check it with:
 
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
 
-There you will find which groups are allowed to execute **pkexec** and **by default** in some linux can **appear** some of the groups **sudo or admin**.
+There you will find which groups are allowed to execute **pkexec** and **by default** in some linux disctros the groups **sudo** and **admin** appear.
 
 To **become root you can execute**:
 
