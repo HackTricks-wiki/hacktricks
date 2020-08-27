@@ -40,7 +40,63 @@ capsh --print
 | CAP\_NET\_BIND\_SERVICE | SERVICE Bind a socket to internet domain privileged ports |
 | CAP\_SYS\_CHROOT | Ability to call chroot\(\) |
 
-Capabilities are useful when you want to restrict your own processes after performing privileged operations \(e.g. after setting up chroot and binding to a socket\). However, they can be exploited by passing them malicious commands or arguments which are then run as root.
+### Capabilities Sets
+
+#### Inherited capabilities
+
+**CapEff**: The _effective_ capability set represents all capabilities the process is using at the moment. For file capabilities the effective set is in fact a single bit indicating whether the capabilities of the permitted set will be moved to the effective set upon running a binary. This makes it possible for binaries that are not capability-aware to make use of file capabilities without issuing special system calls.
+
+**CapPrm**: The _permitted_ set includes all capabilities a process may use. These capabilities are allowed to be copied to the effective set and used after that.
+
+**CapInh**: Using the _inherited_ set all capabilities that are allowed to be inherited from a parent process can be specified. This prevents a process from receiving any capabilities it does not need. This set is preserved across an `execve` and is usually set by a process _receiving_ capabilities rather than by a process that’s handing out capabilities to its children.
+
+**CapBnd**: With the _bounding_ set it’s possible to restrict the capabilities a process may ever receive. Only capabilities that are present in the bounding set will be allowed in the inheritable and permitted sets.
+
+**CapAmb**: The _ambient_ capability set applies to all non-SUID binaries without file capabilities. It preserves capabilities when calling `execve`. However, not all capabilities in the ambient set may be preserved because they are being dropped in case they are not present in either the inheritable or permitted capability set. This set is preserved across `execve` calls.
+
+## Processes Capabilities
+
+To see the capabilities for a particular process, use the **status** file in the /proc directory. As it provides more details, let’s limit it only to the information related to Linux capabilities.
+
+```bash
+cat /proc/1234/status | grep Cap
+cat /proc/$$/status | grep Cap #This will print the capabilities of the current process
+```
+
+This command should return 5 lines on most systems.
+
+* CapInh = Inherited capabilities
+* CapPrm = Permitted capabilities
+* CapEff = Effective capabilities
+* CapBnd = Bounding set
+* CapAmb = Ambient capabilities set
+
+```
+CapInh: 0000000000000000
+CapPrm: 0000003fffffffff
+CapEff: 0000003fffffffff
+CapBnd: 0000003fffffffff
+CapAmb: 0000000000000000
+```
+
+These hexadecimal numbers don’t make sense. Using the capsh utility we can decode them into the capabilities name.
+
+```bash
+capsh --decode=0000003fffffffff
+0x0000003fffffffff=cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,37
+```
+
+Although that works, there is another and easier way. To see the capabilities of a running process, simply use the **getpcaps** tool followed by its process ID \(PID\). You can also provide a list of process IDs.
+
+```bash
+getpcaps 1234
+```
+
+The _getpcaps_ tool uses the **capget\(\)** system call to query the available capabilities for a particular thread. This system call only needs to provide the PID to obtain more information.
+
+## Malicious Use
+
+Capabilities are useful when you **want to restrict your own processes after performing privileged operations** \(e.g. after setting up chroot and binding to a socket\). However, they can be exploited by passing them malicious commands or arguments which are then run as root.
 
 You can force capabilities upon programs using `setcap`, and query these using `getcap`:
 
@@ -91,5 +147,8 @@ Note that one can assign empty capability sets to a program file, and thus it is
 
 then that binary will run as root.
 
-Capabilities info was extracted from [here](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
+## References
+
+* [https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
+* [https://www.schutzwerk.com/en/43/posts/linux\_container\_capabilities/\#:~:text=Inherited%20capabilities%3A%20A%20process%20can,a%20binary%2C%20e.g.%20using%20setcap%20.](https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/#:~:text=Inherited%20capabilities%3A%20A%20process%20can,a%20binary%2C%20e.g.%20using%20setcap%20.)
 
