@@ -71,7 +71,8 @@ This command should return 5 lines on most systems.
 * CapBnd = Bounding set
 * CapAmb = Ambient capabilities set
 
-```
+```bash
+#These are the typical capabilities of a root owned process (all)
 CapInh: 0000000000000000
 CapPrm: 0000003fffffffff
 CapEff: 0000003fffffffff
@@ -86,12 +87,44 @@ capsh --decode=0000003fffffffff
 0x0000003fffffffff=cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,37
 ```
 
+Lets check now the **capabilities** used by `ping`:
+
+```bash
+cat /proc/9491/status | grep Cap
+CapInh:	0000000000000000
+CapPrm:	0000000000003000
+CapEff:	0000000000000000
+CapBnd:	0000003fffffffff
+CapAmb:	0000000000000000
+
+capsh --decode=0000000000003000
+0x0000000000003000=cap_net_admin,cap_net_raw
+```
+
 Although that works, there is another and easier way. To see the capabilities of a running process, simply use the **getpcaps** tool followed by its process ID \(PID\). You can also provide a list of process IDs.
 
 ```bash
 getpcaps 1234
 ```
 
+Lets check here the capabilities of `tcpdump` after having giving the binary enough capabilities \(`cap_net_admin` and `cap_net_raw`\) to sniff the network \(_tcpdump is running in process 9562_\):
+
+```bash
+$ getpcaps 9562
+Capabilities for `9562': = cap_net_admin,cap_net_raw+ep
+
+$ cat /proc/9562/status | grep Cap
+CapInh:	0000000000000000
+CapPrm:	0000000000003000
+CapEff:	0000000000003000
+CapBnd:	0000003fffffffff
+CapAmb:	0000000000000000
+
+$ capsh --decode=0000000000003000
+0x0000000000003000=cap_net_admin,cap_net_raw
+```
+
+As you can see the given capabilities corresponds with the results of the 2 ways of getting the capabilities of a binary.  
 The _getpcaps_ tool uses the **capget\(\)** system call to query the available capabilities for a particular thread. This system call only needs to provide the PID to obtain more information.
 
 ## Malicious Use
@@ -129,7 +162,7 @@ getcap -r / 2>/dev/null
 /usr/bin/python2.6 -c 'import os; os.setuid(0); os.system("/bin/bash");'
 ```
 
-**Capabilities** needed by `tcpdump` to allow any user to sniff packets:
+**Capabilities** needed by `tcpdump` to **allow any user to sniff packets**:
 
 ```bash
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
