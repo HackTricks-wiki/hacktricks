@@ -1227,9 +1227,15 @@ import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s
 There is a vulnerability on `logrotate`that allows a user with **write permissions over a log file** or **any** of its **parent directories** to make `logrotate`write **a file in any location**. If **logrotate** is being executed by **root**, then the user will be able to write any file in _**/etc/bash\_completion.d/**_  that will be executed by any user that login.  
 So, if you have **write perms** over a **log file** **or** any of its **parent folder**, you can **privesc** \(on most linux distributions, logrotate is executed automatically once a day as **user root**\). Also, check if apart of _/var/log_ there are more files being **rotated**.
 
-More detailed information about the vulnerability can be found in this page [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).
+{% hint style="info" %}
+This vulnerability affects `logrotate` version `3.15.1` and below
+{% endhint %}
 
-You can exploit this vulnerability with [**logrotten**](https://github.com/whotwagner/logrotten). 
+More detailed information about the vulnerability can be found in this page: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).
+
+You can exploit this vulnerability with [**logrotten**](https://github.com/whotwagner/logrotten).
+
+This vulnerability is very similar to [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **\(nginx logs\),** so whenever you find that you can alter logs, check who is managing those logs and check if you can escalate privileges substituting the logs by symlinks.
 
 ### /etc/sysconfig/network-scripts/ \(Centos/Redhat\)
 
