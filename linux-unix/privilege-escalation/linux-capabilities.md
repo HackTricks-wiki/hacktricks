@@ -44,9 +44,9 @@ capsh --print
 
 #### Inherited capabilities
 
-**CapEff**: The _effective_ capability set represents all capabilities the process is using at the moment. For file capabilities the effective set is in fact a single bit indicating whether the capabilities of the permitted set will be moved to the effective set upon running a binary. This makes it possible for binaries that are not capability-aware to make use of file capabilities without issuing special system calls.
+**CapEff**: The _effective_ capability set represents all capabilities the process is using at the moment \(this is the actual set of capabilities that the kernel uses for permission checks\). For file capabilities the effective set is in fact a single bit indicating whether the capabilities of the permitted set will be moved to the effective set upon running a binary. This makes it possible for binaries that are not capability-aware to make use of file capabilities without issuing special system calls.
 
-**CapPrm**: The _permitted_ set includes all capabilities a process may use. These capabilities are allowed to be copied to the effective set and used after that.
+**CapPrm**: \(_Permitted_\) This is a superset of capabilities that the thread may add to either the thread permitted or thread inheritable sets. The thread can use the capset\(\) system call to manage capabilities: It may drop any capability from any set, but only add capabilities to its thread effective and inherited sets that are in its thread permitted set. Consequently it cannot add any capability to its thread permitted set, unless it has the cap\_setpcap capability in its thread effective set.
 
 **CapInh**: Using the _inherited_ set all capabilities that are allowed to be inherited from a parent process can be specified. This prevents a process from receiving any capabilities it does not need. This set is preserved across an `execve` and is usually set by a process _receiving_ capabilities rather than by a process that’s handing out capabilities to its children.
 
@@ -54,9 +54,15 @@ capsh --print
 
 **CapAmb**: The _ambient_ capability set applies to all non-SUID binaries without file capabilities. It preserves capabilities when calling `execve`. However, not all capabilities in the ambient set may be preserved because they are being dropped in case they are not present in either the inheritable or permitted capability set. This set is preserved across `execve` calls.
 
+For a detailed explanation of the difference between capabilities in threads and files and how are the capabilities  passed to threads read the following pages:
+
+* [https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work](https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work)
+* [https://blog.ploetzli.ch/2014/understanding-linux-capabilities/](https://blog.ploetzli.ch/2014/understanding-linux-capabilities/)
+
 ## Processes Capabilities
 
-To see the capabilities for a particular process, use the **status** file in the /proc directory. As it provides more details, let’s limit it only to the information related to Linux capabilities.
+To see the capabilities for a particular process, use the **status** file in the /proc directory. As it provides more details, let’s limit it only to the information related to Linux capabilities.  
+Note that for all running processes capability information is maintained per thread, for binaries in the file system it’s stored in extended attributes.
 
 ```bash
 cat /proc/1234/status | grep Cap
@@ -110,6 +116,9 @@ getpcaps 1234
 Lets check here the capabilities of `tcpdump` after having giving the binary enough capabilities \(`cap_net_admin` and `cap_net_raw`\) to sniff the network \(_tcpdump is running in process 9562_\):
 
 ```bash
+#The following command give tcpdump the needed capabilities to sniff traffic
+$ setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
+
 $ getpcaps 9562
 Capabilities for `9562': = cap_net_admin,cap_net_raw+ep
 
@@ -126,6 +135,20 @@ $ capsh --decode=0000000000003000
 
 As you can see the given capabilities corresponds with the results of the 2 ways of getting the capabilities of a binary.  
 The _getpcaps_ tool uses the **capget\(\)** system call to query the available capabilities for a particular thread. This system call only needs to provide the PID to obtain more information.
+
+### Dropping capabilities with capsh
+
+If we drop the CAP\_NET\_RAW capabilities for _ping_, then the ping utility should no longer work.
+
+```bash
+capsh --drop=cap_net_raw --print -- -c "tcpdump"
+```
+
+Besides the output of _capsh_ itself, the _tcpdump_ command itself should also raise an error.
+
+> /bin/bash: /usr/sbin/tcpdump: Operation not permitted
+
+The error clearly shows that the ping command is not allowed to open an ICMP socket. Now we know for sure that this works as expected.
 
 ## Malicious Use
 
@@ -184,4 +207,6 @@ then that binary will run as root.
 
 * [https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
 * [https://www.schutzwerk.com/en/43/posts/linux\_container\_capabilities/\#:~:text=Inherited%20capabilities%3A%20A%20process%20can,a%20binary%2C%20e.g.%20using%20setcap%20.](https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/#:~:text=Inherited%20capabilities%3A%20A%20process%20can,a%20binary%2C%20e.g.%20using%20setcap%20.)
-
+* [https://linux-audit.com/linux-capabilities-101/](https://linux-audit.com/linux-capabilities-101/)
+* [https://www.linuxjournal.com/article/5737](https://www.linuxjournal.com/article/5737)
+* 
