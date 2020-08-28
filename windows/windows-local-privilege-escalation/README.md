@@ -75,6 +75,26 @@ Access is denied.
 **Therefore, when a file has a minimum integrity level, in order to modify it you need to be running at least in that integrity level.**
 {% endhint %}
 
+### Integrity Levels in Binaries
+
+I made a copy of `cmd.exe` in `C:\Windows\System32\cmd-low.exe` and set it an **integrity level of low from an administrator console:**
+
+```text
+icacls C:\Windows\System32\cmd-low.exe
+C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
+                                BUILTIN\Administrators:(I)(F)
+                                BUILTIN\Users:(I)(RX)
+                                APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
+                                APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
+                                Mandatory Label\Low Mandatory Level:(NW)
+```
+
+Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instead of a medium one:
+
+![](../../.gitbook/assets/image%20%28351%29.png)
+
+For curious people, if you assign high integrity level to a binary \(`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`\) it won't run with high integrity level automatically \(if you invoke it from a medium integrity level --by default-- it will run under a medium integrity level\).
+
 ### Integrity Levels in Processes
 
 Not all files and folders have a minimum integrity level, **but all processes are running under an integrity level**. And similar to what happened with the file-system, **if a process wants to write inside another process it must have at least the same integrity level**. This means that a process with low integrity level can’t open a handle with full access to a process with medium integrity level.
