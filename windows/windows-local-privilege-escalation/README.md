@@ -6,9 +6,10 @@ If you want to **know** about my **latest modifications**/**additions**, **join 
 If you want to **share some tricks with the community** you can also submit **pull requests** to ****[**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) ****that will be reflected in this book.  
 Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
 
-## Process Integrity Levels
+## Integrity Levels
 
 From Windows Vista, all **protected objects are labeled with an integrity level**. Most user and system files and registry keys on the system have a default label of “medium” integrity. The primary exception is a set of specific folders and files writeable by Internet Explorer 7 at Low integrity. **Most processes** run by **standard users** are labeled with **medium integrity** \(even the ones started by a user inside the administrators group\), and most **services** are labeled with **System integrity**. The root directory is protected by a high-integrity label.  
+Note that **a process with a lower integrity level can’t write to an object with a higher integrity level.**  
 There are several levels of integrity:
 
 * **Untrusted** – processes that are logged on anonymously are automatically designated as Untrusted. _Example: Chrome_
@@ -25,6 +26,60 @@ You can get the integrity level of a process using **Process Explorer** from **S
 You can also get your **current integrity level** using `whoami /groups`
 
 ![](../../.gitbook/assets/image%20%28350%29.png)
+
+### Integrity Levels in File-system
+
+A object inside the file-system may need an **minimum integrity level requirement** and if a process doesn't have this integrity process it won't be able to interact with it.  
+For example, lets **create a regular from a regular user console file and check the permissions**:
+
+```text
+echo asd >asd.txt
+icacls asd.txt
+asd.txt BUILTIN\Administrators:(I)(F)
+        DESKTOP-IDJHTKP\user:(I)(F)
+        NT AUTHORITY\SYSTEM:(I)(F)
+        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+        NT AUTHORITY\SERVICE:(I)(M,DC)
+        NT AUTHORITY\BATCH:(I)(M,DC)
+```
+
+Now, lets assign a minimum integrity level of **High** to the file. This **must be done from a console** running as **administrator** as a **regular console** will be running in Medium Integrity level and **won't be allowed** to assign High Integrity level to an object:
+
+```text
+icacls asd.txt /setintegritylevel(oi)(ci) High
+processed file: asd.txt
+Successfully processed 1 files; Failed processing 0 files
+
+C:\Users\Public>icacls asd.txt
+asd.txt BUILTIN\Administrators:(I)(F)
+        DESKTOP-IDJHTKP\user:(I)(F)
+        NT AUTHORITY\SYSTEM:(I)(F)
+        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+        NT AUTHORITY\SERVICE:(I)(M,DC)
+        NT AUTHORITY\BATCH:(I)(M,DC)
+        Mandatory Label\High Mandatory Level:(NW)
+```
+
+This is where things get interesting. You can see that the user `DESKTOP-IDJHTKP\user` has **FULL privileges** over the file \(indeed this was the user that created the file\), however, due to the minimum integrity level implemented he won't be able to modify the file anymore unless he is running inside a High Integrity Level \(note that he will be able to read it\):
+
+```text
+echo 1234 > asd.txt
+Access is denied.
+
+del asd.txt
+C:\Users\Public\asd.txt
+Access is denied.
+```
+
+{% hint style="info" %}
+**Therefore, when a file has a minimum integrity level, in order to modify it you need to be running at least in that integrity level.**
+{% endhint %}
+
+### Integrity Levels in Processes
+
+Not all files and folders have a minimum integrity level, **but all processes are running under an integrity level**. And similar to what happened with the file-system, **if a process wants to write inside another process it must have at least the same integrity level**. This means that a process with low integrity level can’t open a handle with full access to a process with medium integrity level.
+
+Due to the restrictions commented in this and the previous section, from a security point of view, it's always **recommended to run a process in the lower level of integrity possible**.
 
 ## System Info
 
