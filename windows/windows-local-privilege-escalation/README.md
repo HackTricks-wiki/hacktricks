@@ -6,6 +6,26 @@ If you want to **know** about my **latest modifications**/**additions**, **join 
 If you want to **share some tricks with the community** you can also submit **pull requests** to ****[**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) ****that will be reflected in this book.  
 Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
 
+## Process Integrity Levels
+
+From Windows Vista, all **protected objects are labeled with an integrity level**. Most user and system files and registry keys on the system have a default label of “medium” integrity. The primary exception is a set of specific folders and files writeable by Internet Explorer 7 at Low integrity. **Most processes** run by **standard users** are labeled with **medium integrity** \(even the ones started by a user inside the administrators group\), and most **services** are labeled with **System integrity**. The root directory is protected by a high-integrity label.  
+There are several levels of integrity:
+
+* **Untrusted** – processes that are logged on anonymously are automatically designated as Untrusted. _Example: Chrome_
+* **Low** – The Low integrity level is the level used by default for interaction with the Internet. As long as Internet Explorer is run in its default state, Protected Mode, all files and processes associated with it are assigned the Low integrity level. Some folders, such as the **Temporary Internet Folder**, are also assigned the **Low integrity** level by default. However,  note that a **low integrity process** is very **restricted**, it **cannot** write to the **registry** and it’s limited from writing to **most locations** in the current user’s profile.  _Example: Internet Explorer or Microsoft Edge_
+* **Medium** – Medium is the context that **most objects will run in**. Standard users receive the Medium integrity level, and any object not explicitly designated with a lower or higher integrity level is Medium by default. Not that a user inside the Administrators group by default will use medium integrity levels.
+* **High** – **Administrators** are granted the High integrity level. This ensures that Administrators are capable of interacting with and modifying objects assigned Medium or Low integrity levels, but can also act on other objects with a High integrity level, which standard users can not do. _Example: "Run as Administrator"_
+* **System** – As the name implies, the System integrity level is reserved for the system. The Windows kernel and core services are granted the System integrity level. Being even higher than the High integrity level of Administrators protects these core functions from being affected or compromised even by Administrators. Example: Services
+* **Installer** – The Installer integrity level is a special case and is the highest of all integrity levels. By virtue of being equal to or higher than all other WIC integrity levels, objects assigned the Installer integrity level are also able to uninstall all other objects.
+
+You can get the integrity level of a process using **Process Explorer** from **Sysinternals**, accessing the **properties** of the process and viewing the "**Security**" tab:
+
+![](../../.gitbook/assets/image%20%28349%29.png)
+
+You can also get your **current integrity level** using `whoami /groups`
+
+![](../../.gitbook/assets/image%20%28350%29.png)
+
 ## System Info
 
 ### Version info enumeration
