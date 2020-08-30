@@ -6,19 +6,21 @@ If you want to **know** about my **latest modifications**/**additions**, **join 
 If you want to **share some tricks with the community** you can also submit **pull requests** to ****[**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) ****that will be reflected in this book.  
 Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
 
-## Access Tokens
+## Initial Windows Theory
+
+### Access Tokens
 
 **If you don't know what are Windows Access Tokens, read the following page before continuing:**
 
 {% page-ref page="access-tokens.md" %}
 
-## ACLs - DACLs/SACLs/ACEs
+### ACLs - DACLs/SACLs/ACEs
 
 **If you don't know what is any of the acronyms used in the heading of this section, read the following page before continuing**:
 
 {% page-ref page="acls-dacls-sacls-aces.md" %}
 
-## Integrity Levels
+### Integrity Levels
 
 **If you don't know what are integrity levels in Windows you should read the following page before continuing:**
 
