@@ -1220,7 +1220,7 @@ When a **client writes on a pipe**, the **server** that created the pipe can **i
 
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
-\*\*\*\*[**Learn here**](../credentials.md#uac) **about what are the "integrity levels" in Windows, what is UAC and how to**[ **bypass it**](../credentials.md#uac)**.**
+\*\*\*\*[**Read this to learn about Integrity Levels**](integrity-levels.md) **and** [**this to learn what is UAC**](../credentials.md#uac)**, then read how to**[ **bypass it**](../credentials.md#uac)**.**
 
 ## **From High Integrity to System**
 
