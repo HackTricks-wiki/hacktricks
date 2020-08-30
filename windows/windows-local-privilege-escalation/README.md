@@ -1238,6 +1238,10 @@ sc start newservicename
 From a High Integrity process you could try to **enable the AlwaysInstallElevated registry entries** and **install** a reverse shell using a _**.msi**_ wrapper.   
 [More information about the registry keys involved and how to install a _.msi_ package here.](./#alwaysinstallelevated)
 
+### High + SeImpersonate privilege to System
+
+**You can** [**find the code here**](seimpersonate-from-high-to-system.md)**.**
+
 ### From SeDebug + SeImpersonate to Full Token privileges
 
 If you have those token privileges \(probably you will find this in an already High Integrity process\), you will be able to **open almost any process** \(not protected processes\) with the SeDebug privilege, **copy the token** of the process, and create an **arbitrary process with that token**.  
