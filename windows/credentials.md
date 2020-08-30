@@ -1,4 +1,4 @@
-# Authentication, Credentials, Token privileges, UAC and EFS
+# Authentication, Credentials, UAC and EFS
 
 ## Security Support Provider Interface \(SSPI\)
 
@@ -55,60 +55,6 @@ It is the database of the Active Directory. It is only present in Domain Control
 ### Credential Manager store
 
 Allows browsers and other Windows applications to save credentials.
-
-## Process Privileges
-
-**Privileges:**
-
-* Operations on the system:
-  * loading device drivers
-  * system shutdown
-  * timezone change
-  * ...
-* Assigned to user/group
-
-**Access Rights:**
-
-* Access to securable objects
-  * files/dirs,pipes, registry keys, Windows services, printers, jobs, network shares, access tokens, desktops,...
-* Assignedto object's ACL
-
-## Access Tokens
-
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
-
-It is used to describe the security context of a process or a thread.
-
-When a user logins, he is given an access token, and when the user creates a process, an access token derivated from the one of the user is assigned. The token contains information like the SID of the uses, the groups of the user, the privileges assigned to the user and its groups...
-
-You can see this information executing `whoami /all` or using _Process Explorer_ from Sysinternals.
-
-When a local administrator logins, two access tokens are created: One with admin rights and other one with normal rights \(Default one\), and to execute a process as administrator the UAC is involved.
-
-The access token has also a reference of the logon sessions inside the LSASS, this is useful if the process needs to access some objects of the network.
-
-You can see the current logon sessions executing as administrator the binary _logonsessions_ of Sysinternals.  
-You can create a new logon session with new credentials that will be used only in the network:
-
-```text
-runas /user:domain\username /netonly cmd.exe
-```
-
-### Types of tokens
-
-There are 2 types of tokens:
-
-* **Primary**: **Default** security information of the process or thread.
-* **Impersonation**: Allows the process to **act on behalf of another user**. For example, on a client server architecture if the client wants to access some files in the shared folder, the server need a copy of the user token to check if it has sufficient permissions.
-
-#### Impersonate Tokens
-
-Using the _**incognito**_ **module** of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
-
-### Token Privileges
-
-Learn which [**token privileges can be abused to escalate privileges in this page**](windows-local-privilege-escalation/privilege-escalation-abusing-tokens.md).  
-Take a look to [**all the possible token privileges and some definitions on this page**](https://github.com/gtworek/Priv2Admin).
 
 ## UAC
 

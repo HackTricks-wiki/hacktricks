@@ -41,6 +41,7 @@
 
 * [Checklist - Local Windows Privilege Escalation](windows/checklist-windows-privilege-escalation.md)
 * [Windows Local Privilege Escalation](windows/windows-local-privilege-escalation/README.md)
+  * [Access Tokens](windows/windows-local-privilege-escalation/access-tokens.md)
   * [ACLs - DACLs/SACLs/ACEs](windows/windows-local-privilege-escalation/acls-dacls-sacls-aces.md)
   * [Dll Hijacking](windows/windows-local-privilege-escalation/dll-hijacking.md)
   * [From High Integrity to SYSTEM with Name Pipes](windows/windows-local-privilege-escalation/from-high-integrity-to-system-with-name-pipes.md)
@@ -91,7 +92,7 @@
 * [Stealing Credentials](windows/stealing-credentials/README.md)
   * [Credentials Protections](windows/stealing-credentials/credentials-protections.md)
   * [Mimikatz](windows/stealing-credentials/credentials-mimikatz.md)
-* [Authentication, Credentials, Token privileges, UAC and EFS](windows/credentials.md)
+* [Authentication, Credentials, UAC and EFS](windows/credentials.md)
 * [Basic CMD for Pentesters](windows/basic-cmd-for-pentesters.md)
 * [Basic PowerShell for Pentesters](windows/basic-powershell-for-pentesters/README.md)
   * [PowerView](windows/basic-powershell-for-pentesters/powerview.md)

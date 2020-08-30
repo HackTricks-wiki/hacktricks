@@ -2,6 +2,10 @@
 
 ## Tokens
 
+If you **don't know what are Windows Access Tokens** read this page before continuing:
+
+{% page-ref page="access-tokens.md" %}
+
 **Maybe you could be able to escalate privileges abusing the tokens you already have**
 
 ### SeImpersonatePrivilege \(3.1.1\)
