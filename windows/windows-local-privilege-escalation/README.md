@@ -95,11 +95,49 @@ You can learn how to turn this on in [https://sid-500.com/2017/11/07/powershell-
 #Check is enable in the registry
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\Transcription
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\Transcription
+reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\Transcription
+reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\Transcription
 dir C:\Transcripts
 
 #Start a Transcription session
 Start-Transcript -Path "C:\transcripts\transcript0.txt" -NoClobber
 Stop-Transcript
+```
+
+### PowerShell Module Logging
+
+It records the pipeline execution details of PowerShell. This includes the commands which are executed including command invocations and some portion of the scripts. It may not have the entire detail of the execution and the output results.  
+You can enable this following the link of the last section \(Transcript files\) but enabling "Module Logging" instead of "Powershell Transcription".
+
+```text
+reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
+reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
+reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
+reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
+```
+
+To view the last 15 events from PowersShell logs you can execute:
+
+```bash
+Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
+```
+
+### PowerShell  **Script Block Logging**
+
+It records block of code as they are executed therefore it captures the complete activity and full content of the script. It maintains the complete audit trail of each activity which can be used later in forensics and to study the malicious behavior. It records all the activity at time of execution thus provides the complete details.
+
+```text
+reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
+reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
+reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
+reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
+```
+
+The Script Block logging events can be found in Windows Event viewer under following path: _Application and Sevices Logs &gt; Microsoft &gt; Windows &gt; Powershell &gt; Operational_  
+To view the last 20 events you can use:
+
+```bash
+Get-WinEvent -LogName "Microsoft-Windows-Powershell/Operational" | select -first 20 | Out-Gridview
 ```
 
 ### Internet Settings
