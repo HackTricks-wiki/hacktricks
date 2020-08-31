@@ -58,16 +58,11 @@ Allows browsers and other Windows applications to save credentials.
 
 ## UAC
 
-UAC is used to allow an **administrator user to not give administrator privileges to each process executed**. This is **achieved using default** the **low privileged token** of the user. When, the  administrator executes some process **as administrator**, a **UAC elevation** is performed and if it is successfully completed, the privileged token is used to create the process.
+UAC is used to allow an **administrator user to not give administrator privileges to each process executed**. This is **achieved using default** the **low privileged token** of the user. When, the administrator executes some process **as administrator**, a **UAC elevation** is performed and if it is successfully completed, the privileged token is used to create the process.
 
-To **differentiate** which process is executed with **low** or **high privileges** **Mandatory Integrity Controls** \(MIC\) are used.  
-There are **5 levels of integrity**:
+To **differentiate** which process is executed with **low** or **high privileges** **Mandatory Integrity Controls** \(MIC\) are used. If you still don't know what are Windows Integrity levels check the following page:
 
-* **Untrusted**\(0\): Processes launched by members of the Guest group. Writing operations are mostly blocked.
-* **Low**\(1\): Used by _Internet Explorer_. File and registry writing is blocked.
-* **Medium**\(2\): When UAC is enabled, this is the default level of integrity. A process in this level can **request** to **elevate** his **integrity level**.
-* **High**\(3\): Processes running with **administrator privileges**.
-* **System**\(4\): **Services** and other applications \(Wininit, Winlogon, Smss...\)
+{% page-ref page="windows-local-privilege-escalation/integrity-levels.md" %}
 
 Some programs are **autoelevated automatically** if the **user belongs** to the **administrator group**. These binaries have inside their _**Manifests**_ the _**autoElevate**_ option with value _**True**_. The binary has to be **signed by Microsoft** also.
 
@@ -111,7 +106,7 @@ If **`0`**\(default\), the **built-in Administrator account can** do remote admi
 Note that if you have graphical access to the victim, UAC bypass is straight forward as you can simply click on "Yes" when the UAS prompt appears
 {% endhint %}
 
-It is important to mention that it is **much harder to bypass the UAC if it is in the higest security level \(Always\) than if it is in any of the other levels \(Default\).**
+It is important to mention that it is **much harder to bypass the UAC if it is in the highest security level \(Always\) than if it is in any of the other levels \(Default\).**
 
 The UAC bypass is needed in the following situation: **the UAC is activated, your process is running in a medium integrity context, and your user belongs to the administrators group**.  
 All this information can be gathered using the metasploit module: `post/windows/gather/win_privs`
