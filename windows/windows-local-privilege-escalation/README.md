@@ -265,7 +265,7 @@ C:\windows\tracing
 ### UAC
 
 UAC is used to allow an **administrator user to not give administrator privileges to each process executed**. This is **achieved using default** the **low privileged token** of the user.  
-[**More information about UAC here**](../credentials.md#uac).
+[**More information about UAC here**](../authentication-credentials-uac-and-efs.md#uac).
 
 ```text
  reg query HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ 
@@ -300,7 +300,7 @@ If you **belongs to some privileged group you may be able to escalate privileges
 
 ### Token manipulation
 
-**Learn more** about what is a **token** in this page: [**Windows Tokens**](../credentials.md#access-tokens).  
+**Learn more** about what is a **token** in this page: [**Windows Tokens**](../authentication-credentials-uac-and-efs.md#access-tokens).  
 Check the following page to **learn about interesting tokens** and how to abuse them:
 
 {% page-ref page="privilege-escalation-abusing-tokens.md" %}
@@ -1220,7 +1220,7 @@ When a **client writes on a pipe**, the **server** that created the pipe can **i
 
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
-\*\*\*\*[**Read this to learn about Integrity Levels**](integrity-levels.md) **and** [**this to learn what is UAC**](../credentials.md#uac)**, then read how to**[ **bypass it**](../credentials.md#uac)**.**
+\*\*\*\*[**Read this to learn about Integrity Levels**](integrity-levels.md) **and** [**this to learn what is UAC**](../authentication-credentials-uac-and-efs.md#uac)**, then read how to**[ **bypass it**](../authentication-credentials-uac-and-efs.md#uac)**.**
 
 ## **From High Integrity to System**
 

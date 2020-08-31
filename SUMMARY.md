@@ -93,7 +93,7 @@
 * [Stealing Credentials](windows/stealing-credentials/README.md)
   * [Credentials Protections](windows/stealing-credentials/credentials-protections.md)
   * [Mimikatz](windows/stealing-credentials/credentials-mimikatz.md)
-* [Authentication, Credentials, UAC and EFS](windows/credentials.md)
+* [Authentication, Credentials, UAC and EFS](windows/authentication-credentials-uac-and-efs.md)
 * [Basic CMD for Pentesters](windows/basic-cmd-for-pentesters.md)
 * [Basic PowerShell for Pentesters](windows/basic-powershell-for-pentesters/README.md)
   * [PowerView](windows/basic-powershell-for-pentesters/powerview.md)
