@@ -120,7 +120,11 @@ whoami /groups | findstr Level
 
 #### **Very** Basic UAC "bypass" \(full file system access\)
 
-If you have a shell with a user that is inside the Administrators group you can **mount the C$** shared via SMB \(file system\) local in a new disk and you will have **access to everything inside the file system** \(even Administrator home folder\)
+If you have a shell with a user that is inside the Administrators group you can **mount the C$** shared via SMB \(file system\) local in a new disk and you will have **access to everything inside the file system** \(even Administrator home folder\).
+
+{% hint style="info" %}
+**Looks like this trick isn't working anymore**
+{% endhint %}
 
 ```bash
 net use Z: \\127.0.0.1\c$
