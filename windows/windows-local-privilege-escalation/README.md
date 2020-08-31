@@ -805,7 +805,7 @@ Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
 
-You can use **mimikatz module** `dpapi::masterkey` with the appropiate arguments \(`/pvk` or `/rpc`\) to decrypt it.
+You can use **mimikatz module** `dpapi::masterkey` with the appropriate arguments \(`/pvk` or `/rpc`\) to decrypt it.
 
 The **credentials files protected by the master password** are usually located in:
 
