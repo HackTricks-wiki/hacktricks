@@ -75,14 +75,31 @@ dir env:
 Get-ChildItem Env: | ft Key,Value
 ```
 
-### Powershell history
+### PowerShell History
 
 ```bash
+ConsoleHost_history #Find the PATH where is saved
+
 type %userprofile%\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt
 type C:\Users\swissky\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt
 type $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 cat (Get-PSReadlineOption).HistorySavePath
 cat (Get-PSReadlineOption).HistorySavePath | sls passw
+```
+
+### PowerShell Transcript files
+
+You can learn how to turn this on in [https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/)
+
+```bash
+#Check is enable in the registry
+reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\Transcription
+reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\Transcription
+dir C:\Transcripts
+
+#Start a Transcription session
+Start-Transcript -Path "C:\transcripts\transcript0.txt" -NoClobber
+Stop-Transcript
 ```
 
 ### Internet Settings
