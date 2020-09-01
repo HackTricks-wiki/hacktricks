@@ -849,7 +849,7 @@ Requirements to escalate privileges:
 
 \(You can temporarily enable `ptrace_scope` with `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` or permanently modifying `/etc/sysctl.d/10-ptrace.conf` and setting `kernel.yama.ptrace_scope = 0`\)
 
-If all these requirements are met, **you can escalate privileges using:** [**https://github.com/nongiach/sudo\_inject**](https://github.com/nongiach/sudo_inject)\*\*\*\*
+If all these requirements are met, **you can escalate privileges using:** [**https://github.com/nongiach/sudo\_inject**](https://github.com/nongiach/sudo_inject)
 
 * The **first exploit** \(`exploit.sh`\) will create the binary `activate_sudo_token` in _/tmp_. You can use it to **activate the sudo token in your session** \(you won't get automatically a root shell, do `sudo su`\):
 
