@@ -256,7 +256,7 @@ strings /dev/mem -n10 | grep -i PASS
 
 To dump a process memory you could use:
 
-* \*\*\*\*[**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) \(root\) - _You can manually remove root requirements and dump process owned by you_
+* [**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) \(root\) - _You can manually remove root requirements and dump process owned by you_
 * Script A.5 from [**https://www.delaat.net/rp/2016-2017/p97/report.pdf**](https://www.delaat.net/rp/2016-2017/p97/report.pdf) \(root is required\)
 
 ### Credentials from Process Memory
