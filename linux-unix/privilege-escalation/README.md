@@ -971,7 +971,7 @@ int __libc_start_main(int (*main) (int, char **, char **), int argc, char ** ubp
 ## Capabilities
 
 Linux capabilities provide a **subset of the available root privileges to a process**. This effectively breaks up root **privileges into smaller and distinctive units**. Each of these units can then be independently be granted to processes. This way the full set of privileges is reduced and decreasing the risks of exploitation.  
-Read the following page to **learn more about capabilities and howto abuse them**:
+Read the following page to **learn more about capabilities and how to abuse them**:
 
 {% page-ref page="linux-capabilities.md" %}
 
