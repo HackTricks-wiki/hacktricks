@@ -32,7 +32,7 @@ capsh --print
 | CAP\_FOWNER | This enables to bypass permission checks on operations that normally require the filesystem UID of the process to match the UID of the file |
 | CAP\_KILL | Allow the sending of signals to processes belonging to others |
 | CAP\_SETGID | Allow changing of the GID |
-| **remo** | Allow changing of the UID \(set UID of root in you process\) |
+| **CAP\_SETUID** | Allow changing of the UID \(set UID of root in you process\) |
 | CAP\_SETPCAP | Helps to transferring and removal of current set to any PID |
 | CAP\_IPC\_LOCK | This helps to lock memory |
 | CAP\_MAC\_ADMIN | Allow MAC configuration or state changes |
