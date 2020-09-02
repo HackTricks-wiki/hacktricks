@@ -1,4 +1,4 @@
-# Authentication, Credentials, Token privileges, UAC and EFS
+# Authentication, Credentials, UAC and EFS
 
 ## Security Support Provider Interface \(SSPI\)
 
@@ -56,72 +56,13 @@ It is the database of the Active Directory. It is only present in Domain Control
 
 Allows browsers and other Windows applications to save credentials.
 
-## Process Privileges
-
-**Privileges:**
-
-* Operations on the system:
-  * loading device drivers
-  * system shutdown
-  * timezone change
-  * ...
-* Assigned to user/group
-
-**Access Rights:**
-
-* Access to securable objects
-  * files/dirs,pipes, registry keys, Windows services, printers, jobs, network shares, access tokens, desktops,...
-* Assignedto object's ACL
-
-## Access Tokens
-
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
-
-It is used to describe the security context of a process or a thread.
-
-When a user logins, he is given an access token, and when the user creates a process, an access token derivated from the one of the user is assigned. The token contains information like the SID of the uses, the groups of the user, the privileges assigned to the user and its groups...
-
-You can see this information executing `whoami /all` or using _Process Explorer_ from Sysinternals.
-
-When a local administrator logins, two access tokens are created: One with admin rights and other one with normal rights \(Default one\), and to execute a process as administrator the UAC is involved.
-
-The access token has also a reference of the logon sessions inside the LSASS, this is useful if the process needs to access some objects of the network.
-
-You can see the current logon sessions executing as administrator the binary _logonsessions_ of Sysinternals.  
-You can create a new logon session with new credentials that will be used only in the network:
-
-```text
-runas /user:domain\username /netonly cmd.exe
-```
-
-### Types of tokens
-
-There are 2 types of tokens:
-
-* **Primary**: **Default** security information of the process or thread.
-* **Impersonation**: Allows the process to **act on behalf of another user**. For example, on a client server architecture if the client wants to access some files in the shared folder, the server need a copy of the user token to check if it has sufficient permissions.
-
-#### Impersonate Tokens
-
-Using the _**incognito**_ **module** of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
-
-### Token Privileges
-
-Learn which [**token privileges can be abused to escalate privileges in this page**](windows-local-privilege-escalation/privilege-escalation-abusing-tokens.md).  
-Take a look to [**all the possible token privileges and some definitions on this page**](https://github.com/gtworek/Priv2Admin).
-
 ## UAC
 
-UAC is used to allow an **administrator user to not give administrator privileges to each process executed**. This is **achieved using default** the **low privileged token** of the user. When, the  administrator executes some process **as administrator**, a **UAC elevation** is performed and if it is successfully completed, the privileged token is used to create the process.
+UAC is used to allow an **administrator user to not give administrator privileges to each process executed**. This is **achieved using default** the **low privileged token** of the user. When, the administrator executes some process **as administrator**, a **UAC elevation** is performed and if it is successfully completed, the privileged token is used to create the process.
 
-To **differentiate** which process is executed with **low** or **high privileges** **Mandatory Integrity Controls** \(MIC\) are used.  
-There are **5 levels of integrity**:
+To **differentiate** which process is executed with **low** or **high privileges** **Mandatory Integrity Controls** \(MIC\) are used. If you still don't know what are Windows Integrity levels check the following page:
 
-* **Untrusted**\(0\): Processes launched by members of the Guest group. Writing operations are mostly blocked.
-* **Low**\(1\): Used by _Internet Explorer_. File and registry writing is blocked.
-* **Medium**\(2\): When UAC is enabled, this is the default level of integrity. A process in this level can **request** to **elevate** his **integrity level**.
-* **High**\(3\): Processes running with **administrator privileges**.
-* **System**\(4\): **Services** and other applications \(Wininit, Winlogon, Smss...\)
+{% page-ref page="windows-local-privilege-escalation/integrity-levels.md" %}
 
 Some programs are **autoelevated automatically** if the **user belongs** to the **administrator group**. These binaries have inside their _**Manifests**_ the _**autoElevate**_ option with value _**True**_. The binary has to be **signed by Microsoft** also.
 
@@ -165,7 +106,7 @@ If **`0`**\(default\), the **built-in Administrator account can** do remote admi
 Note that if you have graphical access to the victim, UAC bypass is straight forward as you can simply click on "Yes" when the UAS prompt appears
 {% endhint %}
 
-It is important to mention that it is **much harder to bypass the UAC if it is in the higest security level \(Always\) than if it is in any of the other levels \(Default\).**
+It is important to mention that it is **much harder to bypass the UAC if it is in the highest security level \(Always\) than if it is in any of the other levels \(Default\).**
 
 The UAC bypass is needed in the following situation: **the UAC is activated, your process is running in a medium integrity context, and your user belongs to the administrators group**.  
 All this information can be gathered using the metasploit module: `post/windows/gather/win_privs`
@@ -179,7 +120,11 @@ whoami /groups | findstr Level
 
 #### **Very** Basic UAC "bypass" \(full file system access\)
 
-If you have a shell with a user that is inside the Administrators group you can **mount the C$** shared via SMB \(file system\) local in a new disk and you will have **access to everything inside the file system** \(even Administrator home folder\)
+If you have a shell with a user that is inside the Administrators group you can **mount the C$** shared via SMB \(file system\) local in a new disk and you will have **access to everything inside the file system** \(even Administrator home folder\).
+
+{% hint style="info" %}
+**Looks like this trick isn't working anymore**
+{% endhint %}
 
 ```bash
 net use Z: \\127.0.0.1\c$

@@ -6,6 +6,26 @@ If you want to **know** about my **latest modifications**/**additions**, **join 
 If you want to **share some tricks with the community** you can also submit **pull requests** to ****[**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) ****that will be reflected in this book.  
 Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
 
+## Initial Windows Theory
+
+### Access Tokens
+
+**If you don't know what are Windows Access Tokens, read the following page before continuing:**
+
+{% page-ref page="access-tokens.md" %}
+
+### ACLs - DACLs/SACLs/ACEs
+
+**If you don't know what is any of the acronyms used in the heading of this section, read the following page before continuing**:
+
+{% page-ref page="acls-dacls-sacls-aces.md" %}
+
+### Integrity Levels
+
+**If you don't know what are integrity levels in Windows you should read the following page before continuing:**
+
+{% page-ref page="integrity-levels.md" %}
+
 ## System Info
 
 ### Version info enumeration
@@ -55,14 +75,69 @@ dir env:
 Get-ChildItem Env: | ft Key,Value
 ```
 
-### Powershell history
+### PowerShell History
 
 ```bash
+ConsoleHost_history #Find the PATH where is saved
+
 type %userprofile%\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt
 type C:\Users\swissky\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt
 type $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 cat (Get-PSReadlineOption).HistorySavePath
 cat (Get-PSReadlineOption).HistorySavePath | sls passw
+```
+
+### PowerShell Transcript files
+
+You can learn how to turn this on in [https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/)
+
+```bash
+#Check is enable in the registry
+reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\Transcription
+reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\Transcription
+reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\Transcription
+reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\Transcription
+dir C:\Transcripts
+
+#Start a Transcription session
+Start-Transcript -Path "C:\transcripts\transcript0.txt" -NoClobber
+Stop-Transcript
+```
+
+### PowerShell Module Logging
+
+It records the pipeline execution details of PowerShell. This includes the commands which are executed including command invocations and some portion of the scripts. It may not have the entire detail of the execution and the output results.  
+You can enable this following the link of the last section \(Transcript files\) but enabling "Module Logging" instead of "Powershell Transcription".
+
+```text
+reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
+reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
+reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
+reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
+```
+
+To view the last 15 events from PowersShell logs you can execute:
+
+```bash
+Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
+```
+
+### PowerShell  **Script Block Logging**
+
+It records block of code as they are executed therefore it captures the complete activity and full content of the script. It maintains the complete audit trail of each activity which can be used later in forensics and to study the malicious behavior. It records all the activity at time of execution thus provides the complete details.
+
+```text
+reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
+reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
+reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
+reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
+```
+
+The Script Block logging events can be found in Windows Event viewer under following path: _Application and Sevices Logs &gt; Microsoft &gt; Windows &gt; Powershell &gt; Operational_  
+To view the last 20 events you can use:
+
+```bash
+Get-WinEvent -LogName "Microsoft-Windows-Powershell/Operational" | select -first 20 | Out-Gridview
 ```
 
 ### Internet Settings
@@ -245,7 +320,7 @@ C:\windows\tracing
 ### UAC
 
 UAC is used to allow an **administrator user to not give administrator privileges to each process executed**. This is **achieved using default** the **low privileged token** of the user.  
-[**More information about UAC here**](../credentials.md#uac).
+[**More information about UAC here**](../authentication-credentials-uac-and-efs.md#uac).
 
 ```text
  reg query HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ 
@@ -280,7 +355,7 @@ If you **belongs to some privileged group you may be able to escalate privileges
 
 ### Token manipulation
 
-**Learn more** about what is a **token** in this page: [**Windows Tokens**](../credentials.md#access-tokens).  
+**Learn more** about what is a **token** in this page: [**Windows Tokens**](../authentication-credentials-uac-and-efs.md#access-tokens).  
 Check the following page to **learn about interesting tokens** and how to abuse them:
 
 {% page-ref page="privilege-escalation-abusing-tokens.md" %}
@@ -730,7 +805,7 @@ Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
 
-You can use **mimikatz module** `dpapi::masterkey` with the appropiate arguments \(`/pvk` or `/rpc`\) to decrypt it.
+You can use **mimikatz module** `dpapi::masterkey` with the appropriate arguments \(`/pvk` or `/rpc`\) to decrypt it.
 
 The **credentials files protected by the master password** are usually located in:
 
@@ -773,7 +848,7 @@ HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 %localappdata%\Microsoft\Remote Desktop Connection Manager\RDCMan.settings
 ```
 
-Use the **Mimikatz** `dpapi::rd`g module with appropriate `/masterkey` to **decrypt any .rdg files**  
+Use the **Mimikatz** `dpapi::rdg` module with appropriate `/masterkey` to **decrypt any .rdg files**  
 You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurlsa::dpapi` module
 
 ### AppCmd.exe
@@ -894,9 +969,18 @@ SSH private keys can be stored inside the registry key `HKCU\Software\OpenSSH\Ag
 reg query HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys
 ```
 
-If you find any entry inside that path it will probably be a saved SSH key. It is stored encrypted but can be easily decrypted using [https://github.com/ropnop/windows\_sshagent\_extract](https://github.com/ropnop/windows_sshagent_extract).
-
+If you find any entry inside that path it will probably be a saved SSH key. It is stored encrypted but can be easily decrypted using [https://github.com/ropnop/windows\_sshagent\_extract](https://github.com/ropnop/windows_sshagent_extract).  
 More information about this technique here: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
+
+If `ssh-agent` service is not running and you want it to automatically start on boot run:
+
+```text
+Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
+```
+
+{% hint style="info" %}
+It looks like this technique isn't valid anymore. I tried to create some ssh keys, add them with `ssh-add` and login via ssh to a machine. The registry HKCU\Software\OpenSSH\Agent\Keys doesn't exist and procmon didn't identify the use of `dpapi.dll` during the asymmetric key authentication.
+{% endhint %}
 
 ### Unattended files
 
@@ -1031,6 +1115,9 @@ You can always **ask the user to enter his credentials of even the credentials o
 ```text
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+'anotherusername',[Environment]::UserDomainName); $cred.getnetworkcredential().password
+
+#Get plaintext
+$cred.GetNetworkCredential() | fl
 ```
 
 ### **Possible filenames containing credentials**
@@ -1200,7 +1287,7 @@ When a **client writes on a pipe**, the **server** that created the pipe can **i
 
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
-\*\*\*\*[**Learn here**](../credentials.md#uac) **about what are the "integrity levels" in Windows, what is UAC and how to**[ **bypass it**](../credentials.md#uac)**.**
+\*\*\*\*[**Read this to learn about Integrity Levels**](integrity-levels.md) **and** [**this to learn what is UAC**](../authentication-credentials-uac-and-efs.md#uac)**, then read how to**[ **bypass it**](../authentication-credentials-uac-and-efs.md#uac)**.**
 
 ## **From High Integrity to System**
 
@@ -1217,6 +1304,10 @@ sc start newservicename
 
 From a High Integrity process you could try to **enable the AlwaysInstallElevated registry entries** and **install** a reverse shell using a _**.msi**_ wrapper.   
 [More information about the registry keys involved and how to install a _.msi_ package here.](./#alwaysinstallelevated)
+
+### High + SeImpersonate privilege to System
+
+**You can** [**find the code here**](seimpersonate-from-high-to-system.md)**.**
 
 ### From SeDebug + SeImpersonate to Full Token privileges
 

