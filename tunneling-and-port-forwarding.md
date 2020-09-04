@@ -117,6 +117,46 @@ You need to upload a web file tunnel: ashx\|aspx\|js\|jsp\|php\|php\|jsp
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
 
+## Chisel
+
+[https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)
+
+Chisel is a fast TCP tunnel, transported over HTTP, secured via SSH. Single executable including both client and server. Written in Go (golang). Chisel is mainly useful for passing through firewalls, though it can also be used to provide a secure endpoint into your network. Chisel is very similar to crowbar though achieves much higher performance.
+
+You can do port forwarding (bind & reverse), create a socks proxy (bind & reverse).
+
+```bash
+root@kali:/opt# git clone https://github.com/jpillora/chisel.git
+Cloning into 'chisel'...
+remote: Enumerating objects: 33, done.
+remote: Counting objects: 100% (33/33), done.
+remote: Compressing objects: 100% (27/27), done.
+remote: Total 1151 (delta 7), reused 18 (delta 5), pack-reused 1118
+Receiving objects: 100% (1151/1151), 3.31 MiB | 19.03 MiB/s, done.
+Resolving deltas: 100% (416/416), done.
+
+root@kali:/opt/chisel# ./chisel --help
+
+  Usage: chisel [command] [--help]
+
+  Version: 0.0.0-src
+
+  Commands:
+    server - runs chisel in server mode
+    client - runs chisel in client mode
+
+  Read more:
+    https://github.com/jpillora/chisel
+```
+
+![](https://0xdf.gitlab.io/img/chisel-2.webp)
+
+Read more:
+- https://0xdf.gitlab.io/2020/08/10/tunneling-with-chisel-and-ssf-update.html (Blog by Oxdf)
+- https://github.com/jpillora/chisel
+- https://www.youtube.com/watch?v=Yp4oxoQIBAM&t=1469s (HTB Reddish by ippsec)
+- https://0xdf.gitlab.io/2019/01/26/htb-reddish.html (HTB Reddish by 0xdf)
+
 ## Rpivot
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
