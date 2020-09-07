@@ -364,6 +364,7 @@
 
 ## Crypto
 
+* [Certificates](crypto/certificates.md)
 * [Electronic Code Book \(ECB\)](crypto/electronic-code-book-ecb.md)
 * [Cipher Block Chaining CBC-MAC](crypto/cipher-block-chaining-cbc-mac-priv.md)
 * [Padding Oracle](crypto/padding-oracle-priv.md)
@@ -418,5 +419,4 @@
 * [Phising Documents](phising-documents.md)
 * [Reset Password Bypass](reset-password.md)
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
-* [Certificates](certificates.md)
 
