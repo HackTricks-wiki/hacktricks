@@ -417,4 +417,5 @@
 * [Online Platforms with API](online-platforms-with-api.md)
 * [Phising Documents](phising-documents.md)
 * [Reset Password Bypass](reset-password.md)
+* [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
 
