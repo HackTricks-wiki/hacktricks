@@ -104,6 +104,7 @@
 
 * [Android APK Checklist](mobile-apps-pentesting/android-checklist.md)
 * [Android Applications Pentesting](mobile-apps-pentesting/android-app-pentesting/README.md)
+  * [AVD - Android Virtual Device](mobile-apps-pentesting/android-app-pentesting/avd-android-virtual-device.md)
   * [ADB Commands](mobile-apps-pentesting/android-app-pentesting/adb-commands.md)
   * [APK decompilers](mobile-apps-pentesting/android-app-pentesting/apk-decompilers.md)
   * [Burp Suite Configuration for Android](mobile-apps-pentesting/android-app-pentesting/android-burp-suite-settings.md)
