@@ -103,6 +103,9 @@ sudo dpkg-reconfigure tzdata
 
 #Search from wich package is a binary
 apt-file search /usr/bin/file #Needed: apt-get install apt-file
+
+#Protobuf decode https://www.ezequiel.tech/2020/08/leaking-google-cloud-projects.html
+echo "CIKUmMesGw==" | base64 -d | protoc --decode_raw
 ```
 
 ## Bash for Windows
