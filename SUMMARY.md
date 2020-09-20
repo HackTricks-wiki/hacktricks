@@ -20,6 +20,7 @@
 
 * [Checklist - Linux Privilege Escalation](linux-unix/linux-privilege-escalation-checklist.md)
 * [Linux Privilege Escalation](linux-unix/privilege-escalation/README.md)
+  * [electron/CEF/chromium debugger abuse](linux-unix/privilege-escalation/electron-cef-chromium-debugger-abuse.md)
   * [Escaping from a Docker container](linux-unix/privilege-escalation/escaping-from-a-docker-container.md)
   * [Escaping from restricted shells - Jails](linux-unix/privilege-escalation/escaping-from-limited-bash.md)
   * [Cisco - vmanage](linux-unix/privilege-escalation/cisco-vmanage.md)

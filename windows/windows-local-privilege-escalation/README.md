@@ -404,6 +404,8 @@ Get-WmiObject -Query "Select * from Win32_Process" | where {$_.Name -notlike "sv
 Get-Process | where {$_.ProcessName -notlike "svchost*"} | ft ProcessName, Id
 ```
 
+Always check for possible [**electron/cef/chromium debuggers** running, you could abuse it to escalate privileges](../../linux-unix/privilege-escalation/electron-cef-chromium-debugger-abuse.md).
+
 #### Checking permissions of the processes binaries
 
 ```bash

@@ -201,6 +201,7 @@ ps -ef
 top -n 1
 ```
 
+Always check for possible [**electron/cef/chromium debuggers** running, you could abuse it to escalate privileges](electron-cef-chromium-debugger-abuse.md). **Linpeas** detect those by checking the `--inspect` parameter inside the command line of the process.   
 Also **check your privileges over the processes binaries**, maybe you can overwrite someone.
 
 ### Process monitoring
