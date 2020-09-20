@@ -488,6 +488,12 @@ sc config SSDPSRV obj= ".\LocalSystem" password= ""
 
 **Take into account that the service upnphost depends on SSDPSRV to work \(for XP SP1\)**
 
+**Another workaround** of this problem is running:
+
+```text
+sc.exe config usosvc start= auto
+```
+
 ### **Modify service binary path**
 
 If the group "Authenticated users" has **SERVICE\_ALL\_ACCESS** in a service, then it can modify the binary that is being executed by the service. To modify it and execute **nc** you can do:
