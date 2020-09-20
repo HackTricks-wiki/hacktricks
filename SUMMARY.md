@@ -387,6 +387,7 @@
 ## MISC
 
 * [Basic Python](misc/basic-python/README.md)
+  * [venv](misc/basic-python/venv.md)
   * [Bypass Python sandboxes](misc/basic-python/bypass-python-sandboxes.md)
   * [Magic Methods](misc/basic-python/magic-methods.md)
   * [Web Requests](misc/basic-python/web-requests.md)
