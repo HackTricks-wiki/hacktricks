@@ -2,6 +2,7 @@
 
 ## Online Hashes DBs
 
+* ***Google it***
 * [http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240](http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240)
 * [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com/)
 * [https://crackstation.net/](https://crackstation.net/)
@@ -13,11 +14,16 @@
 * [https://hashkiller.co.uk/Cracker/MD5](https://hashkiller.co.uk/Cracker/MD5)
 * [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html)
 
-## Enconders
+## Encoders
+
+Most of encoded data can be decoded with these 2 ressources:
+- https://www.dcode.fr/tools-list
+- https://gchq.github.io/CyberChef/
 
 ### Substitution Autosolvers
 
 * [https://www.boxentriq.com/code-breaking/cryptogram](https://www.boxentriq.com/code-breaking/cryptogram)
+* [https://quipqiup.com/](https://quipqiup.com/) - Very good !
 
 #### Caesar - ROTx Autosolvers
 
@@ -63,7 +69,7 @@ Check all bases with: [https://github.com/mufeedvh/basecrack](https://github.com
 * **Citrix CTX1** \[\]
   * `MNGIKCAHMOGLKPAKMMGJKNAINPHKLOBLNNHILCBHNOHLLPBK`
 
-[http://k4.cba.pl/dw/crypo/tools/eng\_atom128c.html](http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html)
+[http://k4.cba.pl/dw/crypo/tools/eng\_atom128c.html](http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html) - 404 Dead: https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html
 
 ### HackerizeXS \[_╫Λ↻├☰┏_\]
 
@@ -71,7 +77,7 @@ Check all bases with: [https://github.com/mufeedvh/basecrack](https://github.com
 ╫☐↑Λ↻Λ┏Λ↻☐↑Λ
 ```
 
-* [http://k4.cba.pl/dw/crypo/tools/eng\_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
+* [http://k4.cba.pl/dw/crypo/tools/eng\_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 Dead: https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html
 
 ### Morse
 
@@ -79,7 +85,7 @@ Check all bases with: [https://github.com/mufeedvh/basecrack](https://github.com
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .- 
 ```
 
-* [http://k4.cba.pl/dw/crypo/tools/eng\_morse-encode.html](http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html)
+* [http://k4.cba.pl/dw/crypo/tools/eng\_morse-encode.html](http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html) - 404 Dead: https://gchq.github.io/CyberChef/
 
 ### UUencoder
 
@@ -226,7 +232,8 @@ A secret is splitted in X parts and to recover it you need Y parts \(_Y &lt;=X_\
 803bc8cf294b3f83d88e86d9818792e80cd
 ```
 
-{% embed url="http://christian.gen.co/secrets/" %}
+http://christian.gen.co/secrets/
+
 
 ### OpenSSL brute-force
 
