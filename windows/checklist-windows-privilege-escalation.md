@@ -114,7 +114,7 @@
 
 
 
-If you want to **know** about my **latest modifications**/**additions or you have any suggestion for HackTricks or PEASS**, **join the** [**PEASS & HackTricks telegram group here**](https://t.me/peass)**.**  
+If you want to **know** about my **latest modifications**/**additions** or you have **any suggestion for HackTricks or PEASS**, ****join the [💬](https://emojipedia.org/speech-balloon/) ****[**PEASS & HackTricks telegram group here**](https://t.me/peass), or **follow me on Twitter** [🐦](https://emojipedia.org/bird/)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**  
 If you want to **share some tricks with the community** you can also submit **pull requests** to ****[**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) ****that will be reflected in this book.  
 Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
 
