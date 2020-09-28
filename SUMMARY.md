@@ -168,6 +168,7 @@
 * [69/UDP TFTP/Bittorrent-tracker](pentesting/69-udp-tftp.md)
 * [79 - Pentesting Finger](pentesting/pentesting-finger.md)
 * [80,443 - Pentesting Web Methodology](pentesting/pentesting-web/README.md)
+  * [Artifactory Hacking guide](pentesting/pentesting-web/artifactory-hacking-guide.md)
   * [SpEL - Spring Expression Language](pentesting/pentesting-web/spel-spring-expression-language.md)
   * [Apache](pentesting/pentesting-web/apache.md)
   * [JSP](pentesting/pentesting-web/jsp.md)
