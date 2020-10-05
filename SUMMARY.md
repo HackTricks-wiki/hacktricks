@@ -203,7 +203,7 @@
 * [111/TCP/UDP - Pentesting Portmapper](pentesting/pentesting-rpcbind.md)
 * [113 - Pentesting Ident](pentesting/113-pentesting-ident.md)
 * [123/udp - Pentesting NTP](pentesting/pentesting-ntp.md)
-* [135, 593 - Pentesting MSRPC](pentesting/135-penstesting-msrpc.md)
+* [135, 593 - Pentesting MSRPC](pentesting/135-pentesting-msrpc.md)
 * [137,138,139 - Pentesting NetBios](pentesting/137-138-139-pentesting-netbios.md)
 * [139,445 - Pentesting SMB](pentesting/pentesting-smb.md)
 * [143,993 - Pentesting IMAP](pentesting/pentesting-imap.md)
