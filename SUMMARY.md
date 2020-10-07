@@ -421,6 +421,6 @@
 * [1911 - Pentesting fox](1911-pentesting-fox.md)
 * [Online Platforms with API](online-platforms-with-api.md)
 * [Phising Documents](phising-documents.md)
-* [Reset Password Bypass](reset-password.md)
+* [Reset/Forgoten Password Bypass](reset-password.md)
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
 
