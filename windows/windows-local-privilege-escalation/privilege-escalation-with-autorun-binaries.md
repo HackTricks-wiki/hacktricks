@@ -251,10 +251,10 @@ If you could write/overwrite on any Key with _**IsInstalled == "1"**_ the key **
 {% endhint %}
 
 ```bash
-query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
-query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
-query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
-query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
+reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
+reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
+reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
+reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 ```
 
 ### Browser Helper Objects
@@ -267,8 +267,8 @@ A **Browser Helper Object** \(**BHO**\) is a DLL module designed as a plugin for
 BHOs are still supported as of Windows 10, through Internet Explorer 11, while BHOs are not supported in the default web browser Microsoft Edge.
 
 ```bash
-query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
-query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
+reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
+reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
 
 Note that the registry will contain 1 new registry per each dll and it will be represented by the **CLSID**. You can find the CLSID info in `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
