@@ -242,7 +242,7 @@ Inside those keys you will find more keys and each for those will home some inte
 * **IsInstalled:**
   * 0: The component’s command will not run.
   * 1: The component’s command will be run once per user. This is the default \(if the IsInstalled value does not exist\).
-*  **StubPath**
+* **StubPath**
   * Format: Any valid command line, e.g. “notepad”
   * This is the command that is executed if Active Setup determines this component needs to run during logon.
 

@@ -176,7 +176,9 @@ And if `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer
 
 Then, **it is exploitable.** If the last registry is equals to 0, then, the WSUS entry will be ignored.
 
-You can use: [Wsuxploit](https://github.com/pimps/wsuxploit) - This is a MiTM weaponized exploit script to inject 'fake' updates into non-SSL WSUS traffic.
+In orther to exploit this vulnerabilities you can use tools like: **Wsuspicious**, [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus)- These are MiTM weaponized exploits scripts to inject 'fake' updates into non-SSL WSUS traffic.
+
+You can read here the [research of **WSUS CVE-2020-1013**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/) and the **first one donde here:**
 
 {% file src="../../.gitbook/assets/ctx\_wsuspect\_white\_paper \(1\).pdf" %}
 
