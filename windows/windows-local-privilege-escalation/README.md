@@ -176,11 +176,22 @@ And if `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer
 
 Then, **it is exploitable.** If the last registry is equals to 0, then, the WSUS entry will be ignored.
 
-In orther to exploit this vulnerabilities you can use tools like: **Wsuspicious**, [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus)- These are MiTM weaponized exploits scripts to inject 'fake' updates into non-SSL WSUS traffic.
+In orther to exploit this vulnerabilities you can use tools like: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus)- These are MiTM weaponized exploits scripts to inject 'fake' updates into non-SSL WSUS traffic.
 
-You can read here the [research of **WSUS CVE-2020-1013**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/) and the **first one donde here:**
+Read the research here:
 
 {% file src="../../.gitbook/assets/ctx\_wsuspect\_white\_paper \(1\).pdf" %}
+
+#### WSUS CVE-2020-1013
+
+\*\*\*\*[**Read the complete report here**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).  
+Basically, this is the flaw that this bug exploits: 
+
+> If we have the power to modify our local user proxy, and Windows Updates uses the proxy configured in Internet Explorer’s settings, we therefore have the power to run [PyWSUS](https://github.com/GoSecure/pywsus) locally to intercept our own traffic and run code as an elevated user on our asset.
+>
+> Furthermore, since the WSUS service uses the current user’s settings, it will also use its certificate store. If we generate a self-signed certificate for the WSUS hostname and add this certificate into the current user’s certificate store, we will be able to intercept both HTTP and HTTPS WSUS traffic. WSUS uses no HSTS-like mechanisms to implement a trust-on-first-use type validation on the certificate. If the certificate presented is trusted by the user and has the correct hostname, it will be accepted by the service.
+
+You can exploit this vulnerability using the tool [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) \(once it's liberated\).
 
 ## AlwaysInstallElevated
 
