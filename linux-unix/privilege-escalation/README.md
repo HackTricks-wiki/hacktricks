@@ -340,6 +340,14 @@ for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; do
 
 **You can also use** [**pspy**](https://github.com/DominicBreuker/pspy/releases) \(this will monitor and list every process that start\).
 
+### Invisible cron jobs
+
+It's possible to create a cronjob **putting a carriage return after a comment** \(without new line character\), and the cron job will work. Example \(note the carriege return char\):
+
+```bash
+#This is a comment inside a cron config file\r* * * * * echo "Surprise!"
+```
+
 ## Services
 
 ### Writable _.service_ files

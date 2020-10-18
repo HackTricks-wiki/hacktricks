@@ -368,4 +368,5 @@ ping 1.1.1.100 #After a successful connection, the victim will be in the 1.1.1.1
 
 * [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 * [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
+* [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)
 
