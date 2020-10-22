@@ -2,7 +2,7 @@
 
 * [HackTricks](README.md)
 * [Pentesting Methodology](pentesting-methodology.md)
-* [External Recon Methodology](bug-bounties-methodology.md)
+* [External Recon Methodology](external-recon-methodology.md)
 * [About the author](about-the-author.md)
 * [Exfiltration](exfiltration.md)
 * [Tunneling and Port Forwarding](tunneling-and-port-forwarding.md)
