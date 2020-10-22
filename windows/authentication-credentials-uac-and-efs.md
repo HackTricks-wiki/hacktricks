@@ -134,6 +134,15 @@ cd C$
 dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
 
+#### UAC disabled
+
+If UAC is already disabled \(**`ConsentPromptBehaviorAdmin`**is **`0`**\) you can **execute a reverse shell with admin privileges** \(high integrity level\) using something like:
+
+```bash
+#Put your reverse shell instead of "calc.exe"
+Start-Process powershell -Verb runAs "calc.exe"
+```
+
 #### UAC bypass exploits
 
 You could also use some tools to **bypass UAC like** [**UACME** ](https://github.com/hfiref0x/UACME)which is a **compilation** of several UAC bypass exploits. Note that you will need to **compile UACME using visual studio or msbuild**. The compilation will create several executables \(like_Source\Akagi\outout\x64\Debug\Akagi.exe_\) , you will need to know **which one you need.**  
