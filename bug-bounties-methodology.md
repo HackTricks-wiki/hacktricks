@@ -1,4 +1,4 @@
-# Bug Bounties Methodology
+# External Recon Methodology
 
 ## Assets discoveries
 
