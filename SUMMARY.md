@@ -2,6 +2,7 @@
 
 * [HackTricks](README.md)
 * [Pentesting Methodology](pentesting-methodology.md)
+* [External Recon Methodology](bug-bounties-methodology.md)
 * [About the author](about-the-author.md)
 * [Exfiltration](exfiltration.md)
 * [Tunneling and Port Forwarding](tunneling-and-port-forwarding.md)
@@ -411,7 +412,6 @@
 * [Other Web Tricks](other-web-tricks.md)
 * [Interesting HTTP](interesting-http.md)
 * [Emails Vulnerabilities](emails-vulns.md)
-* [External Recon Methodology](bug-bounties-methodology.md)
 * [Cloud security review](cloud-security-review.md)
 * [Android Forensics](android-forensics.md)
 * [TR-069](tr-069.md)
