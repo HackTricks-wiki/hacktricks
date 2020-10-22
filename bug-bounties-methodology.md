@@ -150,7 +150,7 @@ dnsrecon -a -d tesla.com
 
 The fastest way to obtain a lot of subdomains is search in external sources. I'm not going to discuss which sources are the bests and how to use them, but you can find here several utilities: [https://pentester.land/cheatsheets/2018/11/14/subdomains-enumeration-cheatsheet.html](https://pentester.land/cheatsheets/2018/11/14/subdomains-enumeration-cheatsheet.html)
 
-The most used tools are [**Amass**](https://github.com/OWASP/Amass)**,** [**subfinder**](https://github.com/projectdiscovery/subfinder)**,** [**findomain**](https://github.com/Edu4rdSHL/findomain/)**,** [**OneForAll**](https://github.com/shmilylty/OneForAll/blob/master/README.en.md)**,** [**assetfinder**](https://github.com/tomnomnom/assetfinder) ****and [**Subvenkon**](https://github.com/CoffeeJunkiee/Subvenkon), I would recommend to start using them configuring the API keys, and then start testing other tools or possibilities.
+The most used tools are [**Amass**](https://github.com/OWASP/Amass)**,** [**subfinder**](https://github.com/projectdiscovery/subfinder)**,** [**findomain**](https://github.com/Edu4rdSHL/findomain/)**,** [**OneForAll**](https://github.com/shmilylty/OneForAll/blob/master/README.en.md)**,** [**assetfinder**](https://github.com/tomnomnom/assetfinder)**,** [**Sudomy**](https://github.com/Screetsec/Sudomy)**,** [**Subvenkon**](https://github.com/CoffeeJunkiee/Subvenkon), I would recommend to start using them configuring the API keys, and then start testing other tools or possibilities.
 
 ```bash
 amass enum [-active] [-ip] -d tesla.com
