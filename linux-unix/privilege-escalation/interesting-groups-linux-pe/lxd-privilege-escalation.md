@@ -61,6 +61,17 @@ Build an Alpine image and start it using the flag `security.privileged=true`, fo
 git clone https://github.com/saghul/lxd-alpine-builder
 ./build-alpine -a i686
 
+# If you got error
+ERROR: unsatisfiable constraints:
+  alpine-base (missing):
+    required by: world[alpine-base]
+Failed to install rootfs
+
+# Maybe the error is due to mirror sites but it will create a rootfs directory in same folder i.e "lxd-alpine-builder" .
+1.) Goto - cd/rootfs/usr/share/alpine-mirrors/Mirrors.txt
+2.) Open that .txt file with any editor and remove all the mirror sites except first one, then save it there only.
+3.) Again run - sudo ./build-alpine -a i686
+
 # import the image
 lxc image import ./alpine.tar.gz --alias myimage
 
