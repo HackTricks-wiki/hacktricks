@@ -37,6 +37,14 @@ crunch 6 8 -t ,@@^^%%
 cewl example.com -m 5 -w words.txt
 ```
 
+### [CUPP](https://github.com/Mebus/cupp)
+
+Generate passwords based on your knowledge of the victim \(names, dates...\)
+
+```text
+python3 cupp.py -h
+```
+
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
 ### Wordlists
