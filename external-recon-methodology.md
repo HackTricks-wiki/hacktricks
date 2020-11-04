@@ -303,6 +303,7 @@ Now that we have built the list of assets of our scope it's time to search for s
 * [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
 * [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 * [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
+* [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
 **Dorks**:  _AWS\_SECRET\_ACCESS\_KEY, API KEY, API SECRET, API TOKEN… ROOT PASSWORD, ADMIN PASSWORD, COMPANYNAME SECRET, COMPANYNAME ROOT, GCP SECRET, AWS SECRET, “username password” extension:sql, “private” extension:pgp..._
 
