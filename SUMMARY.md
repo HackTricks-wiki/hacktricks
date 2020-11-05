@@ -169,6 +169,8 @@
 * [69/UDP TFTP/Bittorrent-tracker](pentesting/69-udp-tftp.md)
 * [79 - Pentesting Finger](pentesting/pentesting-finger.md)
 * [80,443 - Pentesting Web Methodology](pentesting/pentesting-web/README.md)
+  * [Symphony](pentesting/pentesting-web/symphony.md)
+  * [XSS to RCE Electron Desktop Apps](pentesting/pentesting-web/xss-to-rce-electron-desktop-apps.md)
   * [Spring Actuators](pentesting/pentesting-web/spring-actuators.md)
   * [Artifactory Hacking guide](pentesting/pentesting-web/artifactory-hacking-guide.md)
   * [Apache](pentesting/pentesting-web/apache.md)
