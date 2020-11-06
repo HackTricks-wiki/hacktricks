@@ -254,6 +254,7 @@
 * [6000 - Pentesting X11](pentesting/6000-pentesting-x11.md)
 * [6379 - Pentesting Redis](pentesting/6379-pentesting-redis.md)
 * [8009 - Pentesting Apache JServ Protocol \(AJP\)](pentesting/8009-pentesting-apache-jserv-protocol-ajp.md)
+* [8089 - Splunkd](pentesting/8089-splunkd.md)
 * [9042/9160 - Pentesting Cassandra](pentesting/cassandra.md)
 * [9100 - Pentesting Raw Printing \(JetDirect, AppSocket, PDL-datastream\)](pentesting/9100-pjl.md)
 * [9200 - Pentesting Elasticsearch](pentesting/9200-pentesting-elasticsearch.md)
