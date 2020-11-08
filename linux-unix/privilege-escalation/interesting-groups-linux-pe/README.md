@@ -203,5 +203,8 @@ uid=0(root) gid=0(root) groups=0(root)
 
 {% page-ref page="./" %}
 
+## Adm Group
 
+Usually **members** of the group **`adm`** have permissions to **read log** files located inside _/var/log/_.  
+Therefore, if you have compromised a user inside this group you should definitely take a **look to the logs**.
 

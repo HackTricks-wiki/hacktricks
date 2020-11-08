@@ -1,7 +1,7 @@
 # Linux Privilege Escalation
 
 If you want to **know** about my **latest modifications**/**additions** or you have **any suggestion for HackTricks or PEASS**, **join the** [**💬**](https://emojipedia.org/speech-balloon/) ****[**PEASS & HackTricks telegram group here**](https://t.me/peass), or **follow me on Twitter** [🐦](https://emojipedia.org/bird/)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**  
-If you want to **share some tricks with the community** you can also submit **pull requests** to **\*\*\[**[https://github.com/carlospolop/hacktricks\*\*\]\(https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks**]%28https://github.com/carlospolop/hacktricks)\) **\*\*that will be reflected in this book.  
+If you want to **share some tricks with the community** you can also submit **pull requests** to [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks**]%28https://github.com/carlospolop/hacktricks) **that will be reflected in this book.  
 Don't forget to** give ⭐ on the github\*\* to motivate me to continue developing this book.
 
 ## System Information
@@ -1263,6 +1263,18 @@ find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/gam
 
 Read the code of [**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS), it searches for **several possible files that could contain passwords**.  
 **Other interesting tool** that you can use to do so is: [**LaZagne**](https://github.com/AlessandroZ/LaZagne) which is an open source application used to retrieve lots of passwords stored on a local computer for Windows, Linux & Mac.
+
+### Logs
+
+If you can read logs, you may be able to find **interesting/confidential information inside of them**. The more strange the log is, the more interesting will be \(probably\).  
+Also, some "**bad**" configured \(backdoored?\) **audit logs** may allow you to **record passwords** inside audit logs as explained in this post: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).
+
+```bash
+aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
+grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
+```
+
+In order to **read logs the group** [**adm**](interesting-groups-linux-pe/#adm-group) will be really helpful.
 
 ### Generic Creds Search/Regex
 
