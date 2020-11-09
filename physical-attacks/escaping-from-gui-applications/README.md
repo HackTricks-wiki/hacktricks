@@ -2,6 +2,8 @@
 
 ## Check for possible actions inside the GUI application
 
+**Common Dialogs** are those options of **saving a file**, **opening a file**, selecting a font, a color... Most of them will **offer a full Explorer functionality**. This means that you will be able to access Explorer functionalities if you can access these options:
+
 * Close/Close as
 * Open/Open with
 * Print
@@ -16,32 +18,54 @@ You should check if you can:
 * Get access to restricted areas
 * Execute other apps
 
-Maybe using a _Open with_ option you can open a _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe_
+### Command Execution
 
-If you can execute something with commands you can execute binaries like _rundll32.exe, at.exe, schtasks.exe, regedit.exe, qwinsta.exe, systeminfo.exe, msinfo32.exe, msconfig.exe, wmic.exe, eventvwr.exe_
+Maybe **using a** _**Open with**_ **option** you can open/execute some kind of shell.
 
-## Bypassing path restrictions
+#### Windows
+
+For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands \(and perform unexpected actions\) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io/)
+
+#### \*NIX __
+
+_bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io/)
+
+## Windows
+
+### Bypassing path restrictions
 
 * **Environment variables**: There are a lot of environment variables that are pointing to some path
-* **UNC paths**: Paths to connect to shared folders. You should try to connect to the C$ of the local machine \("\\127.0.0.1\c$\Windows\System32"\)
 * **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
 * **Symbolic links**
 * **Shortcuts**: CTRL+N \(open new session\), CTRL+R \(Execute Commands\), CTRL+SHIFT+ESC \(Task Manager\),  Windows+E \(open explorer\), CTRL-B, CTRL-I \(Favourites\), CTRL-H \(History\), CTRL-L, CTRL-O \(File/Open Dialog\), CTRL-P \(Print Dialog\), CTRL-S \(Save As\)
   * Hidden Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
 * **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
+* **UNC paths**: Paths to connect to shared folders. You should try to connect to the C$ of the local machine \("\\127.0.0.1\c$\Windows\System32"\)
+  * **More UNC paths:**
 
-## Download Binaries
+| UNC | UNC | UNC |
+| :--- | :--- | :--- |
+| %ALLUSERSPROFILE% | %APPDATA% | %CommonProgramFiles% |
+| %COMMONPROGRAMFILES\(x86\)% | %COMPUTERNAME% | %COMSPEC% |
+| %HOMEDRIVE% | %HOMEPATH% | %LOCALAPPDATA% |
+| %LOGONSERVER% | %PATH% | %PATHEXT% |
+| %ProgramData% | %ProgramFiles% | %ProgramFiles\(x86\)% |
+| %PROMPT% | %PSModulePath% | %Public% |
+| %SYSTEMDRIVE% | %SYSTEMROOT% | %TEMP% |
+| %TMP% | %USERDOMAIN% | %USERNAME% |
+| %USERPROFILE% | %WINDIR% |  |
+
+### Download Your Binaries
 
 Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)  
 Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)  
 Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-## Accessing filesytem from the browser
+### Accessing filesystem from the browser
 
-### Windows
-
-| File:/C:/windows | File:/C:/windows/ | File:/C:/windows\ | File:/C:\windows |
+| PATH | PATH | PATH | PATH |
 | :--- | :--- | :--- | :--- |
+| File:/C:/windows | File:/C:/windows/ | File:/C:/windows\ | File:/C:\windows |
 | File:/C:\windows\ | File:/C:\windows/ | File://C:/windows | File://C:/windows/ |
 | File://C:/windows\ | File://C:\windows | File://C:\windows/ | File://C:\windows\ |
 | C:/windows | C:/windows/ | C:/windows\ | C:\windows |
@@ -49,28 +73,53 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 | %TEMP% | %SYSTEMDRIVE% | %SYSTEMROOT% | %APPDATA% |
 | %HOMEDRIVE% | %HOMESHARE |  |   |
 
-## Abusing Common Dialogs
+### ShortCuts
 
-**Common Dialogs** are those options of **saving a file**, **opening a file**, selecting a font, a color... Most of them will **offer a full Explorer functionality**. This means that you will be able to access Explorer functionalities if you can access these options.
+* Sticky Keys – Press SHIFT 5 times 
+* Mouse Keys – SHIFT+ALT+NUMLOCK 
+* High Contrast – SHIFT+ALT+PRINTSCN 
+* Toggle Keys – Hold NUMLOCK for 5 seconds 
+* Filter Keys – Hold right SHIFT for 12 seconds 
+* WINDOWS+F1 – Windows Search 
+* WINDOWS+D – Show Desktop 
+* WINDOWS+E – Launch Windows Explorer 
+* WINDOWS+R – Run 
+* WINDOWS+U – Ease of Access Centre 
+* WINDOWS+F – Search 
+* SHIFT+F10 – Context Menu 
+* CTRL+SHIFT+ESC – Task Manager 
+* CTRL+ALT+DEL – Splash screen on newer Windows versions 
+* F1 – Help F3 – Search 
+* F6 – Address Bar 
+* F11 – Toggle full screen within Internet Explorer 
+* CTRL+H – Internet Explorer History 
+* CTRL+T – Internet Explorer – New Tab 
+* CTRL+N – Internet Explorer – New Page 
+* CTRL+O – Open File 
+* CTRL+S – Save CTRL+N – New RDP / Citrix
 
-## Browsers tricks
+### Internet Explorer Tricks
 
-Backup iKat versions:
-
-[http://swin.es/k/](http://swin.es/k/)  
-[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net/)  
-
-
-## Internet Explorer Tricks
-
-### 'Image Toolbar'
+#### 'Image Toolbar'
 
 It's a toolbar that appears on the top-left of image when it's clicked. You will be able to Save, Print, Mailto, Open "My Pictures" in Explorer. The Kiosk needs to be using Internet Explorer.
 
-### Shell Protocol
+#### Shell Protocol
 
 Type this URLs to obtain an Explorer view:
 
+* `shell:Administrative Tools`
+* `shell:DocumentsLibrary`
+* `shell:Libraries`
+* `shell:UserProfiles`
+* `shell:Personal`
+* `shell:SearchHomeFolder`
+* `shell:NetworkPlacesFolder`
+* `shell:SendTo`
+* `shell:UserProfiles`
+* `shell:Common Administrative Tools`
+* `shell:MyComputerFolder`
+* `shell:InternetFolder`
 * `Shell:Profile`
 * `Shell:ProgramFiles`
 * `Shell:System`
@@ -80,6 +129,14 @@ Type this URLs to obtain an Explorer view:
 * `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --&gt; My Computer
 * `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --&gt; My Network Places
 * `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --&gt; Internet Explorer
+
+## Browsers tricks
+
+Backup iKat versions:
+
+[http://swin.es/k/](http://swin.es/k/)  
+[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net/)  
+
 
 ## iPad
 
