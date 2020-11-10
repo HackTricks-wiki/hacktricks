@@ -15,7 +15,7 @@ If you have some user credentials or a shell as a domain user you can get the pa
 
 * `crackmapexec <IP> -u 'user' -p 'password' --pass-pol`
 * `enum4linx -u 'username' -p 'password' -P <IP>`
-* `(Get-DomainPolicy)."System Access" #From powerview`
+* `(Get-DomainPolicy)."SystemAccess" #From powerview`
 
 ### Exploitation
 
