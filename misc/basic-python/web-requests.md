@@ -23,6 +23,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
+float_seconds = gr.elapsed.total_seconds() 10.231
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
