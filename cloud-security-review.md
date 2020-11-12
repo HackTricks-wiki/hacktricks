@@ -94,6 +94,10 @@ azscan #Run, login before with `az login`
 * **Periodic SQL servers scans**:   _Select the SQL server_ --&gt; _Make sure that 'Advanced data security' is set to 'On'_ --&gt; _Under 'Vulnerability assessment settings', set 'Periodic recurring scans' to 'On', and configure a storage account for storing vulnerability assessment scan results_ --&gt; _Click Save_
 * **Lack of App Services restrictions**: Look for "App Services" in Azure \([https://portal.azure.com/\#blade/HubsExtension/BrowseResource/resourceType/Microsoft.Web%2Fsites](https://portal.azure.com/#blade/HubsExtension/BrowseResource/resourceType/Microsoft.Web%2Fsites)\) and check if anyone is being used. In that case check go through each App checking for "Access Restrictions" and there aren't rules, report it. The access to the app service should be restricted according to the needs.
 
+## Office365
+
+You need **Global Admin Reader**
+
 ## AWS
 
 Get objets in graph: [https://github.com/FSecureLABS/awspx](https://github.com/FSecureLABS/awspx)
