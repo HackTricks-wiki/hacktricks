@@ -195,7 +195,7 @@
   * [Joomla](pentesting/pentesting-web/joomla.md)
   * [Nginx](pentesting/pentesting-web/nginx.md)
   * [PHP Tricks \(SPA\)](pentesting/pentesting-web/php-tricks-esp/README.md)
-    * [PHP - Useful Functions \(disabled bypass\)](pentesting/pentesting-web/php-tricks-esp/php-useful-functions.md)
+    * [PHP - Useful Functions & disable\_functiosns/open\_basedir bypass](pentesting/pentesting-web/php-tricks-esp/php-useful-functions.md)
   * [Python](pentesting/pentesting-web/python.md)
   * [SpEL - Spring Expression Language](pentesting/pentesting-web/spel-spring-expression-language.md)
   * [Tomcat](pentesting/pentesting-web/tomcat.md)
