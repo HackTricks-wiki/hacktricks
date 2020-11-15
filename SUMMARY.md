@@ -197,6 +197,7 @@
   * [PHP Tricks \(SPA\)](pentesting/pentesting-web/php-tricks-esp/README.md)
     * [PHP - Useful Functions & disable\_functiosns/open\_basedir bypass](pentesting/pentesting-web/php-tricks-esp/php-useful-functions/README.md)
       * [disable\_functions bypass - php-fpm/FastCGI](pentesting/pentesting-web/php-tricks-esp/php-useful-functions/disable_functions-bypass-php-fpm-fastcgi.md)
+      * [disable\_functions bypass - dl function](pentesting/pentesting-web/php-tricks-esp/php-useful-functions/disable_functions-bypass-dl-function.md)
       * [disable\_functions bypass - PHP 7.0-7.4 \(\*nix only\)](pentesting/pentesting-web/php-tricks-esp/php-useful-functions/disable_functions-bypass-php-7.0-7.4-nix-only.md)
       * [disable\_functions bypass - Imagick &lt;= 3.3.0 PHP &gt;= 5.4 Exploit](pentesting/pentesting-web/php-tricks-esp/php-useful-functions/disable_functions-bypass-imagick-less-than-3.3.0-php-greater-than-5.4-exploit.md)
       * [disable\_functions - PHP 5.x Shellshock Exploit](pentesting/pentesting-web/php-tricks-esp/php-useful-functions/disable_functions-php-5.x-shellshock-exploit.md)
