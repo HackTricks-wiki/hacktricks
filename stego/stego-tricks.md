@@ -145,7 +145,7 @@ Useful commands:
 
 Hide information encrypted using AES-265  
 Download from [the oficial page](http://jpinsoft.net/deepsound/download.aspx).  
-Run it and open the file and check if DeepSound finds any data hidden, in taht case you will need to provide the password.
+Run it and open the file and check if DeepSound finds any data hidden, in that case you will need to provide the password.
 
 ### Sonic visualizer <a id="sonic-visualizer"></a>
 
