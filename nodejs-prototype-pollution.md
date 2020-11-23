@@ -6,7 +6,7 @@
 
 First of all, we need to understand `Object`in javascript. An object is simply a collection of key and value pairs, often called properties of that object. For example:
 
-![](.gitbook/assets/image%20%28397%29.png)
+![](.gitbook/assets/image%20%28398%29.png)
 
 In Javascript, `Object`is a basic object, the template for all newly created objects. It is possible to create an empty object by passing `null`to `Object.create`. However, the newly created object will also have a type that corresponds to the passed parameter and inherits all the basic properties.
 
@@ -32,13 +32,13 @@ function person(fullName, age) {
 }
 ```
 
-![](.gitbook/assets/image%20%28399%29.png)
+![](.gitbook/assets/image%20%28400%29.png)
 
 ```javascript
 var person1 = new person("Satoshi", 70);
 ```
 
-![](.gitbook/assets/image%20%28396%29.png)
+![](.gitbook/assets/image%20%28397%29.png)
 
 As you can se from the previous 2 images, the prototype of a function can be accessed form `function.prototype` and from an object of the function via `.__proto__`
 
@@ -50,13 +50,29 @@ One thing to note is that the prototype attribute can be changed/modified/delete
 
 Functions of the class ca also be modified \(like `toString` or `valueOf` the following cases\):
 
-![](.gitbook/assets/image%20%28398%29.png)
+![](.gitbook/assets/image%20%28399%29.png)
+
+![](.gitbook/assets/image%20%28396%29.png)
+
+## Inheritance
+
+In a prototype-based program, objects inherit properties/methods from classes. The classes are derived by adding properties/methods to an instance of another class or by adding them to an empty object.
+
+Note that, if you add a property to an object that is used as the prototype for a set of objects \(like the myPersonObj\), the objects for which it is the prototype also get the new property, but that property is not printed unless specifically called on.
 
 ![](.gitbook/assets/image%20%28395%29.png)
 
 ## Prototype Pollution <a id="0d0a"></a>
 
+So where’s the prototype pollution? It happens when there’s a bug in the application that makes it possible to overwrite properties of `Object.prototype`. Since every typical object inherits its properties from `Object.prototype`, we can change application behavior. The most commonly shown example is the following:
 
+```text
+if (user.isAdmin) {   // do something important!}
+```
+
+Imagine that we have a prototype pollution that makes it possible to set `Object.prototype.isAdmin = true`. Then, unless the application explicitly assigned any value, `user.isAdmin` is always true!
+
+![](https://research.securitum.com/wp-content/uploads/sites/2/2019/10/image-1.png)
 
 For example, `obj[a][b] = value`. If the attacker can control the value of `a` and `value`, then he only needs to adjust the value of `a`to `__proto__`\(in javascript, `obj["__proto__"]` and `obj.__proto__`are completely equivalent\) then property `b` of all existing objects in the application will be assigned to `value`.
 
@@ -68,7 +84,7 @@ However, the attack is not as simple as the one above, according to [paper](http
 
 Let’s look through some errors:
 
-## CVE-2019–11358: Prototype pollution attack through jQuery $ .extend <a id="64cf"></a>
+### CVE-2019–11358: Prototype pollution attack through jQuery $ .extend
 
 $ .extend, if handled incorrectly, can change the properties of the object `prototype`\(the template of the objects in the app\). This attribute will then appear on all objects. Note that only the “deep” version \(ie g\) of $ .extened is affected.
 
@@ -95,7 +111,7 @@ console.log({}.devMode); // true
 
 These errors can affect a lot of Javascript projects, especially NodeJS projects, the most practical example is the error in Mongoose, the JS library that helps manipulate MongoDB, in December 2018.
 
-## CVE-2018–3721, CVE-2019–10744: Prototype pollution attack through lodash <a id="d6e3"></a>
+### CVE-2018–3721, CVE-2019–10744: Prototype pollution attack through lodash
 
 [Lodash](https://www.npmjs.com/package/lodash) is also a well-known library that provides a lot of different functions, helping us to write code more conveniently and more neatly with over 19 million weekly downloads. And It got the same problem as JQuery.
 
@@ -105,7 +121,7 @@ These errors can affect a lot of Javascript projects, especially NodeJS projects
 
 This bug affects all versions of Lodash, already fixed in version 4.17.11.
 
-## What can I do to prevent? <a id="6eac"></a>
+### What can I do to prevent?
 
 * Freeze properties with Object.freeze \(Object.prototype\)
 * Perform validation on the JSON inputs in accordance with the application’s schema
@@ -113,4 +129,9 @@ This bug affects all versions of Lodash, already fixed in version 4.17.11.
 * Use objects without prototype properties, such as `Object.create(null)`, to avoid affecting the prototype chain
 * Use `Map`instead of `Object`
 * Regularly update new patches for libraries
+
+## Reference
+
+* [https://research.securitum.com/prototype-pollution-rce-kibana-cve-2019-7609/](https://research.securitum.com/prototype-pollution-rce-kibana-cve-2019-7609/)
+* [https://dev.to/caffiendkitten/prototype-inheritance-pollution-2o5l](https://dev.to/caffiendkitten/prototype-inheritance-pollution-2o5l)
 
