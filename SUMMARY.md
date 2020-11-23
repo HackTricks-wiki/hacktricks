@@ -157,6 +157,7 @@
   * [Print job manipulation](pentesting/pentesting-printers/print-job-manipulation.md)
   * [Print Job Retention](pentesting/pentesting-printers/print-job-retention.md)
   * [Scanner and Fax](pentesting/pentesting-printers/scanner-and-fax.md)
+* [Pentesting SAP](pentesting/pentesting-sap.md)
 * [7/tcp/udp - Pentesting Echo](pentesting/7-tcp-udp-pentesting-echo.md)
 * [21 - Pentesting FTP](pentesting/pentesting-ftp/README.md)
   * [FTP Bounce attack - Scan](pentesting/pentesting-ftp/ftp-bounce-attack.md)
