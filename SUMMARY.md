@@ -302,7 +302,7 @@
 * [CSRF \(Cross Site Request Forgery\)](pentesting-web/csrf-cross-site-request-forgery.md)
 * [Dangling Markup - HTML scriptless injection](pentesting-web/dangling-markup-html-scriptless-injection.md)
 * [Deserialization](pentesting-web/deserialization/README.md)
-  * [NodeJS deserialization \_\_proto\_\_ abuse](pentesting-web/deserialization/nodejs-deserialization-__proto__-abuse.md)
+  * [NodeJS - \_\_proto\_\_ & prototype Pollution](pentesting-web/deserialization/nodejs-proto-prototype-pollution.md)
   * [Java JSF ViewState \(.faces\) Deserialization](pentesting-web/deserialization/java-jsf-viewstate-.faces-deserialization.md)
   * [Java DNS Deserialization, GadgetProbe and Java Deserialization Scanner](pentesting-web/deserialization/java-dns-deserialization-and-gadgetprobe.md)
   * [Basic Java Deserialization \(ObjectInputStream, readObject\)](pentesting-web/deserialization/basic-java-deserialization-objectinputstream-readobject.md)
@@ -447,5 +447,4 @@
 * [Phising Documents](phising-documents.md)
 * [Reset/Forgoten Password Bypass](reset-password.md)
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
-* [NodeJS - Prototype Pollution](nodejs-prototype-pollution.md)
 
