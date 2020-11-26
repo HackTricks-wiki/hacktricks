@@ -44,6 +44,7 @@
 
 * [Checklist - Local Windows Privilege Escalation](windows/checklist-windows-privilege-escalation.md)
 * [Windows Local Privilege Escalation](windows/windows-local-privilege-escalation/README.md)
+  * [AppendData/AddSubdirectory permission over service registry](windows/windows-local-privilege-escalation/appenddata-addsubdirectory-permission-over-service-registry.md)
   * [DPAPI - Extracting Passwords](windows/windows-local-privilege-escalation/dpapi-extracting-passwords.md)
   * [SeImpersonate from High To System](windows/windows-local-privilege-escalation/seimpersonate-from-high-to-system.md)
   * [Access Tokens](windows/windows-local-privilege-escalation/access-tokens.md)

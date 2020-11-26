@@ -556,7 +556,7 @@ FOR /F "tokens=2 delims= " %i in (C:\Temp\Servicenames.txt) DO @echo %i >> C:\Te
 FOR /F %i in (C:\Temp\services.txt) DO @sc qc %i | findstr "BINARY_PATH_NAME" >> C:\Temp\path.txt
 ```
 
-### Services registry permissions
+### Services registry modify permissions
 
 You should check if you can modify any service registry.  
 You can **check** your **permissions** over a service **registry** doing:
@@ -577,6 +577,14 @@ To change the Path of the binary executed:
 ```bash
 reg add HKLM\SYSTEM\CurrentControlSet\srevices\<service_name> /v ImagePath /t REG_EXPAND_SZ /d C:\path\new\binary /f
 ```
+
+### Services registry AppendData/AddSubdirectory permissions
+
+If you have this permission over a registry this means to **you can create sub registries from this one**. In case of Windows services this is **enough to execute arbitrary code:**
+
+{% page-ref page="appenddata-addsubdirectory-permission-over-service-registry.md" %}
+
+
 
 ### Unquoted Service Paths
 
