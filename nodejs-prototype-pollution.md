@@ -2,9 +2,9 @@
 
 **This post is based on the one from** [**https://itnext.io/prototype-pollution-attack-on-nodejs-applications-94a8582373e7**](https://itnext.io/prototype-pollution-attack-on-nodejs-applications-94a8582373e7)\*\*\*\*
 
-## Objects in Javascript <a id="053a"></a>
+## Objects in JavaScript <a id="053a"></a>
 
-First of all, we need to understand `Object`in javascript. An object is simply a collection of key and value pairs, often called properties of that object. For example:
+First of all, we need to understand `Object`in JavaScript. An object is simply a collection of key and value pairs, often called properties of that object. For example:
 
 ![](.gitbook/assets/image%20%28398%29.png)
 
@@ -16,7 +16,7 @@ console.log(Object.create(null)); // prints an empty object
 
 ![](.gitbook/assets/image%20%28393%29.png)
 
-Previously we learned that an Oject in javascript is  collection of keys and values, so it makes sense that a `null` object is just an empty dictionary: `{}`
+Previously we learned that an Object in javascript is  collection of keys and values, so it makes sense that a `null` object is just an empty dictionary: `{}`
 
 ## Functions / Classes in Javascript <a id="55dd"></a>
 
@@ -40,15 +40,13 @@ var person1 = new person("Satoshi", 70);
 
 ![](.gitbook/assets/image%20%28397%29.png)
 
-As you can se from the previous 2 images, the prototype of a function can be accessed form `function.prototype` and from an object of the function via `.__proto__`
-
 ## Prototypes in JavaScript <a id="3843"></a>
 
 One thing to note is that the prototype attribute can be changed/modified/deleted when executing the code. For example functions to the class can be dynamically added:
 
 ![](.gitbook/assets/image%20%28394%29.png)
 
-Functions of the class ca also be modified \(like `toString` or `valueOf` the following cases\):
+Functions of the class can also be modified \(like `toString` or `valueOf` the following cases\):
 
 ![](.gitbook/assets/image%20%28399%29.png)
 
@@ -62,9 +60,81 @@ Note that, if you add a property to an object that is used as the prototype for 
 
 ![](.gitbook/assets/image%20%28395%29.png)
 
-## Prototype Pollution <a id="0d0a"></a>
+## \_\_proto\_\_ pollution <a id="0d0a"></a>
 
-So where’s the prototype pollution? It happens when there’s a bug in the application that makes it possible to overwrite properties of `Object.prototype`. Since every typical object inherits its properties from `Object.prototype`, we can change application behavior. The most commonly shown example is the following:
+You should have already learned that **every object in JavaScript is simply a collection of key and value** pairs and that **every object inherits from the Object type in JavaScript**. This means that if you are able to pollute the Object type **each JavaScript object of the environment is going to be polluted!**
+
+This is fairly simple, you just need to be able to modify some properties \(key-value pairs\) from and arbitrary JavaScript object, because as each object inherits from Object, each object can access Object scheme.
+
+```javascript
+function person(fullName) {
+    this.fullName = fullName;
+}
+var person1 = new person("Satoshi");
+```
+
+From the previous example it's possible to access the structure of Object using the following ways:
+
+```javascript
+person1.__proto__.__proto__
+person.__proto__.__proto__
+```
+
+So, as it was mentioned before, if now a property is added to the Object scheme, every JavaScript object will have access to the new property:
+
+```javascript
+function person(fullName) {
+    this.fullName = fullName;
+}
+var person1 = new person("Satoshi");
+//Add function as new property
+person1.__proto__.__proto__.printHello = function(){console.log("Hello");}
+person1.printHello() //This now works and prints hello
+//Add constant as new property
+person1.__proto__.__proto__.globalconstant = true
+person1.globalconstant  //This now works and is "true"
+```
+
+So now each JS object will contain the new properties: the function `printHello` and the new constant `globalconstant`
+
+## prototype pollution
+
+This technique isn't as effective as the previous one as you cannot pollute the scheme of JS Object. But in cases where the **keyword `__proto__`is forbidden this technique can be useful**.
+
+If you are able to modify the properties of a function, you can modify the `prototype` property of the function and **each new property that you adds here will be inherit by each object created from that function:**
+
+```javascript
+function person(fullName) {
+    this.fullName = fullName;
+}
+var person1 = new person("Satoshi");
+//Add function as new property
+person.prototype.sayHello = function(){console.log("Hello");}
+person1.sayHello() //This now works and prints hello
+//Add constant as new property
+person.prototype.newConstant = true
+person1.newConstant //This now works and is "true"
+
+//The same could be achieved using this other way:
+person1.constructor.prototype.sayHello = function(){console.log("Hello");}
+person1.constructor.prototype.newConstant = true
+```
+
+**In this case only the objects created from the `person` class will be affected, but each of them will now inherit the properties `sayHello` and `newConstant`.**
+
+However, there is a possibility to use this technique and pollute every JS object, and it's managing to pollute the prototype property of Object:
+
+```javascript
+Object.prototype.sayBye = function() {console.log("bye!")}
+```
+
+If you manage to do that, each JS object will be able to execute the function `sayBye`.
+
+## Examples
+
+### Basic Example
+
+So where’s the prototype pollution? It happens when there’s a bug in the application that makes it possible to overwrite properties of `Object.prototype`. Since every typical object inherits its properties from `Object.prototype`, we can change application behaviour. The most commonly shown example is the following:
 
 ```javascript
 if (user.isAdmin) {   // do something important!}
@@ -82,7 +152,43 @@ However, the attack is not as simple as the one above, according to [paper](http
 * Property definition by path
 * Clone object
 
-Let’s look through some errors:
+### RCE Example
+
+Imagine a real JS using some code like the following one:
+
+```javascript
+const { execSync, fork } = require('child_process');
+
+function isObject(obj) {
+    console.log(typeof obj);
+    return typeof obj === 'function' || typeof obj === 'object';
+}
+
+function merge(target, source) {
+    for (let key in source) {
+        if (isObject(target[key]) && isObject(source[key])) {
+            merge(target[key], source[key]);
+        } else {
+            target[key] = source[key];
+        }
+    }
+    return target;
+}
+
+function clone(target) {
+    return merge({}, target);
+}
+
+clone(USERINPUT);
+
+let proc = fork('VersionCheck.js', [], {
+    stdio: ['ignore', 'pipe', 'pipe', 'ipc']
+});
+```
+
+You can observe that the merge function is coping one by one all the key-value pairs from a dictionary into another one. This may seem secure, but it isn't as the copy of the `__proto__` or `prototype` properties from a dictionary into an object may modify completely the structure of the rest of the JS objects \(as it was previously explained\).
+
+In order to achieve RCE
 
 ### CVE-2019-7609
 
