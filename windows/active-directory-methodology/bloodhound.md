@@ -63,6 +63,8 @@ You will be prompted for the database credentials: **neo4j:&lt;Your new password
 
 ## Ingestors
 
+### Windows
+
 You can download the [Ingestors from the github](https://github.com/BloodHoundAD/BloodHound/tree/master/Ingestors).  
 They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
 
@@ -80,4 +82,13 @@ runas /netonly /user:domain\user "powershell.exe -exec bypass"
 You could also use other parameters like: **DomainController**, **Domain**, **LdapUsername**, **LdapPassword...**
 
 \*\*\*\*[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)\*\*\*\*
+
+### **Python**
+
+If you have domain credentials you can run a **python bloodhound ingestor from any platform** so you don't need to depend on Windows.  
+Download it from [https://github.com/fox-it/BloodHound.py](https://github.com/fox-it/BloodHound.py) or doing `pip3 install bloodhound`
+
+```bash
+bloodhound-python -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all
+```
 
