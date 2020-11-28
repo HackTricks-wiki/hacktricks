@@ -104,7 +104,7 @@ Find hidden content using Fast Fourier T
 Check it in:
 
 * [http://bigwww.epfl.ch/demo/ip/demos/FFT/](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
-* [http://www.ejectamenta.com/Imaging-Experiments/fourierimagefiltering.html](http://www.ejectamenta.com/Imaging-Experiments/fourierimagefiltering.html)
+* [https://www.ejectamenta.com/Fourifier-fullscreen/](https://www.ejectamenta.com/Fourifier-fullscreen/)
 
 ### Stegpy \[PNG, BMP, GIF, WebP, WAV\]
 
