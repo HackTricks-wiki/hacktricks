@@ -8,7 +8,7 @@ This machine was categorised as easy and it was pretty easy.
 
 I started **enumerating the machine using my tool** [**Legion**](https://github.com/carlospolop/legion):
 
-![](../../.gitbook/assets/image%20%2861%29.png)
+![](../../.gitbook/assets/image%20%2879%29.png)
 
 In as you can see 2 ports are open: 80 \(**HTTP**\) and 22 \(**SSH**\)
 
