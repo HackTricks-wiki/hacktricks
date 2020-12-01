@@ -137,7 +137,7 @@ myset.symmetric\_difference\_update\(myset2\) \#myset = Elements that are not in
 
 The method in \_\_It\_\_ will be the one used by sort in order to compare if an object of this class is bigger than other
 
-```text
+```python
 class Person(name):
 	def __init__(self,name):
 		self.name= name

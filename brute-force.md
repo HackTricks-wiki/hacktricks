@@ -20,7 +20,7 @@ Find as much information about the target as you can and generate a custom dicti
 
 ### Crunch
 
-```text
+```bash
 crunch 4 6 0123456789ABCDEF -o crunch1.txt #From length 4 to 6 using that alphabet
 crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using charset mixalpha (inside file charset.lst)
 
@@ -112,6 +112,7 @@ medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
+# Use https-get mode for httpS
 medusa -h <IP> -u <username> -P  <passwords.txt> -M  http -m DIR:/path/to/auth -T 10
 ```
 
@@ -119,6 +120,7 @@ medusa -h <IP> -u <username> -P  <passwords.txt> -M  http -m DIR:/path/to/auth -
 
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
+# Use https-post-form mode for httpS
 ```
 
 For http**s** you have to change from "http-post-form" to "**https-post-form"**

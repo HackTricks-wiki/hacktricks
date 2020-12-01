@@ -37,7 +37,7 @@ If you don't want to wait an hour you can use a PS script to make the restore ha
 
 Note the spotless' user membership:
 
-![](../../.gitbook/assets/a1.png)
+![](../../.gitbook/assets/1%20%282%29.png)
 
 However, we can still add new users:
 

