@@ -359,6 +359,11 @@
 * [Escaping from KIOSKs](physical-attacks/escaping-from-gui-applications/README.md)
   * [Show file extensions](physical-attacks/escaping-from-gui-applications/show-file-extensions.md)
 
+## Reversing
+
+* [Reversing Tools](reversing/reversing-tools.md)
+* [Cryptographic Algorithms](reversing/cryptographic-algorithms.md)
+
 ## Exploiting
 
 * [Linux Exploiting \(Basic\) \(SPA\)](exploiting/linux-exploiting-basic-esp/README.md)
@@ -370,7 +375,6 @@
 * [Exploiting Tools](exploiting/tools/README.md)
   * [PwnTools](exploiting/tools/pwntools.md)
 * [Windows Exploiting \(Basic Guide - OSCP lvl\)](exploiting/windows-exploiting-basic-guide-oscp-lvl.md)
-* [Reversing](exploiting/reversing.md)
 
 ## Forensics
 
