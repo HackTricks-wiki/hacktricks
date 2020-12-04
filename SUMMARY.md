@@ -315,6 +315,7 @@
 * [File Inclusion/Path traversal](pentesting-web/file-inclusion.md)
 * [File Upload](pentesting-web/file-upload/README.md)
   * [PDF Upload - XXE and CORS bypass](pentesting-web/file-upload/pdf-upload-xxe-and-cors-bypass.md)
+* [Formula Injection](pentesting-web/formula-injection.md)
 * [HTTP Request Smuggling / HTTP Desync Attack](pentesting-web/http-request-smuggling.md)
 * [IDOR](pentesting-web/idor.md)
 * [JWT Vulnerabilities \(Json Web Tokens\)](pentesting-web/hacking-jwt-json-web-tokens.md)
