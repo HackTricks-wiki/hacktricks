@@ -1,5 +1,20 @@
 # Cryptographic Algorithms
 
+## Identifying Algorithms
+
+Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
+
+![](../.gitbook/assets/image%20%28121%29.png)
+
+If you search for the first constant in Google this is what you get:
+
+![](../.gitbook/assets/image%20%28144%29.png)
+
+Therefore, you can assume that the decompiled function is a **sha256 calculator.**  
+You can search any of the other constants and you will obtain \(probably\) the same result.
+
+
+
 ## RC4
 
 It's composed of 3 main parts:
@@ -12,5 +27,16 @@ It's composed of 3 main parts:
 **In order to identify a RC4 in a disassembly/decompiled code you can check for 2 loops of size 0x100 \(with the use of a key\) and then a XOR of the input data with the 256 values created before in the 2 loops probably using a %256 \(mod 256\)**
 {% endhint %}
 
-\*\*\*\*
+**Example Initialization stage:**  
+\(Note the number 256 used as counter and how a 0 is written in each place of the 256 chars\)
+
+![](../.gitbook/assets/image%20%2890%29.png)
+
+**Example of the Scrambling Stage:**
+
+![](../.gitbook/assets/image%20%28107%29.png)
+
+**Example of XOR Stage:**
+
+![](../.gitbook/assets/image%20%2873%29.png)
 
