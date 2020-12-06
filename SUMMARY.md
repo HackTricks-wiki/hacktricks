@@ -365,6 +365,7 @@
 * [Common API used in Malware](reversing/common-api-used-in-malware.md)
 * [Reversing Tools](reversing/reversing-tools.md)
 * [Cryptographic Algorithms](reversing/cryptographic-algorithms.md)
+* [Word Macros](reversing/word-macros.md)
 
 ## Exploiting
 
