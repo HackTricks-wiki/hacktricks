@@ -386,7 +386,7 @@
 * [Pcaps analysis](forensics/pcaps-analysis/README.md)
   * [USB Keyboard pcap analysis](forensics/pcaps-analysis/usb-keyboard-pcap-analysis.md)
   * [DNSCat pcap analysis](forensics/pcaps-analysis/dnscat-exfiltration.md)
-  * [WireShark tricks](forensics/pcaps-analysis/wireshark-tricks.md)
+  * [Wireshark tricks](forensics/pcaps-analysis/wireshark-tricks.md)
 * [Volatility - Examples](forensics/volatility-examples.md)
 * [Basic Forensics \(ESP\)](forensics/basic-forensics-esp/README.md)
   * [USB logs analysis](forensics/basic-forensics-esp/usb-logs-analysis.md)

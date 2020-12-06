@@ -1,4 +1,4 @@
-# WireShark tricks
+# Wireshark tricks
 
 ## Decrypting TLS
 
