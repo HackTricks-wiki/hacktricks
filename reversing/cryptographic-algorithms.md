@@ -2,6 +2,10 @@
 
 ## Identifying Algorithms
 
+If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
+
+### Code constants
+
 Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
 
 ![](../.gitbook/assets/image%20%28121%29.png)
@@ -13,7 +17,14 @@ If you search for the first constant in Google this is what you get:
 Therefore, you can assume that the decompiled function is a **sha256 calculator.**  
 You can search any of the other constants and you will obtain \(probably\) the same result.
 
+### data info
 
+If the code doesn't have any significant constant it may be **loading information from the .data section**.  
+You can access that data, **group the first dword** and search for it in google as we have done in the section before:
+
+![](../.gitbook/assets/image%20%28158%29.png)
+
+In this case, if you look for **0xA56363C6** you can find that it's related to the **tables of the AES algorithm**.
 
 ## RC4
 
