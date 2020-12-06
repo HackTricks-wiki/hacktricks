@@ -4,6 +4,12 @@
 
 If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
 
+### API functions
+
+#### CryptDeriveKey
+
+
+
 ### Code constants
 
 Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
