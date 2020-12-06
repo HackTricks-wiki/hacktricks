@@ -8,7 +8,28 @@ If you ends in a code **using shift rights and lefts, xors and several arithmeti
 
 #### CryptDeriveKey
 
+If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
 
+![](../.gitbook/assets/image%20%28190%29.png)
+
+Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+
+#### RtlCompressBuffer/RtlDecompressBuffer
+
+Compresses and decompresses a given buffer of data.
+
+#### CryptAcquireContext
+
+ The **CryptAcquireContext** function is used to acquire a handle to a particular key container within a particular cryptographic service provider \(CSP\). **This returned handle is used in calls to CryptoAPI** functions that use the selected CSP.
+
+#### CryptCreateHash
+
+Initiates the hashing of a stream of data. If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+
+![](../.gitbook/assets/image%20%28172%29.png)
+
+  
+Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 ### Code constants
 
