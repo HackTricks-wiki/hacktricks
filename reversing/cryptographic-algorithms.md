@@ -100,8 +100,8 @@ It's composed of 3 main parts:
 
 ### Identifying
 
-In the following image notice how the constant **0x9E3779B9** is used \(note that this constant is also used by other crypto algorithms like \).  
-Also note the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
+In the following image notice how the constant **0x9E3779B9** is used \(note that this constant is also used by other crypto algorithms like **TEA** -Tiny Encryption Algorithm\).  
+Also note the **size of the loop** \(**132**\) and the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
 
 ![](../.gitbook/assets/image%20%28198%29.png)
 
