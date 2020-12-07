@@ -43,9 +43,15 @@ The more common they are, the more probable the AV will detect it.
 1. Recon the victim
    1. Select the victim domain.
    2. Preform some basic web enumeration searching for login portals used by the victim and decide which one you will impersonate.
-   3. Use some OSINT to find emails of the domain
-
-
+   3. Use some OSINT to find emails.
+2. Prepare the environment
+   1. Buy the domain you are going to use for the phishing assessment
+   2. Configure the email service related records \(SPF, DMARC, DKIM, rDNS\)
+   3. Configure the VPS with gophish
+3. Prepare the templates
+   1. Prepare the email template to redirect to the malicious web page
+   2. Prepare the web page to steal the credentials
+4. Launch the attack!
 
 ## Generate similar domain names
 
