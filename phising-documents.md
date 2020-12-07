@@ -37,4 +37,36 @@ The more common they are, the more probable the AV will detect it.
 
 * AutoOpen\(\)
 * Document\_Open\(\)
-* 
+
+## Generate similar domain names
+
+### Domain Name Variation Techniques
+
+* **Keyword**: The domain name **contains** an important **keyword** of the original domain \(e.g., zelster.com-management.com\).
+* **hypened subdomain**: Change the **dot for a hyphen** of a subdomain \(e.g., www-zelster.com\).
+* **New TLD**: Same domain using a **new TLD** \(e.g., zelster.org\)
+* **Homoglyph**: It **replaces** a letter in the domain name with **letters that look similar** \(e.g., zelfser.com\).
+* **Transposition:** It **swaps two letters** within the domain name \(e.g., zelster.com\).
+* **Singularization/Pluralization**: Adds or removes “s” at the end of the domain name \(e.g., zeltsers.com\).
+* **Omission**: It **removes one** of the letters from the domain name \(e.g., zelser.com\).
+* **Repetition:** It **repeats one** of the letters in the domain name \(e.g., zeltsser.com\).
+* **Replacement**: Like homoglyph but less stealthy. It replaces one of the letters in the domain name, perhaps with a letter in proximity of the original letter on the keyboard \(e.g, zektser.com\).
+* **Subdomained**: Introduce a **dot** inside the domain name \(e.g., ze.lster.com\).
+* **Insertion**: It **inserts a letter** into the domain name \(e.g., zerltser.com\).
+* **Bitsquatting:** It anticipates a small portion of systems encountering hardware errors, resulting in the mutation of the resolved domain name by 1 bit. \(e.g., xeltser.com\).
+* **Missing dot**: Append the TLD to the domain name. \(e.g., zelstercom.com\)
+
+### Automatic Tools
+
+* \*\*\*\*[**dnstwist**](https://github.com/elceef/dnstwist)\*\*\*\*
+* [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)\*\*\*\*
+
+### **Websites**
+
+* [https://dnstwist.it/](https://dnstwist.it/)
+
+## References
+
+* [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
+* [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)
+
