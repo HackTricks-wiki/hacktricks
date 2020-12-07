@@ -129,7 +129,12 @@ Finally modify the files **`/etc/hostname`** and **`/etc/mailname`** to your dom
 
 Now, create a **DNS A record** of `mail.<domain>` pointing to the **ip address** of the VPS and a **DNS MX** record pointing to `mail.<domain>` 
 
+Now lets test to send an email:
 
+```bash
+apt install mailutils
+echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
+```
 
 #### Gophish configuration
 
@@ -229,7 +234,12 @@ service gophish stop
 
 ### Wait
 
-The older a domain is the less probable it's going to be caught as spam. Then you should wait as much time as possible \(at least 1week\) before the phishing assessment.
+The older a domain is the less probable it's going to be caught as spam. Then you should wait as much time as possible \(at least 1week\) before the phishing assessment.  
+Note that even if you have to wait a week you can finish configuring everything now. 
+
+### Configure Reverse DNS \(rDNS\) record
+
+Set a rDNS \(PTR\) record that resolves the IP address of the VPS to the domain name.
 
 ### Sender Policy Framework \(SPF\) Record
 
@@ -257,6 +267,23 @@ You have to create a new DNS TXT record pointing the hostname `_dmarc.<domain>` 
 
 ```bash
 v=DMARC1; p=none
+```
+
+### DomainKeys Identified Mail \(DKIM\)
+
+You must **configure a DKIM for the new domain**. If you don't know what is a DMARC record read the following page:
+
+{% page-ref page="pentesting/pentesting-smtp/" %}
+
+This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+
+### Test your email configuration score
+
+You can do that using [https://www.mail-tester.com/](https://www.mail-tester.com/)  
+Just access the page and send an email to the address they give you:
+
+```bash
+echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
 
 ## References
