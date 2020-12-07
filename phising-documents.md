@@ -286,6 +286,14 @@ Just access the page and send an email to the address they give you:
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
 
+### ​Removing from Spamhouse Blacklist
+
+The page www.mail-tester.com can indicate you if you your domain is being blocked by spamhouse. You can request your domain/IP to be removed at: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
+
+### Removing from Microsoft Blacklist
+
+​​You can request your domain/IP to be removed at [https://sender.office.com/](https://sender.office.com/).
+
 ## References
 
 * [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
