@@ -19,7 +19,7 @@ DOCX files referencing a remote template \(File –Options –Add-ins –Manage:
 Go to: _Insert --&gt; Quick Parts --&gt; Field_  
 _**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**: http://&lt;ip&gt;/whatever_
 
-![](.gitbook/assets/image%20%28347%29.png)
+![](../.gitbook/assets/image%20%28347%29.png)
 
 ### Macros Code
 
@@ -245,11 +245,11 @@ Set a rDNS \(PTR\) record that resolves the IP address of the VPS to the domain 
 
 You must **configure a SPF record for the new domain**. If you don't know what is a SPF record read the following page:
 
-{% page-ref page="pentesting/pentesting-smtp/" %}
+{% page-ref page="../pentesting/pentesting-smtp/" %}
 
 You can use [https://www.spfwizard.net/](https://www.spfwizard.net/) to generate your SPF policy \(use the IP of the VPS machine\)
 
-![](.gitbook/assets/image%20%28345%29.png)
+![](../.gitbook/assets/image%20%28398%29.png)
 
 This is the content that must be set inside a TXT record inside the domain:
 
@@ -261,7 +261,7 @@ v=spf1 mx a ip4:ip.ip.ip.ip ?all
 
 You must **configure a DMARC record for the new domain**. If you don't know what is a DMARC record read the following page:
 
-{% page-ref page="pentesting/pentesting-smtp/" %}
+{% page-ref page="../pentesting/pentesting-smtp/" %}
 
 You have to create a new DNS TXT record pointing the hostname `_dmarc.<domain>` with the following content:
 
@@ -273,7 +273,7 @@ v=DMARC1; p=none
 
 You must **configure a DKIM for the new domain**. If you don't know what is a DMARC record read the following page:
 
-{% page-ref page="pentesting/pentesting-smtp/" %}
+{% page-ref page="../pentesting/pentesting-smtp/" %}
 
 This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
