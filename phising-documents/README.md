@@ -301,6 +301,17 @@ The page www.mail-tester.com can indicate you if you your domain is being blocke
 
 ​​You can request your domain/IP to be removed at [https://sender.office.com/](https://sender.office.com/).
 
+## Detecting the detection
+
+Obviously one of the best ways to know if you have been busted is to **search your domain inside blacklists**. If it appears listed, somehow your domain was detected as suspicions.  
+One easy way to check if you domain appears in any blacklist is to use [https://malwareworld.com/](https://malwareworld.com/)
+
+However, there are other ways to know if the victim is **actively looking for suspicions phishing activity in the wild** as explained in:
+
+{% page-ref page="detecting-phising.md" %}
+
+You can **buy a domain with a very similar name** to the victims domain **and/or generate a certificate** for a **subdomain** of a domain controlled by you **containing** the **keyword** of the victim's domain. If the **victim** perform any kind of **DNS or HTTP interaction** with them, you will now that **he is actively looking** for suspicious domains and you will need to very very stealth.
+
 ## References
 
 * [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)

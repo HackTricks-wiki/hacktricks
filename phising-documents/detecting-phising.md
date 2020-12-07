@@ -22,12 +22,14 @@ For this purpose you can use any of the following tools. Note that these tolls w
 
 Once you have a list of potential suspicions domain names you should **check**  them \(mainly the ports HTTP and HTTPS\) to **see if they are using some login form similar** to someone of the victim's domain.  
 You could also check the port 3333 to see if it's open and running an instance of `gophish`.  
-It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.
+It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.  
+You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to see if it's really suspicious and in that case **access it to take a deeper look**.
 
 ### Advanced checks
 
 If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while \(every day? it only takes a few seconds/minutes\). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** \(yes, attackers also make mistakes\) and **monitor the HTTP and HTTPS web pages of the suspicions domains and subdomains** to see if they have copied any login form from the victims web pages.  
-In order to automate this I would recommend to to have a list of login forms of the victims domains, spider the suspicions web pages and compare each login form found inside the suspicions domains with each login form of the victim's domain using something like `ssdeep`.
+In order to **automate this** I would recommend to to have a list of login forms of the victims domains, spider the suspicions web pages and compare each login form found inside the suspicions domains with each login form of the victim's domain using something like `ssdeep`.  
+If you have located the login forms of the suspicions domains you can try to **send junk credentials** and **check if it's redirecting you to the victims domain**.
 
 ## Domain names using keywords
 
