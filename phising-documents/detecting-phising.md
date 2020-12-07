@@ -33,7 +33,7 @@ In order to automate this I would recommend to to have a list of login forms of 
 
 I the parent page it's also mentioned a domain name variation technique that consist on putting the **victim's domain name inside a bigger domain** \(e.g. paypal-financial.com for paypal.com\).
 
-#### Certificate Transparency
+### Certificate Transparency
 
 It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover this phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside it's name** For example, if attackers generates a certificate of https://paypal-financial.com, seeing the certificate it's possible to find the keyword "paypal" and know that that suspicions email is being used.
 
@@ -48,6 +48,8 @@ However, you can do "the same" using the free web [**crt.sh**](https://crt.sh/).
 Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domain \(note that a suspicious domain can be a false positive\).
 
 **Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in \(near\) real-time. In fact, there is a project called [**phishing\_catcher**](https://github.com/x0rz/phishing_catcher) that does just like that.
+
+### **New domains**
 
 **One last alternative** is to gather a list of **newly registered domains** for some TLDs \([Whoxy](https://www.whoxy.com/newly-registered-domains/) provides such service\) and **check the keywords in these domains**. However, long domains usually uses one or more subdomains, therefore the keyword won't appear inside the FLD and you won't be able to find the phishing subdomain.
 
