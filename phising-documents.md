@@ -64,6 +64,7 @@ The more common they are, the more probable the AV will detect it.
 ### **Websites**
 
 * [https://dnstwist.it/](https://dnstwist.it/)
+* [https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/](https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/)
 
 ## References
 
