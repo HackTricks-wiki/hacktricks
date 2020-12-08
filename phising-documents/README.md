@@ -293,6 +293,28 @@ Just access the page and send an email to the address they give you:
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
 
+You can also c**heck your email configuration** sending an email to `check-auth@verifier.port25.com` and **reading the response** \(for this you will need to **open** port **25** and see the response in the file _/var/mail/root_ if you send the email a as root\).  
+Check that you pass all the tests:
+
+```bash
+==========================================================
+Summary of Results
+==========================================================
+SPF check:          pass
+DomainKeys check:   neutral
+DKIM check:         pass
+Sender-ID check:    pass
+SpamAssassin check: ham
+```
+
+Alternatively, you can send a **message to a Gmail address that you control**, **view** the received **email’s headers** in your Gmail inbox, `dkim=pass` should be present in the `Authentication-Results` header field.
+
+```text
+Authentication-Results: mx.google.com;
+       spf=pass (google.com: domain of contact@example.com designates --- as permitted sender) smtp.mail=contact@example.com;
+       dkim=pass header.i=@example.com;
+```
+
 ### ​Removing from Spamhouse Blacklist
 
 The page www.mail-tester.com can indicate you if you your domain is being blocked by spamhouse. You can request your domain/IP to be removed at: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
