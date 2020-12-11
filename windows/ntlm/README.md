@@ -67,6 +67,8 @@ The **challenge length is 8 bytes** and **2 responses are sent**: One is **24 by
 
 The **second response** is created using **several values** \(a new client challenge, a **timestamp** to avoid **replay attacks**...\)
 
+If you have a **pcap that has captured a successful authentication process**, you can follow this guide to get the domain, username , challenge and response and try to creak the password: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://research.801labs.org/cracking-an-ntlmv2-hash/)
+
 ## Pass-the-Hash
 
 **Once you have the hash of the victim**, you can use it to **impersonate** it.  
