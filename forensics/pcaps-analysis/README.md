@@ -8,6 +8,7 @@ A note about PCAP vs PCAPNG: there are two versions of the PCAP file format; PCA
 
 * If the header of your pcap is **broken** you should try to **fix** it using: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)\*\*\*\*
 * Extract **information** and search for **malware** inside a pcap in [**PacketTotal**](https://packettotal.com/)\*\*\*\*
+* Search for **malicious activity** using [**www.virustotal.com**](https://www.virustotal.com/) and [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com/)\*\*\*\*
 
 ## Basic Statistics
 
