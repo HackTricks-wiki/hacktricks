@@ -145,7 +145,7 @@ You can identify both of them checking the constants. Note that the sha\_init ha
 
 Note the use of more constants
 
-![](../../.gitbook/assets/image%20%28172%29.png)
+![](../../.gitbook/assets/image%20%28253%29.png)
 
 ## CRC \(hash\)
 
@@ -177,7 +177,7 @@ A CRC hash algorithm looks like:
 
 The graph is quiet large:
 
-![](../../.gitbook/assets/image%20%28343%29.png)
+![](../../.gitbook/assets/image%20%28207%29%20%282%29.png)
 
 Check **3 comparisons to recognise it**:
 
