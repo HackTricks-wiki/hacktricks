@@ -88,7 +88,7 @@ volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f ch2
 
 Something suspicious was executed?
 
-```text
+```bash
 volatility --profile=PROFILE cmdline -f DUMP #Display process command-line arguments
 volatility --profile=PROFILE consoles -f DUMP #command history by scanning for _CONSOLE_INFORMATION
 ```
@@ -105,7 +105,7 @@ volatility --profile=PROFILE envars -f DUMP #Display process environment variabl
 
 Unexpected and exploitable privileges in a process?
 
-```text
+```bash
 #Get enabled privileges of some processes
 volatility --profile=Win7SP1x86_23418 privs --pid=3152 -f file.dmp | grep Enabled
 #Get all processes with interesting privileges
@@ -116,7 +116,7 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep Enabled | grep "S
 
 Processes running with admin privileges?
 
-```text
+```bash
 #Get the SID of a process
 volatility --profile=Win7SP1x86_23418 privs --pid=3152 -f file.dmp | grep Enabled
 #Get processes with admin privileges
@@ -133,14 +133,14 @@ volatility --profile=Win7SP1x86_23418 handles --pid=3152 -f ch2.dmp
 
 ### DLLs
 
-```text
+```bash
 volatility --profile=Win7SP1x86_23418 dlllist --pid=3152 -f ch2.dmp #Get dlls of a proc
 volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f ch2.dmp #Dump dlls of a proc
 ```
 
 ## Services
 
-```text
+```bash
 #Get services and binary path
 volatility --profile=Win7SP1x86_23418 svcscan-f ch2.dmp
 #Get name of the services and SID (slow)
@@ -149,7 +149,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f ch2.dmp
 
 ## Network
 
-```text
+```bash
 volatility --profile=Win7SP1x86_23418 netscan -f ch2.dmp
 volatility --profile=Win7SP1x86_23418 connections -f ch2.dmp #XP and 2003 only
 volatility --profile=Win7SP1x86_23418 connscan -f ch2.dmp #TCP connections 
@@ -167,7 +167,7 @@ volatility --profile=Win7SP1x86_23418 hivelist -f ch2.dmp
 
 ### Get a value
 
-```text
+```bash
 volatility --profile=Win7SP1x86_23418 printkey -K "Software\Microsoft\Windows NT\CurrentVersion" -f ch2.dmp
 # Get Run binaries registry value
 volatility -f ch2.dmp --profile=Win7SP1x86 printkey -o 0x9670e9d0 -K 'Software\Microsoft\Windows\CurrentVersion\Run'
@@ -175,7 +175,7 @@ volatility -f ch2.dmp --profile=Win7SP1x86 printkey -o 0x9670e9d0 -K 'Software\M
 
 ### Dump
 
-```text
+```bash
 #Dump a hive
 volatility --profile=Win7SP1x86_23418 hivedump -o 0x9aad6148 -f ch2.dmp #Offset extracted by hivelist
 #Dump all hives
@@ -186,7 +186,7 @@ volatility --profile=Win7SP1x86_23418 hivedump -f ch2.dmp
 
 ### Scan/dump
 
-```text
+```bash
 volatility --profile=Win7SP1x86_23418 filescan -f ch2.dmp #Scan for files inside the dump
 volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-files=. -f ch2.dmp #Dump the files
 ```
