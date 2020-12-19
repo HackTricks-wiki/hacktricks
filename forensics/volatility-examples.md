@@ -191,7 +191,7 @@ volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f ch2
 
 ### Command line
 
-Something suspicious was executed?
+Anything suspicious was executed?
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -331,6 +331,23 @@ volatility -f /tmp/file.dmp windows.strings.Strings --strings-file /tmp/strings.
 {% endtab %}
 {% endtabs %}
 
+It also allows to search for strings inside a process using the yarascan module:
+
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py -f /tmp/file.dmp windows.vadyarascan.VadYaraScan --yara-rules "https://" --pid 3692 3840 3976 3312 3084 2784
+./vol.py -f /tmp/file.dmp yarascan.YaraScan --yara-rules "https://"
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3312,3084,2784
+```
+{% endtab %}
+{% endtabs %}
+
 ## Services
 
 ```bash
@@ -411,10 +428,40 @@ volatility --profile=Win7SP1x86_23418 hivedump -f ch2.dmp
 
 ### Scan/dump
 
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py -f file.dmp windows.filescan.FileScan #Scan for files inside the dump
+python3 vol.py -f /home/kali/Desktop/ctfs/atenea/analisis\ de\ memoria/dump/dump.raw windows.dumpfiles.DumpFiles --physaddr <0xAAAAA> #Offset from previous command
+```
+{% endtab %}
+
+{% tab title="vol2" %}
 ```bash
 volatility --profile=Win7SP1x86_23418 filescan -f ch2.dmp #Scan for files inside the dump
-volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-files=. -f ch2.dmp #Dump the files
+volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-dir=/tmp -f ch2.dmp #Dump all files
+volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-dir=/tmp -Q 0x000000007dcaa620
 ```
+{% endtab %}
+{% endtabs %}
+
+### Master File Table
+
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+# I couldn't find any plugin to extractthis information in volatility3
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
+```
+{% endtab %}
+{% endtabs %}
+
+The NTFS file system contains a file called the _master file table_, or MFT. There is at least one entry in the MFT for every file on an NTFS file system volume, including the MFT itself. **All information about a file, including its size, time and date stamps, permissions, and data content**, is stored either in MFT entries, or in space outside the MFT that is described by MFT entries. From [here](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
 
 ### SSL Keys/Certs
 
@@ -458,6 +505,24 @@ Download it from [https://github.com/tomchop/volatility-autoruns](https://github
 
 ## MISC
 
+### External plugins
+
+If you want to use an external plugins make sure that the plugins related folder is the first parameter used.
+
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py --plugin-dirs "/tmp/plugins/" [...]
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+ volatilitye --plugins="/tmp/plugins/" [...]
+```
+{% endtab %}
+{% endtabs %}
+
 ### Get clipboard
 
 ```text
@@ -496,11 +561,5 @@ volatility --profile=Win7SP1x86_23418 mbrparser -f ch2.dmp
 
 The MBR holds the information on how the logical partitions, containing [file systems](https://en.wikipedia.org/wiki/File_system), are organized on that medium. The MBR also contains executable code to function as a loader for the installed operating system—usually by passing control over to the loader's [second stage](https://en.wikipedia.org/wiki/Second-stage_boot_loader), or in conjunction with each partition's [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) \(VBR\). This MBR code is usually referred to as a [boot loader](https://en.wikipedia.org/wiki/Boot_loader). From [here](https://en.wikipedia.org/wiki/Master_boot_record).
 
-### Master File Table
 
-```text
-volatility --profile=Win7SP1x86_23418 mftparser -f ch2.dmp
-```
-
- The NTFS file system contains a file called the _master file table_, or MFT. There is at least one entry in the MFT for every file on an NTFS file system volume, including the MFT itself. All information about a file, including its size, time and date stamps, permissions, and data content, is stored either in MFT entries, or in space outside the MFT that is described by MFT entries. From [here](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).
 
