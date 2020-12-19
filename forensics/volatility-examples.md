@@ -12,7 +12,7 @@ python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatil
 
 ### volatility3
 
-```text
+```bash
 git clone https://github.com/volatilityfoundation/volatility3.git
 cd volatility3
 python3 setup.py install
@@ -29,7 +29,7 @@ Download the executable from https://www.volatilityfoundation.org/26
 {% endtab %}
 
 {% tab title="Method 2" %}
-```
+```bash
 git clone https://github.com/volatilityfoundation/volatility.git
 cd volatility
 python setup.py install
@@ -119,13 +119,25 @@ The **kernel debugger block** \(named KdDebuggerDataBlock of the type \_KDDEBUGG
 
 ## Hashes/Passwords
 
-Extract password hashes from memory
+Extract SAM hashes, [domain cached credentials](../windows/stealing-credentials/credentials-protections.md#cached-credentials) and [lsa secrets](../windows/authentication-credentials-uac-and-efs.md#lsa-secrets).
 
+{% tabs %}
+{% tab title="vol3" %}
 ```bash
-volatility --profile=Win7SP1x86_23418 hashdump -f ch2.dmp   #Local hashes
-volatility --profile=Win7SP1x86_23418 cachedump -f ch2.dmp
-volatility --profile=Win7SP1x86_23418 lsadump -f ch2.dmp    # LSA secrets
+./vol.py -f ch2.dmp windows.hashdump.Hashdump #Grab common windows hashes (SAM+SYSTEM)
+./vol.py -f ch2.dmp windows.cachedump.Cachedump #Grab domain cache hashes inside the registry
+./vol.py -f ch2.dmp windows.lsadump.Lsadump #Grab lsa secrets
 ```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=Win7SP1x86_23418 hashdump -f ch2.dmp #Grab common windows hashes (SAM+SYSTEM)
+volatility --profile=Win7SP1x86_23418 cachedump -f ch2.dmp #Grab domain cache hashes inside the registry
+volatility --profile=Win7SP1x86_23418 lsadump -f ch2.dmp #Grab lsa secrets
+```
+{% endtab %}
+{% endtabs %}
 
 ## Memory Dump
 
@@ -139,74 +151,185 @@ volatility -f ch2.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 
 ### List processes
 
-Try to find **suspicious** processes \(by name\) or **unexpected** child **processes** \(for example a cmd.exe as a child of iexplorer.exe\).
+Try to find **suspicious** processes \(by name\) or **unexpected** child **processes** \(for example a cmd.exe as a child of iexplorer.exe\).  
+It could be interesting to **compare** the result of pslist with the one of psscan to identify hidden processes.
 
+{% tabs %}
+{% tab title="vol3" %}
 ```bash
-volatility --profile=PROFILE pstree -f DUMP # Get process tree (not hidden)
-volatility --profile=PROFILE pslist -f DUMP # Get process list (EPROCESS)
-volatility --profile=PROFILE psscan -f DUMP # Get hidden process list(malware)
-volatility --profile=PROFILE psxview -f DUMP # Get hidden process list
+python3 vol.py -f file.dmp windows.pstree.PsTree # Get processes tree (not hidden)
+python3 vol.py -f file.dmp windows.pslist.PsList # Get process list (EPROCESS)
+python3 vol.py -f file.dmp windows.psscan.PsScan # Get hidden process list(malware)
 ```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=PROFILE pstree -f file.dmp # Get process tree (not hidden)
+volatility --profile=PROFILE pslist -f file.dmp # Get process list (EPROCESS)
+volatility --profile=PROFILE psscan -f file.dmp # Get hidden process list(malware)
+volatility --profile=PROFILE psxview -f file.dmp # Get hidden process list
+```
+{% endtab %}
+{% endtabs %}
 
 ### Dump proc
 
-```text
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py -f file.dmp windows.dumpfiles.DumpFiles --pid <pid> #Dump the .exe and dlls of the process in the current directory
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
 volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f ch2.dmp
 ```
+{% endtab %}
+{% endtabs %}
 
 ### Command line
 
 Something suspicious was executed?
 
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+python3 vol.py -f file.dmp windows.cmdline.CmdLine #Display process command-line arguments
+```
+{% endtab %}
+
+{% tab title="vol2" %}
 ```bash
 volatility --profile=PROFILE cmdline -f DUMP #Display process command-line arguments
 volatility --profile=PROFILE consoles -f DUMP #command history by scanning for _CONSOLE_INFORMATION
 ```
+{% endtab %}
+{% endtabs %}
 
-Commands entered into cmd.exe are processed by **conhost.exe** \(csrss.exe prior to Windows 7\). So even if an attacker managed to **kill the cmd.exe** **prior** to us obtaining a memory **dump**, there is still a good chance of **recovering history** of the command line session from **conhost.exe’s memory**. If you find **something weird**\(using the consoles modules\), try to **dump** the **memory** of the **conhost.exe associated** process and **search** for **strings** inside it to extract the command lines.
+Commands entered into cmd.exe are processed by **conhost.exe** \(csrss.exe prior to Windows 7\). So even if an attacker managed to **kill the cmd.exe** **prior** to us obtaining a memory **dump**, there is still a good chance of **recovering history** of the command line session from **conhost.exe’s memory**. If you find **something weird** \(using the consoles modules\), try to **dump** the **memory** of the **conhost.exe associated** process and **search** for **strings** inside it to extract the command lines.
 
 ### Environment
 
-```text
-volatility --profile=PROFILE envars -f DUMP #Display process environment variables
+Get the env variables of each running process. There could be some interesting values.
+
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+python3 vol.py -f file.dmp windows.envars.Envars [--pid <pid>] #Display process environment variables
 ```
+{% endtab %}
 
-### Privileges
+{% tab title="vol2" %}
+```bash
+volatility --profile=PROFILE envars -f file.dmp [--pid <pid>] #Display process environment variables
+```
+{% endtab %}
+{% endtabs %}
 
-Unexpected and exploitable privileges in a process?
+### Token privileges
 
+Check for privileges tokens in unexpected services.  
+It could be interesting to list the processes using some privileged token.
+
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+#Get enabled privileges of some processes
+python3 vol.py -f file.dmp windows.privileges.Privs [--pid <pid>]
+#Get all processes with interesting privileges
+python3 vol.py -f file.dmp windows.privileges.Privs | grep "SeImpersonatePrivilege\|SeAssignPrimaryPrivilege\|SeTcbPrivilege\|SeBackupPrivilege\|SeRestorePrivilege\|SeCreateTokenPrivilege\|SeLoadDriverPrivilege\|SeTakeOwnershipPrivilege\|SeDebugPrivilege"
+```
+{% endtab %}
+
+{% tab title="vol2" %}
 ```bash
 #Get enabled privileges of some processes
 volatility --profile=Win7SP1x86_23418 privs --pid=3152 -f file.dmp | grep Enabled
 #Get all processes with interesting privileges
-volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep Enabled | grep "SeImpersonatePrivilege\|SeAssignPrimaryPrivilege\|SeTcbPrivilege\|SeBackupPrivilege\|SeRestorePrivilege\|SeCreateTokenPrivilege\|SeLoadDriverPrivilege\|SeTakeOwnershipPrivilege\|SeDebugPrivilege" 
+volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePrivilege\|SeAssignPrimaryPrivilege\|SeTcbPrivilege\|SeBackupPrivilege\|SeRestorePrivilege\|SeCreateTokenPrivilege\|SeLoadDriverPrivilege\|SeTakeOwnershipPrivilege\|SeDebugPrivilege"
 ```
+{% endtab %}
+{% endtabs %}
 
 ### SIDs
 
-Processes running with admin privileges?
+Check each SSID owned by a process.  
+It could be interesting to list the processes using a privileges SID \(and the processes using some service SID\).
 
+{% tabs %}
+{% tab title="vol3" %}
 ```bash
-#Get the SID of a process
-volatility --profile=Win7SP1x86_23418 privs --pid=3152 -f file.dmp | grep Enabled
-#Get processes with admin privileges
-volatility --profile=Win7SP1x86_23418 getsids  -f ch2.dmp | grep -i admin
+python3 vol.py -f file.dmp windows.getsids.GetSIDs [--pid <pid>] #Get SIDs of processes
+python3 vol.py -f file.dmp windows.getservicesids.GetServiceSIDs #Get the SID of services
 ```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=Win7SP1x86_23418 getsids -f file.dmp #Get the SID owned by each process
+volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of each service
+```
+{% endtab %}
+{% endtabs %}
 
 ### Handles
 
 Useful to know to which other files, keys, threads, processes... a **process has a handle** for \(has opened\)
 
-```text
-volatility --profile=Win7SP1x86_23418 handles --pid=3152 -f ch2.dmp
+{% tabs %}
+{% tab title="Plain Text" %}
+```bash
+vol.py -f file.dmp windows.handles.Handles [--pid <pid>]
 ```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=Win7SP1x86_23418 -f file.dmp handles [--pid=<pid>]
+```
+{% endtab %}
+{% endtabs %}
 
 ### DLLs
 
+{% tabs %}
+{% tab title="vol3" %}
 ```bash
-volatility --profile=Win7SP1x86_23418 dlllist --pid=3152 -f ch2.dmp #Get dlls of a proc
-volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f ch2.dmp #Dump dlls of a proc
+./vol.py -f file.dmp windows.dlllist.DllList [--pid <pid>] #List dlls used by each
+./vol.py -f file.dmp windows.dumpfiles.DumpFiles --pid <pid> #Dump the .exe and dlls of the process in the current directory process
+
 ```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=Win7SP1x86_23418 dlllist --pid=3152 -f file.dmp #Get dlls of a proc
+volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dmp #Dump dlls of a proc
+```
+{% endtab %}
+{% endtabs %}
+
+### Strings per processes
+
+Volatility allows to check to which process does a string belongs to.
+
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+strings -n6 file.dmp > /tmp/strings.txt
+./vol.py -f /tmp/file.dmp windows.strings.Strings --strings-file /tmp/strings.txt
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+strings -n6 file.dmp > /tmp/strings.txt
+volatility -f /tmp/file.dmp windows.strings.Strings --strings-file /tmp/strings.txt
+```
+{% endtab %}
+{% endtabs %}
 
 ## Services
 
@@ -219,6 +342,14 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f ch2.dmp
 
 ## Network
 
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py -f /tmp/file.dmp windows.netscan.NetScan
+```
+{% endtab %}
+
+{% tab title="vol2" %}
 ```bash
 volatility --profile=Win7SP1x86_23418 netscan -f ch2.dmp
 volatility --profile=Win7SP1x86_23418 connections -f ch2.dmp #XP and 2003 only
@@ -226,22 +357,46 @@ volatility --profile=Win7SP1x86_23418 connscan -f ch2.dmp #TCP connections
 volatility --profile=Win7SP1x86_23418 sockscan -f ch2.dmp #Open sockets
 volatility --profile=Win7SP1x86_23418 sockets -f ch2.dmp #Scanner for tcp socket objects
 ```
+{% endtab %}
+{% endtabs %}
 
-## Hive
+## Registry hive
 
 ### Print available hives
 
-```text
-volatility --profile=Win7SP1x86_23418 hivelist -f ch2.dmp
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py -f file.dmp windows.registry.hivelist.HiveList #List roots
+./vol.py -f file.dmp windows.registry.printkey.PrintKey #List roots and get initial subkeys
 ```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=Win7SP1x86_23418 -f file.dmp hivelist #List roots
+volatility --profile=Win7SP1x86_23418 -f file.dmp printkey #List roots and get initial subkeys
+```
+{% endtab %}
+{% endtabs %}
 
 ### Get a value
 
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py -f file.dmp windows.registry.printkey.PrintKey --key "Software\Microsoft\Windows NT\CurrentVersion"
+```
+{% endtab %}
+
+{% tab title="vol2" %}
 ```bash
 volatility --profile=Win7SP1x86_23418 printkey -K "Software\Microsoft\Windows NT\CurrentVersion" -f ch2.dmp
 # Get Run binaries registry value
 volatility -f ch2.dmp --profile=Win7SP1x86 printkey -o 0x9670e9d0 -K 'Software\Microsoft\Windows\CurrentVersion\Run'
 ```
+{% endtab %}
+{% endtabs %}
 
 ### Dump
 
