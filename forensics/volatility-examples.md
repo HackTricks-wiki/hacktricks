@@ -121,7 +121,7 @@ The **kernel debugger block** \(named KdDebuggerDataBlock of the type \_KDDEBUGG
 
 Extract password hashes from memory
 
-```text
+```bash
 volatility --profile=Win7SP1x86_23418 hashdump -f ch2.dmp   #Local hashes
 volatility --profile=Win7SP1x86_23418 cachedump -f ch2.dmp
 volatility --profile=Win7SP1x86_23418 lsadump -f ch2.dmp    # LSA secrets
@@ -141,7 +141,7 @@ volatility -f ch2.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 
 Try to find **suspicious** processes \(by name\) or **unexpected** child **processes** \(for example a cmd.exe as a child of iexplorer.exe\).
 
-```text
+```bash
 volatility --profile=PROFILE pstree -f DUMP # Get process tree (not hidden)
 volatility --profile=PROFILE pslist -f DUMP # Get process list (EPROCESS)
 volatility --profile=PROFILE psscan -f DUMP # Get hidden process list(malware)
