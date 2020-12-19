@@ -8,6 +8,35 @@ python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatil
 
 [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
 
+## Installation
+
+### volatility3
+
+```text
+git clone https://github.com/volatilityfoundation/volatility3.git
+cd volatility3
+python3 setup.py install
+python3 vol.py —h
+```
+
+### volatility2
+
+{% tabs %}
+{% tab title="Method1" %}
+```text
+Download the executable from https://www.volatilityfoundation.org/26
+```
+{% endtab %}
+
+{% tab title="Method 2" %}
+```
+git clone https://github.com/volatilityfoundation/volatility.git
+cd volatility
+python setup.py install
+```
+{% endtab %}
+{% endtabs %}
+
 ## A note on “list” vs. “scan” plugins
 
 Volatility has two main approaches to plugins, which are sometimes reflected in their names. “list” plugins will try to navigate through Windows Kernel structures to retrieve information like processes \(locate and walk the linked list of `_EPROCESS` structures in memory\), OS handles \(locating and listing the handle table, dereferencing any pointers found, etc\). They more or less behave like the Windows API would if requested to, for example, list processes.
@@ -18,14 +47,55 @@ That makes “list” plugins pretty fast, but just as vulnerable as the Windows
 
 From: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 
-## Get profile
+## OS Profiles
+
+### Volatility3
+
+As explained inside the readme you need to put the **symbol table of the OS** you want to support inside _volatility3/volatility/symbols_.  
+Symbol table packs for the various operating systems are available for **download** at:
+
+* [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
+* [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
+* [https://downloads.volatilityfoundation.org/volatility3/symbols/linux.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/linux.zip)
+
+### Volatility2
+
+#### External Profile
+
+You can get the list of supported profiles doing:
+
+```bash
+./volatility_2.6_lin64_standalone --info | grep "Profile"
+```
+
+If you want to use a **new profile you have downloaded** \(for example a linux one\) you need to create somewhere the following folder structure: _plugins/overlays/linux_ and put inside this folder the zip file containing the profile. Then, get the number of the profiles using:
+
+```text
+./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
+Volatility Foundation Volatility Framework 2.6
+
+
+Profiles
+--------
+LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 - A Profile for Linux CentOS7_3.10.0-123.el7.x86_64_profile x64
+VistaSP0x64                                   - A Profile for Windows Vista SP0 x64
+VistaSP0x86                                   - A Profile for Windows Vista SP0 x86
+```
+
+In the previous chunk you can see that the profile is called `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`  , and you can use it executing something like:
+
+```text
+./vol -f image.vmss --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
+```
+
+#### Discover Profile
 
 ```text
 volatility imageinfo -f file.dmp
 volatility kdbgscan -f file.dmp
 ```
 
-### **Differences between imageinfo and kdbgscan**
+#### **Differences between imageinfo and kdbgscan**
 
 As opposed to imageinfo which simply provides profile suggestions, **kdbgscan** is designed to positively identify the correct profile and the correct KDBG address \(if there happen to be multiple\). This plugin scans for the KDBGHeader signatures linked to Volatility profiles and applies sanity checks to reduce false positives. The verbosity of the output and number of sanity checks that can be performed depends on whether Volatility can find a DTB, so if you already know the correct profile \(or if you have a profile suggestion from imageinfo\), then make sure you use it \(from [here](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)\).
 
@@ -43,7 +113,7 @@ PsActiveProcessHead           : 0xfffff800011947f0 (0 processes)
 PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 
-### KDBG
+#### KDBG
 
 The **kernel debugger block** \(named KdDebuggerDataBlock of the type \_KDDEBUGGER\_DATA64, or **KDBG** by volatility\) is important for many things that Volatility and debuggers do. For example, it has a reference to the PsActiveProcessHead which is the list head of all processes required for process listing.
 
