@@ -4,7 +4,7 @@ Some things that could be useful to debug/desofuscate a malicious vbs file:
 
 ### echo
 
-```text
+```bash
 Wscript.Echo "Like this?"
 ```
 
@@ -22,7 +22,7 @@ cscript.exe file.vbs
 
 ### Write data to a file
 
-```text
+```aspnet
 Function writeBinary(strBinary, strPath)
 
     Dim oFSO: Set oFSO = CreateObject("Scripting.FileSystemObject")
