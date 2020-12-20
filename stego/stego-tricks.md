@@ -57,7 +57,7 @@ Useful commands:
 
 ### Hidden data in spaces
 
-If you find that a **text line** is **bigger** than it should, then some **hidden information** could by included inside the **spaces** usnig invisible characters.󐁈󐁥󐁬󐁬󐁯󐀠󐁴󐁨  
+If you find that a **text line** is **bigger** than it should, then some **hidden information** could by included inside the **spaces** using invisible characters.󐁈󐁥󐁬󐁬󐁯󐀠󐁴󐁨  
 To **extract** the **data** you can use: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
 
 ## Extracting data from images
@@ -87,7 +87,7 @@ Install it : `gem install zsteg` , The source can be found on [github](https://g
  `zsteg -a file` : Runs all the methods on the given file  
  `zsteg -E file` : Extracts data from the given payload \(example : zsteg -E b4,bgr,msb,xy name.png\)
 
-### stegoVeritasJPG, PNG, GIF, TIFF, BMP 
+### stegoVeritas JPG, PNG, GIF, TIFF, BMP 
 
 A wide variety of simple and advanced checks. Check out `stegoveritas.py -h`. Checks metadata, creates many transformed images and saves them to a directory, Brute forces LSB, ...  
  `stegoveritas.py stego.jpg` to run all checks
