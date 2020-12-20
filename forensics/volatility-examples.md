@@ -117,6 +117,15 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 
 The **kernel debugger block** \(named KdDebuggerDataBlock of the type \_KDDEBUGGER\_DATA64, or **KDBG** by volatility\) is important for many things that Volatility and debuggers do. For example, it has a reference to the PsActiveProcessHead which is the list head of all processes required for process listing.
 
+## OS Information
+
+```bash
+#vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
+./vol.py -f file.dmp windows.info.Info
+```
+
+The plugin `banners.Banners` can be used in **vol3 to try to find linux banners** in the dump.
+
 ## Hashes/Passwords
 
 Extract SAM hashes, [domain cached credentials](../windows/stealing-credentials/credentials-protections.md#cached-credentials) and [lsa secrets](../windows/authentication-credentials-uac-and-efs.md#lsa-secrets).
@@ -124,9 +133,9 @@ Extract SAM hashes, [domain cached credentials](../windows/stealing-credentials/
 {% tabs %}
 {% tab title="vol3" %}
 ```bash
-./vol.py -f ch2.dmp windows.hashdump.Hashdump #Grab common windows hashes (SAM+SYSTEM)
-./vol.py -f ch2.dmp windows.cachedump.Cachedump #Grab domain cache hashes inside the registry
-./vol.py -f ch2.dmp windows.lsadump.Lsadump #Grab lsa secrets
+./vol.py -f file.dmp windows.hashdump.Hashdump #Grab common windows hashes (SAM+SYSTEM)
+./vol.py -f file.dmp windows.cachedump.Cachedump #Grab domain cache hashes inside the registry
+./vol.py -f file.dmp windows.lsadump.Lsadump #Grab lsa secrets
 ```
 {% endtab %}
 
@@ -261,8 +270,8 @@ It could be interesting to list the processes using a privileges SID \(and the p
 {% tabs %}
 {% tab title="vol3" %}
 ```bash
-python3 vol.py -f file.dmp windows.getsids.GetSIDs [--pid <pid>] #Get SIDs of processes
-python3 vol.py -f file.dmp windows.getservicesids.GetServiceSIDs #Get the SID of services
+./vol.py -f file.dmp windows.getsids.GetSIDs [--pid <pid>] #Get SIDs of processes
+./vol.py -f file.dmp windows.getservicesids.GetServiceSIDs #Get the SID of services
 ```
 {% endtab %}
 
@@ -348,14 +357,43 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 {% endtab %}
 {% endtabs %}
 
+## UserAssist
+
+ **Windows** systems maintain a set of **keys** in the registry database \(**UserAssist keys**\) to keep track of programs that executed. The number of executions and last execution date and time are available in these **keys**.
+
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py -f /tmp/file.dmp windows.registry.userassist.UserAssist
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```
+volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
+```
+{% endtab %}
+{% endtabs %}
+
 ## Services
 
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py -f /tmp/file.dmp windows.svcscan.SvcScan #List services
+./vol.py -f file.dmp windows.getservicesids.GetServiceSIDs #Get the SID of services
+```
+{% endtab %}
+
+{% tab title="vol2" %}
 ```bash
 #Get services and binary path
-volatility --profile=Win7SP1x86_23418 svcscan-f ch2.dmp
+volatility --profile=Win7SP1x86_23418 svcscan -f file.dmp
 #Get name of the services and SID (slow)
-volatility --profile=Win7SP1x86_23418 getservicesids -f ch2.dmp
+volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp
 ```
+{% endtab %}
+{% endtabs %}
 
 ## Network
 
@@ -450,7 +488,7 @@ volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-dir=/tmp -Q 0x00000000
 {% tabs %}
 {% tab title="vol3" %}
 ```bash
-# I couldn't find any plugin to extractthis information in volatility3
+# I couldn't find any plugin to extract this information in volatility3
 ```
 {% endtab %}
 
@@ -465,43 +503,71 @@ The NTFS file system contains a file called the _master file table_, or MFT. The
 
 ### SSL Keys/Certs
 
-Interesting options for this modules are: _--pid, --name, --ssl_
-
-```text
-volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f ch2.dmp
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+#vol3 allows to search for certificates inside the registry
+./vol.py -f file.dmp windows.registry.certificates.Certificates
 ```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+#vol2 allos you to search and dump certificates from memory
+#Interesting options for this modules are: --pid, --name, --ssl
+volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
+```
+{% endtab %}
+{% endtabs %}
 
 ## Malware
 
-```text
-volatility --profile=Win7SP1x86_23418 malfind -f ch2.dmp
-volatility --profile=Win7SP1x86_23418 apihooks -f ch2.dmp
-volatility --profile=Win7SP1x86_23418 driverirp -f ch2.dmp
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py -f file.dmp windows.malfind.Malfind #Find hidden and injected code
+./vol.py -f file.dmp windows.driverirp.DriverIrp #Driver IRP hook detection
+./vol.py -f file.dmp windows.ssdt.SSDT #Check system call address from unexpected addresses
 ```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=Win7SP1x86_23418 -f file.dmp malfind #Find hidden and injected code
+volatility --profile=Win7SP1x86_23418 -f file.dmp apihooks #Detect API hooks in process and kernel memory
+volatility --profile=Win7SP1x86_23418 -f file.dmp driverirp #Driver IRP hook detection
+volatility --profile=Win7SP1x86_23418 -f file.dmp ssdt #Check system call address from unexpected addresses
+```
+{% endtab %}
+{% endtabs %}
 
 ### Scanning with yara
 
 Use this script to download and merge all the yara malware rules from github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)  
 Create the _**rules**_ directory and execute it. This will create a file called _**malware\_rules.yar**_ which contains all the yara rules for malware.
 
-```text
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+wget https://gist.githubusercontent.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9/raw/4ec711d37f1b428b63bed1f786b26a0654aa2f31/malware_yara_rules.py
+mkdir rules
+python malware_yara_rules.py
+#Only Windows
+./vol.py -f file.dmp windows.vadyarascan.VadYaraScan --yara-files /tmp/malware_rules.yar
+#All
+./vol.py -f file.dmp yarascan.YaraScan --yara-files /tmp/malware_rules.yar
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
 wget https://gist.githubusercontent.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9/raw/4ec711d37f1b428b63bed1f786b26a0654aa2f31/malware_yara_rules.py
 mkdir rules
 python malware_yara_rules.py
 volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp | grep "Rule:" | grep -v "Str_Win32" | sort | uniq
 ```
-
-## External Plugins
-
-When you use an external plugin **the first parameter** that you have to set is `--plugins`
-
-### Autoruns
-
-Download it from [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns)
-
-```text
- volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f dump.img autoruns
-```
+{% endtab %}
+{% endtabs %}
 
 ## MISC
 
@@ -523,34 +589,104 @@ If you want to use an external plugins make sure that the plugins related folder
 {% endtab %}
 {% endtabs %}
 
-### Get clipboard
+#### Autoruns
+
+Download it from [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns)
 
 ```text
-volatility --profile=Win7SP1x86_23418 clipboard -f ch2.dmp
+ volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f file.dmp autoruns
+```
+
+### Mutexes
+
+{% tabs %}
+{% tab title="vol3" %}
+```text
+./vol.py -f file.dmp windows.mutantscan.MutantScan
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=Win7SP1x86_23418 mutantscan -f file.dmp
+```
+{% endtab %}
+{% endtabs %}
+
+### Symlinks
+
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py -f file.dmp windows.symlinkscan.SymlinkScan
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
+```
+{% endtab %}
+{% endtabs %}
+
+### TimeLine
+
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+./vol.py -f file.dmp timeLiner.TimeLiner
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```
+volatility --profile=Win7SP1x86_23418 -f timeliner
+```
+{% endtab %}
+{% endtabs %}
+
+### Drivers
+
+{% tabs %}
+{% tab title="vol3" %}
+```text
+./vol.py -f file.dmp windows.driverscan.DriverScan
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=Win7SP1x86_23418 -f file.dmp driverscan
+```
+{% endtab %}
+{% endtabs %}
+
+### Get clipboard
+
+```bash
+#Just vol2
+volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 ```
 
 ### Get IE history
 
-```text
+```bash
+#Just vol2
 volatility --profile=Win7SP1x86_23418 iehistory -f ch2.dmp
 ```
 
 ### Get notepad text
 
-```text
+```bash
+#Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f ch2.dmp
 ```
 
 ### Screenshot
 
-```text
+```bash
+#Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f ch2.dmp
-```
-
-### Mutantscan
-
-```text
-volatility --profile=Win7SP1x86_23418 mutantscan -f ch2.dmp
 ```
 
 ### Master Boot Record \(MBR\)
