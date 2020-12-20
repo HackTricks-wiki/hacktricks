@@ -94,7 +94,7 @@ A wide variety of simple and advanced checks. Check out `stegoveritas.py -h`. Ch
 
 ### Stegsolve
 
-Sometimes there is a message or a text hidden in the image itself and in order to view it you need to apply some color filters or play with the color levels. You can do it with GIMP or Photoshop or any other image editing software but stegsolve made it easier. it’s a small java tool that applies many color filters on images. Personally i find it very useful  
+Sometimes there is a message or a text hidden in the image itself and in order to view it you need to apply some color filters or play with the color levels. You can do it with GIMP or Photoshop or any other image editing software but stegsolve made it easier. it’s a small java tool that applies many color filters on images. Personally I find it very useful.  
 You can get it from [github](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)  
 Just open the image with this tool and clinck on the  `<`  `>` buttons.
 
