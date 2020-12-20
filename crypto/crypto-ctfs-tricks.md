@@ -164,6 +164,14 @@ Letter to num `(ax+b)%26` \(_a_ and _b_ are the keys and _x_ is the letter\) and
 krodfdudfrod
 ```
 
+### SMS Code
+
+**Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) by repeated digits defined by the corresponding key code on a mobile [phone keypad](https://www.dcode.fr/phone-keypad-cipher) \(This mode is used when writing SMS\).  
+For example: 2=A, 22=B, 222=C, 3=D...  
+You can identify this code because you will see **several numbers repeated**.
+
+You can decode this code in: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
+
 ### Bacon Code
 
 Substitude each letter for 4 As or Bs \(or 1s and 0s\)
