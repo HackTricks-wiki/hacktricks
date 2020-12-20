@@ -1,8 +1,8 @@
-# Volatility - Examples
+# Volatility - CheatSheet
 
 If you want something as **fast** as possible: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 
-```text
+```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # Will use most important plugins (could use a lot of space depending on the size of the memory)
 ```
 
@@ -70,7 +70,7 @@ You can get the list of supported profiles doing:
 
 If you want to use a **new profile you have downloaded** \(for example a linux one\) you need to create somewhere the following folder structure: _plugins/overlays/linux_ and put inside this folder the zip file containing the profile. Then, get the number of the profiles using:
 
-```text
+```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
 
@@ -84,8 +84,8 @@ VistaSP0x86                                   - A Profile for Windows Vista SP0 
 
 In the previous chunk you can see that the profile is called `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`  , and you can use it executing something like:
 
-```text
-./vol -f image.vmss --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
+```bash
+./vol -f file.dmp--plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
 
 #### Discover Profile
@@ -101,13 +101,13 @@ As opposed to imageinfo which simply provides profile suggestions, **kdbgscan** 
 
 Always take a look in the **number of procceses that kdbgscan has found**. Sometimes imageinfo and kdbgscan can find **more than one** suitable **profile** but only the **valid one will have some process related** \(This is because in order to extract processes the correct KDBG address is needed\)
 
-```text
+```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
 PsLoadedModuleList            : 0xfffff8000119aae0 (116 modules)
 ```
 
-```text
+```bash
 # BAD
 PsActiveProcessHead           : 0xfffff800011947f0 (0 processes)
 PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
@@ -141,9 +141,9 @@ Extract SAM hashes, [domain cached credentials](../windows/stealing-credentials/
 
 {% tab title="vol2" %}
 ```bash
-volatility --profile=Win7SP1x86_23418 hashdump -f ch2.dmp #Grab common windows hashes (SAM+SYSTEM)
-volatility --profile=Win7SP1x86_23418 cachedump -f ch2.dmp #Grab domain cache hashes inside the registry
-volatility --profile=Win7SP1x86_23418 lsadump -f ch2.dmp #Grab lsa secrets
+volatility --profile=Win7SP1x86_23418 hashdump -f file.dmp #Grab common windows hashes (SAM+SYSTEM)
+volatility --profile=Win7SP1x86_23418 cachedump -f file.dmp #Grab domain cache hashes inside the registry
+volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 ```
 {% endtab %}
 {% endtabs %}
@@ -153,7 +153,7 @@ volatility --profile=Win7SP1x86_23418 lsadump -f ch2.dmp #Grab lsa secrets
 The memory dump of a process will **extract everything** of the current status of the process. The **procdump** module will only **extract** the **code**.
 
 ```text
-volatility -f ch2.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
+volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
 
 ## Processes
@@ -193,7 +193,7 @@ volatility --profile=PROFILE psxview -f file.dmp # Get hidden process list
 
 {% tab title="vol2" %}
 ```bash
-volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f ch2.dmp
+volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f file.dmp
 ```
 {% endtab %}
 {% endtabs %}
@@ -211,8 +211,8 @@ python3 vol.py -f file.dmp windows.cmdline.CmdLine #Display process command-line
 
 {% tab title="vol2" %}
 ```bash
-volatility --profile=PROFILE cmdline -f DUMP #Display process command-line arguments
-volatility --profile=PROFILE consoles -f DUMP #command history by scanning for _CONSOLE_INFORMATION
+volatility --profile=PROFILE cmdline -f file.dmp #Display process command-line arguments
+volatility --profile=PROFILE consoles -f file.dmp #command history by scanning for _CONSOLE_INFORMATION
 ```
 {% endtab %}
 {% endtabs %}
@@ -288,7 +288,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 Useful to know to which other files, keys, threads, processes... a **process has a handle** for \(has opened\)
 
 {% tabs %}
-{% tab title="Plain Text" %}
+{% tab title="vol3" %}
 ```bash
 vol.py -f file.dmp windows.handles.Handles [--pid <pid>]
 ```
@@ -345,8 +345,8 @@ It also allows to search for strings inside a process using the yarascan module:
 {% tabs %}
 {% tab title="vol3" %}
 ```bash
-./vol.py -f /tmp/file.dmp windows.vadyarascan.VadYaraScan --yara-rules "https://" --pid 3692 3840 3976 3312 3084 2784
-./vol.py -f /tmp/file.dmp yarascan.YaraScan --yara-rules "https://"
+./vol.py -f file.dmp windows.vadyarascan.VadYaraScan --yara-rules "https://" --pid 3692 3840 3976 3312 3084 2784
+./vol.py -f file.dmp yarascan.YaraScan --yara-rules "https://"
 ```
 {% endtab %}
 
@@ -364,7 +364,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 {% tabs %}
 {% tab title="vol3" %}
 ```bash
-./vol.py -f /tmp/file.dmp windows.registry.userassist.UserAssist
+./vol.py -f file.dmp windows.registry.userassist.UserAssist
 ```
 {% endtab %}
 
@@ -380,7 +380,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 {% tabs %}
 {% tab title="vol3" %}
 ```bash
-./vol.py -f /tmp/file.dmp windows.svcscan.SvcScan #List services
+./vol.py -f file.dmp windows.svcscan.SvcScan #List services
 ./vol.py -f file.dmp windows.getservicesids.GetServiceSIDs #Get the SID of services
 ```
 {% endtab %}
@@ -400,17 +400,17 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp
 {% tabs %}
 {% tab title="vol3" %}
 ```bash
-./vol.py -f /tmp/file.dmp windows.netscan.NetScan
+./vol.py -f file.dmp windows.netscan.NetScan
 ```
 {% endtab %}
 
 {% tab title="vol2" %}
 ```bash
-volatility --profile=Win7SP1x86_23418 netscan -f ch2.dmp
-volatility --profile=Win7SP1x86_23418 connections -f ch2.dmp #XP and 2003 only
-volatility --profile=Win7SP1x86_23418 connscan -f ch2.dmp #TCP connections 
-volatility --profile=Win7SP1x86_23418 sockscan -f ch2.dmp #Open sockets
-volatility --profile=Win7SP1x86_23418 sockets -f ch2.dmp #Scanner for tcp socket objects
+volatility --profile=Win7SP1x86_23418 netscan -f file.dmp
+volatility --profile=Win7SP1x86_23418 connections -f file.dmp#XP and 2003 only
+volatility --profile=Win7SP1x86_23418 connscan -f file.dmp#TCP connections 
+volatility --profile=Win7SP1x86_23418 sockscan -f file.dmp#Open sockets
+volatility --profile=Win7SP1x86_23418 sockets -f file.dmp#Scanner for tcp socket objects
 ```
 {% endtab %}
 {% endtabs %}
@@ -446,9 +446,9 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp printkey #List roots and get i
 
 {% tab title="vol2" %}
 ```bash
-volatility --profile=Win7SP1x86_23418 printkey -K "Software\Microsoft\Windows NT\CurrentVersion" -f ch2.dmp
+volatility --profile=Win7SP1x86_23418 printkey -K "Software\Microsoft\Windows NT\CurrentVersion" -f file.dmp
 # Get Run binaries registry value
-volatility -f ch2.dmp --profile=Win7SP1x86 printkey -o 0x9670e9d0 -K 'Software\Microsoft\Windows\CurrentVersion\Run'
+volatility -f file.dmp --profile=Win7SP1x86 printkey -o 0x9670e9d0 -K 'Software\Microsoft\Windows\CurrentVersion\Run'
 ```
 {% endtab %}
 {% endtabs %}
@@ -457,9 +457,9 @@ volatility -f ch2.dmp --profile=Win7SP1x86 printkey -o 0x9670e9d0 -K 'Software\M
 
 ```bash
 #Dump a hive
-volatility --profile=Win7SP1x86_23418 hivedump -o 0x9aad6148 -f ch2.dmp #Offset extracted by hivelist
+volatility --profile=Win7SP1x86_23418 hivedump -o 0x9aad6148 -f file.dmp #Offset extracted by hivelist
 #Dump all hives
-volatility --profile=Win7SP1x86_23418 hivedump -f ch2.dmp
+volatility --profile=Win7SP1x86_23418 hivedump -f file.dmp
 ```
 
 ## Files
@@ -470,7 +470,7 @@ volatility --profile=Win7SP1x86_23418 hivedump -f ch2.dmp
 {% tab title="vol3" %}
 ```bash
 ./vol.py -f file.dmp windows.filescan.FileScan #Scan for files inside the dump
-python3 vol.py -f /home/kali/Desktop/ctfs/atenea/analisis\ de\ memoria/dump/dump.raw windows.dumpfiles.DumpFiles --physaddr <0xAAAAA> #Offset from previous command
+./vol.py -f file.dmp windows.dumpfiles.DumpFiles --physaddr <0xAAAAA> #Offset from previous command
 ```
 {% endtab %}
 
@@ -672,27 +672,27 @@ volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 
 ```bash
 #Just vol2
-volatility --profile=Win7SP1x86_23418 iehistory -f ch2.dmp
+volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 ```
 
 ### Get notepad text
 
 ```bash
 #Just vol2
-volatility --profile=Win7SP1x86_23418 notepad -f ch2.dmp
+volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 ```
 
 ### Screenshot
 
 ```bash
 #Just vol2
-volatility --profile=Win7SP1x86_23418 screenshot -f ch2.dmp
+volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```
 
 ### Master Boot Record \(MBR\)
 
 ```text
-volatility --profile=Win7SP1x86_23418 mbrparser -f ch2.dmp
+volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
 
 The MBR holds the information on how the logical partitions, containing [file systems](https://en.wikipedia.org/wiki/File_system), are organized on that medium. The MBR also contains executable code to function as a loader for the installed operating system—usually by passing control over to the loader's [second stage](https://en.wikipedia.org/wiki/Second-stage_boot_loader), or in conjunction with each partition's [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) \(VBR\). This MBR code is usually referred to as a [boot loader](https://en.wikipedia.org/wiki/Boot_loader). From [here](https://en.wikipedia.org/wiki/Master_boot_record).
