@@ -52,6 +52,9 @@
 * [https://hunter.io/](https://hunter.io/)
 * [https://anymailfinder.com/](https://anymailfinder.com/)
 
+In order to **discover more** valid email addresses or **verify the ones** you have already discovered you can check if you can brute-force them smtp servers of the victim. [Learn how to verify/discover email address here](../pentesting/pentesting-smtp/#username-bruteforce-enumeration).  
+Moreover, don't forget that if the users use **any web portal to access their mails**, you can check if it's vulnerable to **username brute force**, and exploit the vulnerability if possible.
+
 ## Configuring GoPhish
 
 ### Installation
