@@ -525,7 +525,7 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 {% tabs %}
 {% tab title="vol3" %}
 ```bash
-./vol.py -f file.dmp windows.malfind.Malfind #Find hidden and injected code
+./vol.py -f file.dmp windows.malfind.Malfind [--dump] #Find hidden and injected code, [dump each suspicious section]
 ./vol.py -f file.dmp windows.driverirp.DriverIrp #Driver IRP hook detection
 ./vol.py -f file.dmp windows.ssdt.SSDT #Check system call address from unexpected addresses
 ```
@@ -533,7 +533,7 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 
 {% tab title="vol2" %}
 ```bash
-volatility --profile=Win7SP1x86_23418 -f file.dmp malfind #Find hidden and injected code
+volatility --profile=Win7SP1x86_23418 -f file.dmp malfind [-D /tmp] #Find hidden and injected code [dump each suspicious section]
 volatility --profile=Win7SP1x86_23418 -f file.dmp apihooks #Detect API hooks in process and kernel memory
 volatility --profile=Win7SP1x86_23418 -f file.dmp driverirp #Driver IRP hook detection
 volatility --profile=Win7SP1x86_23418 -f file.dmp ssdt #Check system call address from unexpected addresses
