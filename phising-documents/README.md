@@ -1,42 +1,4 @@
-# Phising Documents
-
-Microsoft Word performs file data validation prior to opening a file. Data validation is performed in the form of data structure identification, against the OfficeOpenXML standard. If any error occurs during the data structure identification, the file being analysed will not be opened.
-
-Usually Word files containing macros uses the `.docm` extension. However, it's possible to rename the file changing the file extension and still keep their macro executing capabilities.  
-For example, an RTF file does not support macros, by design, but a DOCM file renamed to RTF will be handled by Microsoft Word and will be capable of macro execution.  
-The same internals and mechanisms apply to all software of the Microsoft Office Suite \(Excel, PowerPoint etc.\).
-
-You can use the following command to check with extensions are going to be executed by some Office programs:
-
-```bash
-assoc | findstr /i "word excel powerp"
-```
-
-DOCX files referencing a remote template \(File –Options –Add-ins –Manage: Templates –Go\) that includes macros can “execute” macros as well.
-
-### Word with external image
-
-Go to: _Insert --&gt; Quick Parts --&gt; Field_  
-_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**: http://&lt;ip&gt;/whatever_
-
-![](../.gitbook/assets/image%20%28347%29.png)
-
-### Macros Code
-
-```bash
-Dim author As String
-author = oWB.BuiltinDocumentProperties("Author")
-With objWshell1.Exec("powershell.exe -nop -Windowsstyle hidden -Command-")
- .StdIn.WriteLine author
- .StdIn.WriteBlackLines 1
-```
-
-## Autoload functions
-
-The more common they are, the more probable the AV will detect it.
-
-* AutoOpen\(\)
-* Document\_Open\(\)
+# Phishing Methodology
 
 ## Methodology
 
@@ -82,7 +44,7 @@ The more common they are, the more probable the AV will detect it.
 * [https://dnstwister.report/](https://dnstwister.report/)
 * [https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/](https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/)
 
-## GoPhish
+## Configuring GoPhish
 
 ### Installation
 
@@ -237,7 +199,7 @@ ss -l | grep "3333\|443"
 service gophish stop
 ```
 
-## SPAM filters bypass
+## Configuring mail server and domain
 
 ### Wait
 
@@ -330,6 +292,70 @@ The page www.mail-tester.com can indicate you if you your domain is being blocke
 ### Removing from Microsoft Blacklist
 
 ​​You can request your domain/IP to be removed at [https://sender.office.com/](https://sender.office.com/).
+
+## Create & Launch GoPhish Campaign
+
+### Sending Profile
+
+* Set some **name to identify** the sender profile
+* Decide from which account are you going to send the phishing emails. Suggestions: _noreply, support, servicedesk, salesforce..._
+* You can leave blank the username and password, but make sure to check the Ignore Certificate Errors
+
+![](../.gitbook/assets/image%20%2825%29.png)
+
+### Email Template
+
+* Set some **name to identify** the template
+* Then write a **subject** \(nothing estrange, just something you could expect to read in a regular email\)
+* Make sure you have checked "**Add Tracking Image**"
+* Write the **email template** \(you can use variables like in the following example\):
+
+```markup
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<p class="MsoNormal"><span style="font-size:10.0pt;font-family:&quot;Verdana&quot;,sans-serif;color:black">Dear {{.FirstName}} {{.LastName}},</span></p>
+
+<p class="MsoNormal"><span style="font-size:10.0pt;font-family:&quot;Verdana&quot;,sans-serif;color:black">As you may be aware, due to the large number of employees working from home, the "PLATFORM NAME" platform is being migrated to a new domain with an improved and more secure version. To finalize account migration, please use the following link to log into the new HR portal and move your account to the new site: <a href="{{.URL}}"> "PLATFORM NAME" login portal </a><br />
+<br />
+Please Note: We require all users to move their accounts by 04/01/2021. Failure to confirm account migration may prevent you from logging into the application after the migration process is complete.<br />
+<br />
+Regards,</span></p>
+
+WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
+
+<p>{{.Tracker}}</p>
+</body>
+</html>
+```
+
+Note that **in order to increase the credibility of the email**, it's recommended to use some signature from an email from the client. Suggestions: 
+
+* Send an email to a **non existent address** and check if the response has any signature.
+* Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.
+* Try to contact **some valid discovered** email and wait for the response
+
+![](../.gitbook/assets/image%20%2861%29.png)
+
+### Landing Page
+
+* Write a **name**
+* **Write the HTML code** of the web page. Note that you can **import** web pages.
+* Mark **Capture Submitted Data** and **Capture Passwords**
+* Set a **redirection**
+
+![](../.gitbook/assets/image%20%2873%29.png)
+
+{% hint style="info" %}
+Usually you will need to modify the HTML code of the page and make some tests in local \(maybe using some Apache server\) **until you like the results.** Then, write that HTML code in the box.  
+Note that if you need to **use some static resources** for the HTML \(maybe some CSS and JS pages\) you can save them in _**/opt/gophish/static/endpoint**_ and then access them from _**/static/&lt;filename&gt;**_
+{% endhint %}
+
+{% hint style="info" %}
+For the redirection you could **redirect the users to the legit main web page** of the victim, or redirect them to _/static/migration.html_ for example, put some **spinning wheel \(**[**https://loading.io/**](https://loading.io/)**\) for 5 seconds and then indicate that the process was successful**.
+{% endhint %}
 
 ## Detecting the detection
 
