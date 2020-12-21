@@ -64,8 +64,17 @@ To **extract** the **data** you can use: [https://www.irongeek.com/i.php?page=se
 
 ### identify
 
- [GraphicMagick](http://www.graphicsmagick.org/) tool to check what kind of image a file is. Checks also if image is corrupted.  
- `identify -verbose stego.jpg`
+ [GraphicMagick](https://imagemagick.org/script/download.php) tool to check what kind of image a file is. Checks also if image is corrupted.
+
+```text
+./magick identify -verbose stego.jpg
+```
+
+If the image is damage, you may be able to restore it just adding a metadata comment to it \(it's badly damaged this won't work\): 
+
+```bash
+./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
+```
 
 ### Steghide \[JPEG, BMP, WAV, AU\] <a id="steghide"></a>
 
