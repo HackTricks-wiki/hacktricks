@@ -3,17 +3,17 @@
 ## Methodology
 
 1. Recon the victim
-   1. Select the victim domain.
-   2. Preform some basic web enumeration searching for login portals used by the victim and decide which one you will impersonate.
-   3. Use some OSINT to find emails.
+   1. Select the **victim domain**.
+   2. Perform some basic web enumeration **searching for login portals** used by the victim and **decide** which one you will **impersonate**.
+   3. Use some **OSINT** to **find emails**.
 2. Prepare the environment
-   1. Buy the domain you are going to use for the phishing assessment
-   2. Configure the email service related records \(SPF, DMARC, DKIM, rDNS\)
-   3. Configure the VPS with gophish
-3. Prepare the templates
-   1. Prepare the email template to redirect to the malicious web page
-   2. Prepare the web page to steal the credentials
-4. Launch the attack!
+   1. **Buy the domain** you are going to use for the phishing assessment
+   2. **Configure the email service** related records \(SPF, DMARC, DKIM, rDNS\)
+   3. Configure the VPS with **gophish**
+3. Prepare the campaign
+   1. Prepare the **email template**
+   2. Prepare the **web page** to steal the credentials
+4. Launch the campaign!
 
 ## Generate similar domain names
 
@@ -43,6 +43,14 @@
 * [https://dnstwist.it/](https://dnstwist.it/)
 * [https://dnstwister.report/](https://dnstwister.report/)
 * [https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/](https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/)
+
+## Discovering Emails
+
+* [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) \(100% free\)
+* [https://phonebook.cz/](https://phonebook.cz/) \(100% free\)
+* [https://maildb.io/](https://maildb.io/)
+* [https://hunter.io/](https://hunter.io/)
+* [https://anymailfinder.com/](https://anymailfinder.com/)
 
 ## Configuring GoPhish
 
