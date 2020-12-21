@@ -8,7 +8,8 @@
 
 [https://github.com/icsharpcode/ILSpy](https://github.com/icsharpcode/ILSpy)  
 [ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): You can have it in any OS \(you can install it directly from VSCode, no need to download the git. Click on **Extensions** and **search ILSpy**\).  
-If you need to **decompile**, **modify** and **recompile** again you can use: [**https://github.com/0xd4d/dnSpy/releases**](https://github.com/0xd4d/dnSpy/releases) \(**Right Click -&gt; Modify Method** to change something inside a function\).
+If you need to **decompile**, **modify** and **recompile** again you can use: [**https://github.com/0xd4d/dnSpy/releases**](https://github.com/0xd4d/dnSpy/releases) \(**Right Click -&gt; Modify Method** to change something inside a function\).  
+You cloud also try [https://www.jetbrains.com/es-es/decompiler/](https://www.jetbrains.com/es-es/decompiler/)
 
 ### DNSpy Logging
 
