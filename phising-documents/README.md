@@ -301,7 +301,12 @@ The page www.mail-tester.com can indicate you if you your domain is being blocke
 * Decide from which account are you going to send the phishing emails. Suggestions: _noreply, support, servicedesk, salesforce..._
 * You can leave blank the username and password, but make sure to check the Ignore Certificate Errors
 
-![](../.gitbook/assets/image%20%2825%29.png)
+![](../.gitbook/assets/image%20%28253%29.png)
+
+{% hint style="info" %}
+It's recommended to use the "**Send Test Email**" functionality to test that everything is working.  
+I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
+{% endhint %}
 
 ### Email Template
 
@@ -337,7 +342,7 @@ Note that **in order to increase the credibility of the email**, it's recommende
 * Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.
 * Try to contact **some valid discovered** email and wait for the response
 
-![](../.gitbook/assets/image%20%2861%29.png)
+![](../.gitbook/assets/image%20%2867%29.png)
 
 ### Landing Page
 
@@ -346,7 +351,7 @@ Note that **in order to increase the credibility of the email**, it's recommende
 * Mark **Capture Submitted Data** and **Capture Passwords**
 * Set a **redirection**
 
-![](../.gitbook/assets/image%20%2873%29.png)
+![](../.gitbook/assets/image%20%2895%29.png)
 
 {% hint style="info" %}
 Usually you will need to modify the HTML code of the page and make some tests in local \(maybe using some Apache server\) **until you like the results.** Then, write that HTML code in the box.  
@@ -356,6 +361,27 @@ Note that if you need to **use some static resources** for the HTML \(maybe some
 {% hint style="info" %}
 For the redirection you could **redirect the users to the legit main web page** of the victim, or redirect them to _/static/migration.html_ for example, put some **spinning wheel \(**[**https://loading.io/**](https://loading.io/)**\) for 5 seconds and then indicate that the process was successful**.
 {% endhint %}
+
+### Users & Groups
+
+* Set a name
+* **Import the data** \(note that in order to use the template for the example you need the firstname, last name and email address of each user\)
+
+![](../.gitbook/assets/image%20%2825%29.png)
+
+### Campaign
+
+Finally, create a campaign selecting a name, the email template, the landing page, the URL, the sending profile and the group. Note that the URL will be the link sent to the victims
+
+Note that the **Sending Profile allow to send a test email to see how will the final phishing email looks like**:
+
+![](../.gitbook/assets/image%20%28207%29.png)
+
+{% hint style="info" %}
+I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
+{% endhint %}
+
+Once everything is ready, just launch the campaign!
 
 ## Detecting the detection
 
