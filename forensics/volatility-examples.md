@@ -553,9 +553,9 @@ wget https://gist.githubusercontent.com/andreafortuna/29c6ea48adf3d45a979a78763c
 mkdir rules
 python malware_yara_rules.py
 #Only Windows
-./vol.py -f file.dmp windows.vadyarascan.VadYaraScan --yara-files /tmp/malware_rules.yar
+./vol.py -f file.dmp windows.vadyarascan.VadYaraScan --yara-file /tmp/malware_rules.yar
 #All
-./vol.py -f file.dmp yarascan.YaraScan --yara-files /tmp/malware_rules.yar
+./vol.py -f file.dmp yarascan.YaraScan --yara-file /tmp/malware_rules.yar
 ```
 {% endtab %}
 
