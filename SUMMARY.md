@@ -84,7 +84,7 @@
   * [Over Pass the Hash/Pass the Key](windows/active-directory-methodology/over-pass-the-hash-pass-the-key.md)
   * [Pass the Ticket](windows/active-directory-methodology/pass-the-ticket.md)
   * [Password Spraying](windows/active-directory-methodology/password-spraying.md)
-  * [Printers Spooler Service abuse](windows/active-directory-methodology/printers-spooler-service-abuse.md)
+  * [Force NTLM Privileged Authentication](windows/active-directory-methodology/printers-spooler-service-abuse.md)
   * [Privileged Accounts and Token Privileges](windows/active-directory-methodology/privileged-accounts-and-token-privileges.md)
   * [Resource-based Constrained Delegation](windows/active-directory-methodology/resource-based-constrained-delegation.md)
   * [Security Descriptors](windows/active-directory-methodology/security-descriptors.md)

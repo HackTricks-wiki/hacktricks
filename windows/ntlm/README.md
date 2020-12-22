@@ -59,6 +59,16 @@ The **hash NT \(16bytes\)** is divided in **3 parts of 7bytes each** \(7B + 7B +
 * The 3º key is composed always by **5 zeros**.
 * Given the **same challenge** the **response** will be **same**. So, you can give as a **challenge** to the victim the string "**1122334455667788**" and attack the response used **precomputed rainbow tables**.
 
+### NTLMv1 attack
+
+Nowadays is becoming less common to find environments with Unconstrained Delegation configured, but this doesn't mean you can't **abuse a Print Spooler service** configured.
+
+You could abuse some credentials/sessions you already have on the AD to **ask the printer to authenticate** against some **host under your control**. Then, using `metasploit auxiliary/server/capture/smb` or `responder` you can **set the authentication challenge to 112233445566778899**, capture the authentication attempt, and if it was done using **NTLMv1** you will be able to **crack it**.  
+If you are using `responder` you could try to **use the flag `--lm`** to try to **downgrade** the **authentication**.  
+_Note that for this technique the authentication must be performed using NTLMv1 \(NTLMv2 is not valid\)._
+
+Remember that the printer will use the computer account during the authentication, and computer accounts use **long and random passwords** that you **probably won't be able to crack** using common **dictionaries**. But the **NTLMv1** authentication **uses DES** \([more info here](./#ntlmv1-challenge)\), so using some services specially dedicated to cracking DES you will be able to crack it \(you could use [https://crack.sh/](https://crack.sh/) for example\).
+
 ### NTLMv2 Challenge
 
 The **challenge length is 8 bytes** and **2 responses are sent**: One is **24 bytes** long and the length of the **other** is **variable**.
