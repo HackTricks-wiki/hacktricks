@@ -126,7 +126,8 @@ wget -O exploit.py http://www.exploit-db.com/download/31853
 python pyinstaller.py --onefile exploit.py
 
 #Compile for windows
-i586-mingw32msvc-gcc -o executable useradd.c
+#sudo apt-get install gcc-mingw-w64-i686
+i686-mingw32msvc-gcc -o executable useradd.c
 ```
 
 ## Greps
