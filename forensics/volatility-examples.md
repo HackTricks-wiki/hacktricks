@@ -526,6 +526,7 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 {% tab title="vol3" %}
 ```bash
 ./vol.py -f file.dmp windows.malfind.Malfind [--dump] #Find hidden and injected code, [dump each suspicious section]
+#Malfind will search for suspicious structures related to malware
 ./vol.py -f file.dmp windows.driverirp.DriverIrp #Driver IRP hook detection
 ./vol.py -f file.dmp windows.ssdt.SSDT #Check system call address from unexpected addresses
 ```
