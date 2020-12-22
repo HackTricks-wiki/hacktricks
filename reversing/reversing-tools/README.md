@@ -27,7 +27,7 @@ In order to debug code using DNSpy you need to:
 
 First, change the **Assembly attributes** related to **debugging**:
 
-![](../.gitbook/assets/image%20%287%29.png)
+![](../../.gitbook/assets/image%20%287%29.png)
 
 From:
 
@@ -46,11 +46,11 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 
 And click on **compile**:
 
-![](../.gitbook/assets/image%20%28314%29%20%281%29.png)
+![](../../.gitbook/assets/image%20%28314%29%20%281%29.png)
 
 Then save the new file on _**File &gt;&gt; Save module...**_:
 
-![](../.gitbook/assets/image%20%28261%29.png)
+![](../../.gitbook/assets/image%20%28261%29.png)
 
 This is necessary because if you don't do this, at **runtime** several **optimisations** will be applied to the code and it could be possible that while debugging a **break-point is never hit** or some **variables don't exist**.
 
@@ -62,25 +62,25 @@ iisreset /noforce
 
 Then, in order to start debugging you should close all the opened files and inside the **Debug Tab** select **Attach to Process...**:
 
-![](../.gitbook/assets/image%20%28166%29.png)
+![](../../.gitbook/assets/image%20%28166%29.png)
 
 Then select **w3wp.exe** to attach to the **IIS server** and click **attach**:
 
-![](../.gitbook/assets/image%20%28274%29.png)
+![](../../.gitbook/assets/image%20%28274%29.png)
 
 Now that we are debugging the process, it's time to stop it and load all the modules. First click on _Debug &gt;&gt; Break All_ and then click on _**Debug &gt;&gt; Windows &gt;&gt; Modules**_:
 
-![](../.gitbook/assets/image%20%28210%29.png)
+![](../../.gitbook/assets/image%20%28210%29.png)
 
-![](../.gitbook/assets/image%20%28341%29.png)
+![](../../.gitbook/assets/image%20%28341%29.png)
 
 Click any module on **Modules** and selec**t Open All Modules**:
 
-![](../.gitbook/assets/image%20%28216%29.png)
+![](../../.gitbook/assets/image%20%28216%29.png)
 
 Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 
-![](../.gitbook/assets/image%20%28130%29.png)
+![](../../.gitbook/assets/image%20%28130%29.png)
 
 ## Java decompiler
 
@@ -95,11 +95,11 @@ Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 * Select **Windbg** debugger
 * Select "**Suspend on library load/unload**"
 
-![](../.gitbook/assets/image%20%2869%29.png)
+![](../../.gitbook/assets/image%20%2869%29.png)
 
 * Configure the **parameters** of the execution putting the **path to the DLL** and the function that you want to call:
 
-![](../.gitbook/assets/image%20%28325%29.png)
+![](../../.gitbook/assets/image%20%28325%29.png)
 
 Then, when you start debugging **the execution will be stopped when each DLL is loaded**, then, when rundll32 load your DLL the execution will be stopped.
 
@@ -114,7 +114,7 @@ But, how can you get to the code of the DLL that was lodaded? Using this method,
 
 Notice that when the execution is stopped by any reason in win64dbg you can see **in which code you are** looking in the **top of the win64dbg window**:
 
-![](../.gitbook/assets/image%20%28181%29.png)
+![](../../.gitbook/assets/image%20%28181%29.png)
 
 Then, looking to this ca see when the execution was stopped in the dll you want to debug.
 
@@ -123,6 +123,19 @@ Then, looking to this ca see when the execution was stopped in the dll you want 
 {% embed url="https://github.com/nongiach/arm\_now" %}
 
 ## Shellcodes
+
+### Debugging a shellcode with blobrunner
+
+[Blobrunner](https://github.com/OALabs/BlobRunner) will **allocate** the **shellcode** inside a space of memory, will **indicate** you the **memory address** were the shellcode was allocated and will **stop** the execution.  
+Then, you need to **attach a debugger** \(Ida or x64dbg\) to the process and put a **breakpoint the indicated memory address** and **resume** the execution. This way you will be debugging the shellcode.
+
+You can find a slightly modified version of Blobrunner in the following link. In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
+
+{% page-ref page="blobrunner.md" %}
+
+
+
+### Deobfuscating shellcode and getting executed functions
 
 You should try ****[**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).  
 It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.

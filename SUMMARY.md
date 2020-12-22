@@ -369,7 +369,8 @@
 ## Reversing
 
 * [Common API used in Malware](reversing/common-api-used-in-malware.md)
-* [Reversing Tools](reversing/reversing-tools.md)
+* [Reversing Tools](reversing/reversing-tools/README.md)
+  * [Blobrunner](reversing/reversing-tools/blobrunner.md)
 * [Cryptographic/Compression Algorithms](reversing/cryptographic-algorithms/README.md)
   * [Unpacking binaries](reversing/cryptographic-algorithms/unpacking-binaries.md)
 * [Word Macros](reversing/word-macros.md)
