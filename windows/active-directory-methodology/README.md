@@ -35,6 +35,10 @@ AD DS is included with Windows Server \(including Windows Server 10\) and is des
 To learn how to **attack an AD** you need to **understand** really good the **Kerberos authentication process**.  
 [**Read this page if you still don't know how it works.**](kerberos-authentication.md)\*\*\*\*
 
+## Cheat Sheet
+
+You can take a lot to [https://wadcoms.github.io/](https://wadcoms.github.io/) to have a quick view of which commands you can run to enumerate/exploit an AD.
+
 ## Recon Active Directory \(No creds/sessions\)
 
 If you just have access to an AD environment but you don't have any credentials/sessions you could:
