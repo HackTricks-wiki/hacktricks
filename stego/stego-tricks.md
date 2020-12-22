@@ -53,6 +53,14 @@ Useful commands:
 `strings -e L -n 6 file`: Extact 32bit strings \(little-endian\)  
 `strings -e B -n 6 file`: Extact 32bit strings \(big-endian\)
 
+### cmp - Comparison
+
+If you have some **modified** image/audio/video, check if you can **find the exact original one** from the internet and **compare both** files:
+
+```text
+cmp original.jpg stego.jpg -b -l
+```
+
 ## Extracting hidden data in text
 
 ### Hidden data in spaces
