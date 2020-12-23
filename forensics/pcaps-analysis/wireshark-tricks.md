@@ -38,7 +38,23 @@ You can add a column that show the Host HTTP header:
 
 And a column that add the Server name from an initiating HTTPS connection \(**ssl.handshake.type == 1**\):
 
+![](../../.gitbook/assets/image%20%28407%29.png)
+
+## Identifying local hostnames
+
+### From DHCP
+
+In current Wireshark instead of `bootp` you need to search for `DHCP`
+
+![](../../.gitbook/assets/image%20%28409%29.png)
+
+### From NBNS
+
 ![](../../.gitbook/assets/image%20%28406%29.png)
+
+
+
+
 
 ## Decrypting TLS
 
