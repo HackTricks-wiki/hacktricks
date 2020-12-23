@@ -355,6 +355,10 @@ Note that **in order to increase the credibility of the email**, it's recommende
 
 ![](../.gitbook/assets/image%20%2867%29.png)
 
+{% hint style="info" %}
+The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../windows/ntlm/places-to-steal-ntlm-creds.md).
+{% endhint %}
+
 ### Landing Page
 
 * Write a **name**
