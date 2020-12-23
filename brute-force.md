@@ -456,7 +456,7 @@ mount /dev/mapper/mylucksopen /mnt
 ```bash
 cryptsetup luksDump backup.img #Check that the payload offset is set to 4096
 dd if=backup.img of=luckshash bs=512 count=4097 #Payload offset +1
-hashcat -m 14600 luckshash 
+hashcat -m 14600 -a 0 luckshash  wordlists/rockyou.txt
 cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
