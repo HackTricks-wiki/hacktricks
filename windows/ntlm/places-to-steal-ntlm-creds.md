@@ -16,8 +16,6 @@ You may be able to **force a windows machine to authenticate to an arbitrary mac
 
 {% page-ref page="../active-directory-methodology/printers-spooler-service-abuse.md" %}
 
-
-
 ## LFI
 
 The include\(\) in PHP will resolve the network path for us.

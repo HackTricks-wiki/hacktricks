@@ -7,7 +7,7 @@ Note when printer send the notification to an arbitrary systems, it needs to **a
 
 ### Finding Windows Servers on the domain
 
-Using Powershell, get a list of Windows boxes. Servers are usually priority, so lets focus there:
+Using PowerShell, get a list of Windows boxes. Servers are usually priority, so lets focus there:
 
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
