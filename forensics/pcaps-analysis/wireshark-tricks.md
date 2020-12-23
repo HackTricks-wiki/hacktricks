@@ -1,5 +1,45 @@
 # Wireshark tricks
 
+## Improve your Wireshark skills
+
+### Tutorials
+
+The following tutorials are amazing to learn some cool basic tricks:
+
+* [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
+* [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
+* [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
+* [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
+
+### Filters
+
+Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)  
+Other interesting filters:
+
+*  `(http.request or ssl.handshake.type == 1) and !(udp.port eq 1900)`
+  * HTTP and initial HTTPS traffic
+*  `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
+  * HTTP and initial HTTPS traffic + TCP SYN
+*  `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
+  * HTTP and initial HTTPS traffic + TCP SYN + DNS requests
+
+### Search
+
+If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_  
+You can add new layers to the main information bar _\(No., Time, Source...\)_ pressing _right bottom_ and _Edit Column_
+
+Practice: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net/)
+
+## Identifying Domains
+
+You can add a column that show the Host HTTP header:
+
+![](../../.gitbook/assets/image%20%28405%29.png)
+
+And a column that add the Server name from an initiating HTTPS connection \(**ssl.handshake.type == 1**\):
+
+![](../../.gitbook/assets/image%20%28406%29.png)
+
 ## Decrypting TLS
 
 ### Decrypting https traffic with server private key

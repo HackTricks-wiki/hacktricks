@@ -20,13 +20,6 @@ capinfos capture.pcap
 
 ### Wireshark
 
-Inside wireshark you can see different **statistics** that could be useful. Some interesting http filters: [https://www.wireshark.org/docs/dfref/h/http.html](https://www.wireshark.org/docs/dfref/h/http.html)
-
-If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_  
-You can add new layers to the main information bar _\(No., Time, Source...\)_ pressing _right bottom_ and _Edit Column_
-
-Practice: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net/)
-
 _**You can find more Wireshark trick in:**_
 
 {% page-ref page="wireshark-tricks.md" %}
