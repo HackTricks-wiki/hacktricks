@@ -53,3 +53,32 @@ find /sbin/ -exec dpkg -S {} \; | grep "no path found"
 find /sbin/ –exec rpm -qf {} \; | grep "is not"
 ```
 
+## Inspect AutoStart locations
+
+### Scheduled Tasks
+
+```bash
+cat /var/spool/cron/crontabs/*  \
+/var/spool/cron/atjobs \
+/var/spool/anacron \
+/etc/cron* \
+/etc/at* \
+/etc/anacrontab \
+/etc/incron.d/* \
+/var/spool/incron/* \
+
+#MacOS
+ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
+```
+
+### Services
+
+It is extremely common for malware to entrench itself as a new, unauthorized service. Linux has a number of scripts that are used to start services as the computer boots. The initialization startup script _**/etc/inittab**_ calls other scripts such as rc.sysinit and various startup scripts under the _**/etc/rc.d/**_ directory, or _**/etc/rc.boot/**_ in some older versions. On other versions of Linux, such as Debian, startup scripts are stored in the _**/etc/init.d/**_ directory. In addition, some common services are enabled in _**/etc/inetd.conf**_ or _**/etc/xinetd/**_ depending on the version of Linux. Digital investigators should inspect each of these startup scripts for anomalous entries.
+
+* _**/etc/inittab**_
+* _**/etc/rc.d/**_ 
+* _**/etc/rc.boot/**_
+* _**/etc/init.d/**_ 
+* _**/etc/inetd.conf**_
+* _**/etc/xinetd/**_
+
