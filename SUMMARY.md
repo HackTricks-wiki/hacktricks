@@ -354,6 +354,7 @@
 * [XSLT Server Side Injection \(Extensible Stylesheet Languaje Transformations\)](pentesting-web/xslt-server-side-injection-extensible-stylesheet-languaje-transformations.md)
 * [XXE - XEE - XML External Entity](pentesting-web/xxe-xee-xml-external-entity.md)
 * [XSS \(Cross Site Scripting\)](pentesting-web/xss-cross-site-scripting/README.md)
+  * [PDF Injection](pentesting-web/xss-cross-site-scripting/pdf-injection.md)
   * [DOM XSS](pentesting-web/xss-cross-site-scripting/dom-xss.md)
   * [Server Side XSS \(Dynamic PDF\)](pentesting-web/xss-cross-site-scripting/server-side-xss-dynamic-pdf.md)
   * [XSS Tools](pentesting-web/xss-cross-site-scripting/xss-tools.md)
