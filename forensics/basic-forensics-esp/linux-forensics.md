@@ -29,6 +29,14 @@ cat /etc/passwd #Unexpected data?
 cat /etc/shadow #Unexpected data?
 ```
 
+#### Suspicious information
+
+While obtaining the basic information you should check for weird things like:
+
+* **root processes** usually run with low PIDS, so if you find a root process with a big PID you may suspect
+* Check **registered logins** of users without a shell inside `/etc/passwd`
+* Check for **password hashes** inside `/etc/shadow` for users without a shell
+
 ### Memory Dump
 
 In order to obtain the memory of the running system it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).  
