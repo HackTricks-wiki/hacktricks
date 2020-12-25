@@ -37,18 +37,20 @@ Remember that you **cannot install LiME or any other thing** in the victim machi
 {% endhint %}
 
 So, if you have an identical version of Ubuntu you can use `apt-get install lime-forensics-dkms`  
-In other cases you need to download [**LiME**](https://github.com/504ensicsLabs/LiME) from github can compile it with correct kernel headers:
+In other cases you need to download [**LiME**](https://github.com/504ensicsLabs/LiME) from github can compile it with correct kernel headers. In order to **obtain the exact kernel headers** of the victim machine, you can just **copy the directory** `/lib/modules/<kernel version>` to your machine, and then **compile** LiME using them:
 
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 ```
 
-LiME supports 3 formats:
+LiME supports 3 **formats**:
 
 * Raw \(every segment concatenated together\)
 * Padded \(same as raw, but with zeroes in right bits\)
 * Lime \(recommended format with metadata
+
+LiME can also be use to **send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
 
 ## Search for known Malware
 
