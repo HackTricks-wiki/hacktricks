@@ -1,5 +1,32 @@
 # Linux Forensics
 
+## Basic Information
+
+First of all, it's recommended to have some **USB** with **good known binaries and libraries on it** \(you can just get a ubuntu and copy the folders _/bin_, _/sbin_, _/lib,_ and _/lib64_\), then mount the USN, and modify the env variables to use those binaries:
+
+```bash
+export PATH=/mnt/usb/bin:/mnt/usb/sbin
+export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
+```
+
+Once you have configured the system to use good and known binaries you can start **extracting some basic information**:
+
+```bash
+date #Date and time (Clock my be skewed, Might be in different timezone)
+uname -a #OS info
+ifconfig -a || ip a #Network interfaces (promiscuosu mode?)
+ps -ef #Running processes
+netstat -anp #Proccess and ports
+lsof -V #Open files
+netstat -rn; route #Routing table
+df; mount #Free space and mounted devices
+w #Who is connected
+last #Logins
+lsmod #What is loaded
+cat /etc/passwd #Unexpected data?
+cat /etc/shadow #Unexpected data?
+```
+
 ## Search for known Malware
 
 ### Modified System Files
