@@ -22,11 +22,13 @@ netstat -anp #Proccess and ports
 lsof -V #Open files
 netstat -rn; route #Routing table
 df; mount #Free space and mounted devices
+free #Meam and swap space
 w #Who is connected
 last #Logins
 lsmod #What is loaded
 cat /etc/passwd #Unexpected data?
 cat /etc/shadow #Unexpected data?
+find /directory -type f -mtime -1 -print #Find modified files during the last minute in the directory
 ```
 
 #### Suspicious information
