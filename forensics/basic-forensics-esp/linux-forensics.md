@@ -27,6 +27,29 @@ cat /etc/passwd #Unexpected data?
 cat /etc/shadow #Unexpected data?
 ```
 
+## Memory Dump
+
+In order to obtain the memory of the running system it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).  
+In order to **compile** it you need to use the **exact same kernel** the victim machine is using.
+
+{% hint style="info" %}
+Remember that you **cannot install LiME or any other thing** in the victim machine it will make several changes to it
+{% endhint %}
+
+So, if you have an identical version of Ubuntu you can use `apt-get install lime-forensics-dkms`  
+In other cases you need to download [**LiME**](https://github.com/504ensicsLabs/LiME) from github can compile it with correct kernel headers:
+
+```bash
+make -C /lib/modules/<kernel version>/build M=$PWD
+sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
+```
+
+LiME supports 3 formats:
+
+* Raw \(every segment concatenated together\)
+* Padded \(same as raw, but with zeroes in right bits\)
+* Lime \(recommended format with metadata
+
 ## Search for known Malware
 
 ### Modified System Files
