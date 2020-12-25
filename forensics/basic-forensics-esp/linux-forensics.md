@@ -68,7 +68,8 @@ There are **2 ways** of shutting down the system, a **normal shutdown** and a **
 dd if=<subject device> of=<image file> bs=512
 
 #Raw copy with hashes along the way (more secur s it checks hashes while it's copying the data)
-dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hash window=<chunk size> hashlog=<hash file>
+dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
+dcfldd if=<subject device> of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
 
 ## Search for known Malware
