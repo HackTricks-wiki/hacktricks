@@ -1,6 +1,8 @@
 # Linux Forensics
 
-## Basic Information
+## Initial Information Gathering
+
+### Basic Information
 
 First of all, it's recommended to have some **USB** with **good known binaries and libraries on it** \(you can just get a ubuntu and copy the folders _/bin_, _/sbin_, _/lib,_ and _/lib64_\), then mount the USN, and modify the env variables to use those binaries:
 
@@ -27,7 +29,7 @@ cat /etc/passwd #Unexpected data?
 cat /etc/shadow #Unexpected data?
 ```
 
-## Memory Dump
+### Memory Dump
 
 In order to obtain the memory of the running system it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).  
 In order to **compile** it you need to use the **exact same kernel** the victim machine is using.
@@ -51,6 +53,23 @@ LiME supports 3 **formats**:
 * Lime \(recommended format with metadata
 
 LiME can also be use to **send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
+
+### Disk Imaging
+
+#### Shutting down
+
+First of all you will need to **shutdown the system**. This isn't always an option as some times system will be a production server that the company cannot afford to shutdown.  
+There are **2 ways** of shutting down the system, a **normal shutdown** and a **"plug the plug" shutdown**. The first one will allow the **processes to terminate as usual** and the **filesystem** to be **synchronized**, but I will also allow the possible **malware** to **destroy evidences**. The "pull the plug" approach may carry **some information loss** \(as we have already took an image of the memory not much info is going to be lost\) and the **malware won't have any opportunity** to do anything about it. Therefore, if you **suspect** that there may be a **malware**, just execute the **`sync`** **command** on the system and pull the plug.
+
+#### Taking an image of the disk
+
+```bash
+#Create a raw copy of the disk
+dd if=<subject device> of=<image file> bs=512
+
+#Raw copy with hashes along the way (more secur s it checks hashes while it's copying the data)
+dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hash window=<chunk size> hashlog=<hash file>
+```
 
 ## Search for known Malware
 
