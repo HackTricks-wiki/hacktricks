@@ -63,6 +63,8 @@ There are **2 ways** of shutting down the system, a **normal shutdown** and a **
 
 #### Taking an image of the disk
 
+It's important to note that **before connecting to your computer anything related to the case**, you need to be sure that it's going to be **mounted as read only** to avoid modifying the any information.
+
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
