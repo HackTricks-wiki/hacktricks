@@ -254,5 +254,46 @@ To deal with such anti-forensic techniques, it is necessary to pay **careful att
 * [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems\_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
 * [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
 
+## MBR - Master Boot Record
 
+It allows up to four partitions \(at most just 1 can be active/bootable\). However, if you need more partitions you can use extended partitions.
+
+Format:
+
+| Offset | Length | Item |
+| :--- | :--- | :--- |
+| 0 \(0x00\) | 446\(0x1BE\) | Boot code |
+| 446 \(0x1BE\) | 16 \(0x10\) | First Partition |
+| 462 \(0x1CE\) | 16 \(0x10\) | Second Partition |
+| 478 \(0x1DE\) | 16 \(0x10\) | Third Partition |
+| 494 \(0x1EE\) | 16 \(0x10\) | Fourth Partition |
+| 510 \(0x1FE\) | 2 \(0x2\) | Signature 0x55 0xAA |
+
+Partition Record Format:
+
+| Offset | Length | Item |
+| :--- | :--- | :--- |
+| 0 \(0x00\) | 1 \(0x01\) | Active flag \(0x80 = bootable\) |
+| 1 \(0x01\) | 1 \(0x01\) | Start head |
+| 2 \(0x02\) | 1 \(0x01\) | Start sector \(bits 0-5\); upper bits of cylinder \(6- 7\) |
+| 3 \(0x03\) | 1 \(0x01\) | Start cylinder lowest 8 bits |
+| 4 \(0x04\) | 1 \(0x01\) | Partition type code \(0x83 = Linux\) |
+| 5 \(0x05\) | 1 \(0x01\) | End head |
+| 6 \(0x06\) | 1 \(0x01\) | End sector \(bits 0-5\); upper bits of cylinder \(6- 7\) |
+| 7 \(0x07\) | 1 \(0x01\) | End cylinder lowest 8 bits |
+| 8 \(0x08\) | 4 \(0x04\) | Sectors preceding partition \(little endian\) |
+| 12 \(0x0C\) | 4 \(0x04\) | Sectors in partition |
+
+In order to mount a MBR in linux you first need to get the start offset \(you can use `fdisk` and the the `p` command\)
+
+![](../../.gitbook/assets/image%20%28411%29.png)
+
+An then use the following code
+
+```bash
+#Mount MBR in Linux
+mount -o ro,loop,offset=<Bytes>
+#63x512 = 32256Bytes
+mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
+```
 
