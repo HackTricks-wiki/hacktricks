@@ -24,7 +24,7 @@ netstat -rn; route #Routing table
 df; mount #Free space and mounted devices
 free #Meam and swap space
 w #Who is connected
-last #Logins
+last -Faiwx #Logins
 lsmod #What is loaded
 cat /etc/passwd #Unexpected data?
 cat /etc/shadow #Unexpected data?
@@ -192,7 +192,7 @@ Interesting system logons:
   * Shows general messages and info regarding the system. Basically a data log of all activity throughout the global system.
 *  **/var/log/auth.log** \(debian\) ****or **/var/log/secure** \(Redhat\)
   * Keep authentication logs for both successful or failed logins, and authentication processes. Storage depends on system type.
-  * `cat /var/log/auth.log | grep -i "session opened for"`
+  * `cat /var/log/auth.log | grep -iE "session opened for|accepted password|new session|not in sudoers"`
 * **/var/log/boot.log**: start-up messages and boot info.
 * **/var/log/maillog** or **var/log/mail.log:** is for mail server logs, handy for postfix, smtpd, or email-related services info running on your server.
 * **/var/log/kern.log**: keeps in Kernel logs and warning info. Kernel activity logs \(e.g., dmesg, kern.log, klog\) can show that a particular service crashed repeatedly, potentially indicating that an unstable trojanized version was installed.
