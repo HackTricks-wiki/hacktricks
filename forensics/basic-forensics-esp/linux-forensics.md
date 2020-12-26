@@ -256,7 +256,8 @@ To deal with such anti-forensic techniques, it is necessary to pay **careful att
 
 ## MBR - Master Boot Record
 
-It allows up to four partitions \(at most just 1 can be active/bootable\). However, if you need more partitions you can use extended partitions.
+The **MBR** occupies the **sector 0 of the disk** \(the first sector\) and it's used to indicate the partitions of the disc. This sector is essential to indicate the PC what and from where a partition should be mounted.  
+It allows up to **four partitions** \(at most **just 1** can be active/**bootable**\). However, if you need more partitions you can use **extended partitions**.
 
 Format:
 
@@ -284,7 +285,7 @@ Partition Record Format:
 | 8 \(0x08\) | 4 \(0x04\) | Sectors preceding partition \(little endian\) |
 | 12 \(0x0C\) | 4 \(0x04\) | Sectors in partition |
 
-In order to mount a MBR in linux you first need to get the start offset \(you can use `fdisk` and the the `p` command\)
+In order to mount a MBR in Linux you first need to get the start offset \(you can use `fdisk` and the the `p` command\)
 
 ![](../../.gitbook/assets/image%20%28411%29.png)
 
