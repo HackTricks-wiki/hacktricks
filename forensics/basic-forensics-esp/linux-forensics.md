@@ -229,6 +229,8 @@ It's recommended to check if those logins make sense:
 
 This is important as **attackers** some times may copy `/bin/bash` inside `/bin/false` so users like **lightdm** may be **able to login**.
 
+Note that you can also **take a look to this information reading the logs**.
+
 ### Application Traces
 
 * **SSH**: Connections to systems made using SSH to and from a compromised system result in entries being made in files for each user account \(_**∼/.ssh/authorized\_keys**_ and _**∼/.ssh/known\_keys**_\). These entries can reveal the hostname or IP address of the remote hosts.
