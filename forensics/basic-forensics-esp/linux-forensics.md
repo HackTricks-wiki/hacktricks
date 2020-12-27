@@ -219,6 +219,16 @@ Many Linux systems are configured to maintain a command history for each user ac
 * ~/.sh\_history
 * ~/.\*\_history
 
+### Logins
+
+Using the command `last -Faiwx` it's possible to get the list of users that have logged in.  
+It's recommended to check if those logins make sense:
+
+* Any unknown user?
+* Any user that shouldn't have a shell has logged in?
+
+This is important as **attackers** some times may copy `/bin/bash` inside `/bin/false` so users like **lightdm** may be **able to login**.
+
 ### Application Traces
 
 * **SSH**: Connections to systems made using SSH to and from a compromised system result in entries being made in files for each user account \(_**∼/.ssh/authorized\_keys**_ and _**∼/.ssh/known\_keys**_\). These entries can reveal the hostname or IP address of the remote hosts.
