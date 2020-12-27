@@ -33,8 +33,8 @@ ssh -t user@<IP> bash # Get directly an interactive shell
 
 ## Other tricks
 
-\*\*\*\*[**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)  
-**\*\*\[**[https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells\*\*\]\(https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**]%28https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\)  
-**\*\*\[**[https://gtfobins.github.io\*\*\]\(https://gtfobins.github.io](https://gtfobins.github.io**]%28https://gtfobins.github.io)\)  
-**It could also be interesting the POST on** [**Bypass Bash restrictions**](../useful-linux-commands/bypass-bash-restrictions.md)\*\*\*\*
+[**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)  
+[https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**]%28https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)  
+[https://gtfobins.github.io](https://gtfobins.github.io**]%28https://gtfobins.github.io)  
+**It could also be interesting the POST on** [**Bypass Bash restrictions**](../useful-linux-commands/bypass-bash-restrictions.md)
 
