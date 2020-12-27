@@ -311,3 +311,24 @@ mount -o ro,loop,offset=<Bytes>
 mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
 
+## Ext - Extended Filesystem
+
+**Ext2** is the most common filesystem for **not journaling** partitions \(**partitions that don't change much**\) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
+
+All block groups in the filesystem have the same size and are stored sequentially. This allows the kernel to easily derive the location of a block group in a disk from its integer index.
+
+Every block group contains the following pieces of information:
+
+* A copy of the filesystem’s superblock
+* A copy of the block group descriptors
+* A data block bitmap which is used to identify the free blocks inside the group
+* An inode bitmap, which is used to identify the free inodes inside the group
+* inode table: it consists of a series of consecutive blocks, each of which contains a predefined Figure 1 Ext2 inode number of inodes. All inodes have the same size: 128 bytes. A 1,024 byte block contains 8 inodes, while a 4,096-byte block contains 32 inodes. Note that in Ext2, there is no need to store on disk a mapping between an inode number and the corresponding block number because the latter value can be derived from the block group number and the relative position inside the inode table. For example, suppose that each block group contains 4,096 inodes and that we want to know the address on disk of inode 13,021. In this case, the inode belongs to the third block group and its disk address is stored in the 733rd entry of the corresponding inode table. As you can see, the inode number is just a key used by the Ext2 routines to retrieve the proper inode descriptor on disk quickly
+* data blocks, containing files. Any block which does not contain any meaningful information, it is said to be free.
+
+![](../../.gitbook/assets/image%20%28414%29.png)
+
+The Superblock contains a description of the basic size and shape of this file system. Usually only the Superblock in Block Group 0 is read when the file system is mounted but each Block Group contains a duplicate copy in case of file system corruption.
+
+[https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz\#:~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.](https://piazza.com/class_profile/get_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.)
+
