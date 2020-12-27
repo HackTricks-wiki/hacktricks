@@ -14,6 +14,13 @@ PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change
 echo /home/* #List directory
 ```
 
+## Using vim
+
+```bash
+:set shell=/bin/sh
+:shell
+```
+
 ## Create script
 
 Check if you can create an executable file with _/bin/bash_ as content
