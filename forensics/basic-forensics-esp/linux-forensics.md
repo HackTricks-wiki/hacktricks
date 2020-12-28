@@ -262,6 +262,8 @@ To deal with such anti-forensic techniques, it is necessary to pay **careful att
 * Also check directories like _/bin_ or _/sbin_ as the **modified and/or changed time** of new or modified files me be interesting.
 * It's interesting to see the files and folders of a directory **sorted by creation date** instead alphabetically to see which files/folders are more recent \(last ones usually\).
 
+You can check the inodes of the files inside a folder using `ls -lai /bin |sort -n`
+
 ## References
 
 * [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems\_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
