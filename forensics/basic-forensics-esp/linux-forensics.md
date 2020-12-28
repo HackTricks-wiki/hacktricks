@@ -450,6 +450,10 @@ Special inodes:
 | 10 | Replica inode |
 | 11 | First non-reserved inode \(often lost + found\) |
 
+{% hint style="info" %}
+Not that the creation time only appears in Ext4.
+{% endhint %}
+
 Knowing the inode number you can easily find it's index:
 
 * **Block group** where an inode belongs: \(Inode number - 1\) / \(Inodes per group\)
