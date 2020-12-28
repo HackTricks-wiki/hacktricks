@@ -338,7 +338,7 @@ Ext has optional features that your OS may or may not support, there are 3 possi
 * Incompatible
 * Compatible Read Only: It can be mounted but not for writing
 
-If any of the features is **incompatible and essential** you won't be able to mount the filesystem as the OS won't know how the access the data.
+If there are **incompatible** features you won't be able to mount the filesystem as the OS won't know how the access the data.
 
 {% hint style="info" %}
 Suspected attacker might have non-standard extensions
