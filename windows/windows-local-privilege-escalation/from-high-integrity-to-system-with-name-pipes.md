@@ -7,6 +7,10 @@
 3. The service receive the data from the client in the pipe, call ImpersonateNamedPipeClient and waits for the service to finish
 4.  Finally, uses the token obtained from the service to spawn a new _cmd.exe_
 
+{% hint style="warning" %}
+If you don't have enough privileges the exploit may get stucked and never return.
+{% endhint %}
+
 ```c
 #include <windows.h>
 #include <time.h>
