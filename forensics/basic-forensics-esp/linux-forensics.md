@@ -458,7 +458,8 @@ Knowing the inode number you can easily find it's index:
 * The "-1" is because the inode 0 is undefined \(not used\)
 
 ```bash
-ls -ali /bin | sort -n #Get all inode numbers ans sort by them
+ls -ali /bin | sort -n #Get all inode numbers and sort by them
+stat /bin/ls #Get the inode information of a file
 ```
 
 ### Filesystem View
