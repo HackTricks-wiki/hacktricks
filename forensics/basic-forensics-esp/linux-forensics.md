@@ -369,7 +369,8 @@ fsstat -o <offsetstart> /pat/to/filesystem-file.ext
 #You can get the <offsetstart> with the "p" command inside fdisk
 ```
 
-You can also use the free gui application: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)
+You can also use the free gui application: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)  
+Or you can also use **python** to obtain the superblock information: [https://pypi.org/project/superblock/](https://pypi.org/project/superblock/)
 
 ### inodes
 
