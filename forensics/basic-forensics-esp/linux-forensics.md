@@ -545,6 +545,8 @@ Directories
   </tbody>
 </table>
 
+**In order to increase the performance, Root hash Directory blocks may be used.**
+
 ### Filesystem View
 
 In order to see the contents of the file system you can **use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)  
