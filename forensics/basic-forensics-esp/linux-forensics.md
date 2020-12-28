@@ -262,8 +262,15 @@ To deal with such anti-forensic techniques, it is necessary to pay **careful att
 * Also check directories like _/bin_ or _/sbin_ as the **modified and/or changed time** of new or modified files me be interesting.
 * It's interesting to see the files and folders of a directory **sorted by creation date** instead alphabetically to see which files/folders are more recent \(last ones usually\).
 
-You can check the inodes of the files inside a folder using `ls -lai /bin |sort -n` saasd  
-You can check the most recent files of a folder using `ls -laR --sort=time /bin`
+You can check the most recent files of a folder using `ls -laR --sort=time /bin`  
+You can check the inodes of the files inside a folder using `ls -lai /bin |sort -n` 
+
+{% hint style="info" %}
+Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modify at the **same time** of the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
+{% endhint %}
+
+  
+
 
 ## References
 
@@ -381,6 +388,74 @@ The **inodes** contain the list of **blocks** that **contains** the actual **dat
 If the file is big, and inode **may contain pointers** to **other inodes** that points to the blocks/more inodes containing the file data.
 
 ![](../../.gitbook/assets/image%20%28423%29.png)
+
+In **Ext2** and **Ext3** inodes are of size **128B**, **Ext4** currently uses **156B** but allocates **256B** on disk to allow a future expansion.
+
+Inode structure:
+
+| Offset | Size | Name | DescriptionF |
+| :--- | :--- | :--- | :--- |
+| 0x0 | 2 | File Mode | File mode and type |
+| 0x2 | 2 | UID | Lower 16 bits of owner ID |
+| 0x4 | 4 | Size Il | Lower 32 bits of file size |
+| 0x8 | 4 | Atime | Access time in seconds since epoch |
+| 0xC | 4 | Ctime | Change time in seconds since epoch |
+| 0x10 | 4 | Mtime | Modify time in seconds since epoch |
+| 0x14 | 4 | Dtime | Delete time in seconds since epoch |
+| 0x18 | 2 | GID | Lower 16 bits of group ID |
+| 0x1A | 2 | Hlink count | Hard link count |
+| 0xC | 4 | Blocks Io | Lower 32 bits of block count |
+| 0x20 | 4 | Flags | Flags |
+| 0x24 | 4 | Union osd1 | Linux: I version |
+| 0x28 | 69 | Block\[15\] | 15 pointes to data block |
+| 0x64 | 4 | Version | File version for NFS |
+| 0x68 | 4 | File ACL low | Lower 32 bits of extended attributes \(ACL, etc\) |
+| 0x6C | 4 | File size hi | Upper 32 bits of file size \(ext4 only\) |
+| 0x70 | 4 | Obsolete fragment | An obsoleted fragment address |
+| 0x74 | 12 | Osd 2 | Second operating system dependent union |
+| 0x74 | 2 | Blocks hi | Upper 16 bits of block count |
+| 0x76 | 2 | File ACL hi | Upper 16 bits of extended attributes \(ACL, etc.\) |
+| 0x78 | 2 | UID hi | Upper 16 bits of owner ID |
+| 0x7A | 2 | GID hi | Upper 16 bits of group ID |
+| 0x7C | 2 | Checksum Io | Lower 16 bits of inode checksum |
+
+Inode structure extended \(Ext4\):
+
+| Offset | Size | Name | Description |
+| :--- | :--- | :--- | :--- |
+| 0x80 | 2 | Extra size | How many bytes beyond standard 128 are used |
+| 0x82 | 2 | Checksum hi | Upper 16 bits of inode checksum |
+| 0x84 | 4 | Ctime extra | Change time extra bits |
+| 0x88 | 4 | Mtime extra | Modify time extra bits |
+| 0x8C | 4 | Atime extra | Access time extra bits |
+| 0x90 | 4 | Crtime | File create time \(seconds since epoch\) |
+| 0x94 | 4 | Crtime extra | File create time extra bits |
+| 0x98 | 4 | Version hi | Upper 32 bits of version |
+| 0x9C |  | Unused | Reserved space for future expansions |
+
+Special inodes:
+
+| Inode | Special Purpose |
+| :--- | :--- |
+| 0 | No such inode, numberings starts at 1 |
+| 1 | Defective block list |
+| 2 | Root directory |
+| 3 | User quotas |
+| 4 | Group quotas |
+| 5 | Boot loader |
+| 6 | Undelete directory |
+| 7 | Reserved group descriptors \(for resizing filesystem\) |
+| 8 | Journal |
+| 9 | Exclude inode \(for snapshots\) |
+| 10 | Replica inode |
+| 11 | First non-reserved inode \(often lost + found\) |
+
+Knowing the inode number you can easily find it's index:
+
+* **Block group** where an inode belongs: \(Inode number - 1\) / \(Inodes per group\)
+* **Index inside it's group**: \(Inode number - 1\) mod\(Inodes/groups\)
+* **Offset** into **inode table**: Inode number \* \(Inode size\)
+* The "-1" is because the inode 0 is undefined \(not used\)
 
 ```bash
 ls -ali /bin | sort -n #Get all inode numbers ans sort by them
