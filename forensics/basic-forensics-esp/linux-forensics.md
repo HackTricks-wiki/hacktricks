@@ -624,6 +624,12 @@ Extended Attributes Entries
   </tbody>
 </table>
 
+```bash
+setfattr -n 'user.secret' -v 'This is a secret' file.txt #Save a secret using extended attributes
+getfattr file.txt #Get extended attribute names of a file
+getdattr -n 'user.secret' file.txt #Get extended attribute called "user.secret"
+```
+
 ### Filesystem View
 
 In order to see the contents of the file system you can **use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)  
