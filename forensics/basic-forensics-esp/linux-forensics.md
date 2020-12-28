@@ -547,6 +547,83 @@ Directories
 
 **In order to increase the performance, Root hash Directory blocks may be used.**
 
+**Extended Attributes**
+
+Can be stored in
+
+* Extra space between inodes \(256 - inode size, usually = 100\)
+* A data block pointed to by file\_acl in inode
+
+Can be used to store anything as a users attribute if name starts with "user".
+
+Data can ne hidden this way.
+
+Extended Attributes Entries
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align:left">Offset</th>
+      <th style="text-align:left">Size</th>
+      <th style="text-align:left">Name</th>
+      <th style="text-align:left">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align:left">0x0</td>
+      <td style="text-align:left">1</td>
+      <td style="text-align:left">Name len</td>
+      <td style="text-align:left">Length of attribute name</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">0x1</td>
+      <td style="text-align:left">1</td>
+      <td style="text-align:left">Name index</td>
+      <td style="text-align:left">
+        <p>0x0 = no prefix</p>
+        <p>0x1 = user. Prefix</p>
+        <p>0x2 = system.posix_acl_access</p>
+        <p>0x3 = system.posix_acl_default</p>
+        <p>0x4 = trusted.</p>
+        <p>0x6 = security.</p>
+        <p>0x7 = system.</p>
+        <p>0x8 = system.richacl</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left">0x2</td>
+      <td style="text-align:left">2</td>
+      <td style="text-align:left">Value offs</td>
+      <td style="text-align:left">Offset from first inode entry or start of block</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">0x4</td>
+      <td style="text-align:left">4</td>
+      <td style="text-align:left">Value blocks</td>
+      <td style="text-align:left">Disk block where value stored or zero for this block</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">0x8</td>
+      <td style="text-align:left">4</td>
+      <td style="text-align:left">Value size</td>
+      <td style="text-align:left">Length of value</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">0xC</td>
+      <td style="text-align:left">4</td>
+      <td style="text-align:left">Hash</td>
+      <td style="text-align:left">Hash for attribs in block or zero if in inode</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">0x10</td>
+      <td style="text-align:left"></td>
+      <td style="text-align:left">Name</td>
+      <td style="text-align:left">Attribute name w/o trailing NULL</td>
+    </tr>
+  </tbody>
+</table>
+
 ### Filesystem View
 
 In order to see the contents of the file system you can **use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)  
