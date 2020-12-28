@@ -491,6 +491,60 @@ File Mode
 
 The bold bits \(12, 13, 14, 15\) indicate the type of file the file is \(a directory, socket...\) only one of the options in bold may exit.
 
+Directories
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align:left">Offset</th>
+      <th style="text-align:left">Size</th>
+      <th style="text-align:left">Name</th>
+      <th style="text-align:left">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align:left">0x0</td>
+      <td style="text-align:left">4</td>
+      <td style="text-align:left">Inode</td>
+      <td style="text-align:left"></td>
+    </tr>
+    <tr>
+      <td style="text-align:left">0x4</td>
+      <td style="text-align:left">2</td>
+      <td style="text-align:left">Rec len</td>
+      <td style="text-align:left">Record length</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">0x6</td>
+      <td style="text-align:left">1</td>
+      <td style="text-align:left">Name len</td>
+      <td style="text-align:left">Name length</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">0x7</td>
+      <td style="text-align:left">1</td>
+      <td style="text-align:left">File type</td>
+      <td style="text-align:left">
+        <p>0x00 Unknown
+          <br />0x01 Regular</p>
+        <p>0x02 Director</p>
+        <p>0x03 Char device</p>
+        <p>0x04 Block device</p>
+        <p>0x05 FIFO</p>
+        <p>0x06 Socket</p>
+        <p>0x07 Sym link</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left">0x8</td>
+      <td style="text-align:left"></td>
+      <td style="text-align:left">Name</td>
+      <td style="text-align:left">Name string (up to 255 characters)</td>
+    </tr>
+  </tbody>
+</table>
+
 ### Filesystem View
 
 In order to see the contents of the file system you can **use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)  
