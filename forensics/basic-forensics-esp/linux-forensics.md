@@ -330,5 +330,12 @@ Every block group contains the following pieces of information:
 
 The Superblock contains a description of the basic size and shape of this file system. Usually only the Superblock in Block Group 0 is read when the file system is mounted but each Block Group contains a duplicate copy in case of file system corruption.
 
+### inodes
+
+The **inodes** contain the list of **blocks** that **contains** the actual **data** of a **file**.  
+If the file is big, and inode **may contain pointers** to **other inodes** that points to the blocks/more inodes containing the file data.
+
+![](../../.gitbook/assets/image%20%28423%29.png)
+
 [https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz\#:~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.](https://piazza.com/class_profile/get_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.)
 
