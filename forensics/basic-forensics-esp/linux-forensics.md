@@ -465,7 +465,31 @@ Knowing the inode number you can easily find it's index:
 ls -ali /bin | sort -n #Get all inode numbers and sort by them
 stat /bin/ls #Get the inode information of a file
 istat -o <start offset> /path/to/image.ext 657103 #Get information of that inode inside the given ext file
+icat -o <start offset> /path/to/image.ext 657103 #Cat the file
 ```
+
+File Mode
+
+| Number | Description |
+| :--- | :--- |
+| **15** | **Reg/Slink-13/Socket-14** |
+| **14** | **Directory/Block Bit 13** |
+| **13** | **Char Device/Block Bit 14** |
+| **12** | **FIFO** |
+| 11 | Set UID |
+| 10 | Set GID |
+| 9 | Sticky Bit |
+| 8 | Owner Read |
+| 7 | Owner Write |
+| 6 | Owner Exec |
+| 5 | Group Read |
+| 4 | Group Write |
+| 3 | Group Exec |
+| 2 | Others Read |
+| 1 | Others Write |
+| 0 | Others Exec |
+
+The bold bits \(12, 13, 14, 15\) indicate the type of file the file is \(a directory, socket...\) only one of the options in bold may exit.
 
 ### Filesystem View
 
