@@ -363,6 +363,8 @@ fsstat -o <offsetstart> /pat/to/filesystem-file.ext
 #You can get the <offsetstart> with the "p" command inside fdisk
 ```
 
+You can also use the free gui application: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)
+
 ### inodes
 
 The **inodes** contain the list of **blocks** that **contains** the actual **data** of a **file**.  
