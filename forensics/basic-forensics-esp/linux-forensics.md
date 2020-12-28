@@ -330,15 +330,21 @@ Every block group contains the following pieces of information:
 
 ### Ext Optional Features
 
+**Features affect where** the data is located, **how** the data is stored in inodes and some of them might supply **additional metadata** for analysis, therefore features are important in Ext.
+
 Ext has optional features that your OS may or may not support, there are 3 possibilities:
 
 * Compatible
 * Incompatible
 * Compatible Read Only: It can be mounted but not for writing
 
-```bash
+If any of the features is **incompatible and essential** you won't be able to mount the filesystem as the OS won't know how the access the data.
+
+{% hint style="info" %}
 Suspected attacker might have non-standard extensions
-```
+{% endhint %}
+
+**Any utility** that reads the **superblock** will be able to indicate the **features** of a **Ext filesystem**, but you could also use `file -sL /dev/sd*`
 
 ### Superblock
 
