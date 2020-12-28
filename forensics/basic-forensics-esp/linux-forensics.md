@@ -328,7 +328,40 @@ Every block group contains the following pieces of information:
 
 ![](../../.gitbook/assets/image%20%28418%29.png)
 
-The Superblock contains a description of the basic size and shape of this file system. Usually only the Superblock in Block Group 0 is read when the file system is mounted but each Block Group contains a duplicate copy in case of file system corruption.
+### Ext Optional Features
+
+Ext has optional features that your OS may or may not support, there are 3 possibilities:
+
+* Compatible
+* Incompatible
+* Compatible Read Only: It can be mounted but not for writing
+
+```bash
+Suspected attacker might have non-standard extensions
+```
+
+### Superblock
+
+The superblock is the first 1024 bytes from the start, it's repeated in the first block of each group and contains:
+
+* Block size
+* Total blocks
+* Blocks per block group
+* Reserved blocks before the first block group
+* Total inodes
+* Inodes per block group
+* Volume name
+* Last write time
+* Last mount time
+* Path where the file system was last mounted
+* Filesystem status \(clean?\)
+
+It's possible to obtain this information from an Ext filesystem file using:
+
+```bash
+fsstat -o <offsetstart> /pat/to/filesystem-file.ext
+#You can get the <offsetstart> with the "p" command inside fdisk
+```
 
 ### inodes
 
