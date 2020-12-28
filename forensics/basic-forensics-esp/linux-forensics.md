@@ -379,9 +379,14 @@ If the file is big, and inode **may contain pointers** to **other inodes** that 
 
 ![](../../.gitbook/assets/image%20%28423%29.png)
 
+```bash
+ls -ali /bin | sort -n #Get all inode numbers ans sort by them
+```
+
 ### Filesystem View
 
-In order to see the contents of the file system you can use the free tool: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)
+In order to see the contents of the file system you can **use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)  
+Or you can mount it in your linux using `mount` command.
 
 [https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz\#:~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.](https://piazza.com/class_profile/get_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.)
 
