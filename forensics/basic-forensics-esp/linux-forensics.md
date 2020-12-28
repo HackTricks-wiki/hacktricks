@@ -464,6 +464,7 @@ Knowing the inode number you can easily find it's index:
 ```bash
 ls -ali /bin | sort -n #Get all inode numbers and sort by them
 stat /bin/ls #Get the inode information of a file
+istat -o <start offset> /path/to/image.ext 657103 #Get information of that inode inside the given ext file
 ```
 
 ### Filesystem View
