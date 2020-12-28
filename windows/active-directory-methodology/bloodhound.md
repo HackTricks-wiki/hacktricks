@@ -65,7 +65,7 @@ You will be prompted for the database credentials: **neo4j:&lt;Your new password
 
 ### Windows
 
-You can download the [Ingestors from the github](https://github.com/BloodHoundAD/BloodHound/tree/master/Ingestors).  
+You can download the [Ingestors from the github](https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors).  
 They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
 
 ```text
