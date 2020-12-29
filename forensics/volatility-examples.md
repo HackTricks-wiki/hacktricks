@@ -529,6 +529,11 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 #Malfind will search for suspicious structures related to malware
 ./vol.py -f file.dmp windows.driverirp.DriverIrp #Driver IRP hook detection
 ./vol.py -f file.dmp windows.ssdt.SSDT #Check system call address from unexpected addresses
+
+./vol.py -f file.dmp linux.check_afinfo.Check_afinfo #Verifies the operation function pointers of network protocols
+./vol.py -f file.dmp linux.check_creds.Check_creds #Checks if any processes are sharing credential structures
+./vol.py -f file.dmp linux.check_idt.Check_idt #Checks if the IDT has been altered
+./vol.py -f file.dmp linux.check_syscall.Check_syscall #Check system call table for hooks
 ```
 {% endtab %}
 
