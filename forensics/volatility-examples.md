@@ -401,6 +401,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp
 {% tab title="vol3" %}
 ```bash
 ./vol.py -f file.dmp windows.netscan.NetScan
+#For network info of linux use volatility2
 ```
 {% endtab %}
 
@@ -411,6 +412,13 @@ volatility --profile=Win7SP1x86_23418 connections -f file.dmp#XP and 2003 only
 volatility --profile=Win7SP1x86_23418 connscan -f file.dmp#TCP connections 
 volatility --profile=Win7SP1x86_23418 sockscan -f file.dmp#Open sockets
 volatility --profile=Win7SP1x86_23418 sockets -f file.dmp#Scanner for tcp socket objects
+
+volatility --profile=SomeLinux -f file.dmp linux_ifconfig
+volatility --profile=SomeLinux -f file.dmp linux_netstat
+volatility --profile=SomeLinux -f file.dmp linux_netfilter
+volatility --profile=SomeLinux -f file.dmp linux_arp #ARP table
+volatility --profile=SomeLinux -f file.dmp linux_list_raw #Processes using raw sockets (comm between processes)
+volatility --profile=SomeLinux -f file.dmp linux_route_cache
 ```
 {% endtab %}
 {% endtabs %}
@@ -535,6 +543,7 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 ./vol.py -f file.dmp linux.check_idt.Check_idt #Checks if the IDT has been altered
 ./vol.py -f file.dmp linux.check_syscall.Check_syscall #Check system call table for hooks
 ./vol.py -f file.dmp linux.check_modules.Check_modules #Compares module list to sysfs info, if available
+./vol.py -f file.dmp linux.tty_check.tty_check #Checks tty devices for hooks
 ```
 {% endtab %}
 
@@ -545,13 +554,13 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp apihooks #Detect API hooks in 
 volatility --profile=Win7SP1x86_23418 -f file.dmp driverirp #Driver IRP hook detection
 volatility --profile=Win7SP1x86_23418 -f file.dmp ssdt #Check system call address from unexpected addresses
 
-volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_afinfo
-volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_creds
-volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_fop
-volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_idt
-volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_syscall
-volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_modules
-volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_tty
+volatility --profile=SomeLinux -f file.dmp linux_check_afinfo
+volatility --profile=SomeLinux -f file.dmp linux_check_creds
+volatility --profile=SomeLinux -f file.dmp linux_check_fop
+volatility --profile=SomeLinux -f file.dmp linux_check_idt
+volatility --profile=SomeLinux -f file.dmp linux_check_syscall
+volatility --profile=SomeLinux -f file.dmp linux_check_modules
+volatility --profile=SomeLinux -f file.dmp linux_check_tty
 ```
 {% endtab %}
 {% endtabs %}
