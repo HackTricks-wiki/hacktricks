@@ -419,6 +419,9 @@ Inode structure:
 | 0x7A | 2 | GID hi | Upper 16 bits of group ID |
 | 0x7C | 2 | Checksum Io | Lower 16 bits of inode checksum |
 
+"Modify" is the timestamp of the last time the file's _content_ has been mofified. This is often called "_mtime_".  
+"Change" is the timestamp of the last time the file's _inode_ has been changed, like by changing permissions, ownership, file name, number of hard links. It's often called "_ctime_".
+
 Inode structure extended \(Ext4\):
 
 | Offset | Size | Name | Description |
@@ -478,7 +481,7 @@ File Mode
 | **12** | **FIFO** |
 | 11 | Set UID |
 | 10 | Set GID |
-| 9 | Sticky Bit |
+| 9 | Sticky Bit \(without it, anyone with Write & exec perms on a directory can delete and rename files\)  |
 | 8 | Owner Read |
 | 7 | Owner Write |
 | 6 | Owner Exec |
