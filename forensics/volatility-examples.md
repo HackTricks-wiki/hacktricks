@@ -630,6 +630,24 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 {% endtab %}
 {% endtabs %}
 
+### Bash
+
+It's possible to **read from memory the bash history.** You could also dump the _.bash\_history_ file, but it was disabled you will be glad you can use this volatility module
+
+{% tabs %}
+{% tab title="vol3" %}
+```text
+./vol.py -f file.dmp linux.bash.Bash
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```
+volatility --profile=Win7SP1x86_23418 -f file.dmp linux_bash
+```
+{% endtab %}
+{% endtabs %}
+
 ### TimeLine
 
 {% tabs %}
