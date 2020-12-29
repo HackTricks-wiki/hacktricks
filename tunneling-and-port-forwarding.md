@@ -88,7 +88,7 @@ portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
 
 ```bash
 background# meterpreter session
-route add <IP_victim> <Netmask> <Session> # (ex: route add 10.10.10.14 2552.55.255.0 8)
+route add <IP_victim> <Netmask> <Session> # (ex: route add 10.10.10.14 255.255.255.0 8)
 use auxiliary/server/socks4a
 run #Proxy port 1080 by default
 echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
