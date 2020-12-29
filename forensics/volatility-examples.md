@@ -534,6 +534,7 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 ./vol.py -f file.dmp linux.check_creds.Check_creds #Checks if any processes are sharing credential structures
 ./vol.py -f file.dmp linux.check_idt.Check_idt #Checks if the IDT has been altered
 ./vol.py -f file.dmp linux.check_syscall.Check_syscall #Check system call table for hooks
+./vol.py -f file.dmp linux.check_modules.Check_modules #Compares module list to sysfs info, if available
 ```
 {% endtab %}
 
@@ -548,6 +549,9 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_afinfo
 volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_creds
 volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_fop
 volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_idt
+volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_syscall
+volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_modules
+volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_tty
 ```
 {% endtab %}
 {% endtabs %}
