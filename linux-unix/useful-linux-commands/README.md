@@ -112,6 +112,10 @@ apt-file search /usr/bin/file #Needed: apt-get install apt-file
 
 #Protobuf decode https://www.ezequiel.tech/2020/08/leaking-google-cloud-projects.html
 echo "CIKUmMesGw==" | base64 -d | protoc --decode_raw
+
+#Set not removable bit
+sudo chattr +i file.txt
+sudo chattr -i file.txt #Remove the bit so you can delete it
 ```
 
 ## Bash for Windows
