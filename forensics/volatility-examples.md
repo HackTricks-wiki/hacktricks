@@ -233,6 +233,8 @@ python3 vol.py -f file.dmp windows.envars.Envars [--pid <pid>] #Display process 
 {% tab title="vol2" %}
 ```bash
 volatility --profile=PROFILE envars -f file.dmp [--pid <pid>] #Display process environment variables
+
+volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of process. runlevel var means the runlevel where the proc is initated 
 ```
 {% endtab %}
 {% endtabs %}
@@ -470,7 +472,24 @@ volatility --profile=Win7SP1x86_23418 hivedump -o 0x9aad6148 -f file.dmp #Offset
 volatility --profile=Win7SP1x86_23418 hivedump -f file.dmp
 ```
 
-## Files
+## Filesystem
+
+### Mount
+
+{% tabs %}
+{% tab title="vol3" %}
+```bash
+#See vol2
+```
+{% endtab %}
+
+{% tab title="vol2" %}
+```bash
+volatility --profile=SomeLinux -f file.dmp linux_mount
+volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the entire filesystem (if possible)
+```
+{% endtab %}
+{% endtabs %}
 
 ### Scan/dump
 
@@ -484,9 +503,13 @@ volatility --profile=Win7SP1x86_23418 hivedump -f file.dmp
 
 {% tab title="vol2" %}
 ```bash
-volatility --profile=Win7SP1x86_23418 filescan -f ch2.dmp #Scan for files inside the dump
-volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-dir=/tmp -f ch2.dmp #Dump all files
-volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-dir=/tmp -Q 0x000000007dcaa620
+volatility --profile=Win7SP1x86_23418 filescan -f file.dmp #Scan for files inside the dump
+volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-dir=/tmp -f file.dmp #Dump all files
+volatility --profile=Win7SP1x86_23418 dumpfiles -n --dump-dir=/tmp -Q 0x000000007dcaa620 -f file.dmp
+
+volatility --profile=SomeLinux -f file.dmp linux_enumerate_files
+volatility --profile=SomeLinux -f file.dmp linux_find_file -F /path/to/file
+volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /path/to/dump/file
 ```
 {% endtab %}
 {% endtabs %}
