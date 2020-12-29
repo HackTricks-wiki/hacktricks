@@ -543,6 +543,11 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp malfind [-D /tmp] #Find hidden
 volatility --profile=Win7SP1x86_23418 -f file.dmp apihooks #Detect API hooks in process and kernel memory
 volatility --profile=Win7SP1x86_23418 -f file.dmp driverirp #Driver IRP hook detection
 volatility --profile=Win7SP1x86_23418 -f file.dmp ssdt #Check system call address from unexpected addresses
+
+volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_afinfo
+volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_creds
+volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_fop
+volatility --profile=Win7SP1x86_23418 -f file.dmp linux_check_idt
 ```
 {% endtab %}
 {% endtabs %}
