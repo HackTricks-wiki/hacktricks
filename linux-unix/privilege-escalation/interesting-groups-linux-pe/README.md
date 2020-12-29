@@ -102,7 +102,8 @@ So, read the file and try to **crack some hashes**.
 
 Files:`/dev/sd[a-z][1-9]`
 
-```text
+```bash
+df -h #Find where "/" is mounted
 debugfs /dev/sda1
 debugfs: cd /root
 debugfs: ls
