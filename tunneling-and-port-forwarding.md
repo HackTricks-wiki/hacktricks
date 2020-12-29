@@ -98,7 +98,7 @@ Another way:
 
 ```bash
 background #meterpreter session
-use post/windows/manage/autoroute
+use post/multi/manage/autoroute
 set SESSION <session_n>
 set SUBNET <New_net_ip> #Ex: set SUBNET 10.1.13.0
 set NETMASK <Netmask>
