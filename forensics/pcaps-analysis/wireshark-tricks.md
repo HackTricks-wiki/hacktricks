@@ -38,7 +38,7 @@ You can add a column that show the Host HTTP header:
 
 And a column that add the Server name from an initiating HTTPS connection \(**ssl.handshake.type == 1**\):
 
-![](../../.gitbook/assets/image%20%28407%29.png)
+![](../../.gitbook/assets/image%20%28408%29.png)
 
 ## Identifying local hostnames
 

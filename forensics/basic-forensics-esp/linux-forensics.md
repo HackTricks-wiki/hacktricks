@@ -310,7 +310,7 @@ Partition Record Format:
 
 In order to mount a MBR in Linux you first need to get the start offset \(you can use `fdisk` and the the `p` command\)
 
-![](../../.gitbook/assets/image%20%28411%29.png)
+![](../../.gitbook/assets/image%20%28413%29%20%281%29.png)
 
 An then use the following code
 

@@ -145,7 +145,7 @@ You can identify both of them checking the constants. Note that the sha\_init ha
 
 Note the use of more constants
 
-![](../../.gitbook/assets/image%20%28253%29%20%281%29.png)
+![](../../.gitbook/assets/image%20%28253%29%20%281%29%20%281%29.png)
 
 ## CRC \(hash\)
 
