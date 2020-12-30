@@ -584,6 +584,7 @@ volatility --profile=SomeLinux -f file.dmp linux_check_idt
 volatility --profile=SomeLinux -f file.dmp linux_check_syscall
 volatility --profile=SomeLinux -f file.dmp linux_check_modules
 volatility --profile=SomeLinux -f file.dmp linux_check_tty
+volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 ```
 {% endtab %}
 {% endtabs %}
