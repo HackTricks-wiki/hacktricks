@@ -399,6 +399,7 @@
   * [Wireshark tricks](forensics/pcaps-analysis/wireshark-tricks.md)
 * [Volatility - CheatSheet](forensics/volatility-examples.md)
 * [Basic Forensics \(ESP\)](forensics/basic-forensics-esp/README.md)
+  * [Browser Artifacts](forensics/basic-forensics-esp/browser-artifacts.md)
   * [Linux Forensics](forensics/basic-forensics-esp/linux-forensics.md)
   * [USB logs analysis](forensics/basic-forensics-esp/usb-logs-analysis.md)
   * [Desofuscation vbs \(cscript.exe\)](forensics/basic-forensics-esp/desofuscation-vbs-cscript.exe.md)
