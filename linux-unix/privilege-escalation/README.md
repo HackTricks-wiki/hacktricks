@@ -519,7 +519,7 @@ Now, you can execute commands on the container from this `socat` connection.
 
 #### Others
 
-Note that if you have write permissions over the docker socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-pe/#docker-group).
+Note that if you have write permissions over the docker socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-pe/#docker-group). If the [**docker API is listening in a port** you can also be able to compromise it](../../pentesting/2375-pentesting-docker.md#compromising).
 
 ## **D-Bus**
 
