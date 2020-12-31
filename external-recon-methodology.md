@@ -320,6 +320,8 @@ Now that we have built the list of assets of our scope it's time to search for s
 * extension:js jsforce conn.login
 * extension:json googleusercontent client\_secret
 
+You can also search for leaked secrets in all open repository platforms using: [https://searchcode.com/?q=auth\_key](https://searchcode.com/?q=auth_key)
+
 ## [**Pentesting Web Methodology**](pentesting/pentesting-web/)\*\*\*\*
 
 Anyway, the **majority of the vulnerabilities** found by bug hunters resides inside **web applications**, so at this point I would like to talk about a **web application testing methodology**, and you can [**find this information here**](pentesting/pentesting-web/).
