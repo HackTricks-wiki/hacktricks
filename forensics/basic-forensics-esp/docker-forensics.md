@@ -52,6 +52,7 @@ docker exec -it wordpress bash
 When you are given an exported docker image \(probably in `.tar` format\) you can use the following command to **extract the modifications**:
 
 ```bash
+docker save <image> > image.tar #Export the image to a .tar file
 container-diff analyze -t history image.tar
 ```
 
