@@ -166,7 +166,7 @@ grep -E "(user|username|login|pass|password|pw|credentials)[=:]" /etc/fstab /etc
 Enumerate useful binaries
 
 ```bash
-which nmap aws nc ncat netcat nc.traditional wget curl ping gcc g++ make gdb base64 socat python python2 python3 python2.7 python2.6 python3.6 python3.7 perl php ruby xterm doas sudo fetch docker lxc rkt kubectl 2>/dev/null
+which nmap aws nc ncat netcat nc.traditional wget curl ping gcc g++ make gdb base64 socat python python2 python3 python2.7 python2.6 python3.6 python3.7 perl php ruby xterm doas sudo fetch docker lxc ctr runc rkt kubectl 2>/dev/null
 ```
 
 Also, check if **any compiler is installed**. This is useful if you need to use some kernel exploit as it's recommended to compile it in the machine where you are going to use it \(or in one similar\)
@@ -520,6 +520,18 @@ Now, you can execute commands on the container from this `socat` connection.
 #### Others
 
 Note that if you have write permissions over the docker socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-pe/#docker-group). If the [**docker API is listening in a port** you can also be able to compromise it](../../pentesting/2375-pentesting-docker.md#compromising).
+
+### Containerd \(ctr\) privilege escalation
+
+If you find that you can use the **`ctr`** command read the following page as **you may be able to abuse it to escalate privileges**:
+
+{% page-ref page="containerd-ctr-privilege-escalation.md" %}
+
+### **RunC** privilege escalation
+
+If you find that you can use the **`runc`** command read the following page as **you may be able to abuse it to escalate privileges**:
+
+{% page-ref page="runc-privilege-escalation.md" %}
 
 ## **D-Bus**
 

