@@ -42,3 +42,69 @@ Silver ticket events ID \(more stealth than golden ticket\):
 
 \*\*\*\*[**More information about Silver Tickets in ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)\*\*\*\*
 
+## Available Services
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align:left">Service Type</th>
+      <th style="text-align:left">Service Silver Tickets</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align:left">WMI</td>
+      <td style="text-align:left">
+        <p>HOST</p>
+        <p>RPCSS</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left">PowerShell Remoting</td>
+      <td style="text-align:left">
+        <p>HOST</p>
+        <p>HTTP</p>
+        <p>Depending on OS also:</p>
+        <p>WSMAN</p>
+        <p>RPCSS</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left">WinRM</td>
+      <td style="text-align:left">
+        <p>HOST</p>
+        <p>HTTP</p>
+        <p>In some occasions you can just ask for: WINRM</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Scheduled Tasks</td>
+      <td style="text-align:left">HOST</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Windows File Share, also psexec</td>
+      <td style="text-align:left">CIFS</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">LDAP operations, included DCSync</td>
+      <td style="text-align:left">LDAP</td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Windows Remote Server Administration Tools</td>
+      <td style="text-align:left">
+        <p>RPCSS</p>
+        <p>LDAP</p>
+        <p>CIFS</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left">Golden Tickets</td>
+      <td style="text-align:left">krbtgt</td>
+    </tr>
+  </tbody>
+</table>
+
+Using **Rubeus** you may **ask for all** these tickets using the parameter:
+
+* `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
+
