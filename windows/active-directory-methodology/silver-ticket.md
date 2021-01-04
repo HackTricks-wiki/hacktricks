@@ -188,5 +188,3 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 
 {% page-ref page="dcsync.md" %}
 
-
-
