@@ -62,6 +62,12 @@ Then, you can **decompress** the image and **access the blobs** to search for su
 tar -xf image.tar
 ```
 
+In order to find added/modified files in docker images you can also use the [**dive**](https://github.com/wagoodman/dive) utility:
+
+![](../../.gitbook/assets/image%20%28425%29.png)
+
+This allow you to **navigate through the different blobs of docker images** and check which files were modified/added. **Red** means added and **yellow** means modified. Use **tab** to move to the other view and **space** to to collapse/open folders.
+
 ## Credentials from memory
 
 Note that when you run a docker container inside a host **you can see the processes running on the container from the host** just running `ps -ef`

