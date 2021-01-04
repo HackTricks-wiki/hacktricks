@@ -15,7 +15,7 @@
    2. Prepare the **web page** to steal the credentials
 4. Launch the campaign!
 
-## Generate similar domain names
+## Generate similar domain names or buy a trusted domain
 
 ### Domain Name Variation Techniques
 
@@ -33,16 +33,24 @@
 * **Bitsquatting:** It anticipates a small portion of systems encountering hardware errors, resulting in the mutation of the resolved domain name by 1 bit. \(e.g., xeltser.com\).
 * **Missing dot**: Append the TLD to the domain name. \(e.g., zelstercom.com\)
 
-### Automatic Tools
+#### Automatic Tools
 
 * \*\*\*\*[**dnstwist**](https://github.com/elceef/dnstwist)\*\*\*\*
 * [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)\*\*\*\*
 
-### **Websites**
+#### **Websites**
 
 * [https://dnstwist.it/](https://dnstwist.it/)
 * [https://dnstwister.report/](https://dnstwister.report/)
 * [https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/](https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/)
+
+### Buy a trusted domain
+
+You can search in [https://www.expireddomains.net/](https://www.expireddomains.net/) for a expired domain that you could use.  
+In order to make sure that the expired domain that you are going to buy **has already a good SEO** you could search how is it categorized in:
+
+* [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
+* [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
 ## Discovering Emails
 
