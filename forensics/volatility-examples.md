@@ -419,7 +419,7 @@ volatility --profile=SomeLinux -f file.dmp linux_ifconfig
 volatility --profile=SomeLinux -f file.dmp linux_netstat
 volatility --profile=SomeLinux -f file.dmp linux_netfilter
 volatility --profile=SomeLinux -f file.dmp linux_arp #ARP table
-volatility --profile=SomeLinux -f file.dmp linux_list_raw #Processes using raw sockets (comm between processes)
+volatility --profile=SomeLinux -f file.dmp linux_list_raw #Processes using promiscuous raw sockets (comm between processes)
 volatility --profile=SomeLinux -f file.dmp linux_route_cache
 ```
 {% endtab %}
