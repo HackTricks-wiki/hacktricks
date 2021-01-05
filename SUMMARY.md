@@ -403,6 +403,8 @@
   * [Wireshark tricks](forensics/pcaps-analysis/wireshark-tricks.md)
 * [Volatility - CheatSheet](forensics/volatility-examples.md)
 * [Basic Forensics \(ESP\)](forensics/basic-forensics-esp/README.md)
+  * [Image Adquisition & Mount](forensics/basic-forensics-esp/image-adquisition-and-mount.md)
+  * [File Extraction](forensics/basic-forensics-esp/file-extraction.md)
   * [Docker Forensics](forensics/basic-forensics-esp/docker-forensics.md)
   * [Browser Artifacts](forensics/basic-forensics-esp/browser-artifacts.md)
   * [Linux Forensics](forensics/basic-forensics-esp/linux-forensics.md)

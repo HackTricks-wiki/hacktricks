@@ -84,6 +84,63 @@ dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<c
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
 
+### Disk Image pre-analysis
+
+Imaging that you receive a disk image with no more data.
+
+```bash
+#Find that it's actually a disk imageusing "file" command
+file disk.img 
+disk.img: Linux rev 1.0 ext4 filesystem data, UUID=59e7a736-9c90-4fab-ae35-1d6a28e5de27 (extents) (64bit) (large files) (huge files)
+
+#Check which type of disk image it's
+img_stat -t evidence.img 
+raw
+#You can list supported types with
+img_stat -i list
+Supported image format types:
+        raw (Single or split raw file (dd))
+        aff (Advanced Forensic Format)
+        afd (AFF Multiple File)
+        afm (AFF with external metadata)
+        afflib (All AFFLIB image formats (including beta ones))
+        ewf (Expert Witness Format (EnCase))
+
+#Data of the image
+fsstat -i raw -f ext4 disk.img 
+FILE SYSTEM INFORMATION
+--------------------------------------------
+File System Type: Ext4
+Volume Name: 
+Volume ID: 162850f203fd75afab4f1e4736a7e776
+
+Last Written at: 2020-02-06 06:22:48 (UTC)
+Last Checked at: 2020-02-06 06:15:09 (UTC)
+
+Last Mounted at: 2020-02-06 06:15:18 (UTC)
+Unmounted properly
+Last mounted on: /mnt/disk0
+
+Source OS: Linux
+[...]
+
+#ls inside the image
+fls -i raw -f ext4 disk.img
+d/d 11: lost+found
+d/d 12: Documents
+d/d 8193:       folder1
+d/d 8194:       folder2
+V/V 65537:      $OrphanFiles
+
+#ls inside folder
+fls -i raw -f ext4 disk.img 12
+r/r 16: secret.txt
+
+#cat file inside image
+icat -i raw -f ext4 disk.img 16
+ThisisTheMasterSecret
+```
+
 ## Search for known Malware
 
 ### Modified System Files
