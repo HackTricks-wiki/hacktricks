@@ -2,9 +2,9 @@
 
 ## Automatic Payloads Creation & Other lists
 
-### [htlm\_theft](https://github.com/Greenwolf/ntlm_theft)
+### [ntlm\_theft](https://github.com/Greenwolf/ntlm_theft)
 
-This tool will **create several documents/files** that if accessed by the user somehow they will s**tart a NTLM authentication with the attacker**.
+This tool will **create several documents/files** that if accessed by the user somehow they will **start a NTLM authentication with the attacker**.
 
 ### [All\_NTLM-Leak](https://github.com/Gl3bGl4z/All_NTLM_leak)
 
