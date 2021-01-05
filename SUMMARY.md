@@ -397,6 +397,7 @@
 * [Malware Analysis](forensics/malware-analysis.md)
 * [Memory dump analysis](forensics/memory-dump-analysis.md)
 * [Pcaps analysis](forensics/pcaps-analysis/README.md)
+  * [Wifi Pcap Analysis](forensics/pcaps-analysis/wifi-pcap-analysis.md)
   * [USB Keyboard pcap analysis](forensics/pcaps-analysis/usb-keyboard-pcap-analysis.md)
   * [DNSCat pcap analysis](forensics/pcaps-analysis/dnscat-exfiltration.md)
   * [Wireshark tricks](forensics/pcaps-analysis/wireshark-tricks.md)
