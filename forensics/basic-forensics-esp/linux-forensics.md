@@ -327,8 +327,35 @@ You can check the inodes of the files inside a folder using `ls -lai /bin |sort 
 Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modify at the **same time** of the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
 {% endhint %}
 
-  
+## Compare files of different filesystem versions
 
+#### Find added files
+
+```bash
+git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/
+```
+
+#### Find Modified content
+
+```bash
+git diff --no-index --diff-filter=M _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/ | grep -E "^\+" | grep -v "Installed-Time"
+```
+
+#### Find deleted files
+
+```bash
+git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/
+```
+
+#### Other filters
+
+**`-diff-filter=[(A|C|D|M|R|T|U|X|B)…​[*]]`**
+
+Select only files that are Added \(`A`\), Copied \(`C`\), Deleted \(`D`\), Modified \(`M`\), Renamed \(`R`\), have their type \(i.e. regular file, symlink, submodule, …​\) changed \(`T`\), are Unmerged \(`U`\), are Unknown \(`X`\), or have had their pairing Broken \(`B`\). Any combination of the filter characters \(including none\) can be used. When `*` \(All-or-none\) is added to the combination, all paths are selected if there is any file that matches other criteria in the comparison; if there is no file that matches other criteria, nothing is selected.
+
+Also, **these upper-case letters can be downcased to exclude**. E.g. `--diff-filter=ad` excludes added and deleted paths.
+
+Note that not all diffs can feature all types. For instance, diffs from the index to the working tree can never have Added entries \(because the set of paths included in the diff is limited by what is in the index\). Similarly, copied and renamed entries cannot appear if detection for those types is disabled.
 
 ## References
 
