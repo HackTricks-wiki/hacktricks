@@ -61,6 +61,8 @@ Generation Complete.
 
 ### [All\_NTLM-Leak](https://github.com/Gl3bGl4z/All_NTLM_leak)
 
+> Cheatsheet
+
 This is a list of techniques to force NTLM authentications to steal credentials from the victim.
 
 ### Force NTLM Privileged Authentication
