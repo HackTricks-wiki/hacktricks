@@ -146,7 +146,7 @@ If you want to **know** about my **latest modifications**/**additions** or you h
 If you want to **share some tricks with the community** you can also submit **pull requests** to ****[**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) ****that will be reflected in this book.  
 Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
 
-![](../.gitbook/assets/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67%20%286%29%20%284%29%20%284%29.png)
+![](../.gitbook/assets/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67%20%286%29%20%284%29%20%285%29.png)
 
 ​[**Buy me a coffee here**](https://www.buymeacoffee.com/carlospolop)\*\*\*\*
 
