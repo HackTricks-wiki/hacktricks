@@ -234,7 +234,8 @@ On Linux systems, kernel modules are commonly used as rootkit components to malw
 There are several configuration files that Linux uses to automatically launch an executable when a user logs into the system that may contain traces of malware.
 
 * _**/etc/profile.d/\***_ , _**/etc/profile**_ , _**/etc/bash.bashrc**_ are executed when any user account logs in.
-* _**∼/.bashrc**_ , _**∼/.bash\_profile**_ , _**∼/.config/autostart**_ are executed when the specific user logs in.
+* _**∼/.bashrc**_ , _**∼/.bash\_profile**_ , _**~/.profile**_ ,  _**∼/.config/autostart**_ are executed when the specific user logs in.
+* _**/etc/rc.local**_ It is traditionally executed after all the normal system services are started, at the end of the process of switching to a multiuser runlevel.
 
 ## Examine Logs
 

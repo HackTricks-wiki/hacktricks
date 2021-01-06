@@ -329,15 +329,18 @@ Volatility allows to check to which process does a string belongs to.
 {% tabs %}
 {% tab title="vol3" %}
 ```bash
-strings -n6 file.dmp > /tmp/strings.txt
-./vol.py -f /tmp/file.dmp windows.strings.Strings --strings-file /tmp/strings.txt
+strings file.dmp > /tmp/strings.txt
+./vol.py -f /tmp/file.dmp windows.strings.Strings --string-file /tmp/strings.txt
 ```
 {% endtab %}
 
 {% tab title="vol2" %}
 ```bash
-strings -n6 file.dmp > /tmp/strings.txt
-volatility -f /tmp/file.dmp windows.strings.Strings --strings-file /tmp/strings.txt
+strings file.dmp > /tmp/strings.txt
+volatility -f /tmp/file.dmp windows.strings.Strings --string-file /tmp/strings.txt
+
+volatility -f /tmp/file.dmp --profile=Win81U1x64 memdump -p 3532 --dump-dir .
+strings 3532.dmp > strings_file
 ```
 {% endtab %}
 {% endtabs %}
@@ -359,7 +362,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 {% endtab %}
 {% endtabs %}
 
-## UserAssist
+### UserAssist
 
  **Windows** systems maintain a set of **keys** in the registry database \(**UserAssist keys**\) to keep track of programs that executed. The number of executions and last execution date and time are available in these **keys**.
 
@@ -657,6 +660,7 @@ Download it from [https://github.com/tomchop/volatility-autoruns](https://github
 {% tab title="vol2" %}
 ```bash
 volatility --profile=Win7SP1x86_23418 mutantscan -f file.dmp
+volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 ```
 {% endtab %}
 {% endtabs %}
