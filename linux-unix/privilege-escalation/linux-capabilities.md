@@ -36,9 +36,12 @@ capsh --print
 | CAP\_SETPCAP | Helps to transferring and removal of current set to any PID |
 | CAP\_IPC\_LOCK | This helps to lock memory |
 | CAP\_MAC\_ADMIN | Allow MAC configuration or state changes |
-| CAP\_NET\_RAW | Use RAW and PACKET sockets |
+| **CAP\_NET\_RAW** | Use RAW and PACKET sockets \(sniff traffic\) |
 | CAP\_NET\_BIND\_SERVICE | SERVICE Bind a socket to internet domain privileged ports |
 | CAP\_SYS\_CHROOT | Ability to call chroot\(\) |
+| **CAP\_SYS\_ADMIN** | Mount/Unmount filesystems |
+| **CAP\_SYS\_PTRACE** | Debug processes \(inject shellcodes\) |
+| **CAP\_SYS\_MODULE** | Insert kernel modules |
 
 ### Capabilities Sets
 
