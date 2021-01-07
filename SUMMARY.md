@@ -24,6 +24,7 @@
 
 * [Checklist - Linux Privilege Escalation](linux-unix/linux-privilege-escalation-checklist.md)
 * [Linux Privilege Escalation](linux-unix/privilege-escalation/README.md)
+  * [Seccomp](linux-unix/privilege-escalation/seccomp.md)
   * [Containerd \(ctr\) Privilege Escalation](linux-unix/privilege-escalation/containerd-ctr-privilege-escalation.md)
   * [Docker Breakout](linux-unix/privilege-escalation/docker-breakout.md)
   * [electron/CEF/chromium debugger abuse](linux-unix/privilege-escalation/electron-cef-chromium-debugger-abuse.md)
