@@ -24,7 +24,6 @@
 
 * [Checklist - Linux Privilege Escalation](linux-unix/linux-privilege-escalation-checklist.md)
 * [Linux Privilege Escalation](linux-unix/privilege-escalation/README.md)
-  * [Seccomp](linux-unix/privilege-escalation/seccomp.md)
   * [Containerd \(ctr\) Privilege Escalation](linux-unix/privilege-escalation/containerd-ctr-privilege-escalation.md)
   * [Docker Breakout](linux-unix/privilege-escalation/docker-breakout.md)
   * [electron/CEF/chromium debugger abuse](linux-unix/privilege-escalation/electron-cef-chromium-debugger-abuse.md)
@@ -38,6 +37,7 @@
   * [NFS no\_root\_squash/no\_all\_squash misconfiguration PE](linux-unix/privilege-escalation/nfs-no_root_squash-misconfiguration-pe.md)
   * [Payloads to execute](linux-unix/privilege-escalation/payloads-to-execute.md)
   * [RunC Privilege Escalation](linux-unix/privilege-escalation/runc-privilege-escalation.md)
+  * [Seccomp](linux-unix/privilege-escalation/seccomp.md)
   * [Splunk LPE and Persistence](linux-unix/privilege-escalation/splunk-lpe-and-persistence.md)
   * [SSH Forward Agent exploitation](linux-unix/privilege-escalation/ssh-forward-agent-exploitation.md)
   * [Socket Command Injection](linux-unix/privilege-escalation/socket-command-injection.md)

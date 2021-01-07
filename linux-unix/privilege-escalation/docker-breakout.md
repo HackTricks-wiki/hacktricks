@@ -439,6 +439,12 @@ capsh --print
 #You can abuse the SYS_MODULE capability
 ```
 
+## Seccomp in Docker
+
+This is not a technique to breakout from a Docker container but a security feature that Docker uses and you should know about:
+
+{% page-ref page="seccomp.md" %}
+
 ## Use containers securely
 
 Docker restricts and limits containers by default. Loosening these restrictions may create security issues, even without the full power of the `--privileged` flag. It is important to acknowledge the impact of each additional permission, and limit permissions overall to the minimum necessary.
