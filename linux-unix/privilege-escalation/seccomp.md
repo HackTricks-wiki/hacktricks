@@ -97,3 +97,23 @@ void main(void) {
 ```
 {% endcode %}
 
+## Seccomp in Docker
+
+**Seccomp-bpf** is supported by **Docker** to restrict the **syscalls** from the containers effectively decreasing the surface area. You can find the **syscalls blocked** by **default** in [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) and the **default seccomp profile** can be found here [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json).  
+You can run a docker container with a **different seccomp** policy with:
+
+```bash
+docker run --rm \
+             -it \
+             --security-opt seccomp=/path/to/seccomp/profile.json \
+             hello-world
+```
+
+If you want for example to **forbid** a container of executing some **syscall** like `uname` you could download the default profile from [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) and just **remove the `uname` string from the list**.  
+If you wan to make sure that **some binary doesn't work inside a a docker container** you could use strace to list the syscalls the binary is using and then forbid them.  
+In the following example the **syscalls** of `uname` are discovered:
+
+```bash
+ocker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
+```
+
