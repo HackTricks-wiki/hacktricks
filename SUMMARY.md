@@ -297,7 +297,7 @@
 
 ## Pentesting Web
 
-* [2FA Bypass](pentesting-web/2fa-bypass.md)
+* [2FA/OTP Bypass](pentesting-web/2fa-bypass.md)
 * [Abusing hop-by-hop headers](pentesting-web/abusing-hop-by-hop-headers.md)
 * [Bypass Payment Process](pentesting-web/bypass-payment-process.md)
 * [Captcha Bypass](pentesting-web/captcha-bypass.md)
