@@ -441,9 +441,15 @@ capsh --print
 
 ## Seccomp in Docker
 
-This is not a technique to breakout from a Docker container but a security feature that Docker uses and you should know about:
+This is not a technique to breakout from a Docker container but a security feature that Docker uses and you should know about as it might prevent you from breaking out from docker:
 
 {% page-ref page="seccomp.md" %}
+
+## AppArmor in Docker
+
+This is not a technique to breakout from a Docker container but a security feature that Docker uses and you should know about as it might prevent you from breaking out from docker:
+
+{% page-ref page="apparmor.md" %}
 
 ## Use containers securely
 
