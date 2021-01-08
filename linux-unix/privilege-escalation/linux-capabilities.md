@@ -1150,6 +1150,35 @@ pgid = os.getpgid(341)
 os.killpg(pgid, signal.SIGKILL)
 ```
 
+### CAP\_NET\_BIND\_SERVICE
+
+**This means that it's possible to listen in any port \(even in privileged ones\).** You cannot escalate privileges directly with this capability.
+
+#### Example with binary
+
+If **`python`** has this capability it will be able to listen on any port and even connect from it to any other port \(some services require connections from specific privileges ports\)
+
+{% tabs %}
+{% tab title="Listen" %}
+```python
+import socket
+s=socket.socket()
+s.bind(('0.0.0.0', 80))
+s.listen(1)
+conn, addr = s.accept()
+```
+{% endtab %}
+
+{% tab title="Connect" %}
+```python
+import socket
+s=socket.socket()
+s.bind(('0.0.0.0',500))
+s.connect(('10.10.10.10',500))
+```
+{% endtab %}
+{% endtabs %}
+
 ## References
 
 * [https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
