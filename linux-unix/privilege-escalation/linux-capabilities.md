@@ -923,7 +923,9 @@ I exploit needs to find a pointer to something mounted on the host. The original
 
 ### CAP\_DAC\_OVERRIDE
 
- **This mean that you can bypass write permission checks on any file, so you can write any file.**
+**This mean that you can bypass write permission checks on any file, so you can write any file.**
+
+There are a lot of files you can **overwrite to escalate privileges,** [**you can get ideas from here**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
 
 #### Example with binary
 
@@ -1159,6 +1161,8 @@ os.system("/bin/bash")
 ### CAP\_SETGID
 
 **This means that it's possible to set the effective group id of the created process.**
+
+There are a lot of files you can **overwrite to escalate privileges,** [**you can get ideas from here**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
 
 #### Example with binary
 

