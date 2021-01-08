@@ -38,6 +38,7 @@ int main(){
 * Add user with password to _/etc/passwd_
 * Change password inside _/etc/shadow_
 * Add user to sudoers in _/etc/sudoers_
+* Abuse docker through the docker socket, usually in _/run/docker.sock_ or _/var/run/docker.sock_
 
 ### Overwriting a library
 
