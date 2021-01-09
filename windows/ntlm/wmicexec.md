@@ -19,6 +19,10 @@ wmic group list /format:list
 wmic sysaccount list /format:list  
 ```
 
+```bash
+ Get-WmiObject Win32_Processor -ComputerName 10.0.0.182 -Credential $cred
+```
+
 ## **Manual Remote WMI Querying**
 
 For example, here's a very stealthy way to discover local admins on a remote machine \(note that domain is the computer name\):
