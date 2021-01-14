@@ -4,7 +4,7 @@
 
 ### The battery
 
-Most of the **motherbords** have a **battery**. I you **remove** it **30min** the settings of the BIOS will be **restarted** \(password included\).
+Most of the **motherbords** have a **battery**. If you **remove** it **30min** the settings of the BIOS will be **restarted** \(password included\).
 
 ### Jumper CMOS
 
