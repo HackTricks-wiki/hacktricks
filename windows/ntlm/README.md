@@ -27,7 +27,7 @@ Execute _secpol.msc_ -&gt; Local policies -&gt; Security Options -&gt; Network S
 This will set the level 5:
 
 ```text
-reg add HKLM\SYSTEM\CurrentControlSet\Lsa\ /v lmcompatibilitylevel /t REG_DWORD /d 5 /f
+reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t REG_DWORD /d 5 /f
 ```
 
 Possible values:
