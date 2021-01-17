@@ -16,7 +16,7 @@ If you could **run** for example a **Kali** Linux from a Live CD/USB you could u
 
 ### Online BIOS password recovery
 
-Put the password of the BIOS **3 times wrong**, then the BIOS will **show an error messag**e and it will be blocked.   
+Put the password of the BIOS **3 times wrong**, then the BIOS will **show an error messag**e and it will be blocked.  
 Visit the page [https://bios-pw.org](https://bios-pw.org) and **introduce the error code** shown by the BIOS and you could be lucky and get a **valid password** \(the **same search could show you different passwords and more than 1 could be valid**\).
 
 ## UEFI
@@ -131,8 +131,4 @@ To check the valid recovery keys you can execute:
 ```text
 manage-bde -protectors -get c:
 ```
-
-
-
-
 
