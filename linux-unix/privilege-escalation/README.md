@@ -1083,7 +1083,7 @@ screen -ls
 **Attach to a session**
 
 ```bash
-screen -dr <session> #The -d is to detacche whoeevr is attached to it
+screen -dr <session> #The -d is to detacche whoever is attached to it
 screen -dr 3350.foo #In the example of the image
 ```
 

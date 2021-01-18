@@ -85,7 +85,7 @@ For example, let's compile and execute manually a function that reads _./poc.py_
 #Locally
 def read():
     return open("./poc.py",'r').read()
-    
+
 read.__code__.co_code
 't\x00\x00d\x01\x00d\x02\x00\x83\x02\x00j\x01\x00\x83\x00\x00S'
 ```
@@ -121,7 +121,7 @@ f(42)
 
 ## Builtins
 
-[Builtins functions of python2  
+[Builtins functions of python2    
 ](https://docs.python.org/2/library/functions.html)[Builtins functions of python3](https://docs.python.org/3/library/functions.html)
 
 If you can access to the**`__builtins__`** object you can import libraries \(notice that you could also use here other string representation showed in last section\):
@@ -268,7 +268,7 @@ dis.dis(get_flag)
   8     >>   40 LOAD_CONST               6 ('Nope')
              43 RETURN_VALUE        
              44 LOAD_CONST               0 (None)
-             47 RETURN_VALUE        
+             47 RETURN_VALUE
 ```
 
 Notice that **if you cannot import `dis` in the python sandbox** you can obtain the **bytecode** of the function \(`get_flag.func_code.co_code`\) and **disassemble** it locally. You won't see the content of the variables being loaded \(`LOAD_CONST`\) but you can guess them from \(`get_flag.func_code.co_consts`\) because `LOAD_CONST`also tells the offset of the variable being loaded.
@@ -292,7 +292,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
     >>   40 LOAD_CONST          6 (6)
          43 RETURN_VALUE   
          44 LOAD_CONST          0 (0)
-         47 RETURN_VALUE   
+         47 RETURN_VALUE
 ```
 
 ## References
@@ -301,7 +301,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 * [https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
 * [https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/](https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/)
 * [https://gynvael.coldwind.pl/n/python\_sandbox\_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
-* [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
+* [https://nedbatchelder.com/blog/201206/eval\_really\_is\_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 
 \*\*\*\*
 
