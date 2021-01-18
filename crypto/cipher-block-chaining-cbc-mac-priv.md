@@ -24,11 +24,17 @@ With CBC-MAC, we can generate two signatures `t` and `t'` for the messages `m` a
 
 To keep things simple, we are going to work on a single block for each message.
 
-We can see below how signing both messages works \(NB: both signatures are completely independent from each other\):![](https://pentesterlab.com/cbc-mac/cbc-mac-1.png)
+We can see below how signing both messages works \(NB: both signatures are completely independent from each other\):
 
-If we try to concatenate those messages, the signature is no longer valid \(since `t` is now the IV for the second block where it was only NULL before\):![](https://pentesterlab.com/cbc-mac/cbc-mac-2.png)
+![](https://pentesterlab.com/cbc-mac/cbc-mac-1.png)
 
-However, if we XOR `m'` and `t`, the signature is now `t'`:![](https://pentesterlab.com/cbc-mac/cbc-mac-3.png)
+If we try to concatenate those messages, the signature is no longer valid \(since `t` is now the IV for the second block where it was only NULL before\):
+
+![](https://pentesterlab.com/cbc-mac/cbc-mac-2.png)
+
+However, if we XOR `m'` and `t`, the signature is now `t'`:
+
+![](https://pentesterlab.com/cbc-mac/cbc-mac-3.png)
 
 ## Implementation
 
