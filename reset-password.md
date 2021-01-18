@@ -1,4 +1,4 @@
-# Reset/Forgoten Password Bypass
+# Reset/Forgotten Password Bypass
 
 ## HTTP Headers
 
