@@ -14,5 +14,5 @@ And this is the most important part of the configuration:
 
 \(Please, note that if you try to pack your own binary you will be able to modify these values\)
 
-From here just click on **nexts butons** and the last **build button and your installer/wrapper will be generated.**
+From here just click on **next buttons** and the last **build button and your installer/wrapper will be generated.**
 
