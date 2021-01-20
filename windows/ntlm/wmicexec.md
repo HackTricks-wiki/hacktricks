@@ -8,7 +8,9 @@ Wmi allows to open process in hosts where you know username/\(password/Hash\). T
 
 ## WMI Basics
 
-**Namespace**: WMI is divided into a directory-style hierarchy, the \root container, with other directories under \root. These "directory paths" are called namespaces.  
+### Namespace
+
+WMI is divided into a directory-style hierarchy, the \root container, with other directories under \root. These "directory paths" are called namespaces.  
 List namespaces:
 
 ```bash
@@ -29,7 +31,9 @@ gwmwi -List -Recurse #If no namespace is specified, by default is used: "root\ci
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 
-**Classes:** The WMI class name eg: win32\_process is a starting point for any WMI action. We always need to know a Class Name and the Namespace where it is located.  
+### **Classes**
+
+The WMI class name eg: win32\_process is a starting point for any WMI action. We always need to know a Class Name and the Namespace where it is located.  
 List classes starting with `win32`:
 
 ```bash
@@ -45,7 +49,25 @@ Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
 
-**Method:** WMI classes have one or more functions that can be executed. These functions are called methods
+### Methods
+
+WMI classes have one or more functions that can be executed. These functions are called methods.
+
+```bash
+#Load a class using [wmiclass], leist methods and call one
+$c = [wmiclass]"win32_share"
+$c.methods
+#Find information about the class in https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-share
+$c.Create("c:\share\path","name",0,$null,"My Description")
+#If returned value is "0", then it was successfully executed
+```
+
+```bash
+#List methods
+Get-WmiObject -Query 'Select * From Meta_Class WHERE __Class LIKE "win32%"' | Where-Object { $_.PSBase.Methods } | Select-Object Name, Methods
+#Call create method from win32_share class
+Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
+```
 
 ## WMI Enumeration
 
