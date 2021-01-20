@@ -96,7 +96,7 @@ azscan #Run, login before with `az login`
 
 ## Office365
 
-You need **Global Admin Reader**
+You need **Global Admin** or at least **Global Admin Reader** \(but note that Global Admin Reader is a little bit limited\). However, those limitations appear in some PS modules and can be bypassed accessing the features via the web application.
 
 ## AWS
 
