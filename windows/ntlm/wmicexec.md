@@ -6,7 +6,75 @@ Wmi allows to open process in hosts where you know username/\(password/Hash\). T
 
 **dcomexec.py:** This script gives a semi-interactive shell similar to wmiexec.py, but using different DCOM endpoints \(ShellBrowserWindow DCOM object\). Currently, it supports MMC20. Application, Shell Windows and Shell Browser Window objects. \(from [here](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)\)
 
-## WMIC
+## WMI Basics
+
+**Namespace**: WMI is divided into a directory-style hierarchy, the \root container, with other directories under \root. These "directory paths" are called namespaces.  
+List namespaces:
+
+```bash
+#Get Root namespaces
+gwmi -namespace "root" -Class "__Namespace" | Select Name
+
+#List all namespaces (you may need administrator to list all of them)
+Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | select __Namespace | sort __Namespace
+
+#List namespaces inside "root\cimv2"
+Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
+```
+
+List classes of a namespace with:
+
+```bash
+gwmwi -List -Recurse #If no namespace is specified, by default is used: "root\cimv2"
+gwmi -Namespace "root/microsoft" -List -Recurse
+```
+
+**Classes:** The WMI class name eg: win32\_process is a starting point for any WMI action. We always need to know a Class Name and the Namespace where it is located.  
+List classes starting with `win32`:
+
+```bash
+Get-WmiObject -Recurse -List -class win32* | more #If no namespace is specified, by default is used: "root\cimv2"
+gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
+```
+
+Call a class:
+
+```bash
+#When you don't specify a namespaces by default is "root/cimv2"
+Get-WmiObject -Class win32_share
+Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
+```
+
+**Method:** WMI classes have one or more functions that can be executed. These functions are called methods
+
+## WMI Enumeration
+
+### Check WMI service
+
+This how you can check if WMI service is running:
+
+```bash
+#Check if WMI service is running
+Get-Service Winmgmt
+Status   Name               DisplayName
+------   ----               -----------
+Running  Winmgmt            Windows Management Instrumentation
+
+#From CMD
+net start | findstr "Instrumentation"
+```
+
+### System Information
+
+```bash
+Get-WmiObject -ClassName win32_operatingsystem | select * | more
+```
+
+### Process Information
+
+```bash
+Get-WmiObject win32_process | Select Name, Processid
+```
 
 From an attacker's perspective, WMI can be very valuable in enumerating sensitive information about a system or the domain.
 
