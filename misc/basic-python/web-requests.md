@@ -36,7 +36,7 @@ filedict = {"<FILE_PARAMETER_NAME>" : ("filename.png", open("filename.png", 'rb'
 pr = requests.post(url, data={"submit": "submit"}, files=filedict)
 
 #Useful for presenting results in boolean/timebased injections
-sys.stdout.write(f"\rflag: {flag}{char}")
+print(f"\rflag: {flag}{char}", end="")
 ```
 
 ## Python cmd to exploit a RCE
