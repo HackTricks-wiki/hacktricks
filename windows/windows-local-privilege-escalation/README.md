@@ -223,7 +223,7 @@ Just execute the created binary to escalate privileges.
 
 ### MSI Wrapper
 
-Read this tutorial to learn how to create a MSI wrapper using this tools:
+Read this tutorial to learn how to create a MSI wrapper using this tools. Note that you can wrap a "**.bat**" file if you **just** want to **execute** **command lines**
 
 {% page-ref page="msi-wrapper.md" %}
 
