@@ -213,7 +213,7 @@ If you have a meterpreter session you can automate this technique using the modu
 
 ### PowerUP
 
-Use the `Write-UserAddMSI` command from power-up to create inside the current directory a Windows MSI binary to escalate privileges:
+Use the `Write-UserAddMSI` command from power-up to create inside the current directory a Windows MSI binary to escalate privileges. This script writes out a precompiled MSI installer that prompts for a user/group addition \(so you will need GIU access\):
 
 ```text
 Write-UserAddMSI
