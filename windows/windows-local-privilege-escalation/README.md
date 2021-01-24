@@ -227,6 +227,10 @@ Read this tutorial to learn how to create a MSI wrapper using this tools. Note t
 
 {% page-ref page="msi-wrapper.md" %}
 
+### Create MSI with WIX
+
+{% page-ref page="create-msi-with-wix.md" %}
+
 ### MSI Installation
 
 To execute the **installation** of the **malicious `.msi`** file in **background:**
