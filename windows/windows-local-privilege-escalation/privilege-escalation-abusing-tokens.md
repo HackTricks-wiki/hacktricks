@@ -10,7 +10,7 @@ If you **don't know what are Windows Access Tokens** read this page before conti
 
 ### SeImpersonatePrivilege \(3.1.1\)
 
-Any process holding this privilege can **impersonate** \(but not create\) any **token** for which it is able to gethandle. You can get a **privileged token** from a **Windows service** \(DCOM\) making it perform an **NTLM authentication** against the exploit, then execute a process as **SYSTEM**. Exploit it with [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM ](https://github.com/antonioCoco/RogueWinRM)\(needs winrm enabled\), [SweetPotato](https://github.com/CCob/SweetPotato), [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
+Any process holding this privilege can **impersonate** \(but not create\) any **token** for which it is able to gethandle. You can get a **privileged token** from a **Windows service** \(DCOM\) making it perform an **NTLM authentication** against the exploit, then execute a process as **SYSTEM**. Exploit it with [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM ](https://github.com/antonioCoco/RogueWinRM)\(needs winrm disabled\), [SweetPotato](https://github.com/CCob/SweetPotato), [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
 ### SeAssignPrimaryPrivilege \(3.1.2\)
 
