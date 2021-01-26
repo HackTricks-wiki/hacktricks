@@ -300,8 +300,7 @@
 
 ## Pentesting Web
 
-* [2FA/OTP Bypass](pentesting-web/2fa-bypass/README.md)
-  * [Regular expression Denial of Service - ReDoS](pentesting-web/2fa-bypass/regular-expression-denial-of-service-redos.md)
+* [2FA/OTP Bypass](pentesting-web/2fa-bypass.md)
 * [Abusing hop-by-hop headers](pentesting-web/abusing-hop-by-hop-headers.md)
 * [Bypass Payment Process](pentesting-web/bypass-payment-process.md)
 * [Captcha Bypass](pentesting-web/captcha-bypass.md)
@@ -342,6 +341,7 @@
 * [PostMessage Vulnerabilities](pentesting-web/postmessage-vulnerabilities.md)
 * [Race Condition](pentesting-web/race-condition.md)
 * [Rate Limit Bypass](pentesting-web/rate-limit-bypass.md)
+* [Regular expression Denial of Service - ReDoS](pentesting-web/regular-expression-denial-of-service-redos.md)
 * [SQL Injection](pentesting-web/sql-injection/README.md)
   * [MSSQL Injection](pentesting-web/sql-injection/mssql-injection.md)
   * [Oracle injection](pentesting-web/sql-injection/oracle-injection.md)
