@@ -55,7 +55,7 @@ Xplico can **analyze** a **pcap** and extract information from it. For example, 
 
 ### Install
 
-```text
+```bash
 sudo bash -c 'echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" /etc/apt/sources.list'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
 sudo apt-get update
@@ -76,6 +76,15 @@ Then create a **new case**, create a **new session** inside the case and **uploa
 ## NetworkMiner
 
 Like Xplico it is a tool to analyze and extract objects from pcaps. It has a free edition that you can download [here](https://www.netresec.com/?page=NetworkMiner).
+
+## [BruteShark](https://github.com/odedshimon/BruteShark)
+
+* Extracting and encoding usernames and passwords \(HTTP, FTP, Telnet, IMAP, SMTP...\)
+* Extract authentication hashes and crack them using Hashcat \(Kerberos, NTLM, CRAM-MD5, HTTP-Digest...\)
+* Build visual network diagram \(Network nodes & users\)
+* Extract DNS queries
+* Reconstruct all TCP & UDP Sessions
+* File Carving
 
 ## Other pcap analysis tricks
 
