@@ -24,6 +24,7 @@
 
 * [Checklist - Linux Privilege Escalation](linux-unix/linux-privilege-escalation-checklist.md)
 * [Linux Privilege Escalation](linux-unix/privilege-escalation/README.md)
+  * [Logstash](linux-unix/privilege-escalation/logstash.md)
   * [AppArmor](linux-unix/privilege-escalation/apparmor.md)
   * [Containerd \(ctr\) Privilege Escalation](linux-unix/privilege-escalation/containerd-ctr-privilege-escalation.md)
   * [Docker Breakout](linux-unix/privilege-escalation/docker-breakout.md)
@@ -277,6 +278,7 @@
 * [5000 - Pentesting Docker Registry](pentesting/5000-pentesting-docker-registry.md)
 * [5353/UDP Multicast DNS \(mDNS\)](pentesting/5353-udp-multicast-dns-mdns.md)
 * [5432,5433 - Pentesting Postgresql](pentesting/pentesting-postgresql.md)
+* [5601 - Pentesting Kibana](pentesting/5601-pentesting-kibana.md)
 * [5671,5672 - Pentesting AMQP](pentesting/5671-5672-pentesting-amqp.md)
 * [5800,5801,5900,5901 - Pentesting VNC](pentesting/pentesting-vnc.md)
 * [5984,6984 - Pentesting CouchDB](pentesting/5984-pentesting-couchdb.md)
