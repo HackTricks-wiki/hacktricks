@@ -481,4 +481,5 @@
 * [Online Platforms with API](online-platforms-with-api.md)
 * [Reset/Forgoten Password Bypass](reset-password.md)
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
+* [AWS Security](aws-security.md)
 
