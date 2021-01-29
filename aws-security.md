@@ -114,7 +114,9 @@ Tracks and monitors AWS API calls made within the environment. Each call to an A
 * The request parameters: `requestParameters`
 * The response elements: `responseElements`
 
-Event's are written to a new log file each 5 minutes in a JSON file and log files are delivered to S3 15mins after
+Event's are written to a new log file each 5 minutes in a JSON file and log files are delivered to S3 15mins after.  
+CloudTrail allows to use log file integrity in order to be able to verify that your log files have remained unchanged since CloudTrail delivered them to you. It created a SHA-256 hash of the logs inside a digest file. A sha-256 hash of the new logs is created every hour   
+When creating a Trail the event selectors will allow you to indicate the trail to log: Management, data or insights events.
 
 Logs are saved in an S3 bucket. By default Server Side Encryption is used \(SSE\) so AWS will decrypt the content for the people that has access to it, but for additional security you can use SSE with KMS and your own keys.
 
@@ -124,11 +126,28 @@ Logs are saved in an S3 bucket. By default Server Side Encryption is used \(SSE\
 
 ### S3 folder structure
 
+Of log files:
+
+![](.gitbook/assets/image%20%28430%29.png)
+
+Of the digest files \(if integrity verification is required\):
+
 ![](.gitbook/assets/image%20%28413%29.png)
+
+### Logs to CloudWatch
+
+CloudTrail can automatically send logs to CloudWatch so you can set alerts that warns you when suspicious activities are performed.  
+Note that in order to allow CloudTrail to send the logs to CloudWatch a role needs to be created that allows that action. If possible, it's recommended to use AWS default role to perform these actions. This role will allow CloudTrail to:
+
+* CreateLogStream: This allows to create a CloudWatch Logs log streams
+* PutLogEvents: Deliver CloudTrail logs to CloudWatch Logs log stream
+
+
 
 ## CloudWatch
 
 Allows to create alarm based on logs. You can monitor for example logs from CloudTrail.  
+CloudWatch Log Event have a size limitation of 256KB.  
 Events that are monitored:
 
 * Changes to Security Groups and NACLs
