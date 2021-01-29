@@ -180,7 +180,7 @@ Invoke-Mimikatz -Command '"lsadump::lsa /patch"'
 ```
 
 **More information about** [**DCSync attack can be found here**](dcsync.md)**.  
-More information about**[ **how to steal the ntdis.dir \(Domain database\) can be found here**](../stealing-credentials/)**.**
+More information about**[ **how to steal the NTDS.dit \(Domain database\) can be found here**](../stealing-credentials/)**.**
 
 ## **Persistence**
 
