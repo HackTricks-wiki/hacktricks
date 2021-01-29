@@ -2,14 +2,18 @@
 
 ## IAM - Identity and Access Management
 
+Authentication - Process of defining an identity and the verification of that identity. This process can be subdivided in: Identification and verification.  
+Authorization - Determines what an identity can access within a system once it's been authenticated to it  
+Access Control - The method and process of how access is granted to a secure resource
+
 IAM can be defined by its ability to manage, control and govern authentication, authorization and access control mechanisms of identities to your resources within your AWS account.
 
-* Users: This could be a real person within your organization who requires access to operate and maintain your AWS environment. Or it could be an account to be used by an application that may require permissions to access your AWS resources programmatically.
+* Users: This could be a real person within your organization who requires access to operate and maintain your AWS environment. Or it could be an account to be used by an application that may require permissions to access your AWS resources programmatically. Note that usernames must be unique.
 * Groups: These are objects that contain multiple users. Permissions can be assigned to a user or inherit form a group. Giving permission to groups and not to users the secure way to grant permissions.
-* Roles: Roles are used to grant identities a set of permissions. Roles don't have any access keys or credentials associated with them. Role are usually used with resources \(like EC2 machines\) but they can also be useful to grant temporary privileges to a user
+* Roles: Roles are used to grant identities a set of permissions. Roles don't have any access keys or credentials associated with them. Role are usually used with resources \(like EC2 machines\) but they can also be useful to grant temporary privileges to a user. Note that when for example an EC2 has an IAM role assigned, instead of saving some keys inside the machine, dynamic temporary access keys will be supplied by the IAM role to handle authentication and determine if access is authorized.
 * Policy Permissions: Are used to assign permissions. There are 2 types: 
   * AWS managed policies \(preconfigured by AWS\)
-  * Customer Managed Policies: Configured by you. You can create policies based on AWS managed policies by copy/pasting or using the policy generator.
+  * Customer Managed Policies: Configured by you. You can create policies based on AWS managed policies \(modifying one of them and creating your own\), using the policy generator \(a GUI view that helps you granting and denying permissions\) or writing  your own..
 
 ```javascript
 {
@@ -34,11 +38,15 @@ IAM can be defined by its ability to manage, control and govern authentication, 
 }
 ```
 
-* Policies: By default access is denied, access will be granted if an explicit role has been specified. But if single "Deny" exist, it will override the "Allow", except for requests that use the AWS account's root security credentials \(which are allowed by default\).
-* Inline Policies: This kind of policies are directly assigned to a user, group or role. Then, they ot appear in the Policies list as any other one can use them.
+* Policies: By default access is denied, access will be granted if an explicit role has been specified. Conflict Permissions: But if single "Deny" exist, it will override the "Allow", except for requests that use the AWS account's root security credentials \(which are allowed by default\).
+* Inline Policies: This kind of policies are directly assigned to a user, group or role. Then, they not appear in the Policies list as any other one can use them.
+* S3 Bucket Policies: Can only be applied to S3 Buckets. They contains an attribute called 'principal' that can be: IAM users, Federated users, another AWS account, an AWS service. Principals define who/what should be allowed or denied access to various S3 resources
 
 Access Key ID: 20 random uppercase alphanumeric characters like AKHDNAPO86BSHKDIRYT  
-Secret access key ID: 40 random upper and lowercase characters: S836fh/J73yHSb64Ag3Rkdi/jaD6sPl6/antFtU \(It's not possible to retrieve lost secret access key IDs\).
+Secret access key ID: 40 random upper and lowercase characters: S836fh/J73yHSb64Ag3Rkdi/jaD6sPl6/antFtU \(It's not possible to retrieve lost secret access key IDs\).  
+Access Key Rotation: Create a new access key -&gt; Apply the new key to system/application -&gt; mark original one as inactive -&gt; Test and verify new access key is working -&gt; Delete old access key
+
+AWS Security Token Service \(STS\) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management \(IAM\) users or for users that you authenticate \(federated users\).
 
 ### Multi-Factor Authentication
 
@@ -58,4 +66,37 @@ You can download "Credential Report" with information about current credentials 
 ### Key Management Service
 
 Easily manage encryption keys to secure your data. These keys cannot be recovered.
+
+## Cost Explorer and Anomaly detection
+
+This allows you to check how are you expending money in AWS services and help you detecting anomalies.  
+Moreover, you can configure an anomaly detection so AWS will warn you when some anomaly in costs is found.
+
+### Budgets
+
+Budgets help to manage costs and usage. You can get alerted when a threshold is reached.  
+Also, they can be used for non cost related monitoring like the usage of a service \(how many GB are used in a particular S3 bucket?\)
+
+## AWS CloudTrail
+
+Tracks and monitors AWS API calls made within the environment. Each event contains:
+
+* The identity of the caller
+* The timestamp of when the request was initiated
+* The source IP address
+* The request parameters
+* The response elements returned by the AWS service
+
+Logs are saved in an S3 bucket. By default Server Side Encryption is used \(SSE\) so AWS will decrypt the content for the people that has access to it, but for additional security you can use SSE with KMS and your own keys.
+
+## CloudWatch
+
+Allows to create alarm based on logs. You can monitor for example logs from CloudTrail.  
+Events that are monitored:
+
+* Changes to Security Groups and NACLs
+* Starting, Stopping, rebooting and terminating EC2instances
+* Changes to Security Policies within IAM and S3
+* Failed login attempts to the AWS Management Console
+* API calls that resulted in failed authorization
 
