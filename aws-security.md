@@ -61,7 +61,7 @@ AWS Identity Federation connects via IAM roles
 
 #### Cross Account Trusts and Roles
 
-It also allows to create a role with some policies and allow some trusted users to change to that role. To create this, just create a new Role and select Cross Account Role. Roles for Cross-Account Access offers two options. Providing access between AWS accounts that you own, and providing access between an account that you own and a third party AWS account.  
+A user \(trusting\) can create a Cross Account Role with some policies and then, allow another user \(trusted\) to access his account but only having the access indicated in the new role policies. To create this, just create a new Role and select Cross Account Role. Roles for Cross-Account Access offers two options. Providing access between AWS accounts that you own, and providing access between an account that you own and a third party AWS account.  
 It's recommended to specify the user who is trusted and not put some generic thing because if not, other authenticated users like federated users will be able to also abuse this trust.
 
 #### AWS Simple AD
@@ -101,15 +101,30 @@ Also, they can be used for non cost related monitoring like the usage of a servi
 
 ## AWS CloudTrail
 
-Tracks and monitors AWS API calls made within the environment. Each event contains:
+Tracks and monitors AWS API calls made within the environment. Each call to an API is logged inside an and it event contains:
 
-* The identity of the caller
-* The timestamp of when the request was initiated
-* The source IP address
-* The request parameters
-* The response elements returned by the AWS service
+* The name of the called API: `eventName`
+* The called service: `eventSource`
+* The time: `eventTime`
+* The IP address: `SourceIPAddress`
+* The agent method: `userAgent`. Examples:
+  * Signing.amazonaws.com - From AWS Management Console
+  * console.amazonaws.com - Root user of the account
+  * lambda.amazonaws.com - AWS Lambda
+* The request parameters: `requestParameters`
+* The response elements: `responseElements`
+
+Event's are written to a new log file each 5 minutes in a JSON file and log files are delivered to S3 15mins after
 
 Logs are saved in an S3 bucket. By default Server Side Encryption is used \(SSE\) so AWS will decrypt the content for the people that has access to it, but for additional security you can use SSE with KMS and your own keys.
+
+### Log File Naing Convention
+
+![](.gitbook/assets/image%20%28253%29.png)
+
+### S3 folder structure
+
+![](.gitbook/assets/image%20%28413%29.png)
 
 ## CloudWatch
 
