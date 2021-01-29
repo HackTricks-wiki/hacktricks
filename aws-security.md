@@ -61,8 +61,7 @@ AWS Identity Federation connects via IAM roles
 
 #### Cross Account Trusts and Roles
 
-Enables to auth in one account \(trusted account\) and access services in another account \(trusting account\).  
-It also allows to create a role with some policies and allow some trusted users to login inside that role. To create this, just create a new Role and select Cross Account Role.  
+It also allows to create a role with some policies and allow some trusted users to change to that role. To create this, just create a new Role and select Cross Account Role. Roles for Cross-Account Access offers two options. Providing access between AWS accounts that you own, and providing access between an account that you own and a third party AWS account.  
 It's recommended to specify the user who is trusted and not put some generic thing because if not, other authenticated users like federated users will be able to also abuse this trust.
 
 #### AWS Simple AD
