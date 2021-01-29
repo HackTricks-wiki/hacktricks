@@ -56,7 +56,30 @@ You can use a free virtual application or a physical device. You can use apps li
 ### Identity Federation
 
 Identity federation allows users from identity providers which are external to AWS to access AWS resources securely without having to supply AWS user credentials from a valid IAM user account.   
-An example of an identity provider can be your own corporate Microsoft Active Directory\(via SAML\) or OpenID services \(like Google\). Federated access will then allow the users within it to access AWS.
+An example of an identity provider can be your own corporate Microsoft Active Directory\(via SAML\) or OpenID services \(like Google\). Federated access will then allow the users within it to access AWS.  
+AWS Identity Federation connects via IAM roles
+
+#### Cross Account Trusts and Roles
+
+Enables to auth in one account \(trusted account\) and access services in another account \(trusting account\).  
+It also allows to create a role with some policies and allow some trusted users to login inside that role. To create this, just create a new Role and select Cross Account Role.  
+It's recommended to specify the user who is trusted and not put some generic thing because if not, other authenticated users like federated users will be able to also abuse this trust.
+
+#### AWS Simple AD
+
+Not supported:
+
+* Trust Relations
+* AD Admin Center
+* Full PS API support
+* AD Recycle Bin
+* Group Managed Service Accounts
+* Schema Extensions
+* No Direct access to OS or Instances
+
+#### Web Federation or OpenID Authentication
+
+The app uses the AssumeRoleWithWebIdentity to create temporary credentials. However this doesn't grant access to the AWS console, just access to resources within AWS.
 
 ### Other IAM options
 
