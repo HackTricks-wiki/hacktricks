@@ -1,8 +1,8 @@
 # Active Directory Methodology
 
-If you want to **know** about my **latest modifications**/**additions** or you have **any suggestion for HackTricks or PEASS**, ****join the [💬](https://emojipedia.org/speech-balloon/) ****[**PEASS & HackTricks telegram group here**](https://t.me/peass), or **follow me on Twitter** [🐦](https://emojipedia.org/bird/)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**  
-If you want to **share some tricks with the community** you can also submit **pull requests** to ****[**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) ****that will be reflected in this book.  
-Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
+If you want to **know** about my **latest modifications**/**additions** or you have **any suggestion for HackTricks or PEASS**, **join the** [**💬**](https://emojipedia.org/speech-balloon/) ****[**PEASS & HackTricks telegram group here**](https://t.me/peass), or **follow me on Twitter** [🐦](https://emojipedia.org/bird/)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**  
+If you want to **share some tricks with the community** you can also submit **pull requests** to **\*\*\[**[https://github.com/carlospolop/hacktricks\*\*\]\(https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks**]%28https://github.com/carlospolop/hacktricks)\) **\*\*that will be reflected in this book.  
+Don't forget to** give ⭐ on the github\*\* to motivate me to continue developing this book.
 
 ## Basic overview
 
@@ -43,7 +43,7 @@ You can take a lot to [https://wadcoms.github.io/](https://wadcoms.github.io/) t
 
 If you just have access to an AD environment but you don't have any credentials/sessions you could:
 
-* **Pentest the network:** Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them \(for example, ****[**printers could be very interesting targets**](ad-information-in-printers.md)\). Take a look to the General ****[**Pentesting Methodology**](../../pentesting-methodology.md) ****to find more information about how to do this.
+* **Pentest the network:** Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them \(for example, **\*\*\[**printers could be very interesting targets**\]\(ad-information-in-printers.md\)\). Take a look to the General \*\***[**Pentesting Methodology**](../../pentesting-methodology.md) _\*\*_to find more information about how to do this.
 * **Check for null and Guest access on smb services** \(this won't work on modern Windows versions\):
   * `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
   * `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
@@ -54,7 +54,7 @@ If you just have access to an AD environment but you don't have any credentials/
   * [**A more detailed guide on how to enumerate LDAP can be found here.**](../../pentesting/pentesting-ldap.md)\*\*\*\*
 * **Poison the network**
   * Gather credentials [**impersonating services with Responder**](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)\*\*\*\*
-  * Access host by ****[**abusing the relay attack**](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
+  * Access host by **\*\*\[**abusing the relay attack**\]\(../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md\#relay-attack\)**.\*\*
   * Gather credentials **exposing** [**fake UPnP services with evil-S**](../../pentesting/pentesting-network/spoofing-ssdp-and-upnp-devices.md)\*\*\*\*[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)\*\*\*\*
 * **OSINT**: Try to **extract possible usernames** from services \(mainly web\) inside the domain environments and also from the publicly available web pages of the company. If you find the complete names of company workers, you could try different AD **username conventions \(**[**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/)**\)**. The most common conventions are: _NameSurname_, _Name.Surname_, _NamSur_ \(3letters of each\), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random letters and 3 random numbers_ \(abc123\). You could also try **statistically most used usernames**: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames) **Read the following Username enumeration section to learn how to find if a username is valid or not.**
 
@@ -79,7 +79,7 @@ Ok, so you know you have already a valid username but no passwords...Then try:
 
 * \*\*\*\*[**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _**DONT\_REQ\_PREAUTH**_ you can **request a AS\_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
 * \*\*\*\*[**Password Spraying**](password-spraying.md): Let's **try** the most **common passwords** with each of the discovered users, maybe some user is using a bad password \(keep in mind the password policy\)
-* A final option if the accounts cannot be locked is the ****[**traditional bruteforce**](password-spraying.md) **\(be careful\)**.
+* A final option if the accounts cannot be locked is the **\*\*\[**traditional bruteforce**\]\(password-spraying.md\)** \(be careful\)\*\*.
 
 ## Enumerating Active Directory \(Some creds/Session\)
 
@@ -88,7 +88,7 @@ For this phase you need to have **compromised the credentials or a session of a 
 ### Enumeration
 
 If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.  
-Regarding [**ASREPRoast** ](asreproast.md)you can now find every possible vulnerable user, and regarding ****[**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account \(if you know it\). It's very easy to obtain all the domain usernames from Windows \(`net user /domain` ,`Get-DomainUser`or `wmic useraccount get name,sid`\). In **linux** you can use:  `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username`
+Regarding [**ASREPRoast** ](asreproast.md)you can now find every possible vulnerable user, and regarding **\*\*\[**Password Spraying**\]\(password-spraying.md\) you can get a** list of all the usernames **and try the password of the compromised account \(if you know it\). It's very easy to obtain all the domain usernames from Windows \(`net user /domain` ,`Get-DomainUser`or `wmic useraccount get name,sid`\). In** linux\*\* you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username`
 
 Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
 
@@ -97,7 +97,7 @@ Having compromised an account is a **big step to start compromising the whole do
 * If you are using **Linux**, you could also [enumerate the domain using **pywerview**](https://github.com/the-useless-one/pywerview)**.**
 * You could also **try** [**https://github.com/tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)\*\*\*\*
 
-**Even if this Enumeration section looks small this is the most important part of all. Access the links \(mainly the one of cmd, powershell, powerview and BloodHound\), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.** 
+**Even if this Enumeration section looks small this is the most important part of all. Access the links \(mainly the one of cmd, powershell, powerview and BloodHound\), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.**
 
 ### **Kerberoast**
 
@@ -108,7 +108,7 @@ You can know that a **user account** is being used as a **service** because the 
 ### Local Privilege Escalation
 
 If you have compromised credentials or a session as a regular domain user and you have **access** with this user to **any machine in the domain** you should try to find your way to **escalate privileges locally**. This is because only with admin privileges you will be able to **dump hashes of other users** in memory \(LSASS\) and locally \(SAM\).  
-There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/) and a ****[**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to try ****[**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
+There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/) and a **\*\*\[**checklist**\]\(../checklist-windows-privilege-escalation.md\). Also, don't forget to try \*\***[**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
 ### Win-RM
 
@@ -122,14 +122,14 @@ Once you have obtained some credentials you could check if you have **access** t
 ### Hash extraction
 
 Hopefully you have managed to **compromise some local admin** account using [ASREPROast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md), [EvilSSDP](../../pentesting/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [Enumerating](./#enumerating-active-directory)... or [escalating privileges locally](../windows-local-privilege-escalation/).  
-Then, its time to dump all the hashes in memory and locally.   
+Then, its time to dump all the hashes in memory and locally.  
 [**Read this page about different ways to obtain the hashes.**](../stealing-credentials/)\*\*\*\*
 
 ### **Pass the Hash**
 
 **Once you have the hash of a user**, you can use it to **impersonate** it.  
 You need to use some **tool** that will **perform** the **NTLM authentication using** that **hash**, **or** you could create a new **sessionlogon** and **inject** that **hash** inside the **LSASS**, so when any **NTLM authentication is performed**, that **hash will be used.** The last option is what mimikatz does.  
-****[**More information about this attack and about how does NTLM works here.**](../ntlm/#pass-the-hash)\*\*\*\*
+**\*\*\[**More information about this attack and about how does NTLM works here._\*\]\(../ntlm/\#pass-the-hash\)\_\*\*\*
 
 ### **Over Pass the Hash/Pass the Key**
 
@@ -139,20 +139,20 @@ This attack aims to **use the user NTLM hash to request Kerberos tickets**, as a
 ### **Pass the Ticket**
 
 This attack is similar to Pass the Key, but instead of using hashes to request a ticket, the **ticket itself is stolen** and used to authenticate as its owner.  
-****[**More information about Pass the Ticket here.**](pass-the-ticket.md)\*\*\*\*
+**\*\*\[**More information about Pass the Ticket here._\*\]\(pass-the-ticket.md\)\_\*\*\*
 
 ### **MSSQL Trusted Links**
 
-If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host \(if running as SA\).   
+If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host \(if running as SA\).  
 Also, if a MSSQL instance is trusted \(database link\) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. These trusts can be chained and at some point the user might be able to find a misconfigured database where he can execute commands.  
 **The links between databases work even across forest trusts.**  
 [**More information about this technique here.**](mssql-trusted-links.md)\*\*\*\*
 
 ### **Unconstrained Delegation**
 
-**If you find any Computer object with the attribute** [ADS\_UF\_TRUSTED\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300%28v=vs.85%29.aspx) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.   
+**If you find any Computer object with the attribute** [ADS\_UF\_TRUSTED\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300%28v=vs.85%29.aspx) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.  
 So, if a **Domain Admin logins onto the computer**, you will be able to dump his TGT and impersonate him using [Pass the Ticket](pass-the-ticket.md).  
-Thanks to constrained delegation you could even **automatically compromise  a Print Server** \(hopefully it will be a DC\).  
+Thanks to constrained delegation you could even **automatically compromise a Print Server** \(hopefully it will be a DC\).  
 [**More information about this technique here.**](unconstrained-delegation.md)\*\*\*\*
 
 ### **Constrained Delegation**
@@ -202,12 +202,12 @@ The Silver ticket attack is based on **crafting a valid TGS for a service once t
 The Access Control List \(ACL\) of the **AdminSDHolder** object is used as a template to **copy** **permissions** to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins.  
 By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker modifies the ACL of the group **AdminSDHolder** for example, giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group \(in an hour\).  
 And if someone tries to delete this user from the Domain Admins \(for example\) in an hour or less, the user will be back in the group.  
-****[**More information about AdminSDHolder Group here.**](privileged-accounts-and-token-privileges.md#adminsdholder-group)\*\*\*\*
+**\*\*\[**More information about AdminSDHolder Group here._\*\]\(privileged-accounts-and-token-privileges.md\#adminsdholder-group\)\_\*\*\*
 
 ### **DSRM Credentials**
 
 There is a **local administrator** account inside each **DC**. Having admin privileges in this machine, you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password** so you can remotely access to this local Administrator user.  
-****[**More information about DSRM Credentials here.**](dsrm-credentials.md)
+**\*\*\[**More information about DSRM Credentials here.\*\*\]\(dsrm-credentials.md\)
 
 ### **ACL Persistence**
 
@@ -217,7 +217,7 @@ You could **give** some **special permissions** to a **user** over some specific
 ### **Security Descriptors**
 
 The **security descriptors** are used to **store** the **permissions** an **object** have **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.  
-****[**More information about Security Descriptors here.**](security-descriptors.md)\*\*\*\*
+**\*\*\[**More information about Security Descriptors here._\*\]\(security-descriptors.md\)\_\*\*\*
 
 ### Skeleton Key
 
@@ -228,13 +228,13 @@ The **security descriptors** are used to **store** the **permissions** an **obje
 
 [Learn what is a SSP \(Security Support Provider\) here.](../authentication-credentials-uac-and-efs.md#security-support-provider-interface-sspi)  
 You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.  
-****[**More information about Custom SSP here.**](custom-ssp.md)
+**\*\*\[**More information about Custom SSP here.\*\*\]\(custom-ssp.md\)
 
 ### **DCShadow**
 
 It registers a **new Domain Controller** in the AD and uses it to **push attributes** \(SIDHistory, SPNs...\) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.  
 Note that if you use wrong data, pretty ugly logs will appear.  
-****[**More information about DCShadow here.**](dcshadow.md)
+**\*\*\[**More information about DCShadow here.\*\*\]\(dcshadow.md\)
 
 ## **Forest Privilege Escalation -** Domain Trusts
 
@@ -244,10 +244,10 @@ Microsoft considers that the **domain isn't a Security Boundary**, the **Forest 
 
 At a high level, a [**domain trust**](http://technet.microsoft.com/en-us/library/cc759554%28v=ws.10%29.aspx) establishes the ability for **users in one domain to authenticate** to resources or act as a [security principal](https://technet.microsoft.com/en-us/library/cc780957%28v=ws.10%29.aspx) **in another domain**.
 
-Essentially, all a trust does is **linking up the authentication systems of two domains** and allowing authentication traffic to flow between them through a system of referrals.   
+Essentially, all a trust does is **linking up the authentication systems of two domains** and allowing authentication traffic to flow between them through a system of referrals.  
 When **2 domains trust each other they exchange keys**, these **keys** are going to be **saved** in the **DCs** of **each domains** \(**1 key per trust direction**\) and the keys will be the base of the trust.
 
-When a **user** tries to **access** a **service** on the **trusting domain** it will request an **inter-realm TGT** to the DC of its domain. The DC wills serve the client this **TGT** which would be **encrypted/signed** with the **inter-realm** **key** \(the key both domains **exchanged**\). Then, the **client** will **access** the **DC of the other domain** and will **request** a **TGS** for the service using the **inter-realm TGT**. The **DC** of the trusting domain will **check** the **key** used, if it's ok, it will **trust everything in that ticket** and will serve the TGS to the client. 
+When a **user** tries to **access** a **service** on the **trusting domain** it will request an **inter-realm TGT** to the DC of its domain. The DC wills serve the client this **TGT** which would be **encrypted/signed** with the **inter-realm** **key** \(the key both domains **exchanged**\). Then, the **client** will **access** the **DC of the other domain** and will **request** a **TGS** for the service using the **inter-realm TGT**. The **DC** of the trusting domain will **check** the **key** used, if it's ok, it will **trust everything in that ticket** and will serve the TGS to the client.
 
 ![](../../.gitbook/assets/image%20%2865%29.png)
 
@@ -281,7 +281,7 @@ There are three **main** ways that security principals \(users/groups/computer\)
 
 ### Child-to-Parent forest privilege escalation
 
-Also, notice that there are **2 trusted keys**, one for _Child --&gt; Parent_  and another one for P_arent --&gt; Child_.
+Also, notice that there are **2 trusted keys**, one for _Child --&gt; Parent_ and another one for P_arent --&gt; Child_.
 
 ```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
@@ -300,7 +300,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarco
 /ticket:C:\path\save\ticket.kirbi
 ```
 
-For finding the **SID** of the **"Enterprise Admins"** group you can find the **SID** of the **root domain** and set it in  S-1-5-21_root domain_-519. For example, from root domain SID _S-1-5-21-280534878-1496970234-700767426_ the "Enterprise Admins"group SID is _S-1-5-21-280534878-1496970234-700767426-519_
+For finding the **SID** of the **"Enterprise Admins"** group you can find the **SID** of the **root domain** and set it in S-1-5-21_root domain_-519. For example, from root domain SID _S-1-5-21-280534878-1496970234-700767426_ the "Enterprise Admins"group SID is _S-1-5-21-280534878-1496970234-700767426-519_
 
 [http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/](http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/)
 
@@ -397,8 +397,6 @@ If you don't execute this from a Domain Controller, ATA is going to catch you, s
 * [Powershell script to do domain auditing automation](https://github.com/phillips321/adaudit)
 * [Python script to enumerate active directory](https://github.com/ropnop/windapsearch)
 * [Python script to enumerate active directory](https://github.com/CroweCybersecurity/ad-ldap-enum)
-
-
 
 ![](../../.gitbook/assets/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67%20%286%29%20%284%29%20%282%29.png)
 
