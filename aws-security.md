@@ -142,7 +142,11 @@ Note that in order to allow CloudTrail to send the logs to CloudWatch a role nee
 * CreateLogStream: This allows to create a CloudWatch Logs log streams
 * PutLogEvents: Deliver CloudTrail logs to CloudWatch Logs log stream
 
+### Event History
 
+CloudTrail Event History allows you to inspect in a table the logs that have been recorded:
+
+![](.gitbook/assets/image%20%28431%29.png)
 
 ## CloudWatch
 
