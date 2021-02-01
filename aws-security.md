@@ -101,6 +101,8 @@ Also, they can be used for non cost related monitoring like the usage of a servi
 
 ## AWS CloudTrail
 
+Resumen: monitorea el uso de las APIs y lo logea.
+
 Tracks and monitors AWS API calls made within the environment. Each call to an API is logged inside an and it event contains:
 
 * The name of the called API: `eventName`
@@ -162,6 +164,8 @@ Events that are monitored:
 
 ## AWS Config
 
+Resumen: Puede acceder a la config de cada objeto dentro de AWS y guardar los cambios que se realiezan. Tambien puede avisar de estos cambios. Molan mucho las cofig rules, cada vez que cambia el objeto minitorizado se checkea una rule \(una lambda function\) y sino cumple con la especificacion, avisa.
+
 AWS Config can capture resource changes, so any change to a resource supported by Config can be recorded, which will record what changed along with other useful metadata, all held within a file known as a configuration item, a CI.  
 It's region specific.
 
@@ -193,6 +197,8 @@ SNS topic is used as a configuration stream for notifications of various events 
 
 ## AWS Inspector
 
+Resumen: A partir de un agente corriendo en el EC2, saca CVEs, CIS checks, security best practices y runtime behaviour analysis.
+
 The Amazon Inspector service is **agent based**, meaning it requires software agents to be installed on any EC2 instances you want to assess. This makes it an easy service to be configured and added at any point to existing resources already running within your AWS infrastructure. This helps Amazon Inspector to become a seamless integration with any of your existing security processes and procedures as another level of security.
 
 * **CVEs**
@@ -220,11 +226,13 @@ Rule package: Contains a number of individual rules that are check against an EC
 
 Once you have configured the Amazon Inspector Role, the AWS Agents are Installed, the target is configured and the template is configured, you will be able to run it. An assessment run can be stopped, resumed, or deleted.
 
-Telemtry: data that is collected from an instance, detailing its configuration, behavior and processes during an assessment run. Once collected, the data is then sent back to Amazon Inspector in near-real-time over TLS where it is then stored and encrypted on S3 via an ephemeral KMS key. Amazon Inspector then accesses the S3 Bucket, decrypts the data in memory, and analyzes it against any rules packages used for that assessment to generate the findings.
+Telemetry: data that is collected from an instance, detailing its configuration, behavior and processes during an assessment run. Once collected, the data is then sent back to Amazon Inspector in near-real-time over TLS where it is then stored and encrypted on S3 via an ephemeral KMS key. Amazon Inspector then accesses the S3 Bucket, decrypts the data in memory, and analyzes it against any rules packages used for that assessment to generate the findings.
 
 Assessment Report: Provide details on what was assessed and the results of the assessment. The findings report contain the summary of the assessment, info about the EC2 and rules and the findings that occurred. The full report is the finding report + a list of rules that were passed
 
 ## Trusted Advisor
+
+Resumen: Compara el estado de la cuenta de AWS con las best practices de AWS.
 
 The main function of [Trusted Advisor](https://cloudacademy.com/course/an-overview-of-aws-trusted-advisor/introduction-54/) is to recommend improvements across your [AWS](https://cloudacademy.com/library/amazon-web-services/) account to help optimize and hone your environment based on **AWS best practices**. These recommendations cover four distinct categories. It's a is a cross-region service.
 
@@ -238,6 +246,8 @@ Trusted advisor can send notifications and you can exclude items from it.
 trusted advisor data is automatically refreshed every 24 hours, but you can perform a manual one 5 mins after the previous one
 
 ## Amazon GuardDuty
+
+Resumen: Analiza logs de cloudtrail, vpc y dns para detectar comportamiento inesperado usando tecnicas comunes comocheckear IPs de blacklists y machine learning.
 
 Amazon GuardDuty is a regional-based intelligent threat detection service, the first of its kind offered by AWS, which allows users to monitor their AWS account for unusual and unexpected behavior by analyzing AWS CloudTrail event logs, VPC flow logs \(network traffic information within the VPC\), and DNS logs. It then uses the data from logs and assesses them against multiple security and threat detection feeds, looking for anomalies and known malicious sources, such as IP addresses and URLs. It also uses Machine Learning to detect unexpected behaviours.  
 You can upload list of whitelisted and blacklisted IP addresses so GuardDuty takes that info into account.
@@ -267,4 +277,42 @@ You pay for the processing of your log files, per 1 million events per months fr
 
 When a user disable GuardDuty, it will stop monitoring your AWS environment and it won't generate any new findings at all, and the existing findings will be lost.  
 If you just stop it, the existing findings will remain.
+
+## Amazon Macie
+
+Resumen: Le indicas el storage que quieres monitorizar \(S3 en general\) y va a detectar que tipo de contenido es y si es sensible o no y mirara tambien los permisos que el storage tiene asignado. Util para detectar cosas que no deberian estar donde estan y para prevenir leaks.
+
+The main function of the service is to provide an automatic method of detecting, identifying, and also classifying data that you are storing within your AWS account.
+
+The service is backed by machine learning, allowing your data to be actively reviewed as different actions are taken within your AWS account. Machine learning can spot access patterns and user behavior by analyzing cloud trail event data to alert against any unusual or irregular activity. Any findings made by Amazon Macie are presented within a dashboard which can trigger alerts, allowing you to quickly resolve any potential threat of exposure or compromise of your data.
+
+There are a number of key features that are offered by Amazon Macie during its detection and classification process. These can be summarized as follows. Amazon Macie will automatically and continuously monitor and detect new data that is stored in Amazon S3. Using the abilities of machine learning and artificial intelligence, this service has the ability to familiarize over time, access patterns to data. Amazon Macie also uses natural language processing methods to help classify and interpret different data types and content. NLP uses principles from computer science and computational linguistics to look at the interactions between computers and the human language. In particular, how to program computers to understand and decipher language data. The service can automatically assign business values to data that is assessed in the form of a risk score. This enables Amazon Macie to order findings on a priority basis, enabling you to focus on the most critical alerts first. In addition to this, Amazon Macie also has the added benefit of being able to monitor and discover security changes governing your data. As well as identify specific security-centric data such as access keys held within an S3 bucket. 
+
+This protective and proactive security monitoring enables Amazon Macie to identify critical, sensitive, and security focused data such as API keys, secret keys, in addition to PII and PHI data. It can detect changes and alterations to existing security policies and access control lists which effect data within your S3 buckets. It will also alert against unusual user behavior and maintain compliance requirements as required. 
+
+This is useful to avoid data leaks as Macie will detect if you are exposing people information to the Internet.
+
+It's a regional service.
+
+It requires the existence of IAM Role 'AWSMacieServiceCustomerSetupRole' and it needs AWS CloudTrail to be enabled.
+
+Pre-defined alerts categories:
+
+* Anonymized access
+* Config compliance
+* Credential Loss
+* Data compliance
+* Files hosting
+* Identity enumeration
+* Information loss
+* Location anomaly
+* Open permissions
+* Privilege escalation
+* Ransomware
+* Service disruption
+* Suspicious access
+
+Alert summary: Provides detailed information to allow you to respond appropriately. It has a description that provides a deeper level of understanding of why it was generated. It also has a breakdown of the results.  
+
+The user has the possibility to create new custom alerts.
 
