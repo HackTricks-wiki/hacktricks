@@ -222,6 +222,18 @@ Once you have configured the Amazon Inspector Role, the AWS Agents are Installed
 
 Telemtry: data that is collected from an instance, detailing its configuration, behavior and processes during an assessment run. Once collected, the data is then sent back to Amazon Inspector in near-real-time over TLS where it is then stored and encrypted on S3 via an ephemeral KMS key. Amazon Inspector then accesses the S3 Bucket, decrypts the data in memory, and analyzes it against any rules packages used for that assessment to generate the findings.
 
-Assessment Report: Provide details on what was assessed and the results of the assessment. The findings report contain the summary of the assessment, info about the EC2 and rules and the findings that occurred. The full report is the finding report + a list of rules that were passed  
+Assessment Report: Provide details on what was assessed and the results of the assessment. The findings report contain the summary of the assessment, info about the EC2 and rules and the findings that occurred. The full report is the finding report + a list of rules that were passed
 
+## Trusted Advisor
+
+The main function of [Trusted Advisor](https://cloudacademy.com/course/an-overview-of-aws-trusted-advisor/introduction-54/) is to recommend improvements across your [AWS](https://cloudacademy.com/library/amazon-web-services/) account to help optimize and hone your environment based on AWS best practices. These recommendations cover four distinct categories. It's a is a cross-region service.
+
+1. Cost optimization, which helps to identify ways in which you could optimize your resources to save money.
+2. Performance. This scans your resources to highlight any potential performance issues across multiple services.
+3. Security. This category analyzes your environment for any potential security weaknesses or vulnerabilities.
+4. And fault tolerance. Which suggests best practices to maintain service operations by increasing resiliency should a fault or incident occur across your resources.
+
+The full power and potential of AWS Trusted Advisor is only really available if you have a business or enterprise support plan with AWS. Without either of these plans, then you will only have access to six core checks that are freely available to everyone. These free core checks are split between the performance and security categories, with the majority of them being related to security. These are the 6 checks: service limits, Security Groups Specific Ports Unrestricted, Amazon EBS Public Snapshots, Amazon RDS Public Snapshots, IAM Use, and MFA on root account.  
+Trusted advisor can send notifications and you can exclude items from it.  
+trusted advisor data is automatically refreshed every 24 hours, but you can perform a manual one 5 mins after the previous one
 
