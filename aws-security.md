@@ -193,12 +193,12 @@ SNS topic is used as a configuration stream for notifications of various events 
 
 ## AWS Inspector
 
-The Amazon Inspector service is agent based, meaning it requires software agents to be installed on any EC2 instances you want to assess. This makes it an easy service to be configured and added at any point to existing resources already running within your AWS infrastructure. This helps Amazon Inspector to become a seamless integration with any of your existing security processes and procedures as another level of security.
+The Amazon Inspector service is **agent based**, meaning it requires software agents to be installed on any EC2 instances you want to assess. This makes it an easy service to be configured and added at any point to existing resources already running within your AWS infrastructure. This helps Amazon Inspector to become a seamless integration with any of your existing security processes and procedures as another level of security.
 
-* CVEs
-* CIS Benchmarks
-* Security Best practices
-* Runtime Behaviour Analysis
+* **CVEs**
+* **CIS Benchmarks**
+* **Security Best practices**
+* **Runtime Behaviour Analysis**
 
 You cam make any of those possibilities run on the EC2 machines you decide
 
@@ -226,7 +226,7 @@ Assessment Report: Provide details on what was assessed and the results of the a
 
 ## Trusted Advisor
 
-The main function of [Trusted Advisor](https://cloudacademy.com/course/an-overview-of-aws-trusted-advisor/introduction-54/) is to recommend improvements across your [AWS](https://cloudacademy.com/library/amazon-web-services/) account to help optimize and hone your environment based on AWS best practices. These recommendations cover four distinct categories. It's a is a cross-region service.
+The main function of [Trusted Advisor](https://cloudacademy.com/course/an-overview-of-aws-trusted-advisor/introduction-54/) is to recommend improvements across your [AWS](https://cloudacademy.com/library/amazon-web-services/) account to help optimize and hone your environment based on **AWS best practices**. These recommendations cover four distinct categories. It's a is a cross-region service.
 
 1. Cost optimization, which helps to identify ways in which you could optimize your resources to save money.
 2. Performance. This scans your resources to highlight any potential performance issues across multiple services.
@@ -236,4 +236,35 @@ The main function of [Trusted Advisor](https://cloudacademy.com/course/an-overvi
 The full power and potential of AWS Trusted Advisor is only really available if you have a business or enterprise support plan with AWS. Without either of these plans, then you will only have access to six core checks that are freely available to everyone. These free core checks are split between the performance and security categories, with the majority of them being related to security. These are the 6 checks: service limits, Security Groups Specific Ports Unrestricted, Amazon EBS Public Snapshots, Amazon RDS Public Snapshots, IAM Use, and MFA on root account.  
 Trusted advisor can send notifications and you can exclude items from it.  
 trusted advisor data is automatically refreshed every 24 hours, but you can perform a manual one 5 mins after the previous one
+
+## Amazon GuardDuty
+
+Amazon GuardDuty is a regional-based intelligent threat detection service, the first of its kind offered by AWS, which allows users to monitor their AWS account for unusual and unexpected behavior by analyzing AWS CloudTrail event logs, VPC flow logs \(network traffic information within the VPC\), and DNS logs. It then uses the data from logs and assesses them against multiple security and threat detection feeds, looking for anomalies and known malicious sources, such as IP addresses and URLs. It also uses Machine Learning to detect unexpected behaviours.  
+You can upload list of whitelisted and blacklisted IP addresses so GuardDuty takes that info into account.
+
+Finding summary:
+
+* Finding type
+* Severity: 7-8.9High, 4-6.9Medium, 01-3.9Low
+* Region
+* Account ID
+* Resource ID
+* Time of detection
+* Which threat list was used
+
+The body has this information:
+
+* Resource affected
+* Action
+* Actor: Ip address, port and domain
+* Additional Information
+
+You can invite other accounts to a different AWS GuardDuty account so every account is monitored from the same GuardDuty. The master account must invite the member accounts and then the representative of the member account must accept the invitation.  
+There are different IAM Role permissions to allow GuardDuty to get the information and to allow a user to upload IPs whitelisted and blacklisted.  
+GuarDuty uses a service-linked role called "AWSServiceRoleForAmazonGuardDuty" that allows it to retrieve metadata from affected endpoints.
+
+You pay for the processing of your log files, per 1 million events per months from CloudTrail and per GB of analysed logs from VPC Flow
+
+When a user disable GuardDuty, it will stop monitoring your AWS environment and it won't generate any new findings at all, and the existing findings will be lost.  
+If you just stop it, the existing findings will remain.
 
