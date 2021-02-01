@@ -191,3 +191,37 @@ Non compliant results are NOT deleted.
 
 SNS topic is used as a configuration stream for notifications of various events triggered by AWS Config. You can have various endpoints associated to the SNS stream. You can notify the alarm to you via Email send them to SQS and then programmatically analyze the results.
 
+## AWS Inspector
+
+The Amazon Inspector service is agent based, meaning it requires software agents to be installed on any EC2 instances you want to assess. This makes it an easy service to be configured and added at any point to existing resources already running within your AWS infrastructure. This helps Amazon Inspector to become a seamless integration with any of your existing security processes and procedures as another level of security.
+
+* CVEs
+* CIS Benchmarks
+* Security Best practices
+* Runtime Behaviour Analysis
+
+You cam make any of those possibilities run on the EC2 machines you decide
+
+Role: Create or select a role to allow Amazon Inspector to have read only access to the EC2 instances  
+Assessment Targets: Group of EC2 instances that you want to run an assessment against  
+AWS agents: Software agents that must be install on EC2 instances to monitor. Data is sent to Amazon Inspector using a TLS channel. A regular heartbeat is sent from the agent to the inspector asking for instructions. It can autoupdate itself  
+Assessment Templates: Define specific configurations as to how an assessment is run on your EC2 instances. An assessment template cannot be modified after creation.
+
+* Rules packages to be used
+* Duration of the assessment run 15min/1hour/8hours
+* SNS topics, select when notify: Starts, finished, change state, reports a finding
+* Attributes to b assigned to findings 
+
+Rule package: Contains a number of individual rules that are check against an EC2 when an assessment is run. Each one also have a severity \(high, medium, low, informational\). The possibilities are:
+
+* Common Vulnerabilities and Exposures \(CVEs\)
+* Center for Internet Security \(CIS\) Benchmark
+* Security Best practices
+
+Once you have configured the Amazon Inspector Role, the AWS Agents are Installed, the target is configured and the template is configured, you will be able to run it. An assessment run can be stopped, resumed, or deleted.
+
+Telemtry: data that is collected from an instance, detailing its configuration, behavior and processes during an assessment run. Once collected, the data is then sent back to Amazon Inspector in near-real-time over TLS where it is then stored and encrypted on S3 via an ephemeral KMS key. Amazon Inspector then accesses the S3 Bucket, decrypts the data in memory, and analyzes it against any rules packages used for that assessment to generate the findings.
+
+Assessment Report: Provide details on what was assessed and the results of the assessment. The findings report contain the summary of the assessment, info about the EC2 and rules and the findings that occurred. The full report is the finding report + a list of rules that were passed  
+
+
