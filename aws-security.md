@@ -323,7 +323,7 @@ Dashboard categorization:
 * S3 Objects by PII - Personally Identifiable Information
 * S3 Objects by ACL
 * High-risk CloudTrail events and associated users
-* High-risk CloudTrail erros and associated users
+* High-risk CloudTrail errors and associated users
 * Activity Location
 * CloudTrail Events
 * Activity ISPs
@@ -335,4 +335,30 @@ User Categories: Macie categorises the users in the following categories:
 * Gold: Users or roles with history of calling APIs related to infrastructure changes. You should also monitor them
 * Silver: Users or roles performing medium level risk API calls
 * Bronze: Users or roles using lowest level of risk based on API calls
+
+Identity types:
+
+* Root: Request made by root user
+* IAM user: Request made by IAM user
+* Assumed Role: Request made by temporary assumed credentials \(AssumeRole API for STS\)
+* Federated User: Request made using temporary credentials \(GetFederationToken API fro STS\)
+* AWS Account: Request made by a different AWS account
+* AWS Service: Request made by an AWS service
+
+Data classification: 4 file classifications exists:
+
+* Content-Type: list files based on content-type detected. The given risk is determined by the type of content detected.
+* File Extension: Same as content-type but based on the extension
+* Theme: Categorises based on a series of keywords detected within the files
+* Regex: Categories based on specific regexps
+
+The final risk of a file will be the highest risk found between those 4 categories
+
+The research function allows to create you own queries again all Amazon Macie data and perform a deep dive analysis of the data. You can filter results based on: CloudTrail Data, S3 Bucket properties and S3 Objects
+
+It possible to invite other accounts to Amazon Macie so several accounts share Amazon Macie.
+
+## Route 53
+
+You can very easily create health checks for web pages via Route53. For example you can create HTTP checks on port 80 to a page to check that the web server is working
 
