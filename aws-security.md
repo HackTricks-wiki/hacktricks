@@ -247,7 +247,7 @@ trusted advisor data is automatically refreshed every 24 hours, but you can perf
 
 ## Amazon GuardDuty
 
-Resumen: Analiza logs de cloudtrail, vpc y dns para detectar comportamiento inesperado usando tecnicas comunes comocheckear IPs de blacklists y machine learning.
+Resumen: Analiza logs de cloudtrail, vpc y dns para detectar comportamiento inesperado usando tecnicas comunes como checkear IPs de blacklists y machine learning.
 
 Amazon GuardDuty is a regional-based intelligent threat detection service, the first of its kind offered by AWS, which allows users to monitor their AWS account for unusual and unexpected behavior by analyzing AWS CloudTrail event logs, VPC flow logs \(network traffic information within the VPC\), and DNS logs. It then uses the data from logs and assesses them against multiple security and threat detection feeds, looking for anomalies and known malicious sources, such as IP addresses and URLs. It also uses Machine Learning to detect unexpected behaviours.  
 You can upload list of whitelisted and blacklisted IP addresses so GuardDuty takes that info into account.
@@ -280,7 +280,7 @@ If you just stop it, the existing findings will remain.
 
 ## Amazon Macie
 
-Resumen: Le indicas el storage que quieres monitorizar \(S3 en general\) y va a detectar que tipo de contenido es y si es sensible o no y mirara tambien los permisos que el storage tiene asignado. Util para detectar cosas que no deberian estar donde estan y para prevenir leaks.
+Resumen: Le indicas el storage que quieres monitorizar \(S3 en general\) y va a detectar que tipo de contenido es y si es sensible o no y mirara tambien los permisos que el storage tiene asignado. Util para detectar cosas que no deberian estar donde estan y para prevenir leaks. Tambien usa machine learning para detectar comportamientros extranos relacionados con los logs que chekea.
 
 The main function of the service is to provide an automatic method of detecting, identifying, and also classifying data that you are storing within your AWS account.
 
@@ -315,4 +315,24 @@ Pre-defined alerts categories:
 Alert summary: Provides detailed information to allow you to respond appropriately. It has a description that provides a deeper level of understanding of why it was generated. It also has a breakdown of the results.  
 
 The user has the possibility to create new custom alerts.
+
+Dashboard categorization:
+
+* S3 Objects for selected time range
+* S3 Objects
+* S3 Objects by PII - Personally Identifiable Information
+* S3 Objects by ACL
+* High-risk CloudTrail events and associated users
+* High-risk CloudTrail erros and associated users
+* Activity Location
+* CloudTrail Events
+* Activity ISPs
+* CloudTrail user identity types
+
+User Categories: Macie categorises the users in the following categories:
+
+* Platinum: Users or roles considered to be making high risk API calls. Often they have admins privileges. You should monitor the pretty god in case they are compromised
+* Gold: Users or roles with history of calling APIs related to infrastructure changes. You should also monitor them
+* Silver: Users or roles performing medium level risk API calls
+* Bronze: Users or roles using lowest level of risk based on API calls
 
