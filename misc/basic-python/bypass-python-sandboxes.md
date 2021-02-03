@@ -16,7 +16,7 @@ subprocess.call("ls", shell=True)
 subprocess.Popen("ls", shell=True)
 pty.spawn("ls")
 pty.spawn("/bin/bash")
-platform.popen("ls").read()
+platform.os.system("ls")
 
 #Other interesting functions
 open("/etc/passwd").read()
