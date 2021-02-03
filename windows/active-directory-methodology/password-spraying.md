@@ -67,11 +67,10 @@ or **spray** \(read next section\).
 
 The best way is not to try with more than 5/7 passwords per account.
 
-So you have to be very careful with password spraying because you could lockout accounts. To brute force taking this into mind, you can use _**spray:**_
+So you have to be very careful with password spraying because you could lockout accounts. To brute force taking this into mind, you can use _**[spray](https://github.com/Greenwolf/Spray):**_
 
 ```bash
-apt-get install spray
-spray -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPe
+spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
 
 ## Outlook Web Access
