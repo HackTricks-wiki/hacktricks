@@ -70,6 +70,8 @@ class P(object):
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
 
+For more information about how does pickle works check this: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
+
 ### Pip package
 
 If you have access to `pip` or to `pip.main()` you can install an arbitrary package and obtain a reverse shell calling:
