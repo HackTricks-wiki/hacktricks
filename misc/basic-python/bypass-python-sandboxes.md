@@ -85,6 +85,10 @@ You can download the package to create the reverse shell here. Please, note that
 
 {% file src="../../.gitbook/assets/reverse.tar.gz" %}
 
+{% hint style="info" %}
+This package is called `Reverse`.However, it was specially crafted so when you exit the reverse shell the rest of the installation will fail, so you **won't leave any extra python package installed on the server** when you leave.
+{% endhint %}
+
 ## Executing python code
 
 This is really interesting if some characters are forbidden because you can use the **hex/octal/B64** representation to **bypass** the restriction:
