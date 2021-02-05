@@ -29,7 +29,7 @@
   * [Containerd \(ctr\) Privilege Escalation](linux-unix/privilege-escalation/containerd-ctr-privilege-escalation.md)
   * [Docker Breakout](linux-unix/privilege-escalation/docker-breakout.md)
   * [electron/CEF/chromium debugger abuse](linux-unix/privilege-escalation/electron-cef-chromium-debugger-abuse.md)
-  * [Escaping from restricted shells - Jails](linux-unix/privilege-escalation/escaping-from-limited-bash.md)
+  * [Escaping from Jails](linux-unix/privilege-escalation/escaping-from-limited-bash.md)
   * [Cisco - vmanage](linux-unix/privilege-escalation/cisco-vmanage.md)
   * [D-Bus Enumeration & Command Injection Privilege Escalation](linux-unix/privilege-escalation/d-bus-enumeration-and-command-injection-privilege-escalation.md)
   * [Interesting Groups - Linux PE](linux-unix/privilege-escalation/interesting-groups-linux-pe/README.md)
