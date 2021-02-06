@@ -128,13 +128,27 @@ Logs are saved in an S3 bucket. By default Server Side Encryption is used \(SSE\
 
 ### S3 folder structure
 
-Of log files:
+Of log files \(note that the folders "AWSLogs" and "CloudTrail" are fixed names\):
 
 ![](.gitbook/assets/image%20%28430%29.png)
 
 Of the digest files \(if integrity verification is required\):
 
 ![](.gitbook/assets/image%20%28413%29.png)
+
+### Aggregate Logs from Multiple Accounts
+
+* Create a Trial in the AWS account where you want the log files to be delivered to
+* Apply permissions to the destination S3 bucket allowing cross-account access for CloudTrail an allow each AWS account that needs access
+* Create a new Trail in the other AWS accounts and select to use the created bucket in step 1
+
+### Log Files Checking
+
+You can check that the logs haven't been altered by running
+
+```javascript
+aws cloudtrail validate-logs --trail-arn <trailARN> --start-time <start-time> [--end-time <end-time>] [--s3-bucket <bucket-name>] [--s3-prefix <prefix>] [--verbose]
+```
 
 ### Logs to CloudWatch
 
@@ -161,6 +175,12 @@ Events that are monitored:
 * Changes to Security Policies within IAM and S3
 * Failed login attempts to the AWS Management Console
 * API calls that resulted in failed authorization
+
+### Agent Installation
+
+* Create a role and attach it to the instance with permissions allowing CloudWatch to collect data from the instances in addition to interacting with AWS systems manager SSM \(CloudWatchAgentAdminPolicy & AmazonEC2RoleforSSM\)
+* Download and install the agent onto the EC2 instance \([https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip](https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip)\). You can download it from inside the EC2 or install it automatically using AWS System Manager selecting the package AWS-ConfigureAWSPackage
+* Configure and start the CloudWatch Agent
 
 ## AWS Config
 
