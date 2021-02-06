@@ -116,7 +116,7 @@ Tracks and monitors AWS API calls made within the environment. Each call to an A
 * The request parameters: `requestParameters`
 * The response elements: `responseElements`
 
-Event's are written to a new log file each 5 minutes in a JSON file and log files are delivered to S3 15mins after.  
+Event's are written to a new log file approximately each 5 minutes in a JSON file, they are help by CloudTrail and finally, log files are delivered to S3 approximately 15mins after.  
 CloudTrail allows to use log file integrity in order to be able to verify that your log files have remained unchanged since CloudTrail delivered them to you. It created a SHA-256 hash of the logs inside a digest file. A sha-256 hash of the new logs is created every hour   
 When creating a Trail the event selectors will allow you to indicate the trail to log: Management, data or insights events.
 
@@ -141,6 +141,8 @@ Of the digest files \(if integrity verification is required\):
 * Create a Trial in the AWS account where you want the log files to be delivered to
 * Apply permissions to the destination S3 bucket allowing cross-account access for CloudTrail an allow each AWS account that needs access
 * Create a new Trail in the other AWS accounts and select to use the created bucket in step 1
+
+However, even if you can save al the logs in the same S3 bucket, you cannot aggregate CloudTrail logs from multiple accounts into a CloudWatch Logs belonging to a single AWS account
 
 ### Log Files Checking
 
@@ -381,4 +383,8 @@ It possible to invite other accounts to Amazon Macie so several accounts share A
 ## Route 53
 
 You can very easily create health checks for web pages via Route53. For example you can create HTTP checks on port 80 to a page to check that the web server is working
+
+## S3 Access logs
+
+It's possible to enable S3 access login \(which by default is disabled\) to some bucket and save the logs in a different bucket to know who is accessing the bucket. The source bucket and the target bucket \(the one is saving the logs needs to be in the same region.
 
