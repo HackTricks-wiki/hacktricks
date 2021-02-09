@@ -422,5 +422,6 @@ For every network interface that publishes data to the CloudWatch log group, it 
 
 ## Amazon Athena
 
-Use Amazon Athena to query data within S3 to search for specific entries.
+Use Amazon Athena to query data within S3 to search for specific entries.  
+Se puede preparar una base de datos relacionada con el contenido que va a tener un bucket S3 para despues poder buscar el contenid de ese bucket mediante consultas de SQL.
 
