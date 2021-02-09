@@ -420,3 +420,7 @@ For every network interface that publishes data to the CloudWatch log group, it 
 
 ![](.gitbook/assets/image%20%28433%29.png)
 
+## Amazon Athena
+
+Use Amazon Athena to query data within S3 to search for specific entries.
+
