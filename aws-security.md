@@ -177,6 +177,7 @@ Events that are monitored:
 * Changes to Security Policies within IAM and S3
 * Failed login attempts to the AWS Management Console
 * API calls that resulted in failed authorization
+* Filters to search in cloudwatch: [https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html)
 
 ### Agent Installation
 
