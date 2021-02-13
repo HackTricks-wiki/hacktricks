@@ -886,7 +886,8 @@ You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurls
 
 ### AppCmd.exe
 
-**AppCmd.exe** is located in the `%systemroot%\system32\inetsrv\` directory.  
+**Note that to recover passwords from AppCmd.exe you need to be Administrator and run under a High Integrity level.  
+AppCmd.exe** is located in the `%systemroot%\system32\inetsrv\` directory.  
 If this file exists then it is possible that some **credentials** have been configured and can be **recovered**.
 
 This code was extracted from _**PowerUP**_:
