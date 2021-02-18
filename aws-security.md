@@ -435,3 +435,43 @@ Se puede preparar una base de datos relacionada con el contenido que va a tener 
 AWS KMS uses symetric cryptography. This is used to encrypt information as rest \(like inside a S3\). If you need to encrypt information in transit you need to use something like TLS.  
 KMSis a region specific service.
 
+Customer Marter Keys: Can encrypt data up to 4KB in size.It's typically used in relatio to your DEKs. The key can generate, encrypt and decrypt these DEK
+
+2 types:
+
+* AWS managed CMKs -Used by other services to encrypt data. It's used by the service that created it ina region. They are created the first time you implemente the encryption in that service
+* Customer manager CMKs: Flexibility, rotation, configu access ad key policy. Enable and disable keys.
+
+Example: When you ask S3 to encrypt the data, it will access KMS to generate 2 keys: The plaintext key and the encrypted key. S3 will use the plaintext key to encrypt the plain text data and delelete it. Then, it will save inside S3 the encrypted data with the encrypted key,so whenever it needs to decrypt the data, it will decryot the encrypted key in KMS and then it will decrypt the data.
+
+Key policies: These difines who can use and access a key in KMS. By default root user has full access over KMS, if you delete this one, you need to contack AWS for support.
+
+Properties of a policy:
+
+* JSON based document
+* Resource --&gt; Affected resources \(can be "\*"\)
+* Action --&gt; kms:CreateGrant ... \(permissions\)
+* Effect --&gt; Allow/Deny
+* Principal --&gt; arn affected
+* Conditions \(optional\) --&gt; Condition to give the permissions
+
+Grants:
+
+* Allow to delegate your permissions to another AWS principal within your AWS account. You need to create them using the AWS KMS APIs. It can be indicated the CMK identifier, the grantee principal and the required level of opoeration \(Decrypt, Encrypt, GenerateDataKey...\)
+* After the grant is created a GrantToken and a GratID are issued
+
+Access:
+
+* Via key policy
+* Via IAM policy
+* Via grants
+
+Rotation of CMKs:
+
+* The longer the same key is left in place, the more data is encrypted with that key, and if that key is breached, then the wider the blast area of data is at risk. In addition to this, the longer the key is active, the probability of it being breached increases.
+* KMS rotate the keys every 365 days \(or you cna perform the process manually whenever you want\)
+* Older keys are retained to decrypt data that was encrypted prior to the rotation
+* In a brear, rotating the key won't remove the threat as it will be possible to decrypt all the data encrypted with the compromised jey. However, th new data will be encrypted with the new key.
+* If CMK is in state of disabled or pending deletion, KMS will not perform a key rotation untilthe CMKis re-enabled or deletion is cancelled
+* AWS managed CMKs are rotated wvwry 3 years and this cannot be changed.
+
