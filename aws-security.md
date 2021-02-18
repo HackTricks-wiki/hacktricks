@@ -433,4 +433,5 @@ Se puede preparar una base de datos relacionada con el contenido que va a tener 
 ## KMS
 
 AWS KMS uses symetric cryptography. This is used to encrypt information as rest \(like inside a S3\). If you need to encrypt information in transit you need to use something like TLS.  
+KMSis a region specific service.
 
