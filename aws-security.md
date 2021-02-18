@@ -435,7 +435,9 @@ Se puede preparar una base de datos relacionada con el contenido que va a tener 
 AWS KMS uses symetric cryptography. This is used to encrypt information as rest \(like inside a S3\). If you need to encrypt information in transit you need to use something like TLS.  
 KMSis a region specific service.
 
-Customer Marter Keys: Can encrypt data up to 4KB in size.It's typically used in relatio to your DEKs. The key can generate, encrypt and decrypt these DEK
+Customer Marter Keys: Can encrypt data up to 4KB in size.It's typically used in relatio to your DEKs \(Data Encryption Keys\). The key can generate, encrypt and decrypt these DEK.CMKs are used to encrypt the DEKs and then the DEKs are used to encrypt the data.
+
+A customer master key \(CMK\) is a logical representation of a master key in AWS KMS. In addition to the master key's identifiers and other metadata, including its creation date, description, and key state, a CMK contains the key material used to encrypt and decrypt data. When you create a CMK, by default, AWS KMS generates the key material for that CMK. However, you can choose to create a CMK without key material and then import your own key material into that CMK.
 
 2 types:
 
@@ -473,5 +475,13 @@ Rotation of CMKs:
 * Older keys are retained to decrypt data that was encrypted prior to the rotation
 * In a brear, rotating the key won't remove the threat as it will be possible to decrypt all the data encrypted with the compromised jey. However, th new data will be encrypted with the new key.
 * If CMK is in state of disabled or pending deletion, KMS will not perform a key rotation untilthe CMKis re-enabled or deletion is cancelled
-* AWS managed CMKs are rotated wvwry 3 years and this cannot be changed.
+* AWS managed CMKs are rotated every 3 years and this cannot be changed.
+
+Manual rotation:
+
+* A new CMK needs to be created, then, a nre CMK-ID is created, so you will need to update any application to referencec the new CMK-ID
+* To do this process easier you can use aliaese to refer to a key-id and then just update the key the alias is referring to
+* You need to keep old keys to decrypt old files encrypted with it
+
+You can import keys from your on-premises key infrastructure 
 
