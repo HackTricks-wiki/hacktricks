@@ -389,9 +389,67 @@ You can very easily create health checks for web pages via Route53. For example 
 
 Route 53 service is mainly used for checking the health of the instances. To check the health of the instances we can ping a certain DNS point and we should get response from the instance if the instances are healthy.
 
-## S3 Access logs
+## 
+
+## S3
+
+### S3 Access logs
 
 It's possible to enable S3 access login \(which by default is disabled\) to some bucket and save the logs in a different bucket to know who is accessing the bucket. The source bucket and the target bucket \(the one is saving the logs needs to be in the same region.
+
+### S3 Encryption Mechanisms
+
+Server-side encryption with S3 managed keys, SSE-S3. This option requires minimal configuration and all management of encryption keys used are managed by AWS. All you need to do is to upload your data and S3 will handle all other aspects. 
+
+* Encryption: 
+  * Object Data + created plaintext DEK --&gt; Encrypted data \(stored inside S3\)
+  * created plaintext DEK + S3 Master Key --&gt; Encrypted DEK \(stored inside S3\) and plain text is deleted from memory
+* Decryption:
+  * Encrypted DEK + S3 Master Key --&gt; Plaintext DEK
+  * Plaintext DEK + Encrypted data --&gt; Object Data
+
+Server-side encryption with KMS managed keys, SSE-KMS. This method allows S3 to use the key management service to generate your data encryption keys. KMS gives you a far greater flexibility of how your keys are managed. For example, you are able to disable, rotate, and apply access controls to the CMK, and order to against their usage using AWS Cloud Trail. 
+
+* Encryption:
+  * S3 request data keys from KMS CMK --&gt; so, KMS uses a CMK to generate the pair DKE plaintext and DEK encrypted --&gt; Pair keys send back to S3 -&gt; S3 uses the plaintext key to encrypt the data, store the encrypted data and the encrypted key and deletes from memory the plain text key
+* Decryption:
+  * S3 ask to KMS to decrypt the encrupted data key of the object
+  * KMS decryptd the data key with the CMK and send it bak to S3
+  * S3 decrypts the object data
+
+Server-side encryption with customer provided keys, SSE-C. This option gives you the opportunity to provide your own master key that you may already be using outside of AWS. Your customer-provided key would then be sent with your data to S3, where S3 would then perform the encryption for you. 
+
+* Encryption:
+  * The user sends the object data + Customer key to S3
+  * The customer key is used to encrypt the data and the encrypted data is stored
+  * a salted HMAC value of the customer key is stored also for future key validation
+  * the customer key is deleted from memory
+* Decryption:
+  * The user send the customer key
+  * The key is validated against the HMAC value stored
+  * The customer provided key is then used to decrypt the data
+
+Client-side encryption with KMS, CSE-KMS. Similarly to SSE-KMS, this also uses the key management service to generate your data encryption keys. However, this time KMS is called upon via the client not S3. The encryption then takes place client-side and the encrypted data is then sent to S3 to be stored. 
+
+* Encryption:
+  * Client request for a data key to KMS
+  * KMS returns the plaintext data key and the same data key encrypted with the CMK
+  * Both keys are sent back
+  * The client then encrypts the data with the plain text data key and send toS3 the encrypted data + the encrypted DEK \(which is saved as metadata of the encrypted data inside S3\)
+* Decryption:
+  * The encrypted data with the encrypted DEK is sent to the client
+  * The client asks KMS to decrypt the encrypted key using the CMK and KMS sends back the plaintext DEK
+  * The client can now decrypt the encrypted data
+
+Client-side encryption with customer provided keys, CSE-C. Using this mechanism, you are able to utilize your own provided keys and use an AWS-SDK client to encrypt your data before sending it to S3 for storage. 
+
+* Encryption: 
+  * The client generates a DEK and encrypts the plaintext data
+  * Then, using it's own custme CMK it encrypts the DEK
+  * submit the encrypted data + encrypted DEK to S3 where it's stored
+* Decryption:
+  * S3 sends the encrypted data and DEK
+  * As the client already has the CMK used to encrypt the DEK, it decrypts the DEK and then uses the plaintext DEK to decrypt the data
 
 ## CloufFront
 
