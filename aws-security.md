@@ -435,6 +435,10 @@ Se puede preparar una base de datos relacionada con el contenido que va a tener 
 AWS KMS uses symetric cryptography. This is used to encrypt information as rest \(like inside a S3\). If you need to encrypt information in transit you need to use something like TLS.  
 KMSis a region specific service.
 
+Key Management Service is a software as a service offering from Amazon. It is a managed service provided by Amazon that enables you to easily manage encryption keys. 
+
+Administrators at Amazon do not have access to your keys. They cannot recover your keys and they do not help you with encryption of your keys. AWS simply administers the operating system and the underlying application it's up to us to administer our encryption keys and administer how those keys are used.
+
 Customer Marter Keys: Can encrypt data up to 4KB in size.It's typically used in relatio to your DEKs \(Data Encryption Keys\). The key can generate, encrypt and decrypt these DEK.CMKs are used to encrypt the DEKs and then the DEKs are used to encrypt the data.
 
 A customer master key \(CMK\) is a logical representation of a master key in AWS KMS. In addition to the master key's identifiers and other metadata, including its creation date, description, and key state, a CMK contains the key material used to encrypt and decrypt data. When you create a CMK, by default, AWS KMS generates the key material for that CMK. However, you can choose to create a CMK without key material and then import your own key material into that CMK.
@@ -452,7 +456,7 @@ Properties of a policy:
 
 * JSON based document
 * Resource --&gt; Affected resources \(can be "\*"\)
-* Action --&gt; kms:CreateGrant ... \(permissions\)
+* Action --&gt; kms:Encrypt, kms:Decrypt, kms:CreateGrant ... \(permissions\)
 * Effect --&gt; Allow/Deny
 * Principal --&gt; arn affected
 * Conditions \(optional\) --&gt; Condition to give the permissions
@@ -464,7 +468,7 @@ Grants:
 
 Access:
 
-* Via key policy
+* Via key policy -- If this exist, this takes precedent over the IAM policy, s the IAM olicy is not used
 * Via IAM policy
 * Via grants
 
@@ -484,4 +488,26 @@ Manual rotation:
 * You need to keep old keys to decrypt old files encrypted with it
 
 You can import keys from your on-premises key infrastructure 
+
+Envelope Encryption in the context of Key Management Service \(KMS\): Two-tier hierarchy system to encrypt data with data key and then encrypt data key with master key.
+
+KMS is priced per number of encryption/decryption requests received from all services per month.
+
+KMS has full audit and compliance integration with CloudTrail; this is where you can audit all changes performed on KMS.
+
+With KMS policy you can do the following:
+
+* Limit who can create data keys and which services have access to use these keys 
+* Limit systems access to encrypt only, decrypt only or both 
+* Define to enable  systems to access keys across regions \(although it is not recommended as a failure in the region hosting KMS will affect availability of systems in other regions\) 
+
+You cannot synchronize or move/copy keys across regions; you can only define rules to allow access across region.
+
+Key Administrators by default:
+
+* Have access to manage KMS but not to encrypt or decrypt data
+* Only IAM users and roles can be added to Key Administrators list \(not groups\)
+* If external CMK is used, Key Administrators have the permission to import key material
+
+KMS stores keys on multi-tenant hardware security modules \(HSMs\).
 
