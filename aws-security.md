@@ -430,3 +430,7 @@ For every network interface that publishes data to the CloudWatch log group, it 
 Use Amazon Athena to query data within S3 to search for specific entries.  
 Se puede preparar una base de datos relacionada con el contenido que va a tener un bucket S3 para despues poder buscar el contenid de ese bucket mediante consultas de SQL.
 
+## KMS
+
+AWS KMS uses symetric cryptography. This is used to encrypt information as rest \(like inside a S3\). If you need to encrypt information in transit you need to use something like TLS.  
+
