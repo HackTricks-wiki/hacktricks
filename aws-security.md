@@ -399,7 +399,7 @@ It's possible to enable S3 access login \(which by default is disabled\) to some
 
 ### S3 Encryption Mechanisms
 
-Server-side encryption with S3 managed keys, SSE-S3. This option requires minimal configuration and all management of encryption keys used are managed by AWS. All you need to do is to upload your data and S3 will handle all other aspects. 
+Server-side encryption with S3 managed keys, SSE-S3. This option requires minimal configuration and all management of encryption keys used are managed by AWS. All you need to do is to upload your data and S3 will handle all other aspects.  Each bucket in an S3 account is assigned a bucket key
 
 * Encryption: 
   * Object Data + created plaintext DEK --&gt; Encrypted data \(stored inside S3\)
@@ -645,6 +645,8 @@ Once the TLS certificate provider has been configured in the security configurat
 
 Presto. When using EMR version 5.6.0 and later, any internal communication between Presto nodes will use SSL and TLS. Tez. Tez Shuffle Handler uses TLS. And Spark. The Akka protocol uses TLS. Block Transfer Service uses Simple Authentication Security Layer and 3DES. External shuffle service uses the Simple Authentication Security Layer.
 
+For Amazon EMR, when using Amazon EBS volumes for your persistent storage layer, you can implement Linux Unified Key Setup \(LUKS\) with KMS and open-source HDFS encryption.
+
 ## RDS
 
 RDS allows you to set up a relational database using a number of different engines such as MySQL, Oracle, SQL Server, etc. During the creation of your RDS database instance, you have the opportunity to Enable Encryption at the Configure Advanced Settings screen under Database Options and Enable Encryption.
@@ -661,7 +663,7 @@ If you want to use the TDE method, then you must first ensure that the database 
 
 Once the database is associated with an option group, you must ensure that the Oracle Transparent Data Encryption option is added to that group. Once this TDE option has been added to the option group, it cannot be removed. TDE can use two different encryption modes, firstly, TDE tablespace encryption which encrypts entire tables and, secondly, TDE column encryption which just encrypts individual elements of the database.
 
-## Amazon Kinesis
+## Amazon Kinesis Firehouse
 
 Amazon Firehose. This service is used to deliver real-time streaming data to different services and destinations within [AWS](https://cloudacademy.com/library/amazon-web-services/), many of which can be used for big data such as S3 Redshift and Amazon Elasticsearch.
 
