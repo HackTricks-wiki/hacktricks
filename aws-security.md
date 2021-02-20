@@ -569,3 +569,53 @@ Key Administrators by default:
 
 KMS stores keys on multi-tenant hardware security modules \(HSMs\).
 
+## AWS Secrets Manager
+
+AWS Secrets Manager is a great service to enhance your security posture by allowing you to remove any hard-coded secrets within your application and replacing them with a simple API call to the aid of your secrets manager which then services the request with the relevant secret. As a result, AWS Secrets Manager acts as a single source of truth for all your secrets across all of your applications.
+
+AWS Secrets Manager enables the ease of rotating secrets and therefore enhancing the security of that secret. An example of this could be your database credentials. Other secret types can also have automatic rotation enabled through the use of lambda functions, for example, API keys.
+
+Access to your secrets within AWS Secret Manager is governed by fine-grained IAM identity-based policies in addition to resource-based policies.
+
+To allow a user form a diffrent account to access your secret you need to authorize him to access the secret and also authorize him to decryt the secret in KMS. The Key policy also needs to allows the external user to use it.
+
+AWS Secrets Manager integrates with AWS KMS to encrypt your secrets within AWS Secrets Manager.
+
+## HSM \_ Hardware Security Module
+
+Cloud HSM is a FIPS 140 level two validated hardware device for secure cryptographic key storage. I can't stress this enough, CloudHSM is a hardware appliance, it is not a virtualized service. It is a SafeNetLuna 7000 appliance with 5.3.13 preloaded. There are two firmware versions and which one you pick is really based on your exact needs. One is for FIPS 140-2 compliance and there was a newer version that can be used.
+
+The unusual feature of CloudHSM is that it is a physical device, and thus it is not shared with other customers, or as it is commonly termed, multi-tenant. It is dedicated single tenant appliance exclusively made available to your workloads
+
+Typically, a device is available within 15 minutes assuming there is capacity, but if the AZ is out of capacity it can take two weeks or more to acquire additional capacity.
+
+One area that CloudHSM and Key Management Service compare fairly well is in their usage. Both are available to you at AWS and both are integrated with your apps at AWS. Since this is a physical device dedicated to you, the keys are stored on the device. Keys need to either be replicated to another device, backed up to offline storage, or exported to a standby appliance. This device is not backed by S3 or any other service at AWS like KMS. Scalability. In CloudHSM, you have to scale the service yourself. You have to provision enough CloudHSM devices to handle whatever your encryption needs are based on the encryption algorithms you have chosen to implement for your solution.
+
+Key Management Service scaling is performed by AWS and automatically scales on demand, so as your use grows, so might the number of CloudHSM appliances that are required. Keep this in mind as you scale your solution and if your solution has auto-scaling, make sure your maximum scale is accounted for with enough CloudHSM appliances to service the solution. Performance. Just like scaling, performance is up to you with CloudHSM. Performance varies based on which encryption algorithm is used and on how often you need to access or retrieve the keys to encrypt the data. Key management service performance is handled by Amazon and automatically scales as demand requires it. CloudHSM's performance is achieved by adding more appliances and if you need more performance you either add devices or alter the encryption method to the algorithm that is faster.
+
+If your solution is multi-region, you should add several CloudHSM appliances in the second region and work out the cross-region connectivity with a private VPN connection or some method to ensure the traffic is always protected between the appliance at every layer of the connection. Multi-region and CloudHSM. If you have a multi-region solution you need to think about how to replicate keys and set up additional CloudHSM devices in the regions where you operate. You can very quickly get into a scenario where you have six or eight devices spread across multiple regions, enabling full redundancy of your encryption keys.
+
+CloudHSM is an enterprise class service for secured key storage and can be used as a root of trust for an enterprise. It can store private keys in PKI and certificate authority keys in X509 implementations. In addition to symmetric keys used in symmetric algorithms such as AES, KMS stores and physically protects symmetric keys only, so if you need to store PKI and CA keys a CloudHSM or two or three could be your solution. Pricing. CloudHSM is considerably more expensive than Key Management Service. CloudHSM is a hardware appliance so you have fix costs to provision the CloudHSM device, then an hourly cost to run the appliance. The cost is multiplied by as many CloudHSM appliances that are required to achieve your specific requirements.
+
+Additionally, cross consideration must be made in the purchase of third party software such as SafeNet ProtectV software suites and integration time and effort. Key Management Service is a usage based and depends on the number of keys you have and the input and output operations. As key management provides seamless integration with many AWS services, integration costs should be significantly lower. Costs should be considered secondary factor in encryption solutions. Encryption is typically used for security and compliance.
+
+With CloudHSM only you have access to the keys and without going into too much detail, with CloudHSM you manage your own keys. With KMS, you and Amazon co-manage your keys. AWS does have many policy safeguards against abuse and still cannot access your keys in either solution. The main distinction is compliance as it pertains to key ownership and management, and with CloudHSM, this is a hardware appliance that you manage and maintain with exclusive access to you and only you.
+
+One, always deploy CloudHSM in an HA setup with at least two appliances in separate availability zones, and if possible, deploy a third either on premise or in another region at AWS.
+
+Two, be careful when initializing a CloudHSM. This action will destroy the keys, so either have another copy of the keys or be absolutely sure you do not and never, ever will need these keys to decrypt any data.
+
+Three, CloudHSM only supports certain versions of firmware and software. Before performing any update, make sure the firmware and or software is supported by AWS. You can always contact AWS support to verify if the upgrade guide is unclear.
+
+Four, the network configuration should never be changed. Remember, it'sin a AWS data center and AWS is monitoring base hardware for you. This means that if the hardware fails, they will replace it for you, but only if they know it failed.
+
+Five, the SysLog forward should not be removed or changed. You can always add a SysLog forwarder to direct the logs to your own collection tool.
+
+Six, the SNMP configuration has the same basic restrictions as the network and SysLog folder. This should not be changed or removed. An additional SNMP configuration is fine, just make sure you do not change the one that is already on the appliance.
+
+Seven, another interesting best practice from AWS is not to change the NTP configuration. It is not clear what would happen if you did, so keep in mind that if you don't use the same NTP configuration for the rest of your solution then you could have two time sources. Just be aware of this and know that the CloudHSM has to stay with the existing NTP source.
+
+The initial launch charge for CloudHSM is $5,000 to allocate the hardware appliance dedicated for your use, then there is an hourly charge associated with running CloudHSM that is currently at $1.88 per hour of operation, or approximately $1,373 per month.
+
+The most common reason to use CloudHSM is compliance standards that you must meet for regulatory reasons. . KMS does not offer data support for asymmetric keys. CloudHSM does let you store asymmetric keys securely.
+
