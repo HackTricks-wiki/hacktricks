@@ -408,6 +408,8 @@ Server-side encryption with S3 managed keys, SSE-S3. This option requires minima
   * Encrypted DEK + S3 Master Key --&gt; Plaintext DEK
   * Plaintext DEK + Encrypted data --&gt; Object Data
 
+Please, note that in this case the key is managed by AWS \(rattion only every 3 years\). If you use your own key you willbe able to rotate, disable and apply access control.
+
 Server-side encryption with KMS managed keys, SSE-KMS. This method allows S3 to use the key management service to generate your data encryption keys. KMS gives you a far greater flexibility of how your keys are managed. For example, you are able to disable, rotate, and apply access controls to the CMK, and order to against their usage using AWS Cloud Trail. 
 
 * Encryption:
@@ -487,6 +489,12 @@ For every network interface that publishes data to the CloudWatch log group, it 
 
 Use Amazon Athena to query data within S3 to search for specific entries.  
 Se puede preparar una base de datos relacionada con el contenido que va a tener un bucket S3 para despues poder buscar el contenid de ese bucket mediante consultas de SQL.
+
+Amazon Athena is a serverless interactive query service which uses standard SQL and automatically execute queries in parallel, making it extremely fast. Amazon Athena supports the ability to query S3 data that is already encrypted and if configured to do so, Athena can also encrypt the results of the query which can then be stored in S3.
+
+This encryption of results is independent of the underlying queried S3 data, meaning that even if the S3 data is not encrypted, the queried results can be encrypted. A couple of points to be aware of is that Amazon Athena only supports data that has been encrypted with the following S3 encryption methods, SSE-S3, SSE-KMS, and CSE-KMS.
+
+SSE-C and CSE-E are not supported. In addition to this, it's important to understand that Amazon Athena will only run queries against encrypted objects that are in the same region as the query itself. If you need to query S3 data that's been encrypted using KMS, then specific permissions are required by the Athena user to enable them to perform the query.
 
 ## KMS
 
@@ -581,7 +589,7 @@ To allow a user form a diffrent account to access your secret you need to author
 
 AWS Secrets Manager integrates with AWS KMS to encrypt your secrets within AWS Secrets Manager.
 
-## HSM \_ Hardware Security Module
+## HSM - Hardware Security Module
 
 Cloud HSM is a FIPS 140 level two validated hardware device for secure cryptographic key storage. I can't stress this enough, CloudHSM is a hardware appliance, it is not a virtualized service. It is a SafeNetLuna 7000 appliance with 5.3.13 preloaded. There are two firmware versions and which one you pick is really based on your exact needs. One is for FIPS 140-2 compliance and there was a newer version that can be used.
 
@@ -618,4 +626,56 @@ Seven, another interesting best practice from AWS is not to change the NTP confi
 The initial launch charge for CloudHSM is $5,000 to allocate the hardware appliance dedicated for your use, then there is an hourly charge associated with running CloudHSM that is currently at $1.88 per hour of operation, or approximately $1,373 per month.
 
 The most common reason to use CloudHSM is compliance standards that you must meet for regulatory reasons. . KMS does not offer data support for asymmetric keys. CloudHSM does let you store asymmetric keys securely.
+
+## EMR
+
+EMR is a managed service by [AWS](https://cloudacademy.com/library/amazon-web-services/) and is comprised of a cluster of EC2 instances that's highly scalable to process and run big data frameworks such Apache Hadoop and Spark.
+
+From EMR version 4.8.0 and onwards, we have the ability to create a security configuration specifying different settings on how to manage encryption for your data within your clusters. You can either encrypt your data at rest, data in transit, or if required, both together. The great thing about these security configurations is they're not actually a part of your EC2 clusters.
+
+One key point of EMR is that by default, the instances within a cluster do not encrypt data at rest.
+
+However, these are not possible for EBS root device volumes. Once enabled, the following features are available. Linux Unified Key Setup. EBS cluster volumes can be encrypted using this method whereby you can specify AWS KMS to be used as your key management provider, or use a custom key provider.
+
+Open-Source HDFS encryption. This provides two Hadoop encryption options. Secure Hadoop RPC which would be set to privacy which uses simple authentication security layer, and data encryption of HDFS Block transfer which would be set to true to use the AES-256 algorithm.
+
+From an encryption in transit perspective, you could enable open source transport layer security encryption features and select a certificate provider type which can be either PEM where you will need to manually create PEM certificates, bundle them up with a zip file and then reference the zip file in S3 or custom where you would add a custom certificate provider as a Java class that provides encryption artifacts.
+
+Once the TLS certificate provider has been configured in the security configuration file, the following encryption applications specific encryption features can be enabled which will vary depending on your EMR version. Hadoop. Hadoop might reduce encrypted shuffle which uses TLS. Both secure Hadoop RPC which uses Simple Authentication Security Layer, and data encryption of HDFS Block Transfer which uses AES-256, are both activated when at rest encryption is enabled in the security configuration.
+
+Presto. When using EMR version 5.6.0 and later, any internal communication between Presto nodes will use SSL and TLS. Tez. Tez Shuffle Handler uses TLS. And Spark. The Akka protocol uses TLS. Block Transfer Service uses Simple Authentication Security Layer and 3DES. External shuffle service uses the Simple Authentication Security Layer.
+
+## RDS
+
+RDS allows you to set up a relational database using a number of different engines such as MySQL, Oracle, SQL Server, etc. During the creation of your RDS database instance, you have the opportunity to Enable Encryption at the Configure Advanced Settings screen under Database Options and Enable Encryption.
+
+During the creation of your RDS database instance, you have the opportunity to Enable Encryption at the Configure Advanced Settings screen under Database Options and Enable Encryption.
+
+By enabling your encryption here, you are enabling encryption at rest for your storage, snapshots, read replicas and your back-ups. Keys to manage this encryption can be issued by using KMS. It's not possible to add this level of encryption after your database has been created. It has to be done during its creation.
+
+However, there is a workaround allowing you to encrypt an unencrypted database as follows. You can create a snapshot of your unencrypted database, create an encrypted copy of that snapshot, use that encrypted snapshot to create a new database, and then, finally, your database would then be encrypted.
+
+In addition to encryption offered by RDS itself at the application level, there are additional platform level encryption mechanisms that could be used for protecting data at rest including Oracle and SQL Server Transparent Data Encryption, known as TDE, and this could be used in conjunction with the method order discussed but it would impact the performance of the database MySQL cryptographic functions and Microsoft Transact-SQL cryptographic functions.
+
+If you want to use the TDE method, then you must first ensure that the database is associated to an option group. Option groups provide default settings for your database and help with management which includes some security features. However, option groups only exist for the following database engines and versions.
+
+Once the database is associated with an option group, you must ensure that the Oracle Transparent Data Encryption option is added to that group. Once this TDE option has been added to the option group, it cannot be removed. TDE can use two different encryption modes, firstly, TDE tablespace encryption which encrypts entire tables and, secondly, TDE column encryption which just encrypts individual elements of the database.
+
+## Amazon Kinesis
+
+Amazon Firehose. This service is used to deliver real-time streaming data to different services and destinations within [AWS](https://cloudacademy.com/library/amazon-web-services/), many of which can be used for big data such as S3 Redshift and Amazon Elasticsearch.
+
+The service is fully managed by AWS, taking a lot of the administration of maintenance out of your hands. Firehose is used to receive data from your data producers where it then automatically delivers the data to your chosen destination. Amazon Streams. This service essentially collects and processes huge amounts of data in real time and makes it available for consumption.
+
+This data can come from a variety of different sources. For example, log data from the infrastructure, social media, web clicks during feeds, market data, etc. So now we have a high-level overview of each of these. We need to understand how they implement encryption of any data process in stored should it be required.
+
+When clients are sending data to Kinesis in transit, the data can be sent over HTTPS, which is HTTP with SSL encryption. However, once it enters the Kinesis service, it is then unencrypted by default. Using both Kinesis Streams and Firehose encryption, you can assure your streams remain encrypted up until the data is sent to its final destination.
+
+If Amazon S3 is used as a destination, Firehose can implement encryption using SSE-KMS on S3.
+
+Amazon Streams now has the ability to implement SSE encryption using KMS to encrypt data as it enters the stream directly from the producers.
+
+As a part of this process, it's important to ensure that both producer and consumer applications have permissions to use the KMS key. Otherwise encryption and decryption will not be possible, and you will receive an unauthorized KMS master key permission error.
+
+Kinesis SSE encryption will typically call upon KMS to generate a new data key every five minutes. So, if you had your stream running for a month or more, thousands of data keys would be generated within this time frame.
 
