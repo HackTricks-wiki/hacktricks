@@ -715,3 +715,16 @@ If your internal security policies or governance controls dictate that you must 
 
 During the rotation, Redshift will rotate the CEK for your cluster and for any backups of that cluster. It will rotate a DEK for the cluster but it's not possible to rotate a DEK for the snapshots stored in [S3](https://cloudacademy.com/course/aws-big-data-security-encryption/amazon-s3-and-amazon-athena-encryption-2/) that have been encrypted using the DEK. It will put the cluster into a state of 'rotating keys' until the process is completed when the status will return to 'available'.
 
+## WAF
+
+So there are a number of essential components relating to WAF, these being: Conditions, Rules and Web access control lists, also known as Web ACLs
+
+Conditions allow you to specify what elements of the incoming HTTP or HTTPS request you want WAF to be monitoring for. \(XSS, GEO - filtering by location-, IP address, Size constraints, SQL Injection attacks, strings and regex matching\). Note that if you are restricting a country from cloudfront, this request qon't arrive to the waf. With this conditions you can create rules: For example, block if 2 condicions are met.  
+When creating your rule you will be asked to select a Rule Type, a Regular Rule or a Rate-Based Rule. 
+
+The only difference between a rate-based rule and a regular rule is that rate-based rules count the number of requests that are being received from a particular IP address over a time period of five minutes.
+
+When you select a rate-based rule option, and as you can see from the image you are asked to enter the maximum number of requests from a single IP within a five minute time frame. When the count limit is reached, all other requests from that same IP address is then blocked. If the request rate falls back below the rate limit specified the traffic is then allowed to pass through and is no longer blocked. When setting your rate limit it must be set to a value above 2000. Any request under this limit is considered a Regular Rule.
+
+an action is applied to each rule, these actions can either be Allow, Block or Count. When a request is allowed, it is forwarded onto the relevant CloudFront distribution or Application Load Balancer. When a request is blocked, the request is terminated there and no further processing of that request is taken. A Count action will do exactly that, it will count the number of requests that meet the conditions within that rule. This is a really good option to select when testing the rules to ensure that the rule is picking up the requests as expected before setting it to either Allow or Block. If an incoming request does not meet any rule within the Web ACL then the request takes the action associated to a default action specified which can either be Allow or Block. An important point to make about these rules is that they are executed in the order that they are listed within a Web ACL. So be careful to architect this order correctly for your rule base, typically these are ordered as shown: Where you have your WhiteListed Ips as Allow. Your BlackListed IP addresses as Block and any Bad Signatures also as Block.
+
