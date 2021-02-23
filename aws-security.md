@@ -742,3 +742,11 @@ A rule group \(a set of WAF rules together\) can be added to an AWS Firewall Man
 
 Firewall Manager policies only allow "Block" or "Count" options for a rule group \(no "Allow" option\).
 
+## AWS Shield
+
+AWS Shield has been designed to help protect your infrastructure against distributed denial of service attacks, commonly known as DDoS.
+
+AWS Shield Standard is free to everyone, well, at least anyone who has an AWS account, and it offers DDoS protection against some of the more common layer three, the network layer, and layer four, transport layer, DDoS attacks. This protection is integrated with both CloudFront and Route 53. 
+
+AWS Shield advanced offers a greater level of protection for DDoS attacks across a wider scope of AWS services for an additional cost. This advanced level offers protection against your web applications running on EC2, CloudFront, ELB and also Route 53. In addition to these additional resource types being protected, there are enhanced levels of DDoS protection offered compared to that of Standard. And you will also have access to a 24-by-seven specialized DDoS response team at AWS, known as DRT.
+
