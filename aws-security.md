@@ -732,5 +732,13 @@ WAF CloudWatch metrics are reported in one minute intervals by default and are k
 
 You can have 100 conditions of each type, such as Geo Match or size constraints, however Regex is the exception to this rule where only 10 Regex conditions are allowed but this limit is possible to increase. You are able to have 100 rules and 50 Web ACLs per AWS account. You are limited to 5 rate-based-rules per account. Finally you can have 10,000 requests per second when using WAF within your application load balancer.
 
+## AWS Firewall Manager
 
+Firewall Manager has been designed to help you manage WAF in a multi-account environment with simplicity and control. It allows you to protect your vulnerable resources across all of your AWS accounts within your AWS Organization. It can group and protect specific resources together, for example, all resources with a particular tag or all of your CloudFront distributions. One key benefit of Firewall Manager is that it automatically protects certain resources that are added to your account as they become active.
+
+Requisites: Created a Firewal Manager Master Account, setup an AWS organization and have added our member accounts and enable AWS Config.
+
+A rule group \(a set of WAF rules together\) can be added to an AWS Firewall Manager Policy which is then associated to AWS resources, such as your cloud front distributions or application load balances.
+
+Firewall Manager policies only allow "Block" or "Count" options for a rule group \(no "Allow" option\).
 
