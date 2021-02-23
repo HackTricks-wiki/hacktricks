@@ -73,7 +73,7 @@ X=$'cat\x20/etc/passwd'&&$X
 p\
 i\
 n\
-g # This 4 lines will equal to ping
+g # These 4 lines will equal to ping
 
 ## Undefined variables and !
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
