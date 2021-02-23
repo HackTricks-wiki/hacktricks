@@ -732,6 +732,8 @@ WAF CloudWatch metrics are reported in one minute intervals by default and are k
 
 You can have 100 conditions of each type, such as Geo Match or size constraints, however Regex is the exception to this rule where only 10 Regex conditions are allowed but this limit is possible to increase. You are able to have 100 rules and 50 Web ACLs per AWS account. You are limited to 5 rate-based-rules per account. Finally you can have 10,000 requests per second when using WAF within your application load balancer.
 
+If an incoming request does not meet ANY rule within the Web ACL then the request takes the action associated to a default action specified which can either be Allow or Block.
+
 ## AWS Firewall Manager
 
 Firewall Manager has been designed to help you manage WAF in a multi-account environment with simplicity and control. It allows you to protect your vulnerable resources across all of your AWS accounts within your AWS Organization. It can group and protect specific resources together, for example, all resources with a particular tag or all of your CloudFront distributions. One key benefit of Firewall Manager is that it automatically protects certain resources that are added to your account as they become active.
@@ -749,4 +751,6 @@ AWS Shield has been designed to help protect your infrastructure against distrib
 AWS Shield Standard is free to everyone, well, at least anyone who has an AWS account, and it offers DDoS protection against some of the more common layer three, the network layer, and layer four, transport layer, DDoS attacks. This protection is integrated with both CloudFront and Route 53. 
 
 AWS Shield advanced offers a greater level of protection for DDoS attacks across a wider scope of AWS services for an additional cost. This advanced level offers protection against your web applications running on EC2, CloudFront, ELB and also Route 53. In addition to these additional resource types being protected, there are enhanced levels of DDoS protection offered compared to that of Standard. And you will also have access to a 24-by-seven specialized DDoS response team at AWS, known as DRT.
+
+Whereas the Standard version of Shield offered protection against layer three and layer four, Advanced also offers protection against layer seven, application, attacks.
 
