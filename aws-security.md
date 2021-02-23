@@ -754,3 +754,11 @@ AWS Shield advanced offers a greater level of protection for DDoS attacks across
 
 Whereas the Standard version of Shield offered protection against layer three and layer four, Advanced also offers protection against layer seven, application, attacks.
 
+## VPC
+
+Inside the VPC you create \(a /28 provides 11 hot addresses\) the network and broadcast address of the subnet can't be used for host addresses and AWS reserves the first three host IP addresses of each subnet for internal AWS usage: he first host address used is for the VPC router. The second address is reserved for AWS DNS and the third address is reserved for future use.
+
+By splitting up your Subnets this way, helps to enforce a greater level of security. Logical grouping of similar resources also helps you to maintain an ease of management across your infrastructure.
+
+Security. By having multiple Subnets with similar resources grouped together, as per the previous point, it allows for greater security management. By implementing network level virtual firewalls, called network access control lists, or NACLs, it's possible to filter traffic on specific ports from both an ingress and egress point at the Subnet level.
+
