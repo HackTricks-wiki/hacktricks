@@ -728,3 +728,9 @@ When you select a rate-based rule option, and as you can see from the image you 
 
 an action is applied to each rule, these actions can either be Allow, Block or Count. When a request is allowed, it is forwarded onto the relevant CloudFront distribution or Application Load Balancer. When a request is blocked, the request is terminated there and no further processing of that request is taken. A Count action will do exactly that, it will count the number of requests that meet the conditions within that rule. This is a really good option to select when testing the rules to ensure that the rule is picking up the requests as expected before setting it to either Allow or Block. If an incoming request does not meet any rule within the Web ACL then the request takes the action associated to a default action specified which can either be Allow or Block. An important point to make about these rules is that they are executed in the order that they are listed within a Web ACL. So be careful to architect this order correctly for your rule base, typically these are ordered as shown: Where you have your WhiteListed Ips as Allow. Your BlackListed IP addresses as Block and any Bad Signatures also as Block.
 
+WAF CloudWatch metrics are reported in one minute intervals by default and are kept for a two week period. The metrics monitored are AllowedRequests, BlockedRequests, CountedRequests, and PassedRequests.
+
+You can have 100 conditions of each type, such as Geo Match or size constraints, however Regex is the exception to this rule where only 10 Regex conditions are allowed but this limit is possible to increase. You are able to have 100 rules and 50 Web ACLs per AWS account. You are limited to 5 rate-based-rules per account. Finally you can have 10,000 requests per second when using WAF within your application load balancer.
+
+
+
