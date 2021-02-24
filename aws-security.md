@@ -784,3 +784,5 @@ To allow VPC 1 and VPC 3 to talk directly, you would have to implement a separat
 
 Flow logs capture IP traffic going in and out of your network interfaces. And these flow logs can be created for subnets, your entire VPC, or even a single interface. Once activated, the login information is sent to a CloudWatch log group, where you are able to filter information and monitor specific metrics.
 
+If you are connection a subnet with a different subnet you canno access the subnets conencted with th other subnet, you need to create connection with them directly. This also applies to internet gatways. You cannot go through a subnet connection to access internet, you need to assign the internet gateway to your subnet.
+
