@@ -762,3 +762,25 @@ By splitting up your Subnets this way, helps to enforce a greater level of secur
 
 Security. By having multiple Subnets with similar resources grouped together, as per the previous point, it allows for greater security management. By implementing network level virtual firewalls, called network access control lists, or NACLs, it's possible to filter traffic on specific ports from both an ingress and egress point at the Subnet level.
 
+Created subnets inside a VPC have an associated ACL, ehich, by default, allows traffic in and out. But you can change it.
+
+In a nutshell, public subnets have direct access to the Internet, whereas your private instances do not.
+
+So what makes a subnet public? There are essentially 2 components required to make any one of your subnets classed as a public subnet. Firstly, you need to create and attach an Internet gateway to your VPC. This Internet gateway is a managed service, controlled, configured, and maintained by AWS. It scales horizontally automatically, and is classified as a highly valuable component of your VPC infrastructure. Once your Internet gateway is attached to your VPC, you have a gateway to the Internet. However, at this point, your instances have no idea how to get out to the Internet. As a result, you need to add a default route to the route table associated with your subnet. The route could have a destination value of 0.0. 0. 0/0, and the target value will be set as your Internet gateway ID. So to quickly recap, to enable the instances to communicate with the Internet, the following conditions must be true. The VPC must have an Internet gateway attached. The subnet must have a route, for example, 0.0.0.0/0, with a target of the attached Internet gateway. The instances must have a public IP address assigned. And the associated NACL must allow ingress and egress traffic.
+
+Depending on the IP addressing behavior of the subnet, these can either be automatically assigned to new instances launched within the subnet, or you must manually choose to have a public IP address for your instance. By default, all subnets have the automatic assigned of public IP addresses turned off.
+
+Even when a subnet is considered a public subnet. The assignment remains as a manual process for instances. To modify the subnet IP addressing behavior from within the management console.
+
+VPC peering allows you to connect two or more VPCs together, using IPV4 or IPV6, as if they were a part of the same network.
+
+Once the peer connectivity is established, resources in one VPC can access resources in the other. The connectivity between the VPCs is implemented through the existing AWS network infrastructure, and so it is highly available with no bandwidth bottleneck. As peered connections operate as if they were part of the same network, there are restrictions when it comes to your [CIDR block](https://cloudacademy.com/course/aws-virtual-private-cloud-subnets-and-routing/vpc-cidr-blocks/) ranges that can be used.
+
+If you have overlapping or duplicate CIDR ranges for your VPC, then you'll not be able to peer the VPCs together. So this is a design consideration if you plan on setting up multiple VPCs that you want to peer. Also from a design perspective, you are not able to daisy-chain VPCs together expecting them all to talk across one large network.
+
+Each AWS VPC will only communicate with its peer. As an example, if you have a peering connection between VPC 1 and VPC 2, and another connection between VPC 2 and VPC 3 as shown, then VPC 1 and 2 could communicate with each other directly, as can VPC 2 and VPC 3, however, VPC 1 and VPC 3 could not. You can't route through one VPC to get to another.
+
+To allow VPC 1 and VPC 3 to talk directly, you would have to implement a separate peering connection, between VPC 1 and VPC 3 as shown.
+
+Flow logs capture IP traffic going in and out of your network interfaces. And these flow logs can be created for subnets, your entire VPC, or even a single interface. Once activated, the login information is sent to a CloudWatch log group, where you are able to filter information and monitor specific metrics.
+
