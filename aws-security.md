@@ -786,3 +786,7 @@ Flow logs capture IP traffic going in and out of your network interfaces. And th
 
 If you are connection a subnet with a different subnet you canno access the subnets conencted with th other subnet, you need to create connection with them directly. This also applies to internet gatways. You cannot go through a subnet connection to access internet, you need to assign the internet gateway to your subnet.
 
+Valid CIDR are from a /16 netmask to a /28 netmask.
+
+A local route within a route table enables communication between VPC subnets.
+
