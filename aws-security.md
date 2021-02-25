@@ -790,3 +790,25 @@ Valid CIDR are from a /16 netmask to a /28 netmask.
 
 A local route within a route table enables communication between VPC subnets.
 
+## Types of services
+
+### Container services
+
+Services that fall under container services have the following characteristics:
+
+* the service itself runs on separate infrastructure instances, such as EC2.
+* AWS is responsible for managing the operating system and the platform.
+* A managed service is provided by AWS, which is typically the service itself for the actual application which are seen as containers.
+* As a user of these container services, you have a number of management and security responsibilities, including managing network access security, such as network access control list rules and any firewalls.
+* Also, platform-level identity and access management where it exists.
+* Examples of AWS container services include Relational Database Service, Elastic Mapreduce, and Elastic Beanstalk.
+
+### Abstract Services
+
+* These services are removed, abstracted, from the platform or management layer which cloud applications are built on.
+* The services are accessed via endpoints using AWS application programming interfaces, APIs.
+* The underlying infrastructure, operating system, and platform is managed by AWS.
+* The abstracted services provide a multi-tenancy platform on which the underlying infrastructure is shared.
+* Data is isolated via security mechanisms.
+* Abstract services have a strong integration with IAM, and examples of abstract services include S3, DynamoDB, Amazon Glacier, and SQS.
+
