@@ -8,6 +8,8 @@ Access Control - The method and process of how access is granted to a secure res
 
 IAM can be defined by its ability to manage, control and govern authentication, authorization and access control mechanisms of identities to your resources within your AWS account.
 
+An IAM role consists of two types of policies: A trust policy, which cannot be empty, defining who can assume the role, A Permissions policy, which cannot be empty, defining what they can access
+
 * Users: This could be a real person within your organization who requires access to operate and maintain your AWS environment. Or it could be an account to be used by an application that may require permissions to access your AWS resources programmatically. Note that usernames must be unique.
 * Groups: These are objects that contain multiple users. Permissions can be assigned to a user or inherit form a group. Giving permission to groups and not to users the secure way to grant permissions.
 * Roles: Roles are used to grant identities a set of permissions. Roles don't have any access keys or credentials associated with them. Role are usually used with resources \(like EC2 machines\) but they can also be useful to grant temporary privileges to a user. Note that when for example an EC2 has an IAM role assigned, instead of saving some keys inside the machine, dynamic temporary access keys will be supplied by the IAM role to handle authentication and determine if access is authorized.
@@ -47,6 +49,8 @@ Secret access key ID: 40 random upper and lowercase characters: S836fh/J73yHSb64
 Access Key Rotation: Create a new access key -&gt; Apply the new key to system/application -&gt; mark original one as inactive -&gt; Test and verify new access key is working -&gt; Delete old access key
 
 AWS Security Token Service \(STS\) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management \(IAM\) users or for users that you authenticate \(federated users\).
+
+MFA is supported when using the AWS CLI
 
 ### Multi-Factor Authentication
 
@@ -253,7 +257,9 @@ Once you have configured the Amazon Inspector Role, the AWS Agents are Installed
 
 Telemetry: data that is collected from an instance, detailing its configuration, behavior and processes during an assessment run. Once collected, the data is then sent back to Amazon Inspector in near-real-time over TLS where it is then stored and encrypted on S3 via an ephemeral KMS key. Amazon Inspector then accesses the S3 Bucket, decrypts the data in memory, and analyzes it against any rules packages used for that assessment to generate the findings.
 
-Assessment Report: Provide details on what was assessed and the results of the assessment. The findings report contain the summary of the assessment, info about the EC2 and rules and the findings that occurred. The full report is the finding report + a list of rules that were passed
+Assessment Report: Provide details on what was assessed and the results of the assessment. The findings report contain the summary of the assessment, info about the EC2 and rules and the findings that occurred. The full report is the finding report + a list of rules that were passed.
+
+Amazon Inspector has a pre-defined set of rules, grouped into packages. Each Assessment Template defines which rules packages to be included in the test. Instances are being evaluated against rules packages included in the assessment template.
 
 ## Trusted Advisor
 
@@ -392,6 +398,10 @@ Route 53 service is mainly used for checking the health of the instances. To che
 ## 
 
 ## S3
+
+ Amazon S3 provides multiple options to achieve the protection of data at REST. The options include **Permission** \(Policy\), **Encryption** \(Client and Server Side\), **Bucket Versioning** and **MFA** **based delete**. The user can enable any of these options to achieve data protection. Data replication is an internal facility by AWS where S3 automatically replicates each object across all the Availability Zones and the organization need not enable it in this case.
+
+With resource-based permissions, you can define permissions for sub-directories of your bucket separately.
 
 ### S3 Access logs
 
@@ -627,6 +637,8 @@ The initial launch charge for CloudHSM is $5,000 to allocate the hardware applia
 
 The most common reason to use CloudHSM is compliance standards that you must meet for regulatory reasons. . KMS does not offer data support for asymmetric keys. CloudHSM does let you store asymmetric keys securely.
 
+Your CTO has asked you to set up the manager account of a Cloud HSM environment. How do you install the SSH key that will be used to authenticate the manager account when logging in to a CloudHSM appliance? The public key is installed on the HSM appliance during provisioning
+
 ## EMR
 
 EMR is a managed service by [AWS](https://cloudacademy.com/library/amazon-web-services/) and is comprised of a cluster of EC2 instances that's highly scalable to process and run big data frameworks such Apache Hadoop and Spark.
@@ -662,6 +674,8 @@ In addition to encryption offered by RDS itself at the application level, there 
 If you want to use the TDE method, then you must first ensure that the database is associated to an option group. Option groups provide default settings for your database and help with management which includes some security features. However, option groups only exist for the following database engines and versions.
 
 Once the database is associated with an option group, you must ensure that the Oracle Transparent Data Encryption option is added to that group. Once this TDE option has been added to the option group, it cannot be removed. TDE can use two different encryption modes, firstly, TDE tablespace encryption which encrypts entire tables and, secondly, TDE column encryption which just encrypts individual elements of the database.
+
+Which AWS service sends data to CloudWatch every minute by default? Amazon RDS
 
 ## Amazon Kinesis Firehouse
 
@@ -702,6 +716,8 @@ This KMS key is then encrypted with the CMK master key, tier one. This encrypted
 Redshift then requests KMS to decrypt the CEK, tier two. This decrypted CEK is then also stored in memory. Redshift then creates a random database encryption key, the DEK, tier three, and loads that into the memory of the cluster. The decrypted CEK in memory then encrypts the DEK, which is also stored in memory.
 
 This encrypted DEK is then sent over a secure channel and stored in Redshift separately from the cluster. Both the CEK and the DEK are now stored in memory of the cluster both in an encrypted and decrypted form. The decrypted DEK is then used to encrypt data keys, tier four, that are randomly generated by Redshift for each data block in the database.
+
+You can use AWS Trusted Advisor to monitor the configuration of your Amazon S3 buckets and ensure that bucket logging is enabled, which can be useful for performing security audits and tracking usage patterns in S3.
 
 ### CloudHSM
 
@@ -789,6 +805,14 @@ If you are connection a subnet with a different subnet you canno access the subn
 Valid CIDR are from a /16 netmask to a /28 netmask.
 
 A local route within a route table enables communication between VPC subnets.
+
+## VPN
+
+A _customer gateway CGW_ is the anchor on the customer side of that connection. It can be a physical or software appliance. The anchor on the AWS side of the VPN connection is called a _virtual private gateway VGW_. There are two lines between the customer gateway and virtual private gateway because the VPN connection consists of two tunnels in case of device failure. When you configure your customer gateway, it's important you configure both tunnels.
+
+The VPN connection will connect VGW attached to certain VPC and CGW on AWS.
+
+Public and Private Virtual Interfaces VIFs are part of configuring a Direct Connect between on-premises and AWS
 
 ## Types of services
 
