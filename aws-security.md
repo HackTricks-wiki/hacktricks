@@ -1,5 +1,29 @@
 # AWS Security
 
+## 
+
+## Types of services
+
+### Container services
+
+Services that fall under container services have the following characteristics:
+
+* The service itself runs on **separate infrastructure instances**, such as EC2.
+* **AWS** is responsible for **managing the operating system and the platform**.
+* A managed service is provided by AWS, which is typically the service itself for the **actual application which are seen as containers**.
+* As a user of these container services, you have a number of management and security responsibilities, including **managing network access security, such as network access control list rules and any firewalls**.
+* Also, platform-level identity and access management where it exists.
+* **Examples** of AWS container services include Relational Database Service, Elastic Mapreduce, and Elastic Beanstalk.
+
+### Abstract Services
+
+* These services are **removed, abstracted, from the platform or management layer which cloud applications are built on**.
+* The services are accessed via endpoints using AWS application programming interfaces, APIs.
+* The **underlying infrastructure, operating system, and platform is managed by AWS**.
+* The abstracted services provide a multi-tenancy platform on which the underlying infrastructure is shared.
+* **Data is isolated via security mechanisms**.
+* Abstract services have a strong integration with IAM, and **examples** of abstract services include S3, DynamoDB, Amazon Glacier, and SQS.
+
 ## IAM - Identity and Access Management
 
 IAM is the service that will allow you to manage **Authentication**, **Authorization** and **Access Control** inside your AWS account.
@@ -119,6 +143,88 @@ The app uses the AssumeRoleWithWebIdentity to create temporary credentials. Howe
 * You can **set a password policy setting** options like minimum length and password requirements.
 * You can **download "Credential Report"** with information about current credentials \(like user creation time, is password enabled...\).
 
+## KMS - Key Management Service
+
+ AWS Key Management Service \(AWS KMS\) is a managed service that makes it easy for you to **create and control** _**customer master keys**_ **\(CMKs\)**, the encryption keys used to encrypt your data. AWS KMS CMKs are **protected by hardware security modules** \(HSMs\)
+
+KMS uses **symmetric cryptography**. This is used to **encrypt information as rest** \(for example, inside a S3\). If you need to **encrypt information in transit** you need to use something like **TLS**.  
+KMS is a **region specific service**.
+
+**Administrators at Amazon do not have access to your keys**. They cannot recover your keys and they do not help you with encryption of your keys. AWS simply administers the operating system and the underlying application it's up to us to administer our encryption keys and administer how those keys are used.
+
+**Customer Master Keys** \(CMK\): Can encrypt data up to 4KB in size. They are typically used to create, encrypt, and decrypt the DEKs \(Data Encryption Keys\). Then the DEKs are used to encrypt the data.
+
+A customer master key \(CMK\) is a logical representation of a master key in AWS KMS. In addition to the master key's identifiers and other metadata, including its creation date, description, and key state, a **CMK contains the key material which used to encrypt and decrypt data**. When you create a CMK, by default, AWS KMS generates the key material for that CMK. However, you can choose to create a CMK without key material and then import your own key material into that CMK.
+
+There are 2 types of master keys:
+
+* **AWS managed CMKs: Used by other services to encrypt data**. It's used by the service that created it in a region. They are created the first time you implement the encryption in that service. Rotates every 3 years and it's not possible to change it.
+* **Customer manager CMKs**: Flexibility, rotation, configurable access and key policy. Enable and disable keys.
+
+**Envelope Encryption** in the context of Key Management Service \(KMS\): Two-tier hierarchy system to **encrypt data with data key and then encrypt data key with master key**.
+
+### Key Policies
+
+These defines **who can use and access a key in KMS**. By default root user has full access over KMS, if you delete this one, you need to contact AWS for support.
+
+Properties of a policy:
+
+* JSON based document
+* Resource --&gt; Affected resources \(can be "\*"\)
+* Action --&gt; kms:Encrypt, kms:Decrypt, kms:CreateGrant ... \(permissions\)
+* Effect --&gt; Allow/Deny
+* Principal --&gt; arn affected
+* Conditions \(optional\) --&gt; Condition to give the permissions
+
+Grants:
+
+* Allow to delegate your permissions to another AWS principal within your AWS account. You need to create them using the AWS KMS APIs. It can be indicated the CMK identifier, the grantee principal and the required level of opoeration \(Decrypt, Encrypt, GenerateDataKey...\)
+* After the grant is created a GrantToken and a GratID are issued
+
+Access:
+
+* Via key policy -- If this exist, this takes precedent over the IAM policy, s the IAM olicy is not used
+* Via IAM policy
+* Via grants
+
+### Key Administrators
+
+Key administrator by default:
+
+* Have access to manage KMS but not to encrypt or decrypt data
+* Only IAM users and roles can be added to Key Administrators list \(not groups\)
+* If external CMK is used, Key Administrators have the permission to import key material
+
+### Rotation of CMKs
+
+* The longer the same key is left in place, the more data is encrypted with that key, and if that key is breached, then the wider the blast area of data is at risk. In addition to this, the longer the key is active, the probability of it being breached increases.
+* **KMS rotate customer keys every 365 days** \(or you can perform the process manually whenever you want\) and **keys managed by AWS every 3 years** and this time it cannot be changed.
+* **Older keys are retained** to decrypt data that was encrypted prior to the rotation
+* In a break, rotating the key won't remove the threat as it will be possible to decrypt all the data encrypted with the compromised key. However, the **new data will be encrypted with the new key**.
+* If **CMK** is in state of **disabled** or **pending** **deletion**, KMS will **not perform a key rotation** until the CMK is re-enabled or deletion is cancelled.
+
+#### Manual rotation
+
+* A **new CMK needs to be created**, then, a new CMK-ID is created, so you will need to **update** any **application** to **reference** the new CMK-ID.
+* To do this process easier you can **use aliases to refer to a key-id** and then just update the key the alias is referring to.
+* You need to **keep old keys to decrypt old files** encrypted with it.
+
+You can import keys from your on-premises key infrastructure .
+
+### Other information
+
+KMS is priced per number of encryption/decryption requests received from all services per month.
+
+KMS has full audit and compliance **integration with CloudTrail**; this is where you can audit all changes performed on KMS.
+
+With KMS policy you can do the following:
+
+* Limit who can create data keys and which services have access to use these keys
+* Limit systems access to encrypt only, decrypt only or both
+* Define to enable systems to access keys across regions \(although it is not recommended as a failure in the region hosting KMS will affect availability of systems in other regions\).
+
+You cannot synchronize or move/copy keys across regions; you can only define rules to allow access across region.
+
 ## S3
 
 Amazon S3 is a service that allows you **store important amounts of data**.
@@ -190,6 +296,46 @@ Please, note that in this case **the key is managed by AWS** \(rotation only eve
 * Decryption:
   * S3 sends the encrypted data and DEK
   * As the client already has the CMK used to encrypt the DEK, it decrypts the DEK and then uses the plaintext DEK to decrypt the data
+
+## HSM - Hardware Security Module
+
+Cloud HSM is a FIPS 140 level two validated **hardware device** for secure cryptographic key storage \(note that CloudHSM is a hardware appliance, it is not a virtualized service\). It is a SafeNetLuna 7000 appliance with 5.3.13 preloaded. There are two firmware versions and which one you pick is really based on your exact needs. One is for FIPS 140-2 compliance and there was a newer version that can be used.
+
+The unusual feature of CloudHSM is that it is a physical device, and thus it is **not shared with other customers**, or as it is commonly termed, multi-tenant. It is dedicated single tenant appliance exclusively made available to your workloads
+
+Typically, a device is available within 15 minutes assuming there is capacity, but if the AZ is out of capacity it can take two weeks or more to acquire additional capacity.
+
+Both KMS and CloudHSM are available to you at AWS and both are integrated with your apps at AWS. Since this is a physical device dedicated to you, **the keys are stored on the device**. Keys need to either be **replicated to another device**, backed up to offline storage, or exported to a standby appliance. **This device is not backed** by S3 or any other service at AWS like KMS. 
+
+In **CloudHSM**, you have to **scale the service yourself**. You have to provision enough CloudHSM devices to handle whatever your encryption needs are based on the encryption algorithms you have chosen to implement for your solution.  
+Key Management Service scaling is performed by AWS and automatically scales on demand, so as your use grows, so might the number of CloudHSM appliances that are required. Keep this in mind as you scale your solution and if your solution has auto-scaling, make sure your maximum scale is accounted for with enough CloudHSM appliances to service the solution. 
+
+Just like scaling, **performance is up to you with CloudHSM**. Performance varies based on which encryption algorithm is used and on how often you need to access or retrieve the keys to encrypt the data. Key management service performance is handled by Amazon and automatically scales as demand requires it. CloudHSM's performance is achieved by adding more appliances and if you need more performance you either add devices or alter the encryption method to the algorithm that is faster.
+
+If your solution is **multi-region**, you should add several **CloudHSM appliances in the second region and work out the cross-region connectivity with a private VPN connection** or some method to ensure the traffic is always protected between the appliance at every layer of the connection. If you have a multi-region solution you need to think about how to **replicate keys and set up additional CloudHSM devices in the regions where you operate**. You can very quickly get into a scenario where you have six or eight devices spread across multiple regions, enabling full redundancy of your encryption keys.
+
+**CloudHSM** is an enterprise class service for secured key storage and can be used as a **root of trust for an enterprise**. It can store private keys in PKI and certificate authority keys in X509 implementations. In addition to symmetric keys used in symmetric algorithms such as AES, **KMS stores and physically protects symmetric keys only \(cannot act as a certificate authority\)**, so if you need to store PKI and CA keys a CloudHSM or two or three could be your solution. 
+
+**CloudHSM is considerably more expensive than Key Management Service**. CloudHSM is a hardware appliance so you have fix costs to provision the CloudHSM device, then an hourly cost to run the appliance. The cost is multiplied by as many CloudHSM appliances that are required to achieve your specific requirements.  
+Additionally, cross consideration must be made in the purchase of third party software such as SafeNet ProtectV software suites and integration time and effort. Key Management Service is a usage based and depends on the number of keys you have and the input and output operations. As key management provides seamless integration with many AWS services, integration costs should be significantly lower. Costs should be considered secondary factor in encryption solutions. Encryption is typically used for security and compliance.
+
+**With CloudHSM only you have access to the keys** and without going into too much detail, with CloudHSM you manage your own keys. **With KMS, you and Amazon co-manage your keys**. AWS does have many policy safeguards against abuse and **still cannot access your keys in either solution**. The main distinction is compliance as it pertains to key ownership and management, and with CloudHSM, this is a hardware appliance that you manage and maintain with exclusive access to you and only you.
+
+### CloudHSM Suggestions
+
+1. Always deploy CloudHSM in an **HA setup** with at least two appliances in **separate availability zones**, and if possible, deploy a third either on premise or in another region at AWS.
+2. Be careful when **initializing** a **CloudHSM**. This action **will destroy the keys**, so either have another copy of the keys or be absolutely sure you do not and never, ever will need these keys to decrypt any data.
+3. CloudHSM only **supports certain versions of firmware** and software. Before performing any update, make sure the firmware and or software is supported by AWS. You can always contact AWS support to verify if the upgrade guide is unclear.
+4. The **network configuration should never be changed.** Remember, it's in a AWS data center and AWS is monitoring base hardware for you. This means that if the hardware fails, they will replace it for you, but only if they know it failed.
+5. The **SysLog forward should not be removed or changed**. You can always **add** a SysLog forwarder to direct the logs to your own collection tool.
+6. The **SNMP** configuration has the same basic restrictions as the network and SysLog folder. This **should not be changed or removed**. An **additional** SNMP configuration is fine, just make sure you do not change the one that is already on the appliance.
+7. Another interesting best practice from AWS is **not to change the NTP configuration**. It is not clear what would happen if you did, so keep in mind that if you don't use the same NTP configuration for the rest of your solution then you could have two time sources. Just be aware of this and know that the CloudHSM has to stay with the existing NTP source.
+
+The initial launch charge for CloudHSM is $5,000 to allocate the hardware appliance dedicated for your use, then there is an hourly charge associated with running CloudHSM that is currently at $1.88 per hour of operation, or approximately $1,373 per month.
+
+The most common reason to use CloudHSM is compliance standards that you must meet for regulatory reasons. **KMS does not offer data support for asymmetric keys. CloudHSM does let you store asymmetric keys securely**.
+
+The **public key is installed on the HSM appliance during provisioning** so you can access the CloudHSM instance via SSH.
 
 ## Amazon Athena
 
@@ -553,208 +699,83 @@ For every network interface that publishes data to the CloudWatch log group, it 
 
 ![](.gitbook/assets/image%20%28433%29.png)
 
-## 
-
-## KMS
-
-AWS KMS uses symetric cryptography. This is used to encrypt information as rest \(like inside a S3\). If you need to encrypt information in transit you need to use something like TLS.  
-KMSis a region specific service.
-
-Key Management Service is a software as a service offering from Amazon. It is a managed service provided by Amazon that enables you to easily manage encryption keys. 
-
-Administrators at Amazon do not have access to your keys. They cannot recover your keys and they do not help you with encryption of your keys. AWS simply administers the operating system and the underlying application it's up to us to administer our encryption keys and administer how those keys are used.
-
-Customer Marter Keys: Can encrypt data up to 4KB in size.It's typically used in relatio to your DEKs \(Data Encryption Keys\). The key can generate, encrypt and decrypt these DEK.CMKs are used to encrypt the DEKs and then the DEKs are used to encrypt the data.
-
-A customer master key \(CMK\) is a logical representation of a master key in AWS KMS. In addition to the master key's identifiers and other metadata, including its creation date, description, and key state, a CMK contains the key material used to encrypt and decrypt data. When you create a CMK, by default, AWS KMS generates the key material for that CMK. However, you can choose to create a CMK without key material and then import your own key material into that CMK.
-
-2 types:
-
-* AWS managed CMKs -Used by other services to encrypt data. It's used by the service that created it ina region. They are created the first time you implemente the encryption in that service
-* Customer manager CMKs: Flexibility, rotation, configu access ad key policy. Enable and disable keys.
-
-Example: When you ask S3 to encrypt the data, it will access KMS to generate 2 keys: The plaintext key and the encrypted key. S3 will use the plaintext key to encrypt the plain text data and delelete it. Then, it will save inside S3 the encrypted data with the encrypted key,so whenever it needs to decrypt the data, it will decryot the encrypted key in KMS and then it will decrypt the data.
-
-Key policies: These difines who can use and access a key in KMS. By default root user has full access over KMS, if you delete this one, you need to contack AWS for support.
-
-Properties of a policy:
-
-* JSON based document
-* Resource --&gt; Affected resources \(can be "\*"\)
-* Action --&gt; kms:Encrypt, kms:Decrypt, kms:CreateGrant ... \(permissions\)
-* Effect --&gt; Allow/Deny
-* Principal --&gt; arn affected
-* Conditions \(optional\) --&gt; Condition to give the permissions
-
-Grants:
-
-* Allow to delegate your permissions to another AWS principal within your AWS account. You need to create them using the AWS KMS APIs. It can be indicated the CMK identifier, the grantee principal and the required level of opoeration \(Decrypt, Encrypt, GenerateDataKey...\)
-* After the grant is created a GrantToken and a GratID are issued
-
-Access:
-
-* Via key policy -- If this exist, this takes precedent over the IAM policy, s the IAM olicy is not used
-* Via IAM policy
-* Via grants
-
-Rotation of CMKs:
-
-* The longer the same key is left in place, the more data is encrypted with that key, and if that key is breached, then the wider the blast area of data is at risk. In addition to this, the longer the key is active, the probability of it being breached increases.
-* KMS rotate the keys every 365 days \(or you cna perform the process manually whenever you want\)
-* Older keys are retained to decrypt data that was encrypted prior to the rotation
-* In a brear, rotating the key won't remove the threat as it will be possible to decrypt all the data encrypted with the compromised jey. However, th new data will be encrypted with the new key.
-* If CMK is in state of disabled or pending deletion, KMS will not perform a key rotation untilthe CMKis re-enabled or deletion is cancelled
-* AWS managed CMKs are rotated every 3 years and this cannot be changed.
-
-Manual rotation:
-
-* A new CMK needs to be created, then, a nre CMK-ID is created, so you will need to update any application to referencec the new CMK-ID
-* To do this process easier you can use aliaese to refer to a key-id and then just update the key the alias is referring to
-* You need to keep old keys to decrypt old files encrypted with it
-
-You can import keys from your on-premises key infrastructure 
-
-Envelope Encryption in the context of Key Management Service \(KMS\): Two-tier hierarchy system to encrypt data with data key and then encrypt data key with master key.
-
-KMS is priced per number of encryption/decryption requests received from all services per month.
-
-KMS has full audit and compliance integration with CloudTrail; this is where you can audit all changes performed on KMS.
-
-With KMS policy you can do the following:
-
-* Limit who can create data keys and which services have access to use these keys 
-* Limit systems access to encrypt only, decrypt only or both 
-* Define to enable  systems to access keys across regions \(although it is not recommended as a failure in the region hosting KMS will affect availability of systems in other regions\) 
-
-You cannot synchronize or move/copy keys across regions; you can only define rules to allow access across region.
-
-Key Administrators by default:
-
-* Have access to manage KMS but not to encrypt or decrypt data
-* Only IAM users and roles can be added to Key Administrators list \(not groups\)
-* If external CMK is used, Key Administrators have the permission to import key material
-
-KMS stores keys on multi-tenant hardware security modules \(HSMs\).
-
 ## AWS Secrets Manager
 
-AWS Secrets Manager is a great service to enhance your security posture by allowing you to remove any hard-coded secrets within your application and replacing them with a simple API call to the aid of your secrets manager which then services the request with the relevant secret. As a result, AWS Secrets Manager acts as a single source of truth for all your secrets across all of your applications.
+AWS Secrets Manager is a great service to enhance your security posture by allowing you to **remove any hard-coded secrets within your application and replacing them with a simple API call** to the aid of your secrets manager which then services the request with the relevant secret. As a result, AWS Secrets Manager acts as a **single source of truth for all your secrets across all of your applications**.
 
-AWS Secrets Manager enables the ease of rotating secrets and therefore enhancing the security of that secret. An example of this could be your database credentials. Other secret types can also have automatic rotation enabled through the use of lambda functions, for example, API keys.
+AWS Secrets Manager enables the **ease of rotating secrets** and therefore enhancing the security of that secret. An example of this could be your database credentials. Other secret types can also have automatic rotation enabled through the use of lambda functions, for example, API keys.
 
 Access to your secrets within AWS Secret Manager is governed by fine-grained IAM identity-based policies in addition to resource-based policies.
 
-To allow a user form a diffrent account to access your secret you need to authorize him to access the secret and also authorize him to decryt the secret in KMS. The Key policy also needs to allows the external user to use it.
+To allow a user form a different account to access your secret you need to authorize him to access the secret and also authorize him to decrypt the secret in KMS. The Key policy also needs to allows the external user to use it.
 
-AWS Secrets Manager integrates with AWS KMS to encrypt your secrets within AWS Secrets Manager.
-
-## HSM - Hardware Security Module
-
-Cloud HSM is a FIPS 140 level two validated hardware device for secure cryptographic key storage. I can't stress this enough, CloudHSM is a hardware appliance, it is not a virtualized service. It is a SafeNetLuna 7000 appliance with 5.3.13 preloaded. There are two firmware versions and which one you pick is really based on your exact needs. One is for FIPS 140-2 compliance and there was a newer version that can be used.
-
-The unusual feature of CloudHSM is that it is a physical device, and thus it is not shared with other customers, or as it is commonly termed, multi-tenant. It is dedicated single tenant appliance exclusively made available to your workloads
-
-Typically, a device is available within 15 minutes assuming there is capacity, but if the AZ is out of capacity it can take two weeks or more to acquire additional capacity.
-
-One area that CloudHSM and Key Management Service compare fairly well is in their usage. Both are available to you at AWS and both are integrated with your apps at AWS. Since this is a physical device dedicated to you, the keys are stored on the device. Keys need to either be replicated to another device, backed up to offline storage, or exported to a standby appliance. This device is not backed by S3 or any other service at AWS like KMS. Scalability. In CloudHSM, you have to scale the service yourself. You have to provision enough CloudHSM devices to handle whatever your encryption needs are based on the encryption algorithms you have chosen to implement for your solution.
-
-Key Management Service scaling is performed by AWS and automatically scales on demand, so as your use grows, so might the number of CloudHSM appliances that are required. Keep this in mind as you scale your solution and if your solution has auto-scaling, make sure your maximum scale is accounted for with enough CloudHSM appliances to service the solution. Performance. Just like scaling, performance is up to you with CloudHSM. Performance varies based on which encryption algorithm is used and on how often you need to access or retrieve the keys to encrypt the data. Key management service performance is handled by Amazon and automatically scales as demand requires it. CloudHSM's performance is achieved by adding more appliances and if you need more performance you either add devices or alter the encryption method to the algorithm that is faster.
-
-If your solution is multi-region, you should add several CloudHSM appliances in the second region and work out the cross-region connectivity with a private VPN connection or some method to ensure the traffic is always protected between the appliance at every layer of the connection. Multi-region and CloudHSM. If you have a multi-region solution you need to think about how to replicate keys and set up additional CloudHSM devices in the regions where you operate. You can very quickly get into a scenario where you have six or eight devices spread across multiple regions, enabling full redundancy of your encryption keys.
-
-CloudHSM is an enterprise class service for secured key storage and can be used as a root of trust for an enterprise. It can store private keys in PKI and certificate authority keys in X509 implementations. In addition to symmetric keys used in symmetric algorithms such as AES, KMS stores and physically protects symmetric keys only, so if you need to store PKI and CA keys a CloudHSM or two or three could be your solution. Pricing. CloudHSM is considerably more expensive than Key Management Service. CloudHSM is a hardware appliance so you have fix costs to provision the CloudHSM device, then an hourly cost to run the appliance. The cost is multiplied by as many CloudHSM appliances that are required to achieve your specific requirements.
-
-Additionally, cross consideration must be made in the purchase of third party software such as SafeNet ProtectV software suites and integration time and effort. Key Management Service is a usage based and depends on the number of keys you have and the input and output operations. As key management provides seamless integration with many AWS services, integration costs should be significantly lower. Costs should be considered secondary factor in encryption solutions. Encryption is typically used for security and compliance.
-
-With CloudHSM only you have access to the keys and without going into too much detail, with CloudHSM you manage your own keys. With KMS, you and Amazon co-manage your keys. AWS does have many policy safeguards against abuse and still cannot access your keys in either solution. The main distinction is compliance as it pertains to key ownership and management, and with CloudHSM, this is a hardware appliance that you manage and maintain with exclusive access to you and only you.
-
-One, always deploy CloudHSM in an HA setup with at least two appliances in separate availability zones, and if possible, deploy a third either on premise or in another region at AWS.
-
-Two, be careful when initializing a CloudHSM. This action will destroy the keys, so either have another copy of the keys or be absolutely sure you do not and never, ever will need these keys to decrypt any data.
-
-Three, CloudHSM only supports certain versions of firmware and software. Before performing any update, make sure the firmware and or software is supported by AWS. You can always contact AWS support to verify if the upgrade guide is unclear.
-
-Four, the network configuration should never be changed. Remember, it'sin a AWS data center and AWS is monitoring base hardware for you. This means that if the hardware fails, they will replace it for you, but only if they know it failed.
-
-Five, the SysLog forward should not be removed or changed. You can always add a SysLog forwarder to direct the logs to your own collection tool.
-
-Six, the SNMP configuration has the same basic restrictions as the network and SysLog folder. This should not be changed or removed. An additional SNMP configuration is fine, just make sure you do not change the one that is already on the appliance.
-
-Seven, another interesting best practice from AWS is not to change the NTP configuration. It is not clear what would happen if you did, so keep in mind that if you don't use the same NTP configuration for the rest of your solution then you could have two time sources. Just be aware of this and know that the CloudHSM has to stay with the existing NTP source.
-
-The initial launch charge for CloudHSM is $5,000 to allocate the hardware appliance dedicated for your use, then there is an hourly charge associated with running CloudHSM that is currently at $1.88 per hour of operation, or approximately $1,373 per month.
-
-The most common reason to use CloudHSM is compliance standards that you must meet for regulatory reasons. . KMS does not offer data support for asymmetric keys. CloudHSM does let you store asymmetric keys securely.
-
-Your CTO has asked you to set up the manager account of a Cloud HSM environment. How do you install the SSH key that will be used to authenticate the manager account when logging in to a CloudHSM appliance? The public key is installed on the HSM appliance during provisioning
+**AWS Secrets Manager integrates with AWS KMS to encrypt your secrets within AWS Secrets Manager.**
 
 ## EMR
 
-EMR is a managed service by [AWS](https://cloudacademy.com/library/amazon-web-services/) and is comprised of a cluster of EC2 instances that's highly scalable to process and run big data frameworks such Apache Hadoop and Spark.
+EMR is a managed service by AWS and is comprised of a **cluster of EC2 instances that's highly scalable** to process and run big data frameworks such Apache Hadoop and Spark.
 
-From EMR version 4.8.0 and onwards, we have the ability to create a security configuration specifying different settings on how to manage encryption for your data within your clusters. You can either encrypt your data at rest, data in transit, or if required, both together. The great thing about these security configurations is they're not actually a part of your EC2 clusters.
+From EMR version 4.8.0 and onwards, we have the ability to create a **security configuration** specifying different settings on **how to manage encryption for your data within your clusters**. You can either encrypt your data at rest, data in transit, or if required, both together. The great thing about these security configurations is they're not actually a part of your EC2 clusters.
 
-One key point of EMR is that by default, the instances within a cluster do not encrypt data at rest.
+One key point of EMR is that **by default, the instances within a cluster do not encrypt data at rest**. Once enabled, the following features are available.
 
-However, these are not possible for EBS root device volumes. Once enabled, the following features are available. Linux Unified Key Setup. EBS cluster volumes can be encrypted using this method whereby you can specify AWS KMS to be used as your key management provider, or use a custom key provider.
+* **Linux Unified Key Setup:** EBS cluster volumes can be encrypted using this method whereby you can specify AWS **KMS** to be used as your key management provider, or use a custom key provider.
+* **Open-Source HDFS encryption:** This provides two Hadoop encryption options. Secure Hadoop RPC which would be set to privacy which uses simple authentication security layer, and data encryption of HDFS Block transfer which would be set to true to use the AES-256 algorithm.
 
-Open-Source HDFS encryption. This provides two Hadoop encryption options. Secure Hadoop RPC which would be set to privacy which uses simple authentication security layer, and data encryption of HDFS Block transfer which would be set to true to use the AES-256 algorithm.
+From an encryption in transit perspective, you could enable **open source transport layer security** encryption features and select a certificate provider type which can be either PEM where you will need to manually create PEM certificates, bundle them up with a zip file and then reference the zip file in S3 or custom where you would add a custom certificate provider as a Java class that provides encryption artefacts.
 
-From an encryption in transit perspective, you could enable open source transport layer security encryption features and select a certificate provider type which can be either PEM where you will need to manually create PEM certificates, bundle them up with a zip file and then reference the zip file in S3 or custom where you would add a custom certificate provider as a Java class that provides encryption artifacts.
+Once the TLS certificate provider has been configured in the security configuration file, the following encryption applications specific encryption features can be enabled which will vary depending on your EMR version. 
 
-Once the TLS certificate provider has been configured in the security configuration file, the following encryption applications specific encryption features can be enabled which will vary depending on your EMR version. Hadoop. Hadoop might reduce encrypted shuffle which uses TLS. Both secure Hadoop RPC which uses Simple Authentication Security Layer, and data encryption of HDFS Block Transfer which uses AES-256, are both activated when at rest encryption is enabled in the security configuration.
+* Hadoop might reduce encrypted shuffle which uses TLS. Both secure Hadoop RPC which uses Simple Authentication Security Layer, and data encryption of HDFS Block Transfer which uses AES-256, are both activated when at rest encryption is enabled in the security configuration.
+* Presto: When using EMR version 5.6.0 and later, any internal communication between Presto nodes will use SSL and TLS. 
+* Tez Shuffle Handler uses TLS.
+* Spark: The Akka protocol uses TLS. Block Transfer Service uses Simple Authentication Security Layer and 3DES. External shuffle service uses the Simple Authentication Security Layer.
 
-Presto. When using EMR version 5.6.0 and later, any internal communication between Presto nodes will use SSL and TLS. Tez. Tez Shuffle Handler uses TLS. And Spark. The Akka protocol uses TLS. Block Transfer Service uses Simple Authentication Security Layer and 3DES. External shuffle service uses the Simple Authentication Security Layer.
+## RDS - Relational Database Service
 
-For Amazon EMR, when using Amazon EBS volumes for your persistent storage layer, you can implement Linux Unified Key Setup \(LUKS\) with KMS and open-source HDFS encryption.
+RDS allows you to set up a **relational database** using a number of **different engines** such as MySQL, Oracle, SQL Server, etc. During the creation of your RDS database instance, you have the opportunity to **Enable Encryption at the Configure Advanced Settings** screen under Database Options and Enable Encryption.
 
-## RDS
+By enabling your encryption here, you are enabling **encryption at rest for your storage, snapshots, read replicas and your back-ups**. Keys to manage this encryption can be issued by using **KMS**. It's not possible to add this level of encryption after your database has been created. **It has to be done during its creation**.
 
-RDS allows you to set up a relational database using a number of different engines such as MySQL, Oracle, SQL Server, etc. During the creation of your RDS database instance, you have the opportunity to Enable Encryption at the Configure Advanced Settings screen under Database Options and Enable Encryption.
+However, there is a **workaround allowing you to encrypt an unencrypted database as follows**. You can create a snapshot of your unencrypted database, create an encrypted copy of that snapshot, use that encrypted snapshot to create a new database, and then, finally, your database would then be encrypted.
 
-During the creation of your RDS database instance, you have the opportunity to Enable Encryption at the Configure Advanced Settings screen under Database Options and Enable Encryption.
+Amazon RDS **sends data to CloudWatch every minute by default.**
 
-By enabling your encryption here, you are enabling encryption at rest for your storage, snapshots, read replicas and your back-ups. Keys to manage this encryption can be issued by using KMS. It's not possible to add this level of encryption after your database has been created. It has to be done during its creation.
-
-However, there is a workaround allowing you to encrypt an unencrypted database as follows. You can create a snapshot of your unencrypted database, create an encrypted copy of that snapshot, use that encrypted snapshot to create a new database, and then, finally, your database would then be encrypted.
-
-In addition to encryption offered by RDS itself at the application level, there are additional platform level encryption mechanisms that could be used for protecting data at rest including Oracle and SQL Server Transparent Data Encryption, known as TDE, and this could be used in conjunction with the method order discussed but it would impact the performance of the database MySQL cryptographic functions and Microsoft Transact-SQL cryptographic functions.
+In addition to encryption offered by RDS itself at the application level, there are **additional platform level encryption mechanisms** that could be used for protecting data at rest including **Oracle and SQL Server Transparent Data Encryption**, known as TDE, and this could be used in conjunction with the method order discussed but it would **impact the performance** of the database MySQL cryptographic functions and Microsoft Transact-SQL cryptographic functions.
 
 If you want to use the TDE method, then you must first ensure that the database is associated to an option group. Option groups provide default settings for your database and help with management which includes some security features. However, option groups only exist for the following database engines and versions.
 
 Once the database is associated with an option group, you must ensure that the Oracle Transparent Data Encryption option is added to that group. Once this TDE option has been added to the option group, it cannot be removed. TDE can use two different encryption modes, firstly, TDE tablespace encryption which encrypts entire tables and, secondly, TDE column encryption which just encrypts individual elements of the database.
 
-Which AWS service sends data to CloudWatch every minute by default? Amazon RDS
-
 ## Amazon Kinesis Firehouse
 
-Amazon Firehose. This service is used to deliver real-time streaming data to different services and destinations within [AWS](https://cloudacademy.com/library/amazon-web-services/), many of which can be used for big data such as S3 Redshift and Amazon Elasticsearch.
+Amazon Firehose is used to deliver **real-time streaming data to different services** and destinations within AWS, many of which can be used for big data such as S3 Redshift and Amazon Elasticsearch.
 
-The service is fully managed by AWS, taking a lot of the administration of maintenance out of your hands. Firehose is used to receive data from your data producers where it then automatically delivers the data to your chosen destination. Amazon Streams. This service essentially collects and processes huge amounts of data in real time and makes it available for consumption.
+The service is fully managed by AWS, taking a lot of the administration of maintenance out of your hands. Firehose is used to receive data from your data producers where it then automatically delivers the data to your chosen destination. 
+
+Amazon Streams essentially collects and processes huge amounts of data in real time and makes it available for consumption.
 
 This data can come from a variety of different sources. For example, log data from the infrastructure, social media, web clicks during feeds, market data, etc. So now we have a high-level overview of each of these. We need to understand how they implement encryption of any data process in stored should it be required.
 
-When clients are sending data to Kinesis in transit, the data can be sent over HTTPS, which is HTTP with SSL encryption. However, once it enters the Kinesis service, it is then unencrypted by default. Using both Kinesis Streams and Firehose encryption, you can assure your streams remain encrypted up until the data is sent to its final destination.
+When clients are **sending data to Kinesis in transit**, the data can be sent over **HTTPS**, which is HTTP with SSL encryption. However, once it enters the Kinesis service, it is then unencrypted by default. Using both **Kinesis Streams and Firehose encryption, you can assure your streams remain encrypted up until the data is sent to its final destination.** As **Amazon Streams** now has the ability to implement SSE encryption using KMS to **encrypt data as it enters the stream** directly from the producers.
 
-If Amazon S3 is used as a destination, Firehose can implement encryption using SSE-KMS on S3.
-
-Amazon Streams now has the ability to implement SSE encryption using KMS to encrypt data as it enters the stream directly from the producers.
+If Amazon **S3** is used as a **destination**, Firehose can implement encryption using **SSE-KMS on S3**.
 
 As a part of this process, it's important to ensure that both producer and consumer applications have permissions to use the KMS key. Otherwise encryption and decryption will not be possible, and you will receive an unauthorized KMS master key permission error.
 
-Kinesis SSE encryption will typically call upon KMS to generate a new data key every five minutes. So, if you had your stream running for a month or more, thousands of data keys would be generated within this time frame.
+Kinesis SSE encryption will typically call upon KMS to **generate a new data key every five minutes**. So, if you had your stream running for a month or more, thousands of data keys would be generated within this time frame.
 
 ## Amazon Redshift
 
-Redshift is a fully managed service that can scale up to over a petabyte in size, which is used as a data warehouse for big data solutions. Using Redshift clusters, you are able to run analytics against your datasets using fast, SQL-based query tools and business intelligence applications to gather greater understanding of vision for your business.
+Redshift is a fully managed service that can scale up to over a petabyte in size, which is used as a **data warehouse for big data solutions**. Using Redshift clusters, you are able to run analytics against your datasets using fast, SQL-based query tools and business intelligence applications to gather greater understanding of vision for your business.
 
-Redshift offers encryption at rest using a four-tired hierarchy of encryption keys using either KMS or CloudHSM to manage the top tier of keys. When encryption is enabled for your cluster, it can't be disable and vice versa. When you have an unencrypted cluster, it can't be encrypted.
+**Redshift offers encryption at rest using a four-tired hierarchy of encryption keys using either KMS or CloudHSM to manage the top tier of keys**. **When encryption is enabled for your cluster, it can't be disable and vice versa**. When you have an unencrypted cluster, it can't be encrypted.
 
-Encryption for your cluster can only happen during its creation, and once encrypted, the data, metadata, and any snapshots are also encrypted. The tiering level of encryption keys are as follows, tier one is the master key, tier two is the cluster encryption key, the CEK, tier three, the database encryption key, the DEK, and finally tier four, the data encryption keys themselves.
+Encryption for your cluster can only happen during its creation, and once encrypted, the data, metadata, and any snapshots are also encrypted. The tiering level of encryption keys are as follows, **tier one is the master key, tier two is the cluster encryption key, the CEK, tier three, the database encryption key, the DEK, and finally tier four, the data encryption keys themselves**.
 
 ### KMS
 
-During the creation of your cluster, you can either select the default KMS key for Redshift or select your own CMK, which gives you more flexibility over the control of the key, specifically from an auditable perspective.
+During the creation of your cluster, you can either select the **default KMS key** for Redshift or select your **own CMK**, which gives you more flexibility over the control of the key, specifically from an auditable perspective.
 
 The default KMS key for Redshift is automatically created by Redshift the first time the key option is selected and used, and it is fully managed by AWS. The CMK is known as the master key, tier one, and once selected, Redshift can enforce the encryption process as follows. So Redshift will send a request to KMS for a new KMS key.
 
@@ -770,7 +791,7 @@ You can use AWS Trusted Advisor to monitor the configuration of your Amazon S3 b
 
 ### CloudHSM
 
-hen working with CloudHSM to perform your encryption, firstly you must set up a trusted connection between your HSM client and Redshift while using client and server certificates.
+When working with CloudHSM to perform your encryption, firstly you must set up a trusted connection between your HSM client and Redshift while using client and server certificates.
 
 This connection is required to provide secure communications, allowing encryption keys to be sent between your HSM client and your Redshift clusters. Using a randomly generated private and public key pair, Redshift creates a public client certificate, which is encrypted and stored by Redshift. This must be downloaded and registered to your HSM client, and assigned to the correct HSM partition.
 
@@ -778,46 +799,68 @@ You must then configure Redshift with the following details of your HSM client: 
 
 If your internal security policies or governance controls dictate that you must apply key rotation, then this is possible with Redshift enabling you to rotate encryption keys for encrypted clusters, however, you do need to be aware that during the key rotation process, it will make a cluster unavailable for a very short period of time, and so it's best to only rotate keys as and when you need to, or if you feel they may have been compromised.
 
-During the rotation, Redshift will rotate the CEK for your cluster and for any backups of that cluster. It will rotate a DEK for the cluster but it's not possible to rotate a DEK for the snapshots stored in [S3](https://cloudacademy.com/course/aws-big-data-security-encryption/amazon-s3-and-amazon-athena-encryption-2/) that have been encrypted using the DEK. It will put the cluster into a state of 'rotating keys' until the process is completed when the status will return to 'available'.
+During the rotation, Redshift will rotate the CEK for your cluster and for any backups of that cluster. It will rotate a DEK for the cluster but it's not possible to rotate a DEK for the snapshots stored in S3 that have been encrypted using the DEK. It will put the cluster into a state of 'rotating keys' until the process is completed when the status will return to 'available'.
 
 ## WAF
 
+AWS WAF is a web application firewall that helps **protect your web applications** or APIs against common web exploits that may affect availability, compromise security, or consume excessive resources. AWS WAF gives you control over **how traffic reaches your applications** by enabling you to create security rules that block common attack patterns, such as SQL injection or cross-site scripting, and rules that filter out specific traffic patterns you define.
+
 So there are a number of essential components relating to WAF, these being: Conditions, Rules and Web access control lists, also known as Web ACLs
 
-Conditions allow you to specify what elements of the incoming HTTP or HTTPS request you want WAF to be monitoring for. \(XSS, GEO - filtering by location-, IP address, Size constraints, SQL Injection attacks, strings and regex matching\). Note that if you are restricting a country from cloudfront, this request qon't arrive to the waf. With this conditions you can create rules: For example, block if 2 condicions are met.  
-When creating your rule you will be asked to select a Rule Type, a Regular Rule or a Rate-Based Rule. 
+### Conditions
 
-The only difference between a rate-based rule and a regular rule is that rate-based rules count the number of requests that are being received from a particular IP address over a time period of five minutes.
+Conditions allow you to specify **what elements of the incoming HTTP or HTTPS request you want WAF to be monitoring** \(XSS, GEO - filtering by location-, IP address, Size constraints, SQL Injection attacks, strings and regex matching\). Note that if you are restricting a country from cloudfront, this request won't arrive to the waf.
 
-When you select a rate-based rule option, and as you can see from the image you are asked to enter the maximum number of requests from a single IP within a five minute time frame. When the count limit is reached, all other requests from that same IP address is then blocked. If the request rate falls back below the rate limit specified the traffic is then allowed to pass through and is no longer blocked. When setting your rate limit it must be set to a value above 2000. Any request under this limit is considered a Regular Rule.
+You can have **100 conditions of each type**, such as Geo Match or size constraints, however **Regex** is the **exception** to this rule where **only 10 Regex** conditions are allowed but this limit is possible to increase. You are able to have **100 rules and 50 Web ACLs per AWS account**. You are limited to **5 rate-based-rules** per account. Finally you can have **10,000 requests per second** when **using WAF** within your application load balancer.
 
-an action is applied to each rule, these actions can either be Allow, Block or Count. When a request is allowed, it is forwarded onto the relevant CloudFront distribution or Application Load Balancer. When a request is blocked, the request is terminated there and no further processing of that request is taken. A Count action will do exactly that, it will count the number of requests that meet the conditions within that rule. This is a really good option to select when testing the rules to ensure that the rule is picking up the requests as expected before setting it to either Allow or Block. If an incoming request does not meet any rule within the Web ACL then the request takes the action associated to a default action specified which can either be Allow or Block. An important point to make about these rules is that they are executed in the order that they are listed within a Web ACL. So be careful to architect this order correctly for your rule base, typically these are ordered as shown: Where you have your WhiteListed Ips as Allow. Your BlackListed IP addresses as Block and any Bad Signatures also as Block.
+### Rules
 
-WAF CloudWatch metrics are reported in one minute intervals by default and are kept for a two week period. The metrics monitored are AllowedRequests, BlockedRequests, CountedRequests, and PassedRequests.
+Using these conditions you can create rules: For example, block request if 2 conditions are met.  
+When creating your rule you will be asked to select a **Rule Type**: **Regular Rule** or **Rate-Based Rule**. 
 
-You can have 100 conditions of each type, such as Geo Match or size constraints, however Regex is the exception to this rule where only 10 Regex conditions are allowed but this limit is possible to increase. You are able to have 100 rules and 50 Web ACLs per AWS account. You are limited to 5 rate-based-rules per account. Finally you can have 10,000 requests per second when using WAF within your application load balancer.
+The only **difference** between a rate-based rule and a regular rule is that **rate-based** rules **count** the **number** of **requests** that are being received from a particular IP address over a time period of **five minutes**.
 
-If an incoming request does not meet ANY rule within the Web ACL then the request takes the action associated to a default action specified which can either be Allow or Block.
+When you select a rate-based rule option, you are asked to **enter the maximum number of requests from a single IP within a five minute time frame**. When the count limit is **reached**, **all other requests from that same IP address is then blocked**. If the request rate falls back below the rate limit specified the traffic is then allowed to pass through and is no longer blocked. When setting your rate limit it **must be set to a value above 2000**. Any request under this limit is considered a Regular Rule.
+
+### Actions
+
+An action is applied to each rule, these actions can either be **Allow**, **Block** or **Count**.
+
+* When a request is **allowed**, it is **forwarded** onto the relevant CloudFront distribution or Application Load Balancer.
+* When a request is **blocked**, the request is **terminated** there and no further processing of that request is taken.
+* A **Count** action will **count the number of requests that meet the conditions** within that rule. This is a really good option to select when testing the rules to ensure that the rule is picking up the requests as expected before setting it to either Allow or Block.
+
+If an **incoming request does not meet any rule** within the Web ACL then the request takes the action associated to a **default action** specified which can either be **Allow** or **Block**. An important point to make about these rules is that they are **executed in the order that they are listed within a Web ACL**. So be careful to architect this order correctly for your rule base, **typically** these are **ordered** as shown: 
+
+1. WhiteListed Ips as Allow.
+2. BlackListed IPs Block
+3. Any Bad Signatures also as Block.
+
+### CloudWatch
+
+WAF CloudWatch metrics are reported **in one minute intervals by default** and are kept for a two week period. The metrics monitored are AllowedRequests, BlockedRequests, CountedRequests, and PassedRequests.
 
 ## AWS Firewall Manager
 
-Firewall Manager has been designed to help you manage WAF in a multi-account environment with simplicity and control. It allows you to protect your vulnerable resources across all of your AWS accounts within your AWS Organization. It can group and protect specific resources together, for example, all resources with a particular tag or all of your CloudFront distributions. One key benefit of Firewall Manager is that it automatically protects certain resources that are added to your account as they become active.
+AWS Firewall Manager simplifies your administration and maintenance tasks across multiple accounts and resources for **AWS WAF, AWS Shield Advanced, Amazon VPC security groups, and AWS Network Firewall**. With Firewall Manager, you set up your AWS WAF firewall rules, Shield Advanced protections, Amazon VPC security groups, and Network Firewall firewalls just once. The service **automatically applies the rules and protections across your accounts and resources**, even as you add new resources.
 
-Requisites: Created a Firewal Manager Master Account, setup an AWS organization and have added our member accounts and enable AWS Config.
+It can **group and protect specific resources together**, for example, all resources with a particular tag or all of your CloudFront distributions. One key benefit of Firewall Manager is that it **automatically protects certain resources that are added** to your account as they become active.
 
-A rule group \(a set of WAF rules together\) can be added to an AWS Firewall Manager Policy which is then associated to AWS resources, such as your cloud front distributions or application load balances.
+**Requisites**: Created a Firewall Manager Master Account, setup an AWS organization and have added our member accounts and enable AWS Config.
 
-Firewall Manager policies only allow "Block" or "Count" options for a rule group \(no "Allow" option\).
+A **rule group** \(a set of WAF rules together\) can be added to an AWS Firewall Manager Policy which is then associated to AWS resources, such as your cloudfront distributions or application load balances.
+
+**Firewall Manager policies only allow "Block" or "Count"** options for a rule group \(no "Allow" option\).
 
 ## AWS Shield
 
-AWS Shield has been designed to help protect your infrastructure against distributed denial of service attacks, commonly known as DDoS.
+AWS Shield has been designed to help **protect your infrastructure against distributed denial of service attacks**, commonly known as DDoS.
 
-AWS Shield Standard is free to everyone, well, at least anyone who has an AWS account, and it offers DDoS protection against some of the more common layer three, the network layer, and layer four, transport layer, DDoS attacks. This protection is integrated with both CloudFront and Route 53. 
+**AWS Shield Standard** is **free** to everyone, and it offers DDoS **protection** against some of the more common layer three, the **network layer**, and layer four, **transport layer**, DDoS attacks. This protection is integrated with both CloudFront and Route 53. 
 
-AWS Shield advanced offers a greater level of protection for DDoS attacks across a wider scope of AWS services for an additional cost. This advanced level offers protection against your web applications running on EC2, CloudFront, ELB and also Route 53. In addition to these additional resource types being protected, there are enhanced levels of DDoS protection offered compared to that of Standard. And you will also have access to a 24-by-seven specialized DDoS response team at AWS, known as DRT.
+**AWS Shield advanced** offers a **greater level of protection** for DDoS attacks across a wider scope of AWS services for an additional cost. This advanced level offers protection against your web applications running on EC2, CloudFront, ELB and also Route 53. In addition to these additional resource types being protected, there are enhanced levels of DDoS protection offered compared to that of Standard. And you will also have **access to a 24-by-seven specialized DDoS response team at AWS, known as DRT**.
 
-Whereas the Standard version of Shield offered protection against layer three and layer four, Advanced also offers protection against layer seven, application, attacks.
+Whereas the Standard version of Shield offered protection against layer three and layer four, **Advanced also offers protection against layer seven, application, attacks.**
 
 ## VPC
 
@@ -862,26 +905,4 @@ A _customer gateway CGW_ is the anchor on the customer side of that connection. 
 The VPN connection will connect VGW attached to certain VPC and CGW on AWS.
 
 Public and Private Virtual Interfaces VIFs are part of configuring a Direct Connect between on-premises and AWS
-
-## Types of services
-
-### Container services
-
-Services that fall under container services have the following characteristics:
-
-* the service itself runs on separate infrastructure instances, such as EC2.
-* AWS is responsible for managing the operating system and the platform.
-* A managed service is provided by AWS, which is typically the service itself for the actual application which are seen as containers.
-* As a user of these container services, you have a number of management and security responsibilities, including managing network access security, such as network access control list rules and any firewalls.
-* Also, platform-level identity and access management where it exists.
-* Examples of AWS container services include Relational Database Service, Elastic Mapreduce, and Elastic Beanstalk.
-
-### Abstract Services
-
-* These services are removed, abstracted, from the platform or management layer which cloud applications are built on.
-* The services are accessed via endpoints using AWS application programming interfaces, APIs.
-* The underlying infrastructure, operating system, and platform is managed by AWS.
-* The abstracted services provide a multi-tenancy platform on which the underlying infrastructure is shared.
-* Data is isolated via security mechanisms.
-* Abstract services have a strong integration with IAM, and examples of abstract services include S3, DynamoDB, Amazon Glacier, and SQS.
 
