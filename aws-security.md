@@ -297,61 +297,68 @@ Also, they can be used for non cost related monitoring like the usage of a servi
 
 ## AWS Config
 
-Resumen: Puede acceder a la config de cada objeto dentro de AWS y guardar los cambios que se realiezan. Tambien puede avisar de estos cambios. Molan mucho las cofig rules, cada vez que cambia el objeto minitorizado se checkea una rule \(una lambda function\) y sino cumple con la especificacion, avisa.
+AWS Config **capture resource changes**, so any change to a resource supported by Config can be recorded, which will **record what changed along with other useful metadata, all held within a file known as a configuration item**, a CI.  
+This service is **region specific**.
 
-AWS Config can capture resource changes, so any change to a resource supported by Config can be recorded, which will record what changed along with other useful metadata, all held within a file known as a configuration item, a CI.  
-It's region specific.
+A configuration item or **CI** as it's known, is a key component of AWS Config. It is comprised of a JSON file that **holds the configuration information, relationship information and other metadata as a point-in-time snapshot view of a supported resource**. All the information that AWS Config can record for a resource is captured within the CI. A CI is created **every time** a supported resource has a change made to its configuration in any way. In addition to recording the details of the affected resource, AWS Config will also record CIs for any directly related resources to ensure the change did not affect those resources too.
 
-A configuration item or CI as it's known, is a key component of AWS Config. It is comprised of a JSON file that holds the configuration information, relationship information and other metadata as a point-in-time snapshot view of a supported resource. All the information that AWS Config can record for a resource is captured within the CI. A CI is created **every time** a supported resource has a change made to its configuration in any way. In addition to recording the details of the affected resource, AWS Config will also record CIs for any directly related resources to ensure the change did not affect those resources too.
+* **Metadata**: Contains details about the configuration item itself. A version ID and a configuration ID, which uniquely identifies the CI. Ither information can include a MD5Hash that allows you to compare other CIs already recorded against the same resource.
+* **Attributes**: This holds common **attribute information against the actual resource**. Within this section, we also have a unique resource ID, and any key value tags that are associated to the resource. The resource type is also listed. For example, if this was a CI for an EC2 instance, the resource types listed could be the network interface, or the elastic IP address for that EC2 instance
+* **Relationships**: This holds information for any connected **relationship that the resource may have**. So within this section, it would show a clear description of any relationship to other resources that this resource had. For example, if the CI was for an EC2 instance, the relationship section may show the connection to a VPC along with the subnet that the EC2 instance resides in.
+* **Current configuration:** This will display the same information that would be generated if you were to perform a describe or list API call made by the AWS CLI. AWS Config uses the same API calls to get the same information.
+* **Related events**: This relates to AWS CloudTrail. This will display the **AWS CloudTrail event ID that is related to the change that triggered the creation of this CI**. There is a new CI made for every change made against a resource. As a result, different CloudTrail event IDs will be created.
 
-* Metadata: contains details about the configuration item itself. a version ID and a configuration ID, which uniquely identifies the CI. other information can include an MD5Hash that allows you to compare other CIs already recorded against the same resource,
-* Attributes: This holds common attribute information against the actual resource. Within this section, we also have a unique resource ID, and any key value tags that are associated to the resource. The resource type is also listed. For example, if this was a CI for an EC2 instance, the resource types listed could be the network interface, or the elastic IP address for that EC2 instance
-* Relationships: This holds information for any connected relationship that the resource may have. So within this section, it would show a clear description of any relationship to other resources that this resource had. For example, if the CI was for an EC2 instance, the relationship section may show the connection to a VPC along with the subnet that the EC2 instance resides in.
-* Current configuration. This will display the same information that would be generated if you were to perform a describe or list API call made by the AWS CLI. AWS Config uses the same API calls to get the same information.
-* Related events. This relates to AWS CloudTrail. This will display the AWS CloudTrail event ID that is related to the change that triggered the creation of this CI. There is a new CI made for every change made against a resource. As a result, different CloudTrail event IDs will be created.
+**Configuration History**: It's possible to obtain the configuration history of resources thanks to the configurations items. A configuration history is delivered every 6 hours and contains all CI's for a particular resource type.
 
-Configuration History: It's possible to obtain the configuration history of resources thanks to the configurations items. A configuration history is delivered every 6 hours and contains all CI's for a particular resource type.
+**Configuration Streams**: Configuration items are sent to an SNS Topic to enable analysis of the data.
 
-* Configuration Streams - Configuration items are sent to an SNS Topic to enable analysis of the data
-* Configuration Snapshots - Configuration items are used to create a point in time snapshot of all supported resources
-* S3 is used to store the Configuration History files and any Configuration snapshots of your data within a single bucket, which is defined within the Configuration recorder. If you have multiple AWS accounts you may want to aggregate your configuration history files into the same S3 bucket for your primary account. However, you'll need to grant write access for this service principle, config.amazonaws.com, and your secondary accounts with write access to the S3 bucket in your primary account.
+**Configuration Snapshots**: Configuration items are used to create a point in time snapshot of all supported resources.
 
-Config rules: Great way to help you enforce specific compliance checks and controls across your resources, and allows you to adopt an ideal deployment specification for each of your resource types. Each rule **is essentially a lambda function** that when called upon evaluates the resource and carries out some simple logic to determine the compliance result with the rule. Each time a change is made to one of your supported resources, AWS Config will check the compliance against any config rules that you have in place. AWS have a number of predefined rules that fall under the security umbrella that are ready to use. For example, Rds-storage-encrypted. This checks whether storage encryption is activated by your RDS database instances. Encrypted-volumes. This checks to see if any EBS volumes that have an attached state are encrypted.
+**S3 is used to store** the Configuration History files and any Configuration snapshots of your data within a single bucket, which is defined within the Configuration recorder. If you have multiple AWS accounts you may want to aggregate your configuration history files into the same S3 bucket for your primary account. However, you'll need to grant write access for this service principle, config.amazonaws.com, and your secondary accounts with write access to the S3 bucket in your primary account.
 
-* AWS Managed rules: set of predefined rules that cover a lot of best practices, so it's always worth browsing these rules first before setting up your own as there is a chance that the rule may already exist.
+### Config Rules
 
-Limit of 50 config rules per region before you need to contact AWS for an increase.
+Config rules are a great way to help you **enforce specific compliance checks** **and controls across your resources**, and allows you to adopt an ideal deployment specification for each of your resource types. Each rule **is essentially a lambda function** that when called upon evaluates the resource and carries out some simple logic to determine the compliance result with the rule. **Each time a change is made** to one of your supported resources, **AWS Config will check the compliance against any config rules that you have in place**.  
+AWS have a number of **predefined rules** that fall under the security umbrella that are ready to use. For example, Rds-storage-encrypted. This checks whether storage encryption is activated by your RDS database instances. Encrypted-volumes. This checks to see if any EBS volumes that have an attached state are encrypted.
 
+* **AWS Managed rules**: Set of predefined rules that cover a lot of best practices, so it's always worth browsing these rules first before setting up your own as there is a chance that the rule may already exist.
+* **Custom rules**: You can create your own rules to check specific customconfigurations.
+
+Limit of 50 config rules per region before you need to contact AWS for an increase.  
 Non compliant results are NOT deleted.
 
 ## SNS Topic
 
-SNS topic is used as a configuration stream for notifications of various events triggered by AWS Config. You can have various endpoints associated to the SNS stream. You can notify the alarm to you via Email send them to SQS and then programmatically analyze the results.
+SNS topic is used as a **configuration stream for notifications** from different AWS services like Config or CloudWatch alarms.  
+You can have various endpoints associated to the SNS stream.  
+You can use SNS topic to send notifications to you via email or to SQS to treate programatically the notification.
 
-## AWS Inspector
+## Inspector
 
-Resumen: A partir de un agente corriendo en el EC2, saca CVEs, CIS checks, security best practices y runtime behaviour analysis.
+The Amazon Inspector service is **agent based**, meaning it requires software agents to be **installed on any EC2 instances** you want to assess. This makes it an easy service to be configured and added at any point to existing resources already running within your AWS infrastructure. This helps Amazon Inspector to become a seamless integration with any of your existing security processes and procedures as another level of security.
 
-The Amazon Inspector service is **agent based**, meaning it requires software agents to be installed on any EC2 instances you want to assess. This makes it an easy service to be configured and added at any point to existing resources already running within your AWS infrastructure. This helps Amazon Inspector to become a seamless integration with any of your existing security processes and procedures as another level of security.
+These are the tests that AWS Inspector allow you to perform:
 
 * **CVEs**
 * **CIS Benchmarks**
 * **Security Best practices**
-* **Runtime Behaviour Analysis**
+* **Network Reachability**
 
-You cam make any of those possibilities run on the EC2 machines you decide
+You can make any of those run on the EC2 machines you decide.
 
-Role: Create or select a role to allow Amazon Inspector to have read only access to the EC2 instances  
-Assessment Targets: Group of EC2 instances that you want to run an assessment against  
-AWS agents: Software agents that must be install on EC2 instances to monitor. Data is sent to Amazon Inspector using a TLS channel. A regular heartbeat is sent from the agent to the inspector asking for instructions. It can autoupdate itself  
-Assessment Templates: Define specific configurations as to how an assessment is run on your EC2 instances. An assessment template cannot be modified after creation.
+### Element of AWS Inspector
+
+**Role**: Create or select a role to allow Amazon Inspector to have read only access to the EC2 instances  
+**Assessment Targets**: Group of EC2 instances that you want to run an assessment against  
+**AWS agents**: Software agents that must be install on EC2 instances to monitor. Data is sent to Amazon Inspector using a TLS channel. A regular heartbeat is sent from the agent to the inspector asking for instructions. It can autoupdate itself  
+**Assessment Templates**: Define specific configurations as to how an assessment is run on your EC2 instances. An assessment template cannot be modified after creation.
 
 * Rules packages to be used
 * Duration of the assessment run 15min/1hour/8hours
 * SNS topics, select when notify: Starts, finished, change state, reports a finding
 * Attributes to b assigned to findings 
 
-Rule package: Contains a number of individual rules that are check against an EC2 when an assessment is run. Each one also have a severity \(high, medium, low, informational\). The possibilities are:
+**Rule package**: Contains a number of individual rules that are check against an EC2 when an assessment is run. Each one also have a severity \(high, medium, low, informational\). The possibilities are:
 
 * Common Vulnerabilities and Exposures \(CVEs\)
 * Center for Internet Security \(CIS\) Benchmark
@@ -359,26 +366,33 @@ Rule package: Contains a number of individual rules that are check against an EC
 
 Once you have configured the Amazon Inspector Role, the AWS Agents are Installed, the target is configured and the template is configured, you will be able to run it. An assessment run can be stopped, resumed, or deleted.
 
-Telemetry: data that is collected from an instance, detailing its configuration, behavior and processes during an assessment run. Once collected, the data is then sent back to Amazon Inspector in near-real-time over TLS where it is then stored and encrypted on S3 via an ephemeral KMS key. Amazon Inspector then accesses the S3 Bucket, decrypts the data in memory, and analyzes it against any rules packages used for that assessment to generate the findings.
-
-Assessment Report: Provide details on what was assessed and the results of the assessment. The findings report contain the summary of the assessment, info about the EC2 and rules and the findings that occurred. The full report is the finding report + a list of rules that were passed.
-
 Amazon Inspector has a pre-defined set of rules, grouped into packages. Each Assessment Template defines which rules packages to be included in the test. Instances are being evaluated against rules packages included in the assessment template.
+
+{% hint style="info" %}
+Note that nowadays AWS already allow you to **autocreate** all the necesary **configurations** and even automatically **install the agents inside the EC2 instances.**
+{% endhint %}
+
+### **Reporting**
+
+**Telemetry**: data that is collected from an instance, detailing its configuration, behavior and processes during an assessment run. Once collected, the data is then sent back to Amazon Inspector in near-real-time over TLS where it is then stored and encrypted on S3 via an ephemeral KMS key. Amazon Inspector then accesses the S3 Bucket, decrypts the data in memory, and analyzes it against any rules packages used for that assessment to generate the findings.
+
+**Assessment Report**: Provide details on what was assessed and the results of the assessment. 
+
+* The **findings report** contain the summary of the assessment, info about the EC2 and rules and the findings that occurred.
+* The **full report** is the finding report + a list of rules that were passed.
 
 ## Trusted Advisor
 
-Resumen: Compara el estado de la cuenta de AWS con las best practices de AWS.
+The main function of Trusted Advisor is to **recommend improvements across your AWS account** to help optimize and hone your environment based on **AWS best practices**. These recommendations cover four distinct categories. It's a is a cross-region service.
 
-The main function of [Trusted Advisor](https://cloudacademy.com/course/an-overview-of-aws-trusted-advisor/introduction-54/) is to recommend improvements across your [AWS](https://cloudacademy.com/library/amazon-web-services/) account to help optimize and hone your environment based on **AWS best practices**. These recommendations cover four distinct categories. It's a is a cross-region service.
+1. **Cost optimization:** which helps to identify ways in which you could **optimize your resources** to save money.
+2. **Performance:** This scans your resources to highlight any **potential performance issues** across multiple services.
+3. **Security:** This category analyzes your environment for any **potential security weaknesses** or vulnerabilities.
+4. **Fault tolerance:** Which suggests best practices to **maintain service operations** by increasing resiliency should a fault or incident occur across your resources.
 
-1. Cost optimization, which helps to identify ways in which you could optimize your resources to save money.
-2. Performance. This scans your resources to highlight any potential performance issues across multiple services.
-3. Security. This category analyzes your environment for any potential security weaknesses or vulnerabilities.
-4. And fault tolerance. Which suggests best practices to maintain service operations by increasing resiliency should a fault or incident occur across your resources.
-
-The full power and potential of AWS Trusted Advisor is only really available if you have a business or enterprise support plan with AWS. Without either of these plans, then you will only have access to six core checks that are freely available to everyone. These free core checks are split between the performance and security categories, with the majority of them being related to security. These are the 6 checks: service limits, Security Groups Specific Ports Unrestricted, Amazon EBS Public Snapshots, Amazon RDS Public Snapshots, IAM Use, and MFA on root account.  
+The full power and potential of AWS Trusted Advisor is only really **available if you have a business or enterprise support plan with AWS**. **Without** either of these plans, then you will only have access to **six core checks** that are freely available to everyone. These free core checks are split between the performance and security categories, with the majority of them being related to security. These are the 6 checks: service limits, Security Groups Specific Ports Unrestricted, Amazon EBS Public Snapshots, Amazon RDS Public Snapshots, IAM Use, and MFA on root account.  
 Trusted advisor can send notifications and you can exclude items from it.  
-trusted advisor data is automatically refreshed every 24 hours, but you can perform a manual one 5 mins after the previous one
+Trusted advisor data is **automatically refreshed every 24 hours**, **but** you can perform a **manual one 5 mins after the previous one.**
 
 ## Amazon GuardDuty
 
