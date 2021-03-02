@@ -2,20 +2,53 @@
 
 ## IAM - Identity and Access Management
 
-Authentication - Process of defining an identity and the verification of that identity. This process can be subdivided in: Identification and verification.  
-Authorization - Determines what an identity can access within a system once it's been authenticated to it  
-Access Control - The method and process of how access is granted to a secure resource
+IAM is the service that will allow you to manage **Authentication**, **Authorization** and **Access Control** inside your AWS account.
+
+* **Authentication** - Process of defining an identity and the verification of that identity. This process can be subdivided in: Identification and verification.
+* **Authorization** - Determines what an identity can access within a system once it's been authenticated to it.
+* **Access Control** - The method and process of how access is granted to a secure resource
 
 IAM can be defined by its ability to manage, control and govern authentication, authorization and access control mechanisms of identities to your resources within your AWS account.
 
-An IAM role consists of two types of policies: A trust policy, which cannot be empty, defining who can assume the role, A Permissions policy, which cannot be empty, defining what they can access
+### Users
 
-* Users: This could be a real person within your organization who requires access to operate and maintain your AWS environment. Or it could be an account to be used by an application that may require permissions to access your AWS resources programmatically. Note that usernames must be unique.
-* Groups: These are objects that contain multiple users. Permissions can be assigned to a user or inherit form a group. Giving permission to groups and not to users the secure way to grant permissions.
-* Roles: Roles are used to grant identities a set of permissions. Roles don't have any access keys or credentials associated with them. Role are usually used with resources \(like EC2 machines\) but they can also be useful to grant temporary privileges to a user. Note that when for example an EC2 has an IAM role assigned, instead of saving some keys inside the machine, dynamic temporary access keys will be supplied by the IAM role to handle authentication and determine if access is authorized.
-* Policy Permissions: Are used to assign permissions. There are 2 types: 
-  * AWS managed policies \(preconfigured by AWS\)
-  * Customer Managed Policies: Configured by you. You can create policies based on AWS managed policies \(modifying one of them and creating your own\), using the policy generator \(a GUI view that helps you granting and denying permissions\) or writing  your own..
+This could be a **real person** within your organization who requires access to operate and maintain your AWS environment. Or it could be an account to be used by an **application** that may require permissions to **access** your **AWS** resources **programmatically**. Note that **usernames must be unique**.
+
+#### CLI
+
+* **Access Key ID**: 20 random uppercase alphanumeric characters like AKHDNAPO86BSHKDIRYT
+* **Secret access key ID**: 40 random upper and lowercase characters: S836fh/J73yHSb64Ag3Rkdi/jaD6sPl6/antFtU \(It's not possible to retrieve lost secret access key IDs\).
+
+Whenever you need to **change the Access Key** this is the process you should follow:  
+****_Create a new access key -&gt; Apply the new key to system/application -&gt; mark original one as inactive -&gt; Test and verify new access key is working -&gt; Delete old access key_
+
+**MFA** is **supported** when using the AWS **CLI**.
+
+### Groups
+
+These are objects that **contain multiple users**. Permissions can be assigned to a user or inherit form a group. **Giving permission to groups and not to users the secure way to grant permissions**.
+
+### Roles
+
+Roles are used to grant identities a set of permissions. **Roles don't have any access keys or credentials associated with them**. Roles are usually used with resources \(like EC2 machines\) but they can also be useful to grant **temporary privileges to a user**. Note that when for example an EC2 has an IAM role assigned, instead of saving some keys inside the machine, dynamic temporary access keys will be supplied by the IAM role to handle authentication and determine if access is authorized.
+
+An IAM role consists of **two types of policies**: A **trust policy**, which cannot be empty, defining who can assume the role, and a **permissions policy**, which cannot be empty, defining what they can access.
+
+#### AWS Security Token Service \(STS\) 
+
+This is a web service that enables you to **request temporary, limited-privilege credentials** for AWS Identity and Access Management \(IAM\) users or for users that you authenticate \(federated users\).
+
+### Policies
+
+#### Policy Permissions
+
+Are used to assign permissions. There are 2 types: 
+
+* AWS managed policies \(preconfigured by AWS\)
+* Customer Managed Policies: Configured by you. You can create policies based on AWS managed policies \(modifying one of them and creating your own\), using the policy generator \(a GUI view that helps you granting and denying permissions\) or writing  your own..
+
+By **default access** is **denied**, access will be granted if an explicit role has been specified.   
+If **single "Deny" exist, it will override the "Allow"**, except for requests that use the AWS account's root security credentials \(which are allowed by default\).
 
 ```javascript
 {
@@ -40,33 +73,30 @@ An IAM role consists of two types of policies: A trust policy, which cannot be e
 }
 ```
 
-* Policies: By default access is denied, access will be granted if an explicit role has been specified. Conflict Permissions: But if single "Deny" exist, it will override the "Allow", except for requests that use the AWS account's root security credentials \(which are allowed by default\).
-* Inline Policies: This kind of policies are directly assigned to a user, group or role. Then, they not appear in the Policies list as any other one can use them.
-* S3 Bucket Policies: Can only be applied to S3 Buckets. They contains an attribute called 'principal' that can be: IAM users, Federated users, another AWS account, an AWS service. Principals define who/what should be allowed or denied access to various S3 resources
+#### Inline Policies
 
-Access Key ID: 20 random uppercase alphanumeric characters like AKHDNAPO86BSHKDIRYT  
-Secret access key ID: 40 random upper and lowercase characters: S836fh/J73yHSb64Ag3Rkdi/jaD6sPl6/antFtU \(It's not possible to retrieve lost secret access key IDs\).  
-Access Key Rotation: Create a new access key -&gt; Apply the new key to system/application -&gt; mark original one as inactive -&gt; Test and verify new access key is working -&gt; Delete old access key
+This kind of policies are **directly assigned** to a user, group or role. Then, they not appear in the Policies list as any other one can use them.  
+Inline policies are useful if you want to **maintain a strict one-to-one relationship between a policy and the identity** that it's applied to. For example, you want to be sure that the permissions in a policy are not inadvertently assigned to an identity other than the one they're intended for. When you use an inline policy, the permissions in the policy cannot be inadvertently attached to the wrong identity. In addition, when you use the AWS Management Console to delete that identity, the policies embedded in the identity are deleted as well. That's because they are part of the principal entity.
 
-AWS Security Token Service \(STS\) is a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management \(IAM\) users or for users that you authenticate \(federated users\).
+#### S3 Bucket Policies
 
-MFA is supported when using the AWS CLI
+Can only be applied to S3 Buckets. They contains an attribute called 'principal' that can be: IAM users, Federated users, another AWS account, an AWS service. P**rincipals define who/what should be allowed or denied access to various S3 resources.**
 
 ### Multi-Factor Authentication
 
-It's used to create an additional factor for authentication in addition to your existing methods, such as password, therefore, creating a multi-factor level of authentication.  
-You can use a free virtual application or a physical device. You can use apps like google authentication for free to activate a MFA in AWS.
+It's used to **create an additional factor for authentication** in addition to your existing methods, such as password, therefore, creating a multi-factor level of authentication.  
+You can use a **free virtual application or a physical device**. You can use apps like google authentication for free to activate a MFA in AWS.
 
 ### Identity Federation
 
-Identity federation allows users from identity providers which are external to AWS to access AWS resources securely without having to supply AWS user credentials from a valid IAM user account.   
+Identity federation **allows users from identity providers which are external** to AWS to access AWS resources securely without having to supply AWS user credentials from a valid IAM user account.   
 An example of an identity provider can be your own corporate Microsoft Active Directory\(via SAML\) or OpenID services \(like Google\). Federated access will then allow the users within it to access AWS.  
-AWS Identity Federation connects via IAM roles
+AWS Identity Federation connects via IAM roles.
 
 #### Cross Account Trusts and Roles
 
-A user \(trusting\) can create a Cross Account Role with some policies and then, allow another user \(trusted\) to access his account but only having the access indicated in the new role policies. To create this, just create a new Role and select Cross Account Role. Roles for Cross-Account Access offers two options. Providing access between AWS accounts that you own, and providing access between an account that you own and a third party AWS account.  
-It's recommended to specify the user who is trusted and not put some generic thing because if not, other authenticated users like federated users will be able to also abuse this trust.
+**A user** \(trusting\) can create a Cross Account Role with some policies and then, **allow another user** \(trusted\) to **access his account** but only h**aving the access indicated in the new role policies**. To create this, just create a new Role and select Cross Account Role. Roles for Cross-Account Access offers two options. Providing access between AWS accounts that you own, and providing access between an account that you own and a third party AWS account.  
+It's recommended to **specify the user who is trusted and not put some generic thing** because if not, other authenticated users like federated users will be able to also abuse this trust.
 
 #### AWS Simple AD
 
@@ -86,28 +116,84 @@ The app uses the AssumeRoleWithWebIdentity to create temporary credentials. Howe
 
 ### Other IAM options
 
-You can set a password policy setting options like minimum length and password requirements.  
-You can download "Credential Report" with information about current credentials \(like user creation time, is password enabled...\)
+* You can **set a password policy setting** options like minimum length and password requirements.
+* You can **download "Credential Report"** with information about current credentials \(like user creation time, is password enabled...\).
 
-### Key Management Service
+## S3
 
-Easily manage encryption keys to secure your data. These keys cannot be recovered.
+Amazon S3 is a service that allows you **store important amounts of data**.
 
-## Cost Explorer and Anomaly detection
+Amazon S3 provides multiple options to achieve the **protection** of data at REST. The options include **Permission** \(Policy\), **Encryption** \(Client and Server Side\), **Bucket Versioning** and **MFA** **based delete**. The **user can enable** any of these options to achieve data protection. **Data replication** is an internal facility by AWS where **S3 automatically replicates each object across all the Availability Zones** and the organization need not enable it in this case.
 
-This allows you to check how are you expending money in AWS services and help you detecting anomalies.  
-Moreover, you can configure an anomaly detection so AWS will warn you when some anomaly in costs is found.
+With resource-based permissions, you can define permissions for sub-directories of your bucket separately.
 
-### Budgets
+### S3 Access logs
 
-Budgets help to manage costs and usage. You can get alerted when a threshold is reached.  
-Also, they can be used for non cost related monitoring like the usage of a service \(how many GB are used in a particular S3 bucket?\)
+It's possible to **enable S3 access login** \(which by default is disabled\) to some bucket and save the logs in a different bucket to know who is accessing the bucket. The source bucket and the target bucket \(the one is saving the logs needs to be in the same region.
+
+### S3 Encryption Mechanisms
+
+**DEK means Data Encryption Key** and is the key that is always generated and used to encrypt data.
+
+**Server-side encryption with S3 managed keys, SSE-S3:** This option requires minimal configuration and all management of encryption keys used are managed by AWS. All you need to do is to **upload your data and S3 will handle all other aspects**. Each bucket in a S3 account is assigned a bucket key.
+
+* Encryption: 
+  * Object Data + created plaintext DEK --&gt; Encrypted data \(stored inside S3\)
+  * Created plaintext DEK + S3 Master Key --&gt; Encrypted DEK \(stored inside S3\) and plain text is deleted from memory
+* Decryption:
+  * Encrypted DEK + S3 Master Key --&gt; Plaintext DEK
+  * Plaintext DEK + Encrypted data --&gt; Object Data
+
+Please, note that in this case **the key is managed by AWS** \(rotation only every 3 years\). If you use your own key you willbe able to rotate, disable and apply access control.
+
+**Server-side encryption with KMS managed keys, SSE-KMS:** This method allows S3 to use the key management service to generate your data encryption keys. KMS gives you a far greater flexibility of how your keys are managed. For example, you are able to disable, rotate, and apply access controls to the CMK, and order to against their usage using AWS Cloud Trail. 
+
+* Encryption:
+  * S3 request data keys from KMS CMK
+  * KMS uses a CMK to generate the pair DEK plaintext and DEK encrypted and send them to S£
+  * S3 uses the paintext key to encrypt the data, store the encrypted data and the encrypted key and deletes from memory the plain text key
+* Decryption:
+  * S3 ask to KMS to decrypt the encrypted data key of the object
+  * KMS decrypt the data key with the CMK and send it back to S3
+  * S3 decrypts the object data
+
+**Server-side encryption with customer provided keys, SSE-C:** This option gives you the opportunity to provide your own master key that you may already be using outside of AWS. Your customer-provided key would then be sent with your data to S3, where S3 would then perform the encryption for you. 
+
+* Encryption:
+  * The user sends the object data + Customer key to S3
+  * The customer key is used to encrypt the data and the encrypted data is stored
+  * a salted HMAC value of the customer key is stored also for future key validation
+  * the customer key is deleted from memory
+* Decryption:
+  * The user send the customer key
+  * The key is validated against the HMAC value stored
+  * The customer provided key is then used to decrypt the data
+
+**Client-side encryption with KMS, CSE-KMS:** Similarly to SSE-KMS, this also uses the key management service to generate your data encryption keys. However, this time KMS is called upon via the client not S3. The encryption then takes place client-side and the encrypted data is then sent to S3 to be stored. 
+
+* Encryption:
+  * Client request for a data key to KMS
+  * KMS returns the plaintext DEK and the encrypted DEK with the CMK
+  * Both keys are sent back
+  * The client then encrypts the data with the plaintext DEK and send to S3 the encrypted data + the encrypted DEK \(which is saved as metadata of the encrypted data inside S3\)
+* Decryption:
+  * The encrypted data with the encrypted DEK is sent to the client
+  * The client asks KMS to decrypt the encrypted key using the CMK and KMS sends back the plaintext DEK
+  * The client can now decrypt the encrypted data
+
+**Client-side encryption with customer provided keys, CSE-C:** Using this mechanism, you are able to utilize your own provided keys and use an AWS-SDK client to encrypt your data before sending it to S3 for storage. 
+
+* Encryption: 
+  * The client generates a DEK and encrypts the plaintext data
+  * Then, using it's own custme CMK it encrypts the DEK
+  * submit the encrypted data + encrypted DEK to S3 where it's stored
+* Decryption:
+  * S3 sends the encrypted data and DEK
+  * As the client already has the CMK used to encrypt the DEK, it decrypts the DEK and then uses the plaintext DEK to decrypt the data
 
 ## AWS CloudTrail
 
-Resumen: monitorea el uso de las APIs y lo logea.
-
-Tracks and monitors AWS API calls made within the environment. Each call to an API is logged inside an and it event contains:
+This service **tracks and monitors AWS API calls made within the environment**. Each call to an API \(event\) is logged. Each logged event contains:
 
 * The name of the called API: `eventName`
 * The called service: `eventSource`
@@ -120,11 +206,11 @@ Tracks and monitors AWS API calls made within the environment. Each call to an A
 * The request parameters: `requestParameters`
 * The response elements: `responseElements`
 
-Event's are written to a new log file approximately each 5 minutes in a JSON file, they are help by CloudTrail and finally, log files are delivered to S3 approximately 15mins after.  
-CloudTrail allows to use log file integrity in order to be able to verify that your log files have remained unchanged since CloudTrail delivered them to you. It created a SHA-256 hash of the logs inside a digest file. A sha-256 hash of the new logs is created every hour   
+Event's are written to a new log file **approximately each 5 minutes in a JSON file**, they are held by CloudTrail and finally, log files are **delivered to S3 approximately 15mins after**.  
+CloudTrail allows to use **log file integrity in order to be able to verify that your log files have remained unchanged** since CloudTrail delivered them to you. It creates a SHA-256 hash of the logs inside a digest file. A sha-256 hash of the new logs is created every hour.  
 When creating a Trail the event selectors will allow you to indicate the trail to log: Management, data or insights events.
 
-Logs are saved in an S3 bucket. By default Server Side Encryption is used \(SSE\) so AWS will decrypt the content for the people that has access to it, but for additional security you can use SSE with KMS and your own keys.
+Logs are saved in an S3 bucket. By default Server Side Encryption is used \(SSE-S3\) so AWS will decrypt the content for the people that has access to it, but for additional security you can use SSE with KMS and your own keys.
 
 ### Log File Naing Convention
 
@@ -132,18 +218,18 @@ Logs are saved in an S3 bucket. By default Server Side Encryption is used \(SSE\
 
 ### S3 folder structure
 
-Of log files \(note that the folders "AWSLogs" and "CloudTrail" are fixed names\):
-
 ![](.gitbook/assets/image%20%28430%29.png)
 
-Of the digest files \(if integrity verification is required\):
+Note that the folders "_AWSLogs_" and "_CloudTrail_" are fixed folder names,
 
-![](.gitbook/assets/image%20%28413%29.png)
+**Digest** files have a similar folders path:
+
+![](.gitbook/assets/image%20%28438%29.png)
 
 ### Aggregate Logs from Multiple Accounts
 
 * Create a Trial in the AWS account where you want the log files to be delivered to
-* Apply permissions to the destination S3 bucket allowing cross-account access for CloudTrail an allow each AWS account that needs access
+* Apply permissions to the destination S3 bucket allowing cross-account access for CloudTrail and allow each AWS account that needs access
 * Create a new Trail in the other AWS accounts and select to use the created bucket in step 1
 
 However, even if you can save al the logs in the same S3 bucket, you cannot aggregate CloudTrail logs from multiple accounts into a CloudWatch Logs belonging to a single AWS account
@@ -158,8 +244,8 @@ aws cloudtrail validate-logs --trail-arn <trailARN> --start-time <start-time> [-
 
 ### Logs to CloudWatch
 
-CloudTrail can automatically send logs to CloudWatch so you can set alerts that warns you when suspicious activities are performed.  
-Note that in order to allow CloudTrail to send the logs to CloudWatch a role needs to be created that allows that action. If possible, it's recommended to use AWS default role to perform these actions. This role will allow CloudTrail to:
+**CloudTrail can automatically send logs to CloudWatch so you can set alerts that warns you when suspicious activities are performed.**  
+Note that in order to allow CloudTrail to send the logs to CloudWatch a **role** needs to be created that allows that action. If possible, it's recommended to use AWS default role to perform these actions. This role will allow CloudTrail to:
 
 * CreateLogStream: This allows to create a CloudWatch Logs log streams
 * PutLogEvents: Deliver CloudTrail logs to CloudWatch Logs log stream
@@ -170,10 +256,16 @@ CloudTrail Event History allows you to inspect in a table the logs that have bee
 
 ![](.gitbook/assets/image%20%28431%29.png)
 
+### Insights
+
+**CloudTrail Insights** automatically **analyzes** write management events from CloudTrail trails and **alerts** you to **unusual activity**. For example, if there is an increase in `TerminateInstance` events that differs from established baselines, you’ll see it as an Insight event. These events make **finding and responding to unusual API activity easier** than ever.
+
 ## CloudWatch
 
-Allows to create alarm based on logs. You can monitor for example logs from CloudTrail.  
-CloudWatch Log Event have a size limitation of 256KB.  
+Amazon CloudWatch allows to **collect all of your logs in a single repository** where you can create **metrics** and **alarms** based on the logs.  
+CloudWatch Log Event have a **size limitation of 256KB of each log line**.
+
+You can monitor for example logs from CloudTrail.  
 Events that are monitored:
 
 * Changes to Security Groups and NACLs
@@ -185,11 +277,23 @@ Events that are monitored:
 
 ### Agent Installation
 
-* Create a role and attach it to the instance with permissions allowing CloudWatch to collect data from the instances in addition to interacting with AWS systems manager SSM \(CloudWatchAgentAdminPolicy & AmazonEC2RoleforSSM\)
-* Download and install the agent onto the EC2 instance \([https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip](https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip)\). You can download it from inside the EC2 or install it automatically using AWS System Manager selecting the package AWS-ConfigureAWSPackage
-* Configure and start the CloudWatch Agent
+You can install agents insie your machines/containers to automatically send the logs back to CloudWatch.
 
-A log group has many streams. A stream has many events. And inside of each stream, the events are guaranteed to be in order
+* **Create** a **role** and **attach** it to the **instance** with permissions allowing CloudWatch to collect data from the instances in addition to interacting with AWS systems manager SSM \(CloudWatchAgentAdminPolicy & AmazonEC2RoleforSSM\)
+* **Download** and **install** the **agent** onto the EC2 instance \([https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip](https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip)\). You can download it from inside the EC2 or install it automatically using AWS System Manager selecting the package AWS-ConfigureAWSPackage
+* **Configure** and **start** the CloudWatch Agent
+
+A log group has many streams. A stream has many events. And inside of each stream, the events are guaranteed to be in order.
+
+## Cost Explorer and Anomaly detection
+
+This allows you to check how are you expending money in AWS services and help you **detecting anomalies**.  
+Moreover, you can configure an anomaly detection so AWS will warn you when some anomaly in costs is found.
+
+### Budgets
+
+Budgets help to manage costs and usage. You can get **alerted when a threshold is reached**.  
+Also, they can be used for non cost related monitoring like the usage of a service \(how many GB are used in a particular S3 bucket?\).
 
 ## AWS Config
 
@@ -394,74 +498,6 @@ It possible to invite other accounts to Amazon Macie so several accounts share A
 You can very easily create health checks for web pages via Route53. For example you can create HTTP checks on port 80 to a page to check that the web server is working.
 
 Route 53 service is mainly used for checking the health of the instances. To check the health of the instances we can ping a certain DNS point and we should get response from the instance if the instances are healthy.
-
-## 
-
-## S3
-
- Amazon S3 provides multiple options to achieve the protection of data at REST. The options include **Permission** \(Policy\), **Encryption** \(Client and Server Side\), **Bucket Versioning** and **MFA** **based delete**. The user can enable any of these options to achieve data protection. Data replication is an internal facility by AWS where S3 automatically replicates each object across all the Availability Zones and the organization need not enable it in this case.
-
-With resource-based permissions, you can define permissions for sub-directories of your bucket separately.
-
-### S3 Access logs
-
-It's possible to enable S3 access login \(which by default is disabled\) to some bucket and save the logs in a different bucket to know who is accessing the bucket. The source bucket and the target bucket \(the one is saving the logs needs to be in the same region.
-
-### S3 Encryption Mechanisms
-
-Server-side encryption with S3 managed keys, SSE-S3. This option requires minimal configuration and all management of encryption keys used are managed by AWS. All you need to do is to upload your data and S3 will handle all other aspects.  Each bucket in an S3 account is assigned a bucket key
-
-* Encryption: 
-  * Object Data + created plaintext DEK --&gt; Encrypted data \(stored inside S3\)
-  * created plaintext DEK + S3 Master Key --&gt; Encrypted DEK \(stored inside S3\) and plain text is deleted from memory
-* Decryption:
-  * Encrypted DEK + S3 Master Key --&gt; Plaintext DEK
-  * Plaintext DEK + Encrypted data --&gt; Object Data
-
-Please, note that in this case the key is managed by AWS \(rattion only every 3 years\). If you use your own key you willbe able to rotate, disable and apply access control.
-
-Server-side encryption with KMS managed keys, SSE-KMS. This method allows S3 to use the key management service to generate your data encryption keys. KMS gives you a far greater flexibility of how your keys are managed. For example, you are able to disable, rotate, and apply access controls to the CMK, and order to against their usage using AWS Cloud Trail. 
-
-* Encryption:
-  * S3 request data keys from KMS CMK --&gt; so, KMS uses a CMK to generate the pair DKE plaintext and DEK encrypted --&gt; Pair keys send back to S3 -&gt; S3 uses the plaintext key to encrypt the data, store the encrypted data and the encrypted key and deletes from memory the plain text key
-* Decryption:
-  * S3 ask to KMS to decrypt the encrupted data key of the object
-  * KMS decryptd the data key with the CMK and send it bak to S3
-  * S3 decrypts the object data
-
-Server-side encryption with customer provided keys, SSE-C. This option gives you the opportunity to provide your own master key that you may already be using outside of AWS. Your customer-provided key would then be sent with your data to S3, where S3 would then perform the encryption for you. 
-
-* Encryption:
-  * The user sends the object data + Customer key to S3
-  * The customer key is used to encrypt the data and the encrypted data is stored
-  * a salted HMAC value of the customer key is stored also for future key validation
-  * the customer key is deleted from memory
-* Decryption:
-  * The user send the customer key
-  * The key is validated against the HMAC value stored
-  * The customer provided key is then used to decrypt the data
-
-Client-side encryption with KMS, CSE-KMS. Similarly to SSE-KMS, this also uses the key management service to generate your data encryption keys. However, this time KMS is called upon via the client not S3. The encryption then takes place client-side and the encrypted data is then sent to S3 to be stored. 
-
-* Encryption:
-  * Client request for a data key to KMS
-  * KMS returns the plaintext data key and the same data key encrypted with the CMK
-  * Both keys are sent back
-  * The client then encrypts the data with the plain text data key and send toS3 the encrypted data + the encrypted DEK \(which is saved as metadata of the encrypted data inside S3\)
-* Decryption:
-  * The encrypted data with the encrypted DEK is sent to the client
-  * The client asks KMS to decrypt the encrypted key using the CMK and KMS sends back the plaintext DEK
-  * The client can now decrypt the encrypted data
-
-Client-side encryption with customer provided keys, CSE-C. Using this mechanism, you are able to utilize your own provided keys and use an AWS-SDK client to encrypt your data before sending it to S3 for storage. 
-
-* Encryption: 
-  * The client generates a DEK and encrypts the plaintext data
-  * Then, using it's own custme CMK it encrypts the DEK
-  * submit the encrypted data + encrypted DEK to S3 where it's stored
-* Decryption:
-  * S3 sends the encrypted data and DEK
-  * As the client already has the CMK used to encrypt the DEK, it decrypts the DEK and then uses the plaintext DEK to decrypt the data
 
 ## CloufFront
 
