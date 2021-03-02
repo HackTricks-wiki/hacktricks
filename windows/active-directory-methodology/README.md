@@ -88,7 +88,7 @@ For this phase you need to have **compromised the credentials or a session of a 
 ### Enumeration
 
 If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.  
-Regarding [**ASREPRoast** ](asreproast.md)you can now find every possible vulnerable user, and regarding **\*\*\[**Password Spraying**\]\(password-spraying.md\) you can get a** list of all the usernames **and try the password of the compromised account \(if you know it\). It's very easy to obtain all the domain usernames from Windows \(`net user /domain` ,`Get-DomainUser`or `wmic useraccount get name,sid`\). In** linux\*\* you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username`
+Regarding [**ASREPRoast**](asreproast.md)you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account \(if you know it\). It's very easy to obtain all the domain usernames from Windows \(`net user /domain` ,`Get-DomainUser`or `wmic useraccount get name,sid`\). In** linux\*\* you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username`
 
 Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
 
