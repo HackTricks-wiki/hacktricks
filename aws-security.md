@@ -191,6 +191,18 @@ Please, note that in this case **the key is managed by AWS** \(rotation only eve
   * S3 sends the encrypted data and DEK
   * As the client already has the CMK used to encrypt the DEK, it decrypts the DEK and then uses the plaintext DEK to decrypt the data
 
+## Amazon Athena
+
+Amazon Athena is an interactive query service that makes it easy to **analyze data** directly in Amazon Simple Storage Service \(Amazon **S3**\) **using** standard **SQL**.
+
+You need to **prepare a relational DB table** with the format of the content that is going to appear in the monitored S3 buckets. And then, Amazon Athena will be able to populate the DB from th logs, so you can query it.
+
+Amazon Athena supports the **hability to query S3 data that is already encrypted** and if configured to do so, **Athena can also encrypt the results of the query which can then be stored in S3**.
+
+**This encryption of results is independent of the underlying queried S3 data**, meaning that even if the S3 data is not encrypted, the queried results can be encrypted. A couple of points to be aware of is that Amazon Athena only supports data that has been **encrypted** with the **following S3 encryption methods**, **SSE-S3, SSE-KMS, and CSE-KMS**.
+
+SSE-C and CSE-E are not supported. In addition to this, it's important to understand that Amazon Athena will only run queries against **encrypted objects that are in the same region as the query itself**. If you need to query S3 data that's been encrypted using KMS, then specific permissions are required by the Athena user to enable them to perform the query.
+
 ## AWS CloudTrail
 
 This service **tracks and monitors AWS API calls made within the environment**. Each call to an API \(event\) is logged. Each logged event contains:
@@ -428,19 +440,18 @@ If you just stop it, the existing findings will remain.
 
 ## Amazon Macie
 
-Resumen: Le indicas el storage que quieres monitorizar \(S3 en general\) y va a detectar que tipo de contenido es y si es sensible o no y mirara tambien los permisos que el storage tiene asignado. Util para detectar cosas que no deberian estar donde estan y para prevenir leaks. Tambien usa machine learning para detectar comportamientros extranos relacionados con los logs que chekea.
+The main function of the service is to provide an automatic method of **detecting, identifying, and also classifying data** that you are storing within your AWS account.
 
-The main function of the service is to provide an automatic method of detecting, identifying, and also classifying data that you are storing within your AWS account.
+The service is backed by **machine learning**, allowing your data to be actively reviewed as different actions are taken within your AWS account. Machine learning can spot access patterns and **user behavior** by analyzing **cloud trail event** data to **alert against any unusual or irregular activity**. Any findings made by Amazon Macie are presented within a dashboard which can trigger alerts, allowing you to quickly resolve any potential threat of exposure or compromise of your data.
 
-The service is backed by machine learning, allowing your data to be actively reviewed as different actions are taken within your AWS account. Machine learning can spot access patterns and user behavior by analyzing cloud trail event data to alert against any unusual or irregular activity. Any findings made by Amazon Macie are presented within a dashboard which can trigger alerts, allowing you to quickly resolve any potential threat of exposure or compromise of your data.
+Amazon Macie will automatically and continuously **monitor and detect new data that is stored in Amazon S3**. Using the abilities of machine learning and artificial intelligence, this service has the ability to familiarize over time, access patterns to data.   
+Amazon Macie also uses natural language processing methods to **classify and interpret different data types and content**. NLP uses principles from computer science and computational linguistics to look at the interactions between computers and the human language. In particular, how to program computers to understand and decipher language data. The **service can automatically assign business values to data that is assessed in the form of a risk score**. This enables Amazon Macie to order findings on a priority basis, enabling you to focus on the most critical alerts first. In addition to this, Amazon Macie also has the added benefit of being able to **monitor and discover security changes governing your data**. As well as identify specific security-centric data such as access keys held within an S3 bucket. 
 
-There are a number of key features that are offered by Amazon Macie during its detection and classification process. These can be summarized as follows. Amazon Macie will automatically and continuously monitor and detect new data that is stored in Amazon S3. Using the abilities of machine learning and artificial intelligence, this service has the ability to familiarize over time, access patterns to data. Amazon Macie also uses natural language processing methods to help classify and interpret different data types and content. NLP uses principles from computer science and computational linguistics to look at the interactions between computers and the human language. In particular, how to program computers to understand and decipher language data. The service can automatically assign business values to data that is assessed in the form of a risk score. This enables Amazon Macie to order findings on a priority basis, enabling you to focus on the most critical alerts first. In addition to this, Amazon Macie also has the added benefit of being able to monitor and discover security changes governing your data. As well as identify specific security-centric data such as access keys held within an S3 bucket. 
-
-This protective and proactive security monitoring enables Amazon Macie to identify critical, sensitive, and security focused data such as API keys, secret keys, in addition to PII and PHI data. It can detect changes and alterations to existing security policies and access control lists which effect data within your S3 buckets. It will also alert against unusual user behavior and maintain compliance requirements as required. 
+This protective and proactive security monitoring enables Amazon Macie to identify critical, sensitive, and security focused data such as API keys, secret keys, in addition to PII \(personally identifiable information\) and PHI data.
 
 This is useful to avoid data leaks as Macie will detect if you are exposing people information to the Internet.
 
-It's a regional service.
+It's a **regional service**.
 
 It requires the existence of IAM Role 'AWSMacieServiceCustomerSetupRole' and it needs AWS CloudTrail to be enabled.
 
@@ -460,11 +471,11 @@ Pre-defined alerts categories:
 * Service disruption
 * Suspicious access
 
-Alert summary: Provides detailed information to allow you to respond appropriately. It has a description that provides a deeper level of understanding of why it was generated. It also has a breakdown of the results.  
+The **alert summary** provides detailed information to allow you to respond appropriately. It has a description that provides a deeper level of understanding of why it was generated. It also has a breakdown of the results.  
 
 The user has the possibility to create new custom alerts.
 
-Dashboard categorization:
+**Dashboard categorization**:
 
 * S3 Objects for selected time range
 * S3 Objects
@@ -477,14 +488,14 @@ Dashboard categorization:
 * Activity ISPs
 * CloudTrail user identity types
 
-User Categories: Macie categorises the users in the following categories:
+**User Categories**: Macie categorises the users in the following categories:
 
-* Platinum: Users or roles considered to be making high risk API calls. Often they have admins privileges. You should monitor the pretty god in case they are compromised
-* Gold: Users or roles with history of calling APIs related to infrastructure changes. You should also monitor them
-* Silver: Users or roles performing medium level risk API calls
-* Bronze: Users or roles using lowest level of risk based on API calls
+* **Platinum**: Users or roles considered to be making high risk API calls. Often they have admins privileges. You should monitor the pretty god in case they are compromised
+* **Gold**: Users or roles with history of calling APIs related to infrastructure changes. You should also monitor them
+* **Silver**: Users or roles performing medium level risk API calls
+* **Bronze**: Users or roles using lowest level of risk based on API calls
 
-Identity types:
+**Identity types:**
 
 * Root: Request made by root user
 * IAM user: Request made by IAM user
@@ -493,7 +504,7 @@ Identity types:
 * AWS Account: Request made by a different AWS account
 * AWS Service: Request made by an AWS service
 
-Data classification: 4 file classifications exists:
+**Data classification**: 4 file classifications exists:
 
 * Content-Type: list files based on content-type detected. The given risk is determined by the type of content detected.
 * File Extension: Same as content-type but based on the extension
@@ -508,52 +519,41 @@ It possible to invite other accounts to Amazon Macie so several accounts share A
 
 ## Route 53
 
-You can very easily create health checks for web pages via Route53. For example you can create HTTP checks on port 80 to a page to check that the web server is working.
+You can very easily create **health checks for web pages** via Route53. For example you can create HTTP checks on port 80 to a page to check that the web server is working.
 
 Route 53 service is mainly used for checking the health of the instances. To check the health of the instances we can ping a certain DNS point and we should get response from the instance if the instances are healthy.
 
 ## CloufFront
 
-Amazon CloudFront is AWS's content delivery network that speeds up distribution of your static and dynamic content through its worldwide network of edge locations. When you use a request content that you're hosting through Amazon CloudFront, the request is routed to the closest edge location which provides it the lowest latency to deliver the best performance. When CloudFront access logs are enabled you can record the request from each user requesting access to your website and distribution. As with S3 access logs, these logs are also stored on Amazon S3 for durable and persistent storage. There are no charges for enabling logging itself, however, as the logs are stored in S3 you will be stored for the storage used by S3.
+Amazon CloudFront is AWS's **content delivery network that speeds up distribution** of your static and dynamic content through its worldwide network of edge locations. When you use a request content that you're hosting through Amazon CloudFront, the request is routed to the closest edge location which provides it the lowest latency to deliver the best performance. When **CloudFront access logs** are enabled you can record the request from each user requesting access to your website and distribution. As with S3 access logs, these logs are also **stored on Amazon S3 for durable and persistent storage**. There are no charges for enabling logging itself, however, as the logs are stored in S3 you will be stored for the storage used by S3.
 
-The log files capture data over a period of time and depending on the amount of requests that are received by Amazon CloudFront for that distribution will depend on the amount of log fils that are generated. It's important to know that these log files are not created or written to on S3. S3 is simply where they are delivered to once the log file is full. Amazon CloudFront retains these logs until they are ready to be delivered to S3. Again, depending on the size of these log files this delivery can take between one and 24 hours.
+The log files capture data over a period of time and depending on the amount of requests that are received by Amazon CloudFront for that distribution will depend on the amount of log fils that are generated. It's important to know that these log files are not created or written to on S3. S3 is simply where they are delivered to once the log file is full. **Amazon CloudFront retains these logs until they are ready to be delivered to S3**. Again, depending on the size of these log files this delivery can take **between one and 24 hours**.
 
-By default cookie logging is disabled but you can enable it.
+**By default cookie logging is disabled** but you can enable it.
 
 ## VPC
 
-Within your VPC, you could potentially have hundreds or even thousands of resources all communicating between different subnets both public and private and also between different VPCs through VPC peering connections. VPC Flow Logs allows you to capture IP traffic information that flows between your network interfaces of your resources within your VPC.
+Within your VPC, you could potentially have hundreds or even thousands of resources all communicating between different subnets both public and private and also between different VPCs through VPC peering connections. **VPC Flow Logs allows you to capture IP traffic information that flows between your network interfaces of your resources within your VPC**.
 
-Unlike S3 access logs and [CloudFront access logs](https://cloudacademy.com/course/how-implement-enable-logging-across-aws-services-part-2-2/cloudfront-access-logs/), the log data generated by VPC Flow Logs is not stored in S3. Instead, the log data captured is sent to CloudWatch logs.
+Unlike S3 access logs and CloudFront access logs, the **log data generated by VPC Flow Logs is not stored in S3. Instead, the log data captured is sent to CloudWatch logs**.
 
 Limitations:
 
 * If you are running a VPC peered connection, then you'll only be able to see flow logs of peered VPCs that are within the same account.
-* if you are still running resources within the EC2-Classic environment, then unfortunately you are not able to retrieve information from their interfaces
-* once a VPC Flow Log has been created, it cannot be changed. To alter the VPC Flow Log configuration, you need to delete it and then recreate a new one.
-* the following traffic is not monitored and captured by the logs. DHCP traffic within the VPC, traffic from instances destined for the Amazon DNS Server.
+* If you are still running resources within the EC2-Classic environment, then unfortunately you are not able to retrieve information from their interfaces
+* Once a VPC Flow Log has been created, it cannot be changed. To alter the VPC Flow Log configuration, you need to delete it and then recreate a new one.
+* The following traffic is not monitored and captured by the logs. DHCP traffic within the VPC, traffic from instances destined for the Amazon DNS Server.
 * Any traffic destined to the IP address for the VPC default router and traffic to and from the following addresses, 169.254.169.254 which is used for gathering instance metadata, and 169.254.169.123 which is used for the Amazon Time Sync Service.
 * Traffic relating to an Amazon Windows activation license from a Windows instance
-* traffic between a network load balancer interface and an endpoint network interface
+* Traffic between a network load balancer interface and an endpoint network interface
 
-For every network interface that publishes data to the CloudWatch log group, it will use a different log stream. And within each of these streams, there will be the flow log event data that shows the content of the log entries. Each of these logs captures data during a window of approximately 10 to 15 minutes.
-
-
+For every network interface that publishes data to the CloudWatch log group, it will use a different log stream. And within each of these streams, there will be the flow log event data that shows the content of the log entries. Each of these **logs captures data during a window of approximately 10 to 15 minutes**.
 
 ![](.gitbook/assets/image%20%28432%29.png)
 
 ![](.gitbook/assets/image%20%28433%29.png)
 
-## Amazon Athena
-
-Use Amazon Athena to query data within S3 to search for specific entries.  
-Se puede preparar una base de datos relacionada con el contenido que va a tener un bucket S3 para despues poder buscar el contenid de ese bucket mediante consultas de SQL.
-
-Amazon Athena is a serverless interactive query service which uses standard SQL and automatically execute queries in parallel, making it extremely fast. Amazon Athena supports the ability to query S3 data that is already encrypted and if configured to do so, Athena can also encrypt the results of the query which can then be stored in S3.
-
-This encryption of results is independent of the underlying queried S3 data, meaning that even if the S3 data is not encrypted, the queried results can be encrypted. A couple of points to be aware of is that Amazon Athena only supports data that has been encrypted with the following S3 encryption methods, SSE-S3, SSE-KMS, and CSE-KMS.
-
-SSE-C and CSE-E are not supported. In addition to this, it's important to understand that Amazon Athena will only run queries against encrypted objects that are in the same region as the query itself. If you need to query S3 data that's been encrypted using KMS, then specific permissions are required by the Athena user to enable them to perform the query.
+## 
 
 ## KMS
 
