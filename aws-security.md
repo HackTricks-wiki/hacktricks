@@ -396,10 +396,9 @@ Trusted advisor data is **automatically refreshed every 24 hours**, **but** you 
 
 ## Amazon GuardDuty
 
-Resumen: Analiza logs de cloudtrail, vpc y dns para detectar comportamiento inesperado usando tecnicas comunes como checkear IPs de blacklists y machine learning.
-
-Amazon GuardDuty is a regional-based intelligent threat detection service, the first of its kind offered by AWS, which allows users to monitor their AWS account for unusual and unexpected behavior by analyzing AWS CloudTrail event logs, VPC flow logs \(network traffic information within the VPC\), and DNS logs. It then uses the data from logs and assesses them against multiple security and threat detection feeds, looking for anomalies and known malicious sources, such as IP addresses and URLs. It also uses Machine Learning to detect unexpected behaviours.  
-You can upload list of whitelisted and blacklisted IP addresses so GuardDuty takes that info into account.
+Amazon GuardDuty is a regional-based intelligent **threat detection service**, the first of its kind offered by AWS, which allows users to **monitor** their **AWS account** for **unusual and unexpected behavior by analyzing VPC Flow Logs, AWS CloudTrail management event logs, Cloudtrail S3 data event logs, and DNS logs**. It uses **threat intelligence feeds**, such as lists of malicious IP addresses and domains, and **machine learning** to identify **unexpected and potentially unauthorized and malicious activity** within your AWS environment. This can include issues like escalations of privileges, uses of exposed credentials, or communication with malicious IP addresses, or domains.  
+For example, GuardDuty can detect compromised EC2 instances serving malware or mining bitcoin. It also monitors AWS account access behavior for signs of compromise, such as unauthorized infrastructure deployments, like instances deployed in a Region that has never been used, or unusual API calls, like a password policy change to reduce password strength.  
+You can **upload list of whitelisted and blacklisted IP addresses** so GuardDuty takes that info into account.
 
 Finding summary:
 
@@ -418,7 +417,7 @@ The body has this information:
 * Actor: Ip address, port and domain
 * Additional Information
 
-You can invite other accounts to a different AWS GuardDuty account so every account is monitored from the same GuardDuty. The master account must invite the member accounts and then the representative of the member account must accept the invitation.  
+You can invite other accounts to a different AWS GuardDuty account so **every account is monitored from the same GuardDuty**. The master account must invite the member accounts and then the representative of the member account must accept the invitation.  
 There are different IAM Role permissions to allow GuardDuty to get the information and to allow a user to upload IPs whitelisted and blacklisted.  
 GuarDuty uses a service-linked role called "AWSServiceRoleForAmazonGuardDuty" that allows it to retrieve metadata from affected endpoints.
 
