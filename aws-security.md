@@ -702,7 +702,8 @@ For every network interface that publishes data to the CloudWatch log group, it 
 ### Subnets
 
 Subnets helps to enforce a greater level of security. **Logical grouping of similar resources** also helps you to maintain an **ease of management** across your infrastructure.  
-Valid CIDR are from a /16 netmask to a /28 netmask.
+Valid CIDR are from a /16 netmask to a /28 netmask.  
+A subnet cannot be in different availability zones at the same time.
 
 By having **multiple Subnets with similar resources grouped together**, it allows for greater security management. By implementing **network level virtual firewalls,** called network access control lists, or **NACLs**, it's possible to **filter traffic** on specific ports from both an ingress and egress point at the Subnet level.
 
@@ -891,11 +892,66 @@ Whereas the Standard version of Shield offered protection against layer three an
 
 ## VPN
 
-A _customer gateway CGW_ is the anchor on the customer side of that connection. It can be a physical or software appliance. The anchor on the AWS side of the VPN connection is called a _virtual private gateway VGW_. There are two lines between the customer gateway and virtual private gateway because the VPN connection consists of two tunnels in case of device failure. When you configure your customer gateway, it's important you configure both tunnels.
+### Site-to-Site VPN
 
-The VPN connection will connect VGW attached to certain VPC and CGW on AWS.
+**Connect your on premisses network with your VPC.**
 
-Public and Private Virtual Interfaces VIFs are part of configuring a Direct Connect between on-premises and AWS
+#### Concepts
+
+* **VPN connection**: A secure connection between your on-premises equipment and your VPCs.
+* **VPN tunnel**: An encrypted link where data can pass from the customer network to or from AWS.
+
+  Each VPN connection includes two VPN tunnels which you can simultaneously use for high availability.
+
+* **Customer gateway**: An AWS resource which provides information to AWS about your customer gateway device.
+* **Customer gateway device**: A physical device or software application on your side of the Site-to-Site VPN connection.
+* **Virtual private gateway**: The VPN concentrator on the Amazon side of the Site-to-Site VPN connection. You use a virtual private gateway or a transit gateway as the gateway for the Amazon side of the Site-to-Site VPN connection.
+* **Transit gateway**: A transit hub that can be used to interconnect your VPCs and on-premises networks. You use a transit gateway or virtual private gateway as the gateway for the Amazon side of the Site-to-Site VPN connection.
+
+#### Limitations
+
+* IPv6 traffic is not supported for VPN connections on a virtual private gateway.
+* An AWS VPN connection does not support Path MTU Discovery.
+
+In addition, take the following into consideration when you use Site-to-Site VPN.
+
+* When connecting your VPCs to a common on-premises network, we recommend that you use non-overlapping CIDR blocks for your networks.
+
+### Components of Client VPN <a id="what-is-components"></a>
+
+**Connect from your machine to your VPC**
+
+#### Concepts
+
+*  **Client VPN endpoint:** The resource that you create and configure to enable and manage client VPN sessions. It is the resource where all client VPN sessions are terminated.
+*  **Target network:** A target network is the network that you associate with a Client VPN endpoint. **A subnet from a VPC is a target network**. Associating a subnet with a Client VPN endpoint enables you to establish VPN sessions. You can associate multiple subnets with a Client VPN endpoint for high availability. All subnets must be from the same VPC. Each subnet must belong to a different Availability Zone.
+* **Route**: Each Client VPN endpoint has a route table that describes the available destination network routes. Each route in the route table specifies the path for traffic to specific resources or networks.
+*  **Authorization rules:** An authorization rule **restricts the users who can access a network**. For a specified network, you configure the Active Directory or identity provider \(IdP\) group that is allowed access. Only users belonging to this group can access the specified network. **By default, there are no authorization rules** and you must configure authorization rules to enable users to access resources and networks.
+* **Client:** The end user connecting to the Client VPN endpoint to establish a VPN session. End users need to download an OpenVPN client and use the Client VPN configuration file that you created to establish a VPN session.
+* **Client CIDR range:** An IP address range from which to assign client IP addresses. Each connection to the Client VPN endpoint is assigned a unique IP address from the client CIDR range. You choose the client CIDR range, for example, `10.2.0.0/16`.
+* **Client VPN ports:** AWS Client VPN supports ports 443 and 1194 for both TCP and UDP. The default is port 443.
+* **Client VPN network interfaces:** When you associate a subnet with your Client VPN endpoint, we create Client VPN network interfaces in that subnet. **Traffic that's sent to the VPC from the Client VPN endpoint is sent through a Client VPN network interface**. Source network address translation \(SNAT\) is then applied, where the source IP address from the client CIDR range is translated to the Client VPN network interface IP address.
+* **Connection logging:** You can enable connection logging for your Client VPN endpoint to log connection events. You can use this information to run forensics, analyze how your Client VPN endpoint is being used, or debug connection issues.
+* **Self-service portal:** You can enable a self-service portal for your Client VPN endpoint. Clients can log into the web-based portal using their credentials and download the latest version of the Client VPN endpoint configuration file, or the latest version of the AWS provided client.
+
+#### Limitations
+
+* **Client CIDR ranges cannot overlap with the local CIDR** of the VPC in which the associated subnet is located, or any routes manually added to the Client VPN endpoint's route table.
+* Client CIDR ranges must have a block size of at **least /22** and must **not be greater than /12.**
+* A **portion of the addresses** in the client CIDR range are used to **support the availability** model of the Client VPN endpoint, and cannot be assigned to clients. Therefore, we recommend that you **assign a CIDR block that contains twice the number of IP addresses that are required** to enable the maximum number of concurrent connections that you plan to support on the Client VPN endpoint.
+* The **client CIDR range cannot be changed** after you create the Client VPN endpoint.
+* The **subnets** associated with a Client VPN endpoint **must be in the same VPC**.
+* You **cannot associate multiple subnets from the same Availability Zone with a Client VPN endpoint**.
+* A Client VPN endpoint **does not support subnet associations in a dedicated tenancy VPC**.
+* Client VPN supports **IPv4** traffic only.
+* Client VPN is **not** Federal Information Processing Standards \(**FIPS**\) **compliant**.
+* If multi-factor authentication \(MFA\) is disabled for your Active Directory, a user password cannot be in the following format.
+
+  ```text
+  SCRV1:<base64_encoded_string>:<base64_encoded_string>
+  ```
+
+* The self-service portal is **not available for clients that authenticate using mutual authentication**.
 
 ## Amazon Cognito
 
