@@ -139,7 +139,7 @@ The app uses the AssumeRoleWithWebIdentity to create temporary credentials. Howe
 ### Other IAM options
 
 * You can **set a password policy setting** options like minimum length and password requirements.
-* You can **download "Credential Report"** with information about current credentials \(like user creation time, is password enabled...\).
+* You can **download "Credential Report"** with information about current credentials \(like user creation time, is password enabled...\). You can generate a credential report as often as once every **four hours**.
 
 ## KMS - Key Management Service
 
@@ -289,7 +289,7 @@ Please, note that in this case **the key is managed by AWS** \(rotation only eve
 
 * Encryption: 
   * The client generates a DEK and encrypts the plaintext data
-  * Then, using it's own custme CMK it encrypts the DEK
+  * Then, using it's own custom CMK it encrypts the DEK
   * submit the encrypted data + encrypted DEK to S3 where it's stored
 * Decryption:
   * S3 sends the encrypted data and DEK
@@ -504,7 +504,7 @@ You can make any of those run on the EC2 machines you decide.
 
 ### Element of AWS Inspector
 
-**Role**: Create or select a role to allow Amazon Inspector to have read only access to the EC2 instances  
+**Role**: Create or select a role to allow Amazon Inspector to have read only access to the EC2 instances \(DescribeInstances\)  
 **Assessment Targets**: Group of EC2 instances that you want to run an assessment against  
 **AWS agents**: Software agents that must be install on EC2 instances to monitor. Data is sent to Amazon Inspector using a TLS channel. A regular heartbeat is sent from the agent to the inspector asking for instructions. It can autoupdate itself  
 **Assessment Templates**: Define specific configurations as to how an assessment is run on your EC2 instances. An assessment template cannot be modified after creation.
