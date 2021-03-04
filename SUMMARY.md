@@ -374,32 +374,10 @@
 * [XSSI \(Cross-Site Script Inclusion\)](pentesting-web/xssi-cross-site-script-inclusion.md)
 * [XS-Search](pentesting-web/xs-search.md)
 
-## Physical attacks
+## Cloud Security
 
-* [Physical Attacks](physical-attacks/physical-attacks.md)
-* [Escaping from KIOSKs](physical-attacks/escaping-from-gui-applications/README.md)
-  * [Show file extensions](physical-attacks/escaping-from-gui-applications/show-file-extensions.md)
-
-## Reversing
-
-* [Common API used in Malware](reversing/common-api-used-in-malware.md)
-* [Reversing Tools](reversing/reversing-tools/README.md)
-  * [Blobrunner](reversing/reversing-tools/blobrunner.md)
-* [Cryptographic/Compression Algorithms](reversing/cryptographic-algorithms/README.md)
-  * [Unpacking binaries](reversing/cryptographic-algorithms/unpacking-binaries.md)
-* [Word Macros](reversing/word-macros.md)
-
-## Exploiting
-
-* [Linux Exploiting \(Basic\) \(SPA\)](exploiting/linux-exploiting-basic-esp/README.md)
-  * [ROP - Syscall execv](exploiting/linux-exploiting-basic-esp/rop-syscall-execv.md)
-  * [ROP - Leaking LIBC address](exploiting/linux-exploiting-basic-esp/rop-leaking-libc-address.md)
-  * [Bypassing Canary & PIE](exploiting/linux-exploiting-basic-esp/bypassing-canary-and-pie.md)
-  * [Ret2Lib](exploiting/linux-exploiting-basic-esp/ret2lib.md)
-  * [Fusion](exploiting/linux-exploiting-basic-esp/fusion.md)
-* [Exploiting Tools](exploiting/tools/README.md)
-  * [PwnTools](exploiting/tools/pwntools.md)
-* [Windows Exploiting \(Basic Guide - OSCP lvl\)](exploiting/windows-exploiting-basic-guide-oscp-lvl.md)
+* [Cloud security review](cloud-security/cloud-security-review.md)
+* [AWS Security](cloud-security/aws-security.md)
 
 ## Forensics
 
@@ -426,6 +404,33 @@
   * [File System Analysis](forensics/basic-forensics-esp/file-system-analysis.md)
   * [PNG tricks](forensics/basic-forensics-esp/png-tricks.md)
   * [ZIPs tricks](forensics/basic-forensics-esp/zips-tricks.md)
+
+## Physical attacks
+
+* [Physical Attacks](physical-attacks/physical-attacks.md)
+* [Escaping from KIOSKs](physical-attacks/escaping-from-gui-applications/README.md)
+  * [Show file extensions](physical-attacks/escaping-from-gui-applications/show-file-extensions.md)
+
+## Reversing
+
+* [Common API used in Malware](reversing/common-api-used-in-malware.md)
+* [Reversing Tools](reversing/reversing-tools/README.md)
+  * [Blobrunner](reversing/reversing-tools/blobrunner.md)
+* [Cryptographic/Compression Algorithms](reversing/cryptographic-algorithms/README.md)
+  * [Unpacking binaries](reversing/cryptographic-algorithms/unpacking-binaries.md)
+* [Word Macros](reversing/word-macros.md)
+
+## Exploiting
+
+* [Linux Exploiting \(Basic\) \(SPA\)](exploiting/linux-exploiting-basic-esp/README.md)
+  * [ROP - Syscall execv](exploiting/linux-exploiting-basic-esp/rop-syscall-execv.md)
+  * [ROP - Leaking LIBC address](exploiting/linux-exploiting-basic-esp/rop-leaking-libc-address.md)
+  * [Bypassing Canary & PIE](exploiting/linux-exploiting-basic-esp/bypassing-canary-and-pie.md)
+  * [Ret2Lib](exploiting/linux-exploiting-basic-esp/ret2lib.md)
+  * [Fusion](exploiting/linux-exploiting-basic-esp/fusion.md)
+* [Exploiting Tools](exploiting/tools/README.md)
+  * [PwnTools](exploiting/tools/pwntools.md)
+* [Windows Exploiting \(Basic Guide - OSCP lvl\)](exploiting/windows-exploiting-basic-guide-oscp-lvl.md)
 
 ## Crypto
 
@@ -471,7 +476,6 @@
 * [Other Web Tricks](other-web-tricks.md)
 * [Interesting HTTP](interesting-http.md)
 * [Emails Vulnerabilities](emails-vulns.md)
-* [Cloud security review](cloud-security-review.md)
 * [Android Forensics](android-forensics.md)
 * [TR-069](tr-069.md)
 * [6881/udp - Pentesting BitTorrent](6881-udp-pentesting-bittorrent.md)
@@ -483,5 +487,4 @@
 * [Online Platforms with API](online-platforms-with-api.md)
 * [Reset/Forgoten Password Bypass](reset-password.md)
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
-* [AWS Security](aws-security.md)
 

@@ -370,17 +370,17 @@ Logs are saved in an S3 bucket. By default Server Side Encryption is used \(SSE-
 
 ### Log File Naing Convention
 
-![](.gitbook/assets/image%20%28253%29.png)
+![](../.gitbook/assets/image%20%28253%29.png)
 
 ### S3 folder structure
 
-![](.gitbook/assets/image%20%28430%29.png)
+![](../.gitbook/assets/image%20%28430%29.png)
 
 Note that the folders "_AWSLogs_" and "_CloudTrail_" are fixed folder names,
 
 **Digest** files have a similar folders path:
 
-![](.gitbook/assets/image%20%28438%29.png)
+![](../.gitbook/assets/image%20%28438%29.png)
 
 ### Aggregate Logs from Multiple Accounts
 
@@ -410,7 +410,7 @@ Note that in order to allow CloudTrail to send the logs to CloudWatch a **role**
 
 CloudTrail Event History allows you to inspect in a table the logs that have been recorded:
 
-![](.gitbook/assets/image%20%28431%29.png)
+![](../.gitbook/assets/image%20%28431%29.png)
 
 ### Insights
 
@@ -695,9 +695,9 @@ Limitations:
 
 For every network interface that publishes data to the CloudWatch log group, it will use a different log stream. And within each of these streams, there will be the flow log event data that shows the content of the log entries. Each of these **logs captures data during a window of approximately 10 to 15 minutes**.
 
-![](.gitbook/assets/image%20%28432%29.png)
+![](../.gitbook/assets/image%20%28432%29.png)
 
-![](.gitbook/assets/image%20%28433%29.png)
+![](../.gitbook/assets/image%20%28433%29.png)
 
 ### Subnets
 

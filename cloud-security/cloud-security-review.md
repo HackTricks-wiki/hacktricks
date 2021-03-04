@@ -79,16 +79,16 @@ azscan #Run, login before with `az login`
 * Check for a **high number of Global Admin** \(between 2-4 are recommended\). Access it on: [https://portal.azure.com/\#blade/Microsoft\_AAD\_IAM/ActiveDirectoryMenuBlade/Overview](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/Overview)
 * Global admins should have MFA activated. Go to Users and click on Multi-Factor Authentication button.
 
-![](.gitbook/assets/image%20%28281%29.png)
+![](../.gitbook/assets/image%20%28281%29.png)
 
 * Dedicated admin account shouldn't have mailboxes \(they can only have mailboxes if they have Office 365\).
 * Local AD shouldn't be sync with Azure AD if not needed\([https://portal.azure.com/\#blade/Microsoft\_AAD\_IAM/ActiveDirectoryMenuBlade/AzureADConnect](https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/AzureADConnect)\). And if synced Password Hash Sync should be enabled for reliability. In this case it's disabled:
 
-![](.gitbook/assets/image%20%2852%29.png)
+![](../.gitbook/assets/image%20%2852%29.png)
 
 * **Global Administrators** shouldn't be synced from a local AD. Check if Global Administrators emails uses the domain **onmicrosoft.com**. If not, check the source of the user, the source should be Azure Active Directory, if it comes from Windows Server AD, then report it.
 
-![](.gitbook/assets/image%20%2889%29.png)
+![](../.gitbook/assets/image%20%2889%29.png)
 
 * **Standard tier** is recommended instead of free tier \(see the tier being used in _Pricing & Settings_ or in [https://portal.azure.com/\#blade/Microsoft\_Azure\_Security/SecurityMenuBlade/24](https://portal.azure.com/#blade/Microsoft_Azure_Security/SecurityMenuBlade/24)\)
 * **Periodic SQL servers scans**:   _Select the SQL server_ --&gt; _Make sure that 'Advanced data security' is set to 'On'_ --&gt; _Under 'Vulnerability assessment settings', set 'Periodic recurring scans' to 'On', and configure a storage account for storing vulnerability assessment scan results_ --&gt; _Click Save_
