@@ -6,7 +6,7 @@ Note that the shell you set in the `SHELL` variable **must** be **listed inside*
 This incident has been reported`.
 
 ```bash
-python -c 'import pty; pty.spawn("/bin/bash")'
+python3 -c 'import pty; pty.spawn("/bin/bash")'
 (inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset;
 ```
 
