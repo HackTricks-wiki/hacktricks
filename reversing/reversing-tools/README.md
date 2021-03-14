@@ -2,7 +2,7 @@
 
 ## Wasm decompiler
 
-[https://www.pnfsoftware.com/jeb/demowasm](https://www.pnfsoftware.com/jeb/demowasm)
+[https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 
 ## .Net decompiler
 
