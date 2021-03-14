@@ -1,8 +1,17 @@
 # Reversing Tools
 
-## Wasm decompiler
+## Wasm decompiler / Wat compiler
 
-[https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
+Online:
+
+* Use [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) to **decompile** from wasm \(binary\) to wat \(clear text\)
+* Use [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) to **compile** from wat to wasm
+* you can also try to use [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) to decompile
+
+Software:
+
+* [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
+* [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
 ## .Net decompiler
 
