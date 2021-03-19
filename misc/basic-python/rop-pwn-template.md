@@ -43,7 +43,7 @@ if GDB and not REMOTETTCP and not REMOTESSH:
 ####################
 #### Find offset ###
 ####################
-OFFSET = ""#"A"*72
+OFFSET = b""#b"A"*72
 if OFFSET == "":
     gdb.attach(p.pid, "c") #Attach and continue
     payload = cyclic(1000)
