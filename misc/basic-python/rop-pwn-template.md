@@ -103,7 +103,7 @@ if libc == "":
 #################################
 ### GET SHELL with known LIBC ###
 #################################
-BINSH = next(libc.search("/bin/sh")) #Verify with find /bin/sh
+BINSH = next(libc.search(b"/bin/sh")) #Verify with find /bin/sh
 SYSTEM = libc.sym["system"]
 EXIT = libc.sym["exit"]
 
