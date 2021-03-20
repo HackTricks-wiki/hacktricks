@@ -15,7 +15,7 @@ GDB = False
 
 LOCAL_BIN = "./vuln"
 REMOTE_BIN = "~/vuln" #For ssh
-LIBC = "" #ELF("libc.so.6") #Set library path when know it
+LIBC = "" #ELF("/lib/x86_64-linux-gnu/libc.so.6") #Set library path when know it
 
 if LOCAL:
     P = process(LOCAL_BIN) # start the vuln binary
