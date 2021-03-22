@@ -424,8 +424,10 @@
 ## Exploiting
 
 * [Linux Exploiting \(Basic\) \(SPA\)](exploiting/linux-exploiting-basic-esp/README.md)
+  * [Format String Template](exploiting/linux-exploiting-basic-esp/format-string-template.md)
   * [ROP - Syscall execv](exploiting/linux-exploiting-basic-esp/rop-syscall-execv.md)
   * [ROP - Leaking LIBC address](exploiting/linux-exploiting-basic-esp/rop-leaking-libc-address.md)
+  * [ROP-PWN template](exploiting/linux-exploiting-basic-esp/rop-pwn-template.md)
   * [Bypassing Canary & PIE](exploiting/linux-exploiting-basic-esp/bypassing-canary-and-pie.md)
   * [Ret2Lib](exploiting/linux-exploiting-basic-esp/ret2lib.md)
   * [Fusion](exploiting/linux-exploiting-basic-esp/fusion.md)
@@ -462,7 +464,6 @@
   * [Magic Methods](misc/basic-python/magic-methods.md)
   * [Web Requests](misc/basic-python/web-requests.md)
   * [Bruteforce hash \(few chars\)](misc/basic-python/bruteforce-hash-few-chars.md)
-  * [ROP-PWN template](misc/basic-python/rop-pwn-template.md)
 * [Other Big References](misc/references.md)
 
 ## TODO
