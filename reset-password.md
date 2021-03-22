@@ -13,3 +13,5 @@ Example from [https://medium.com/@abhishake100/password-reset-poisoning-to-ato-a
 
 In other occasions you can manage to obtain the **same** **results** modifying the domain used in the **Referer header like in** [**here**](https://medium.com/bugbountywriteup/fun-with-header-and-forget-password-without-that-nasty-twist-cbf45e5cc8db)**.**
 
+Or even adding the header **X-Forwarded-Host** you can be able to steal the reset password token from other accounts \(like [here](https://infosecwriteups.com/password-reset-token-leak-via-x-forwarded-host-4ed3e33dca31)\).
+
