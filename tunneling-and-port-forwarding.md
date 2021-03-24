@@ -132,6 +132,13 @@ You need to use the **same version for client and server**
 #And now you can use proxychains with port 1080 (default)
 ```
 
+### Port forwarding
+
+```bash
+./chisel_1.7.6_linux_amd64 server -p 12312 --reverse
+./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505
+```
+
 ## Rpivot
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
