@@ -276,6 +276,7 @@
 * [3306 - Pentesting Mysql](pentesting/pentesting-mysql.md)
 * [3389 - Pentesting RDP](pentesting/pentesting-rdp.md)
 * [3632 - Pentesting distcc](pentesting/3632-pentesting-distcc.md)
+* [3690 - Pentesting Subversion \(svn server\)](pentesting/3690-pentesting-subversion-svn-server.md)
 * [4369 - Pentesting Erlang Port Mapper Daemon \(epmd\)](pentesting/4369-pentesting-erlang-port-mapper-daemon-epmd.md)
 * [5000 - Pentesting Docker Registry](pentesting/5000-pentesting-docker-registry.md)
 * [5353/UDP Multicast DNS \(mDNS\)](pentesting/5353-udp-multicast-dns-mdns.md)
