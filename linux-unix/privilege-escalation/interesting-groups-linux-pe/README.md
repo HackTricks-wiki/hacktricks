@@ -192,3 +192,8 @@ If you have write permissions over the docker socket read [**this post about how
 Usually **members** of the group **`adm`** have permissions to **read log** files located inside _/var/log/_.  
 Therefore, if you have compromised a user inside this group you should definitely take a **look to the logs**.
 
+## Auth group
+
+Inside OpenBSD the **auth** group usually can write in the folders _**/etc/skey**_ and _**/var/db/yubikey**_ if they are used.  
+These permissions may be abused with the following exploit to **escalate privileges** to root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+
