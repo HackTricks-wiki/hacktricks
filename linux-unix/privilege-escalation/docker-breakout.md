@@ -1,5 +1,20 @@
 # Docker Breakout
 
+## Runc exploit (CVE-2019-5736)
+
+In case you have the `docker exec` permission within the container as root, you can escape the container by getting the go implementation of CVE-2019-5736 from [here](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go).
+Change the payload accordingly and build the main.go with `go build main.go`. The resulting binary should be placed in the docker container for execution.
+
+Upon execution, as soon as it displays `[+] Overwritten /bin/sh successfully` you need to execute the following from the host machine:
+
+`docker exec -it <container-name> /bin/sh`
+
+This will trigger the payload which is present in the main.go file.
+
+For more information:
+https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html
+
+
 ## Mounted docker socket
 
 If somehow you find that the **docker socket is mounted** inside the docker container, you will be able to escape from it.  
