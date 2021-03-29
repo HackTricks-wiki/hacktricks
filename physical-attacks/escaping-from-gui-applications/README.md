@@ -98,6 +98,13 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 * CTRL+O – Open File 
 * CTRL+S – Save CTRL+N – New RDP / Citrix
 
+### Swipes
+
+* Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
+* Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
+* Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
+* Swipe up from the bottom to show  the taskbar in a full screen app.
+
 ### Internet Explorer Tricks
 
 #### 'Image Toolbar'
