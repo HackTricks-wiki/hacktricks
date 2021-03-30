@@ -18,6 +18,20 @@ For this purpose you can use any of the following tools. Note that these tolls w
 * \*\*\*\*[**dnstwist**](https://github.com/elceef/dnstwist)\*\*\*\*
 * [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)\*\*\*\*
 
+### Bitflipping
+
+In the world of computing, everything is stored in bits \(zeros and ones\) in memory behind the scenes.  
+This applies to domains too. For example, _windows.com_ becomes _01110111..._ in the volatile memory of your computing device.  
+However, what if one of these bits got automatically flipped due to a solar flare, cosmic rays, or a hardware error? That is one of the 0's becomes a 1 and vice versa.  
+Applying this concept to DNS request, it's possible that the **domain requested** that arrives to the DNS server **isn't the same as the domain initially requested.**
+
+For example a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._  
+**Attackers may register as many bit-flipping domains as possible related to the victim in order to redirect legitimate users to their infrastructure**.
+
+For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+
+**All possible bit-flipping domain names should be also monitored.**
+
 ### Basic checks
 
 Once you have a list of potential suspicions domain names you should **check**  them \(mainly the ports HTTP and HTTPS\) to **see if they are using some login form similar** to someone of the victim's domain.  
