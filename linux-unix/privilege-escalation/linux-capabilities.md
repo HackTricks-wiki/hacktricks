@@ -1003,7 +1003,9 @@ void dump_handle(const struct my_file_handle * h) {
       fprintf(stderr, ", ");
   }
   fprintf(stderr, "};\n");
-} {
+} 
+int find_handle(int bfd, const char *path, const struct my_file_handle *ih, struct my_file_handle *oh)
+{
   int fd;
   uint32_t ino = 0;
   struct my_file_handle outh = {
