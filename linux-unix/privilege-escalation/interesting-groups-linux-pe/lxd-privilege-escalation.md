@@ -13,11 +13,10 @@ You can install in your machine this distro builder: [https://github.com/lxc/dis
 sudo apt update
 sudo apt install -y golang-go debootstrap rsync gpg squashfs-tools
 #Clone repo
-go get -d -v github.com/lxc/distrobuilder
+sudo go get -d -v github.com/lxc/distrobuilder
 #Make distrobuilder
 cd $HOME/go/src/github.com/lxc/distrobuilder
 make
-cd
 #Prepare the creation of alpine
 mkdir -p $HOME/ContainerImages/alpine/
 cd $HOME/ContainerImages/alpine/
