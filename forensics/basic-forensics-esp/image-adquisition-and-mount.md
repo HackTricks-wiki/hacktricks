@@ -48,6 +48,10 @@ ewfacquire /dev/sdb
 
 ## Mount
 
+### Several types
+
+In **Windows** you can try to use the free version of Arsenal Image Mounter \([https://arsenalrecon.com/downloads/](https://arsenalrecon.com/downloads/)\) to **mount the forensics image**.
+
 ### Raw
 
 ```bash
