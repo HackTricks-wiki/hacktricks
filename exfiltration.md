@@ -290,3 +290,7 @@ wine exe2bat.exe nc.exe nc.txt
 
 Now we just copy-paste the text into our windows-shell. And it will automatically create a file called nc.exe
 
+## DNS
+
+[https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
+
