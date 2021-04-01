@@ -234,6 +234,10 @@ wfuzz -c -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-2
 vhostbrute.py --url="example.com" --remoteip="10.1.1.15" --base="www.example.com" --vhosts="vhosts_full.list" 
 ```
 
+{% hint style="info" %}
+With this technique you may even be able to access internal/hidden endpoints.
+{% endhint %}
+
 ### CORS Brute Force
 
 Sometimes you will find pages that only return the header _**Access-Control-Allow-Origin**_ when a valid domain/subdomain is set in the _**Origin**_ header. In these scenarios, you can abuse this behavior to **discover** new **subdomains**.
