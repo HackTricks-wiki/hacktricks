@@ -272,6 +272,7 @@
 * [2049 - Pentesting NFS Service](pentesting/nfs-service-pentesting.md)
 * [2301,2381 - Pentesting Compaq/HP Insight Manager](pentesting/pentesting-compaq-hp-insight-manager.md)
 * [2375, 2376 Pentesting Docker](pentesting/2375-pentesting-docker.md)
+* [3128 - Pentesting Squid](pentesting/3128-pentesting-squid.md)
 * [3260 - Pentesting ISCSI](pentesting/3260-pentesting-iscsi.md)
 * [3299 - Pentesting SAPRouter](pentesting/3299-pentesting-saprouter.md)
 * [3306 - Pentesting Mysql](pentesting/pentesting-mysql.md)
