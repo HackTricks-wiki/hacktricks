@@ -8,6 +8,7 @@
 
 ### **Auto-generated shells**
 
+* \*\*\*\*[**https://reverse-shell.sh/**](https://reverse-shell.sh/)\*\*\*\*
 * \*\*\*\*[**https://www.revshells.com/**](https://www.revshells.com/)\*\*\*\*
 * \*\*\*\*[**https://github.com/ShutdownRepo/shellerator**](https://github.com/ShutdownRepo/shellerator)\*\*\*\*
 * \*\*\*\*[**https://github.com/0x00-0x00/ShellPop**](https://github.com/0x00-0x00/ShellPop)\*\*\*\*
