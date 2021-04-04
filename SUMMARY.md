@@ -1,6 +1,7 @@
 # Table of contents
 
 * [HackTricks](README.md)
+* [Getting Started in Hacking](getting-started-in-hacking.md)
 * [Pentesting Methodology](pentesting-methodology.md)
 * [External Recon Methodology](external-recon-methodology.md)
 * [Phishing Methodology](phishing-methodology/README.md)
