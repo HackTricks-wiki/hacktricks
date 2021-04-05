@@ -184,6 +184,7 @@
 * [69/UDP TFTP/Bittorrent-tracker](pentesting/69-udp-tftp.md)
 * [79 - Pentesting Finger](pentesting/pentesting-finger.md)
 * [80,443 - Pentesting Web Methodology](pentesting/pentesting-web/README.md)
+  * [Moodle](pentesting/pentesting-web/moodle.md)
   * [Golang](pentesting/pentesting-web/golang.md)
   * [Uncovering CloudFlare](pentesting/pentesting-web/uncovering-cloudflare.md)
   * [Laravel](pentesting/pentesting-web/laravel.md)
