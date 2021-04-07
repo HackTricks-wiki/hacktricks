@@ -493,6 +493,6 @@
     * [Pickle Rick](ctf-write-ups/try-hack-me/pickle-rick.md)
 * [1911 - Pentesting fox](1911-pentesting-fox.md)
 * [Online Platforms with API](online-platforms-with-api.md)
-* [Reset/Forgoten Password Bypass](reset-password.md)
+* [Reset/Forgotten Password Bypass](reset-password.md)
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
 

