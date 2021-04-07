@@ -70,7 +70,7 @@ If everything goes as expected, the tool will indicate the **primary key** that 
 The resulting hex is the final key used to encrypt the databases which can be decrypted with:
 
 ```bash
-sqlite -k <Obtained Key> config.dbx ".backup bbdd.db"
+sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
 
 The **`config.dbx`** database contains:
