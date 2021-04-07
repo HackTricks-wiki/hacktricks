@@ -14,7 +14,7 @@ And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` 
 * Report generation time
 * Size of the HD of the OS
 
-Once you have found the CID it's recommended to **search files containing this ID**. You may be able to find files with the name: _**&lt;CID&gt;.ini**_ and _**&lt;CID&gt;.dat**_ that may contain interesting information like the names of files managed by OneDrive.
+Once you have found the CID it's recommended to **search files containing this ID**. You may be able to find files with the name: _**&lt;CID&gt;.ini**_ and _**&lt;CID&gt;.dat**_ that may contain interesting information like the names of files syncronized with OneDrive.
 
 ## Google Drive
 
@@ -78,7 +78,7 @@ The **`config.dbx`** database contains:
 * **Email**: The email of the user
 * **usernamedisplayname**: The name of the user
 * **dropbox\_path**: Path where the dropbox folder is located
-* **Host\_id:Hash** used to authenticate to the cloud. This can only be revoked from the web.
+* **Host\_id: Hash** used to authenticate to the cloud. This can only be revoked from the web.
 * **Root\_ns**: User identifier
 
 The **`filecache.db`** database contains information about all the files and folders synchronized with Dropbox. The table `File_journal` is the one with more useful information:
