@@ -7,7 +7,7 @@ It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INF
 
 Both attributes have 4 timestamps: **Modification**, **access**, **creation**, and **MFT registry modification** \(MACE or MACB\).
 
-**Windows explorer** and other tools show the information from `$`**`STANDARD_INFORMATION`**.
+**Windows explorer** and other tools show the information from **`$STANDARD_INFORMATION`**.
 
 ### TimeStomp - Anti-forensic Tool
 
