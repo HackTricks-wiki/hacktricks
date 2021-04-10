@@ -398,6 +398,7 @@
   * [Wireshark tricks](forensics/pcaps-analysis/wireshark-tricks.md)
 * [Volatility - CheatSheet](forensics/volatility-examples.md)
 * [Basic Forensics \(ESP\)](forensics/basic-forensics-esp/README.md)
+  * [Windows Forensics](forensics/basic-forensics-esp/windows-forensics.md)
   * [Anti-Forensic Techniques](forensics/basic-forensics-esp/anti-forensic-techniques.md)
   * [Cloud Storage](forensics/basic-forensics-esp/cloud-storage.md)
   * [Image Adquisition & Mount](forensics/basic-forensics-esp/image-adquisition-and-mount.md)
