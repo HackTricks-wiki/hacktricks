@@ -6,8 +6,8 @@
 
 ### Binwalk <a id="binwalk"></a>
 
-Binwalk is a tool for searching binary files like images and audio files for embedded files and data.  
-It can be installed with `apt` however the [source](https://github.com/ReFirmLabs/binwalk) can be found on github.  
+Binwalk is a tool for searching binary files, like images and audio files, for embedded hidden files and data.  
+It can be installed with `apt`, and the [source](https://github.com/ReFirmLabs/binwalk) can be found on Github.  
 **Useful commands**:  
 `binwalk file` : Displays the embedded data in the given file  
 `binwalk -e file` : Displays and extracts the data from the given file  
@@ -15,14 +15,14 @@ It can be installed with `apt` however the [source](https://github.com/ReFirmLab
 
 ### Foremost <a id="foremost"></a>
 
-Foremost is a program that recovers files based on their headers , footers and internal data structures , I find it useful when dealing with png images. You can select the files that foremost extract by changing the config file in **/etc/foremost.conf.**  
-It can be installed with `apt` however the [source](https://github.com/korczis/foremost) can be found on github.  
+Foremost is a program that recovers files based on their headers, footers, and internal data structures. I find it especially useful when dealing with png images. You can select the files that Foremost will extract by changing the config file in **/etc/foremost.conf.**  
+It can be installed with `apt`, and the [source](https://github.com/korczis/foremost) can be found on Github.  
 **Useful commands:**  
  `foremost -i file` : extracts data from the given file.
 
 ### Exiftool <a id="exiftool"></a>
 
-Sometimes important stuff is hidden in the metadata of the image or the file , exiftool can be very helpful to view the metadata of the files.  
+Sometimes, important stuff is hidden in the metadata of an image or file; exiftool can be very helpful to view file metadata.  
 You can get it from [here](https://www.sno.phy.queensu.ca/~phil/exiftool/)  
 **Useful commands:**  
 `exiftool file` : shows the metadata of the given file
@@ -30,7 +30,7 @@ You can get it from [here](https://www.sno.phy.queensu.ca/~phil/exiftool/)
 ### Exiv2 <a id="exiv2"></a>
 
 A tool similar to exiftool.  
-It can be installed with `apt` however the [source](https://github.com/Exiv2/exiv2) can be found on github.  
+It can be installed with `apt`, and the [source](https://github.com/Exiv2/exiv2) can be found on Github.  
 [Official website](http://www.exiv2.org/)  
 **Useful commands:**  
  `exiv2 file` : shows the metadata of the given file
@@ -43,19 +43,19 @@ Check out what kind of file you have
 
 Extract strings from the file.  
 Useful commands:  
-`strings -n 6 file`: Extact the strings with min length of 6  
-`strings -n 6 file | head -n 20`: Extact first 20 strings with min length of 6  
-`strings -n 6 file | tail -n 20`: Extact last 20 strings with min length of 6  
-`strings -e s -n 6 file`: Extact 7bit strings  
-`strings -e S -n 6 file`: Extact 8bit strings   
-`strings -e l -n 6 file`: Extact 16bit strings \(little-endian\)  
-`strings -e b -n 6 file`: Extact 16bit strings \(big-endian\)  
-`strings -e L -n 6 file`: Extact 32bit strings \(little-endian\)  
-`strings -e B -n 6 file`: Extact 32bit strings \(big-endian\)
+`strings -n 6 file`: Extract the strings with min length of 6  
+`strings -n 6 file | head -n 20`: Extract first 20 strings with min length of 6  
+`strings -n 6 file | tail -n 20`: Extract last 20 strings with min length of 6  
+`strings -e s -n 6 file`: Extract 7bit strings  
+`strings -e S -n 6 file`: Extract 8bit strings   
+`strings -e l -n 6 file`: Extract 16bit strings \(little-endian\)  
+`strings -e b -n 6 file`: Extract 16bit strings \(big-endian\)  
+`strings -e L -n 6 file`: Extract 32bit strings \(little-endian\)  
+`strings -e B -n 6 file`: Extract 32bit strings \(big-endian\)
 
 ### cmp - Comparison
 
-If you have some **modified** image/audio/video, check if you can **find the exact original one** from the internet and **compare both** files:
+If you have some **modified** image/audio/video, check if you can **find the exact original one** on the internet, then **compare both** files with:
 
 ```text
 cmp original.jpg stego.jpg -b -l
@@ -65,20 +65,20 @@ cmp original.jpg stego.jpg -b -l
 
 ### Hidden data in spaces
 
-If you find that a **text line** is **bigger** than it should, then some **hidden information** could by included inside the **spaces** using invisible characters.󐁈󐁥󐁬󐁬󐁯󐀠󐁴󐁨  
-To **extract** the **data** you can use: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+If you find that a **text line** is **bigger** than it should be, then some **hidden information** could be included inside the **spaces** using invisible characters.󐁈󐁥󐁬󐁬󐁯󐀠󐁴󐁨  
+To **extract** the **data**, you can use: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
 
 ## Extracting data from images
 
 ### identify
 
- [GraphicMagick](https://imagemagick.org/script/download.php) tool to check what kind of image a file is. Checks also if image is corrupted.
+ [GraphicMagick](https://imagemagick.org/script/download.php) tool to check what kind of image a file is. Also checks if the image is corrupted.
 
 ```text
 ./magick identify -verbose stego.jpg
 ```
 
-If the image is damage, you may be able to restore it just adding a metadata comment to it \(it's badly damaged this won't work\): 
+If the image is damaged, you may be able to restore it by simply adding a metadata comment to it \(if it's very badly damaged this won't work\): 
 
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
@@ -86,10 +86,10 @@ If the image is damage, you may be able to restore it just adding a metadata com
 
 ### Steghide \[JPEG, BMP, WAV, AU\] <a id="steghide"></a>
 
-Steghide is a steganography program that hides data in various kinds of image and audio files , only supports these file formats : `JPEG, BMP, WAV and AU`. but it’s also useful for extracting embedded and encrypted data from other files.  
- It can be installed with `apt` however the [source](https://github.com/StefanoDeVuono/steghide) can be found on github.  
+Steghide is a steganography program that hides data in various kinds of image and audio files. It supports the following file formats : `JPEG, BMP, WAV and AU`. It’s also useful for extracting embedded and encrypted data from other files.  
+ It can be installed with `apt`, and the [source](https://github.com/StefanoDeVuono/steghide) can be found on Github.  
 **Useful commands:**  
-`steghide info file` : displays info about a file whether it has embedded data or not.  
+`steghide info file` : displays info about whether a file has embedded data or not.  
 `steghide extract -sf file [--passphrase password]` : extracts embedded data from a file \[using a password\]
 
 You can also extract content from steghide using the web: [https://futureboy.us/stegano/decinput.html](https://futureboy.us/stegano/decinput.html)
@@ -99,43 +99,43 @@ You can also extract content from steghide using the web: [https://futureboy.us/
 ### Zsteg \[PNG, BMP\] <a id="zsteg"></a>
 
 zsteg is a tool that can detect hidden data in png and bmp files.  
-Install it : `gem install zsteg` , The source can be found on [github](https://github.com/zed-0xff/zsteg)  
+To install it : `gem install zsteg`. The source can also be found on [Github](https://github.com/zed-0xff/zsteg)  
 **Useful commands:**  
- `zsteg -a file` : Runs all the methods on the given file  
- `zsteg -E file` : Extracts data from the given payload \(example : zsteg -E b4,bgr,msb,xy name.png\)
+ `zsteg -a file` : Runs every detection method on the given file  
+ `zsteg -E file` : Extracts data with the given payload \(example : zsteg -E b4,bgr,msb,xy name.png\)
 
 ### stegoVeritas JPG, PNG, GIF, TIFF, BMP 
 
-A wide variety of simple and advanced checks. Check out `stegoveritas.py -h`. Checks metadata, creates many transformed images and saves them to a directory, Brute forces LSB, ...  
- `stegoveritas.py stego.jpg` to run all checks
+Capable of a wide variety of simple and advanced tricks, this tool can check file metadata, create transformed images, brute force LSB, and more. Check out `stegoveritas.py -h` to read about its full capabilities.
+Execute `stegoveritas.py stego.jpg` to run all checks.
 
 ### Stegsolve
 
-Sometimes there is a message or a text hidden in the image itself and in order to view it you need to apply some color filters or play with the color levels. You can do it with GIMP or Photoshop or any other image editing software but stegsolve made it easier. it’s a small java tool that applies many color filters on images. Personally I find it very useful.  
-You can get it from [github](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)  
-Just open the image with this tool and clinck on the  `<`  `>` buttons.
+Sometimes there is a message or a text hidden in the image itself that, in order to view it, must have color filters applied, or some color levels changed. Although you can do that with something like GIMP or Photoshop, Stegsolve makes it easier. It's a small Java tool that applies many useful color filters on images; In CTF challenges, Stegsolve is often a real timesaver.  
+You can get it from [Github](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)  
+To use it, just open the image and click on the `<` `>` buttons.
 
 ### FFT
 
-Find hidden content using Fast Fourier T  
-Check it in:
+To find hidden content using Fast Fourier T:
 
 * [http://bigwww.epfl.ch/demo/ip/demos/FFT/](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 * [https://www.ejectamenta.com/Fourifier-fullscreen/](https://www.ejectamenta.com/Fourifier-fullscreen/)
-* [https://github.com/0xcomposure/FFTStegPic](https://github.com/0xcomposure/FFTStegPic) `pip3 install opencv-python`
+* [https://github.com/0xcomposure/FFTStegPic](https://github.com/0xcomposure/FFTStegPic) 
+* `pip3 install opencv-python`
 
 ### Stegpy \[PNG, BMP, GIF, WebP, WAV\]
 
-A program for encoding information in image and audio files through steganography. It can store it in plain and encrypted.  
-Find it in [github](https://github.com/dhsdshdhk/stegpy).
+A program for encoding information in image and audio files through steganography. It can store the data as either plaintext or encrypted.  
+Find it on [Github](https://github.com/dhsdshdhk/stegpy).
 
 ### Pngcheck
 
-Get details on a PNG file \(or find out is is actually something else\).  
-`apt-get isntall pngcheck`: Install the tool  
-`pngcheck stego.png` : Obtain info
+Get details on a PNG file \(or even find out it's actually something else!\).  
+`apt-get install pngcheck`: Install the tool  
+`pngcheck stego.png` : Obtain info about the PNG
 
-### Other tools
+### Some other image tools worth mentioning
 
 * [http://magiceye.ecksdee.co.uk/](http://magiceye.ecksdee.co.uk/)
 * [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -148,27 +148,27 @@ Get details on a PNG file \(or find out is is actually something else\).
 
 ### ffmpeg
 
-ffmpeg can be used to check integrity of audio files and let it report infos and errors.  
+ffmpeg can be used to check the integrity of audio files, reporting various information about the file, as well as any errors it finds.  
  `ffmpeg -v info -i stego.mp3 -f null -`
 
 ### Wavsteg \[WAV\] <a id="wavsteg"></a>
 
-WavSteg is a python3 tool that can hide data \(using least significant bit\) in wav files and can also extract data from wav files.  
-You can get it from [github](https://github.com/ragibson/Steganography#WavSteg)  
+WavSteg is a Python3 tool that can hide data, using least significant bit, in wav files. It can also search for, and extract, data from wav files.  
+You can get it from [Github](https://github.com/ragibson/Steganography#WavSteg)  
 Useful commands:  
- `python3 WavSteg.py -r -b 1 -s soundfile -o outputfile` : Extracts to output \(taking only 1 lsb\)  
- `python3 WavSteg.py -r -b 2 -s soundfile -o outputfile` : Extracts to output \(taking only 2 lsb\)
+ `python3 WavSteg.py -r -b 1 -s soundfile -o outputfile` : Extracts to an output file \(taking only 1 lsb\)  
+ `python3 WavSteg.py -r -b 2 -s soundfile -o outputfile` : Extracts to an output file \(taking only 2 lsb\)
 
 ### Deepsound
 
-Hide information encrypted using AES-265  
+Hide, and check for, information encrypted with AES-265 in sound files. 
 Download from [the oficial page](http://jpinsoft.net/deepsound/download.aspx).  
-Run it and open the file and check if DeepSound finds any data hidden, in that case you will need to provide the password.
+To search for hidden info, simply run the program and open the sound file. If DeepSound finds any data hidden, you'll need to provide the password to unlock it.
 
 ### Sonic visualizer <a id="sonic-visualizer"></a>
 
-Sonic visualizer is a tool for viewing and analyzing the contents of audio files, however it can be helpful when dealing with audio steganography. You can reveal hidden shapes in audio files.   
-You should always check the spectrogram of the audio.  
+Sonic visualizer is a tool for viewing and analyzing the contents of audio files. It can be very helpful when facing audio steganography challenges; you can reveal hidden shapes in audio files that many other tools won't detect.  
+If you're stuck, always check the spectrogram of the audio.
  [Offical Website](https://www.sonicvisualiser.org/)
 
 ### DTMF Tones - Dial tones
@@ -180,15 +180,15 @@ You should always check the spectrogram of the audio.
 
 ### Binary length SQRT - QR Code
 
-If you receibe a length of a binary data whose SQRT is an entire number, think that it can be some kind of QR code:
+If you receive binary data with an SQRT length of an entire number, it could be some kind of QR code:
 
 ```text
 import math
 math.sqrt(2500) #50
 ```
 
-From "1"s and "0"s to image: [ https://www.dcode.fr/binary-image](%20https://www.dcode.fr/binary-image)  
-Read a QR code: [https://online-barcode-reader.inliteresearch.com/](https://online-barcode-reader.inliteresearch.com/)
+To convert binary "1"s and "0"s to a proper image: [ https://www.dcode.fr/binary-image](%20https://www.dcode.fr/binary-image)  
+To read a QR code: [https://online-barcode-reader.inliteresearch.com/](https://online-barcode-reader.inliteresearch.com/)
 
 ### Braile
 
