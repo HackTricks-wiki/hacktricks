@@ -1,6 +1,6 @@
 # Stego Tricks
 
-**Some info was taken from** [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/) **and from** [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)\*\*\*\*
+**Some info was taken from** [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/) **and from** [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
 
 ## Extracting data from all files
 
@@ -18,7 +18,7 @@ It can be installed with `apt`, and the [source](https://github.com/ReFirmLabs/b
 Foremost is a program that recovers files based on their headers, footers, and internal data structures. I find it especially useful when dealing with png images. You can select the files that Foremost will extract by changing the config file in **/etc/foremost.conf.**  
 It can be installed with `apt`, and the [source](https://github.com/korczis/foremost) can be found on Github.  
 **Useful commands:**  
- `foremost -i file` : extracts data from the given file.
+`foremost -i file` : extracts data from the given file.
 
 ### Exiftool <a id="exiftool"></a>
 
@@ -33,7 +33,7 @@ A tool similar to exiftool.
 It can be installed with `apt`, and the [source](https://github.com/Exiv2/exiv2) can be found on Github.  
 [Official website](http://www.exiv2.org/)  
 **Useful commands:**  
- `exiv2 file` : shows the metadata of the given file
+`exiv2 file` : shows the metadata of the given file
 
 ### File
 
@@ -47,7 +47,7 @@ Useful commands:
 `strings -n 6 file | head -n 20`: Extract first 20 strings with min length of 6  
 `strings -n 6 file | tail -n 20`: Extract last 20 strings with min length of 6  
 `strings -e s -n 6 file`: Extract 7bit strings  
-`strings -e S -n 6 file`: Extract 8bit strings   
+`strings -e S -n 6 file`: Extract 8bit strings  
 `strings -e l -n 6 file`: Extract 16bit strings \(little-endian\)  
 `strings -e b -n 6 file`: Extract 16bit strings \(big-endian\)  
 `strings -e L -n 6 file`: Extract 32bit strings \(little-endian\)  
@@ -72,13 +72,13 @@ To **extract** the **data**, you can use: [https://www.irongeek.com/i.php?page=s
 
 ### identify
 
- [GraphicMagick](https://imagemagick.org/script/download.php) tool to check what kind of image a file is. Also checks if the image is corrupted.
+[GraphicMagick](https://imagemagick.org/script/download.php) tool to check what kind of image a file is. Also checks if the image is corrupted.
 
 ```text
 ./magick identify -verbose stego.jpg
 ```
 
-If the image is damaged, you may be able to restore it by simply adding a metadata comment to it \(if it's very badly damaged this won't work\): 
+If the image is damaged, you may be able to restore it by simply adding a metadata comment to it \(if it's very badly damaged this won't work\):
 
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
@@ -87,7 +87,7 @@ If the image is damaged, you may be able to restore it by simply adding a metada
 ### Steghide \[JPEG, BMP, WAV, AU\] <a id="steghide"></a>
 
 Steghide is a steganography program that hides data in various kinds of image and audio files. It supports the following file formats : `JPEG, BMP, WAV and AU`. It’s also useful for extracting embedded and encrypted data from other files.  
- It can be installed with `apt`, and the [source](https://github.com/StefanoDeVuono/steghide) can be found on Github.  
+It can be installed with `apt`, and the [source](https://github.com/StefanoDeVuono/steghide) can be found on Github.  
 **Useful commands:**  
 `steghide info file` : displays info about whether a file has embedded data or not.  
 `steghide extract -sf file [--passphrase password]` : extracts embedded data from a file \[using a password\]
@@ -101,13 +101,12 @@ You can also extract content from steghide using the web: [https://futureboy.us/
 zsteg is a tool that can detect hidden data in png and bmp files.  
 To install it : `gem install zsteg`. The source can also be found on [Github](https://github.com/zed-0xff/zsteg)  
 **Useful commands:**  
- `zsteg -a file` : Runs every detection method on the given file  
- `zsteg -E file` : Extracts data with the given payload \(example : zsteg -E b4,bgr,msb,xy name.png\)
+`zsteg -a file` : Runs every detection method on the given file  
+`zsteg -E file` : Extracts data with the given payload \(example : zsteg -E b4,bgr,msb,xy name.png\)
 
-### stegoVeritas JPG, PNG, GIF, TIFF, BMP 
+### stegoVeritas JPG, PNG, GIF, TIFF, BMP
 
-Capable of a wide variety of simple and advanced tricks, this tool can check file metadata, create transformed images, brute force LSB, and more. Check out `stegoveritas.py -h` to read about its full capabilities.
-Execute `stegoveritas.py stego.jpg` to run all checks.
+Capable of a wide variety of simple and advanced tricks, this tool can check file metadata, create transformed images, brute force LSB, and more. Check out `stegoveritas.py -h` to read about its full capabilities. Execute `stegoveritas.py stego.jpg` to run all checks.
 
 ### Stegsolve
 
@@ -149,27 +148,25 @@ Get details on a PNG file \(or even find out it's actually something else!\).
 ### ffmpeg
 
 ffmpeg can be used to check the integrity of audio files, reporting various information about the file, as well as any errors it finds.  
- `ffmpeg -v info -i stego.mp3 -f null -`
+`ffmpeg -v info -i stego.mp3 -f null -`
 
 ### Wavsteg \[WAV\] <a id="wavsteg"></a>
 
 WavSteg is a Python3 tool that can hide data, using least significant bit, in wav files. It can also search for, and extract, data from wav files.  
 You can get it from [Github](https://github.com/ragibson/Steganography#WavSteg)  
 Useful commands:  
- `python3 WavSteg.py -r -b 1 -s soundfile -o outputfile` : Extracts to an output file \(taking only 1 lsb\)  
- `python3 WavSteg.py -r -b 2 -s soundfile -o outputfile` : Extracts to an output file \(taking only 2 lsb\)
+`python3 WavSteg.py -r -b 1 -s soundfile -o outputfile` : Extracts to an output file \(taking only 1 lsb\)  
+`python3 WavSteg.py -r -b 2 -s soundfile -o outputfile` : Extracts to an output file \(taking only 2 lsb\)
 
 ### Deepsound
 
-Hide, and check for, information encrypted with AES-265 in sound files. 
-Download from [the oficial page](http://jpinsoft.net/deepsound/download.aspx).  
+Hide, and check for, information encrypted with AES-265 in sound files. Download from [the oficial page](http://jpinsoft.net/deepsound/download.aspx).  
 To search for hidden info, simply run the program and open the sound file. If DeepSound finds any data hidden, you'll need to provide the password to unlock it.
 
 ### Sonic visualizer <a id="sonic-visualizer"></a>
 
 Sonic visualizer is a tool for viewing and analyzing the contents of audio files. It can be very helpful when facing audio steganography challenges; you can reveal hidden shapes in audio files that many other tools won't detect.  
-If you're stuck, always check the spectrogram of the audio.
- [Offical Website](https://www.sonicvisualiser.org/)
+If you're stuck, always check the spectrogram of the audio. [Offical Website](https://www.sonicvisualiser.org/)
 
 ### DTMF Tones - Dial tones
 
@@ -187,14 +184,10 @@ import math
 math.sqrt(2500) #50
 ```
 
-To convert binary "1"s and "0"s to a proper image: [ https://www.dcode.fr/binary-image](%20https://www.dcode.fr/binary-image)  
+To convert binary "1"s and "0"s to a proper image: [ https://www.dcode.fr/binary-image](https://github.com/carlospolop/hacktricks/tree/32fa51552498a17d266ff03e62dfd1e2a61dcd10/binary-image/README.md)  
 To read a QR code: [https://online-barcode-reader.inliteresearch.com/](https://online-barcode-reader.inliteresearch.com/)
 
 ### Braile
 
 [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator%29)
-
-
-
-
 
