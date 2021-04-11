@@ -60,20 +60,12 @@ Build an Alpine image and start it using the flag `security.privileged=true`, fo
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
-./build-alpine -a i686
-
-# If you got error
-ERROR: unsatisfiable constraints:
-  alpine-base (missing):
-    required by: world[alpine-base]
-Failed to install rootfs
-
-# Maybe the error is due to mirror sites but it will create a rootfs directory in same folder i.e "lxd-alpine-builder" .
-1.) Edit the file rootfs/usr/share/alpine-mirrors/Mirrors.txt deleting all the entries but the first one, do the same with mirrors.yaml.
-2.) Again run - sudo ./build-alpine -a i686
+cd lxd-alpine-builder
+sed -i 's,yaml_path="latest-stable/releases/$apk_arch/latest-releases.yaml",yaml_path="v3.8/releases/$apk_arch/latest-releases.yaml",' build-alpine
+sudo ./build-alpine -a i686
 
 # import the image
-lxc image import ./alpine.tar.gz --alias myimage # It's important doing this from YOUR HOME directory on the victim machine, or it might fail.
+lxc image import ./alpine*.tar.gz --alias myimage # It's important doing this from YOUR HOME directory on the victim machine, or it might fail.
 
 # before running the image, start and configure the lxd storage pool as default 
 lxd init
