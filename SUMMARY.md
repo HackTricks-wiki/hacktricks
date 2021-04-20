@@ -343,6 +343,7 @@
   * [PDF Upload - XXE and CORS bypass](pentesting-web/file-upload/pdf-upload-xxe-and-cors-bypass.md)
 * [Formula Injection](pentesting-web/formula-injection.md)
 * [HTTP Request Smuggling / HTTP Desync Attack](pentesting-web/http-request-smuggling.md)
+* [H2C Smuggling](pentesting-web/h2c-smuggling.md)
 * [IDOR](pentesting-web/idor.md)
 * [JWT Vulnerabilities \(Json Web Tokens\)](pentesting-web/hacking-jwt-json-web-tokens.md)
 * [NoSQL injection](pentesting-web/nosql-injection.md)
