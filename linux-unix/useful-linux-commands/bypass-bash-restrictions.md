@@ -44,7 +44,7 @@ ech""o test # echo test
 bas''e64 # base64
 /\b\i\n/////s\h
 
-# Execution thriugh $0
+# Execution through $0
 echo whoami|$0
 
 # Uninitialized variables: A uninitialized variable equals to null (nothing)
