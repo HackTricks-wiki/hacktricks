@@ -118,6 +118,7 @@
 
 * [Android APK Checklist](mobile-apps-pentesting/android-checklist.md)
 * [Android Applications Pentesting](mobile-apps-pentesting/android-app-pentesting/README.md)
+  * [Android Applications Basics](mobile-apps-pentesting/android-app-pentesting/android-applications-basics.md)
   * [ADB Commands](mobile-apps-pentesting/android-app-pentesting/adb-commands.md)
   * [APK decompilers](mobile-apps-pentesting/android-app-pentesting/apk-decompilers.md)
   * [AVD - Android Virtual Device](mobile-apps-pentesting/android-app-pentesting/avd-android-virtual-device.md)
