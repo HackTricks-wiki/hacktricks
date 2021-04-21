@@ -139,7 +139,6 @@
   * [Smali - Decompiling/\[Modifying\]/Compiling](mobile-apps-pentesting/android-app-pentesting/smali-changes.md)
   * [Spoofing your location in Play Store](mobile-apps-pentesting/android-app-pentesting/spoofing-your-location-in-play-store.md)
   * [Webview Attacks](mobile-apps-pentesting/android-app-pentesting/webview-attacks.md)
-  * [What are Intents](mobile-apps-pentesting/android-app-pentesting/what-are-intents.md)
 
 ## Pentesting
 
