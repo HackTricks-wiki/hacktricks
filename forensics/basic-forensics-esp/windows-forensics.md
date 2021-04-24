@@ -48,3 +48,94 @@ Inside the Application table of this database it's possible to find the columns:
 It's also possible to **find installed application** inside the registry path: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`  
 And **uninstalled** **applications** in: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
+## Windows Events
+
+Information that appears inside Windows events:
+
+* What happened
+* Timestamp
+* Users involved
+* Hosts involved \(hostname, IP\)
+* Assets accessed \(files, folder, printer, services\)
+
+The logs are located in `C:\Windows\System32\config` before Windows Vista and in `C:\Windows\System32\winevt\Logs` after Windows Vista.
+
+Before Windows Vista the event logs were in binary format and after it, they are in **XML format** and use the **.evtx** extension.
+
+The location of the event files can be found in the SYSTEM registry in **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**
+
+They can be visualized from the Windows Event Viewer \(**`eventvwr.msc`**\) or with other tools.
+
+### Security
+
+These event register the accesses and give information about the security configuration.  
+they can be found in `C:\Windows\System32\winevt\Security.evtx`.
+
+The **max size** of the event file is configurable, and it will start overwriting old events when the maximum size is reached.
+
+Events that are registered:
+
+* Login/Logoff
+* Actions of the user
+* Access to files, folders and shared assets
+* Modification of the security configuration
+
+Events related to the user authentication:
+
+| EventID | Description |
+| :--- | :--- |
+| 4624 | Successful authentication |
+| 4625 | Authentication error |
+| 4634/4647 | log off |
+| 4672 | Logon with admin permissions |
+
+Inside the EventID 4634/4647 there are interesting sub-types:
+
+* **2 \(interactive\)**: The login was interactive using the keyboard or software like VNC or `PSexec -U-`
+* **3 \(network\)**: Connection to a shared folder
+* **4 \(Batch\)**: Process executed
+* **5 \(service\)**: Service started by the Service Control Manager
+* **7**: Screen unblocked using password
+* **8 \(network cleartext\)**: User authenticated sendin clear text passwords. This event use to come from the IIS
+* **9 \(new credentials\)**: It's generated when the command `RunAs` is used or the user access to a network service with different credentials.
+* **10 \(remote interactive\)**: Authentication via Terminal Services or RDP
+* **11 \(cache interactive\)**: Access using the last cached credentials because it wasn't possible to contact the domain controller
+
+The Status and sub status information of the event s can indicate more details about the causes of the event. For example take a look to the following Status and Sub Status Codes of the Event ID 4625:
+
+![](../../.gitbook/assets/image%20%28455%29.png)
+
+### Recovering Windows Events
+
+It's highly recommended to turn off the suspicious PC by **unplugging it** to maximize the probabilities of recovering the Windows Events. In case they were deleted, a tool that can be useful to try to recover them is [**Bulk\_extractor**](file-extraction.md#bulk-extractor) indicating the **evtx** extension.
+
+## Identifying Common Attacks with Windows Events
+
+### Brute-Force Attack
+
+A brute-force attack can be easily identifiable because **several EventIDs 4625 will appear**. **If** the attack was **successful**, after the EventIDs 4625, **an EventID 4624 will appear**.
+
+### Time Change
+
+This is awful for the forensics team as all the timestamps will be modified.  
+This event is recorded by the EventID 4616 inside the Security Event log.
+
+### USB devices
+
+The following System EventIDs are useful:
+
+* 20001 / 20003 / 10000: First time it was used
+* 10100: Driver update 
+
+The EventID 112 from DeviceSetupManager contains the timestamp of each USB device inserted.
+
+### Turn Off / Turn On
+
+The ID 6005 of the "Event Log" service indicates the PC was turned On. The ID 6006 indicates it was turned Off.
+
+### Logs Deletion
+
+The Security EventID 1102 indicates the logs were deleted.
+
+
+
