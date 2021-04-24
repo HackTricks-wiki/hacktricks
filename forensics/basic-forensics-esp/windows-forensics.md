@@ -53,7 +53,7 @@ And **uninstalled** **applications** in: `Software\Microsoft\Windows\CurrentVers
 Information that appears inside Windows events:
 
 * What happened
-* Timestamp
+* Timestamp \(UTC + 0\)
 * Users involved
 * Hosts involved \(hostname, IP\)
 * Assets accessed \(files, folder, printer, services\)
