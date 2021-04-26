@@ -500,4 +500,6 @@
 * [1911 - Pentesting fox](1911-pentesting-fox.md)
 * [Online Platforms with API](online-platforms-with-api.md)
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
+* [iOS Pentesting](ios-pentesting/README.md)
+  * [Burp Configuration for iOS](ios-pentesting/burp-configuration-for-ios.md)
 
