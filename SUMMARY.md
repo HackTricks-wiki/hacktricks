@@ -374,6 +374,7 @@
     * [Second Order Injection - SQLMap](pentesting-web/sql-injection/sqlmap/second-order-injection-sqlmap.md)
 * [SSRF \(Server Side Request Forgery\)](pentesting-web/ssrf-server-side-request-forgery.md)
 * [SSTI \(Server Side Template Injection\)](pentesting-web/ssti-server-side-template-injection.md)
+* [Reverse Tab Nabbing](pentesting-web/reverse-tab-nabbing.md)
 * [Unicode Normalization vulnerability](pentesting-web/unicode-normalization-vulnerability.md)
 * [Web Tool - WFuzz](pentesting-web/web-tool-wfuzz.md)
 * [XPATH injection](pentesting-web/xpath-injection.md)
