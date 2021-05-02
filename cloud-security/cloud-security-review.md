@@ -1,5 +1,7 @@
 # Cloud security review
 
+**Check for nice cloud hacking tricks in** [**https://hackingthe.cloud/aws/general-knowledge/connection-tracking/**](https://hackingthe.cloud/aws/general-knowledge/connection-tracking/)\*\*\*\*
+
 ## Generic tools
 
 There are several tools that can be used to test different cloud environments. The installation steps and links are going to be indicated in this section.
