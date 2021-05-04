@@ -123,6 +123,7 @@
   * [APK decompilers](mobile-apps-pentesting/android-app-pentesting/apk-decompilers.md)
   * [AVD - Android Virtual Device](mobile-apps-pentesting/android-app-pentesting/avd-android-virtual-device.md)
   * [Burp Suite Configuration for Android](mobile-apps-pentesting/android-app-pentesting/android-burp-suite-settings.md)
+  * [content:// protocol](mobile-apps-pentesting/android-app-pentesting/content-protocol.md)
   * [Drozer Tutorial](mobile-apps-pentesting/android-app-pentesting/drozer-tutorial/README.md)
     * [Exploiting Content Providers](mobile-apps-pentesting/android-app-pentesting/drozer-tutorial/exploiting-content-providers.md)
   * [Exploiting a debuggeable applciation](mobile-apps-pentesting/android-app-pentesting/exploiting-a-debuggeable-applciation.md)
