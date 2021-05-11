@@ -31,7 +31,7 @@ Each profile has a "**Path**" variable with the name of the folder where it's da
 Inside the folder **of each profile** \(_~/.mozilla/firefox/&lt;ProfileName&gt;/_\) path you should be able to find the following interesting files:
 
 * _**places.sqlite**_ : History \(moz_\__places\), bookmarks \(moz\_bookmarks\), and downloads \(moz_\__annos\). In windows the tool [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing_history_view.html) can be used to read the history inside _**places.sqlite**_.
-  * Query to dump history: `select datetime(lastvisitdate/1000000,'unixepoch') as visit_date, url, title, visit_count, visit_type FROM moz_places,moz_historyvisits WHERE moz_places.id = moz_historyvisits.place_id` 
+  * Query to dump history: `select datetime(lastvisitdate/1000000,'unixepoch') as visit_date, url, title, visit_count, visit_type FROM moz_places,moz_historyvisits WHERE moz_places.id = moz_historyvisits.place_id;` 
     * Note that the link type is a number that indicates:
       * 1: User followed a link
       * 2: User wrote the URL
@@ -41,7 +41,7 @@ Inside the folder **of each profile** \(_~/.mozilla/firefox/&lt;ProfileName&gt;/
       * 6: Accessed via HTTP redirect 302
       * 7: Downloaded file
       * 8: User followed a link inside an Iframe
-  * Query to dump downloads: `SELECT datetime(lastModified/1000000,'unixepoch') AS down_date, content as File, url as URL FROM moz_places, moz_annos WHERE moz_places.id = moz_annos.place_id`
+  * Query to dump downloads: `SELECT datetime(lastModified/1000000,'unixepoch') AS down_date, content as File, url as URL FROM moz_places, moz_annos WHERE moz_places.id = moz_annos.place_id;`
   * 
 * _**bookmarkbackups/**_ : Bookmarks backups
 * _**formhistory.sqlite**_ : **Web form data** \(like emails\)
