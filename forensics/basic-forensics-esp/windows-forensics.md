@@ -137,5 +137,36 @@ The ID 6005 of the "Event Log" service indicates the PC was turned On. The ID 60
 
 The Security EventID 1102 indicates the logs were deleted.
 
+## Windows Registry
 
+The Windows Registry Contains a lot of **information** about the **system and the actions of the users**.
+
+The files containing the registry are located in:
+
+* %windir%\System32\Config\**SAM**:  `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\**SECURITY**:  `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\**SYSTEM**:  `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\**SOFTWARE**:  `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\**DEFAULT**:  `HKEY_LOCAL_MACHINE`
+* %UserProfile%\{User}\**NTUSER.DAT**:  `HKEY_CURRENT_USER`
+
+From Windows Vista and Windows 2008 Server upwards there are some backups of the `HKEY_LOCAL_MACHINE` registry files in **`%Windir%\System32\Config\RegBack\`**.  
+Also from these versions, the registry file **`%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`** is created saving information about program executions.
+
+### Tools
+
+Some tools are useful to analyzed the registry files:
+
+* **Registry Editor**: It's installed in Windows. It's a GUI to navigate through the Windows registry of the current session.
+* \*\*\*\*[**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): It allows to load the registry file and navigate through them with a GUI. It also contains Bookmarks highlighting keys with interesting information.
+* \*\*\*\*[**RegRipper**](https://github.com/keydet89/RegRipper3.0): Again, it has a GUI that allows to navigate through the loaded registry and also contains plugins that highlight interesting information inside the loaded registry.
+* \*\*\*\*[**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Another GUI application capable of extracting the important information from the registry loaded.
+
+### Recovering Deleted Element
+
+When a key is deleted it's marked as such but until the space it's occupying is needed it won't be removed. Therefore, using tools like **Registry Explorer** it's possible to recover these deleted keys.
+
+### Last Write Time
+
+Each Key-Value contains a timestamp indicating the last time it was modified.
 
