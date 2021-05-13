@@ -48,6 +48,43 @@ Inside the Application table of this database it's possible to find the columns:
 It's also possible to **find installed application** inside the registry path: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`  
 And **uninstalled** **applications** in: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
+## Office AutoSaved Files
+
+You can find the office autosaved files in : `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
+
+## Shell Items
+
+A shell item is an item taht contains information about how to access another file.
+
+### Recent Documents \(LNK\)
+
+Windows **automatically** **creates** these **shortcuts** when the user **open, uses or creates a file** in:
+
+* Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
+* Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
+
+When a folder is created, a link to the folder, to the parent folder and to the grandparent folder is also created.
+
+These automatically created link files **contain information about the origin** like if it's a **file** **or** a **folder**, **MAC** **times** of that file, **volume informatio**n of where is the file stored and **folder of the target file**.  
+This information can be useful to recover those files in case they were removed.
+
+Also, the **date created of the link** file is the first **time** the original file was **first** **used** and the **date** **modified** of the link file is the **last** **time** the origin file was used.
+
+### Jumplists
+
+These are the recent files that are indicated per application. It's the list of **recent files used by an application** that you can access on each application.
+
+They can be created **automatically or be custom**.
+
+The **jumplists** created automatically are stored in `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`.  
+The jumplists are named following the format `{id}.autmaticDestinations-ms` where the initial ID is the ID of the application.
+
+The custom jumlists are stored in `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` and they are created by the application usually because something **important** has happened with the file \(maybe marked as favorite\)
+
+The **created time** of any jumlist indicates the **first time the file was accessed** and the **modified time the last time**.
+
+You can inspect the jumlists using [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
+
 ## Windows Events
 
 Information that appears inside Windows events:
@@ -103,11 +140,11 @@ Inside the EventID 4634/4647 there are interesting sub-types:
 
 The Status and sub status information of the event s can indicate more details about the causes of the event. For example take a look to the following Status and Sub Status Codes of the Event ID 4625:
 
-![](../../.gitbook/assets/image%20%28455%29.png)
+![](../../../.gitbook/assets/image%20%28455%29.png)
 
 ### Recovering Windows Events
 
-It's highly recommended to turn off the suspicious PC by **unplugging it** to maximize the probabilities of recovering the Windows Events. In case they were deleted, a tool that can be useful to try to recover them is [**Bulk\_extractor**](file-extraction.md#bulk-extractor) indicating the **evtx** extension.
+It's highly recommended to turn off the suspicious PC by **unplugging it** to maximize the probabilities of recovering the Windows Events. In case they were deleted, a tool that can be useful to try to recover them is [**Bulk\_extractor**](../file-extraction.md#bulk-extractor) indicating the **evtx** extension.
 
 ## Identifying Common Attacks with Windows Events
 
@@ -168,5 +205,15 @@ When a key is deleted it's marked as such but until the space it's occupying is 
 
 ### Last Write Time
 
-Each Key-Value contains a timestamp indicating the last time it was modified.
+Each Key-Value contains a **timestamp** indicating the last time it was modified.
 
+### SAM
+
+The file/hive **SAM** contains the **users, groups and users passwords** hashes of the system.  
+In `SAM\Domains\Account\Users` you can obtain the username, the RID, last logon, last failed logon, login counter, password policy and when the account was created. In order to get the **hashes** you also **need** the file/hive **SYSTEM**.
+
+### Interesting entries in the Windows Registry
+
+#### \*\*\*\*
+
+* 
