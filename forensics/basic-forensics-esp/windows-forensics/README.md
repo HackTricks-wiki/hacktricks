@@ -85,6 +85,10 @@ The **created time** of any jumlist indicates the **first time the file was acce
 
 You can inspect the jumlists using [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
+### Shellbags
+
+[**Follow this link to learn what are the shellbags.**](interesting-windows-registry-keys.md#shellbags)\*\*\*\*
+
 ## Windows Events
 
 Information that appears inside Windows events:
