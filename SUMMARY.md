@@ -508,7 +508,7 @@
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
 * [iOS Pentesting](ios-pentesting/README.md)
   * [Frida Configuration in iOS](ios-pentesting/frida-configuration-in-ios.md)
-  * [Jailbreaking](ios-pentesting/jailbreaking.md)
+  * [iOS Testing Environment](ios-pentesting/ios-testing-environment.md)
   * [Basic iOS Testing Operations](ios-pentesting/basic-ios-testing-operations.md)
   * [Burp Suite Configuration for iOS](ios-pentesting/burp-configuration-for-ios.md)
 
