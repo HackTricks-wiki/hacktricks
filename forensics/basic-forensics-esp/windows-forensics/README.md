@@ -70,6 +70,18 @@ This information can be useful to recover those files in case they were removed.
 
 Also, the **date created of the link** file is the first **time** the original file was **first** **used** and the **date** **modified** of the link file is the **last** **time** the origin file was used.
 
+To inspect these files you can use [**LinkParser**](http://4discovery.com/our-tools/).
+
+In this tools you will find 2 set of timestamps: **FileModifiedDate**, **FileAccessDate** and **FileCreationDate**, and **LinkModifiedDate**, **LinkAccessDate** and **LinkCreationDate**. The first set of timestamp references the **timestamps of the link file itself**. The second set references the **timestamps of the linked file**.
+
+You can get the same information running the Windows cli tool: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)\*\*\*\*
+
+```text
+LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
+```
+
+In this case the information is going to be saved inside a CSV file.
+
 ### Jumplists
 
 These are the recent files that are indicated per application. It's the list of **recent files used by an application** that you can access on each application.
@@ -79,15 +91,49 @@ They can be created **automatically or be custom**.
 The **jumplists** created automatically are stored in `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`.  
 The jumplists are named following the format `{id}.autmaticDestinations-ms` where the initial ID is the ID of the application.
 
-The custom jumlists are stored in `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` and they are created by the application usually because something **important** has happened with the file \(maybe marked as favorite\)
+The custom jumplists are stored in `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` and they are created by the application usually because something **important** has happened with the file \(maybe marked as favorite\)
 
-The **created time** of any jumlist indicates the **first time the file was accessed** and the **modified time the last time**.
+The **created time** of any jumplist indicates the **first time the file was accessed** and the **modified time the last time**.
 
-You can inspect the jumlists using [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
+You can inspect the jumplists using [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
+
+![](../../../.gitbook/assets/image%20%28478%29.png)
+
+\(_Note that the timestamps provided by JumplistExplorer are related to the jumplist file itself_\)
 
 ### Shellbags
 
 [**Follow this link to learn what are the shellbags.**](interesting-windows-registry-keys.md#shellbags)\*\*\*\*
+
+## Use of Windows USBs
+
+It's possible to identify that a USB device was used thanks to the creation of:
+
+* Windows Recent Folder
+* Microsoft Office Recent Folder
+* Jumplists
+
+Note that some LNK file instead of pointing to the original path, points to the WPDNSE folder:
+
+![](../../../.gitbook/assets/image%20%28487%29.png)
+
+The files in the folder WPDNSE are a copy of the original ones, then won't survive a restart of the PC and the GUID is taken from a shellbag.
+
+### Registry Information
+
+[Check this page to learn](interesting-windows-registry-keys.md#usb-information) which registry keys contains interesting information about USB connected devices.
+
+### setupapi
+
+Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about when the USB connection was produced \(search for `Section start`\).
+
+![](../../../.gitbook/assets/image%20%28490%29.png)
+
+### USB Detective
+
+\*\*\*\*[**USBDetective**](https://usbdetective.com/) can be used to obtain information about the USB devices that have been connected to an image.
+
+![](../../../.gitbook/assets/image%20%28480%29.png)
 
 ## Windows Events
 
@@ -218,6 +264,7 @@ In `SAM\Domains\Account\Users` you can obtain the username, the RID, last logon,
 
 ### Interesting entries in the Windows Registry
 
-#### \*\*\*\*
+{% page-ref page="interesting-windows-registry-keys.md" %}
 
-* 
+
+
