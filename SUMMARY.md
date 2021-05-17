@@ -507,6 +507,7 @@
 * [Online Platforms with API](online-platforms-with-api.md)
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
 * [iOS Pentesting](ios-pentesting/README.md)
+  * [Extracting Entitlements From Compiled Application](ios-pentesting/extracting-entitlements-from-compiled-application.md)
   * [iOS Basics](ios-pentesting/ios-basics.md)
   * [Frida Configuration in iOS](ios-pentesting/frida-configuration-in-ios.md)
   * [iOS Testing Environment](ios-pentesting/ios-testing-environment.md)
