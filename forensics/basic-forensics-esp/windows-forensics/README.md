@@ -135,6 +135,90 @@ Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about whe
 
 ![](../../../.gitbook/assets/image%20%28480%29.png)
 
+## Emails
+
+The emails contains **2 interesting parts: The headers and the content** of the email. In the **headers** you can find information like:
+
+* **Who** send the emails \(email address, IP, mail servers that has redirected the email\)
+* **When** was the email sent
+
+Also, inside the `References` and `In-Reply-To` headers you can find the ID of the messages:
+
+![](../../../.gitbook/assets/image%20%28491%29.png)
+
+### Microsoft Outlook
+
+When Exchange servers or Outlook clients are used there are going to be some MAPI headers:
+
+* `Mapi-Client-Submit-Time`: Time of the system when the email was sent
+* `Mapi-Conversation-Index`: Number of children message of the thread and timestamp of each message of the thread
+* `Mapi-Entry-ID`: Message identifier.
+* `Mappi-Message-Flags` and `Pr_last_Verb-Executed`: Information about the MAPI client \(message read? no read? responded? redirected? out of the office?\)
+
+In the Microsoft Outlook client all the sent and received messages, contacts and calendar data is stored in a PST file in:
+
+* `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` \(WinXP\)
+* `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
+
+The registry path `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messagin Subsystem\Profiles\Outlook` indicates the file that is being used.
+
+You can open the PST file using the tool [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
+
+![](../../../.gitbook/assets/image%20%28494%29.png)
+
+### Outlook OST
+
+When Microsoft Outlook is configured **using** **IMAP** or using an **Exchange** server, it generates a **OST** file that stores almost the same info as the PST file. It keeps the file synchronized with the server for the l**ast 12 months**, with a **max file-size of 50GB** and in the **same folder as the PST** file is saved.
+
+You can inspect this file using [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
+
+### Recovering Attachments
+
+You may be able to find them in the folder:
+
+* `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook` -&gt; IE10
+* `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook` -&gt; IE11+
+
+### Thunderbird MBOX
+
+**Thunderbird** stores the information in **MBOX** **files** in the folder `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`
+
+## Thumbnails
+
+When a user access a folder and organised it using thumbnails, then a `thumbs.db` file is created. This db **stores the thumbnails of the images** of the folder even if they are deleted.  
+in winXP and WIn8-8.1 this file is created automatically. In Win7/Win10, it's created automatically if it's accessed via an UNC path \(\\IP\folder\...\).
+
+It is possible to read this file with the tool [**Thumbsviewer**](https://thumbsviewer.github.io/).
+
+### Thumbcache
+
+Beginning with Windows Vista, **thumbnail previews are stored in a centralized location on the system**. This provides the system with access to images independent of their location, and addresses issues with the locality of Thumbs.db files. The cache is stored at **`%userprofile%\AppData\Local\Microsoft\Windows\Explorer`** as a number of files with the label **thumbcache\_xxx.db** \(numbered by size\); as well as an index used to find thumbnails in each sized database.
+
+* Thumbcache\_32.db -&gt; small
+* Thumbcache\_96.db -&gt; medium
+* Thumbcache\_256.db -&gt; large
+* Thumbcache\_1024.db -&gt; extra large
+
+You can read this file using [**ThumbCache Viewer**](https://thumbcacheviewer.github.io/).
+
+## Recycle Bin
+
+In Vista/Win7/Win8/Win10 the **Reciclye Bin** can be found in the folder **`$Recycle.bin`** in the root of the drive \(`C:\$Reciycle.bin`\).  
+When a file is deleted in this folder are created 2 files:
+
+* `$I{id}`: File information \(date of when it was deleted}
+* `$R{id}`: Content of the file
+
+![](../../../.gitbook/assets/image%20%28492%29.png)
+
+Having these files you can sue the tool [**Rifiuti**](https://github.com/abelcheung/rifiuti2) to get the original address of the deleted files and the date it was deleted \(use `rifiuti-vista.exe` for Vista – Win10\).
+
+```text
+.\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
+```
+
+![](../../../.gitbook/assets/image%20%28495%29.png)
+
 ## Windows Events
 
 Information that appears inside Windows events:
