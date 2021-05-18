@@ -201,19 +201,24 @@ For this action you will need some common subdomains lists like:
 * [https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056](https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056)
 * [https://github.com/pentester-io/commonspeak](https://github.com/pentester-io/commonspeak)
 
-For **massdns** you will need to pass as argument the file will all the **possible well formed subdomains** you want to bruteforce:
-
-```bash
-sed 's/$/.domain.com/' subdomains.txt > bf-subdomains.txt
-./massdns -r resolvers.txt -w /tmp/results.txt bf-subdomains.txt
-grep -E "tesla.com. [0-9]+ IN A .+" /tmp/results.txt
-```
-
 {% code title="Gobuster bruteforcing dns" %}
 ```bash
 gobuster dns -d mysite.com -t 50 -w subdomains.txt
 ```
 {% endcode %}
+
+For **massdns** you will need to pass as argument the file will all the **possible well formed subdomains** you want to bruteforce and list of DNS resolvers to use. Some projects that use massdns as base and provides better results by checking massdns results are [**shuffledns**](https://github.com/projectdiscovery/shuffledns) **and** [**puredns**](https://github.com/d3mondev/puredns)**.**
+
+```bash
+sed 's/$/.domain.com/' subdomains.txt > bf-subdomains.txt
+./massdns -r resolvers.txt -w /tmp/results.txt bf-subdomains.txt
+grep -E "tesla.com. [0-9]+ IN A .+" /tmp/results.txt
+
+shuffledns -d example.com -list example-subdomains.txt -r resolvers.txt
+puredns bruteforce all.txt domain.com
+```
+
+Note how these tools require a **list of IPs of public DNSs**. If these public DNSs are malfunctioning \(DNS poisoning for example\) you will get bad results. In order to generate a list of trusted DNS resolvers you can download the resolvers from [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) and use [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) to filter them.
 
 ### VHosts
 
