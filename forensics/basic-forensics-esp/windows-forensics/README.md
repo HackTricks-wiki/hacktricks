@@ -223,7 +223,106 @@ Having these files you can sue the tool [**Rifiuti**](https://github.com/abelche
 
 ### Windows Prefetch
 
+Prefetching is a technique that allows a computer to silently **fetch the necessary resources needed to display content** that a user **might access in the near future** so resources can be accessed in less time.
 
+Windows prefetch consist on creating **caches of the executed programs** in order to be able to load them faster. These caches as created as `.pf` files inside the path: `C:\Windows\Prefetch`.   
+there is a limit of 128 files in XP/VISTA/WIN7 and 1024 files in Win8/Win10.
+
+The file name is created as `{program_name}-{hash}.pf` \(the hash is based on the path and arguments of the executable\). In W10 these files are compressed.  
+Note that the sole presence of the file indicates that **the program was executed** at some point.
+
+The file `C:\Windows\Prefetch\Layout.ini` contains the **names of the folders of the files that are prefetched**. This file contains **information about the number of the executions**, **dates** of the execution and **files** **open** by the program.
+
+To inspect these files you can use the tool [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd):
+
+```bash
+.\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
+```
+
+![](../../../.gitbook/assets/image%20%28496%29.png)
+
+### Superprefetch
+
+**Superprefetch** has the same goal as prefetch, **load programs faster** by predicting what is going to be loaded next. However, it doesn't substitute the prefetch service.  
+This service will generate database files in `C:\Windows\Prefetch\Ag*.db`.
+
+In these databases you can find the **name** of the **program**, **number** of **executions**, **files** **opened**, **volume** **accessed**, **complete** **path**, **timeframes** and **timestamps**.
+
+You can access this information using the tool [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/).
+
+### SRUM
+
+**System Resource Usage Monitor** \(SRUM\) **monitors** the **resources** **consumed** **by a process**. It appeared in W8 and it stores the data en an ESE database located in `C:\Windows\System32\sru\SRUDB.dat`.
+
+It gives the information:
+
+* AppID and Path
+* User that executed the process
+* Sent Bytes
+* Received Bytes
+* Network Interface
+* Connection duration
+* Process duration
+
+This information is updated every 60mins.
+
+You can obtain the date from this file using the tool [**srum\_dump**](https://github.com/MarkBaggett/srum-dump).
+
+```bash
+.\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -t SRUM_TEMPLATE.xlsx -o C:\Users\student\Desktop\srum
+```
+
+### AppCompatCache \(ShimCache\)
+
+**Shimcache**, also known as **AppCompatCache**, is a component of the **Application Compatibility Database**, which was created by **Microsoft** and used by the operating system to identify application compatibility issues.
+
+The cache stores various file metadata depending on the operating system, such as:
+
+* File Full Path
+* File Size
+* **$Standard\_Information** \(SI\) Last Modified time
+* Shimcache Last Updated time
+* Process Execution Flag
+
+This information can be found in the registry in:
+
+* `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` 
+  * XP \(96 entries\)
+* `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`
+  * Server 2003 \(512 entries\)
+  * 2008/2012/2016 Win7/Win8/Win10 \(1024 entries\)
+
+You can use the tool [**AppCompatCacheParser**](https://github.com/EricZimmerman/AppCompatCacheParser) to parse this information.
+
+![](../../../.gitbook/assets/image%20%28497%29.png)
+
+### Amcache
+
+The **Amcache.hve** file is a registry file that stores the information of executed applications. It's located in `C:\Windows\AppCompat\Programas\Amcache.hve`
+
+**Amcache.hve** records the recent processes that were run and lists the path of the files that’s executed which can then be used to find the executed program. It also record the SHA1 of the program.
+
+You can parse this information with the tool [**Amcacheparser**](https://github.com/EricZimmerman/AmcacheParser)\*\*\*\*
+
+```bash
+AmcacheParser.exe -f C:\Users\student\Desktop\Amcache.hve --csv C:\Users\student\Desktop\srum
+```
+
+The most interesting CVS file generated if the `Amcache_Unassociated file entries`.
+
+### RecentFileCache
+
+This artifact can only be found in W7 in `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` and it contains information about the recent execution of some binaries.
+
+You can use the tool [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) to parse the file.
+
+### Scheduled tasks
+
+You can extract them from `C:\Windows\Tasks` or `C:\Windows\System32\Tasks` and read them as XML.
+
+### Services
+
+You can find them in the registry under `SYSTEM\ControlSet001\Services`. You can see what is going to be executed and when.
 
 ## Windows Events
 
