@@ -219,6 +219,12 @@ Having these files you can sue the tool [**Rifiuti**](https://github.com/abelche
 
 ![](../../../.gitbook/assets/image%20%28495%29.png)
 
+## Programs Executed
+
+### Windows Prefetch
+
+
+
 ## Windows Events
 
 Information that appears inside Windows events:
