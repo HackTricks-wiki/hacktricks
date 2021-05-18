@@ -32,7 +32,13 @@
 
 ### Shared Folders
 
-* **`System\ControlSet001\Services\lanmanserver\Shares\`**: Share folders and their configurations. If **Client Side Caching** \(CSCFLAGS\) is enabled, then, a copy of the shared files will be saved in the clients in `C:\Windows\CSC` \(there are different options\)
+* **`System\ControlSet001\Services\lanmanserver\Shares\`**: Share folders and their configurations. If **Client Side Caching** \(CSCFLAGS\) is enabled, then, a copy of the shared files will be saved in the clients and server in `C:\Windows\CSC` 
+  * CSCFlag=0 -&gt; By default the user needs to indicate the files that he wants to cache
+  * CSCFlag=16 -&gt; Automatic caching documents. “All files and programs that users open from the shared folder are automatically available offline” with the “optimize for performance" unticked.
+  * CSCFlag=32 -&gt; Like the previous options by “optimize for performance”  is ticked
+  * CSCFlag=48 -&gt; Cache is disabled.
+  * CSCFlag=2048: This setting is only on Win 7 & 8 and is the default setting until you disable “Simple file sharing” or use the “advanced” sharing option. It also appears to be the default setting for the “Homegroup”
+  * CSCFlag=768 -&gt; This setting was only seen on shared Print devices.
 
 ### AutoStart programs
 
