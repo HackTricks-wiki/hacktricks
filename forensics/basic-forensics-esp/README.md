@@ -397,18 +397,6 @@ Primer apartado: Info del sistema
 
  Quinto apartado: Saca todas las imagenes
 
-**Volatility:**
-
- vol.py -f PATH\_IMAGE imageinfo —&gt; Primer plug-in a usar para obtener el so
-
- vol.py -f PATH\_IMAGE pslist —&gt; Procesos pslist no supera los rootkits pero psscan algunos sí
-
- vol.py -f PATH\_IMAGE psscan —&gt; Comparar esta salida y la anterior para buscar rootkits
-
- vol.py -f PATH\_IMAGE connscan —&gt; Conexiones, a partir de windows Vista se usa netscan
-
- vol.py -f PATH\_IMAGE printkey -K “Microsoft\Windows NT\CurrentVersion\Winlogon” —&gt; procesos que escribieron en dicho registro
-
 **Cold Boot Attack:**
 
 En el caso en el que el sistema esté cifrado y encendido pero no se tenga la contraseña para entrar se realiza este tipo de ataque.
@@ -431,25 +419,148 @@ Mediaclone’s Superimager —&gt; de 29 a 31 GB por minuto
 
 En Windows un Block es llamado Cluster. En este sistema operativo cuando un cluster no se llena el espacio vacio se queda sin usar, lo cual es util pues puede contener datos eliminados. En linux la parte que no se llena de un block se rellena con ceros.
 
-Windows filesystems: FAT12, FAT16, FAT32, exFAT, NTFS4, NTFS5 y ReFS
 
-Un sistema de ficheros FAT comienza con un BOOT RECORD seguido de una ALLOCATION TABLE, depués el ROOT DIRECTORY y finalmente el DATA AREA, el tamaño de un cluster es de 512B
 
- BOOT SECTOR:
+\*\*\*\*
 
- Primer setor de FAT12 o FAT16, o 3 primeros sectores de FAT32, define el volumen, el offset de las otras 3 áreas y contiene el boot program si es booteable
+Borrado de datos: [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
- FAT \(File Allocation Table\):
+recuperacion de datos: [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
- Es una tabla donde buscar qué cluster va a continuacion. Para localizar un archivo basta con saber la dirección del primer cluster y luego usando la FAT se localiza lo demás. FAT32 usa 32 bits para la dirección del cluster. Una dirección en la tabla guarda la dirección del siguiente cluster. Un cluster es el ultimo estara relleno de unos y si no se usa, de ceros. Un cluster malo tiene hex FFF7.
 
- WINDOWS ROOT DIRECTORY:
 
- Un directorio contiene info del nombre y la extension, entry type, la dirección del primer cluster, the lens of the file y data time \(contiene toda esta info en 32bits\)
 
-Cuando se elimina un archivo se cambia el primer byte del nombre por 0xE5 y se desalojan los clusters la ta tabla FAT.
 
-Quick format: Pone a cero las entradas de root directory y file allocation table entries, pero deja los datos sin tocar.
+
+
+## Partitions
+
+A hard drive or a **SSD disk can contain different partitions** with the goal of separating data physically.  
+The **minimum** unit of a disk is the **sector** \(normally composed by 512B\). So, each partition size needs to be multiple of that size.
+
+### MBR \(master Boot Record\)
+
+It's allocated in the **first sector of the disk after the 446B of the boot code**. It contains the **partitions** table \(there can be up to **4 primary partitions**\). The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.  
+MBR allows **max 2.2TB**.
+
+![](../../.gitbook/assets/image%20%28503%29.png)
+
+![](../../.gitbook/assets/image%20%28498%29.png)
+
+From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** \(if Windows is used\). The logical drive letters of the hard disk depend on the Windows Disk Signature. Changing this signature could prevent Windows from booting.
+
+![](../../.gitbook/assets/image%20%28499%29.png)
+
+#### LBA \(Logical block addressing\)
+
+**Logical block addressing** \(**LBA**\) is a common scheme used for **specifying the location of blocks** of data stored on computer storage devices, generally secondary storage systems such as hard disk drives. LBA is a particularly simple linear addressing scheme; **blocks are located by an integer index**, with the first block being LBA 0, the second LBA 1, and so on.
+
+### GPT \(GUID Partition Table\)
+
+It’s called GUID Partition Table because every partition on your drive has a **globally unique identifier**.
+
+Just like MBR it starts in the **sector 0**. The MBR occupies 32bits while **GPT** uses **64bits**.  
+GPT **allows up to 128 partitions** in Windows and up to **9.4ZB**.  
+Also, partitions can have a 36 character Unicode name.
+
+On an MBR disk, the partitioning and boot data is stored in one place. If this data is overwritten or corrupted, you’re in trouble. In contrast, **GPT stores multiple copies of this data across the disk**, so it’s much more robust and can recover if the data is corrupted.
+
+GPT also stores **cyclic redundancy check \(CRC\)** values to check that its data is intact. If the data is corrupted, GPT can notice the problem and **attempt to recover the damaged data** from another location on the disk.
+
+#### Protective MBR \(LBA0\)
+
+For limited backward compatibility, the space of the legacy MBR is still reserved in the GPT specification, but it is now used in a **way that prevents MBR-based disk utilities from misrecognizing and possibly overwriting GPT disks**. This is referred to as a protective MBR.
+
+![](../../.gitbook/assets/image%20%28504%29.png)
+
+#### Hybrid MBR \(LBA 0 + GPT\)
+
+In operating systems that support **GPT-based boot through BIOS** services rather than EFI, the first sector may also still be used to store the first stage of the **bootloader** code, but **modified** to recognize **GPT** **partitions**. The bootloader in the MBR must not assume a sector size of 512 bytes.
+
+#### Partition table header \(LBA 1\)
+
+The partition table header defines the usable blocks on the disk. It also defines the number and size of the partition entries that make up the partition table \(offsets 80 and 84 in the table\).
+
+| Offset | Length | Contents |
+| :--- | :--- | :--- |
+| 0 \(0x00\) | 8 bytes | Signature \("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h or 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#cite_note-8)on little-endian machines\) |
+| 8 \(0x08\) | 4 bytes | Revision 1.0 \(00h 00h 01h 00h\) for UEFI 2.8 |
+| 12 \(0x0C\) | 4 bytes | Header size in little endian \(in bytes, usually 5Ch 00h 00h 00h or 92 bytes\) |
+| 16 \(0x10\) | 4 bytes | [CRC32](https://en.wikipedia.org/wiki/CRC32) of header \(offset +0 up to header size\) in little endian, with this field zeroed during calculation |
+| 20 \(0x14\) | 4 bytes | Reserved; must be zero |
+| 24 \(0x18\) | 8 bytes | Current LBA \(location of this header copy\) |
+| 32 \(0x20\) | 8 bytes | Backup LBA \(location of the other header copy\) |
+| 40 \(0x28\) | 8 bytes | First usable LBA for partitions \(primary partition table last LBA + 1\) |
+| 48 \(0x30\) | 8 bytes | Last usable LBA \(secondary partition table first LBA − 1\) |
+| 56 \(0x38\) | 16 bytes | Disk GUID in mixed endian |
+| 72 \(0x48\) | 8 bytes | Starting LBA of array of partition entries \(always 2 in primary copy\) |
+| 80 \(0x50\) | 4 bytes | Number of partition entries in array |
+| 84 \(0x54\) | 4 bytes | Size of a single partition entry \(usually 80h or 128\) |
+| 88 \(0x58\) | 4 bytes | CRC32 of partition entries array in little endian |
+| 92 \(0x5C\) | \* | Reserved; must be zeroes for the rest of the block \(420 bytes for a sector size of 512 bytes; but can be more with larger sector sizes\) |
+
+#### Partition entries \(LBA 2–33\)
+
+| GUID partition entry format |  |  |
+| :--- | :--- | :--- |
+| Offset | Length | Contents |
+| 0 \(0x00\) | 16 bytes | [Partition type GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) \(mixed endian\) |
+| 16 \(0x10\) | 16 bytes | Unique partition GUID \(mixed endian\) |
+| 32 \(0x20\) | 8 bytes | First LBA \([little endian](https://en.wikipedia.org/wiki/Little_endian)\) |
+| 40 \(0x28\) | 8 bytes | Last LBA \(inclusive, usually odd\) |
+| 48 \(0x30\) | 8 bytes | Attribute flags \(e.g. bit 60 denotes read-only\) |
+| 56 \(0x38\) | 72 bytes | Partition name \(36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE code units\) |
+
+#### Partitions Types
+
+![](../../.gitbook/assets/image%20%28500%29.png)
+
+More partition types in [https://en.wikipedia.org/wiki/GUID\_Partition\_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+
+### Inspecting
+
+After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image a **MBR** was detected on the **sector 0** and interpreted:
+
+![](../../.gitbook/assets/image%20%28501%29.png)
+
+If it was a **GPT table instead of a MBR** it should appear the signature _EFI PART_ in the **sector 1** \(which in the previous image is empty\).
+
+## File-Systems
+
+### Windows file-systems list
+
+* **FAT12/16**: MSDOS, WIN95/98/NT/200
+* **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
+* **ExFAT**: 2008/2012/2016/VISTA/7/8/10
+* **NTFS**: XP/2003/2008/2012/VISTA/7/8/10
+* **ReFS**: 2012/2016
+
+### FAT
+
+The **FAT \(File Allocation Table\)** file system is named for its method of organization, the file allocation table, which resides at the beginning of the volume. To protect the volume, **two copies** of the table are kept, in case one becomes damaged. In addition, the file allocation tables and the root folder must be stored in a **fixed location** so that the files needed to start the system can be correctly located.
+
+![](../../.gitbook/assets/image%20%28502%29.png)
+
+The minimum space unit used by this file-system is a **cluster, typically 512B** \(which is composed by a number of sectors\).
+
+The earlier **FAT12** had a **cluster addresses to 12-bit** values with up to **4078** **clusters**; it allowed up to 4084 clusters with UNIX. The more efficient **FAT16** increased to **16-bit** cluster address allowing up to **65,517 clusters** per volume. FAT32 uses 32-bit cluster address allowing up to **268,435,456 clusters** per volume
+
+The **maximum file-size allowed by FAT is 4GB** \(minus one byte\) because the file system uses a 32-bit field to store the file size in bytes, and 2^32 bytes = 4 GiB. This happens for FAT12, FAT16 and FAT32.
+
+The **root directory** occupies a **specific position** for both FAT12 and FAT16 \(in FAT32 it occupies a position like any other folder\). Each file/folder entry contains this information:
+
+* Name of the file/folder \(8 chars max\)
+* Attributes
+* Date of creation
+* Date of modification
+* Date of last access
+* Address of the FAT table where the first cluster of the file starts
+* Size
+
+When a file is "deleted" using a FAT file system, the directory entry remains almost **unchanged** except for the **first character of the file name** \(modified to ****0xE5\), preserving most of the "deleted" file's name, along with its time stamp, file length and — most importantly — its physical location on the disk. The list of disk clusters occupied by the file will, however, be erased from the File Allocation Table, marking those sectors available for use by other files created or modified thereafter. In case of FAT32, it is additionally erased field responsible for upper 16 bits of file start cluster value.  
+
+
+
 
 **NTFS**
 
@@ -471,44 +582,7 @@ El tamaño de un cluster es de 64kB, aunque se pueden crear clusters mas pequeñ
 
 Cuando se elimina algo, el pone el cluster a 0 \(unallocated\) la entrada de $index es eliminada el MTF padre, pero no se borran los datos.
 
-**REGSTRO**
+## References
 
- Usuarios y contraseñas, e-mails, sitios de internet
-
- Historial de navegación
-
- Internet searches
-
- Lista de archivos accedidos
-
- Lista de programas instalados
-
-Windows guarda el registro en archivos binarios llamados hives.
-
-SAM: Información de cuentas y contraseñas asi como el SID de cada. También guarda el tiempo de LOGON
-
-SID: Identifica unequivocamente a usuarios y su grupo para dar derecho o no a archivos
-
-En system se guarda info de los usbs introducidos asi como cuando entraron y cuando se sacaron
-
-El registro se puede ver tanto en máquinas corriendo como en imagenes de memoria. Para verlos se puede usar EnCase, Registry Explore, RegRipper, Registry Recon, Access Data Registry Viewer
-
-Registros: SAM \(para cuentas\), SYSTEM \(para info del sistema\), NTUSER.dat \(cada usuario tiene el suyo que guarda info del usuario\)
-
-**CUSTOM**
-
-Cuando tienes una imagen puedes pasarle binwalk para saber qué esconde la imagen.
-
-Si tienes una copia de la MFT:
-
- Con volatility puedes reconstruir la MFT e ir mirando todos los archivos que hay y su contenido en hex y ascii \(aunque son muchos pero está bien para buscar archivos extraños\) con: volatility -f mft.dd mftparser -N --output-file=mft.dd.vol.txt --&gt; Te da un archivo con texto cno todos los archivos que existen en dicha imagen
-
-Borrado de datos: [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
-
-recuperacion de datos: [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
-
-En imagenes:
-
-Strings  
-exiftool
+* [https://en.wikipedia.org/wiki/GUID\_Partition\_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
