@@ -507,6 +507,7 @@
 * [Online Platforms with API](online-platforms-with-api.md)
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
 * [iOS Pentesting](ios-pentesting/README.md)
+  * [iOS WebViews](ios-pentesting/ios-webviews.md)
   * [Basic iOS Testing Operations](ios-pentesting/basic-ios-testing-operations.md)
   * [Burp Suite Configuration for iOS](ios-pentesting/burp-configuration-for-ios.md)
   * [Extracting Entitlements From Compiled Application](ios-pentesting/extracting-entitlements-from-compiled-application.md)
