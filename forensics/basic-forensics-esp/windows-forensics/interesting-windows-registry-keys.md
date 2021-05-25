@@ -100,7 +100,7 @@ The GUID is the id of the application. Data saved:
 
 When you open a directory Windows saves data about how to visualize the directory in the registry. These entries are known as Shellbags.
 
-Explorer Access: 
+Explorer Access:
 
 * `USRCLASS.DAT\Local Settings\Software\Microsoft\Windows\Shell\Bags`
 * `USRCLASS.DAT\Local Settings\Software\Microsoft\Windows\Shell\BagMRU`
@@ -110,7 +110,7 @@ Desktop Access:
 * `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU`
 * `NTUSER.DAT\Software\Microsoft\Windows\Shell\Bags`
 
-To analyze the Shellbags you can use [**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md) ****and you will be able to find the **MAC time of the folder** and also the **creation date and modified date of the shellbag** which are related with the **first time the folder was accessed and the last time**.
+To analyze the Shellbags you can use [**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md) **\*\*and you will be able to find the** MAC time of the folder **and also the** creation date and modified date of the shellbag **which are related with the** first time the folder was accessed and the last time\*\*.
 
 Note 2 things from the following image:
 
@@ -131,17 +131,13 @@ Within this registry it's possible to find:
 * The Device Class ID
 * The volume name \(in the following images the volume name is the highlighted subkey\)
 
-
-
 ![](../../../.gitbook/assets/image%20%28489%29.png)
 
 ![](../../../.gitbook/assets/image%20%28479%29%20%281%29.png)
 
-Moreover, checking the registry `HKLM\SYSTEM\ControlSet001\Enum\USB`  and comparing the values of the sub-keys it's possible to find the VID value
+Moreover, checking the registry `HKLM\SYSTEM\ControlSet001\Enum\USB` and comparing the values of the sub-keys it's possible to find the VID value
 
 ![](../../../.gitbook/assets/image%20%28476%29.png)
-
-
 
 With the previous information the registry `SOFTWARE\Microsoft\Windows Portable Devices\Devices` can be used to obtain the **`{GUID}`**:
 
