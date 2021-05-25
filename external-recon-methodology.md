@@ -319,7 +319,6 @@ Now that we have built the list of assets of our scope it's time to search for s
 * [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
 * [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
 * [https://github.com/michenriksen/gitrob](https://github.com/michenriksen/gitrob)
-* [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
 * [https://github.com/anshumanbh/git-all-secrets](https://github.com/anshumanbh/git-all-secrets)
 * [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
 * [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
