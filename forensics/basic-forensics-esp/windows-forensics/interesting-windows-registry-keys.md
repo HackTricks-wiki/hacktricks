@@ -135,7 +135,7 @@ Within this registry it's possible to find:
 
 ![](../../../.gitbook/assets/image%20%28489%29.png)
 
-![](../../../.gitbook/assets/image%20%28481%29.png)
+![](../../../.gitbook/assets/image%20%28479%29%20%281%29.png)
 
 Moreover, checking the registry `HKLM\SYSTEM\ControlSet001\Enum\USB`  and comparing the values of the sub-keys it's possible to find the VID value
 
@@ -157,7 +157,7 @@ Having the **{GUID}** of the device it's now possible to **check all the NTUDER.
 
 Checking the registry `System\MoutedDevices` it's possible to find out **which device was the last one mounted**. In the following image check how the last device mounted in `E:` is the Thoshiba one \(using the tool Registry Explorer\).
 
-![](../../../.gitbook/assets/image%20%28483%29.png)
+![](../../../.gitbook/assets/image%20%28483%29%20%281%29.png)
 
 ### Volume Serial Number
 

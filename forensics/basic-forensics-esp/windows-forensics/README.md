@@ -127,7 +127,7 @@ The files in the folder WPDNSE are a copy of the original ones, then won't survi
 
 Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about when the USB connection was produced \(search for `Section start`\).
 
-![](../../../.gitbook/assets/image%20%28490%29.png)
+![](../../../.gitbook/assets/image%20%28477%29%20%281%29.png)
 
 ### USB Detective
 
@@ -217,7 +217,7 @@ Having these files you can sue the tool [**Rifiuti**](https://github.com/abelche
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
 
-![](../../../.gitbook/assets/image%20%28495%29.png)
+![](../../../.gitbook/assets/image%20%28495%29%20%281%29.png)
 
 ## Programs Executed
 
