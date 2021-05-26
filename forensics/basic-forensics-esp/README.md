@@ -576,6 +576,10 @@ The cluster is the minimum size unit of NTFS and the size of the cluster depends
 | 16,385MB-32,768MB \(32GB\) | 64 | 32KB |
 | Greater than 32,768MB | 128 | 64KB |
 
+#### **Slack-Space**
+
+As the **minimum** size unit of NTFS is a **cluster**. Each file will be occupying a number of complete clusters. Then, it's highly probable that **each file occupies more space than necessary**. These **unused** **spaces** **booked** by a file which is called **slacking** **space**. And people could take advantage of this technique to **hide** **information**.
+
 ![](../../.gitbook/assets/image%20%28464%29.png)
 
 #### **NTFS boot sector**
@@ -584,11 +588,54 @@ When you format an NTFS volume, the format program allocates the first 16 sector
 
 #### **Master File Table o $MFT**
 
-It contains records about all the files and folders of the file system.
+The NTFS file system contains a file called the _master file table_, or MFT. There is at least **one entry in the MFT for every file on an NTFS file system** volume, including the MFT itself. All information about a file, including its **size, time and date stamps, permissions, and data content**, is stored either in MFT entries, or in space outside the MFT that is described by MFT entries.
 
-#### **Slack-Space**
+As **files are added** to an NTFS file system volume, more entries are added to the MFT and the **MFT increases in size**. When **files** are **deleted** from an NTFS file system volume, their **MFT entries are marked as free** and may be reused. However, disk space that has been allocated for these entries is not reallocated, and the size of the MFT does not decrease.
 
-As the **minimum** size unit of NTFS is a **cluster**. Each file will be occupying a number of complete clusters. Then, it's highly probable that **each file occupies more space than necessary**. These **unused** **spaces** **booked** by a file which is called **slacking** **space**. And people could take advantage of this technique to **hide** **information**.
+The NTFS file system **reserves space for the MFT to keep the MFT as contiguous as possible** as it grows. The space reserved by the NTFS file system for the MFT in each volume is called the **MFT zone**. Space for file and directories are also allocated from this space, but only after all of the volume space outside of the MFT zone has been allocated.
+
+Depending on the average file size and other variables, **either the reserved MFT zone or the unreserved space on the disk may be allocated first as the disk fills to capacity**. Volumes with a small number of relatively large files will allocate the unreserved space first, while volumes with a large number of relatively small files allocate the MFT zone first. In either case, fragmentation of the MFT starts to take place when one region or the other becomes fully allocated. If the unreserved space is completely allocated, space for user files and directories will be allocated from the MFT zone. If the MFT zone is completely allocated, space for new MFT entries will be allocated from the unreserved space.
+
+NTFS file systems also generate a **$MFTMirror**. This is a **copy** of the **first 4 entries** of the MFT: $MFT, $MFT Mirror, $Log, $Volume.
+
+NTFS reserves the first 16 records of the table for special information:
+
+| System File | File Name | MFT Record | Purpose of the File |
+| :--- | :--- | :--- | :--- |
+| Master file table | $Mft | 0 | Contains one base file record for each file and folder on an NTFS volume. If the allocation information for a file or folder is too large to fit within a single record, other file records are allocated as well. |
+| Master file table 2 | $MftMirr | 1 | A duplicate image of the first four records of the MFT. This file guarantees access to the MFT in case of a single-sector failure. |
+| Log file | $LogFile | 2 | Contains a list of transaction steps used for NTFS recoverability. Log file size depends on the volume size and can be as large as 4 MB. It is used by Windows NT/2000 to restore consistency to NTFS after a system failure. |
+| Volume | $Volume | 3 | Contains information about the volume, such as the volume label and the volume version. |
+| Attribute definitions | $AttrDef | 4 | A table of attribute names, numbers, and descriptions. |
+| Root file name index | $ | 5 | The root folder. |
+| Cluster bitmap | $Bitmap | 6 | A representation of the volume showing which clusters are in use. |
+| Boot sector | $Boot | 7 | Includes the BPB used to mount the volume and additional bootstrap loader code used if the volume is bootable. |
+| Bad cluster file | $BadClus | 8 | Contains bad clusters for the volume. |
+| Security file | $Secure | 9 | Contains unique security descriptors for all files within a volume. |
+| Upcase table | $Upcase | 10 | Converts lowercase characters to matching Unicode uppercase characters. |
+| NTFS extension file | $Extend | 11 | Used for various optional extensions such as quotas, reparse point data, and object identifiers. |
+|  |  | 12-15 | Reserved for future use. |
+| Quota management file | $Quota | 24 | Contains user assigned quota limits on the volume space. |
+| Object Id file | $ObjId | 25 | Contains file object IDs. |
+| Reparse point file | $Reparse | 26 | This file contains information about files and folders on the volume include reparse point data. |
+
+#### Each entry of the MFT looks like the following:
+
+![](../../.gitbook/assets/image%20%28483%29.png)
+
+Note how each entry starts with "FILE". Each entry occupies 1024 bits. So after 1024 bit from the start of a MFT entry you will find the next one.
+
+Using the [**Active Disk Editor**](https://www.disk-editor.org/index.html) it's very easy to inspect the entry of a file in the MFT. Just right click on the file and then click "Inspect File Record"
+
+![](../../.gitbook/assets/image%20%28493%29.png)
+
+![](../../.gitbook/assets/image%20%28482%29.png)
+
+Checking the "In use" flag it's very easy to know if a file was deleted \(a value of 0x0 means deleted\).
+
+It's also possible to recover deleted files using FTKImager:
+
+![](../../.gitbook/assets/image%20%28490%29.png)
 
 
 

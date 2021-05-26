@@ -438,7 +438,6 @@
   * [Office file analysis](forensics/basic-forensics-esp/office-file-analysis.md)
   * [Video and Audio file analysis](forensics/basic-forensics-esp/video-and-audio-file-analysis.md)
   * [PDF File analysis](forensics/basic-forensics-esp/pdf-file-analysis.md)
-  * [File System Analysis](forensics/basic-forensics-esp/file-system-analysis.md)
   * [PNG tricks](forensics/basic-forensics-esp/png-tricks.md)
   * [ZIPs tricks](forensics/basic-forensics-esp/zips-tricks.md)
 
