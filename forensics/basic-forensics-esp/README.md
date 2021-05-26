@@ -563,9 +563,34 @@ When a file is "deleted" using a FAT file system, the directory entry remains al
 
 **NTFS** \(**New Technology File System**\) is a proprietary journaling file system developed by Microsoft.
 
-\*\*\*\*
+The cluster is the minimum size unit of NTFS and the size of the cluster depends on the size of a partition.
 
-\*\*\*\*
+| Partition size | Sectors per cluster | Cluster size |
+| :--- | :--- | :--- |
+| 512MB or less | 1 | 512 bytes |
+| 513MB-1024MB \(1GB\) | 2 | 1KB |
+| 1025MB-2048MB \(2GB\) | 4 | 2KB |
+| 2049MB-4096MB \(4GB\) | 8 | 4KB |
+| 4097MB-8192MB \(8GB\) | 16 | 8KB |
+| 8193MB-16,384MB \(16GB\) | 32 | 16KB |
+| 16,385MB-32,768MB \(32GB\) | 64 | 32KB |
+| Greater than 32,768MB | 128 | 64KB |
+
+![](../../.gitbook/assets/image%20%28464%29.png)
+
+#### **NTFS boot sector**
+
+When you format an NTFS volume, the format program allocates the first 16 sectors for the $Boot metadata file. First sector, in fact, is a boot sector with a "bootstrap" code and the following 15 sectors are the boot sector's IPL \(initial program loader\). To increase file system reliability the very last sector an NTFS partition contains a spare copy of the boot sector.
+
+#### **Master File Table o $MFT**
+
+It contains records about all the files and folders of the file system.
+
+#### **Slack-Space**
+
+As the **minimum** size unit of NTFS is a **cluster**. Each file will be occupying a number of complete clusters. Then, it's highly probable that **each file occupies more space than necessary**. These **unused** **spaces** **booked** by a file which is called **slacking** **space**. And people could take advantage of this technique to **hide** **information**.
+
+
 
 El tamaño de un cluster es de 64kB, aunque se pueden crear clusters mas pequeños o más grandes. 64bits para la dirección de cada cluster
 
