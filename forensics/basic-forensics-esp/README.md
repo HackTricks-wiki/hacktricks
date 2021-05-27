@@ -631,7 +631,9 @@ Using the [**Active Disk Editor**](https://www.disk-editor.org/index.html) it's 
 
 ![](../../.gitbook/assets/image%20%28482%29.png)
 
-Checking the "In use" flag it's very easy to know if a file was deleted \(a value of 0x0 means deleted\).
+Checking the **"In use**" flag it's very easy to know if a file was deleted \(a value of **0x0 means deleted**\).
+
+![](../../.gitbook/assets/image%20%28515%29.png)
 
 It's also possible to recover deleted files using FTKImager:
 
@@ -667,7 +669,7 @@ Each attribute indicates some entry information identified by the type:
 
 For example the **type 48 \(0x30\)** identifies the **file name**:
 
-![](../../.gitbook/assets/image%20%28510%29.png)
+![](../../.gitbook/assets/image%20%28512%29.png)
 
 It is also useful to understand that **these attributes can be resident** \(meaning, they exist within a given MFT record\) or **nonresident** \(meaning, they exist outside a given MFT record, elsewhere on the disk, and are simply referenced within the record\). For example, if the attribute **$Data is resident**, these means that the **whole file is saved in the MFT**, if it's nonresident, then the content of the file is in other part of the file system.
 
@@ -689,9 +691,11 @@ Some interesting attributes:
   * Real size
   * [File reference](https://flatcap.org/linux-ntfs/ntfs/concepts/file_reference.html) to the parent directory.
 * [$Data](https://flatcap.org/linux-ntfs/ntfs/attributes/data.html) \(among others\):
-  * Contains the file's data or the indication of the sectors where the data resides.
+  * Contains the file's data or the indication of the sectors where the data resides. In the following example the attribute data is not resident so the attribute gives information about the sectors where the data resides.
 
 ![](../../.gitbook/assets/image%20%28509%29.png)
+
+![](../../.gitbook/assets/image%20%28511%29.png)
 
 
 
