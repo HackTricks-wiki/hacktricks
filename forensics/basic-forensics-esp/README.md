@@ -637,7 +637,61 @@ It's also possible to recover deleted files using FTKImager:
 
 ![](../../.gitbook/assets/image%20%28490%29.png)
 
+#### MFT Attributes
 
+Each MFT entry has several attributes as the following image indicates:
+
+![](../../.gitbook/assets/image%20%28495%29.png)
+
+Each attribute indicates some entry information identified by the type:
+
+| Type Identifier | Name | Description |
+| :--- | :--- | :--- |
+| 16 | $STANDARD\_INFORMATION | General information, such as flags; the last accessed, written, and created times; and the owner and security ID. |
+| 32 | $ATTRIBUTE\_LIST | List where other attributes for file can be found. |
+| 48 | $FILE\_NAME | File name, in Unicode, and the last accessed, written, and created times. |
+| 64 | $VOLUME\_VERSION | Volume information. Exists only in version 1.2 \(Windows NT\). |
+| 64 | $OBJECT\_ID | A 16-byte unique identifier for the file or directory. Exists only in versions 3.0+ and after \(Windows 2000+\). |
+| 80 | $SECURITY\_ DESCRIPTOR | The access control and security properties of the file. |
+| 96 | $VOLUME\_NAME | Volume name. |
+| 112 | $VOLUME\_ INFORMATION | File system version and other flags. |
+| 128 | $DATA | File contents. |
+| 144 | $INDEX\_ROOT | Root node of an index tree. |
+| 160 | $INDEX\_ALLOCATION | Nodes of an index tree rooted in $INDEX\_ROOT attribute. |
+| 176 | $BITMAP | A bitmap for the $MFT file and for indexes. |
+| 192 | $SYMBOLIC\_LINK | Soft link information. Exists only in version 1.2 \(Windows NT\). |
+| 192 | $REPARSE\_POINT | Contains data about a reparse point, which is used as a soft link in version 3.0+ \(Windows 2000+\). |
+| 208 | $EA\_INFORMATION | Used for backward compatibility with OS/2 applications \(HPFS\). |
+| 224 | $EA | Used for backward compatibility with OS/2 applications \(HPFS\). |
+| 256 | $LOGGED\_UTILITY\_STREAM | Contains keys and information about encrypted attributes in version 3.0+ \(Windows 2000+\). |
+
+For example the **type 48 \(0x30\)** identifies the **file name**:
+
+![](../../.gitbook/assets/image%20%28510%29.png)
+
+It is also useful to understand that **these attributes can be resident** \(meaning, they exist within a given MFT record\) or **nonresident** \(meaning, they exist outside a given MFT record, elsewhere on the disk, and are simply referenced within the record\). For example, if the attribute **$Data is resident**, these means that the **whole file is saved in the MFT**, if it's nonresident, then the content of the file is in other part of the file system.
+
+Some interesting attributes:
+
+* [$STANDARD\_INFORMATION](https://flatcap.org/linux-ntfs/ntfs/attributes/standard_information.html) \(among others\):
+  * Creation date
+  * Modification date
+  * Access date
+  * MFT update date
+  * DOS File permissions
+* [$FILE\_NAME](https://flatcap.org/linux-ntfs/ntfs/attributes/file_name.html) \(among others\): 
+  * File name
+  * Creation date
+  * Modification date
+  * Access date
+  * MFT update date
+  * Allocated size
+  * Real size
+  * [File reference](https://flatcap.org/linux-ntfs/ntfs/concepts/file_reference.html) to the parent directory.
+* [$Data](https://flatcap.org/linux-ntfs/ntfs/attributes/data.html) \(among others\):
+  * Contains the file's data or the indication of the sectors where the data resides.
+
+![](../../.gitbook/assets/image%20%28509%29.png)
 
 
 
