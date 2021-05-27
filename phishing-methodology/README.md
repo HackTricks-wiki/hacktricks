@@ -417,6 +417,12 @@ I would recommend to **send the test emails to 10min mails addresses** in order 
 
 Once everything is ready, just launch the campaign!
 
+## Website Cloning
+
+If for any reason you want to clone the website check the following page:
+
+{% page-ref page="clone-a-website.md" %}
+
 ## Detecting the detection
 
 Obviously one of the best ways to know if you have been busted is to **search your domain inside blacklists**. If it appears listed, somehow your domain was detected as suspicions.  
