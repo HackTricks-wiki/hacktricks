@@ -639,6 +639,20 @@ It's also possible to recover deleted files using FTKImager:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 El tamaño de un cluster es de 64kB, aunque se pueden crear clusters mas pequeños o más grandes. 64bits para la dirección de cada cluster
 
  BOOT RECORD:
