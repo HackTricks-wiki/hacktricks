@@ -633,7 +633,7 @@ Using the [**Active Disk Editor**](https://www.disk-editor.org/index.html) it's 
 
 Checking the **"In use**" flag it's very easy to know if a file was deleted \(a value of **0x0 means deleted**\).
 
-![](../../.gitbook/assets/image%20%28515%29.png)
+![](../../.gitbook/assets/image%20%28520%29.png)
 
 It's also possible to recover deleted files using FTKImager:
 
@@ -669,7 +669,7 @@ Each attribute indicates some entry information identified by the type:
 
 For example the **type 48 \(0x30\)** identifies the **file name**:
 
-![](../../.gitbook/assets/image%20%28512%29.png)
+![](../../.gitbook/assets/image%20%28515%29.png)
 
 It is also useful to understand that **these attributes can be resident** \(meaning, they exist within a given MFT record\) or **nonresident** \(meaning, they exist outside a given MFT record, elsewhere on the disk, and are simply referenced within the record\). For example, if the attribute **$Data is resident**, these means that the **whole file is saved in the MFT**, if it's nonresident, then the content of the file is in other part of the file system.
 
@@ -695,13 +695,41 @@ Some interesting attributes:
 
 ![](../../.gitbook/assets/image%20%28509%29.png)
 
-![](../../.gitbook/assets/image%20%28511%29.png)
+![](../../.gitbook/assets/image%20%28512%29.png)
 
+#### NTFS timestamps
 
+![](../../.gitbook/assets/image%20%28521%29.png)
 
+Another useful tool to analyze the MFT is [**MFT2csv**](https://github.com/jschicht/Mft2Csv).  
+This program will extract all the MFT data and present it in CSV format. It can also be used to dump the files.
 
+![](../../.gitbook/assets/image%20%28514%29.png)
 
+#### $LOGFILE
 
+The file **`$LOGFILE`** contains **logs** about the **actions** that have been **performed** **to** **files**. It also **saves** the **action** it would need to perform in case of a **redo** and the action needed to **go back** to the **previous** **state**.
+
+The maximum file size of this file is **65536KB**.
+
+In order to inspect the `$LOGFILE` you need to extract it and inspect the `$MFT` previously with [**MFT2csv**](https://github.com/jschicht/Mft2Csv).  
+Then run [**LogFileParser**](https://github.com/jschicht/LogFileParser) against this file and selecting the exported `$LOGFILE` file and the CVS of the inspection of the `$MFT` you will obtain a csv file with the logs of the file system activity recorded by the `$LOGFILE` log.
+
+![](../../.gitbook/assets/image%20%28519%29.png)
+
+Filtering by filenames you can see **all the actions performed against a file**:
+
+![](../../.gitbook/assets/image%20%28513%29.png)
+
+#### $USNJnrl
+
+The file `$EXTEND/$USNJnrl/$J` is and alternate data stream of the file `$EXTEND$USNJnrl` . This artifact contains a **registry of changes produced inside the NTFS volume**.
+
+To inspect this file you can use the tool [**UsnJrnl2csv**](https://github.com/jschicht/UsnJrnl2Csv).
+
+Filtering by the filename it's possible to see **all the actions performed against a file**. Also you can find the `MFTReference` of the parent folder. Then, looking for that `MFTReference` you can find i**nformation of the parent folder.**
+
+![](../../.gitbook/assets/image%20%28517%29.png)
 
 
 
