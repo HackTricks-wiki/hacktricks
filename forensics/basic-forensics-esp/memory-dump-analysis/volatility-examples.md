@@ -130,7 +130,7 @@ The plugin `banners.Banners` can be used in **vol3 to try to find linux banners*
 
 ## Hashes/Passwords
 
-Extract SAM hashes, [domain cached credentials](../windows/stealing-credentials/credentials-protections.md#cached-credentials) and [lsa secrets](../windows/authentication-credentials-uac-and-efs.md#lsa-secrets).
+Extract SAM hashes, [domain cached credentials](../../../windows/stealing-credentials/credentials-protections.md#cached-credentials) and [lsa secrets](../../../windows/authentication-credentials-uac-and-efs.md#lsa-secrets).
 
 {% tabs %}
 {% tab title="vol3" %}

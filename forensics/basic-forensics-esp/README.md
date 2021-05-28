@@ -11,6 +11,25 @@ if you are given a **forensic image** of a device you can start **analyzing the 
 
 {% page-ref page="partitions-file-systems-carving/" %}
 
+Depending on the used OSs and even platform different interesting artifacts should be searched:
+
+{% page-ref page="windows-forensics/" %}
+
+{% page-ref page="linux-forensics.md" %}
+
+{% page-ref page="docker-forensics.md" %}
+
+## Deep inspection of specific file-types and Software
+
+If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.  
+Read the following page to learn some interesting tricks:
+
+{% page-ref page="specific-software-file-type-tricks/" %}
+
+I want to do a special mention to the page:
+
+{% page-ref page="specific-software-file-type-tricks/browser-artifacts.md" %}
+
 
 
 
