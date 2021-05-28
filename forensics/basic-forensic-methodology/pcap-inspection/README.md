@@ -79,7 +79,7 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 
 Using common carving techniques can be useful to extract files and information from the pcap:
 
-{% page-ref page="../partitions-file-systems-carving/file-data-carving-tools.md" %}
+{% page-ref page="../partitions-file-systems-carving/file-data-carving-recovery-tools.md" %}
 
 ## Check Exploits/Malware
 

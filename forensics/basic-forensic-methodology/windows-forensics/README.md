@@ -446,7 +446,7 @@ The Status and sub status information of the event s can indicate more details a
 
 ### Recovering Windows Events
 
-It's highly recommended to turn off the suspicious PC by **unplugging it** to maximize the probabilities of recovering the Windows Events. In case they were deleted, a tool that can be useful to try to recover them is [**Bulk\_extractor**](../partitions-file-systems-carving/file-data-carving-tools.md#bulk-extractor) indicating the **evtx** extension.
+It's highly recommended to turn off the suspicious PC by **unplugging it** to maximize the probabilities of recovering the Windows Events. In case they were deleted, a tool that can be useful to try to recover them is [**Bulk\_extractor**](../partitions-file-systems-carving/file-data-carving-recovery-tools.md#bulk-extractor) indicating the **evtx** extension.
 
 ## Identifying Common Attacks with Windows Events
 

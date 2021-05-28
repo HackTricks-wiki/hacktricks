@@ -424,7 +424,7 @@
   * [Memory dump analysis](forensics/basic-forensic-methodology/memory-dump-analysis/README.md)
     * [Volatility - CheatSheet](forensics/basic-forensic-methodology/memory-dump-analysis/volatility-examples.md)
   * [Partitions/File Systems/Carving](forensics/basic-forensic-methodology/partitions-file-systems-carving/README.md)
-    * [File/Data Carving Tools](forensics/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-tools.md)
+    * [File/Data Carving & Recovery Tools](forensics/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md)
     * [NTFS](forensics/basic-forensic-methodology/partitions-file-systems-carving/ntfs.md)
   * [Pcap Inspection](forensics/basic-forensic-methodology/pcap-inspection/README.md)
     * [DNSCat pcap analysis](forensics/basic-forensic-methodology/pcap-inspection/dnscat-exfiltration.md)

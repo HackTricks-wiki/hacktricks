@@ -160,14 +160,14 @@ Note that this technique **doesn't work to retrieve fragmented files**. If a fil
 
 There are several tools that you can use for file Carving indicating them the file-types you want search for 
 
-{% page-ref page="file-data-carving-tools.md" %}
+{% page-ref page="file-data-carving-recovery-tools.md" %}
 
 ### Data Stream **C**arving
 
 Data Stream Carving is similar to File Carving but i**nstead of looking for complete files, it looks for interesting fragments** of information.  
 For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
 
-{% page-ref page="file-data-carving-tools.md" %}
+{% page-ref page="file-data-carving-recovery-tools.md" %}
 
 ### Secure Deletion
 

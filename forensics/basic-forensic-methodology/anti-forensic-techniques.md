@@ -72,6 +72,10 @@ A way to discover this would be to inspect the running processes and **review ea
 
 These distros are **executed inside the RAM** memory. The only way to detect them is **in case the NTFS file-system is mounted with write permissions**. If it's mounted just with read permissions it won't be possible to detect the intrusion.
 
+## Secure Deletion
+
+[https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
+
 ## Windows Configuration
 
 It's possible to disable several windows logging methods to make the forensics investigation much harder.
