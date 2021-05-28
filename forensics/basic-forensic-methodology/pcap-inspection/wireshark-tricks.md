@@ -34,11 +34,11 @@ Practice: [https://www.malware-traffic-analysis.net/](https://www.malware-traffi
 
 You can add a column that show the Host HTTP header:
 
-![](../../.gitbook/assets/image%20%28405%29.png)
+![](../../../.gitbook/assets/image%20%28405%29.png)
 
 And a column that add the Server name from an initiating HTTPS connection \(**ssl.handshake.type == 1**\):
 
-![](../../.gitbook/assets/image%20%28408%29.png)
+![](../../../.gitbook/assets/image%20%28408%29.png)
 
 ## Identifying local hostnames
 
@@ -46,11 +46,11 @@ And a column that add the Server name from an initiating HTTPS connection \(**ss
 
 In current Wireshark instead of `bootp` you need to search for `DHCP`
 
-![](../../.gitbook/assets/image%20%28409%29.png)
+![](../../../.gitbook/assets/image%20%28409%29.png)
 
 ### From NBNS
 
-![](../../.gitbook/assets/image%20%28406%29.png)
+![](../../../.gitbook/assets/image%20%28406%29.png)
 
 
 
@@ -62,7 +62,7 @@ In current Wireshark instead of `bootp` you need to search for `DHCP`
 
 _edit&gt;preference&gt;protocol&gt;ssl&gt;_
 
-![](../../.gitbook/assets/image%20%28263%29.png)
+![](../../../.gitbook/assets/image%20%28263%29.png)
 
 Press _Edit_ and add all the data of the server and the private key \(_IP, Port, Protocol, Key file and password_\)
 
@@ -73,11 +73,11 @@ To detect this search inside the environment for to variable `SSLKEYLOGFILE`
 
 A file of shared keys will looks like this:
 
-![](../../.gitbook/assets/image%20%2862%29.png)
+![](../../../.gitbook/assets/image%20%2862%29.png)
 
 To import this in wireshark go to _edit&gt;preference&gt;protocol&gt;ssl&gt;_ and import it in \(Pre\)-Master-Secret log filename:
 
-![](../../.gitbook/assets/image%20%28191%29.png)
+![](../../../.gitbook/assets/image%20%28191%29.png)
 
 ## ADB communication
 

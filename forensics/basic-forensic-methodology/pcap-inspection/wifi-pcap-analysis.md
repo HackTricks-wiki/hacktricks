@@ -4,9 +4,9 @@
 
 When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with _Wireless --&gt; WLAN Traffic_:
 
-![](../../.gitbook/assets/image%20%28426%29.png)
+![](../../../.gitbook/assets/image%20%28426%29.png)
 
-![](../../.gitbook/assets/image%20%28429%29.png)
+![](../../../.gitbook/assets/image%20%28429%29.png)
 
 ### Brute Force
 
@@ -34,7 +34,7 @@ Once you have detected **unknown MAC** addresses communicating inside the networ
 
 Edit --&gt; Preferences --&gt; Protocols --&gt; IEEE 802.11--&gt; Edit
 
-![](../../.gitbook/assets/image%20%28427%29.png)
+![](../../../.gitbook/assets/image%20%28427%29.png)
 
 
 

@@ -48,7 +48,7 @@ This tool can scan an image and will **extract pcaps** inside it, **network info
 bulk_extractor memory.img -o out_folder
 ```
 
-Navigate through **all the information** that the tool has gathered \(passwords?\), **analyse** the **packets** \(read[ **Pcaps analysis**](../../pcaps-analysis/)\), search for **weird domains** \(domains related to **malware** or **non-existent**\).
+Navigate through **all the information** that the tool has gathered \(passwords?\), **analyse** the **packets** \(read[ **Pcaps analysis**](../pcap-inspection/)\), search for **weird domains** \(domains related to **malware** or **non-existent**\).
 
 ### PhotoRec
 
