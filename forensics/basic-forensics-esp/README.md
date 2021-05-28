@@ -738,9 +738,15 @@ Every **directory** in the file system contains an **`$I30`** **attribute** that
 
 You can get the `$I30` file of a directory from the **FTK Imager** and inspect it with the tool [Indx2Csv](https://github.com/jschicht/Indx2Csv).
 
-![](../../.gitbook/assets/image%20%28525%29.png)
+![](../../.gitbook/assets/image%20%28526%29.png)
 
 With this data you can find **information about the file changes performed inside the folder** but note that the deletion time of a file isn't saved inside this logs. However, you can see that **last modified date** of the **`$I30` file**, and if the **last action performed** over the directory is the **deletion** of a file, the times may be the same.
+
+#### $Bitmap
+
+The **`$BitMap`** is a special file within the NTFS file system. This file keeps **track of all of the used and unused clusters** on an NTFS volume. When a file takes up space on the NTFS volume the location is uses is marked out in the `$BitMap`.
+
+![](../../.gitbook/assets/image%20%28525%29.png)
 
 #### ADS \(Alternate Data Stream\)
 
@@ -749,11 +755,11 @@ In this [page you can see different ways to create/access/discover alternate dat
 
 Using the tool [**AlternateStreamView**](https://www.nirsoft.net/utils/alternate_data_streams.html) you can search and export all the files with some ADS.
 
-![](../../.gitbook/assets/image%20%28526%29.png)
+![](../../.gitbook/assets/image%20%28527%29.png)
 
 Using the FTK imager and double clicking in a file with ADS you can **access the ADS data**:
 
-![](../../.gitbook/assets/image%20%28527%29.png)
+![](../../.gitbook/assets/image%20%28528%29.png)
 
 If you find an ADS called **`Zone.Identifier`** \(see previous image\) this usually contains **information about how was the file downloaded**. There would be a "ZoneId" field with the following info:
 
@@ -772,29 +778,58 @@ Moreover, different software may store additional information:
 | Firefox, Tor browser, Outlook2016, Thunderbird, Windows Mail, Skype | ZoneId=3 |
 | μTorrent | ZoneId=3, HostUrl=about:internet |
 
-#### 
+## **Metadata**
 
+Some files contains metadata. This is information about the content of the file which sometimes might be interesting for the analyst as depending on the file-type it might have information like:
 
+* Title
+* MS Office Version used
+* Author
+* Dates of creation and last modification
+* Model of the camera
+* GPS coordinates
+* Image information
 
+You can use tools like [**exiftool**](https://exiftool.org/) and [**Metadiver**](https://www.easymetadata.com/metadiver-2/) to get the metadata of a file.
 
+## **Deleted Files Recovery**
 
-El tamaño de un cluster es de 64kB, aunque se pueden crear clusters mas pequeños o más grandes. 64bits para la dirección de cada cluster
+### Logged Deleted Files
 
- BOOT RECORD:
+As it was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file-system just mark it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files \(like the MFT\) and find the deleted files.
 
- Puede usar hasta 16 sectores, tiene el cluster size, dirección de MFT\(master file table\), el mirror de MFT\(4 primeras entradas\) y el código si es booteable.
+Also, the OS usually saves a lot of information about file system changes and backups, so it's possible to try to use them to recover the file or as much information as possible.
 
- MASTER FILE TABLE \(se puede ver con EnCase\)
+### **File Carving**
 
- Su nombre comienza con $ y se crea cuando el NTFS es formateado. Cada archivo usa uno o mas MFT records para guardar info: $file record head\(MFT nº, link count, tipo de archivo, tamaño, etc\), $standard information, $filename, $data y $attribute.
+**File carving** is a technique that tries to **find files in a bulk of data**. There are 3 main ways tools like this works: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
 
- Si el metadata de un archivo es mayor que un MFT record, se usan mas.
+Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
 
- El primer archivo es $MFT
+There are several tools that you can use for file Carving indicating them the file-types you want search for like:
 
- $BITMAP guarda el estado de cada cluster, si está usado vale 1, sino vale 0.
+* \*\*\*\*[**PhotoRec**](https://www.cgsecurity.org/wiki/TestDisk_Download)\*\*\*\*
+* \*\*\*\*[**Binwalk**](https://github.com/ReFirmLabs/binwalk)\*\*\*\*
+* \*\*\*\*[**Foremost**](https://github.com/jonstewart/foremost)\*\*\*\*
+* \*\*\*\*[**Bulk Extractor**](https://github.com/simsong/bulk_extractor)\*\*\*\*
 
-Cuando se elimina algo, el pone el cluster a 0 \(unallocated\) la entrada de $index es eliminada el MTF padre, pero no se borran los datos.
+**There are also other tools to find more specific file-types like:**
+
+* \*\*\*\*[**vss\_carver**](https://github.com/mnrkbys/vss_carver): Use it to search for delete Volume shadow Copies
+
+### Data Stream **C**arving
+
+Data Stream Carving is similar to File Carving but i**nstead of looking for complete files, it looks for interesting fragments** of information.  
+For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
+
+The following tools can be used to find specific interesting information inside a bulk of data:
+
+* \*\*\*\*[**Bulk Extractor**](https://github.com/simsong/bulk_extractor)\*\*\*\*
+
+### Secure Deletion
+
+Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**.   
+You may notice that even performing that action there might be **other parts where the existence of the file is still logged**, and that's true and part of the forensics professional job is to find them.
 
 ## References
 
