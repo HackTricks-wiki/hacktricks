@@ -415,12 +415,12 @@
 
 ## Forensics
 
-* [Malware Analysis](forensics/malware-analysis.md)
 * [Basic Forensic Methodology](forensics/basic-forensic-methodology/README.md)
   * [Anti-Forensic Techniques](forensics/basic-forensic-methodology/anti-forensic-techniques.md)
   * [Docker Forensics](forensics/basic-forensic-methodology/docker-forensics.md)
   * [Image Adquisition & Mount](forensics/basic-forensic-methodology/image-adquisition-and-mount.md)
   * [Linux Forensics](forensics/basic-forensic-methodology/linux-forensics.md)
+  * [Malware Analysis](forensics/basic-forensic-methodology/malware-analysis.md)
   * [Memory dump analysis](forensics/basic-forensic-methodology/memory-dump-analysis/README.md)
     * [Volatility - CheatSheet](forensics/basic-forensic-methodology/memory-dump-analysis/volatility-examples.md)
   * [Partitions/File Systems/Carving](forensics/basic-forensic-methodology/partitions-file-systems-carving/README.md)

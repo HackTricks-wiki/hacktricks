@@ -1,6 +1,6 @@
 # Memory dump analysis
 
-Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../../malware-analysis.md).
+Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).
 
 ## [Volatility](volatility-examples.md)
 

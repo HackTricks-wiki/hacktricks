@@ -1,8 +1,8 @@
 # Pcap Inspection
 
-Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../../malware-analysis.md).
-
-A note about PCAP vs PCAPNG: there are two versions of the PCAP file format; PCAPNG is newer and not supported by all tools. You may need to convert a file from PCAPNG to PCAP using Wireshark or another compatible tool, in order to work with it in some other tools.
+{% hint style="info" %}
+A note about **PCAP** vs **PCAPNG**: there are two versions of the PCAP file format; P**CAPNG is newer and not supported by all tools**. You may need to convert a file from PCAPNG to PCAP using Wireshark or another compatible tool, in order to work with it in some other tools.
+{% endhint %}
 
 ## Online tools for pcaps
 
@@ -13,8 +13,6 @@ A note about PCAP vs PCAPNG: there are two versions of the PCAP file format; PCA
 ## Extract Information
 
 The following tools are useful to extract statistic, files...
-
-
 
 ### Wireshark
 
@@ -111,6 +109,12 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 * Scans every file with yara
 * writes a report.txt
 * optionally saves matching files to a Dir
+
+### Malware Analysis
+
+Check if you can find any fingerprint of a known malware:
+
+{% page-ref page="../malware-analysis.md" %}
 
 ## Other pcap analysis tricks
 
