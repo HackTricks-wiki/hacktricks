@@ -179,7 +179,7 @@ Every **directory** in the file system contains an **`$I30`** **attribute** that
 
 You can get the `$I30` file of a directory from the **FTK Imager** and inspect it with the tool [Indx2Csv](https://github.com/jschicht/Indx2Csv).
 
-![](../../../.gitbook/assets/image%20%28526%29.png)
+![](../../../.gitbook/assets/image%20%28527%29.png)
 
 With this data you can find **information about the file changes performed inside the folder** but note that the deletion time of a file isn't saved inside this logs. However, you can see that **last modified date** of the **`$I30` file**, and if the **last action performed** over the directory is the **deletion** of a file, the times may be the same.
 
@@ -187,7 +187,7 @@ With this data you can find **information about the file changes performed insid
 
 The **`$BitMap`** is a special file within the NTFS file system. This file keeps **track of all of the used and unused clusters** on an NTFS volume. When a file takes up space on the NTFS volume the location is uses is marked out in the `$BitMap`.
 
-![](../../../.gitbook/assets/image%20%28525%29.png)
+![](../../../.gitbook/assets/image%20%28526%29.png)
 
 ### ADS \(Alternate Data Stream\)
 
@@ -196,11 +196,11 @@ In this [page you can see different ways to create/access/discover alternate dat
 
 Using the tool [**AlternateStreamView**](https://www.nirsoft.net/utils/alternate_data_streams.html) you can search and export all the files with some ADS.
 
-![](../../../.gitbook/assets/image%20%28527%29.png)
+![](../../../.gitbook/assets/image%20%28528%29.png)
 
 Using the FTK imager and double clicking in a file with ADS you can **access the ADS data**:
 
-![](../../../.gitbook/assets/image%20%28528%29.png)
+![](../../../.gitbook/assets/image%20%28529%29.png)
 
 If you find an ADS called **`Zone.Identifier`** \(see previous image\) this usually contains **information about how was the file downloaded**. There would be a "ZoneId" field with the following info:
 

@@ -1,9 +1,6 @@
-# File Extraction
+# File/Data Carving
 
-In some occasions \(a forensics or stego case\) you will have a file \(disk image,  memory dump, zip file, image...\) that **will have more files embedded on it** \(especial efforts may have made to hide them\). In these cases, there are a bunch of tools you can try to extract all of the embedded files.  
-**Remember that it's possible that each tools will uncover different files.**
-
-## Extraction tools
+## Carving tools
 
 ### Autopsy
 
@@ -51,7 +48,17 @@ This tool can scan an image and will **extract pcaps** inside it, **network info
 bulk_extractor memory.img -o out_folder
 ```
 
-Navigate through **all the information** that the tool has gathered \(passwords?\), **analyse** the **packets** \(read[ **Pcaps analysis**](../pcaps-analysis/)\), search for **weird domains** \(domains related to **malware** or **non-existent**\).
+Navigate through **all the information** that the tool has gathered \(passwords?\), **analyse** the **packets** \(read[ **Pcaps analysis**](../../pcaps-analysis/)\), search for **weird domains** \(domains related to **malware** or **non-existent**\).
+
+### PhotoRec
+
+You can find it in [https://www.cgsecurity.org/wiki/TestDisk\_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
+
+It comes with GUI and CLI version. You can select the **file-types** you want PhotoRec to search for.
+
+![](../../../.gitbook/assets/image%20%28524%29.png)
+
+## Specific Data Carving Tools
 
 ### FindAES
 

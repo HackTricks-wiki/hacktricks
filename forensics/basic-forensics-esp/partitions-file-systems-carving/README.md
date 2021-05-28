@@ -158,7 +158,7 @@ Also, the OS usually saves a lot of information about file system changes and ba
 
 Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
 
-There are several tools that you can use for file Carving indicating them the file-types you want search for like:
+There are several tools that you can use for file Carving indicating them the file-types you want search for 
 
 * \*\*\*\*[**PhotoRec**](https://www.cgsecurity.org/wiki/TestDisk_Download)\*\*\*\*
 * \*\*\*\*[**Binwalk**](https://github.com/ReFirmLabs/binwalk)\*\*\*\*

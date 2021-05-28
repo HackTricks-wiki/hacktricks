@@ -1,6 +1,24 @@
 # Basic Forensics \(ESP\)
 
-* 
+In this section of the book we are going to learn about some **useful forensics tricks**.  
+We are going to talk about partitions, file-systems, carving, memory, logs, backups, OSs, and much more.
+
+So if you are doing a professional forensic analysis to some data or just playing a CTF you can find here useful interesting tricks.
+
+## Inspecting an Image
+
+if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** \(even deleted ones\). Learn how in:
+
+{% page-ref page="partitions-file-systems-carving/" %}
+
+
+
+
+
+
+
+
+
 **Linux/Unix**
 
 En linux cualquier cosa es un archivo. Por ejemplo la RAM es un archivo llamado **/dev/mem**

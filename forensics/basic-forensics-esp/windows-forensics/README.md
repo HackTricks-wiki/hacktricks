@@ -228,7 +228,7 @@ These backups are usually located in the `\System Volume Information` from the r
 
 Mounting the forensics image with the **ArsenalImageMounter**, the tool [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) can be used to inspect a shadow copy and even **extract the files** from the shadow copy backups.
 
-![](../../../.gitbook/assets/image%20%28524%29.png)
+![](../../../.gitbook/assets/image%20%28525%29.png)
 
 The registry entry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` contains the files and keys **to not backup**:
 
@@ -400,7 +400,7 @@ The Status and sub status information of the event s can indicate more details a
 
 ### Recovering Windows Events
 
-It's highly recommended to turn off the suspicious PC by **unplugging it** to maximize the probabilities of recovering the Windows Events. In case they were deleted, a tool that can be useful to try to recover them is [**Bulk\_extractor**](../file-extraction.md#bulk-extractor) indicating the **evtx** extension.
+It's highly recommended to turn off the suspicious PC by **unplugging it** to maximize the probabilities of recovering the Windows Events. In case they were deleted, a tool that can be useful to try to recover them is [**Bulk\_extractor**](../partitions-file-systems-carving/file-extraction.md#bulk-extractor) indicating the **evtx** extension.
 
 ## Identifying Common Attacks with Windows Events
 
