@@ -5,6 +5,10 @@ We are going to talk about partitions, file-systems, carving, memory, logs, back
 
 So if you are doing a professional forensic analysis to some data or just playing a CTF you can find here useful interesting tricks.
 
+## Creating and Mounting an Image
+
+{% page-ref page="image-adquisition-and-mount.md" %}
+
 ## Inspecting an Image
 
 if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** \(even deleted ones\). Learn how in:
@@ -34,7 +38,9 @@ I want to do a special mention to the page:
 
 {% page-ref page="memory-dump-analysis/" %}
 
+## Pcap Inspection
 
+When yo
 
 
 
