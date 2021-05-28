@@ -1,54 +1,57 @@
-# Windows Forensics
+# Windows Artifacts
 
-## Windows 10 Notifications
+## Generic Windows Artifacts
+
+### Windows 10 Notifications
 
 In the path `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` you can find the database `appdb.dat` \(before Windows anniversary\) or `wpndatabase.db` \(after Windows Anniversary\).
 
 Inside this SQLite database you can find the `Notification` table with all the notifications \(in xml format\) that may contain interesting data.
 
-## Timeline
+### Timeline
 
 Timeline is a Windows characteristic that provides **chronological history** of web pages visited, edited documents, executed applications...  
 The database resides in the path `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`  
 This database can be open with a SQLite tool or with the tool [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **\*\*which generates 2 files that can be opened with the tool \[**TimeLine Explorer\*\*\]\([https://ericzimmerman.github.io/\#!index.md](https://ericzimmerman.github.io/#!index.md)\).
 
-## Windows RecentAPPs
+## **File Backups**
 
-Inside the registry `NTUSER.DAT` in the path `Software\Microsoft\Current Version\Search\RecentApps` you can subkeys with information about the **application executed**, **last time** it was executed, and **number of times** it was launched.
+### Recycle Bin
 
-## BAM
+In Vista/Win7/Win8/Win10 the **Reciclye Bin** can be found in the folder **`$Recycle.bin`** in the root of the drive \(`C:\$Reciycle.bin`\).  
+When a file is deleted in this folder are created 2 files:
 
-You can open the `SYSTEM` file with a registry editor and inside the path `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` you can find the information about the **applications executed by each user** \(note the `{SID}` in the path\) and at **what time** they were executed \(the time is inside the Data value of the registry\).
+* `$I{id}`: File information \(date of when it was deleted}
+* `$R{id}`: Content of the file
 
-## Windows Mail App
+![](../../../.gitbook/assets/image%20%28492%29.png)
 
-This application saves the emails in HTML or text. You can find the emails inside subfolders inside `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. The emails are saved with `.dat` extension.
+Having these files you can sue the tool [**Rifiuti**](https://github.com/abelcheung/rifiuti2) to get the original address of the deleted files and the date it was deleted \(use `rifiuti-vista.exe` for Vista – Win10\).
 
-The **metadata** of the emails and the **contacts** can be found inside the **EDB database**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
+```text
+.\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
+```
 
-**Change the extension** of the file from `.vol` to `.edb` and you can use the tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) to open it. Inside the `Message` table you can see the emails.
+![](../../../.gitbook/assets/image%20%28495%29%20%281%29.png)
 
-## Plug and Play Cleanup
+### Volume Shadow Copies
 
-The 'Plug and Play Cleanup' scheduled task is responsible for **clearing** legacy versions of drivers. It would appear \(based upon reports online\) that it also picks up **drivers which have not been used in 30 days**, despite its description stating that "the most current version of each driver package will be kept". As such, **removable devices which have not been connected for 30 days may have their drivers removed**.  
-The scheduled task itself is located at ‘C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup’, and its content is displayed below:
+Shadow Copy is a technology included in Microsoft Windows that can create **backup copies** or snapshots of computer files or volumes, even when they are in use.  
+These backups are usually located in the `\System Volume Information` from the roof of the file system and the name is composed by **UIDs** as in the following image:
 
-![](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
+![](../../../.gitbook/assets/image%20%28522%29.png)
 
-The task references 'pnpclean.dll' which is responsible for performing the cleanup activity additionally we see that the ‘UseUnifiedSchedulingEngine’ field is set to ‘TRUE’ which specifies that the generic task scheduling engine is used to manage the task. The ‘Period’ and ‘Deadline’ values of 'P1M' and 'P2M' within ‘MaintenanceSettings’ instruct Task Scheduler to execute the task once every month during regular Automatic maintenance and if it fails for 2 consecutive months, to start attempting the task during.  
-**This section was copied from** [**here**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)**.**
+Mounting the forensics image with the **ArsenalImageMounter**, the tool [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) can be used to inspect a shadow copy and even **extract the files** from the shadow copy backups.
 
-## **Windows Store**
+![](../../../.gitbook/assets/image%20%28525%29.png)
 
-The installed applications can be found in `\ProgramData\Microsoft\Windows\AppRepository\`  
-This repository has a **log** with **each application installed** in the system inside the database **`StateRepository-Machine.srd`**.
+The registry entry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` contains the files and keys **to not backup**:
 
-Inside the Application table of this database it's possible to find the columns: "Application ID", "PackageNumber", and "Display Name". This columns have information about pre-installed and installed applications and it can be found if some applications were uninstalled because the IDs of installed applications should be sequential.
+![](../../../.gitbook/assets/image%20%28523%29.png)
 
-It's also possible to **find installed application** inside the registry path: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`  
-And **uninstalled** **applications** in: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
+The registry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` also contains configuration information about the `Volume Shadow Copies`.
 
-## Office AutoSaved Files
+### Office AutoSaved Files
 
 You can find the office autosaved files in : `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
@@ -131,9 +134,19 @@ Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about whe
 
 ### USB Detective
 
-\*\*\*\*[**USBDetective**](https://usbdetective.com/) can be used to obtain information about the USB devices that have been connected to an image.
+[**USBDetective**](https://usbdetective.com/) can be used to obtain information about the USB devices that have been connected to an image.
 
 ![](../../../.gitbook/assets/image%20%28480%29.png)
+
+### Plug and Play Cleanup
+
+The 'Plug and Play Cleanup' scheduled task is responsible for **clearing** legacy versions of drivers. It would appear \(based upon reports online\) that it also picks up **drivers which have not been used in 30 days**, despite its description stating that "the most current version of each driver package will be kept". As such, **removable devices which have not been connected for 30 days may have their drivers removed**.  
+The scheduled task itself is located at ‘C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup’, and its content is displayed below:
+
+![](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
+
+The task references 'pnpclean.dll' which is responsible for performing the cleanup activity additionally we see that the ‘UseUnifiedSchedulingEngine’ field is set to ‘TRUE’ which specifies that the generic task scheduling engine is used to manage the task. The ‘Period’ and ‘Deadline’ values of 'P1M' and 'P2M' within ‘MaintenanceSettings’ instruct Task Scheduler to execute the task once every month during regular Automatic maintenance and if it fails for 2 consecutive months, to start attempting the task during.  
+**This section was copied from** [**here**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)**.**
 
 ## Emails
 
@@ -145,6 +158,14 @@ The emails contains **2 interesting parts: The headers and the content** of the 
 Also, inside the `References` and `In-Reply-To` headers you can find the ID of the messages:
 
 ![](../../../.gitbook/assets/image%20%28491%29.png)
+
+### Windows Mail App
+
+This application saves the emails in HTML or text. You can find the emails inside subfolders inside `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. The emails are saved with `.dat` extension.
+
+The **metadata** of the emails and the **contacts** can be found inside the **EDB database**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
+
+**Change the extension** of the file from `.vol` to `.edb` and you can use the tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) to open it. Inside the `Message` table you can see the emails.
 
 ### Microsoft Outlook
 
@@ -201,42 +222,57 @@ Beginning with Windows Vista, **thumbnail previews are stored in a centralized l
 
 You can read this file using [**ThumbCache Viewer**](https://thumbcacheviewer.github.io/).
 
-## Recycle Bin
+## Windows Registry
 
-In Vista/Win7/Win8/Win10 the **Reciclye Bin** can be found in the folder **`$Recycle.bin`** in the root of the drive \(`C:\$Reciycle.bin`\).  
-When a file is deleted in this folder are created 2 files:
+The Windows Registry Contains a lot of **information** about the **system and the actions of the users**.
 
-* `$I{id}`: File information \(date of when it was deleted}
-* `$R{id}`: Content of the file
+The files containing the registry are located in:
 
-![](../../../.gitbook/assets/image%20%28492%29.png)
+* %windir%\System32\Config\*_SAM\*_:  `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\*_SECURITY\*_:  `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\*_SYSTEM\*_:  `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\*_SOFTWARE\*_:  `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\*_DEFAULT\*_:  `HKEY_LOCAL_MACHINE`
+* %UserProfile%{User}\*_NTUSER.DAT\*_:  `HKEY_CURRENT_USER`
 
-Having these files you can sue the tool [**Rifiuti**](https://github.com/abelcheung/rifiuti2) to get the original address of the deleted files and the date it was deleted \(use `rifiuti-vista.exe` for Vista – Win10\).
+From Windows Vista and Windows 2008 Server upwards there are some backups of the `HKEY_LOCAL_MACHINE` registry files in **`%Windir%\System32\Config\RegBack\`**.  
+Also from these versions, the registry file **`%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`** is created saving information about program executions.
 
-```text
-.\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
-```
+### Tools
 
-![](../../../.gitbook/assets/image%20%28495%29%20%281%29.png)
+Some tools are useful to analyzed the registry files:
 
-## Volume Shadow Copies
+* **Registry Editor**: It's installed in Windows. It's a GUI to navigate through the Windows registry of the current session.
+* [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): It allows to load the registry file and navigate through them with a GUI. It also contains Bookmarks highlighting keys with interesting information.
+* [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Again, it has a GUI that allows to navigate through the loaded registry and also contains plugins that highlight interesting information inside the loaded registry.
+* [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Another GUI application capable of extracting the important information from the registry loaded.
 
-Shadow Copy is a technology included in Microsoft Windows that can create **backup copies** or snapshots of computer files or volumes, even when they are in use.  
-These backups are usually located in the `\System Volume Information` from the roof of the file system and the name is composed by **UIDs** as in the following image:
+### Recovering Deleted Element
 
-![](../../../.gitbook/assets/image%20%28522%29.png)
+When a key is deleted it's marked as such but until the space it's occupying is needed it won't be removed. Therefore, using tools like **Registry Explorer** it's possible to recover these deleted keys.
 
-Mounting the forensics image with the **ArsenalImageMounter**, the tool [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) can be used to inspect a shadow copy and even **extract the files** from the shadow copy backups.
+### Last Write Time
 
-![](../../../.gitbook/assets/image%20%28525%29.png)
+Each Key-Value contains a **timestamp** indicating the last time it was modified.
 
-The registry entry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` contains the files and keys **to not backup**:
+### SAM
 
-![](../../../.gitbook/assets/image%20%28523%29.png)
+The file/hive **SAM** contains the **users, groups and users passwords** hashes of the system.  
+In `SAM\Domains\Account\Users` you can obtain the username, the RID, last logon, last failed logon, login counter, password policy and when the account was created. In order to get the **hashes** you also **need** the file/hive **SYSTEM**.
 
-The registry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` also contains configuration information about the `Volume Shadow Copies`.
+### Interesting entries in the Windows Registry
+
+{% page-ref page="interesting-windows-registry-keys.md" %}
 
 ## Programs Executed
+
+### Windows RecentAPPs
+
+Inside the registry `NTUSER.DAT` in the path `Software\Microsoft\Current Version\Search\RecentApps` you can subkeys with information about the **application executed**, **last time** it was executed, and **number of times** it was launched.
+
+### BAM
+
+You can open the `SYSTEM` file with a registry editor and inside the path `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` you can find the information about the **applications executed by each user** \(note the `{SID}` in the path\) and at **what time** they were executed \(the time is inside the Data value of the registry\).
 
 ### Windows Prefetch
 
@@ -341,6 +377,16 @@ You can extract them from `C:\Windows\Tasks` or `C:\Windows\System32\Tasks` and 
 
 You can find them in the registry under `SYSTEM\ControlSet001\Services`. You can see what is going to be executed and when.
 
+### **Windows Store**
+
+The installed applications can be found in `\ProgramData\Microsoft\Windows\AppRepository\`  
+This repository has a **log** with **each application installed** in the system inside the database **`StateRepository-Machine.srd`**.
+
+Inside the Application table of this database it's possible to find the columns: "Application ID", "PackageNumber", and "Display Name". This columns have information about pre-installed and installed applications and it can be found if some applications were uninstalled because the IDs of installed applications should be sequential.
+
+It's also possible to **find installed application** inside the registry path: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`  
+And **uninstalled** **applications** in: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
+
 ## Windows Events
 
 Information that appears inside Windows events:
@@ -429,46 +475,4 @@ The ID 6005 of the "Event Log" service indicates the PC was turned On. The ID 60
 ### Logs Deletion
 
 The Security EventID 1102 indicates the logs were deleted.
-
-## Windows Registry
-
-The Windows Registry Contains a lot of **information** about the **system and the actions of the users**.
-
-The files containing the registry are located in:
-
-* %windir%\System32\Config\*_SAM\*_:  `HKEY_LOCAL_MACHINE`
-* %windir%\System32\Config\*_SECURITY\*_:  `HKEY_LOCAL_MACHINE`
-* %windir%\System32\Config\*_SYSTEM\*_:  `HKEY_LOCAL_MACHINE`
-* %windir%\System32\Config\*_SOFTWARE\*_:  `HKEY_LOCAL_MACHINE`
-* %windir%\System32\Config\*_DEFAULT\*_:  `HKEY_LOCAL_MACHINE`
-* %UserProfile%{User}\*_NTUSER.DAT\*_:  `HKEY_CURRENT_USER`
-
-From Windows Vista and Windows 2008 Server upwards there are some backups of the `HKEY_LOCAL_MACHINE` registry files in **`%Windir%\System32\Config\RegBack\`**.  
-Also from these versions, the registry file **`%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`** is created saving information about program executions.
-
-### Tools
-
-Some tools are useful to analyzed the registry files:
-
-* **Registry Editor**: It's installed in Windows. It's a GUI to navigate through the Windows registry of the current session.
-* \*\*\*\*[**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): It allows to load the registry file and navigate through them with a GUI. It also contains Bookmarks highlighting keys with interesting information.
-* \*\*\*\*[**RegRipper**](https://github.com/keydet89/RegRipper3.0): Again, it has a GUI that allows to navigate through the loaded registry and also contains plugins that highlight interesting information inside the loaded registry.
-* \*\*\*\*[**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Another GUI application capable of extracting the important information from the registry loaded.
-
-### Recovering Deleted Element
-
-When a key is deleted it's marked as such but until the space it's occupying is needed it won't be removed. Therefore, using tools like **Registry Explorer** it's possible to recover these deleted keys.
-
-### Last Write Time
-
-Each Key-Value contains a **timestamp** indicating the last time it was modified.
-
-### SAM
-
-The file/hive **SAM** contains the **users, groups and users passwords** hashes of the system.  
-In `SAM\Domains\Account\Users` you can obtain the username, the RID, last logon, last failed logon, login counter, password policy and when the account was created. In order to get the **hashes** you also **need** the file/hive **SYSTEM**.
-
-### Interesting entries in the Windows Registry
-
-{% page-ref page="interesting-windows-registry-keys.md" %}
 
