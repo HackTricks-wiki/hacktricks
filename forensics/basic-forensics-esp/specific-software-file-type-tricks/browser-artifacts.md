@@ -78,7 +78,7 @@ done < $passfile
 ```
 {% endcode %}
 
-![](../../.gitbook/assets/image%20%2873%29.png)
+![](../../../.gitbook/assets/image%20%2873%29.png)
 
 ## Google Chrome
 
@@ -118,7 +118,7 @@ In the previous folder you can also find the file V01.log. In case the **modifie
 Once **recovered** this artifact \(It's an ESE database, photorec can recover it with the options Exchange Database or EDB\) you can use the program [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) to open it.  
 Once **opened**, go to the table "**Containers**".
 
-![](../../.gitbook/assets/image%20%28447%29.png)
+![](../../../.gitbook/assets/image%20%28447%29.png)
 
 Inside this table you can find in which other tables or containers each part of the stored information is saved. Following that you can find the **locations of the data** stored by the browsers **and metadata** about that data inside the .
 
@@ -175,7 +175,7 @@ Session cookies will reside in memory and persistent cookie in the disk.
 
 Checking the tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) you can find the container with the metadata of the downloads:
 
-![](../../.gitbook/assets/image%20%28445%29.png)
+![](../../../.gitbook/assets/image%20%28445%29.png)
 
 Getting the information of the column "ResponseHeaders" you can transform from hex that information and obtain the URL, the file type and the location of the downloaded file.
 

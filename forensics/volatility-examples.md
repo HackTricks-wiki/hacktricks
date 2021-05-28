@@ -1,12 +1,10 @@
 # Volatility - CheatSheet
 
-If you want something as **fast** as possible: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+If you want something **fast and crazy** that will launch several Volatility plugins on parallel you can use: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # Will use most important plugins (could use a lot of space depending on the size of the memory)
 ```
-
-[Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
 
 ## Installation
 
@@ -37,7 +35,11 @@ python setup.py install
 {% endtab %}
 {% endtabs %}
 
-## A note on “list” vs. “scan” plugins
+## Volatility Commands
+
+Access the official doc in [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
+
+### A note on “list” vs. “scan” plugins
 
 Volatility has two main approaches to plugins, which are sometimes reflected in their names. “list” plugins will try to navigate through Windows Kernel structures to retrieve information like processes \(locate and walk the linked list of `_EPROCESS` structures in memory\), OS handles \(locating and listing the handle table, dereferencing any pointers found, etc\). They more or less behave like the Windows API would if requested to, for example, list processes.
 
