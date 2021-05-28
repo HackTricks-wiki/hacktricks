@@ -219,6 +219,23 @@ Having these files you can sue the tool [**Rifiuti**](https://github.com/abelche
 
 ![](../../../.gitbook/assets/image%20%28495%29%20%281%29.png)
 
+## Volume Shadow Copies
+
+Shadow Copy is a technology included in Microsoft Windows that can create **backup copies** or snapshots of computer files or volumes, even when they are in use.  
+These backups are usually located in the `\System Volume Information` from the roof of the file system and the name is composed by **UIDs** as in the following image:
+
+![](../../../.gitbook/assets/image%20%28522%29.png)
+
+Mounting the forensics image with the **ArsenalImageMounter**, the tool [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) can be used to inspect a shadow copy and even **extract the files** from the shadow copy backups.
+
+![](../../../.gitbook/assets/image%20%28524%29.png)
+
+The registry entry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` contains the files and keys **to not backup**:
+
+![](../../../.gitbook/assets/image%20%28523%29.png)
+
+The registry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` also contains configuration information about the `Volume Shadow Copies`.
+
 ## Programs Executed
 
 ### Windows Prefetch

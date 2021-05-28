@@ -708,7 +708,8 @@ This program will extract all the MFT data and present it in CSV format. It can 
 
 #### $LOGFILE
 
-The file **`$LOGFILE`** contains **logs** about the **actions** that have been **performed** **to** **files**. It also **saves** the **action** it would need to perform in case of a **redo** and the action needed to **go back** to the **previous** **state**.
+The file **`$LOGFILE`** contains **logs** about the **actions** that have been **performed** **to** **files**. It also **saves** the **action** it would need to perform in case of a **redo** and the action needed to **go back** to the **previous** **state**.  
+These logs are useful for the MFT to rebuild the file system in case some kind of error happened.
 
 The maximum file size of this file is **65536KB**.
 
@@ -723,7 +724,7 @@ Filtering by filenames you can see **all the actions performed against a file**:
 
 #### $USNJnrl
 
-The file `$EXTEND/$USNJnrl/$J` is and alternate data stream of the file `$EXTEND$USNJnrl` . This artifact contains a **registry of changes produced inside the NTFS volume**.
+The file `$EXTEND/$USNJnrl/$J` is and alternate data stream of the file `$EXTEND$USNJnrl` . This artifact contains a **registry of changes produced inside the NTFS volume with more detail than `$LOGFILE`**.
 
 To inspect this file you can use the tool [**UsnJrnl2csv**](https://github.com/jschicht/UsnJrnl2Csv).
 
@@ -731,9 +732,47 @@ Filtering by the filename it's possible to see **all the actions performed again
 
 ![](../../.gitbook/assets/image%20%28517%29.png)
 
+#### $I30
 
+Every **directory** in the file system contains an **`$I30`** **attribute** that must be maintained whenever there are changes to the directory's contents. When files or folders are removed from the directory, the **`$I30`** index records are re-arranged accordingly. However, **re-arranging of the index records may leave remnants of the deleted file/folder entry within the slack space**. This can be useful in forensics analysis for identifying files that may have existed on the drive.
 
+You can get the `$I30` file of a directory from the **FTK Imager** and inspect it with the tool [Indx2Csv](https://github.com/jschicht/Indx2Csv).
 
+![](../../.gitbook/assets/image%20%28525%29.png)
+
+With this data you can find **information about the file changes performed inside the folder** but note that the deletion time of a file isn't saved inside this logs. However, you can see that **last modified date** of the **`$I30` file**, and if the **last action performed** over the directory is the **deletion** of a file, the times may be the same.
+
+#### ADS \(Alternate Data Stream\)
+
+Alternate data streams allow files to contain more than one stream of data. Every file has at least one data stream. In Windows, this default data stream is called `:$DATA`.  
+In this [page you can see different ways to create/access/discover alternate data streams](../../windows/basic-cmd-for-pentesters.md#alternate-data-streams-cheatsheet-ads-alternate-data-stream) from the console. In the past this cause a vulnerability in IIS as people was able to access the source code of a page by accessing the `:$DATA` stream like `http://www.alternate-data-streams.com/default.asp::$DATA`.
+
+Using the tool [**AlternateStreamView**](https://www.nirsoft.net/utils/alternate_data_streams.html) you can search and export all the files with some ADS.
+
+![](../../.gitbook/assets/image%20%28526%29.png)
+
+Using the FTK imager and double clicking in a file with ADS you can **access the ADS data**:
+
+![](../../.gitbook/assets/image%20%28527%29.png)
+
+If you find an ADS called **`Zone.Identifier`** \(see previous image\) this usually contains **information about how was the file downloaded**. There would be a "ZoneId" field with the following info:
+
+* Zone ID = 0 -&gt; Mycomputer
+* Zone ID = 1 -&gt; Intranet
+* Zone ID = 2 -&gt; Trusted
+* Zone ID = 3 -&gt; Internet
+* Zone ID = 4 -&gt; Unstrusted
+
+Moreover, different software may store additional information:
+
+| Software | Info |
+| :--- | :--- |
+| Google Chrome, Opera, Vivaldi, | ZoneId=3, ReferrerUrl, HostUrl |
+| Microsoft Edge | ZoneId=3, LastWriterPackageFamilyName=Microsoft.MicrosoftEdge\_8wekyb3d8bbwe |
+| Firefox, Tor browser, Outlook2016, Thunderbird, Windows Mail, Skype | ZoneId=3 |
+| μTorrent | ZoneId=3, HostUrl=about:internet |
+
+#### 
 
 
 
