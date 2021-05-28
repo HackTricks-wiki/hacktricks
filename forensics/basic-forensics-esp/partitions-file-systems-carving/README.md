@@ -160,23 +160,14 @@ Note that this technique **doesn't work to retrieve fragmented files**. If a fil
 
 There are several tools that you can use for file Carving indicating them the file-types you want search for 
 
-* \*\*\*\*[**PhotoRec**](https://www.cgsecurity.org/wiki/TestDisk_Download)\*\*\*\*
-* \*\*\*\*[**Binwalk**](https://github.com/ReFirmLabs/binwalk)\*\*\*\*
-* \*\*\*\*[**Foremost**](https://github.com/jonstewart/foremost)\*\*\*\*
-* \*\*\*\*[**Bulk Extractor**](https://github.com/simsong/bulk_extractor)\*\*\*\*
-
-**There are also other tools to find more specific file-types like:**
-
-* \*\*\*\*[**vss\_carver**](https://github.com/mnrkbys/vss_carver): Use it to search for delete Volume shadow Copies
+{% page-ref page="file-data-carving-tools.md" %}
 
 ### Data Stream **C**arving
 
 Data Stream Carving is similar to File Carving but i**nstead of looking for complete files, it looks for interesting fragments** of information.  
 For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
 
-The following tools can be used to find specific interesting information inside a bulk of data:
-
-* \*\*\*\*[**Bulk Extractor**](https://github.com/simsong/bulk_extractor)\*\*\*\*
+{% page-ref page="file-data-carving-tools.md" %}
 
 ### Secure Deletion
 
