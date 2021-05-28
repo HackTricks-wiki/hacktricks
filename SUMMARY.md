@@ -424,6 +424,8 @@
   * [Wireshark tricks](forensics/pcaps-analysis/wireshark-tricks.md)
 * [Volatility - CheatSheet](forensics/volatility-examples.md)
 * [Basic Forensics \(ESP\)](forensics/basic-forensics-esp/README.md)
+  * [Partitions/File Systems/Carving](forensics/basic-forensics-esp/partitions-file-systems-carving/README.md)
+    * [NTFS](forensics/basic-forensics-esp/partitions-file-systems-carving/ntfs.md)
   * [Windows Forensics](forensics/basic-forensics-esp/windows-forensics/README.md)
     * [Interesting Windows Registry Keys](forensics/basic-forensics-esp/windows-forensics/interesting-windows-registry-keys.md)
   * [Anti-Forensic Techniques](forensics/basic-forensics-esp/anti-forensic-techniques.md)
