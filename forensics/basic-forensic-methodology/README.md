@@ -1,4 +1,4 @@
-# Basic Forensics \(ESP\)
+# Basic Forensic Methodology
 
 In this section of the book we are going to learn about some **useful forensics tricks**.  
 We are going to talk about partitions, file-systems, carving, memory, logs, backups, OSs, and much more.
@@ -29,6 +29,10 @@ Read the following page to learn some interesting tricks:
 I want to do a special mention to the page:
 
 {% page-ref page="specific-software-file-type-tricks/browser-artifacts.md" %}
+
+## Memory Dump Inspection
+
+{% page-ref page="memory-dump-analysis/" %}
 
 
 
