@@ -27,6 +27,7 @@
 * [https://builtwith.com/](https://builtwith.com/)
 * [https://www.spiderfoot.net/](https://www.spiderfoot.net/)
 * [https://github.com/zricethezav/gitleaks](https://github.com/zricethezav/gitleaks)
+* [https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/sys/tools/subdomainfinder/) : 8 Subdomain finder tools, sublist3r, amass and more
 
 ## **WEB**
 
