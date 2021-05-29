@@ -7,7 +7,8 @@ The **minimum** unit of a disk is the **sector** \(normally composed by 512B\). 
 
 ### MBR \(master Boot Record\)
 
-It's allocated in the **first sector of the disk after the 446B of the boot code**. It contains the **partitions** table \(there can be up to **4 primary partitions**\). The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.  
+It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate the PC what and from where a partition should be mounted.  
+It allows up to **4 partitions** \(at most **just 1** can be active/**bootable**\). However, if you need more partitions you can use **extended partitions**.. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.  
 MBR allows **max 2.2TB**.
 
 ![](../../../.gitbook/assets/image%20%28503%29.png)
@@ -17,6 +18,45 @@ MBR allows **max 2.2TB**.
 From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** \(if Windows is used\). The logical drive letters of the hard disk depend on the Windows Disk Signature. Changing this signature could prevent Windows from booting \(tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**\)**.
 
 ![](../../../.gitbook/assets/image%20%28499%29.png)
+
+#### Format
+
+| Offset | Length | Item |
+| :--- | :--- | :--- |
+| 0 \(0x00\) | 446\(0x1BE\) | Boot code |
+| 446 \(0x1BE\) | 16 \(0x10\) | First Partition |
+| 462 \(0x1CE\) | 16 \(0x10\) | Second Partition |
+| 478 \(0x1DE\) | 16 \(0x10\) | Third Partition |
+| 494 \(0x1EE\) | 16 \(0x10\) | Fourth Partition |
+| 510 \(0x1FE\) | 2 \(0x2\) | Signature 0x55 0xAA |
+
+#### Partition Record Format
+
+| Offset | Length | Item |
+| :--- | :--- | :--- |
+| 0 \(0x00\) | 1 \(0x01\) | Active flag \(0x80 = bootable\) |
+| 1 \(0x01\) | 1 \(0x01\) | Start head |
+| 2 \(0x02\) | 1 \(0x01\) | Start sector \(bits 0-5\); upper bits of cylinder \(6- 7\) |
+| 3 \(0x03\) | 1 \(0x01\) | Start cylinder lowest 8 bits |
+| 4 \(0x04\) | 1 \(0x01\) | Partition type code \(0x83 = Linux\) |
+| 5 \(0x05\) | 1 \(0x01\) | End head |
+| 6 \(0x06\) | 1 \(0x01\) | End sector \(bits 0-5\); upper bits of cylinder \(6- 7\) |
+| 7 \(0x07\) | 1 \(0x01\) | End cylinder lowest 8 bits |
+| 8 \(0x08\) | 4 \(0x04\) | Sectors preceding partition \(little endian\) |
+| 12 \(0x0C\) | 4 \(0x04\) | Sectors in partition |
+
+In order to mount a MBR in Linux you first need to get the start offset \(you can use `fdisk` and the the `p` command\)
+
+![](../../../.gitbook/assets/image%20%28413%29%20%283%29%20%283%29%20%283%29%20%282%29%20%281%29.png)
+
+An then use the following code
+
+```bash
+#Mount MBR in Linux
+mount -o ro,loop,offset=<Bytes>
+#63x512 = 32256Bytes
+mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
+```
 
 #### LBA \(Logical block addressing\)
 
@@ -130,6 +170,12 @@ When a file is "deleted" using a FAT file system, the directory entry remains al
 
 {% page-ref page="ntfs.md" %}
 
+### EXT
+
+**Ext2** is the most common file-system for **not journaling** partitions \(**partitions that don't change much**\) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
+
+{% page-ref page="ext.md" %}
+
 ## **Metadata**
 
 Some files contains metadata. This is information about the content of the file which sometimes might be interesting for the analyst as depending on the file-type it might have information like:
@@ -151,6 +197,8 @@ You can use tools like [**exiftool**](https://exiftool.org/) and [**Metadiver**]
 As it was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file-system just mark it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files \(like the MFT\) and find the deleted files.
 
 Also, the OS usually saves a lot of information about file system changes and backups, so it's possible to try to use them to recover the file or as much information as possible.
+
+{% page-ref page="file-data-carving-recovery-tools.md" %}
 
 ### **File Carving**
 
