@@ -113,5 +113,3 @@ y por aqui la metodologia owasp para analizar firmware: [https://github.com/scri
 * [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : This list aims to cover Electron.js security related topics.
 * [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Info about BB programs
 
-## 
-
