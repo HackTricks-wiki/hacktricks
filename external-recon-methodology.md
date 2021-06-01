@@ -1,5 +1,13 @@
 # External Recon Methodology
 
+{% hint style="danger" %}
+Do you use **Hacktricks every day**? Did you find the book **very** **useful**? Would you like to **receive extra help** with cybersecurity questions? Would you like to **find more and higher quality content on Hacktricks**?  
+[**Support Hacktricks through github sponsors**](https://github.com/sponsors/carlospolop) **so we can dedicate more time to it and also get access to the Hacktricks private group where you will get the help you need and much more!**
+{% endhint %}
+
+If you want to know about my **latest modifications**/**additions** or you have **any suggestion for HackTricks** or **PEASS**, **join the** [**💬**](https://emojipedia.org/speech-balloon/)[**telegram group**](https://t.me/peass), or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**  
+If you want to **share some tricks with the community** you can also submit **pull requests** to [**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) that will be reflected in this book and don't forget to **give ⭐** on **github** to **motivate** **me** to continue developing this book.
+
 ## Assets discoveries
 
 > So you were said that everything belonging to some company is inside the scope, and you want to figure out what this company actually owns.
@@ -25,8 +33,8 @@ An autonomous system number \(**ASN**\) is a **unique number** assigned to an **
 An **AS** consists of **blocks** of **IP addresses** which have a distinctly defined policy for accessing external networks and are administered by a single organisation but may be made up of several operators.
 
 It's interesting to find if the **company have assigned any ASN** to find its **IP ranges.** It will be interested to perform a **vulnerability test** against all the **hosts** inside the **scope** and **look for domains** inside these IPs.  
-****You can search by **company name**, by **IP** or by **domain** in [https://bgp.he.net/](https://bgp.he.net/).  
-Depending on the region of the company this links could be useful to gather more data: [AFRINIC](https://www.afrinic.net/) \(Africa\), [Arin](https://www.arin.net/about/welcome/region/)\(North America\), [APNIC](https://www.apnic.net/) \(Asia\), [LACNIC](https://www.lacnic.net/) \(Latin America\), [RIPE NCC](https://www.ripe.net/) \(Europe\). Anyway, probably all the **useful information** \(IP ranges and Whois\) **appears already in the first link**.
+**\*\*You can search by** company name**, by** IP **or by** domain **in** [**https://bgp.he.net/**](https://bgp.he.net/)**.  
+Depending on the region of the company this links could be useful to gather more data:** [**AFRINIC**](https://www.afrinic.net/) **\(Africa\),** [**Arin**](https://www.arin.net/about/welcome/region/)**\(North America\),** [**APNIC**](https://www.apnic.net/) **\(Asia\),** [**LACNIC**](https://www.lacnic.net/) **\(Latin America\),** [**RIPE NCC**](https://www.ripe.net/) **\(Europe\). Anyway, probably all the** useful information **\(IP ranges and Whois\)** appears already in the first link\*\*.
 
 ```bash
 #You can try "automate" this with amass, but it's not very recommended
@@ -40,14 +48,14 @@ You can fins the IP and ASN of a domain using [http://ipv4info.com/](http://ipv4
 ### Looking for vulnerabilities
 
 At this point we known **all the assets inside the scope**, so if you are allowed you could launch some **vulnerability scanner** \(Nessus, OpenVAS\) over all the hosts.  
-Also, you could launch some [**port scans**](pentesting/pentesting-network/#discovering-hosts-from-the-outside) ****or use services like **shodan** to find **open ports** and depending on what you find you should **take a look in this book to how to pentest several possible service running**.  
-Also, It could be worth it to mention that you can also prepare some **default username** and **passwords** lists and try to **bruteforce** services with [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
+Also, you could launch some [**port scans**](pentesting/pentesting-network/#discovering-hosts-from-the-outside) **\*\*or use services like** shodan **to find** open ports **and depending on what you find you should** take a look in this book to how to pentest several possible service running**.  
+Also, It could be worth it to mention that you can also prepare some** default username **and** passwords **lists and try to** bruteforce\*\* services with [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
 
 ## Domains
 
 > We know all the companies inside the scope and their assets, it's time to find the domains inside the scope.
 
-_Please, note that in the following purposed techniques you can also find subdomains and that information shouldn't be underrated._ 
+_Please, note that in the following purposed techniques you can also find subdomains and that information shouldn't be underrated._
 
 First of all you should look for the **main domain**\(s\) of each company. For example, for _Tesla Inc._ is going to be _tesla.com_.
 
@@ -68,7 +76,7 @@ You can also use a online tool for this info: [http://ptrarchive.com/](http://pt
 ### Reverse Whois \(loop\)
 
 Inside a **whois** you can find a lot of interesting **information** like **organisation name**, **address**, **emails**, phone numbers... But which is even more interesting is that you can find **more assets related to the company** if you perform **reverse whois lookups by any of those fields** \(for example other whois registries where the same email appears\).  
-You can use online tools like: 
+You can use online tools like:
 
 * [https://viewdns.info/reversewhois/](https://viewdns.info/reversewhois/) - **Free**
 * [https://domaineye.com/reverse-whois](https://domaineye.com/reverse-whois)  - **Free**
@@ -112,7 +120,7 @@ Simply said, favihash will allow us to discover domains that have the same favic
 
 **Note that you can use this technique to discover more domain names every time you find a new domain.**
 
-#### Shodan 
+#### Shodan
 
 As you already know the name of the organisation owning the IP space. You can search by that data in shodan using: `org:"Tesla, Inc."` Check the found hosts for new unexpected domains in the TLS certificate.
 
@@ -173,7 +181,7 @@ You could also find subdomains scrapping the web pages and parsing them \(includ
 
 #### RapidDNS
 
-Quickly find subdomains using [RapidDNS](https://rapiddns.io/) API \(from  [link](https://twitter.com/Verry__D/status/1282293265597779968)\):
+Quickly find subdomains using [RapidDNS](https://rapiddns.io/) API \(from [link](https://twitter.com/Verry__D/status/1282293265597779968)\):
 
 ```text
 rapiddns(){
@@ -186,15 +194,15 @@ curl -s "https://rapiddns.io/subdomain/$1?full=1" \
 
 #### Shodan
 
- You found **dev-int.bigcompanycdn.com**, make a Shodan query like the following:
+You found **dev-int.bigcompanycdn.com**, make a Shodan query like the following:
 
 * http.html:”dev-int.bigcompanycdn.com”
-* http.html:”https://dev-int-bigcompanycdn.com”
+* http.html:”[https://dev-int-bigcompanycdn.com”](https://dev-int-bigcompanycdn.com”)
 
 ### DNS Brute force
 
 Let's try to find new **subdomains** brute-forcing DNS servers using possible subdomain names.  
-The most recommended tools for this are [**massdns**](https://github.com/blechschmidt/massdns)**,** [**gobuster**](https://github.com/OJ/gobuster)**,** [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) ****and ****[**shuffledns**](https://github.com/projectdiscovery/shuffledns). The first one is faster but more prone to errors \(you should always check for **false positives**\) and the second one **is more reliable** \(always use gobuster\).
+The most recommended tools for this are [**massdns**](https://github.com/blechschmidt/massdns)**,** [**gobuster**](https://github.com/OJ/gobuster)**,** [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) **and** [**shuffledns**](https://github.com/projectdiscovery/shuffledns). The first one is faster but more prone to errors \(you should always check for **false positives**\) and the second one **is more reliable** \(always use gobuster\).
 
 For this action you will need some common subdomains lists like:
 
@@ -236,7 +244,7 @@ gobuster vhost -u https://mysite.com -t 50 -w subdomains.txt
 wfuzz -c -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-20000.txt --hc 400,404,403 -H "Host: FUZZ.example.com" -u http://example.com -t 100
 
 #From https://github.com/allyshka/vhostbrute
-vhostbrute.py --url="example.com" --remoteip="10.1.1.15" --base="www.example.com" --vhosts="vhosts_full.list" 
+vhostbrute.py --url="example.com" --remoteip="10.1.1.15" --base="www.example.com" --vhosts="vhosts_full.list"
 ```
 
 {% hint style="info" %}
@@ -292,7 +300,7 @@ cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 a
 
 Now that you have discovered **all the web servers** running in the scope \(in **IPs** of the company and all the **domains** and **subdomains**\) you probably **don't know where to start**. So, let's make it simple and start just taking screenshots of all of them. Just **taking a look** to the **main page** of all of them you could find **weird** endpoints more **prone** to be **vulnerable**.
 
-To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), ****[**Aquatone**](https://github.com/michenriksen/aquatone)**,** [**shutter**](https://shutter-project.org/downloads/) ****or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
+To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), **\*\*\[**Aquatone**\]\(**[https://github.com/michenriksen/aquatone](https://github.com/michenriksen/aquatone)**\)**, **\[**shutter**\]\(**[https://shutter-project.org/downloads/](https://shutter-project.org/downloads/)**\) \*\***or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
 ## Recapitulation 1
 
@@ -319,14 +327,13 @@ Now that we have built the list of assets of our scope it's time to search for s
 * [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
 * [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
 * [https://github.com/michenriksen/gitrob](https://github.com/michenriksen/gitrob)
-* [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
 * [https://github.com/anshumanbh/git-all-secrets](https://github.com/anshumanbh/git-all-secrets)
 * [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
 * [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 * [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 * [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
-**Dorks**:  _AWS\_SECRET\_ACCESS\_KEY, API KEY, API SECRET, API TOKEN… ROOT PASSWORD, ADMIN PASSWORD, COMPANYNAME SECRET, COMPANYNAME ROOT, GCP SECRET, AWS SECRET, “username password” extension:sql, “private” extension:pgp..._
+**Dorks**: _AWS\_SECRET\_ACCESS\_KEY, API KEY, API SECRET, API TOKEN… ROOT PASSWORD, ADMIN PASSWORD, COMPANYNAME SECRET, COMPANYNAME ROOT, GCP SECRET, AWS SECRET, “username password” extension:sql, “private” extension:pgp..._
 
 #### More Github Dorks
 
@@ -355,6 +362,4 @@ At this point you should have already read the Pentesting Web Methodology and ap
 As you can see there is a lot of different vulnerabilities to search for.
 
 **If you have find any vulnerability thanks to this book, please reference the book in your write-up.**
-
-
 
