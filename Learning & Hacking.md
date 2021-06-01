@@ -34,15 +34,17 @@ This site seems to be a community platform
 
 ## https://www.hacker101.com/
 
-free and smale site with videos and CTFs
-
+Free and smale site with videos and CTFs
 
 
 ## https://crackmes.one/
 
 This site has a lot of binarys for forensic learning.
 
+## https://overthewire.org/wargames/
 
+The wargames offered by the OverTheWire community can help you to learn and practice security concepts in the form of fun-filled games.
+ Perfect for beginners.
 
 ## https://www.hackthissite.org/missions/basic/ 
 
