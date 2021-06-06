@@ -130,7 +130,7 @@ The files in the folder WPDNSE are a copy of the original ones, then won't survi
 
 Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about when the USB connection was produced \(search for `Section start`\).
 
-![](../../../.gitbook/assets/image%20%28477%29%20%282%29%20%281%29.png)
+![](../../../.gitbook/assets/image%20%28477%29%20%282%29%20%282%29%20%281%29.png)
 
 ### USB Detective
 
