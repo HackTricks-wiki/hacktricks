@@ -216,7 +216,7 @@
   * [Artifactory Hacking guide](pentesting/pentesting-web/artifactory-hacking-guide.md)
   * [Apache](pentesting/pentesting-web/apache.md)
   * [JSP](pentesting/pentesting-web/jsp.md)
-  * [API Pentesting](pentesting/pentesting-web/api-pentesting.md)
+  * [Web API Pentesting](pentesting/pentesting-web/web-api-pentesting.md)
   * [Buckets](pentesting/pentesting-web/buckets/README.md)
     * [Firebase Database](pentesting/pentesting-web/buckets/firebase-database.md)
     * [AWS-S3](pentesting/pentesting-web/buckets/aws-s3.md)
