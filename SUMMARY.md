@@ -480,11 +480,12 @@
 ## Crypto
 
 * [Certificates](crypto/certificates.md)
-* [Electronic Code Book \(ECB\)](crypto/electronic-code-book-ecb.md)
 * [Cipher Block Chaining CBC-MAC](crypto/cipher-block-chaining-cbc-mac-priv.md)
+* [Crypto CTFs Tricks](crypto/crypto-ctfs-tricks.md)
+* [Electronic Code Book \(ECB\)](crypto/electronic-code-book-ecb.md)
+* [Hash Length Extension Attack](crypto/hash-length-extension-attack.md)
 * [Padding Oracle](crypto/padding-oracle-priv.md)
 * [RC4 - Encrypt&Decrypt](crypto/rc4-encrypt-and-decrypt.md)
-* [Crypto CTFs Tricks](crypto/crypto-ctfs-tricks.md)
 
 ## BACKDOORS
 

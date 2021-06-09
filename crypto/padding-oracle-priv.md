@@ -10,7 +10,9 @@ description: 'https://pentesterlab.com/'
 
 CBC is an encryption mode in which the message is split into blocks of X bytes length and each block is XORed with the previous encrypted block. The result is then encrypted.
 
-The following schema \(source: [Wikipedia](http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)\) explains this method:![CBC encryption](https://assets.pentesterlab.com/padding_oracle/CBC_encryption.png)
+The following schema \(source: [Wikipedia](http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)\) explains this method:
+
+![CBC encryption](https://assets.pentesterlab.com/padding_oracle/CBC_encryption.png)
 
 During the decryption, the reverse operation is used. The encrypted data is split in block of X bytes. Then the block is decrypted and XORed with the previous encrypted block to get the cleartext. The following schema \(source: [Wikipedia](http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)\) highlights this behavior:
 
