@@ -411,11 +411,6 @@
 * [XSSI \(Cross-Site Script Inclusion\)](pentesting-web/xssi-cross-site-script-inclusion.md)
 * [XS-Search](pentesting-web/xs-search.md)
 
-## Cloud Security
-
-* [Cloud security review](cloud-security/cloud-security-review.md)
-* [AWS Security](cloud-security/aws-security.md)
-
 ## Forensics
 
 * [Basic Forensic Methodology](forensics/basic-forensic-methodology/README.md)
@@ -447,6 +442,15 @@
     * [ZIPs tricks](forensics/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md)
   * [Windows Artifacts](forensics/basic-forensic-methodology/windows-forensics/README.md)
     * [Interesting Windows Registry Keys](forensics/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys.md)
+
+## A.I. Exploiting
+
+* [BRA.I.NSMASHER Presentation](a.i.-exploiting/bra.i.nsmasher-presentation.md)
+
+## Cloud Security
+
+* [Cloud security review](cloud-security/cloud-security-review.md)
+* [AWS Security](cloud-security/aws-security.md)
 
 ## Physical attacks
 
