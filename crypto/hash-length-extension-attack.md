@@ -4,7 +4,7 @@
 
 Imagine a server which is **signing** some **data** by **appending** a **secret** to some known clear text data and then hashing that data. If you know:
 
-* **The length of the secret**
+* **The length of the secret** \(this can be also bruteforced from a given length range\)
 * **The clear text data**
 * **The algorithm \(and it's vulnerable to this attack\)**
 * **The padding is known** 
