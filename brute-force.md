@@ -406,6 +406,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 * [https://www.cmd5.org/](https://www.cmd5.org/) \(Hashes\)
 * [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) \(MD5, NTLM, SHA1, MySQL5, SHA256, SHA512\)
 * [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) \(MD5\)
+* [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com/)
 
 Check this out before trying to bruteforce a Hash.
 
