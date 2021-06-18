@@ -287,7 +287,7 @@
 * [873 - Pentesting Rsync](pentesting/873-pentesting-rsync.md)
 * [1026 - Pentesting Rusersd](pentesting/1026-pentesting-rusersd.md)
 * [1080 - Pentesting Socks](pentesting/1080-pentesting-socks.md)
-* [1098/1099 - Pentesting Java RMI](pentesting/1099-pentesting-java-rmi.md)
+* [1098/1099/1050 - Pentesting Java RMI - RMI-IIOP](pentesting/1099-pentesting-java-rmi.md)
 * [1433 - Pentesting MSSQL - Microsoft SQL Server](pentesting/pentesting-mssql-microsoft-sql-server.md)
 * [1521,1522-1529 - Pentesting Oracle TNS Listener](pentesting/1521-1522-1529-pentesting-oracle-listener/README.md)
   * [Oracle Pentesting requirements installation](pentesting/1521-1522-1529-pentesting-oracle-listener/oracle-pentesting-requirements-installation.md)
