@@ -447,7 +447,8 @@
 
 ## A.I. Exploiting
 
-* [BRA.I.NSMASHER Presentation](a.i.-exploiting/bra.i.nsmasher-presentation.md)
+* [BRA.I.NSMASHER Presentation](a.i.-exploiting/bra.i.nsmasher-presentation/README.md)
+  * [Basic Captcha Breaker](a.i.-exploiting/bra.i.nsmasher-presentation/basic-captcha-breaker.md)
 
 ## Cloud Security
 
