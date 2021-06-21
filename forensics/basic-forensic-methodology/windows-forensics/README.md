@@ -12,7 +12,7 @@ Inside this SQLite database you can find the `Notification` table with all the n
 
 Timeline is a Windows characteristic that provides **chronological history** of web pages visited, edited documents, executed applications...  
 The database resides in the path `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`  
-This database can be open with a SQLite tool or with the tool [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **\*\*which generates 2 files that can be opened with the tool \[**TimeLine Explorer\*\*\]\([https://ericzimmerman.github.io/\#!index.md](https://ericzimmerman.github.io/#!index.md)\).
+This database can be open with a SQLite tool or with the tool [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **which generates 2 files that can be opened with the tool** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
 ## **File Backups**
 
