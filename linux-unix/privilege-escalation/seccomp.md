@@ -114,6 +114,6 @@ If you wan to make sure that **some binary doesn't work inside a a docker contai
 In the following example the **syscalls** of `uname` are discovered:
 
 ```bash
-ocker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
+docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 ```
 
