@@ -26,6 +26,7 @@
 
 * [Checklist - Linux Privilege Escalation](linux-unix/linux-privilege-escalation-checklist.md)
 * [Linux Privilege Escalation](linux-unix/privilege-escalation/README.md)
+  * [PAM - Pluggable Authentication Modules](linux-unix/privilege-escalation/pam-pluggable-authentication-modules.md)
   * [SELinux](linux-unix/privilege-escalation/selinux.md)
   * [Logstash](linux-unix/privilege-escalation/logstash.md)
   * [AppArmor](linux-unix/privilege-escalation/apparmor.md)
