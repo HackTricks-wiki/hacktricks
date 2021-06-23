@@ -4,6 +4,7 @@
 
 Note that the shell you set in the `SHELL` variable **must** be **listed inside** _**/etc/shells**_ or `The value for the SHELL variable was not found the /etc/shells file   
 This incident has been reported`.
+Also note that the next snippets only work in bash. If you're in a zsh, change to a bash before obtaining the shell by running `bash`. 
 
 ```bash
 python3 -c 'import pty; pty.spawn("/bin/bash")'
