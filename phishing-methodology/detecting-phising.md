@@ -47,7 +47,7 @@ If you have located the login forms of the suspicions domains you can try to **s
 
 ## Domain names using keywords
 
-I the parent page it's also mentioned a domain name variation technique that consist on putting the **victim's domain name inside a bigger domain** \(e.g. paypal-financial.com for paypal.com\).
+The parent page also mentions a domain name variation technique that consist on putting the **victim's domain name inside a bigger domain** \(e.g. paypal-financial.com for paypal.com\).
 
 ### Certificate Transparency
 
