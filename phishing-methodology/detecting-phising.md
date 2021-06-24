@@ -34,7 +34,7 @@ For more information read [https://www.bleepingcomputer.com/news/security/hijack
 
 ### Basic checks
 
-Once you have a list of potential suspicions domain names you should **check**  them \(mainly the ports HTTP and HTTPS\) to **see if they are using some login form similar** to someone of the victim's domain.  
+Once you have a list of potential suspicions domain names you should **check** them \(mainly the ports HTTP and HTTPS\) to **see if they are using some login form similar** to someone of the victim's domain.  
 You could also check the port 3333 to see if it's open and running an instance of `gophish`.  
 It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.  
 You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to see if it's really suspicious and in that case **access it to take a deeper look**.
@@ -51,7 +51,7 @@ The parent page also mentions a domain name variation technique that consist on 
 
 ### Certificate Transparency
 
-It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover this phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside it's name** For example, if attackers generates a certificate of https://paypal-financial.com, seeing the certificate it's possible to find the keyword "paypal" and know that that suspicions email is being used.
+It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover this phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside it's name** For example, if attackers generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that that suspicions email is being used.
 
 The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggest that you can use Censys to search for certificates affecting a specific keyword and filter by date \(only "new" certificates\) and by the CA issuer "Let's Encrypt":
 
