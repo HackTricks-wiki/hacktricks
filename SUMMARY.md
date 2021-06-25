@@ -336,7 +336,7 @@
 
 ## Pentesting Web
 
-* [PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet.md)
+* [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet.md)
 * [2FA/OTP Bypass](pentesting-web/2fa-bypass.md)
 * [Abusing hop-by-hop headers](pentesting-web/abusing-hop-by-hop-headers.md)
 * [Bypass Payment Process](pentesting-web/bypass-payment-process.md)
