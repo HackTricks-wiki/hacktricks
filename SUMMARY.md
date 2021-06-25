@@ -364,6 +364,7 @@
 * [Domain/Subdomain takeover](pentesting-web/domain-subdomain-takeover.md)
 * [Email Header Injection](pentesting-web/email-header-injection.md)
 * [File Inclusion/Path traversal](pentesting-web/file-inclusion/README.md)
+  * [LFI - Windows List](pentesting-web/file-inclusion/lfi-windows-list.md)
   * [phar:// deserialization](pentesting-web/file-inclusion/phar-deserialization.md)
   * [LFI - Linux List](pentesting-web/file-inclusion/lfi-linux-list.md)
 * [File Upload](pentesting-web/file-upload/README.md)
