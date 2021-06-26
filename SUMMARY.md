@@ -376,6 +376,8 @@
 * [JWT Vulnerabilities \(Json Web Tokens\)](pentesting-web/hacking-jwt-json-web-tokens.md)
 * [NoSQL injection](pentesting-web/nosql-injection.md)
 * [LDAP Injection](pentesting-web/ldap-injection.md)
+* [Login Bypass](pentesting-web/login-bypass/README.md)
+  * [SQL Login bypass](pentesting-web/login-bypass/sql-login-bypass.md)
 * [OAuth to Account takeover](pentesting-web/oauth-to-account-takeover.md)
 * [Open Redirect](pentesting-web/open-redirect.md)
 * [Parameter Pollution](pentesting-web/parameter-pollution.md)
