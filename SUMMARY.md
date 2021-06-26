@@ -336,6 +336,7 @@
 
 ## Pentesting Web
 
+* [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology.md)
 * [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet.md)
 * [2FA/OTP Bypass](pentesting-web/2fa-bypass.md)
 * [Abusing hop-by-hop headers](pentesting-web/abusing-hop-by-hop-headers.md)
