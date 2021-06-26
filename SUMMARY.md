@@ -249,7 +249,6 @@
       * [disable\_functions bypass - mod\_cgi](pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-mod_cgi.md)
       * [disable\_functions bypass - PHP 4 &gt;= 4.2.0, PHP 5 pcntl\_exec](pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-php-4-greater-than-4.2.0-php-5-pcntl_exec.md)
   * [Python](pentesting/pentesting-web/python.md)
-  * [SpEL - Spring Expression Language](pentesting/pentesting-web/spel-spring-expression-language.md)
   * [Spring Actuators](pentesting/pentesting-web/spring-actuators.md)
   * [Symphony](pentesting/pentesting-web/symphony.md)
   * [Tomcat](pentesting/pentesting-web/tomcat.md)
