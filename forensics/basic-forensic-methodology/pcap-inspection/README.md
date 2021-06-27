@@ -81,6 +81,10 @@ Using common carving techniques can be useful to extract files and information f
 
 {% page-ref page="../partitions-file-systems-carving/file-data-carving-recovery-tools.md" %}
 
+### Capturing credentials
+
+You can us tools like [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) to parse credentials from a pcap or a live interface.
+
 ## Check Exploits/Malware
 
 ### Suricata
