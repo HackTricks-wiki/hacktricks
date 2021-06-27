@@ -229,7 +229,7 @@ puredns bruteforce all.txt domain.com
 
 Note how these tools require a **list of IPs of public DNSs**. If these public DNSs are malfunctioning \(DNS poisoning for example\) you will get bad results. In order to generate a list of trusted DNS resolvers you can download the resolvers from [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) and use [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) to filter them.
 
-### VHosts
+### VHosts / Virtual Hosts
 
 #### IP VHosts
 
@@ -246,6 +246,9 @@ wfuzz -c -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-2
 
 #From https://github.com/allyshka/vhostbrute
 vhostbrute.py --url="example.com" --remoteip="10.1.1.15" --base="www.example.com" --vhosts="vhosts_full.list"
+
+#https://github.com/codingo/VHostScan
+VHostScan -t example.com
 ```
 
 {% hint style="info" %}
