@@ -57,7 +57,7 @@ You can find the office autosaved files in : `C:\Usuarios\\AppData\Roaming\Micro
 
 ## Shell Items
 
-A shell item is an item taht contains information about how to access another file.
+A shell item is an item that contains information about how to access another file.
 
 ### Recent Documents \(LNK\)
 
@@ -106,7 +106,7 @@ You can inspect the jumplists using [**JumplistExplorer**](https://ericzimmerman
 
 ### Shellbags
 
-[**Follow this link to learn what are the shellbags.**](interesting-windows-registry-keys.md#shellbags)\*\*\*\*
+[**Follow this link to learn what are the shellbags.**](interesting-windows-registry-keys.md#shellbags)
 
 ## Use of Windows USBs
 
