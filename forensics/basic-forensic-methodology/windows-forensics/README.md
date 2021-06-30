@@ -355,7 +355,7 @@ The **Amcache.hve** file is a registry file that stores the information of execu
 
 **Amcache.hve** records the recent processes that were run and lists the path of the files that’s executed which can then be used to find the executed program. It also record the SHA1 of the program.
 
-You can parse this information with the tool [**Amcacheparser**](https://github.com/EricZimmerman/AmcacheParser)\*\*\*\*
+You can parse this information with the tool [**Amcacheparser**](https://github.com/EricZimmerman/AmcacheParser)
 
 ```bash
 AmcacheParser.exe -f C:\Users\student\Desktop\Amcache.hve --csv C:\Users\student\Desktop\srum
