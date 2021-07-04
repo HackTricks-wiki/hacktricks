@@ -459,7 +459,7 @@
 
 ## Courses and Certifications Reviews
 
-* [INE Courses and eLearnSecurity Certifications Reviews](courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications.md)
+* [INE Courses and eLearnSecurity Certifications Reviews](courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md)
 
 ## Cloud Security
 
