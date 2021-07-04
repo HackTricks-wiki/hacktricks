@@ -84,10 +84,12 @@ VistaSP0x64                                   - A Profile for Windows Vista SP0 
 VistaSP0x86                                   - A Profile for Windows Vista SP0 x86
 ```
 
+You can **download Linux and Mac profiles** from [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
+
 In the previous chunk you can see that the profile is called `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`  , and you can use it executing something like:
 
 ```bash
-./vol -f file.dmp--plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
+./vol -f file.dmp --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
 
 #### Discover Profile
