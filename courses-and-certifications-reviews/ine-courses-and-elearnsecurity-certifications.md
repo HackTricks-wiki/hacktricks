@@ -13,8 +13,8 @@ Besides, once you have completed the course \(or before\) you can go to the [**H
 
 ### Course: [**iOS & Mobile App Pentesting**](https://my.ine.com/CyberSecurity/courses/089d060b/ios-mobile-app-pentesting)\*\*\*\*
 
-When I performed this course I didn't have much experience \(close to none\) with iOS applications, and I found this **course to be a great asset to get me started quickly in the topic, so if you have the chance to perform the course don't miss the opportunity.** As the previous course, this course will teach you the **basics of iOS** as OS, how the **applications works**, the **most sensitive components** of the applications, and the how to **configure and use** the main **tools** to test the applications.  
-However, there is a very important difference, if you want to follow the labs, I would recommend you to **get a jailbroken iOS or pay for some good iOS emulator.**
+When I performed this course I didn't have much experience with iOS applications, and I found this **course to be a great resource to get me started quickly in the topic, so if you have the chance to perform the course don't miss the opportunity.** As the previous course, this course will teach you the **basics of iOS**, how the **iOS** **applications works**, the **most sensitive components** of the applications, and the how to **configure and use** the main **tools** to test the applications.  
+However, there is a very important difference with the android course, if you want to follow the labs, I would recommend you to **get a jailbroken iOS or pay for some good iOS emulator.**
 
 As in the previous course, this course has some very useful labs to practice what you learn, but it doesn't explain every possible vulnerability of iOS applications. However, that's not an issue as **it teach you the basics to be able to understand other iOS vulnerabilities**.  
 Besides, once you have completed the course \(or before\) you can go to the [**Hacktricks iOS Applications pentesting section**](../mobile-apps-pentesting/ios-pentesting/) and learn more tricks.
@@ -27,9 +27,9 @@ The goal of this certificate is to **show** that you are capable of performing c
 
 During the exam you are **given 2 vulnerable android applications** and you need to **create** an **android** **application** that **exploit** the vulnerabilities automatically. In order to **pass the exam**, you need to **send** the **exploit** **application** \(the apk and the code\) and it must **exploit** the **other** **apps** **vulnerabilities**.
 
-Having done the [course about android applications pentesting](https://my.ine.com/CyberSecurity/courses/cfd5ec2b/android-mobile-app-pentesting) is **more than enough** to find the vulnerabilities of the applications. So, what I found to be more "complicated" was to **write an android application** that exploit vulnerabilities. However, having some experience as Java developer and looking for tutorials on the Internet about what I wanted to do **I was able to complete the exam in just one afternoon**. You have 7 days, so if you find the vulnerabilities will will have plenty of time to develop the app.
+Having done the [**INE course about android applications pentesting**](https://my.ine.com/CyberSecurity/courses/cfd5ec2b/android-mobile-app-pentesting) **is** **more than enough** to find the vulnerabilities of the applications. What I found to be more "complicated" of the exam was to **write an android application** that exploit vulnerabilities. However, having some experience as Java developer and looking for tutorials on the Internet about what I wanted to do **I was able to complete the exam in just some hours**. They give you 7 days to complete the exam, so if you find the vulnerabilities you will have plenty of time to develop the exploit app.
 
-In this exam I **missed the opportunity to exploit more vulnerabilities**, however, **I lost a bit the "fear" to write android applications to exploit a vulnerability**. So it felt just like **another part of the course to complete your knowledge in android application pentesting**.
+In this exam I **missed the opportunity to exploit more vulnerabilities**, however, **I lost a bit the "fear" to write android applications to exploit a vulnerability**. So it felt just like **another part of the course to complete your knowledge in android applications pentesting**.
 
 ## eLearnSecurity Web application Penetration Tester eXtreme \(eWPTXv2\) and the INE course related
 
@@ -38,7 +38,7 @@ In this exam I **missed the opportunity to exploit more vulnerabilities**, howev
 This course is the one meant to **prepare** you for the **eWPTXv2** **certificate** **exam**.   
 Even having been working as web pentester for several years before doing the course, it tough me several **neat hacking tricks about "weird" web vulnerabilities and ways to bypass protections**. Moreover, the course contains **pretty nice labs where you can practice what you learn**, and that is always helpful to fully understand the vulnerabilities.
 
-I think this course isn't for web hacking beginners \(there are other INE courses for that like [**Web Application Penetration Testing**](https://my.ine.com/CyberSecurity/courses/38316560/web-application-penetration-testing)**\).** However, ****if you aren't a beginner, independently on the hacking web "level" you think you have, **I definitely recommend you to take a look to the course** because I'm sure you **will learn new things** like I did.
+I think this course **isn't for web hacking beginners** \(there are other INE courses for that like [**Web Application Penetration Testing**](https://my.ine.com/CyberSecurity/courses/38316560/web-application-penetration-testing)**\).** However, ****if you aren't a beginner, independently on the hacking web "level" you think you have, **I definitely recommend you to take a look to the course** because I'm sure you **will learn new things** like I did.
 
 ### [eWPTXv2](https://elearnsecurity.com/product/ewptxv2-certification/)
 
