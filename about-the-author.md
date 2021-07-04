@@ -6,7 +6,7 @@ This is **Carlos Polop**.
 
 First of all, I want to indicate that **I don't own this entire book**, a lot of **information was copy/pasted from other websites and that content belongs to them** \(this is indicated on the copy/pasted content\).
 
-I also wants to say **thanks to all the people that share cyber-security related information for free** on the Internet. Thanks to them I learnt hacking and thanks to them HackTricks is possible.
+I also wants to say **thanks to all the people that share cyber-security related information for free** on the Internet. Thanks to them I learn new hacking techniques that then I add to Hacktricks.
 
 ### BIO
 
@@ -14,7 +14,7 @@ If for some weird reason you are interested in knowing about my bio here you hav
 
 * I've worked in different companies as sysadmin, developer and **pentester** \(which is my current role\).
 * I'm a **Telecommunications Engineer** with a **Masters** in **Cybersecurity**
-* Relevant certifications: **OSCP, OSWE**, **CRTP** \(Certified Red Team Professional\) and Professional Drone pilot.
+* Relevant certifications: **OSCP, OSWE**, **CRTP, eMAPT, eWPTXv2** and Professional Drone pilot.
 * I speak **Spanish** and **English** and little of French \(some day I will improve that\).
 * I'm a **CTF player**
 * I'm very proud of this **book** and my **PEASS** \(I'm talking about these peass: [https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite)\)
