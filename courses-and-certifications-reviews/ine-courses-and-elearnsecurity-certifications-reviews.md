@@ -36,7 +36,7 @@ In this exam I **missed the opportunity to exploit more vulnerabilities**, howev
 ### Course: [**Web Application Penetration Testing eXtreme**](https://my.ine.com/CyberSecurity/courses/630a470a/web-application-penetration-testing-extreme)\*\*\*\*
 
 This course is the one meant to **prepare** you for the **eWPTXv2** **certificate** **exam**.   
-Even having been working as web pentester for several years before doing the course, it tough me several **neat hacking tricks about "weird" web vulnerabilities and ways to bypass protections**. Moreover, the course contains **pretty nice labs where you can practice what you learn**, and that is always helpful to fully understand the vulnerabilities.
+Even having been working as web pentester for several years before doing the course, it taught me several **neat hacking tricks about "weird" web vulnerabilities and ways to bypass protections**. Moreover, the course contains **pretty nice labs where you can practice what you learn**, and that is always helpful to fully understand the vulnerabilities.
 
 I think this course **isn't for web hacking beginners** \(there are other INE courses for that like [**Web Application Penetration Testing**](https://my.ine.com/CyberSecurity/courses/38316560/web-application-penetration-testing)**\).** However, ****if you aren't a beginner, independently on the hacking web "level" you think you have, **I definitely recommend you to take a look to the course** because I'm sure you **will learn new things** like I did.
 
