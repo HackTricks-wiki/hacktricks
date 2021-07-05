@@ -286,6 +286,22 @@ Typically, `/dev/mem` is only readable by **root** and **kmem** group.
 strings /dev/mem -n10 | grep -i PASS
 ```
 
+#### osxpmem
+
+In order to dump the memory in a MacOS machine you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
+
+```bash
+sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
+```
+
+If you find this error: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` You can fix it doing:
+
+```bash
+sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
+sudo kextutil "/tmp/MacPmem.kext"
+sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
+```
+
 #### Tools
 
 To dump a process memory you could use:
