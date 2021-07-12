@@ -455,6 +455,9 @@
 ## A.I. Exploiting
 
 * [BRA.I.NSMASHER Presentation](a.i.-exploiting/bra.i.nsmasher-presentation/README.md)
+  * [Basic Bruteforcer](a.i.-exploiting/bra.i.nsmasher-presentation/basic-bruteforcer.md)
+  * [BIM Bruteforcer](a.i.-exploiting/bra.i.nsmasher-presentation/bim-bruteforcer.md)
+  * [Hybrid Malware Classifier Part 1](a.i.-exploiting/bra.i.nsmasher-presentation/hybrid-malware-classifier-part-1.md)
   * [Basic Captcha Breaker](a.i.-exploiting/bra.i.nsmasher-presentation/basic-captcha-breaker.md)
 
 ## Courses and Certifications Reviews
