@@ -53,6 +53,10 @@
   * [Bypass Bash Restrictions](linux-unix/useful-linux-commands/bypass-bash-restrictions.md)
 * [Linux Environment Variables](linux-unix/linux-environment-variables.md)
 
+## MacOS
+
+* [MacOS Security & Privilege Escalation](macos/macos-security-and-privilege-escalation.md)
+
 ## Windows
 
 * [Checklist - Local Windows Privilege Escalation](windows/checklist-windows-privilege-escalation.md)
