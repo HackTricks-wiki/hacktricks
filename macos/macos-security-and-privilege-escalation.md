@@ -25,5 +25,41 @@ spctl --disable
 #You can also allow nee identifies to execute code using the binary "spctl"
 ```
 
+## Common users
 
+* **Daemon**: User reserved for system daemons
+* **Guest**: Account for guests with very strict permissions
+* **Nobody**: Processes are executed with this user when minimal permissions are required
+* **Root**
+
+## Specific MacOS Enumeration
+
+```bash
+smbutil statshares -a #View smb shares mounted to the hard drive
+launchctl list #List services
+atq #List "at" tasks for the user
+mdfind password #Show all the files that contains the word password
+mfind -name password #List all the files containing the word password in the name
+sysctl -a #List kernel configuration
+diskutil list #List connected hard drives
+codesign -vv -d /bin/ls #Check the signature of a binary
+nettop #Monitor network usage of processes in top style
+
+#security
+secuirty dump-trust-settings [-s] [-d] #List certificates
+security list-keychains #List keychain dbs
+security list-smartcards #List smartcards
+security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychains entries
+security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
+
+
+
+#networksetup - set or view network options: Proxies, FW options and more
+networksetup -listallnetworkservices #List network services
+networksetup -listallhardwareports #Hardware ports
+networksetup -getinfo Wi-Fi #Wi-Fi info
+networksetup -getautoproxyurl Wi-Fi #Get proxy URL for Wifi
+networksetup -getwebproxy Wi-Fi #Wifi Web proxy
+networksetup -getftpproxy Wi-Fi #Wifi ftp proxy
+```
 
