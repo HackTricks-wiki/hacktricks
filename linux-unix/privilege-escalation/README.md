@@ -1078,6 +1078,11 @@ Read the following page to **learn more about capabilities and how to abuse them
 
 {% page-ref page="linux-capabilities.md" %}
 
+## Directory permissions
+
+In a directory the **bit for execute** implies that the user affected can "**cd**" into the folder.  
+The **read** bit implies the user can **list** the **files**, and the **write** bit implies the user can **delete** and **create** new **files**.
+
 ## ACLs
 
 ACLs are a second level of discretionary permissions, that **may override the standard ugo/rwx** ones. When used correctly they can grant you a **better granularity in setting access to a file or a directory**, for example by giving or denying access to a specific user that is neither the file owner, nor in the group owner \(from [**here**](https://linuxconfig.org/how-to-manage-acls-on-linux)\).  
