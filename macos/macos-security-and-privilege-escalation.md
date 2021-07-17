@@ -146,6 +146,14 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 * **`.metadata_never_index`**: If this file is at the root of a volume Spotlight won't index that volume.
 * **`<name>.noindex`**: Files and folder with this extension won't be indexed by Spotlight.
 * **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV`**2: Contains information about downloaded files, like the URL from where they were downloaded.
+* **`/var/log/system.log`**: Main log of OSX systems. com.apple.syslogd.plist is responsible for the execution of syslogging \(you can check if it's disabled looking for "com.apple.syslogd" in `launchctl list`.
+* **`/private/var/log/asl/*.asl`**: These are the Apple System Logs which may contain interesting information.
+* **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Stores recently accessed files and applications through "Finder".
+* **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Stores items to launch upon system startup
+* **`$HOME/Library/Logs/DiskUtility.log`**: Log file for thee DiskUtility App \(info about drives, including USBs\)
+* **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Data about wireless access points.
+* **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List of daemons deactivated.
+* **`/private/etc/kcpassword`**: If autologin is enabled this file will contain the users login password XORed with a key.
 
 ## Specific MacOS Enumeration
 
