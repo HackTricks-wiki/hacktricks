@@ -52,7 +52,13 @@ And **remove** that attribute with:
 ```bash
 xattr -d com.apple.quarantine portada.png
 #You can also remove this attribute from every file with
-find . -iname '*.webarchive' -print0 | xargs -0 xattr -d com.apple.quarantine
+find . -iname '*' -print0 | xargs -0 xattr -d com.apple.quarantine
+```
+
+And find all the quarantined files with:
+
+```bash
+find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
 
 ## Common users
@@ -103,8 +109,35 @@ ls -l a.txt #The file length is still q
 You can **find all the files containing this extended attribute** with:
 
 ```bash
-find / -exec xattr -vl {} \; | grep com.apple.ResourceFork 2>/dev/null
+find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
 ```
+
+## OS X Specific Extensions
+
+* **`.dmg`**: Apple Disk Image files are very frequent for installers.
+* **`.kext`**: It must follow a specific structure and it's the OS X version of a driver.
+* **`.plist`**: Also known as property list stores information in XML or binary format.
+* **`.app`**: Apple applications that follows  directory structure.
+* **`.dylib`**: Dynamic libraries \(like Windows DLL files\)
+* **`.pkg`**: Are the same as xar \(eXtensible Archive format\). The installer command can be use to install the contents of these files.
+
+## File hierarchy layout
+
+* **/Applications**: The installed apps should be here. All the users will be able to access them.
+* **/bin**: Command line binaries
+* **/cores**: If exists, it's used to store core dumps
+* **/dev**: Everything is treated as a file so you may see hardware devices stored here.
+* **/etc**: Configuration files
+* **/Library**: A lot of subdirectories and files related to preferences, caches and logs can be found here. A Library folder exists in root and on each user's directory.
+* **/private**: Undocumented but a lot of the mentioned folders are symbolic links to the private directory.
+* **/sbin**: Essential system binaries \(related to administration\)
+* **/System**: File fo making OS X run. You should find mostly only Apple specific files here \(not third party\).
+* **/tmp**: Files are deleted after 3 days \(it's a soft link to /private/tmp\)
+* **/Users**: Home directory for users.
+* **/usr**: Config and system binaries
+* **/var**: Log files
+* **/Volumes**: The mounted drives will apear here.
+* **/.vol**: Running `stat a.txt` you obtain something like `16777223 7545753 -rw-r--r-- 1 username wheel ...` where the first number is the id number of the volume where the file exists and the second one is the inode number. You can access the content of this file through /.vol/ with that information running  `cat /.vol/16777223/7545753`
 
 ## Specific MacOS Enumeration
 
