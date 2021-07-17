@@ -14,7 +14,7 @@ Gatekeeper builds upon **File Quarantine.**
 Upon download of an application, a particular **extended file attribute** \("quarantine flag"\) can be **added** to the **downloaded** **file**. This attribute **is added by the application that downloads the file**, such as a **web** **browser** or email client, but is not usually added by others like common BitTorrent client software.  
 When a user executes a "quarentined" file, **Gatekeeper** is the one that **performs the mentioned actions** to allow the execution of the file.
 
-It's possible to check it's status and enable/disable \(root required\) with:
+It's possible to **check it's status and enable/disable** \(root required\) with:
 
 ```bash
 spctl --status
@@ -25,12 +25,86 @@ spctl --disable
 #You can also allow nee identifies to execute code using the binary "spctl"
 ```
 
+You can also **find if a file has the quarantine extended attribute** with:
+
+```bash
+xattr portada.png
+com.apple.macl
+com.apple.quarantine
+```
+
+Check the **value** of the **extended** **attributes** with:
+
+```bash
+xattr -l portada.png
+com.apple.macl:
+00000000  03 00 53 DA 55 1B AE 4C 4E 88 9D CA B7 5C 50 F3  |..S.U..LN.....P.|
+00000010  16 94 03 00 27 63 64 97 98 FB 4F 02 84 F3 D0 DB  |....'cd...O.....|
+00000020  89 53 C3 FC 03 00 27 63 64 97 98 FB 4F 02 84 F3  |.S....'cd...O...|
+00000030  D0 DB 89 53 C3 FC 00 00 00 00 00 00 00 00 00 00  |...S............|
+00000040  00 00 00 00 00 00 00 00                          |........|
+00000048
+com.apple.quarantine: 0081;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
+```
+
+And **remove** that attribute with:
+
+```bash
+xattr -d com.apple.quarantine portada.png
+#You can also remove this attribute from every file with
+find . -iname '*.webarchive' -print0 | xargs -0 xattr -d com.apple.quarantine
+```
+
 ## Common users
 
 * **Daemon**: User reserved for system daemons
 * **Guest**: Account for guests with very strict permissions
 * **Nobody**: Processes are executed with this user when minimal permissions are required
 * **Root**
+
+## **File ACLs**
+
+When the file contains ACLs you will **find a "+" when listing the permissions like in**:
+
+```bash
+ls -ld Movies
+drwx------+   7 username  staff     224 15 Apr 19:42 Movies
+```
+
+You can **read the ACLs** of the file with:
+
+```bash
+ls -lde Movies
+drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
+ 0: group:everyone deny delete
+```
+
+You can find **all the files with ACLs** with \(this is veeery slow\):
+
+```bash
+ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
+```
+
+## Resource Forks or MacOS ADS
+
+This is a way to obtain **Alternate Data Streams in MacOS** machines. You can save content inside an extended attribute called **com.apple.ResourceFork** inside a file by saving it in **file/..namedfork/rsrc**.
+
+```bash
+echo "Hello" > a.txt
+echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
+
+xattr -l a.txt #Read extended attributes
+com.apple.ResourceFork: Hello Mac ADS
+
+ls -l a.txt #The file length is still q
+-rw-r--r--@ 1 username  wheel  6 17 Jul 01:15 a.txt
+```
+
+You can **find all the files containing this extended attribute** with:
+
+```bash
+find / -exec xattr -vl {} \; | grep com.apple.ResourceFork 2>/dev/null
+```
 
 ## Specific MacOS Enumeration
 
