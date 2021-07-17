@@ -139,6 +139,14 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 * **/Volumes**: The mounted drives will apear here.
 * **/.vol**: Running `stat a.txt` you obtain something like `16777223 7545753 -rw-r--r-- 1 username wheel ...` where the first number is the id number of the volume where the file exists and the second one is the inode number. You can access the content of this file through /.vol/ with that information running  `cat /.vol/16777223/7545753`
 
+### Special MacOS files and folders
+
+* **`.DS_Store`**: This file is on each directory, it saves the attributes and customisations of the directory.
+* **`.Spotlight-V100`**: This folder appears on the root directory of every volume on the system.
+* **`.metadata_never_index`**: If this file is at the root of a volume Spotlight won't index that volume.
+* **`<name>.noindex`**: Files and folder with this extension won't be indexed by Spotlight.
+* **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV`**2: Contains information about downloaded files, like the URL from where they were downloaded.
+
 ## Specific MacOS Enumeration
 
 ```bash
