@@ -265,7 +265,7 @@ ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http:
 
 ### DNS Brute Force v2
 
-Once you have finished looking for subdomains you can use [**dnsgen** ](https://github.com/ProjectAnte/dnsgen)and [**altdns**](https://github.com/infosec-au/altdns) to generate possible permutations of the discovered subdomains and use again **massdns** and **gobuster** to search new domains.
+Once you have finished looking for subdomains you can use [**dnsgen**](https://github.com/ProjectAnte/dnsgen)**,** [**altdns**](https://github.com/infosec-au/altdns) and [**gotator**](https://github.com/Josue87/gotator) to generate possible permutations of the discovered subdomains and use again **massdns** and **gobuster** to search new domains.
 
 ### Buckets Brute Force
 
