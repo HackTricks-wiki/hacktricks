@@ -155,6 +155,23 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 * **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List of daemons deactivated.
 * **`/private/etc/kcpassword`**: If autologin is enabled this file will contain the users login password XORed with a key.
 
+## Auto Start Extensibility Point \(ASEP\)
+
+An ASEP is a location on the system that could lead to the execution of a binary without user interaction. The main ones used in OS X take the form of plists.
+
+### Launchd
+
+launchd is the first process executed by OX S kernel at startup and the last one to finish at shut down. It should always have the PID 1. This process will read and execute the configurations indicated in the ASEP plists in:
+
+* /Library/LaunchAgents: Per-user agents installed by the admin
+* /Library/LaunchDaemons: System-wide daemons installed by the admin
+* /System/Library/LaunchAgents: Per-user agents provided by Apple.
+* /System/Library/LaunchDaemons: System-wide daemons provided by Apple.
+
+The main difference between agents and daemons is that agents are loaded when the user logs in and the daemons are loaded at system startup \(as there are services like ssh that needs to be executed before any user access the system\). Also agents may use GUI while daemons need to run in the background.
+
+
+
 ## Specific MacOS Enumeration
 
 ```bash
