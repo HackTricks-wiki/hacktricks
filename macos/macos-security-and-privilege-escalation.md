@@ -117,6 +117,9 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 * **`.dmg`**: Apple Disk Image files are very frequent for installers.
 * **`.kext`**: It must follow a specific structure and it's the OS X version of a driver.
 * **`.plist`**: Also known as property list stores information in XML or binary format.
+  * Can be XML or binary. Binary ones can be read with:
+    * `defaults read config.plist`
+    * `/usr/libexec/PlistBuddy -c print config.plsit`
 * **`.app`**: Apple applications that follows  directory structure.
 * **`.dylib`**: Dynamic libraries \(like Windows DLL files\)
 * **`.pkg`**: Are the same as xar \(eXtensible Archive format\). The installer command can be use to install the contents of these files.
@@ -157,20 +160,87 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 
 ## Auto Start Extensibility Point \(ASEP\)
 
-An ASEP is a location on the system that could lead to the execution of a binary without user interaction. The main ones used in OS X take the form of plists.
+An **ASEP** is a location on the system that could lead to the **execution** of a binary **without** **user** **interaction**. The main ones used in OS X take the form of plists.
 
 ### Launchd
 
-launchd is the first process executed by OX S kernel at startup and the last one to finish at shut down. It should always have the PID 1. This process will read and execute the configurations indicated in the ASEP plists in:
+**`launchd`** is the **first** **process** executed by OX S kernel at startup and the last one to finish at shut down. It should always have the **PID 1**. This process will **read and execute** the configurations indicated in the **ASEP** **plists** in:
 
-* /Library/LaunchAgents: Per-user agents installed by the admin
-* /Library/LaunchDaemons: System-wide daemons installed by the admin
-* /System/Library/LaunchAgents: Per-user agents provided by Apple.
-* /System/Library/LaunchDaemons: System-wide daemons provided by Apple.
+* `/Library/LaunchAgents`: Per-user agents installed by the admin
+* `/Library/LaunchDaemons`: System-wide daemons installed by the admin
+* `/System/Library/LaunchAgents`: Per-user agents provided by Apple.
+* `/System/Library/LaunchDaemons`: System-wide daemons provided by Apple.
 
-The main difference between agents and daemons is that agents are loaded when the user logs in and the daemons are loaded at system startup \(as there are services like ssh that needs to be executed before any user access the system\). Also agents may use GUI while daemons need to run in the background.
+When a user logs in the plists located in `/Users/$USER/Library/LaunchAgents` are started with the **logged users permissions**.
 
+The **main difference between agents and daemons is that agents are loaded when the user logs in and the daemons are loaded at system startup** \(as there are services like ssh that needs to be executed before any user access the system\). Also agents may use GUI while daemons need to run in the background.
 
+```markup
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCKTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+        <string>com.apple.someidentifier</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/username/malware</string>
+    </array>
+    <key>RunAtLoad</key><true/> <!--Execute at system startup-->
+    <key>StartInterval</key>
+    <integer>800</integer> <!--Execute each 800s-->
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key></false> <!--Re-execute if exit unsuccessful-->
+        <!--If previous is true, then re-execute in successful exit-->
+    </dict>
+</dict>
+</plist>
+```
+
+There are cases where an **agent needs to be executed before the user logins**, these are called **PreLoginAgents**. For example, this is useful to provide assistive technology at login. They can be found also in `/Library/LaunchAgents`\(see [**here**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) an example\).
+
+{% hint style="info" %}
+New Daemons or Agents config files will be **loaded after next reboot or using** `launchctl load <target.plist>` It's **also possible to load .plist files without that extension** with `launchctl -F <file>` \(however those plist files won't be automatically loaded after reboot\).  
+It's also possible to **unload** with `launchctl unload <target.plist>` \(the process pointed by it will be terminated\),
+
+To **ensure** that there isn't **anything** \(like an override\) **preventing** an **Agent** or **Daemon** **from** **running** run: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
+{% endhint %}
+
+List all the agents and daemons loaded by the current user:
+
+```bash
+launchctl list
+```
+
+### Cron
+
+List the cron jobs of the **current user** with:
+
+```bash
+crontab -l
+```
+
+You can also see all the cron jobs of the users in **`/usr/lib/cron/tabs/`** \(needs root\).
+
+### kext
+
+In order to install a KEXT as a startup item, it needs to be **installed in one of the following locations**:
+
+* `/System/Library/Extensions`
+  * KEXT files built into the OS X operating system.
+* `/Library/Extensions`
+  * KEXT files installed by 3rd party software
+
+You can list currently loaded kext files with:
+
+```bash
+kextstat #List loaded kext
+kextload /path/to/kext.kext #Load a new one based on path
+kextload -b com.apple.driver.ExampleBundle #Load a new one based on path
+kextunload /path/to/kext.kext
+kextunload -b com.apple.driver.ExampleBundle
+```
 
 ## Specific MacOS Enumeration
 
