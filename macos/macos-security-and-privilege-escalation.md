@@ -242,6 +242,10 @@ kextunload /path/to/kext.kext
 kextunload -b com.apple.driver.ExampleBundle
 ```
 
+### User Autostart
+
+### At
+
 ## Specific MacOS Enumeration
 
 ```bash
