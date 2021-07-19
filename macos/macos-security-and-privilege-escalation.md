@@ -177,7 +177,7 @@ The **main difference between agents and daemons is that agents are loaded when 
 
 ```markup
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCKTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN">
 <plist version="1.0">
 <dict>
     <key>Label</key>
@@ -242,9 +242,214 @@ kextunload /path/to/kext.kext
 kextunload -b com.apple.driver.ExampleBundle
 ```
 
-### User Autostart
+### **Login Items**
+
+In System Preferences -&gt; Users & Groups -&gt; **Login Items** you can find  **items to be executed when the user logs in**.  
+It it's possible to list them, add and remove from the command line:
+
+```bash
+#List all items:
+osascript -e 'tell application "System Events" to get the name of every login item'
+
+#Add an item:
+osascript -e 'tell application "System Events" to make login item at end with properties {path:"/path/to/itemname", hidden:false}' 
+
+#Remove an item:
+osascript -e 'tell application "System Events" to delete login item "itemname"' 
+
+```
 
 ### At
+
+“At tasks” are used to **schedule tasks at specific times**.  
+These tasks differ from cron in that **they are one time tasks** t**hat get removed after executing**. However, they will **survive a system restart** so they can’t be ruled out as a potential threat.
+
+By **default** they are **disabled** but the **root** user can **enable** **them** with:
+
+```bash
+sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
+```
+
+This will create a file at 13:37:
+
+```bash
+echo hello > /tmp/hello | at 1337
+```
+
+If AT tasks aren't enabled the created tasks won't be executed.
+
+### Login/Logout Hooks
+
+They are deprecated but can be used to execute commands when a user logs in.
+
+```bash
+cat > $HOME/hook.sh << EOF
+#!/bin/bash
+echo 'My is: \`id\`' > /tmp/login_id.txt
+EOF
+chmod +x $HOME/hook.sh
+defaults write com.apple.loginwindow LoginHook /Users/username/hook.sh
+```
+
+This setting is stored in `/Users/$USER/Library/Preferences/com.apple.loginwindow.plist`
+
+```bash
+defaults read /Users/$USER/Library/Preferences/com.apple.loginwindow.plist
+{
+    LoginHook = "/Users/username/hook.sh";
+    MiniBuddyLaunch = 0;
+    TALLogoutReason = "Shut Down";
+    TALLogoutSavesState = 0;
+    oneTimeSSMigrationComplete = 1;
+}
+```
+
+The root user one is stored in `/private/var/root/Library/Preferences/com.apple.loginwindow.plist`
+
+### Startup Items
+
+This is deprecated, so nothing should be found in the following directories.
+
+A **StartupItem** is a **directory** that gets **placed** in one of these two folders. `/Library/StartupItems/` or `/System/Library/StartupItems/`
+
+After placing a new directory in one of these two locations, **two more items** need to be placed inside that directory. These two items are a **rc script** **and a plist** that holds a few settings. This plist must be called “**StartupParameters.plist**”.
+
+{% code title="StartupParameters.plist" %}
+```markup
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Description</key>
+        <string>This is a description of this service</string>
+    <key>OrderPreference</key>
+        <string>None</string> <!--Other req services to execute before this -->
+    <key>Provides</key>
+    <array>
+        <string>superservicename</string> <!--Name of the services provided by this file -->
+    </array>
+</dict>
+</plist>
+```
+{% endcode %}
+
+{% code title="superservicename" %}
+```bash
+#!/bin/sh
+. /etc/rc.common
+
+StartService(){
+    touch /tmp/superservicestarted
+}
+
+StopService(){
+    rm /tmp/superservicestarted
+}
+
+RestartService(){
+    echo "Restarting"
+}
+
+RunService "$1"
+```
+{% endcode %}
+
+### /etc/rc.common
+
+It's also possible to place here **commands that will be executed at startup.** Example os regular rc.common script:
+
+```bash
+##
+# Common setup for startup scripts.
+##
+# Copyright 1998-2002 Apple Computer, Inc.
+##
+
+#######################
+# Configure the shell #
+#######################
+
+##
+# Be strict
+##
+#set -e
+set -u
+
+##
+# Set command search path
+##
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/libexec:/System/Library/CoreServices; export PATH
+
+##
+# Set the terminal mode
+##
+#if [ -x /usr/bin/tset ] && [ -f /usr/share/misc/termcap ]; then
+#    TERM=$(tset - -Q); export TERM
+#fi
+
+####################
+# Useful functions #
+####################
+
+##
+# Determine if the network is up by looking for any non-loopback
+# internet network interfaces.
+##
+CheckForNetwork()
+{
+    local test
+
+    if [ -z "${NETWORKUP:=}" ]; then
+	test=$(ifconfig -a inet 2>/dev/null | sed -n -e '/127.0.0.1/d' -e '/0.0.0.0/d' -e '/inet/p' | wc -l)
+	if [ "${test}" -gt 0 ]; then
+	    NETWORKUP="-YES-"
+	else
+	    NETWORKUP="-NO-"
+	fi
+    fi
+}
+
+alias ConsoleMessage=echo
+
+##
+# Process management
+##
+GetPID ()
+{
+    local program="$1"
+    local pidfile="${PIDFILE:=/var/run/${program}.pid}"
+    local     pid=""
+
+    if [ -f "${pidfile}" ]; then
+	pid=$(head -1 "${pidfile}")
+	if ! kill -0 "${pid}" 2> /dev/null; then
+	    echo "Bad pid file $pidfile; deleting."
+	    pid=""
+	    rm -f "${pidfile}"
+	fi
+    fi
+
+    if [ -n "${pid}" ]; then
+	echo "${pid}"
+	return 0
+    else
+	return 1
+    fi
+}
+
+##
+# Generic action handler
+##
+RunService ()
+{
+    case $1 in
+      start  ) StartService   ;;
+      stop   ) StopService    ;;
+      restart) RestartService ;;
+      *      ) echo "$0: unknown argument: $1";;
+    esac
+}
+```
 
 ## Specific MacOS Enumeration
 
