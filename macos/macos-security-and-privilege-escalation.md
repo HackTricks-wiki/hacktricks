@@ -120,6 +120,7 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
   * Can be XML or binary. Binary ones can be read with:
     * `defaults read config.plist`
     * `/usr/libexec/PlistBuddy -c print config.plsit`
+    * `plutil -p config.plist`
 * **`.app`**: Apple applications that follows  directory structure.
 * **`.dylib`**: Dynamic libraries \(like Windows DLL files\)
 * **`.pkg`**: Are the same as xar \(eXtensible Archive format\). The installer command can be use to install the contents of these files.

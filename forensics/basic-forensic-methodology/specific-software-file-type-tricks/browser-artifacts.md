@@ -24,7 +24,7 @@ Let us take a look at the most common artefacts stored by browsers.
 
 ## Firefox
 
-Firefox use to create the profiles folder in ~/_**.mozilla/firefox/**_ \(Linux\) ****or in _**%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\**_ \(Windows\)_**.**_  
+Firefox use to create the profiles folder in ~/_**.mozilla/firefox/**_ \(Linux\),  in **/Users/$USER/Library/Application Support/Firefox/Profiles/** \(MacOS\), _**%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\**_ \(Windows\)_**.**_  
 Inside this folder, the file _**profiles.ini**_ should appear with the name\(s\) of the used profile\(s\).  
 Each profile has a "**Path**" variable with the name of the folder where it's data is going to be stored. The folder should be **present in the same directory where the** _**profiles.ini**_ **exist**. If it isn't, then, probably it was deleted.
 
@@ -57,7 +57,7 @@ Inside the folder **of each profile** \(_~/.mozilla/firefox/&lt;ProfileName&gt;/
 
 * _**favicons.sqlite**_ : Favicons
 * _**prefs.js**_ : Settings and Preferences
-* _**downloads.sqlite**_ : Downloads
+* _**downloads.sqlite**_ : Old downloads database \(now it's inside places.sqlite\)
 * _**thumbnails/**_ : Thumbnails
 * _**logins.json**_ : Encrypted usernames and passwords
 * _**key4.db**_ or _**key3.db**_ : Master key ?
@@ -82,7 +82,7 @@ done < $passfile
 
 ## Google Chrome
 
-Google Chrome creates the profile inside the home of the user _**~/.config/google-chrome/**_ \(Linux\) or in _**C:\Users\XXX\AppData\Local\Google\Chrome\User Data\**_ \(Windows\).  
+Google Chrome creates the profile inside the home of the user _**~/.config/google-chrome/**_ \(Linux\), in _**C:\Users\XXX\AppData\Local\Google\Chrome\User Data\**_ \(Windows\), or in _**/Users/$USER/Library/Application Support/Google/Chrome/**_ \(MacOS\).  
 Most of the information will be saved inside the _**Default/**_ or _**ChromeDefaultData/**_ folders inside the paths indicated before. Inside here you can find the following interesting files:
 
 * _**History**_ : URLs, downloads and even searched keywords. In Windows you can use the tool [ChromeHistoryView](https://www.nirsoft.net/utils/chrome_history_view.html) to read the history. The "Transition Type" column means:
@@ -100,9 +100,10 @@ Most of the information will be saved inside the _**Default/**_ or _**ChromeDefa
 * _**Favicons**_ : Favicons
 * _**Login Data**_ : Login information \(usernames, passwords...\)
 * _**Current Session**_ and _**Current Tabs**_ : Current session data and current tabs
-* _**Last Session**_ and _**Last Tabs**_ : Old session and tabs
+* _**Last Session**_ and _**Last Tabs**_ : These files hold sites that were active in the browser when Chrome was last closed.
 * _**Extensions/**_ : Extensions and addons folder
 * **Thumbnails** : Thumbnails
+* **Preferences**: This file contains a plethora of good information such as plugins, extensions, sites using geolocation, popups, notifications, DNS prefetching, certificate exceptions, and much more. If you’re trying to research whether or not a specific Chrome setting was enabled, you will likely find that setting in here.
 
 ## **SQLite DB Data Recovery**
 
@@ -215,4 +216,21 @@ For analyzing Microsoft Edge artifacts all the **explanations about cache and lo
 * Settings, Bookmarks, and Reading List: _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb**_
 * Cache: _**C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\#!XXX\MicrosoftEdge\Cache**_
 * Last active sessions: _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active**_
+
+## **Safari**
+
+The databases can be found in `/Users/$User/Library/Safari`
+
+* **History.db**: The tables `history_visits` _and_ `history_items` contains information about the history and timestamps.
+* **Downloads.plist**: Contains the info about the downloaded files.
+* **Book-marks.plis**t: URLs bookmarked.
+* **TopSites.plist**: List of the most visited websites that the user browses to.
+* **UserNotificationPermissions.plist**: Domains that are allowed to push notifications.
+* **LastSession.plist**: Tabs that were opened the last time the user exited Safari.
+
+## Opera
+
+The databases can be found in `/Users/$USER/Library/Application Support/com.operasoftware.Opera`
+
+Opera **stores browser history and download data in the exact same format as Google Chrome**. This applies to the file names as well as the table names.
 
