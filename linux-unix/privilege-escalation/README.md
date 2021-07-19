@@ -299,6 +299,7 @@ If you find this error: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext
 ```bash
 sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
 sudo kextutil "/tmp/MacPmem.kext"
+#Allow the kext in "Security & Privacy --> General"
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
 
