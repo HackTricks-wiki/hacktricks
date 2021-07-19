@@ -142,6 +142,7 @@
     * [Frida Tutorial 3](mobile-apps-pentesting/android-app-pentesting/frida-tutorial/owaspuncrackable-1.md)
     * [Objection Tutorial](mobile-apps-pentesting/android-app-pentesting/frida-tutorial/objection-tutorial.md)
   * [Google CTF 2018 - Shall We Play a Game?](mobile-apps-pentesting/android-app-pentesting/google-ctf-2018-shall-we-play-a-game.md)
+  * [Intent Injection](mobile-apps-pentesting/android-app-pentesting/intent-injection.md)
   * [Make APK Accept CA Certificate](mobile-apps-pentesting/android-app-pentesting/make-apk-accept-ca-certificate.md)
   * [Manual DeObfuscation](mobile-apps-pentesting/android-app-pentesting/manual-deobfuscation.md)
   * [React Native Application](mobile-apps-pentesting/android-app-pentesting/react-native-application.md)
