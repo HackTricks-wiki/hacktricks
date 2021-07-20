@@ -460,6 +460,95 @@ RunService ()
 }
 ```
 
+## Memory Artifacts
+
+### Swap Files
+
+* **`/private/var/vm/swapfile0`**: This file is used as a **cache when physical memory fills up**. Data in physical memory will be pushed to the swapfile and then swapped back into physical memory if it’s needed again. More than one file can exist in here. For example, you might see swapfile0, swapfile1, and so on.
+* **`/private/var/vm/sleepimage`**: When OS X goes into **hibernation**, **data stored in memory is put into the sleepimage file**. When the user comes back and wakes the computer, memory is restored from the sleepimage and the user can pick up where they left off.
+
+  By default in modern MacOS systems this file will be encrypted, so it might be not recuperable.
+
+  * However, the encryption of this file might be disabled. Check the out of `sysctl vm.swapusage`.
+
+### Dumping memory with osxpmem
+
+In order to dump the memory in a MacOS machine you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
+
+```bash
+#Dump raw format
+sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
+
+#Dump aff4 format
+sudo osxpmem.app/osxpmem -o /tmp/dump_mem.aff4
+```
+
+If you find this error: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` You can fix it doing:
+
+```bash
+sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
+sudo kextutil "/tmp/MacPmem.kext"
+#Allow the kext in "Security & Privacy --> General"
+sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
+```
+
+**Other errors** might be fixed by **allowing the load of the kext** in "Security & Privacy --&gt; General", just **allow** it.
+
+You can also use this **oneliner** to download the application, load the kext and dump the memory:
+
+```bash
+cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip; unzip osxpmem-2.1.post4.zip; chown -R root:wheel osxpmem.app/MacPmem.kext; kextload osxpmem.app/MacPmem.kext; osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
+```
+
+## User Privileges
+
+* **Standard User:** The most basic of users. This user needs permissions granted from an admin user when attempting to install software or perform other advanced tasks. They are not able to do it on their own.
+* **Admin User**: A user who operates most of the time as a standard user but is also allowed to perform root actions such as install software and other administrative tasks. All users belonging to the admin group are **given access to root via the sudoers file**.
+* **Root**: Root is a user allowed to perform almost any action \(there are limitations imposed by protections like System Integrity Protection\).
+  * For example root won't be able to place a file inside `/System`
+
+## Passwords
+
+### Shadow Passwords
+
+Shadow password is stored withe the users configuration in plists located in **`/var/db/dslocal/nodes/Default/users/`**.  
+The following oneliner can be use to dump **all the information about the users** \(including hash info\):
+
+```bash
+for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
+```
+
+\*\*\*\*[**Scripts like this one**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) or [**this one**](https://github.com/octomagon/davegrohl.git) can be used to transform the hash to **hashcat** **format**.
+
+### [Keychaindump](https://github.com/juuso/keychaindump)
+
+The attacker still needs to gain access to the system as well as escalate to root privileges in order to run keychaindump. This approach comes with its own conditions. As mentioned earlier, upon login your keychain is unlocked by default and remains unlocked while you use your system. This is for convenience so that the user doesn’t need to enter their password every time an application wishes to access the keychain. If the user has changed this setting and chosen to lock the keychain after every use, keychaindump will no longer work; it relies on an unlocked keychain to function.
+
+It’s important to understand how Keychaindump extracts passwords out of memory. The most important process in this transaction is the ”securityd“ process. Apple refers to this process as a security context daemon for authorization and cryptographic operations. The Apple developer libraries don’t say a whole lot about it; however, they do tell us that securityd handles access to the keychain. In his research, Juuso refers to the key needed to decrypt the keychain as ”The Master Key“. A number of steps need to be taken to acquire this key as it is derived from the user’s OS X login password. If you want to read the keychain file you must have this master key. The following steps can be done to acquire it. Perform a scan of securityd’s heap \(keychaindump does this with the vmmap command\). Possible master keys are stored in an area flagged as MALLOC\_TINY. You can see the locations of these heaps yourself with the following command:
+
+```bash
+sudo vmmap <securityd PID> | grep MALLOC_TINY
+```
+
+**Keychaindump** will then search the returned heaps for occurrences of 0x0000000000000018. If the following 8-byte value points to the current heap, we’ve found a potential master key. From here a bit of deobfuscation still needs to occur which can be seen in the source code, but as an analyst the most important part to note is that the necessary data to decrypt this information is stored in securityd’s process memory. Here’s an example of keychain dump output.
+
+```bash
+sudo ./keychaindump
+```
+
+### Keychain Dump
+
+Note that when using the security binary to **dump the passwords decrypted**, several prompts will ask the user to allow this operation.
+
+```bash
+#security
+secuirty dump-trust-settings [-s] [-d] #List certificates
+security list-keychains #List keychain dbs
+security list-smartcards #List smartcards
+security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychains entries
+security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
+```
+
 ## Specific MacOS Enumeration
 
 ```bash
@@ -472,15 +561,6 @@ sysctl -a #List kernel configuration
 diskutil list #List connected hard drives
 codesign -vv -d /bin/ls #Check the signature of a binary
 nettop #Monitor network usage of processes in top style
-
-#security
-secuirty dump-trust-settings [-s] [-d] #List certificates
-security list-keychains #List keychain dbs
-security list-smartcards #List smartcards
-security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychains entries
-security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
-
-
 
 #networksetup - set or view network options: Proxies, FW options and more
 networksetup -listallnetworkservices #List network services
