@@ -289,7 +289,7 @@ cat > $HOME/hook.sh << EOF
 echo 'My is: \`id\`' > /tmp/login_id.txt
 EOF
 chmod +x $HOME/hook.sh
-defaults write com.apple.loginwindow LoginHook /Users/username/hook.sh
+defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh
 ```
 
 This setting is stored in `/Users/$USER/Library/Preferences/com.apple.loginwindow.plist`
@@ -304,6 +304,14 @@ defaults read /Users/$USER/Library/Preferences/com.apple.loginwindow.plist
     oneTimeSSMigrationComplete = 1;
 }
 ```
+
+To delete it:
+
+```bash
+defaults delete com.apple.loginwindow LoginHook
+```
+
+In the previous example we have created and deleted a **LoginHook**, it's also possible to create a **LogoutHook**.
 
 The root user one is stored in `/private/var/root/Library/Preferences/com.apple.loginwindow.plist`
 
