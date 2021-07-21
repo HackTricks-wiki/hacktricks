@@ -6,6 +6,8 @@
 
 ## [**MSFVenom - CheatSheet**](msfvenom.md)
 
+## [**Full TTYs**](full-ttys.md)
+
 ## **Auto-generated shells**
 
 * [**https://reverse-shell.sh/**](https://reverse-shell.sh/)
