@@ -1005,6 +1005,12 @@ There are some alternatives to the `sudo` binary such as `doas` for OpenBSD, rem
 permit nopass demo as root cmd vim
 ```
 
+### Sudo Hijacking
+
+If you know that a **user usually connects to a machine and uses `sudo`** to escalate privileges and you got a shell within that user context, you can **create a new sudo executable** that will execute your code as root and then the users command. Then, **modify the $PATH** of the user context \(for example adding the new path in .bash\_profile\) so we the user executed sudo, your sudo executable is executed.
+
+Note that if the user uses a different shell \(not bash\) you will need to modify other files to add the new path. For example[ sudo-piggyback](https://github.com/APTy/sudo-piggyback) modifies `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`. You can find another example in [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire_modules/bashdoor.py)
+
 ## Shared Library
 
 ### ld.so

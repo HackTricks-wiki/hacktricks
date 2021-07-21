@@ -549,6 +549,13 @@ security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychain
 security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
 ```
 
+### kcpassword
+
+The **kcpassword** file is a file that holds the **user’s login password**, but only if the system owner has **enabled automatic login**. Therefore, the user will be automatically logged in without being asked for a password \(which isn't very secure\).
+
+The password is stored in the file **`/etc/kcpassword`** xored with the key **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. If the users password is longer than the key, the key will be reused.  
+This makes the password pretty easy to recover, for example using scripts like [**this one**](https://gist.github.com/opshope/32f65875d45215c3677d).
+
 ## Specific MacOS Enumeration
 
 ```bash
