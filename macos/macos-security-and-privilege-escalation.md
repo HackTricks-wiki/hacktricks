@@ -61,6 +61,61 @@ And find all the quarantined files with:
 find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
 
+### Sandbox
+
+MacOS Sandbox makes applications run inside the sandbox **need to request access to resources outside of the limited sandbox**. This helps to ensure that **the application will be accessing only expected resources** and if it wants to access anything else it will need to ask for permissions to the user.
+
+Important **system services** also run inside their own custom **sandbox** such as the mdnsresponder service. You can view these custom **sandbox profiles** inside the **`/usr/share/sandbox`** directory.
+
+Check some of the **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
+
+### SIP - System Integrity Protection
+
+This protection was enabled to **help keep root level malware from taking over certain parts** of the operating system. Although this means **applying limitations to the root user** many find it to be worthwhile trade off.  
+The most notable of these limitations are that **users can no longer create, modify, or delete files inside** of the following four directories in general: 
+
+* /System
+* /bin
+* /sbin
+* /usr
+
+Note that there are **exceptions specified by Apple**: The file **`/System/Library/Sandbox/rootless.conf`** holds a list of **files and directories that cannot be modified**. But if the line starts with an **asterisk** it means that it can be **modified** as **exception**.  
+For example, the config lines:
+
+```bash
+        /usr
+*				/usr/libexec/cups
+*				/usr/local
+*				/usr/share/man
+```
+
+Means that `/usr` **cannot be modified** **except** for the **3 allowed** folders allowed.
+
+The final exception to these rules is that **any installer package signed with the Apple’s certificate can bypass SIP protection**, but **only Apple’s certificate**. Packages signed by standard developers will still be rejected when trying to modify SIP protected directories.
+
+Note that if **a file is specified** in the previous config file **but** it **doesn't exist, it can be created**. This might be used by malware to obtain stealth persistence. For example, imagine that a **.plist** in `/System/Library/LaunchDaemons` appears listed but it doesn't exist. A malware may c**reate one and use it as persistence mechanism.**
+
+Also, not how files and directories specified in **`rootless.conf`** have a **rootless extended attribute**:
+
+```bash
+xattr /System/Library/LaunchDaemons/com.apple.UpdateSettings.plist
+com.apple.rootless
+
+ls -lO /System/Library/LaunchDaemons/com.apple.UpdateSettings.plist
+-rw-r--r--@ 1 root  wheel  restricted,compressed 412  1 Jan  2020 /System/Library/LaunchDaemons/com.apple.UpdateSettings.plist
+```
+
+**SIP** handles a number of **other limitations as well**. Like it **doesn't allows for the loading of unsigned kext**s.  SIP is also responsible for **ensuring** that no OS X **system processes are debugged**. This also means that Apple put a stop to dtrace inspecting system processes.
+
+Check if SIP is enabled with:
+
+```bash
+csrutil status
+System Integrity Protection status: enabled.
+```
+
+If you want to disable it, you need to put the computer in recovery mode \(start it pressing command+R\) and execute: `csrutil disable`
+
 ## Common users
 
 * **Daemon**: User reserved for system daemons
