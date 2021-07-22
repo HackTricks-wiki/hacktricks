@@ -2,7 +2,7 @@
 
 First of all, please note that **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** machines. So see:
 
-{% page-ref page="../linux-unix/privilege-escalation/" %}
+{% page-ref page="../../linux-unix/privilege-escalation/" %}
 
 ## Security Restrictions
 
