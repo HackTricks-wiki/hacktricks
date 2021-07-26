@@ -4,7 +4,7 @@
 
 You can ask if an IP is related to suspicious/malicious activities. Completely free.
 
-## \*\*\*\*[**BotScout**](http://botscout.com/api.htm)\*\*\*\*
+## [**BotScout**](http://botscout.com/api.htm)
 
 Check if the IP address is related to a bot that register accounts. It can also check usernames and emails. Initially free.
 
