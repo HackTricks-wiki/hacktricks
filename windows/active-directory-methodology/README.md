@@ -41,66 +41,39 @@ To learn how to **attack an AD** you need to **understand** really good the **Ke
 
 ## Cheat Sheet
 
-### Tools and methodology
-
-![Orange-cyberdefense/Arsenal](https://raw.githubusercontent.com/Orange-Cyberdefense/arsenal/master/mindmap/pentest_ad.png)
-
-
-### Commands Cheat Sheet 
 You can take a lot to [https://wadcoms.github.io/](https://wadcoms.github.io/) to have a quick view of which commands you can run to enumerate/exploit an AD.
 
-## Active Directory Reconnaissance (***No creds***)
+## Recon Active Directory \(No creds/sessions\)
 
 If you just have access to an AD environment but you don't have any credentials/sessions you could:
 
-* **Network scanning**:
-  * See [Pentesting Network](../../pentesting/pentesting-network#scanning-hosts)
-* **Check for null access**:
-  * `enum4linux -a -u "" -p "" <DC IP>`
-  * `smbmap -u "" -p "" -P 445 -H <DC IP>`
-  * `smbclient -U '%' -L //<DC IP>`
-  * `cme smb <IP> -u '' -p ''`
-* **Check for guest access**:
-  * `enum4linux -a -u "guest" -p "" <DC IP>`
-  * `smbmap -u "guest" -p "" -P 445 -H <DC IP>`
-  * `smbclient -U 'guest%' -L //<IP>`
-  * `cme smb <IP> -u 'a' -p ''`
+* **Pentest the network:** Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them \(for example, [printers could be very interesting targets](ad-information-in-printers.md)**. Take a look to the General** [**Pentesting Methodology**](../../pentesting-methodology.md) to find more information about how to do this.
+* **Check for null and Guest access on smb services** \(this won't work on modern Windows versions\):
+  * `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
+  * `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
+  * `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
   * [**A more detailed guide on how to enumerate a SMB server can be found here.**](../../pentesting/pentesting-smb.md)
 * **Enumerate Ldap**:
   * `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
-  * `ldapsearch -x -h <IP> -s base`
-  * `ldapsearch -x -h <IP> -D '' -w '' -b "DC=<1_SUBDOMAIN>,DC=<TDL>"`
   * [**A more detailed guide on how to enumerate LDAP can be found here.**](../../pentesting/pentesting-ldap.md)
-* **Cleartext credentials**:
-Some fields as *UserPassword, UnixUserPassword, unicodePwd and msSFU30Password* can contain passwords.
-  * `Get-GPPPassword.py -no-pass <IP>`
-  * `crackmapexec ldap <IP> -u '' -p '' <IP> -M gpp_password`
-  * `enum4linux | grep -i desc`
-  * `crackmapexec ldap <IP> -u '' -p '' --kdcHost <IP> -M get-desc-users`
-  * `crackmapexec ldap <IP> -u '' -p '' <IP> -M gpp_autologin`
-* **Zerologon**: [dirkjanm/CVE-2020-1472](https://github.com/dirkjanm/CVE-2020-1472)
-* **EternalBlue**: [exploit/windows/smb/ms17_010_eternalblue](https://www.rapid7.com/db/modules/exploit/windows/smb/ms17_010_eternalblue/)
-* **Network poisoning**
-  * Gather credentials [impersonating services with Responder](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
-  * Access host by [abusing the relay attack](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
-  * Gather credentials **exposing** [fake UPnP services with evil-S](../../pentesting/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
-* **OSINT**: Try to *extract possible usernames* from web services inside the domain environments and also from the publicly available web pages of the company. If you find the complete names of company workers, you could try different *AD username conventions* ([read this](https://activedirectorypro.com/active-directory-user-naming-convention/)). You could also try statistically most used usernames: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames).
+* **Poison the network**
+  * Gather credentials [**impersonating services with Responder**](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
+  * Access host by [abusing the relay attack](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)\*\*\*\*
+  * Gather credentials **exposing** [**fake UPnP services with evil-S**](../../pentesting/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+* **OSINT**: Try to **extract possible usernames** from services \(mainly web\) inside the domain environments and also from the publicly available web pages of the company. If you find the complete names of company workers, you could try different AD **username conventions \(**[**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/)**\)**. The most common conventions are: _NameSurname_, _Name.Surname_, _NamSur_ \(3letters of each\), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random letters and 3 random numbers_ \(abc123\). You could also try **statistically most used usernames**: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames) **Read the following Username enumeration section to learn how to find if a username is valid or not.**
 
 ### User enumeration
 
-When an **invalid username is requested** the server will respond using the **Kerberos error** code _*KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN*_, allowing us to determine that the username was invalid. However **Valid usernames** will illicit either the **TGT in a AS-REP** response **or** the error _*KRB5KDC\_ERR\_PREAUTH\_REQUIRED*_, indicating that the user is required to perform pre-authentication.
+When an **invalid username is requested** the server will respond using the **Kerberos error** code _**KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN**_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response **or** the error _**KRB5KDC\_ERR\_PREAUTH\_REQUIRED**_, indicating that the user is required to perform pre-authentication.
 
-#### Enumeration
-* `enum4linux -U 10.10.10.161 | grep 'user:' | sed 's/user:\[//g' | sed 's/\]//g' | awk '{print $1}'`
-* `nmap -p 88 --script=krb5-enum-users --script-args="krb5-enum-users.realm='DOMAIN'" <IP>`
-
-#### List based
-Build your own userlist.
-
-* `nmap -p 88 --script=krb5-enum-users --script-args krb5-enum-users.realm='<domain>',userdb=/root/Desktop/usernames.txt <IP>`
-* `msf> use auxiliary/gather/kerberos_enumusers`
-* `./kerbrute_linux_amd64 userenum -d lab.ropnop.com usernames.txt`
-* `crackmapexec smb <IP> -u '' -p '' --users`
+```text
+nmap -p 88 --script=krb5-enum-users --script-args="krb5-enum-users.realm='DOMAIN'" <IP>
+Nmap -p 88 --script=krb5-enum-users --script-args krb5-enum-users.realm='<domain>',userdb=/root/Desktop/usernames.txt <IP>
+msf> use auxiliary/gather/kerberos_enumusers
+./kerbrute_linux_amd64 userenum -d lab.ropnop.com usernames.txt
+crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
+enum4linux -U 10.10.10.161 | grep 'user:' | sed 's/user:\[//g' | sed 's/\]//g' | awk '{print $1}'
+```
 
 You could also use the **impacket script of ASREPRoast** to enumerate valid usernames.
 
@@ -110,7 +83,7 @@ Ok, so you know you have already a valid username but no passwords...Then try:
 
 * [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _**DONT\_REQ\_PREAUTH**_ you can **request a AS\_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
 * [**Password Spraying**](password-spraying.md): Let's **try** the most **common passwords** with each of the discovered users, maybe some user is using a bad password \(keep in mind the password policy\)
-* A final option if the accounts **cannot be locked** is the [traditional bruteforce](password-spraying.md)
+* A final option if the accounts cannot be locked is the [**traditional bruteforce**](password-spraying.md)\*\*\*\*
 
 ## Enumerating Active Directory \(Some creds/Session\)
 

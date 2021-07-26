@@ -56,6 +56,7 @@
 ## MacOS
 
 * [MacOS Security & Privilege Escalation](macos/macos-security-and-privilege-escalation/README.md)
+  * [MacOS Serial Number](macos/macos-security-and-privilege-escalation/macos-serial-number.md)
   * [Mac OS Architecture](macos/macos-security-and-privilege-escalation/mac-os-architecture.md)
 
 ## Windows

