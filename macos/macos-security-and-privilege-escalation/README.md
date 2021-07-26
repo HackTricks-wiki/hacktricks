@@ -61,13 +61,25 @@ And find all the quarantined files with:
 find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
 
-### Sandbox
+## XProtect
+
+**X-Protect is Apple’s built in malware scanner.** It keeps track of known malware hashes and patterns.
+
+## Sandbox
 
 MacOS Sandbox makes applications run inside the sandbox **need to request access to resources outside of the limited sandbox**. This helps to ensure that **the application will be accessing only expected resources** and if it wants to access anything else it will need to ask for permissions to the user.
 
+You can get information about the latest XProtect update running:
+
 Important **system services** also run inside their own custom **sandbox** such as the mdnsresponder service. You can view these custom **sandbox profiles** inside the **`/usr/share/sandbox`** directory.
 
+```bash
+system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistConfigData" | tail -n 5
+```
+
 Check some of the **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
+
+## Common users
 
 ### SIP - System Integrity Protection
 
@@ -610,6 +622,44 @@ The **kcpassword** file is a file that holds the **user’s login password**, bu
 
 The password is stored in the file **`/etc/kcpassword`** xored with the key **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. If the users password is longer than the key, the key will be reused.  
 This makes the password pretty easy to recover, for example using scripts like [**this one**](https://gist.github.com/opshope/32f65875d45215c3677d).
+
+## **Library injection**
+
+### Dylib Hijacking
+
+As in Windows, in MacOS you can also **hijack dylibs** to make **applications** **execute** **arbitrary** **code**.  
+However, the way **MacOS** applications **load** libraries is **more restricted** than in Windows. This implies that **malware** developers can still use this technique for **stealth**, but the probably to be able to **abuse this to escalate privileges is much lower**.
+
+First of all, is **more common** to find that **MacOS binaries indicates the full path** to the libraries to load. And second, **MacOS never search** in the folders of the **$PATH** for libraries.
+
+However, there are 2 types of dylib hijacking:
+
+* **Missing weak linked libraries**: This means that the application will try to load a library that doesn't exist configured with **LC\_LOAD\_WEAK\_DYLIB**. Then, **if an attacker places a dylib where it's expected it will be loaded**.
+  * The fact that the link is "weak" means that the application will continue running even if the library isn't found.
+* **Configured with @rpath**: The path to the library configured contains "**@rpath**" and it's configured with **multiple** **LC\_RPATH** containing **paths**. Therefore, **when loading** the dylib, the loader is going to **search** \(in order\) **through all the paths** specified in the **LC\_RPATH** **configurations**. If anyone is missing and **an attacker can place a dylib there** and it will be loaded.
+
+The way to **escalate privileges** abusing this functionality would be in the rare case that an **application** being executed **by** **root** is **looking** for some **library in some folder where the attacker has write permissions.**
+
+**A nice scanner to find missing libraries in applications is** [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html)**.  
+A nice report with technical details about this technique can be found** [**here**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x)**.**
+
+### **DYLD\_INSERT\_LIBRARIES**
+
+> This is a colon separated **list of dynamic libraries** to l**oad before the ones specified in the program**. This lets you test new modules of existing dynamic shared libraries that are used in flat-namespace images by loading a temporary dynamic shared library with just the new modules. Note that this has no effect on images built a two-level namespace images using a dynamic shared library unless DYLD\_FORCE\_FLAT\_NAMESPACE is also used.
+
+This is like the [**LD\_PRELOAD on Linux**](../../linux-unix/privilege-escalation/#ld_preload).
+
+This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
+
+## Crons
+
+In MacOS several folders executing scripts with **certain frequency** can be found in:
+
+```bash
+ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
+```
+
+There you can find the regular **cron** **jobs**, the **at** **jobs** \(not very used\) and the **periodic** **jobs** \(mainly used for cleaning temporary files\). The daily periodic jobs can be executed for example with: `periodic daily`.
 
 ## Specific MacOS Enumeration
 
