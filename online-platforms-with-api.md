@@ -116,5 +116,5 @@ Search by domain and email and get if it was pwned and passwords. Commercial?
 
 [https://www.netcraft.com/](https://www.netcraft.com/) \(in a commercial tool?\)
 
-[https:/https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(in a commercial tool?\)
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(in a commercial tool?\)
 
