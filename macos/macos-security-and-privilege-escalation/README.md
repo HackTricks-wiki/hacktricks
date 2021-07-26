@@ -310,6 +310,8 @@ kextunload /path/to/kext.kext
 kextunload -b com.apple.driver.ExampleBundle
 ```
 
+For more information about [**kernel extensions check this section**](mac-os-architecture.md#i-o-kit-drivers).
+
 ### **Login Items**
 
 In System Preferences -&gt; Users & Groups -&gt; **Login Items** you can find  **items to be executed when the user logs in**.  
