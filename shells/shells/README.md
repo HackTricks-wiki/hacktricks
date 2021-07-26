@@ -4,7 +4,9 @@
 
 ## [**Shells - Windows**](windows.md)
 
-## [**MSFVenom - CheatSheet**](untitled.md)
+## [**MSFVenom - CheatSheet**](msfvenom.md)
+
+## [**Full TTYs**](full-ttys.md)
 
 ## **Auto-generated shells**
 
