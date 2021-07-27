@@ -670,6 +670,61 @@ ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
 
 There you can find the regular **cron** **jobs**, the **at** **jobs** \(not very used\) and the **periodic** **jobs** \(mainly used for cleaning temporary files\). The daily periodic jobs can be executed for example with: `periodic daily`.
 
+## File Extensions Apps
+
+The following line can be useful to find the applications that can open files depending on the extension:
+
+```bash
+/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
+```
+
+Or use something like [https://github.com/Lord-Kamina/SwiftDefaultApps](https://github.com/Lord-Kamina/SwiftDefaultApps).
+
+You can also check the extensions supported by an application doing:
+
+```bash
+cd /Applications/Safari.app/Contents
+grep -A3 CFBundleTypeExtensions Info.plist  | grep string
+				<string>css</string>
+				<string>pdf</string>
+				<string>webarchive</string>
+				<string>webbookmark</string>
+				<string>webhistory</string>
+				<string>webloc</string>
+				<string>download</string>
+				<string>safariextz</string>
+				<string>gif</string>
+				<string>html</string>
+				<string>htm</string>
+				<string>js</string>
+				<string>jpg</string>
+				<string>jpeg</string>
+				<string>jp2</string>
+				<string>txt</string>
+				<string>text</string>
+				<string>png</string>
+				<string>tiff</string>
+				<string>tif</string>
+				<string>url</string>
+				<string>ico</string>
+				<string>xhtml</string>
+				<string>xht</string>
+				<string>xml</string>
+				<string>xbl</string>
+				<string>svg</string>
+```
+
+## Risk Files Mac OS
+
+The files `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` contains the risk associated to files depending on the file extension.
+
+The possible categories include the following:
+
+* **LSRiskCategorySafe**: **Totally** **safe**; Safari will auto-open after download
+* **LSRiskCategoryNeutral**: No warning, but **not auto-opened**
+* **LSRiskCategoryUnsafeExecutable**: **Triggers** a **warning** “This file is an application...”
+* **LSRiskCategoryMayContainUnsafeExecutable**: This is for things like archives that contain an executable. It **triggers a warning unless Safari can determine all the contents are safe or neutral**.
+
 ## Specific MacOS Enumeration
 
 ```bash
