@@ -74,7 +74,7 @@ The **hash NT \(16bytes\)** is divided in **3 parts of 7bytes each** \(7B + 7B +
 
 Nowadays is becoming less common to find environments with Unconstrained Delegation configured, but this doesn't mean you can't **abuse a Print Spooler service** configured.
 
-You could abuse some credentials/sessions you already have on the AD to **ask the printer to authenticate** against some **host under your control**. Then, using `metasploit auxiliary/server/capture/smb` or `responder` you can **set the authentication challenge to 112233445566778899**, capture the authentication attempt, and if it was done using **NTLMv1** you will be able to **crack it**.  
+You could abuse some credentials/sessions you already have on the AD to **ask the printer to authenticate** against some **host under your control**. Then, using `metasploit auxiliary/server/capture/smb` or `responder` you can **set the authentication challenge to 1122334455667788**, capture the authentication attempt, and if it was done using **NTLMv1** you will be able to **crack it**.  
 If you are using `responder` you could try to **use the flag `--lm`** to try to **downgrade** the **authentication**.  
 _Note that for this technique the authentication must be performed using NTLMv1 \(NTLMv2 is not valid\)._
 
