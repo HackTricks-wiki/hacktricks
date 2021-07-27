@@ -97,7 +97,7 @@ As you may be thinking usually a universal binary compiled for 2 architectures *
 
 ### Mach-o Format
 
-* Header
+* **Header**
 
 The header contains basic information about the file, such as magic bytes to identify it as a Mach-O file and information about the target architecture. You can find it in: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 
@@ -106,14 +106,30 @@ struct mach_header {
 	uint32_t	magic;		/* mach magic number identifier */
 	cpu_type_t	cputype;	/* cpu specifier (e.g. I386) */
 	cpu_subtype_t	cpusubtype;	/* machine specifier */
-	uint32_t	filetype;	/* type of file */
+	uint32_t	filetype;	/* type of file (usage and alignment for the file) */
 	uint32_t	ncmds;		/* number of load commands */
 	uint32_t	sizeofcmds;	/* the size of all the load commands */
 	uint32_t	flags;		/* flags */
 };
 ```
 
+* **load-commands region**
 
+This specifies the **layout of the file in memory**. It contains the **location of the symbol table**, the main thread context at the beginning of execution, and which shared libraries are required.
+
+* **data region**
+
+The heart of the file is the final region, the data, which consists of a number of segments as laid out in the load-commands region. **Each segment can contain a number of data sections**. Each of these sections **contains code or data** of one particular type.
+
+![](../../.gitbook/assets/image%20%28507%29.png)
+
+#### Get the info
+
+```bash
+otool -f /bin/ls #Get universal headers info
+otool -h /bin/ls #get the Mach header
+otool -l /bin/ls #Get Load commands
+```
 
 ## References
 
