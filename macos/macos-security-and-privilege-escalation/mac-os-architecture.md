@@ -131,6 +131,18 @@ otool -h /bin/ls #get the Mach header
 otool -l /bin/ls #Get Load commands
 ```
 
+### Bundles
+
+Basically, a bundle is a **directory structure** within the file system. Interestingly, by default this directory **looks like a single object in Finder**. The types of resources contained within a bundle may consist of applications, libraries, images, documentation, header files, etc. All these files are inside `<application>.app/Contents/`
+
+```bash
+ls -lR /Applications/Safari.app/Contents
+```
+
+* The **MacOS** **folder** contains the executable of the application
+* The **Resources** **folder** contains the resources of the app \(icons, images...\)
+* **Plist** **files** contains configuration information. You can find find information about the meaning of they plist keys in [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
+
 ## References
 
 * \*\*\*\*[**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)\*\*\*\*

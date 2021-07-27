@@ -61,25 +61,32 @@ And find all the quarantined files with:
 find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
 
-## XProtect
+### XProtect
 
-**X-Protect is Apple’s built in malware scanner.** It keeps track of known malware hashes and patterns.
-
-## Sandbox
-
-MacOS Sandbox makes applications run inside the sandbox **need to request access to resources outside of the limited sandbox**. This helps to ensure that **the application will be accessing only expected resources** and if it wants to access anything else it will need to ask for permissions to the user.
-
+**X-Protect is Apple’s built in malware scanner.** It keeps track of known malware hashes and patterns.  
 You can get information about the latest XProtect update running:
-
-Important **system services** also run inside their own custom **sandbox** such as the mdnsresponder service. You can view these custom **sandbox profiles** inside the **`/usr/share/sandbox`** directory.
 
 ```bash
 system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistConfigData" | tail -n 5
 ```
 
+## Sandbox
+
+MacOS Sandbox works with the kernel extension Seatbelt. It makes applications run inside the sandbox **need to request access to resources outside of the limited sandbox**. This helps to ensure that **the application will be accessing only expected resources** and if it wants to access anything else it will need to ask for permissions to the user.
+
+Important **system services** also run inside their own custom **sandbox** such as the mdnsresponder service. You can view these custom **sandbox profiles** inside the **`/usr/share/sandbox`** directory. Other sandbox profiles can be checked in [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
+
 Check some of the **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
 
-## Common users
+To start an application with a sandbox config you can use:
+
+```bash
+sandbox-exec -f example.sb /Path/To/The/Application
+```
+
+{% hint style="info" %}
+Note that the **Apple-authored** **software** that runs on **Windows** **doesn’t have additional security precautions**, such as application sandboxing.
+{% endhint %}
 
 ### SIP - System Integrity Protection
 
