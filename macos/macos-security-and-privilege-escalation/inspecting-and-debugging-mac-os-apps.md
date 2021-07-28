@@ -32,7 +32,70 @@ ktrace trace -s -S -t c -c ls | grep "ls("
 
 ### dtrace
 
+It allows users access to applications at an extremely **low level** and provides a way for users to **trace** **programs** and even change their execution flow. Dtrace uses **probes** which are **placed throughout the kernel** and are at locations such as the beginning and end of system calls.
+
+The available probes of dtrace can be obtained with:
+
 ```bash
-sudo dtrace -n 'syscall:::entry {@[execname] = count()}' #Count the number of syscalls of each running process
+dtrace -l | head
+   ID   PROVIDER            MODULE                          FUNCTION NAME
+    1     dtrace                                                     BEGIN
+    2     dtrace                                                     END
+    3     dtrace                                                     ERROR
+   43    profile                                                     profile-97
+   44    profile                                                     profile-199
+```
+
+The probe name consists of four parts: the provider, module, function, and name \(`fbt:mach_kernel:ptrace:entry`\). If you not specifies some part of the name, Dtrace will apply that part as a wildcard.
+
+A more detailed explanation and more examples can be found in [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)
+
+#### Examples
+
+* In line
+
+```bash
+#Count the number of syscalls of each running process
+sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
+```
+
+* script
+
+```bash
+syscall:::entry
+/pid == $1/
+{
+}
+
+#Log every syscall of a PID
+sudo dtrace -s script.d 1234 
+```
+
+```bash
+syscall::open:entry
+{
+    printf("%s(%s)", probefunc, copyinstr(arg0));
+}
+syscall::close:entry
+{
+        printf("%s(%d)\n", probefunc, arg0);
+}
+
+#Log files opened and closed by a process
+sudo dtrace -s b.d -c "cat /etc/hosts"
+```
+
+```bash
+syscall:::entry
+{
+        ;
+}
+syscall:::return
+{
+        printf("=%d\n", arg1);
+}
+
+#Log sys calls with values
+sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 ```
 
