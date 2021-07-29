@@ -296,7 +296,7 @@ List the cron jobs of the **current user** with:
 crontab -l
 ```
 
-You can also see all the cron jobs of the users in **`/usr/lib/cron/tabs/`** \(needs root\).
+You can also see all the cron jobs of the users in **`/usr/lib/cron/tabs/`** and **`/var/at/tabs/`** \(needs root\).
 
 ### kext
 
@@ -333,8 +333,9 @@ osascript -e 'tell application "System Events" to make login item at end with pr
 
 #Remove an item:
 osascript -e 'tell application "System Events" to delete login item "itemname"' 
-
 ```
+
+These items are stored in the file /Users/&lt;username&gt;/Library/Application Support/com.apple.backgroundtaskmanagementagent
 
 ### At
 
@@ -649,7 +650,7 @@ However, there are 2 types of dylib hijacking:
 
 The way to **escalate privileges** abusing this functionality would be in the rare case that an **application** being executed **by** **root** is **looking** for some **library in some folder where the attacker has write permissions.**
 
-**A nice scanner to find missing libraries in applications is** [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html)**.  
+**A nice scanner to find missing libraries in applications is** [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) **or a** [**CLI version**](https://github.com/pandazheng/DylibHijack)**.  
 A nice report with technical details about this technique can be found** [**here**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x)**.**
 
 ### **DYLD\_INSERT\_LIBRARIES**
@@ -659,6 +660,14 @@ A nice report with technical details about this technique can be found** [**here
 This is like the [**LD\_PRELOAD on Linux**](../../linux-unix/privilege-escalation/#ld_preload).
 
 This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
+
+{% hint style="info" %}
+Since 2012 when [OSX.FlashBack.B](https://www.f-secure.com/v-descs/trojan-downloader_osx_flashback_b.shtml) \[22\] abused this technique, **Apple has drastically reduced the “power”** of the DYLD\_INSERT\_LIBRARIES. 
+
+For example the dynamic loader \(dyld\) ignores the DYLD\_INSERT\_LIBRARIES environment variable in a wide range of cases, such as setuid and platform binaries. And, starting with macOS Catalina, only 3rd-party applications that are not compiled with the hardened runtime \(which “protects the runtime integrity of software” \[22\]\), or have an exception such as the com.apple.security.cs.allow-dyld-environment-variables entitlement\) are susceptible to dylib insertions. 
+
+For more details on the security features afforded by the hardened runtime, see Apple’s documentation: “[Hardened Runtime](https://developer.apple.com/documentation/security/hardened_runtime)” 
+{% endhint %}
 
 ## Crons
 
@@ -746,4 +755,8 @@ networksetup -getautoproxyurl Wi-Fi #Get proxy URL for Wifi
 networksetup -getwebproxy Wi-Fi #Wifi Web proxy
 networksetup -getftpproxy Wi-Fi #Wifi ftp proxy
 ```
+
+## References
+
+* [https://taomm.org/vol1/analysis.html](https://taomm.org/vol1/analysis.html)
 
