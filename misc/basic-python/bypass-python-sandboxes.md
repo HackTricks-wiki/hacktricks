@@ -158,6 +158,10 @@ f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdi
 f(42)
 ```
 
+### Decompiling Python
+
+Using tools like [https://www.decompiler.com/](https://www.decompiler.com/) one can decompile given compiled python code
+
 ## Builtins
 
 * [Builtins functions of python2](https://docs.python.org/2/library/functions.html)

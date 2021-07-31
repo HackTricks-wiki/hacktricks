@@ -1,4 +1,4 @@
-# Inspecting and debugging Mac OS Apps
+# Inspecting and debugging Mac OS Sotware
 
 ## Static Analysis
 
@@ -8,6 +8,21 @@
 otool -L /bin/ls #List dynamically linked libraries
 otool -tv /bin/ps #Decompile application
 ```
+
+### SuspiciousPackage
+
+\*\*\*\*[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) is a tool useful to inspect **.pkg** files \(installers\) and see what is inside before installing it.  
+These installers have `preinstall` and `postinstall` bash scripts that malware authors usually abuse to **persist** **the** **malware**.
+
+### hdiutil
+
+This tool allows to **mount** Apple disk images \(**.dmg**\) files to inspect them before running anything:
+
+```bash
+hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
+```
+
+It will be mounted in `/Volumes`
 
 ## Dynamic Analysis
 
