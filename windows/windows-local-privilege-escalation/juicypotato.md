@@ -101,8 +101,7 @@ c:\Users\Public>
 
 Oftentimes, the default CLSID that JuicyPotato uses **doesn't work** and the exploit fails. Usually, it takes multiple attempts to find a **working CLSID**. To get a list of CLSIDs to try for a specific operating system, you should visit this page:
 
-{% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
-
+{% embed url="https://ohpe.it/juicy-potato/CLSID/" caption="" %}
 
 ### **Checking CLSIDs**
 

@@ -139,7 +139,7 @@
   * [content:// protocol](mobile-apps-pentesting/android-app-pentesting/content-protocol.md)
   * [Drozer Tutorial](mobile-apps-pentesting/android-app-pentesting/drozer-tutorial/README.md)
     * [Exploiting Content Providers](mobile-apps-pentesting/android-app-pentesting/drozer-tutorial/exploiting-content-providers.md)
-  * [Exploiting a debuggeable applciation](mobile-apps-pentesting/android-app-pentesting/exploiting-a-debuggeable-applciation.md)
+  * [Exploiting a debuggable application](mobile-apps-pentesting/android-app-pentesting/exploiting-a-debuggeable-applciation.md)
   * [Frida Tutorial](mobile-apps-pentesting/android-app-pentesting/frida-tutorial/README.md)
     * [Frida Tutorial 1](mobile-apps-pentesting/android-app-pentesting/frida-tutorial/frida-tutorial-1.md)
     * [Frida Tutorial 2](mobile-apps-pentesting/android-app-pentesting/frida-tutorial/frida-tutorial-2.md)
