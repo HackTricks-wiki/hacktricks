@@ -45,7 +45,7 @@ Inception is a **physical memory manipulation** and hacking tool exploiting PCI-
 
 **If INCEPTION succeeds, any password introduced will be vaid.**
 
-**It doesn't work with Wndows10.**
+**It doesn't work with Windows10.**
 
 ## Live CD/USB
 
