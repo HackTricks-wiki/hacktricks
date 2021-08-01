@@ -139,11 +139,37 @@ Basically, a bundle is a **directory structure** within the file system. Interes
 ls -lR /Applications/Safari.app/Contents
 ```
 
-* The **MacOS** **folder** contains the executable of the application
-* The **Resources** **folder** contains the resources of the app \(icons, images...\)
-* **Plist** **files** contains configuration information. You can find find information about the meaning of they plist keys in [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
+* `Contents/_CodeSignature`
+
+  Contains **code-signing information** about the application \(i.e., hashes, etc.\).
+
+* `Contents/MacOS`
+
+  Contains the **application’s binary** \(which is executed when the user double-clicks the application icon in the UI\). 
+
+* `Contents/Resources`
+
+  Contains **UI elements of the application**, such as images, documents, and nib/xib files \(that describe various user interfaces\). 
+
+* `Contents/Info.plist` ****The application’s main “**configuration file.**” Apple notes that “the system relies on the presence of this file to identify relevant information about \[the\] application and any related files”.
+  * **Plist** **files** contains configuration information. You can find find information about the meaning of they plist keys in [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
+  * Pairs that may be of interest when analyzing an application include:  
+
+
+    * **CFBundleExecutable**
+
+    Contains the **name of the application’s binary** \(found in Contents/MacOS\).
+
+    * **CFBundleIdentifier**
+
+    Contains the application’s bundle identifier \(often used by the system to **globally** **identify** the application\).
+
+    * **LSMinimumSystemVersion**
+
+    Contains the **oldest** **version** of **macOS** that the application is compatible with.
 
 ## References
 
 * \*\*\*\*[**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)\*\*\*\*
+* \*\*\*\*[**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)\*\*\*\*
 

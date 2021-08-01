@@ -734,6 +734,35 @@ The possible categories include the following:
 * **LSRiskCategoryUnsafeExecutable**: **Triggers** a **warning** “This file is an application...”
 * **LSRiskCategoryMayContainUnsafeExecutable**: This is for things like archives that contain an executable. It **triggers a warning unless Safari can determine all the contents are safe or neutral**.
 
+## Apple Scripts
+
+It's a scripting language used for task automation **interacting with remote processes**. It makes pretty easy to **ask other processes to perform some actions**. **Malware** may abuse these features to abuse functions exported by other processes.  
+For example, a malware could **inject arbitrary JS code in browser opened pages**. Or **auto click** some allow permissions requested to the user;
+
+```bash
+tell window 1 of process “SecurityAgent” 
+     click button “Always Allow” of group 1
+end tell
+```
+
+Here you have some examples: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)  
+Find more info about malware using applescripts [**here**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).
+
+Apple scripts may be easily "**compiled**". These versions can be easily "**decompiled**" with `osadecompile`
+
+However, this scripts can also be **exported as "Read only"** \(via the "Export..." option\):
+
+![](../../.gitbook/assets/image%20%28535%29.png)
+
+```bash
+file mal.scpt
+mal.scpt: AppleScript compiled
+```
+
+and tin this case the content cannot be decompiled even with `osadecompile`
+
+However, there are still some tools that can be used to understand this kind of executables, [**read this research for more info**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)\). The tool [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) with [**aevt\_decompile**](https://github.com/SentineLabs/aevt_decompile) will be very useful to understand how the script works.
+
 ## Specific MacOS Enumeration
 
 ```bash
