@@ -88,8 +88,8 @@ Moreover, don't forget that if the users use **any web portal to access their ma
 
 You can download it from [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
-Download and decompress it inside `/opt/gophish` and execute  `/opt/gophish/gophish`  
-You will be given a password for the admin user in port 3333 in the output. Therefore, access that port and use those credentials to change the admin password. You may need to tunnel that port to local: 
+Download and decompress it inside `/opt/gophish` and execute `/opt/gophish/gophish`  
+You will be given a password for the admin user in port 3333 in the output. Therefore, access that port and use those credentials to change the admin password. You may need to tunnel that port to local:
 
 ```bash
 ssh -L 333:127.0.0.1:3333 <user>@<ip>
@@ -119,7 +119,7 @@ cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crtâ€
 
 #### Mail configuration
 
-Start installing:  `apt-get install postfix`
+Start installing: `apt-get install postfix`
 
 Then add the domain to the following files:
 
@@ -129,12 +129,12 @@ Then add the domain to the following files:
 
 **Change also the values of the following variables inside /etc/postfix/main.cf**
 
-`myhostname = <domain>  
+`myhostname = <domain>    
 mydestination = $myhostname, <domain>, localhost.com, localhost`
 
 Finally modify the files **`/etc/hostname`** and **`/etc/mailname`** to your domain name and **restart your VPS.**
 
-Now, create a **DNS A record** of `mail.<domain>` pointing to the **ip address** of the VPS and a **DNS MX** record pointing to `mail.<domain>` 
+Now, create a **DNS A record** of `mail.<domain>` pointing to the **ip address** of the VPS and a **DNS MX** record pointing to `mail.<domain>`
 
 Now lets test to send an email:
 
@@ -242,7 +242,7 @@ service gophish stop
 ### Wait
 
 The older a domain is the less probable it's going to be caught as spam. Then you should wait as much time as possible \(at least 1week\) before the phishing assessment.  
-Note that even if you have to wait a week you can finish configuring everything now. 
+Note that even if you have to wait a week you can finish configuring everything now.
 
 ### Configure Reverse DNS \(rDNS\) record
 
@@ -356,7 +356,7 @@ I would recommend to **send the test emails to 10min mails addresses** in order 
 ```markup
 <html>
 <head>
-	<title></title>
+    <title></title>
 </head>
 <body>
 <p class="MsoNormal"><span style="font-size:10.0pt;font-family:&quot;Verdana&quot;,sans-serif;color:black">Dear {{.FirstName}} {{.LastName}},</span></p>
@@ -374,7 +374,7 @@ WRITE HERE SOME SIGNATURE OF SOMEONE FROM THE COMPANY
 </html>
 ```
 
-Note that **in order to increase the credibility of the email**, it's recommended to use some signature from an email from the client. Suggestions: 
+Note that **in order to increase the credibility of the email**, it's recommended to use some signature from an email from the client. Suggestions:
 
 * Send an email to a **non existent address** and check if the response has any signature.
 * Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.

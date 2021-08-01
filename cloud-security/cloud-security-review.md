@@ -16,7 +16,7 @@ pip3 install scoutsuite
 
 ### [cs-suite](https://github.com/SecurityFTW/cs-suite)
 
-AWS, GCP, Azure, DigitalOcean 
+AWS, GCP, Azure, DigitalOcean
 
 ```text
 git clone https://github.com/SecurityFTW/cs-suite.git && cd cs-suite/
@@ -43,13 +43,13 @@ Take a look to the **network access rules** and detect if the services are corre
 ## Azure
 
 Access the portal here: [http://portal.azure.com/](http://portal.azure.com/)  
-To start the tests you should have access with a user with **Reader permissions over the subscription** and  **Global Reader role in AzureAD**. If even in that case you are **not able to access the content of the Storage accounts** you can fix it with the **role Storage Account Contributor**.
+To start the tests you should have access with a user with **Reader permissions over the subscription** and **Global Reader role in AzureAD**. If even in that case you are **not able to access the content of the Storage accounts** you can fix it with the **role Storage Account Contributor**.
 
 It is recommended to **install azure-cli** in a **linux** and **windows** virtual machines \(to be able to run powershell and python scripts\): [https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)  
 Then, run `az login` to login. Note the **account information** and **token** will be **saved** inside _&lt;HOME&gt;/.azure_ \(in both Windows and Linux\).
 
 Remember that if the **Security Centre Standard Pricing Tier** is being used and **not** the **free** tier, you can **generate** a **CIS compliance scan report** from the azure portal. Go to _Policy & Compliance-&gt; Regulatory Compliance_ \(or try to access [https://portal.azure.com/\#blade/Microsoft\_Azure\_Security/SecurityMenuBlade/22](https://portal.azure.com/#blade/Microsoft_Azure_Security/SecurityMenuBlade/22)\).  
-__If the company is not paying for a Standard account you may need to review the **CIS Microsoft Azure Foundations Benchmark** by "hand" \(you can get some help using the following tools\). Download it from [**here**](https://www.newnettechnologies.com/cis-benchmark.html?keyword=&gclid=Cj0KCQjwyPbzBRDsARIsAFh15JYSireQtX57C6XF8cfZU3JVjswtaLFJndC3Hv45YraKpLVDgLqEY6IaAhsZEALw_wcB#microsoft-azure).
+\_\_If the company is not paying for a Standard account you may need to review the **CIS Microsoft Azure Foundations Benchmark** by "hand" \(you can get some help using the following tools\). Download it from [**here**](https://www.newnettechnologies.com/cis-benchmark.html?keyword=&gclid=Cj0KCQjwyPbzBRDsARIsAFh15JYSireQtX57C6XF8cfZU3JVjswtaLFJndC3Hv45YraKpLVDgLqEY6IaAhsZEALw_wcB#microsoft-azure).
 
 ### Run scanners
 
@@ -94,7 +94,9 @@ azscan #Run, login before with `az login`
 
 * **Standard tier** is recommended instead of free tier \(see the tier being used in _Pricing & Settings_ or in [https://portal.azure.com/\#blade/Microsoft\_Azure\_Security/SecurityMenuBlade/24](https://portal.azure.com/#blade/Microsoft_Azure_Security/SecurityMenuBlade/24)\)
 * **Periodic SQL servers scans**: 
+
   _Select the SQL server_ --&gt; _Make sure that 'Advanced data security' is set to 'On'_ --&gt; _Under 'Vulnerability assessment settings', set 'Periodic recurring scans' to 'On', and configure a storage account for storing vulnerability assessment scan results_ --&gt; _Click Save_
+
 * **Lack of App Services restrictions**: Look for "App Services" in Azure \([https://portal.azure.com/\#blade/HubsExtension/BrowseResource/resourceType/Microsoft.Web%2Fsites](https://portal.azure.com/#blade/HubsExtension/BrowseResource/resourceType/Microsoft.Web%2Fsites)\) and check if anyone is being used. In that case check go through each App checking for "Access Restrictions" and there aren't rules, report it. The access to the app service should be restricted according to the needs.
 
 ## Office365
@@ -104,8 +106,4 @@ You need **Global Admin** or at least **Global Admin Reader** \(but note that Gl
 ## AWS
 
 Get objects in graph: [https://github.com/FSecureLABS/awspx](https://github.com/FSecureLABS/awspx)
-
-
-
-
 

@@ -4,7 +4,7 @@
 
 This is **Carlos Polop**.
 
-First of all, I want to indicate that **I don't own this entire book**, a lot of **information was copy/pasted from other websites and that content belongs to them** \(this is indicated on the copy/pasted content\).
+First of all, I want to indicate that **I don't own this entire book**, a lot of **information was copy/pasted from other websites and that content belongs to them** \(this is indicated on the pages\).
 
 I also wants to say **thanks to all the people that share cyber-security related information for free** on the Internet. Thanks to them I learn new hacking techniques that then I add to Hacktricks.
 
@@ -12,7 +12,7 @@ I also wants to say **thanks to all the people that share cyber-security related
 
 If for some weird reason you are interested in knowing about my bio here you have a summary:
 
-* I've worked in different companies as sysadmin, developer and **pentester** \(which is my current role\).
+* I've worked in different companies as sysadmin, developer and **pentester**.
 * I'm a **Telecommunications Engineer** with a **Masters** in **Cybersecurity**
 * Relevant certifications: **OSCP, OSWE**, **CRTP, eMAPT, eWPTXv2** and Professional Drone pilot.
 * I speak **Spanish** and **English** and little of French \(some day I will improve that\).
