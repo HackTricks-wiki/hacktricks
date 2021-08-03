@@ -97,7 +97,9 @@ As you may be thinking usually a universal binary compiled for 2 architectures *
 
 ### Mach-o Format
 
-* **Header**
+![](../../.gitbook/assets/image%20%28557%29.png)
+
+#### **Header**
 
 The header contains basic information about the file, such as magic bytes to identify it as a Mach-O file and information about the target architecture. You can find it in: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 
@@ -113,11 +115,81 @@ struct mach_header {
 };
 ```
 
-* **load-commands region**
+Filetypes:
 
-This specifies the **layout of the file in memory**. It contains the **location of the symbol table**, the main thread context at the beginning of execution, and which shared libraries are required.
+* MH\_EXECUTE \(0x2\): Standard Mach-O executable             
+* MH\_DYLIB \(0x6\): A Mach-O dynamic linked library \(i.e. .dylib\)
+* MH\_BUNDLE \(0x8\): A Mach-O bundle \(i.e. .bundle\)
 
-* **data region**
+#### \*\*\*\*
+
+#### **Load commands**
+
+This specifies the **layout of the file in memory**. It contains the **location of the symbol table**, the main thread context at the beginning of execution, and which **shared libraries** are required.  
+The commands basically instruct the dynamic loader **\(dyld\) how to load the binary in memory.**
+
+Load commands all begin with a **load\_command** structure, defined in mach-o/loader.h:
+
+```objectivec
+struct load_command {
+        uint32_t cmd;           /* type of load command */
+        uint32_t cmdsize;       /* total size of command in bytes */
+};
+```
+
+A **common** type of load command is **LC\_SEGMENT/LC\_SEGMENT\_64**, which **describes** a **segment:**   
+_A segment defines a **range of bytes** in a Mach-O file and the **addresses** and **memory** **protection** **attributes** at which those bytes are **mapped into** virtual memory when the dynamic linker loads the application._
+
+![](../../.gitbook/assets/image%20%28554%29.png)
+
+Common segments:
+
+* **`__TEXT`**: Contains **executable** **code** and **data** that is **read-only.** Common sections of this segment:
+  * `__text`: ****Compiled binary code
+  * `__const`: Constant data
+  * `__cstring`: String constants
+* **`__DATA`**: Contains data that is **writable.**
+  * `__data`: Global variables \(that have been initialized\)
+  * `__bss`: Static variables \(that have not been initialized\)
+  * `__objc_*` \(\_\_objc\_classlist, \_\_objc\_protolist, etc\): Information used by the Objective-C runtime 
+* **`__LINKEDIT`**: Contains information for the linker \(dyld\) such as, "symbol, string, and relocation table entries."
+* **`__OBJC`**: Contains information used by the Objective-C runtime. Though this information might also be found in the \_\_DATA segment, within various in \_\_objc\_\* sections.
+* **`LC_MAIN`**: Contains the entrypoint in the **entryoff attribute.** At load time, **dyld** simply **adds** this value to the \(in-memory\) **base of the binary**, then **jumps** to this instruction to kickoff execution of the binary’s code.
+* **`LC_LOAD_DYLIB`**: ****This load command describes a **dynamic** **library** dependency which **instructs** the **loader** \(dyld\) to l**oad and link said library**. There is a LC\_LOAD\_DYLIB load command **for each library** that the Mach-O binary requires.
+
+  * This load command is a structure of type **`dylib_command`** \(which contains a struct dylib, describing the actual dependent dynamic library\):
+
+  ```objectivec
+  struct dylib_command {
+          uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
+          uint32_t        cmdsize;        /* includes pathname string */
+          struct dylib    dylib;          /* the library identification */ 
+  };
+
+  struct dylib {
+      union lc_str  name;                 /* library's path name */
+      uint32_t timestamp;                 /* library's build time stamp */
+      uint32_t current_version;           /* library's current version number */
+      uint32_t compatibility_version;     /* library's compatibility vers number*/
+  };
+  ```
+
+![](../../.gitbook/assets/image%20%28558%29.png)
+
+Some potential malware related libraries are:
+
+* **DiskArbitration**: Monitoring USB drives
+* **AVFoundation:** Capture audio and video
+* **CoreWLAN**: Wifi scans.
+
+{% hint style="info" %}
+A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC\_MAIN**.   
+The offsets of any constructors are held in the **\_\_mod\_init\_func** section of the **\_\_DATA\_CONST** segment.
+{% endhint %}
+
+#### \*\*\*\*
+
+#### **Data**
 
 The heart of the file is the final region, the data, which consists of a number of segments as laid out in the load-commands region. **Each segment can contain a number of data sections**. Each of these sections **contains code or data** of one particular type.
 
@@ -127,9 +199,12 @@ The heart of the file is the final region, the data, which consists of a number 
 
 ```bash
 otool -f /bin/ls #Get universal headers info
-otool -h /bin/ls #get the Mach header
+otool -hv /bin/ls #Get the Mach header
 otool -l /bin/ls #Get Load commands
+otool -L /bin/ls #Get libraries used by the binary
 ```
+
+Or you can use the GUI tool [**machoview**](https://sourceforge.net/projects/machoview/).
 
 ### Bundles
 

@@ -763,6 +763,21 @@ and tin this case the content cannot be decompiled even with `osadecompile`
 
 However, there are still some tools that can be used to understand this kind of executables, [**read this research for more info**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)\). The tool [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) with [**aevt\_decompile**](https://github.com/SentineLabs/aevt_decompile) will be very useful to understand how the script works.
 
+## Apple Binary Signatures
+
+When checking some **malware sample** you should always **check the signature** of the binary as the **developer** that signed it may be already **related** with **malware.**
+
+```bash
+#Get signer
+codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
+
+#Check if the app’s contents have been modified
+codesign --verify --verbose /Applications/Safari.app
+
+#Check if the signature is valid
+spctl --assess --verbose /Applications/Safari.app
+```
+
 ## Specific MacOS Enumeration
 
 ```bash
@@ -773,7 +788,6 @@ mdfind password #Show all the files that contains the word password
 mfind -name password #List all the files containing the word password in the name
 sysctl -a #List kernel configuration
 diskutil list #List connected hard drives
-codesign -vv -d /bin/ls #Check the signature of a binary
 nettop #Monitor network usage of processes in top style
 
 #networksetup - set or view network options: Proxies, FW options and more
