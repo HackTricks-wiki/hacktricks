@@ -243,6 +243,20 @@ ls -lR /Applications/Safari.app/Contents
 
     Contains the **oldest** **version** of **macOS** that the application is compatible with.
 
+### Objective-C
+
+Programs written in Objective-C **retain** their class declarations **when** **compiled** into \(Mach-O\) binaries. Such class declarations **include** the name and type of:
+
+* The class
+* The class methods
+* The class instance variables
+
+You can get this information using [**class-dump**](https://github.com/nygard/class-dump):
+
+```bash
+class-dump Kindle.app
+```
+
 ## References
 
 * \*\*\*\*[**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)\*\*\*\*
