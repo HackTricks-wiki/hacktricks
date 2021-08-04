@@ -92,7 +92,7 @@ Download and decompress it inside `/opt/gophish` and execute `/opt/gophish/gophi
 You will be given a password for the admin user in port 3333 in the output. Therefore, access that port and use those credentials to change the admin password. You may need to tunnel that port to local:
 
 ```bash
-ssh -L 333:127.0.0.1:3333 <user>@<ip>
+ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
 
 ### Configuration
