@@ -257,6 +257,19 @@ You can get this information using [**class-dump**](https://github.com/nygard/cl
 class-dump Kindle.app
 ```
 
+Note that this names can be obfuscated to make the reversing of the binary more difficult.
+
+### Native Packages
+
+There are some projects that allow to generate a binary executable by MacOS containing script code which will be executed. Some examples are:
+
+* **Platypus**: Generate MacOS binary executing ****shell scripts, Python, Perl, Ruby, PHP, Swift, Expect, Tcl, AWK, JavaScript, AppleScript or any other user-specified interpreter.
+  * **It saves the script in `Contents/Resources/script`. So finding this script is a good indicator that Platypus was used.**
+* **PyInstaller:** Python
+  * Ways to detect this is the use of the embedded ****string **“Py\_SetPythonHome”** or a a **call** into a function named **`pyi_main`.**
+* **Electron:** JavaScript, HTML, and CSS.
+  * These binaries will use **Electron Framework.framework**. Moreover, the non-binary components \(e.g. JavaScript files\) maybe found in the application’s **`Contents/Resources/`** directory, achieved in `.asar` files. These binaries will use Electron Framework.framework. Moreover, the non-binary components \(e.g. JavaScript files\) maybe found in the application’s **`Contents/Resources/`** directory, achieved in **`.asar` files**. It's possible **unpack** such archives via the **asar** node module, or the **npx** **utility:** `npx asar extract StrongBox.app/Contents/Resources/app.asar appUnpacked` 
+
 ## References
 
 * \*\*\*\*[**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)\*\*\*\*
