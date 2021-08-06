@@ -24,6 +24,28 @@ hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 
 It will be mounted in `/Volumes`
 
+### Objective-C
+
+When a function is called in a binary that uses objective-C, the compiled code instead of calling that function, it will call **`objc_msgSend`**. Which will be calling the final function:
+
+![](../../.gitbook/assets/image%20%28559%29.png)
+
+The params this function expects are:
+
+* The first parameter \(**self**\) is "a pointer that points to the **instance of the class that is to receive the message**". Or more simply put, it’s the object that the method is being invoked upon. If the method is a class method, this will be an instance of the class object \(as a whole\), whereas for an instance method, self  will point to an instantiated instance of the class as an object. 
+* The second parameter, \(**op**\), is "the selector of the method that handles the message". Again, more simply put, this is just the **name of the method.** 
+* The remaining parameters are any **values that are required by the method** \(op\).
+
+| **Argument**   | **Register** | **\(for\) objc\_msgSend** |
+| :--- | :--- | :--- |
+| **1st argument**  | **rdi** | **self: object that the method is being invoked upon** |
+| **2nd argument**  | **rsi** | **op: name of the method** |
+| **3rd argument** | **rdx** | **1st argument to the method** |
+| **4th argument** | **rcx** | **2nd argument to the method** |
+| **5th argument** | **r8** | **3rd argument to the method** |
+| **6th argument** | **r9** | **4th argument to the method** |
+| **7th+ argument** | **rsp+ \(on the stack\)** | **5th+ argument to the method** |
+
 ## Dynamic Analysis
 
 {% hint style="warning" %}
