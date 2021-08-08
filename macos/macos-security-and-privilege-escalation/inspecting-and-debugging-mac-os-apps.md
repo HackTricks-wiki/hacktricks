@@ -136,3 +136,16 @@ syscall:::return
 sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 ```
 
+### ProcessMonitor
+
+\*\*\*\*[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) is a very useful tool to check the process related actions a process is performing \(for example, monitor which new processes a process is creating\).
+
+### fs\_usage
+
+Allows to follow actions performed by processes:
+
+```bash
+fs_usage -w -f filesys ls #This tracks filesystem actions of proccess names containing ls
+fs_usage -w -f network curl #This tracks network actions
+```
+
