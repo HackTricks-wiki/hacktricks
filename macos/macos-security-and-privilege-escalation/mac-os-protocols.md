@@ -75,5 +75,8 @@ If you feel like Bonjour might be more secured **disabled**, you can do so with:
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
 
+## References
 
+* [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)\*\*\*\*
+* \*\*\*\*[**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)\*\*\*\*
 

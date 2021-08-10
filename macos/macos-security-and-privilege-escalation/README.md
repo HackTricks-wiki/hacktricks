@@ -186,7 +186,12 @@ csrutil status
 System Integrity Protection status: enabled.
 ```
 
-If you want to disable it, you need to put the computer in recovery mode \(start it pressing command+R\) and execute: `csrutil disable`
+If you want to **disable** **it**, you need to put the computer in recovery mode \(start it pressing command+R\) and execute: `csrutil disable`   
+You can also maintain it **enable but without debugging protections** doing: 
+
+```text
+csrutil enable --without debug
+```
 
 ## Common users
 

@@ -49,7 +49,11 @@ The params this function expects are:
 ## Dynamic Analysis
 
 {% hint style="warning" %}
-These tools require **SIP to be disabled** or to copy the binaries to a temporary folder and **remove the signature** with `codesign --remove-signature <binary-path>`
+Note that in order to debug binaries, **SIP needs to be disabled** \(`csrutil disable` or `csrutil enable --without debug`\) or to copy the binaries to a temporary folder and **remove the signature** with `codesign --remove-signature <binary-path>` or allow the debugging of the binary \(you can use [this script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b)\)
+{% endhint %}
+
+{% hint style="warning" %}
+Note that in order to **instrument system binarie**s, \(such as `cloudconfigurationd`\) on macOS, **SIP must be disabled** \(just removing the signature won't work\).
 {% endhint %}
 
 ### dtruss
@@ -214,4 +218,5 @@ Or use `netstat` or `lsof`
 ## References
 
 * [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
-* 
+* [https://taomm.org/vol1/analysis.html](https://taomm.org/vol1/analysis.html)
+
