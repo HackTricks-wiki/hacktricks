@@ -42,8 +42,8 @@ If you want to **share some tricks with the community** you can also submit **pu
 
 #### Automatic Tools
 
-* \*\*\*\*[**dnstwist**](https://github.com/elceef/dnstwist)\*\*\*\*
-* [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)\*\*\*\*
+* [**dnstwist**](https://github.com/elceef/dnstwist)
+* [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
 #### **Websites**
 
@@ -430,6 +430,17 @@ Once everything is ready, just launch the campaign!
 If for any reason you want to clone the website check the following page:
 
 {% page-ref page="clone-a-website.md" %}
+
+## Phishing2.0
+
+The previous attack is pretty clever as you are faking a real website and gathering the information set by the user. Unfortunately, if the user didn't put the correct password or if the application you faked is configured with 2FA, **this information won't allow you to impersonate the tricked user**.
+
+This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2) are useful. This tool will allow you to generate a MitM like attack. Basically, the attacks works in the following way:
+
+1. You **impersonate the login** form of the real webpage.
+2. The user **send** his **credentials** to your fake page and the tool send those to the real webpage, **checking if the credentials work**.
+3. If the account is configured with **2FA**, the MitM page will ask for it and once the **user introduces** it the tool will send it to the real web page.
+4. Once the user is authenticated you \(as attacker\) will have **captured the credentials, the 2FA, the cookie and any information** of every interaction your while the tool is performing a MitM.
 
 ## Detecting the detection
 
