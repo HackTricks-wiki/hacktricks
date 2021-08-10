@@ -4,23 +4,21 @@ First of all, please note that **most of the tricks about privilege escalation a
 
 {% page-ref page="../../linux-unix/privilege-escalation/" %}
 
-## Security Restrictions
+## MacOS Security Mechanisms
 
-### Gatekeeper, Notarizing, and File Quarantine
+### Gatekeeper
 
-\*\*\*\*[**In this talk**](https://www.youtube.com/watch?v=T5xfL9tEg44) Jeremy Brown talks about this protections and a bug that allowed to bypass them.
-
-#### Gatekeeper
+[**In this talk**](https://www.youtube.com/watch?v=T5xfL9tEg44) Jeremy Brown talks about this protections and a bug that allowed to bypass them.
 
 _**Gatekeeper**_ is designed to ensure that, by default, **only trusted software runs on a user’s Mac**. Gatekeeper is used when a user **downloads** and **opens** an app, a plug-in or an installer package from outside the App Store. Gatekeeper verifies that the software is **signed by** an **identified developer**, is **notarised** by Apple to be **free of known malicious content**, and **hasn’t been altered**. Gatekeeper also **requests user approval** before opening downloaded software for the first time to make sure the user hasn’t been tricked into running executable code they believed to simply be a data file.
 
-#### Notarizing
+### Notarizing
 
 In order for an **app to be notarised by Apple**, the developer needs to send the app for review. Notarization is **not App Review**. The Apple notary service is an **automated system** that **scans your software for malicious content**, checks for code-signing issues, and returns the results to you quickly. If there are no issues, the notary service generates a ticket for you to staple to your software; the notary service also **publishes that ticket online where Gatekeeper can find it**.
 
 When the user first installs or runs your software, the presence of a ticket \(either online or attached to the executable\) **tells Gatekeeper that Apple notarized the software**. **Gatekeeper then places descriptive information in the initial launch dialog** indicating that Apple has already checked for malicious content.
 
-#### File Quarantine
+### File Quarantine
 
 Gatekeeper builds upon **File Quarantine.**  
 Upon download of an application, a particular **extended file attribute** \("quarantine flag"\) can be **added** to the **downloaded** **file**. This attribute **is added by the application that downloads the file**, such as a **web** **browser** or email client, but is not usually added by others like common BitTorrent client software.  
@@ -75,20 +73,58 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 
 ### XProtect
 
-**X-Protect is Apple’s built in malware scanner.** It keeps track of known malware hashes and patterns.  
+**X-Protect** is also part of Gatekeeper. **It's Apple’s built in malware scanner.** It keeps track of known malware hashes and patterns.  
 You can get information about the latest XProtect update running:
 
 ```bash
 system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistConfigData" | tail -n 5
 ```
 
-## Sandbox
+### MRT: Malware Removal Tool
+
+Should malware make its way onto a Mac, macOS also includes technology to remediate infections. The _Malware Removal Tool \(MRT\)_ is an engine in macOS that remediates infections based on updates automatically delivered from Apple \(as part of automatic updates of system data files and security updates\). **MRT removes malware upon receiving updated information** and it continues to check for infections on restart and login. MRT doesn’t automatically reboot the Mac. \(From [here](https://support.apple.com/en-gb/guide/security/sec469d47bd8/web#:~:text=The%20Malware%20Removal%20Tool%20%28MRT,data%20files%20and%20security%20updates%29.)\)
+
+### Automatic Security Updates
+
+Apple issues the **updates for XProtect and MRT automatically** based on the latest threat intelligence available. By default, macOS checks for these updates **daily**. Notarisation updates are distributed using CloudKit sync and are much more frequent.
+
+### TCC
+
+**TCC \(Transparency, Consent, and Control\)** is a mechanism in macOS to **limit and control application access to certain features**, usually from a privacy perspective. This can include things such as location services, contacts, photos, microphone, camera, accessibility, full disk access, and a bunch more.
+
+From a user’s perspective, they see TCC in action **when an application wants access to one of the features protected by TCC**. When this happens the user is prompted with a dialog asking them whether they want to allow access or not. This response is then stored in the TCC database.
+
+![An example of a TCC prompt](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
+
+Check some of the **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
+
+The TCC database is just a **sqlite3 database**, which makes the task of investigating it much simpler. There are two different databases, a global one in `/Library/Application Support/com.apple.TCC/TCC.db` and a per-user one located in `/Users/<username>/Library/Application Support/com.apple.TCC/TCC.db`. The first database is **protected from editing with SIP**\(System Integrity Protection\), but you can read them by granting terminal\(or your editor\) full disk access.
+
+This information was [taken from here](https://rainforest.engineering/2021-02-09-macos-tcc/) \(read the **original source for more information**\).
+
+Some protected directories:
+
+* $HOME/Desktop
+* $HOME/Documents
+* $HOME/Downloads
+* iCloud Drive
+* ...
+
+Unprotected directories:
+
+* $HOME \(itself\)
+* $HOME/.ssh, $HOME/.aws, etc
+* /tmp
+
+Here you can find examples of how **malware has been able to bypass this protection**:
+
+* [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
+
+### Seatbelt Sandbox
 
 MacOS Sandbox works with the kernel extension Seatbelt. It makes applications run inside the sandbox **need to request access to resources outside of the limited sandbox**. This helps to ensure that **the application will be accessing only expected resources** and if it wants to access anything else it will need to ask for permissions to the user.
 
 Important **system services** also run inside their own custom **sandbox** such as the mdnsresponder service. You can view these custom **sandbox profiles** inside the **`/usr/share/sandbox`** directory. Other sandbox profiles can be checked in [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
-
-Check some of the **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
 
 To start an application with a sandbox config you can use:
 
@@ -99,6 +135,11 @@ sandbox-exec -f example.sb /Path/To/The/Application
 {% hint style="info" %}
 Note that the **Apple-authored** **software** that runs on **Windows** **doesn’t have additional security precautions**, such as application sandboxing.
 {% endhint %}
+
+Bypasses examples:
+
+* [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
+* [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) \(they are able to write files outside the sandbox whose name starts with `~$`\).
 
 ### SIP - System Integrity Protection
 
@@ -549,6 +590,11 @@ RunService ()
 }
 ```
 
+### Other persistence techniques and tools
+
+* [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
+* [https://github.com/D00MFist/PersistentJXA](https://github.com/D00MFist/PersistentJXA)
+
 ## Memory Artifacts
 
 ### Swap Files
@@ -638,6 +684,23 @@ security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychain
 security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
 ```
 
+### chainbreaker
+
+\*\*\*\*[**Chainbreaker**](https://github.com/n0fate/chainbreaker) can be used to extract the following types of information from an OSX keychain in a forensically sound manner:
+
+* Hashed Keychain password, suitable for cracking with [hashcat](https://hashcat.net/hashcat/) or [John the Ripper](https://www.openwall.com/john/)
+* Internet Passwords
+* Generic Passwords
+* Private Keys
+* Public Keys
+* X509 Certificates
+* Secure Notes
+* Appleshare Passwords
+
+Given the keychain unlock password, a master key obtained using [volafox](https://github.com/n0fate/volafox) or [volatility](https://github.com/volatilityfoundation/volatility), or an unlock file such as SystemKey, Chainbreaker will also provide plaintext passwords.
+
+Without one of these methods of unlocking the Keychain, Chainbreaker will display all other available information.
+
 ### kcpassword
 
 The **kcpassword** file is a file that holds the **user’s login password**, but only if the system owner has **enabled automatic login**. Therefore, the user will be automatically logged in without being asked for a password \(which isn't very secure\).
@@ -699,7 +762,14 @@ The following line can be useful to find the applications that can open files de
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```
 
-Or use something like [https://github.com/Lord-Kamina/SwiftDefaultApps](https://github.com/Lord-Kamina/SwiftDefaultApps).
+Or use something like [SwiftDefaultApps](https://github.com/Lord-Kamina/SwiftDefaultApps):
+
+```bash
+./swda getSchemes #Get all the available schemes
+./swda getApps #Get all the apps declared
+./swda getUTIs #Get all the UTIs
+./swda getHandler --URL ftp #Get ftp handler
+```
 
 You can also check the extensions supported by an application doing:
 
@@ -789,6 +859,15 @@ codesign --verify --verbose /Applications/Safari.app
 #Check if the signature is valid
 spctl --assess --verbose /Applications/Safari.app
 ```
+
+## Remote Access Services
+
+You can enable/disable these services in "System Preferences" --&gt; Sharing
+
+* **VNC**, known as “Screen Sharing”
+* **SSH**, called “Remote Login”
+* **Apple Remote Desktop** \(ARD\), or “Remote Management”
+* **AppleEvent**, known as “Remote Apple Event”
 
 ## Specific MacOS Enumeration
 

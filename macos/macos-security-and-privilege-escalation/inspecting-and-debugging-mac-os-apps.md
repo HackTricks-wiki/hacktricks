@@ -1,4 +1,4 @@
-# Inspecting and debugging Mac OS Sotware
+# Inspecting, debugging and Fuzzing Mac OS Software
 
 ## Static Analysis
 
@@ -149,3 +149,65 @@ fs_usage -w -f filesys ls #This tracks filesystem actions of proccess names cont
 fs_usage -w -f network curl #This tracks network actions
 ```
 
+## Fuzzing
+
+### [ReportCrash](https://ss64.com/osx/reportcrash.html#:~:text=ReportCrash%20analyzes%20crashing%20processes%20and%20saves%20a%20crash%20report%20to%20disk.&text=ReportCrash%20also%20records%20the%20identity,when%20a%20crash%20is%20detected.)
+
+ReportCrash **analyzes crashing processes and saves a crash report to disk**. A crash report contains information that can **help a developer diagnose** the cause of a crash.  
+For applications and other processes **running in the per-user launchd context**, ReportCrash runs as a LaunchAgent and saves crash reports in the user's `~/Library/Logs/DiagnosticReports/`  
+For daemons, other processes **running in the system launchd context** and other privileged processes, ReportCrash runs as a LaunchDaemon and saves crash reports in the system's `/Library/Logs/DiagnosticReports`
+
+If you are worried about crash reports **being sent to Apple** you can disable them. If not, crash reports can be useful to **figure out how a server crashed**.
+
+```bash
+#To disable crash reporting:
+launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
+sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
+
+#To re-enable crash reporting:
+launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
+sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
+```
+
+### Sleep
+
+While fuzzing in a MacOS it's important to not allow the Mac to sleep:
+
+* systemsetup -setsleep Never
+* pmset, System Preferences
+* [KeepingYouAwake](https://github.com/newmarcel/KeepingYouAwake)
+
+#### SSH Disconnect
+
+If you are fuzzing via a SSH connection it's important to make sure the session isn't going to day. So change the sshd\_config file with:
+
+* TCPKeepAlive Yes
+* ClientAliveInterval 0
+* ClientAliveCountMax 0
+
+```bash
+sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist
+sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
+```
+
+### Internal Handlers
+
+[**Checkout this section**](./#file-extensions-apps) ****to find out how you can find which app is responsible of **handling the specified scheme or protocol**.
+
+### Enumerating Network Processes
+
+This interesting to find processes that are managing network data:
+
+```bash
+dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >> recv.log
+#wait some time
+sort -u recv.log > procs.txt
+cat procs.txt
+```
+
+Or use `netstat` or `lsof`
+
+## References
+
+* [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
+* 

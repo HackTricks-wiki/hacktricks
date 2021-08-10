@@ -56,8 +56,9 @@
 ## MacOS
 
 * [MacOS Security & Privilege Escalation](macos/macos-security-and-privilege-escalation/README.md)
+  * [MacOS Red Teaming](macos/macos-security-and-privilege-escalation/macos-red-teaming.md)
   * [Mac OS Protocols](macos/macos-security-and-privilege-escalation/mac-os-protocols.md)
-  * [Inspecting and debugging Mac OS Sotware](macos/macos-security-and-privilege-escalation/inspecting-and-debugging-mac-os-apps.md)
+  * [Inspecting, debugging and Fuzzing Mac OS Software](macos/macos-security-and-privilege-escalation/inspecting-and-debugging-mac-os-apps.md)
   * [Mac OS Serial Number](macos/macos-security-and-privilege-escalation/macos-serial-number.md)
   * [Mac OS Architecture](macos/macos-security-and-privilege-escalation/mac-os-architecture.md)
 
@@ -564,4 +565,5 @@
 * [1911 - Pentesting fox](1911-pentesting-fox.md)
 * [Online Platforms with API](online-platforms-with-api.md)
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
+* [Post Exploitation](post-exploitation.md)
 
