@@ -56,6 +56,7 @@
 ## MacOS
 
 * [MacOS Security & Privilege Escalation](macos/macos-security-and-privilege-escalation/README.md)
+  * [MacOS MDM](macos/macos-security-and-privilege-escalation/macos-mdm.md)
   * [MacOS Red Teaming](macos/macos-security-and-privilege-escalation/macos-red-teaming.md)
   * [Mac OS Protocols](macos/macos-security-and-privilege-escalation/mac-os-protocols.md)
   * [Inspecting, debugging and Fuzzing Mac OS Software](macos/macos-security-and-privilege-escalation/inspecting-and-debugging-mac-os-apps.md)
