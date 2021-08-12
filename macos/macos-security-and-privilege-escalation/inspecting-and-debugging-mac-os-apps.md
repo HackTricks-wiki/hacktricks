@@ -46,6 +46,12 @@ The params this function expects are:
 | **6th argument** | **r9** | **4th argument to the method** |
 | **7th+ argument** | **rsp+ \(on the stack\)** | **5th+ argument to the method** |
 
+### Packed binaries
+
+* Check for high entropy
+* Check the strings \(is there is almost no understandable string, packed\)
+* The UPX packer for MacOS generates a section called "\_\_XHDR"
+
 ## Dynamic Analysis
 
 {% hint style="warning" %}
@@ -156,6 +162,11 @@ Allows to follow actions performed by processes:
 fs_usage -w -f filesys ls #This tracks filesystem actions of proccess names containing ls
 fs_usage -w -f network curl #This tracks network actions
 ```
+
+### TaskExplorer
+
+\*\*\*\*[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) is useful to see the **libraries** used by a binary, the **files** it's using and the **network** connections.  
+It also checks the binary processes against **virustotal** and show information about the binary.
 
 ### lldb
 
@@ -295,6 +306,19 @@ When calling the **`objc_sendMsg`** function, the **rsi** register holds the **n
 
 \(lldb\) reg read $rsi: rsi = 0x00000001000f1576  "startMiningWithPort:password:coreCount:slowMemory:currency:"
 {% endhint %}
+
+### Anti-Dynamic Analysis
+
+#### VM detection
+
+* The command **`sysctl hw.model`** returns "Mac" when the **host is a MacOS** but something different when it's a VM.
+* Playing with the values of **`hw.logicalcpu`** and **`hw.physicalcpu`** some malwares try to detect if it's a VM.
+* Some malwares can also **detect** if the machine is **VMware** based on the MAC address.
+* It's also possible to find **if a process is being debugged** with a simple code such us:
+  * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
+* It can also invoke the **`ptrace`** system call with the **`PT_DENY_ATTACH`** flag. This **prevents** a deb**u**gger from attaching and tracing.
+  * You can check if the **`sysctl`** or**`ptrace`** function is being **imported** \(but the malware could import it dynamically\)
+  * As noted in this writeup, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” : “_The message Process \# exited with **status = 45 \(0x0000002d\)** is usually a tell-tale sign that the debug target is using **PT\_DENY\_ATTACH**_”
 
 ## Fuzzing
 
