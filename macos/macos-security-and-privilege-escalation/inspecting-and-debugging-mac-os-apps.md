@@ -157,6 +157,81 @@ fs_usage -w -f filesys ls #This tracks filesystem actions of proccess names cont
 fs_usage -w -f network curl #This tracks network actions
 ```
 
+### lldb
+
+**lldb** is the de **facto tool** for **macOS** binary **debugging**.
+
+```bash
+lldb ./malware.bin
+lldb -p 1122
+lldb -n malware.bin
+lldb -n malware.bin --waitfor
+```
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align:left"><b>(lldb) Command</b>
+      </th>
+      <th style="text-align:left"><b>Description</b>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align:left"><b>run (r)</b>
+      </td>
+      <td style="text-align:left">Starting execution, which will continue unabated until a breakpoint is
+        hit or the process terminates.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>continue (c)</b>
+      </td>
+      <td style="text-align:left">Continue execution of the debugged process.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>nexti (n)</b>
+      </td>
+      <td style="text-align:left">Execute the next instruction. This command will skip over function calls.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>stepi (s)</b>
+      </td>
+      <td style="text-align:left">Execute the next instruction. Unlike the nexti command, this command will
+        step into function calls.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>finish (f)</b>
+      </td>
+      <td style="text-align:left">Execute the rest of the instructions in the current function (&#x201C;frame&#x201D;)
+        return and halt.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>control + c</b>
+      </td>
+      <td style="text-align:left">Pause execution. If the process has been run (r) or continued (c), this
+        will cause the process to halt ...wherever it is currently executing.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>breakpoint (b)</b>
+      </td>
+      <td style="text-align:left">
+        <p>b main</p>
+        <p>b -[NSDictionary objectForKey:]</p>
+        <p>b 0x0000000100004bd9</p>
+        <p>br l #Breakpoint list</p>
+        <p>br e/dis &lt;num&gt; #Enable/Disable breakpoint</p>
+        <p>breakpoint delete &lt;num&gt;</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>help</b>
+      </td>
+      <td style="text-align:left">help breakpoint #Get help of breakpoint command</td>
+    </tr>
+  </tbody>
+</table>
+
 ## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html#:~:text=ReportCrash%20analyzes%20crashing%20processes%20and%20saves%20a%20crash%20report%20to%20disk.&text=ReportCrash%20also%20records%20the%20identity,when%20a%20crash%20is%20detected.)
