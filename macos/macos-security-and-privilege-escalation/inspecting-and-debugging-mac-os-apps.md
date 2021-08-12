@@ -227,7 +227,60 @@ lldb -n malware.bin --waitfor
     <tr>
       <td style="text-align:left"><b>help</b>
       </td>
-      <td style="text-align:left">help breakpoint #Get help of breakpoint command</td>
+      <td style="text-align:left">
+        <p>help breakpoint #Get help of breakpoint command</p>
+        <p>help memory write #Get help to write into the memory</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>reg</b>
+      </td>
+      <td style="text-align:left">
+        <p>reg read $rax</p>
+        <p>reg write $rip 0x100035cc0</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>x/s &lt;reg/memory address&gt;</b>
+      </td>
+      <td style="text-align:left">Display the memory as a null-terminated string.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>x/i &lt;reg/memory address&gt;</b>
+      </td>
+      <td style="text-align:left">Display the memory as assembly instruction.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>x/b &lt;reg/memory address&gt;</b>
+      </td>
+      <td style="text-align:left">Display the memory as byte.</td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>print object (po)</b>
+      </td>
+      <td style="text-align:left">
+        <p>This will print the object referenced by the param</p>
+        <p>po $raw</p>
+        <p><code>{</code>
+        </p>
+        <p><code> dnsChanger =  {</code>
+        </p>
+        <p><code>   &quot;affiliate&quot; = &quot;&quot;;</code>
+        </p>
+        <p><code>   &quot;blacklist_dns&quot; = ();</code>
+        </p>
+        <p>Note that most of Apple&#x2019;s Objective-C APIs or methods return objects,
+          and thus should be displayed via the &#x201C;print object&#x201D; (po)
+          command. If po doesn&apos;t produce a meaningful output use <code>x/b</code>
+          <br
+          />
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align:left"><b>memory write</b>
+      </td>
+      <td style="text-align:left">memory write 0x100600000 -s 4 0x41414141 #Write AAAA in that address</td>
     </tr>
   </tbody>
 </table>

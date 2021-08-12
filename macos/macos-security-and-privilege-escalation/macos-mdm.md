@@ -95,7 +95,7 @@ It follows a few steps to get the Activation Record performed by **`MCTeslaConfi
    2. The JSON payload is encrypted using Absinthe \(**`NACSign`**\)
    3. All requests over HTTPs, built-in root certificates are used 
 
-![](../../.gitbook/assets/image%20%28563%29.png)
+![](../../.gitbook/assets/image%20%28566%29.png)
 
 The response is a JSON dictionary with some important data like:
 
@@ -115,7 +115,7 @@ The response is a JSON dictionary with some important data like:
 * Signed using the **device identity certificate \(from APNS\)**
 * **Certificate chain** includes expired **Apple iPhone Device CA**
 
-![](../../.gitbook/assets/image%20%28570%29.png)
+![](../../.gitbook/assets/image%20%28567%29%20%281%29.png)
 
 ### Step 6: Profile Installation
 
