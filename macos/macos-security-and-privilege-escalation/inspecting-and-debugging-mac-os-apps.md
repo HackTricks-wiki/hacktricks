@@ -285,6 +285,17 @@ lldb -n malware.bin --waitfor
   </tbody>
 </table>
 
+{% hint style="info" %}
+When calling the **`objc_sendMsg`** function, the **rsi** register holds the **name of the method** as a null-terminated \(“C”\) string. To print the name via lldb do:
+
+\(lldb\) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"
+
+\(lldb\) print \(char\*\)$rsi:  
+\(char \*\) $1 = 0x00000001000f1576 "startMiningWithPort:password:coreCount:slowMemory:currency:"
+
+\(lldb\) reg read $rsi: rsi = 0x00000001000f1576  "startMiningWithPort:password:coreCount:slowMemory:currency:"
+{% endhint %}
+
 ## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html#:~:text=ReportCrash%20analyzes%20crashing%20processes%20and%20saves%20a%20crash%20report%20to%20disk.&text=ReportCrash%20also%20records%20the%20identity,when%20a%20crash%20is%20detected.)
