@@ -299,12 +299,12 @@ lldb -n malware.bin --waitfor
 {% hint style="info" %}
 When calling the **`objc_sendMsg`** function, the **rsi** register holds the **name of the method** as a null-terminated \(“C”\) string. To print the name via lldb do:
 
-\(lldb\) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"
+`(lldb) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 
-\(lldb\) print \(char\*\)$rsi:  
-\(char \*\) $1 = 0x00000001000f1576 "startMiningWithPort:password:coreCount:slowMemory:currency:"
+`(lldb) print (char*)$rsi:  
+(char *) $1 = 0x00000001000f1576 "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 
-\(lldb\) reg read $rsi: rsi = 0x00000001000f1576  "startMiningWithPort:password:coreCount:slowMemory:currency:"
+`(lldb) reg read $rsi: rsi = 0x00000001000f1576  "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 {% endhint %}
 
 ### Anti-Dynamic Analysis
@@ -313,7 +313,7 @@ When calling the **`objc_sendMsg`** function, the **rsi** register holds the **n
 
 * The command **`sysctl hw.model`** returns "Mac" when the **host is a MacOS** but something different when it's a VM.
 * Playing with the values of **`hw.logicalcpu`** and **`hw.physicalcpu`** some malwares try to detect if it's a VM.
-* Some malwares can also **detect** if the machine is **VMware** based on the MAC address.
+* Some malwares can also **detect** if the machine is **VMware** based on the MAC address \(00:50:56\).
 * It's also possible to find **if a process is being debugged** with a simple code such us:
   * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
 * It can also invoke the **`ptrace`** system call with the **`PT_DENY_ATTACH`** flag. This **prevents** a deb**u**gger from attaching and tracing.
