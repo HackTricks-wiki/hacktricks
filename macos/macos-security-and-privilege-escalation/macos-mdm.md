@@ -115,7 +115,7 @@ The response is a JSON dictionary with some important data like:
 * Signed using the **device identity certificate \(from APNS\)**
 * **Certificate chain** includes expired **Apple iPhone Device CA**
 
-![](../../.gitbook/assets/image%20%28567%29%20%281%29.png)
+![](../../.gitbook/assets/image%20%28567%29%20%281%29%20%281%29.png)
 
 ### Step 6: Profile Installation
 
