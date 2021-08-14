@@ -378,6 +378,12 @@ cat procs.txt
 
 Or use `netstat` or `lsof`
 
+### More Fuzzing MacOS Info
+
+* [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
+* [https://github.com/bnagy/francis/tree/master/exploitaben](https://github.com/bnagy/francis/tree/master/exploitaben)
+* [https://github.com/ant4g0nist/crashwrangler](https://github.com/ant4g0nist/crashwrangler)
+
 ## References
 
 * [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
