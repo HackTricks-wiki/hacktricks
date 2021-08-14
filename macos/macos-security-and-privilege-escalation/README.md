@@ -917,6 +917,15 @@ open some.doc -a TextEdit #Open a file in one application
 caffeinate &
 
 
+#Screenshot
+## This will ask for permission to the user
+screencapture -x /tmp/ss.jpg #Save screenshot in that file
+
+
+#Get clipboard info
+pbpaste
+
+
 #system_profiler
 system_profiler --help #This command without arguments take lot of memory and time.
 system_profiler -listDataTypes
