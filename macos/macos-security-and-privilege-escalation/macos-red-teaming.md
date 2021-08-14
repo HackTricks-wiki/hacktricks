@@ -52,6 +52,28 @@ In addition to using the HasSession and AdminTo edges, **MacHound adds three new
 * **CanVNC** - entity allowed to VNC to host
 * **CanAE** - entity allowed to execute AppleEvent scripts on host
 
+```bash
+#User enumeration
+dscl . ls /Users
+dscl . read /Users/[username]
+dscl "/Active Directory/TEST/All Domains" ls /Users
+dscl "/Active Directory/TEST/All Domains" read /Users/[username]
+dscacheutil -q user
+
+#Computer enumeration
+dscl "/Active Directory/TEST/All Domains" ls /Computers
+dscl "/Active Directory/TEST/All Domains" read "/Computers/[compname]$"
+
+#Group enumeration
+dscl . ls /Groups
+dscl . read "/Groups/[groupname]"
+dscl "/Active Directory/TEST/All Domains" ls /Groups
+dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
+
+#Domain Information
+dsconfigad -show
+```
+
 ## External Services
 
 MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** \(like github, aws...\) via OneLogin:
@@ -64,4 +86,5 @@ MacOS Red Teaming is different from a regular Windows Red Teaming as usually **M
 
 * [https://www.youtube.com/watch?v=IiMladUbL6E](https://www.youtube.com/watch?v=IiMladUbL6E)
 * [https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
+* [https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
 

@@ -874,6 +874,12 @@ You can enable/disable these services in "System Preferences" --&gt; Sharing
 * **Apple Remote Desktop** \(ARD\), or “Remote Management”
 * **AppleEvent**, known as “Remote Apple Event”
 
+## MacOS Automatic Enumeration
+
+* **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
+* **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum\_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
+* **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
+
 ## Specific MacOS Commands
 
 ```bash
