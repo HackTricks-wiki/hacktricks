@@ -74,6 +74,8 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 dsconfigad -show
 ```
 
+More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
+
 ## External Services
 
 MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** \(like github, aws...\) via OneLogin:
