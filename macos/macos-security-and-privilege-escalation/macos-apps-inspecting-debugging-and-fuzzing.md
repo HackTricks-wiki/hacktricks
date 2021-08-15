@@ -1,4 +1,4 @@
-# Inspecting, debugging and Fuzzing Mac OS Software
+# MacOS Apps - Inspecting, debugging and Fuzzing
 
 ## Static Analysis
 

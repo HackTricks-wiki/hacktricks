@@ -145,7 +145,11 @@ You can enable/disable these services in "System Preferences" --&gt; Sharing
 
 ### MacOS Protocols
 
-{% page-ref page="mac-os-protocols.md" %}
+{% page-ref page="macos-protocols.md" %}
+
+### MacOS - Inspecting, Debugging and Fuzzing
+
+{% page-ref page="macos-apps-inspecting-debugging-and-fuzzing.md" %}
 
 ## MacOS Security Mechanisms
 
@@ -890,7 +894,13 @@ and tin this case the content cannot be decompiled even with `osadecompile`
 
 However, there are still some tools that can be used to understand this kind of executables, [**read this research for more info**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)\). The tool [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) with [**aevt\_decompile**](https://github.com/SentineLabs/aevt_decompile) will be very useful to understand how the script works.
 
-## MacOS Automatic Enumeration
+## MacOS Red Teaming
+
+Red Teaming in **environments where MacOS** is used instead of Windows can be very **different**. In this guide you will find some interesting tricks for this kind of assessments:
+
+{% page-ref page="macos-red-teaming.md" %}
+
+## MacOS Automatic Enumeration Tools
 
 * **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 * **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum\_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)

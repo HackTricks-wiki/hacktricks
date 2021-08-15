@@ -1,4 +1,4 @@
-# Mac OS Protocols
+# MacOS Protocols
 
 ## Bonjour
 

@@ -7,6 +7,14 @@
 
 If you manage to **compromise admin credentials** to access the management platform, you can **potentially compromise all the computers** by distributing your malware in the machines.
 
+For red teaming in MacOS environments it's highly recommended to have some understanding of how the MDMs work:
+
+{% page-ref page="macos-mdm.md" %}
+
+And also about **MacOS** "special" **network** **protocols**:
+
+{% page-ref page="macos-protocols.md" %}
+
 ## Active Directory
 
 In some occasions you will find that the **MacOS computer is connected to an AD**. In this scenario you should try to **enumerate** the active directory as you are use to it. Find some **help** in the following pages:
