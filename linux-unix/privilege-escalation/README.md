@@ -1428,6 +1428,11 @@ Files that ships in packages downloaded from distribution repository go into `/u
 
 {% page-ref page="cisco-vmanage.md" %}
 
+### Kernel Security Protections
+
+* [https://github.com/a13xp0p0v/kconfig-hardened-check](https://github.com/a13xp0p0v/kconfig-hardened-check)
+* [https://github.com/a13xp0p0v/linux-kernel-defence-map](https://github.com/a13xp0p0v/linux-kernel-defence-map)
+
 ## More help
 
 [Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)
