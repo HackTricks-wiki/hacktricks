@@ -57,7 +57,8 @@
 
 * [MacOS Security & Privilege Escalation](macos/macos-security-and-privilege-escalation/README.md)
   * [Mac OS Architecture](macos/macos-security-and-privilege-escalation/mac-os-architecture.md)
-  * [MacOS MDM](macos/macos-security-and-privilege-escalation/macos-mdm.md)
+  * [MacOS MDM](macos/macos-security-and-privilege-escalation/macos-mdm/README.md)
+    * [Enrolling Devices in Other Organisations](macos/macos-security-and-privilege-escalation/macos-mdm/enrolling-devices-in-other-organisations.md)
   * [MacOS Protocols](macos/macos-security-and-privilege-escalation/macos-protocols.md)
   * [MacOS Red Teaming](macos/macos-security-and-privilege-escalation/macos-red-teaming.md)
   * [MacOS Serial Number](macos/macos-security-and-privilege-escalation/macos-serial-number.md)

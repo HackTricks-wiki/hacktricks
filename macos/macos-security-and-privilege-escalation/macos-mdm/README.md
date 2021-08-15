@@ -4,15 +4,25 @@
 
 ### What is MDM \(Mobile Device Management\)?
 
+[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) \(MDM\) is a technology commonly used to **administer end-user computing devices** such as mobile phones, laptops, desktops and tablets. In the case of Apple platforms like iOS, macOS and tvOS, it refers to a specific set of features, APIs and techniques used by administrators to manage these devices. Management of devices via MDM requires a compatible commercial or open-source MDM server that implements support for the [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf).
+
 * A way to achieve **centralized device management**
 * Requires an **MDM server** which implements support for the MDM protocol
 * MDM server can **send MDM commands**, such as remote wipe or “install this config”
 
 ### Basics What is DEP \(Device Enrolment Program\)?
 
+The [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) \(DEP\) is a service offered by Apple that **simplifies** Mobile Device Management \(MDM\) **enrollment** by offering **zero-touch configuration** of iOS, macOS, and tvOS devices. Unlike more traditional deployment methods, which require the end-user or administrator to take action to configure a device, or manually enroll with an MDM server, DEP aims to bootstrap this process, **allowing the user to unbox a new Apple device and have it configured for use in the organization almost immediately**.
+
+Administrators can leverage DEP to automatically enroll devices in their organization’s MDM server. Once a device is enrolled, **in many cases it is treated as a “trusted”** device owned by the organization, and could receive any number of certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).
+
 * Allows a device to automatically enroll in pre-configured MDM server the **first time it’s powered** on
 * Most useful when the **device** is **brand new**
 * Can also be useful for **reprovisioning** workflows \(**wiped** with fresh install of the OS\)
+
+{% hint style="danger" %}
+Unfortunately, if an organization has not taken additional steps to **protect their MDM enrollment**, a simplified end-user enrollment process through DEP can also mean a simplified process for **attackers to enroll a device of their choosing in the organization’s MDM** server, assuming the "identity" of a corporate device.
+{% endhint %}
 
 ### Basics What is SCEP \(Simple Certificate Enrolment Protocol\)?
 
@@ -38,7 +48,10 @@
 
 ### DEP
 
-* **3 APIs**: 1 for resellers, 1 for MDM vendors, 1 for device identity \(undocumented\)
+* **3 APIs**: 1 for resellers, 1 for MDM vendors, 1 for device identity \(undocumented\):
+  * The so-called [DEP "cloud service" API](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). This is used by MDM servers to associate DEP profiles with specific devices.
+  * The [DEP API used by Apple Authorized Resellers](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) to enroll devices, check enrollment status, and check transaction status.
+  * The undocumented private DEP API. This is used by Apple Devices to request their DEP profile. On macOS, the `cloudconfigurationd` binary is responsible for communicating over this API.
 * More modern and **JSON** based \(vs. plist\)
 * Apple grants an **OAuth token** to the MDM vendor
 
@@ -62,7 +75,7 @@
 6. Profile installation \(Device\) a. incl. MDM, SCEP and root CA payloads
 7. MDM command issuance \(Device\)
 
-![](../../.gitbook/assets/image%20%28564%29.png)
+![](../../../.gitbook/assets/image%20%28564%29.png)
 
 The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` exports functions that can be considered **high-level "steps"** of the enrolment process.
 
@@ -70,7 +83,7 @@ The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Librar
 
 This part of the process occurs when a **user boots a Mac for the first time** \(or after a complete wipe\)
 
-![](../../.gitbook/assets/image%20%28568%29.png)
+![](../../../.gitbook/assets/image%20%28568%29.png)
 
 or when executing `sudo profiles show -type enrollment`
 
@@ -95,7 +108,7 @@ It follows a few steps to get the Activation Record performed by **`MCTeslaConfi
    2. The JSON payload is encrypted using Absinthe \(**`NACSign`**\)
    3. All requests over HTTPs, built-in root certificates are used 
 
-![](../../.gitbook/assets/image%20%28566%29.png)
+![](../../../.gitbook/assets/image%20%28566%29.png)
 
 The response is a JSON dictionary with some important data like:
 
@@ -104,7 +117,7 @@ The response is a JSON dictionary with some important data like:
 
 ### **Step 5: Profile Retrieval**
 
-![](../../.gitbook/assets/image%20%28569%29.png)
+![](../../../.gitbook/assets/image%20%28569%29.png)
 
 * Request sent to **url provided in DEP profile**.
 * **Anchor certificates** are used to **evaluate trust** if provided.
@@ -115,7 +128,7 @@ The response is a JSON dictionary with some important data like:
 * Signed using the **device identity certificate \(from APNS\)**
 * **Certificate chain** includes expired **Apple iPhone Device CA**
 
-![](../../.gitbook/assets/image%20%28567%29%20%281%29%20%282%29.png)
+![](../../../.gitbook/assets/image%20%28567%29%20%281%29%20%282%29.png)
 
 ### Step 6: Profile Installation
 
@@ -160,7 +173,17 @@ Typically, **activation profile** provided by an MDM vendor will **include the f
   * **`ServerURLPinningCertificateUUIDs`** for pinning request
   * **`IdentityCertificateUUID`** for TLS client certificate
 
+## Attacks
+
+### Enrolling Devices in Other Organisations
+
+As previously commented, in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).  
+Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected:
+
+{% page-ref page="enrolling-devices-in-other-organisations.md" %}
+
 ## **References**
 
 * [https://www.youtube.com/watch?v=ku8jZe-MHUU](https://www.youtube.com/watch?v=ku8jZe-MHUU)
+* [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)
 

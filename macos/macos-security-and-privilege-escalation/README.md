@@ -141,7 +141,7 @@ You can enable/disable these services in "System Preferences" --&gt; Sharing
 
 ### MacOS MDM
 
-{% page-ref page="macos-mdm.md" %}
+{% page-ref page="macos-mdm/" %}
 
 ### MacOS Protocols
 

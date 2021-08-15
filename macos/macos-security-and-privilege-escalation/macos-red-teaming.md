@@ -9,7 +9,7 @@ If you manage to **compromise admin credentials** to access the management platf
 
 For red teaming in MacOS environments it's highly recommended to have some understanding of how the MDMs work:
 
-{% page-ref page="macos-mdm.md" %}
+{% page-ref page="macos-mdm/" %}
 
 And also about **MacOS** "special" **network** **protocols**:
 
