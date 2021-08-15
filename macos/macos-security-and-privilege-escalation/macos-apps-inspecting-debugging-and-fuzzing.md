@@ -386,6 +386,7 @@ Or use `netstat` or `lsof`
 
 ## References
 
-* [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
-* [https://taomm.org/vol1/analysis.html](https://taomm.org/vol1/analysis.html)
+* [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)\*\*\*\*
+* \*\*\*\*[**https://www.youtube.com/watch?v=T5xfL9tEg44**](https://www.youtube.com/watch?v=T5xfL9tEg44)\*\*\*\*
+* \*\*\*\*[**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)\*\*\*\*
 

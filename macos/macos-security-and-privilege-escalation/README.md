@@ -1018,6 +1018,7 @@ sudo killall -HUP mDNSResponder
 
 ## References
 
-* [https://taomm.org/vol1/analysis.html](https://taomm.org/vol1/analysis.html)
-* [https://github.com/NicolasGrimonpont/Cheatsheet](https://github.com/NicolasGrimonpont/Cheatsheet)
+* \*\*\*\*[**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)\*\*\*\*
+* \*\*\*\*[**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)\*\*\*\*
+* \*\*\*\*[**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)\*\*\*\*
 
