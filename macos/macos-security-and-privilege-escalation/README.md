@@ -314,7 +314,7 @@ The final exception to these rules is that **any installer package signed with t
 
 Note that if **a file is specified** in the previous config file **but** it **doesn't exist, it can be created**. This might be used by malware to obtain stealth persistence. For example, imagine that a **.plist** in `/System/Library/LaunchDaemons` appears listed but it doesn't exist. A malware may c**reate one and use it as persistence mechanism.**
 
-Also, not how files and directories specified in **`rootless.conf`** have a **rootless extended attribute**:
+Also, note how files and directories specified in **`rootless.conf`** have a **rootless extended attribute**:
 
 ```bash
 xattr /System/Library/LaunchDaemons/com.apple.UpdateSettings.plist
@@ -324,7 +324,7 @@ ls -lO /System/Library/LaunchDaemons/com.apple.UpdateSettings.plist
 -rw-r--r--@ 1 root  wheel  restricted,compressed 412  1 Jan  2020 /System/Library/LaunchDaemons/com.apple.UpdateSettings.plist
 ```
 
-**SIP** handles a number of **other limitations as well**. Like it **doesn't allows for the loading of unsigned kext**s.  SIP is also responsible for **ensuring** that no OS X **system processes are debugged**. This also means that Apple put a stop to dtrace inspecting system processes.
+**SIP** handles a number of **other limitations as well**. Like it **doesn't allows for the loading of unsigned kexts**.  SIP is also responsible for **ensuring** that no OS X **system processes are debugged**. This also means that Apple put a stop to dtrace inspecting system processes.
 
 Check if SIP is enabled with:
 
@@ -339,6 +339,8 @@ You can also maintain it **enable but without debugging protections** doing:
 ```bash
 csrutil enable --without debug
 ```
+
+For more **information about SIP** read the following response: [https://apple.stackexchange.com/questions/193368/what-is-the-rootless-feature-in-el-capitan-really](https://apple.stackexchange.com/questions/193368/what-is-the-rootless-feature-in-el-capitan-really)
 
 ### Apple Binary Signatures
 
@@ -814,6 +816,15 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
+```
+
+#### Dump keychain keys \(with passwords\) using users password
+
+If you know the users password you can use it to **dump and decrypt keychains that belong to the user**.
+
+```bash
+#Prompt to ask for the password
+python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
 
 ### kcpassword
