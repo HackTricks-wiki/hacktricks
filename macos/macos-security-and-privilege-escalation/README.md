@@ -55,7 +55,12 @@ First of all, please note that **most of the tricks about privilege escalation a
 
 ### Common users
 
-* **Daemon**: User reserved for system daemons
+* **Daemon**: User reserved for system daemons. The default daemon account names usually start with  a "\_":
+
+  ```bash
+  _amavisd, _analyticsd, _appinstalld, _appleevents, _applepay, _appowner, _appserver, _appstore, _ard, _assetcache, _astris, _atsserver, _avbdeviced, _calendar, _captiveagent, _ces, _clamav, _cmiodalassistants, _coreaudiod, _coremediaiod, _coreml, _ctkd, _cvmsroot, _cvs, _cyrus, _datadetectors, _demod, _devdocs, _devicemgr, _diskimagesiod, _displaypolicyd, _distnote, _dovecot, _dovenull, _dpaudio, _driverkit, _eppc, _findmydevice, _fpsd, _ftp, _fud, _gamecontrollerd, _geod, _hidd, _iconservices, _installassistant, _installcoordinationd, _installer, _jabber, _kadmin_admin, _kadmin_changepw, _knowledgegraphd, _krb_anonymous, _krb_changepw, _krb_kadmin, _krb_kerberos, _krb_krbtgt, _krbfast, _krbtgt, _launchservicesd, _lda, _locationd, _logd, _lp, _mailman, _mbsetupuser, _mcxalr, _mdnsresponder, _mobileasset, _mysql, _nearbyd, _netbios, _netstatistics, _networkd, _nsurlsessiond, _nsurlstoraged, _oahd, _ondemand, _postfix, _postgres, _qtss, _reportmemoryexception, _rmd, _sandbox, _screensaver, _scsd, _securityagent, _softwareupdate, _spotlight, _sshd, _svn, _taskgated, _teamsserver, _timed, _timezone, _tokend, _trustd, _trustevaluationagent, _unknown, _update_sharing, _usbmuxd, _uucp, _warmd, _webauthserver, _windowserver, _www, _wwwproxy, _xserverdocs
+  ```
+
 * **Guest**: Account for guests with very strict permissions
 * **Nobody**: Processes are executed with this user when minimal permissions are required
 * **Root**
@@ -355,6 +360,30 @@ codesign --verify --verbose /Applications/Safari.app
 
 #Check if the signature is valid
 spctl --assess --verbose /Applications/Safari.app
+```
+
+## Installed Software & Services
+
+Check for **suspicious** applications installed and **privileges** over the.installed resources: 
+
+```bash
+system_profiler SPApplicationsDataType #Installed Apps
+system_profiler SPFrameworksDataType #Instaled framework
+lsappinfo list #Installed Apps
+launchtl list #Services
+```
+
+## User Processes
+
+```bash
+# will print all the running services under that particular user domain.
+launchctl print gui/<users UID>
+
+# will print all the running services under root
+launchctl print system
+
+# will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
+launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 
 ## Auto Start Extensibility Point \(ASEP\)
@@ -1077,4 +1106,5 @@ sudo killall -HUP mDNSResponder
 * \*\*\*\*[**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)\*\*\*\*
 * \*\*\*\*[**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)\*\*\*\*
 * \*\*\*\*[**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)\*\*\*\*
+* \*\*\*\*[**https://www.sentinelone.com/blog/malware-hunting-macos-practical-guide/**](https://www.sentinelone.com/blog/malware-hunting-macos-practical-guide/)\*\*\*\*
 
