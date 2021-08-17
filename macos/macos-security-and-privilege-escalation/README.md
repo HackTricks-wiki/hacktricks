@@ -754,6 +754,10 @@ sudo vmmap <securityd PID> | grep MALLOC_TINY
 sudo ./keychaindump
 ```
 
+{% hint style="danger" %}
+Base on this comment [https://github.com/juuso/keychaindump/issues/10\#issuecomment-751218760](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) it looks like this tools isn't working anymore in Big Sur.
+{% endhint %}
+
 ### chainbreaker
 
 \*\*\*\*[**Chainbreaker**](https://github.com/n0fate/chainbreaker) can be used to extract the following types of information from an OSX keychain in a forensically sound manner:
