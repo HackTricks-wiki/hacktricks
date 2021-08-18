@@ -250,7 +250,7 @@ From a user’s perspective, they see TCC in action **when an application wants 
 
 Check some of the **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
 
-The TCC database is just a **sqlite3 database**, which makes the task of investigating it much simpler. There are two different databases, a global one in `/Library/Application Support/com.apple.TCC/TCC.db` and a per-user one located in `/Users/<username>/Library/Application Support/com.apple.TCC/TCC.db`. The first database is **protected from editing with SIP**\(System Integrity Protection\), but you can read them by granting terminal\(or your editor\) full disk access.
+The TCC database is just a **sqlite3 database**, which makes the task of investigating it much simpler. There are two different databases, a global one in `/Library/Application Support/com.apple.TCC/TCC.db` and a per-user one located in `/Users/<username>/Library/Application Support/com.apple.TCC/TCC.db`. The first database is **protected from editing with SIP**\(System Integrity Protection\), but you can read them by granting terminal\(or your editor\) **full disk access**.
 
 This information was [taken from here](https://rainforest.engineering/2021-02-09-macos-tcc/) \(read the **original source for more information**\).
 
@@ -268,7 +268,13 @@ Unprotected directories:
 * $HOME/.ssh, $HOME/.aws, etc
 * /tmp
 
-Here you can find examples of how **malware has been able to bypass this protection**:
+#### Bypasses
+
+By default an access via **SSH** will have **"Full Disk Access"**. In order to disable this you need to have it listed but disabled \(removing it from the list won't remove those privileges\):
+
+![](../../.gitbook/assets/image%20%28563%29.png)
+
+Here you can find examples of how some **malwares have been able to bypass this protection**:
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
@@ -553,9 +559,25 @@ In the previous example we have created and deleted a **LoginHook**, it's also p
 
 The root user one is stored in `/private/var/root/Library/Preferences/com.apple.loginwindow.plist`
 
+### Emond
+
+Apple introduced a logging mechanism called **emond**. It appears it was never fully developed, and development may have been **abandoned** by Apple for other mechanisms, but it remains **available**.
+
+This little-known service may **not be much use to a Mac admin**, but to a threat actor one very good reason would be to use it as a **persistence mechanism that most macOS admins probably wouldn't know** to look for. Detecting malicious use of emond shouldn't be difficult, as the System LaunchDaemon for the service looks for scripts to run in only one place:
+
+```bash
+ls -l /private/var/db/emondClients
+```
+
+{% hint style="danger" %}
+**As this isn't used much, anything in that folder should be suspicious**
+{% endhint %}
+
 ### Startup Items
 
-This is deprecated, so nothing should be found in the following directories.
+{% hint style="danger" %}
+**This is deprecated, so nothing should be found in the following directories.**
+{% endhint %}
 
 A **StartupItem** is a **directory** that gets **placed** in one of these two folders. `/Library/StartupItems/` or `/System/Library/StartupItems/`
 
@@ -602,6 +624,10 @@ RunService "$1"
 {% endcode %}
 
 ### /etc/rc.common
+
+{% hint style="danger" %}
+**This isn't working in modern MacOS versions**
+{% endhint %}
 
 It's also possible to place here **commands that will be executed at startup.** Example os regular rc.common script:
 
@@ -696,6 +722,16 @@ RunService ()
       *      ) echo "$0: unknown argument: $1";;
     esac
 }
+```
+
+### Profiles
+
+Configuration profiles can force a user to use certain browser settings, DNS proxy settings, or VPN settings. Many other payloads are possible which make them ripe for abuse.
+
+You can enumerate them running:
+
+```bash
+ls -Rl /Library/Managed\ Preferences/
 ```
 
 ### Other persistence techniques and tools
@@ -1106,5 +1142,5 @@ sudo killall -HUP mDNSResponder
 * \*\*\*\*[**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)\*\*\*\*
 * \*\*\*\*[**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)\*\*\*\*
 * \*\*\*\*[**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)\*\*\*\*
-* \*\*\*\*[**https://www.sentinelone.com/blog/malware-hunting-macos-practical-guide/**](https://www.sentinelone.com/blog/malware-hunting-macos-practical-guide/)\*\*\*\*
+* \*\*\*\*[**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)\*\*\*\*
 
