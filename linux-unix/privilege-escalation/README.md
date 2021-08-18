@@ -1352,6 +1352,19 @@ grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
 
 In order to **read logs the group** [**adm**](interesting-groups-linux-pe/#adm-group) will be really helpful.
 
+### Shell files
+
+```bash
+~/.bash_profile # if it exists, read once when you log in to the shell
+~/.bash_login # if it exists, read once if .bash_profile doesn't exist
+~/.profile # if it exists, read once if the two above don't exist
+/etc/profile # only read if none of the above exist
+~/.bashrc # if it exists, read every time you start a new shell
+~/.bash_logout # if it exists, read when the login shell exits
+~/.zlogin #zsh shell
+~/.zshrc #zsh shell
+```
+
 ### Generic Creds Search/Regex
 
 You should also check for files containing the word "**password**" in it's **name** or inside the **content**, also check for IPs and emails inside logs, or hashes regexps.  

@@ -62,6 +62,7 @@ First of all, please note that **most of the tricks about privilege escalation a
   ```
 
 * **Guest**: Account for guests with very strict permissions
+  * `state=("automaticTime" "afpGuestAccess" "filesystem" "guestAccount" "smbGuestAccess"); for i in "${state[@]}"; do sysadminctl -"${i}" status; done;`
 * **Nobody**: Processes are executed with this user when minimal permissions are required
 * **Root**
 
@@ -135,6 +136,18 @@ You can enable/disable these services in "System Preferences" --&gt; Sharing
 * **SSH**, called “Remote Login”
 * **Apple Remote Desktop** \(ARD\), or “Remote Management”
 * **AppleEvent**, known as “Remote Apple Event”
+
+Check if any is enabled running:
+
+```bash
+rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
+scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
+flShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | egrep "\*.88|\*.445|\*.548" | wc -l);
+rLgn=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.22" | wc -l);
+rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
+bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
+printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
+```
 
 ### MacOS Architecture
 
@@ -934,6 +947,40 @@ For example the dynamic loader \(dyld\) ignores the DYLD\_INSERT\_LIBRARIES envi
 
 For more details on the security features afforded by the hardened runtime, see Apple’s documentation: “[Hardened Runtime](https://developer.apple.com/documentation/security/hardened_runtime)” 
 {% endhint %}
+
+## Interesting Information in Databases
+
+### Messages
+
+```bash
+sqlite3 $HOME/Library/Messages/chat.db .tables
+sqlite3 $HOME/Library/Messages/chat.db 'select * from message'
+sqlite3 $HOME/Library/Messages/chat.db 'select * from attachment'
+sqlite3 $HOME/Library/Messages/chat.db 'select * from deleted_messages'
+sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
+```
+
+### Notifications
+
+You can find the Notifications data in `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
+
+Most of the interesting information is going to be in **blob**. So you will need to **extract** that content and **transform** it to **human** **readable** or use **`strings`**. To access it you can do:
+
+```bash
+cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
+strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
+```
+
+### Notes
+
+The users **notes** can be found in `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`
+
+```bash
+sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tables
+
+#To dump it in a readable format:
+for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select Z_PK from ZICNOTEDATA;"); do sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select writefile('body1.gz.z', ZDATA) from ZICNOTEDATA where Z_PK = '$i';"; zcat body1.gz.Z ; done
+```
 
 ## File Extensions Apps
 
