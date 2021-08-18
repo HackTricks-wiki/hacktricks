@@ -60,6 +60,8 @@ Inside the folder **of each profile** \(_~/.mozilla/firefox/&lt;ProfileName&gt;/
 * _**downloads.sqlite**_ : Old downloads database \(now it's inside places.sqlite\)
 * _**thumbnails/**_ : Thumbnails
 * _**logins.json**_ : Encrypted usernames and passwords
+* **Browser’s built-in anti-phishing:** `grep 'browser.safebrowsing' ~/Library/Application Support/Firefox/Profiles/*/prefs.js`
+  * Will return “safebrowsing.malware.enabled” and “phishing.enabled” as false if the safe search settings have been disabled
 * _**key4.db**_ or _**key3.db**_ : Master key ?
 
 In order to try to decrypt the master password you can use [https://github.com/unode/firefox\_decrypt](https://github.com/unode/firefox_decrypt)  
@@ -104,6 +106,8 @@ Most of the information will be saved inside the _**Default/**_ or _**ChromeDefa
 * _**Extensions/**_ : Extensions and addons folder
 * **Thumbnails** : Thumbnails
 * **Preferences**: This file contains a plethora of good information such as plugins, extensions, sites using geolocation, popups, notifications, DNS prefetching, certificate exceptions, and much more. If you’re trying to research whether or not a specific Chrome setting was enabled, you will likely find that setting in here.
+* **Browser’s built-in anti-phishing:** `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`
+  * You can simply grep for “**safebrowsing**” and look for `{"enabled: true,"}` in the result to indicate anti-phishing and malware protection is on.
 
 ## **SQLite DB Data Recovery**
 
@@ -222,15 +226,26 @@ For analyzing Microsoft Edge artifacts all the **explanations about cache and lo
 The databases can be found in `/Users/$User/Library/Safari`
 
 * **History.db**: The tables `history_visits` _and_ `history_items` contains information about the history and timestamps.
+  * `sqlite3 ~/Library/Safari/History.db "SELECT h.visit_time, i.url FROM history_visits h INNER JOIN history_items i ON h.history_item = i.id"`
 * **Downloads.plist**: Contains the info about the downloaded files.
 * **Book-marks.plis**t: URLs bookmarked.
 * **TopSites.plist**: List of the most visited websites that the user browses to.
+* **Extensions.plist**: To retrieve an old-style list of Safari browser extensions.
+  * `plutil -p ~/Library/Safari/Extensions/Extensions.plist| grep "Bundle Directory Name" | sort --ignore-case`
+  * `pluginkit -mDvvv -p com.apple.Safari.extension`
 * **UserNotificationPermissions.plist**: Domains that are allowed to push notifications.
+  * `plutil -p ~/Library/Safari/UserNotificationPermissions.plist | grep -a3 '"Permission" => 1'`
 * **LastSession.plist**: Tabs that were opened the last time the user exited Safari.
+  * `plutil -p ~/Library/Safari/LastSession.plist | grep -iv sessionstate`
+* **Browser’s built-in anti-phishing:** `defaults read com.apple.Safari WarnAboutFraudulentWebsites`
+  * The reply should be 1 to indicate the setting is active
 
 ## Opera
 
 The databases can be found in `/Users/$USER/Library/Application Support/com.operasoftware.Opera`
 
 Opera **stores browser history and download data in the exact same format as Google Chrome**. This applies to the file names as well as the table names.
+
+* **Browser’s built-in anti-phishing:** `grep --color 'fraud_protection_enabled' ~/Library/Application Support/com.operasoftware.Opera/Preferences`
+  * **fraud\_protection\_enabled** should be **true**
 
