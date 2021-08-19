@@ -128,6 +128,86 @@ Check if you can find any fingerprint of a known malware:
 
 {% page-ref page="../malware-analysis.md" %}
 
+## Zeek
+
+> Zeek is a passive, open-source network traffic analyzer. Many operators use Zeek as a network security monitor \(NSM\) to support investigations of suspicious or malicious activity. Zeek also supports a wide range of traffic analysis tasks beyond the security domain, including performance measurement and troubleshooting.
+
+Basically, logs created by `zeek` aren't **pcaps**. Therefore you will need to use **other tools** to analyse the logs where the **information** about the pcaps are.
+
+### Connections Info
+
+```bash
+#Get info about longest connections (add "grep udp" to see only udp traffic)
+#The longest connection might be of malware (constant reverse shell?)
+cat conn.log | zeek-cut id.orig_h id.orig_p id.resp_h id.resp_p proto service duration | sort -nrk 7 | head -n 10
+
+10.55.100.100   49778   65.52.108.225   443     tcp     -       86222.365445
+10.55.100.107   56099   111.221.29.113  443     tcp     -       86220.126151
+10.55.100.110   60168   40.77.229.82    443     tcp     -       86160.119664
+
+
+#Improve the metrics by summing up the total duration time for connections that have the same destination IP and Port.
+cat conn.log | zeek-cut id.orig_h id.resp_h id.resp_p proto duration | awk 'BEGIN{ FS="\t" } { arr[$1 FS $2 FS $3 FS $4] += $5 } END{ for (key in arr) printf "%s%s%s\n", key, FS, arr[key] }' | sort -nrk 5 | head -n 10
+
+10.55.100.100   65.52.108.225   443     tcp     86222.4
+10.55.100.107   111.221.29.113  443     tcp     86220.1
+10.55.100.110   40.77.229.82    443     tcp     86160.1
+
+#Get the number of connectionssummed up per each line
+cat conn.log | zeek-cut id.orig_h id.resp_h duration | awk 'BEGIN{ FS="\t" } { arr[$1 FS $2] += $3; count[$1 FS $2] += 1 } END{ for (key in arr) printf "%s%s%s%s%s\n", key, FS, count[key], FS, arr[key] }' | sort -nrk 4 | head -n 10
+
+10.55.100.100   65.52.108.225   1       86222.4
+10.55.100.107   111.221.29.113  1       86220.1
+10.55.100.110   40.77.229.82    134       86160.1
+
+#Check if any IP is connecting to 1.1.1.1
+cat conn.log | zeek-cut id.orig_h id.resp_h id.resp_p proto service | grep '1.1.1.1' | sort | uniq -c
+
+#Get number of connections per source IP, dest IP and dest Port
+cat conn.log | zeek-cut id.orig_h id.resp_h id.resp_p proto | awk 'BEGIN{ FS="\t" } { arr[$1 FS $2 FS $3 FS $4] += 1 } END{ for (key in arr) printf "%s%s%s\n", key, FS, arr[key] }' | sort -nrk 5 | head -n 10
+
+
+### RITA
+#Something similar can be done with the tool rita
+rita show-long-connections -H --limit 10 zeek_logs
+
++---------------+----------------+--------------------------+----------------+
+|   SOURCE IP   | DESTINATION IP | DSTPORT:PROTOCOL:SERVICE |    DURATION    |
++---------------+----------------+--------------------------+----------------+
+| 10.55.100.100 | 65.52.108.225  | 443:tcp:-                | 23h57m2.3655s  |
+| 10.55.100.107 | 111.221.29.113 | 443:tcp:-                | 23h57m0.1262s  |
+| 10.55.100.110 | 40.77.229.82   | 443:tcp:-                | 23h56m0.1197s  |
+
+#Get connections info from rita
+rita show-beacons zeek_logs | head -n 10
+Score,Source IP,Destination IP,Connections,Avg Bytes,Intvl Range,Size Range,Top Intvl,Top Size,Top Intvl Count,Top Size Count,Intvl Skew,Size Skew,Intvl Dispersion,Size Dispersion
+1,192.168.88.2,165.227.88.15,108858,197,860,182,1,89,53341,108319,0,0,0,0
+1,10.55.100.111,165.227.216.194,20054,92,29,52,1,52,7774,20053,0,0,0,0
+0.838,10.55.200.10,205.251.194.64,210,69,29398,4,300,70,109,205,0,0,0,0
+```
+
+### DNS info
+
+```bash
+#Get info about each DNS request performed
+cat dns.log | zeek-cut -c id.orig_h query qtype_name answers
+
+#Get number of times each domain was requestedand get top 10
+cat dns.log | zeek-cut query | sort | uniq | rev | cut -d '.' -f 1-2 | rev | sort | uniq -c | sort -nr | head -n 10
+
+#Get all the IPs
+cat dns.log | zeek-cut id.orig_h query | grep 'example\.com' | cut -f 1 | sort | uniq -c
+
+#Sort the most common dnsrecord request (should be A)
+cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
+
+#See top DNS domain requested with rita
+rita show-exploded-dns -H --limit 10 zeek_logs
+
+
+
+```
+
 ## Other pcap analysis tricks
 
 {% page-ref page="dnscat-exfiltration.md" %}

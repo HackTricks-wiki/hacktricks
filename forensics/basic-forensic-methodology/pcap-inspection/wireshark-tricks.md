@@ -11,7 +11,7 @@ The following tutorials are amazing to learn some cool basic tricks:
 * [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 * [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Wireshark analysed Information
+### Analysed Information
 
 #### Expert Information
 
@@ -43,6 +43,12 @@ Under _**Statistics --&gt; Conversations**_ you can find a **summary of the conv
 Under _**Statistics --&gt; Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
 
 ![](../../../.gitbook/assets/image%20%28575%29.png)
+
+#### DNS info
+
+Under _**Statistics --&gt; DNS**_ you can find statistics about the DNS request captured.
+
+![](../../../.gitbook/assets/image%20%28577%29.png)
 
 #### I/O Graph
 
