@@ -26,7 +26,7 @@ You can find some Wireshark trick in:
 
 ### Xplico Framework
 
-Xplico can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico extracts each email \(POP, IMAP, and SMTP protocols\), all HTTP contents, each VoIP call \(SIP\), FTP, TFTP, and so on.
+\*\*\*\*[**Xplico** ](https://github.com/xplico/xplico)_\(only linux\)_ ****can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico extracts each email \(POP, IMAP, and SMTP protocols\), all HTTP contents, each VoIP call \(SIP\), FTP, TFTP, and so on.
 
 #### Install
 
@@ -50,12 +50,12 @@ Then create a **new case**, create a **new session** inside the case and **uploa
 
 ### NetworkMiner
 
-Like Xplico it is a tool to **analyze and extract objects from pcaps**. It has a free edition that you can **download** [**here**](https://www.netresec.com/?page=NetworkMiner).  
+Like Xplico it is a tool to **analyze and extract objects from pcaps**. It has a free edition that you can **download** [**here**](https://www.netresec.com/?page=NetworkMiner). It works with **Windows**.  
 This tool is also useful to get **other information analysed** from the packets in order to be able to know what was happening there in a **quick** way.
 
 ### NetWitness Investigator
 
-You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware).  
+You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **\(It works in Windows\)**.  
 This is another useful tool that **analyse the packets** and sort the information in a useful way to **know what is happening inside**.
 
 ![](../../../.gitbook/assets/image%20%28570%29.png)
@@ -79,7 +79,7 @@ capinfos capture.pcap
 
 If you are **looking** for **something** inside the pcap you can use **ngrep**. And example using the main filters:
 
-```text
+```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
 
