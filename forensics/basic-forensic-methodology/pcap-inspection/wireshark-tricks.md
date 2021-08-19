@@ -11,6 +11,45 @@ The following tutorials are amazing to learn some cool basic tricks:
 * [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 * [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
+### Wireshark analysed Information
+
+#### Expert Information
+
+Clicking on _**Analyze** --&gt; **Expert Information**_ you will have an **overview** of what is happening in the packets **analised**:
+
+![](../../../.gitbook/assets/image%20%28571%29.png)
+
+#### Resolved Addresses
+
+Under _**Statistics --&gt; Resolved Addresses**_ you can find several **information** that was "**resolved**" by wireshark like port/transport to protocol, mac to manufacturer...  
+This is interesting to know what is implicated in the communication.
+
+![](../../../.gitbook/assets/image%20%28574%29.png)
+
+#### Protocol Hierarchy
+
+Under _**Statistics --&gt; Protocol Hierarchy**_ you can find the **protocols** **involved** in the communication and data about them.
+
+![](../../../.gitbook/assets/image%20%28576%29.png)
+
+#### Conversations
+
+Under _**Statistics --&gt; Conversations**_ you can find a **summary of the conversations** in the communication and data about them.
+
+![](../../../.gitbook/assets/image%20%28572%29.png)
+
+#### **Endpoints**
+
+Under _**Statistics --&gt; Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
+
+![](../../../.gitbook/assets/image%20%28575%29.png)
+
+#### I/O Graph
+
+Under _**Statistics --&gt; I/O Graph**_ you can find a **graph of the communication.**
+
+![](../../../.gitbook/assets/image%20%28573%29.png)
+
 ### Filters
 
 Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)  

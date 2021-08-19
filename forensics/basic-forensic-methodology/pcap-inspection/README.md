@@ -50,7 +50,15 @@ Then create a **new case**, create a **new session** inside the case and **uploa
 
 ### NetworkMiner
 
-Like Xplico it is a tool to analyze and extract objects from pcaps. It has a free edition that you can download [here](https://www.netresec.com/?page=NetworkMiner).
+Like Xplico it is a tool to **analyze and extract objects from pcaps**. It has a free edition that you can **download** [**here**](https://www.netresec.com/?page=NetworkMiner).  
+This tool is also useful to get **other information analysed** from the packets in order to be able to know what was happening there in a **quick** way.
+
+### NetWitness Investigator
+
+You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware).  
+This is another useful tool that **analyse the packets** and sort the information in a useful way to **know what is happening inside**.
+
+![](../../../.gitbook/assets/image%20%28570%29.png)
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
