@@ -789,6 +789,7 @@ sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 You can also use this **oneliner** to download the application, load the kext and dump the memory:
 
 ```bash
+sudo su
 cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip; unzip osxpmem-2.1.post4.zip; chown -R root:wheel osxpmem.app/MacPmem.kext; kextload osxpmem.app/MacPmem.kext; osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
 
