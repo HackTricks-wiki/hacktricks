@@ -42,7 +42,11 @@ If you detect this behaviour, you can **decrypt the encrypted data** and even **
 
 ### How to exploit
 
-You could use [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster) to exploit this kind of vulnerability.
+You could use [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster) to exploit this kind of vulnerability or just do 
+
+```text
+sudo apt-get install padbuster
+```
 
 In order to test if the cookie of a site is vulnerable you could try: 
 
