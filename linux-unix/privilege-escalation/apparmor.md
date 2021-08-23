@@ -190,7 +190,7 @@ By default **Apparmor docker-default profile** is generated from [https://github
 
 * **Access** to all **networking**
 * **No capability** is defined \(However, some capabilities will come from including basic base rules i.e. \#include &lt;abstractions/base&gt; \)
-* **Writing** to any **/proc** file is **not allo**wed
+* **Writing** to any **/proc** file is **not allowed**
 * Other **subdirectories**/**files** of /**proc** and /**sys** are **denied** read/write/lock/link/execute access
 * **Mount** is **not allowed**
 * **Ptrace** can only be run on a process that is confined by **same apparmor profile**
