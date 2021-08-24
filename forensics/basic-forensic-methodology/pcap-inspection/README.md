@@ -58,7 +58,7 @@ This tool is also useful to get **other information analysed** from the packets 
 You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **\(It works in Windows\)**.  
 This is another useful tool that **analyse the packets** and sort the information in a useful way to **know what is happening inside**.
 
-![](../../../.gitbook/assets/image%20%28570%29.png)
+![](../../../.gitbook/assets/image%20%28567%29%20%281%29.png)
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 

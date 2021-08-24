@@ -3,8 +3,8 @@
 ## Basic Information
 
 **AppArmor** is a kernel enhancement to confine **programs** to a **limited** set of **resources**. It's a Mandatory Access Control or **MAC** that binds **access control** attributes **to programs rather than to users**.  
-AppArmor confinement is provided via **profiles loaded into the kernel**, typically on boot.   
-AppArmor profiles can be in one of **two modes**: 
+AppArmor confinement is provided via **profiles loaded into the kernel**, typically on boot.  
+AppArmor profiles can be in one of **two modes**:
 
 * **Enforcement**: Profiles loaded in enforcement mode will result in **enforcement of the policy** defined in the profile **as well as reporting** policy violation attempts \(either via syslog or auditd\).
 * **Complain**: Profiles in complain mode **will not enforce policy** but instead **report** policy **violation** attempts.
@@ -25,7 +25,7 @@ With `sudo aa-status` you will be able to list the binaries that are restricted 
 
 For example, a **apparmor** profile for _/usr/bin/man_ will be located in _/etc/apparmor.d/usr.bin.man_
 
-### Commands 
+### Commands
 
 ```bash
 aa-status     #check the current status 
@@ -186,7 +186,7 @@ apparmor module is loaded.
 
 By default **Apparmor docker-default profile** is generated from [https://github.com/moby/moby/blob/master/profiles/apparmor/template.go](https://github.com/moby/moby/blob/master/profiles/apparmor/template.go)
 
-**docker-default profile Summary**: 
+**docker-default profile Summary**:
 
 * **Access** to all **networking**
 * **No capability** is defined \(However, some capabilities will come from including basic base rules i.e. \#include &lt;abstractions/base&gt; \)
@@ -199,7 +199,7 @@ Once you **run a docker container** you should see the following output:
 
 ```bash
 1 processes are in enforce mode.
-   docker-default (825) 
+   docker-default (825)
 ```
 
 Note that **apparmor will even block capabilities privileges** granted to the container by default. For example, it will be able to **block permission to write inside /proc even if the SYS\_ADMIN capability is granted** because by default docker apparmor profile denies this access:
@@ -239,6 +239,4 @@ find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 ```
 
 In the weird case you can **modify the apparmor docker profile and reload it.** You could remove the restrictions and "bypass" them.
-
-
 

@@ -339,7 +339,7 @@ The page www.mail-tester.com can indicate you if you your domain is being blocke
 * Decide from which account are you going to send the phishing emails. Suggestions: _noreply, support, servicedesk, salesforce..._
 * You can leave blank the username and password, but make sure to check the Ignore Certificate Errors
 
-![](../.gitbook/assets/image%20%28253%29%20%281%29%20%282%29%20%281%29%20%281%29%20%282%29%20%282%29%20%283%29%20%283%29%20%285%29.png)
+![](../.gitbook/assets/image%20%28253%29%20%281%29%20%282%29%20%281%29%20%281%29%20%282%29%20%282%29%20%283%29%20%283%29%20%285%29%20%283%29.png)
 
 {% hint style="info" %}
 It's recommended to use the "**Send Test Email**" functionality to test that everything is working.  
