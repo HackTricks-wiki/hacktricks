@@ -127,6 +127,12 @@ Notice that when the execution is stopped by any reason in win64dbg you can see 
 
 Then, looking to this ca see when the execution was stopped in the dll you want to debug.
 
+## GUI Apps / Videogames
+
+\*\*\*\*[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
+
+{% page-ref page="cheat-engine.md" %}
+
 ## ARM & MIPS
 
 {% embed url="https://github.com/nongiach/arm\_now" %}
