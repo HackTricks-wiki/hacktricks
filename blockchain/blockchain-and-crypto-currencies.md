@@ -129,6 +129,14 @@ This is an issue for transactions which have more than one input. One way to fix
 5 btc
 ```
 
+### Forced address reuse
+
+**Forced address reuse** or **incentivized address reuse** is when an adversary pays an \(often small\) amount of bitcoin to addresses that have already been used on the block chain. The adversary hopes that users or their wallet software **will use the payments as inputs to a larger transaction which will reveal other addresses via the the common-input-ownership** heuristic. These payments can be understood as a way to coerce the address owner into unintentional address reuse.
+
+This attack is sometimes incorrectly called a **dust attack**.
+
+The correct behaviour by wallets is to not spend coins that have landed on an already-used empty addresses.
+
 ### Other Analysis
 
 * **Exact Payment Amounts**: In order to avoid transactions with a change, the payment needs to be equal to the UTXO \(which is highly unexpected\). Therefore, a **transaction with no change address are probably transfer between 2 addresses of the same user**.
