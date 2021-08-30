@@ -474,6 +474,10 @@
   * [BIM Bruteforcer](a.i.-exploiting/bra.i.nsmasher-presentation/bim-bruteforcer.md)
   * [Hybrid Malware Classifier Part 1](a.i.-exploiting/bra.i.nsmasher-presentation/hybrid-malware-classifier-part-1.md)
 
+## Blockchain
+
+* [Blockchain & Crypto Currencies](blockchain/blockchain-and-crypto-currencies.md)
+
 ## Courses and Certifications Reviews
 
 * [INE Courses and eLearnSecurity Certifications Reviews](courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md)
@@ -513,15 +517,15 @@
   * [PwnTools](exploiting/tools/pwntools.md)
 * [Windows Exploiting \(Basic Guide - OSCP lvl\)](exploiting/windows-exploiting-basic-guide-oscp-lvl.md)
 
-## Crypto
+## Cryptography
 
-* [Certificates](crypto/certificates.md)
-* [Cipher Block Chaining CBC-MAC](crypto/cipher-block-chaining-cbc-mac-priv.md)
-* [Crypto CTFs Tricks](crypto/crypto-ctfs-tricks.md)
-* [Electronic Code Book \(ECB\)](crypto/electronic-code-book-ecb.md)
-* [Hash Length Extension Attack](crypto/hash-length-extension-attack.md)
-* [Padding Oracle](crypto/padding-oracle-priv.md)
-* [RC4 - Encrypt&Decrypt](crypto/rc4-encrypt-and-decrypt.md)
+* [Certificates](cryptography/certificates.md)
+* [Cipher Block Chaining CBC-MAC](cryptography/cipher-block-chaining-cbc-mac-priv.md)
+* [Crypto CTFs Tricks](cryptography/crypto-ctfs-tricks.md)
+* [Electronic Code Book \(ECB\)](cryptography/electronic-code-book-ecb.md)
+* [Hash Length Extension Attack](cryptography/hash-length-extension-attack.md)
+* [Padding Oracle](cryptography/padding-oracle-priv.md)
+* [RC4 - Encrypt&Decrypt](cryptography/rc4-encrypt-and-decrypt.md)
 
 ## BACKDOORS
 

