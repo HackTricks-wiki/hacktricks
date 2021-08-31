@@ -223,6 +223,10 @@ Change avoidance is where transaction inputs and outputs are carefully chosen to
 
 If change avoidance is not an option then **creating more than one change output can improve privacy**. This also breaks change detection heuristics which usually assume there is only a single change output. As this method uses more block space than usual, change avoidance is preferable.
 
+## Monero
+
+When Monero was developed, the gaping need for **complete anonymity** was what it sought to resolve, and to a large extent, it has filled that void.
+
 ## Ethereum
 
 ### Gas
