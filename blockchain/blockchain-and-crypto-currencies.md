@@ -90,7 +90,7 @@ Normal use of the Lightning Network consists of **opening a payment channel** by
 
 Note that any of the both members of the channel can stop and send the final state of the channel to the blockchain at any time.
 
-## Bitcoin Tracing Transactions Techniques
+## Bitcoin Privacy Attacks
 
 ### Common Input
 
@@ -137,12 +137,91 @@ This attack is sometimes incorrectly called a **dust attack**.
 
 The correct behaviour by wallets is to not spend coins that have landed on an already-used empty addresses.
 
-### Other Analysis
+### Other Blockchain Analysis
 
 * **Exact Payment Amounts**: In order to avoid transactions with a change, the payment needs to be equal to the UTXO \(which is highly unexpected\). Therefore, a **transaction with no change address are probably transfer between 2 addresses of the same user**.
 * **Round Numbers**: In a transaction, if one of the outputs is a "**round number**", it's highly probable that this is a **payment to a human that put that** "round number" **price**, so the other part must be the leftover.
 * **Wallet fingerprinting:** A careful analyst sometimes deduce which software created a certain transaction, because the many **different wallet softwares don't always create transactions in exactly the same way**. Wallet fingerprinting can be used to detect change outputs because a change output is the one spent with the same wallet fingerprint.
 * **Amount & Timing correlations**: If the person that performed the transaction **discloses** the **time** and/or **amount** of the transaction, it can be easily **discoverable**.
+
+### Traffic analysis
+
+Some organisation **sniffing your traffic** can see you communicating in the bitcoin network.  
+If the adversary sees a transaction or block **coming out of your node which did not previously enter**, then it can know with near-certainty that **the transaction was made by you or the block was mined by you**. As internet connections are involved, the adversary will be able to **link the IP address with the discovered bitcoin information**.
+
+An attacker that isn't able to sniff all the Internet traffic but that has **a lot of Bitcoin nodes** in order to stay **closer** to the s**o**urces could be able to know the IP address that are announcing transactions or blocks.  
+Also, some wallets periodically rebroadcast their unconfirmed transactions so that they are more likely to propagate widely through the network and be mined.
+
+### Other attacks to find info about the owner of addresses
+
+For more attacks read [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy)
+
+## Anonymous Bitcoins
+
+### Obtaining Bitcoins Anonymously
+
+* **Cash trades:** Buy bitcoin using cash.
+* **Cash substitute:** Buy gift cards or similar and exchange them for bitcoin online.
+* **Mining:** Mining is the most anonymous way to obtain bitcoin. This applies to solo-mining as [mining pools](https://en.bitcoin.it/wiki/Pooled_mining) generally know the hasher's IP address.
+* **Stealing:** In theory another way of obtaining anonymous bitcoin is to steal them.
+
+### Mixers
+
+A user would **send bitcoins to a mixing service** and the service would **send different bitcoins back to the user**, minus a fee. In theory an adversary observing the blockchain would be **unable to link** the incoming and outgoing transactions.
+
+However, the user needs to trust the mixing service to return the bitcoin and also to not be saving logs about the relations between the money received and sent.  
+Some other services can be also used as mixers, like Bitcoin casinos where you can send bitcoins and retrieve them later.
+
+### CoinJoin
+
+**CoinJoin** will **mix several transactions of different users into just one** in order to make more **difficult** for an observer to find out **which input is related to which output**.  
+This offers a new level of privacy, however, **some** **transactions** where some input and output amounts are  correlated or are very different from the rest of the inputs and outputs **can still be correlated** by the external observer.
+
+Examples of \(likely\) CoinJoin transactions IDs on bitcoin's blockchain are `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+
+### PayJoin
+
+The type of CoinJoin discussed in the previous section can be easily identified as such by checking for the multiple outputs with the same value. 
+
+PayJoin \(also called pay-to-end-point or P2EP\) is a special type of CoinJoin between two parties where one party pays the other. The transaction then **doesn't have the distinctive multiple outputs** with the same value, and so is not obviously visible as an equal-output CoinJoin. Consider this transaction:
+
+```text
+2 btc --> 3 btc
+5 btc     4 btc
+```
+
+It could be interpreted as a simple transaction paying to somewhere with leftover change \(ignore for now the question of which output is payment and which is change\). Another way to interpret this transaction is that the 2 BTC input is owned by a merchant and 5 BTC is owned by their customer, and that this transaction involves the customer paying 1 BTC to the merchant. There is no way to tell which of these two interpretations is correct. The result is a coinjoin transaction that breaks the common-input-ownership heuristic and improves privacy, but is also **undetectable and indistinguishable from any regular bitcoin transaction**.
+
+If PayJoin transactions became even moderately used then it would make the **common-input-ownership heuristic be completely flawed in practice**. As they are undetectable we wouldn't even know whether they are being used today. As transaction surveillance companies mostly depend on that heuristic, as of 2019 there is great excitement about the PayJoin idea.
+
+## Bitcoin Privacy Good Practices
+
+### Wallet Synchronization
+
+Bitcoin wallets must somehow obtain information about their balance and history. As of late-2018 the most practical and private existing solutions are to use a **full node wallet** \(which is maximally private\) and **client-side block filtering** \(which is very good\).
+
+* **Full node:** Full nodes download the entire blockchain which contains every on-chain [transaction](https://en.bitcoin.it/wiki/Transaction) that has ever happened in bitcoin. So an adversary watching the user's internet connection will not be able to learn which transactions or addresses the user is interested in. 
+* **Client-side block filtering:** Client-side block filtering works by having **filters** created that contains all the **addresses** for every transaction in a block. The filters can test whether an **element is in the set**; false positives are possible but not false negatives. A lightweight wallet would **download** all the filters for every **block** in the **blockchain** and check for matches with its **own** **addresses**. Blocks which contain matches would be downloaded in full from the peer-to-peer network, and those blocks would be used to obtain the wallet's history and current balance.
+
+### Tor
+
+Bitcoin network uses a peer-to-peer network, which means that other peers can learn your IP address. This is why it's recommend to **connect through Tor every time you want to interact with the bitcoin network**.
+
+### Avoiding address reuse
+
+**Addresses being used more than once is very damaging to privacy because that links together more blockchain transactions with proof that they were created by the same entity**. The most private and secure way to use bitcoin is to send a brand **new address to each person who pays you**. After the received coins have been spent the address should never be used again. Also, a brand new bitcoin address should be demanded when sending bitcoin. All good bitcoin wallets have a user interface which discourages address reuse.
+
+### Multiple transactions
+
+**Paying** someone with **more than one on-chain transaction** can greatly reduce the power of amount-based privacy attacks such as amount correlation and round numbers. For example, if the user wants to pay 5 BTC to somebody and they don't want the 5 BTC value to be easily searched for, then they can send two transactions for the value of 2 BTC and 3 BTC which together add up to 5 BTC.
+
+### Change avoidance
+
+Change avoidance is where transaction inputs and outputs are carefully chosen to not require a change output at all. **Not having a change output is excellent for privacy**, as it breaks change detection heuristics.
+
+### Multiple change outputs
+
+If change avoidance is not an option then **creating more than one change output can improve privacy**. This also breaks change detection heuristics which usually assume there is only a single change output. As this method uses more block space than usual, change avoidance is preferable.
 
 ## Ethereum
 
