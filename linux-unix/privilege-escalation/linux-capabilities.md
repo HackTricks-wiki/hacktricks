@@ -1123,7 +1123,7 @@ Lets suppose the **`python`** binary has this capability, you can **change** the
 python -c 'import os;os.chown("/etc/shadow",1000,1000)'
 ```
 
-### CAP\_FORMER
+### CAP\_FOWNER
 
 **This means that it's possible to change the permission of any file.**
 
