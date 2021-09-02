@@ -217,6 +217,15 @@ And [install keystone](https://github.com/keystone-engine/keystone/blob/master/d
 
 If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html) 
 
+## Rust
+
+To find the **entry point** search the functions by `::main` like in:
+
+![](../../.gitbook/assets/image%20%28612%29.png)
+
+In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.  
+Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
+
 ## Delphi
 
 For Delphi compiled binaries you can use [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
