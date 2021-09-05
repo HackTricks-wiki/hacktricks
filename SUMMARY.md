@@ -450,7 +450,7 @@
     * [NTFS](forensics/basic-forensic-methodology/partitions-file-systems-carving/ntfs.md)
   * [Pcap Inspection](forensics/basic-forensic-methodology/pcap-inspection/README.md)
     * [DNSCat pcap analysis](forensics/basic-forensic-methodology/pcap-inspection/dnscat-exfiltration.md)
-    * [USB Keyboard pcap analysis](forensics/basic-forensic-methodology/pcap-inspection/usb-keyboard-pcap-analysis.md)
+    * [USB Keystrokes](forensics/basic-forensic-methodology/pcap-inspection/usb-keystrokes.md)
     * [Wifi Pcap Analysis](forensics/basic-forensic-methodology/pcap-inspection/wifi-pcap-analysis.md)
     * [Wireshark tricks](forensics/basic-forensic-methodology/pcap-inspection/wireshark-tricks.md)
   * [Specific Software/File-Type Tricks](forensics/basic-forensic-methodology/specific-software-file-type-tricks/README.md)

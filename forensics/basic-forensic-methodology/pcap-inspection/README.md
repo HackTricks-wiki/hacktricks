@@ -1,7 +1,7 @@
 # Pcap Inspection
 
 {% hint style="info" %}
-A note about **PCAP** vs **PCAPNG**: there are two versions of the PCAP file format; P**CAPNG is newer and not supported by all tools**. You may need to convert a file from PCAPNG to PCAP using Wireshark or another compatible tool, in order to work with it in some other tools.
+A note about **PCAP** vs **PCAPNG**: there are two versions of the PCAP file format; **PCAPNG is newer and not supported by all tools**. You may need to convert a file from PCAPNG to PCAP using Wireshark or another compatible tool, in order to work with it in some other tools.
 {% endhint %}
 
 ## Online tools for pcaps
@@ -212,7 +212,9 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 
 {% page-ref page="dnscat-exfiltration.md" %}
 
-{% page-ref page="usb-keyboard-pcap-analysis.md" %}
-
 {% page-ref page="wifi-pcap-analysis.md" %}
+
+{% page-ref page="usb-keystrokes.md" %}
+
+
 

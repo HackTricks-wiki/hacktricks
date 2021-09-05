@@ -179,6 +179,9 @@ This offers a new level of privacy, however, **some** **transactions** where som
 
 Examples of \(likely\) CoinJoin transactions IDs on bitcoin's blockchain are `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
+[**https://coinjoin.io/en**](https://coinjoin.io/en)  
+**Similar to coinjoin but better and for ethereum you have** [**Tornado Cash**](https://tornado.cash/) **\(the money is given from miners, so it jus appear in your waller\).**
+
 ### PayJoin
 
 The type of CoinJoin discussed in the previous section can be easily identified as such by checking for the multiple outputs with the same value. 
