@@ -266,6 +266,12 @@ In `SAM\Domains\Account\Users` you can obtain the username, the RID, last logon,
 
 ## Programs Executed
 
+### Basic Windows Processes
+
+in the following page you can learn about the basic Windows processes to detect suspicious behaviours:
+
+{% page-ref page="windows-processes.md" %}
+
 ### Windows RecentAPPs
 
 Inside the registry `NTUSER.DAT` in the path `Software\Microsoft\Current Version\Search\RecentApps` you can subkeys with information about the **application executed**, **last time** it was executed, and **number of times** it was launched.
