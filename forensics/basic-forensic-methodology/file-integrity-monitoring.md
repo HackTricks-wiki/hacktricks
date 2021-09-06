@@ -1,4 +1,13 @@
-# File Integrity Monitoring
+# Baseline Monitoring
+
+## Baseline
+
+A baseline consist on take a snapshot of certain part of a system in oder to c**ompare it with a future status to highlight changes**.
+
+For example, you can calculate and store the hash of each file of the filesystem to .be able to find out which files were modified.  
+This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all. 
+
+### File Integrity Monitoring
 
 File integrity monitoring is one of the most powerful techniques used to secure IT infrastructures and business data against a wide variety of both known and unknown threats.  
 The goal is to generate a **baseline of all the files** that you want monitor and then **periodically** **check** those files for possible **changes** \(in the content, attribute, metadata...\).
@@ -12,7 +21,7 @@ The goal is to generate a **baseline of all the files** that you want monitor an
 * [https://github.com/topics/file-integrity-monitoring](https://github.com/topics/file-integrity-monitoring)
 * [https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software](https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software)
 
-### References
+## References
 
 * [https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it](https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it)
 
