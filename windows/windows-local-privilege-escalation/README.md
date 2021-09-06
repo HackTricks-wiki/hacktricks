@@ -631,6 +631,10 @@ You can manually create a service binary with metasploit:
 msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f exe-service -o service.exe
 ```
 
+### Recovery Actions
+
+It's possible to indicate Windows what it should do[ when executing a service this fails](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662%28v=ws.11%29?redirectedfrom=MSDN). If that setting is pointing a binary and this binary can be overwritten you may be able to escalate privileges.
+
 ## Applications
 
 ### Installed Applications
