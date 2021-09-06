@@ -464,6 +464,7 @@
     * [Video and Audio file analysis](forensics/basic-forensic-methodology/specific-software-file-type-tricks/video-and-audio-file-analysis.md)
     * [ZIPs tricks](forensics/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md)
   * [Windows Artifacts](forensics/basic-forensic-methodology/windows-forensics/README.md)
+    * [Windows Processes](forensics/basic-forensic-methodology/windows-forensics/windows-processes.md)
     * [Interesting Windows Registry Keys](forensics/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys.md)
 
 ## A.I. Exploiting
