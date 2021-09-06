@@ -64,3 +64,9 @@ Keep in mind the possible use of anti-forensic techniques:
 
 {% page-ref page="anti-forensic-techniques.md" %}
 
+## Threat Hunting
+
+{% page-ref page="file-integrity-monitoring.md" %}
+
+
+
