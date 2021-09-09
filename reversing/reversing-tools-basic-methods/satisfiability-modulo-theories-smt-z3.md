@@ -1,4 +1,4 @@
-# Satisfiability Modulo Theories \(SMT\)  - Z3
+# Satisfiability Modulo Theories \(SMT\) - Z3
 
 Very basically, this tool will help us to find values for variables that need to satisfy some conditions and calculating them by hand will be so annoying. Therefore, you can indicate to Z3 the conditions the variables need to satisfy and it will find some values \(if possible\).
 
@@ -118,5 +118,12 @@ s.check()
 m = s.model()
 print("f(f(x)) =", m.evaluate(f(f(x))))
 print("f(x)    =", m.evaluate(f(x)))
+
+print(m.evaluate(f(2)))
+s.add(f(x) == 4) #Find the value that generates 4 as response
+s.check()
+print(m.model())
 ```
+
+
 
