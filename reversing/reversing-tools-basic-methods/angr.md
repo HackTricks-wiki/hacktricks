@@ -104,7 +104,7 @@ block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x4016
 
 ## Dynamic Analysis
 
-### Simulation Manager, States and BitVectors
+### Simulation Manager, States 
 
 ```python
 #Live States
@@ -116,12 +116,24 @@ state.mem[proj.entry].int.concreteved #Resolve as python int
 state.regs.rsi = state.solver.BVV(3, 64) #Modify RIP
 state.mem[0x1000].long = 4 #Modify mem
 
+#Other States
+project.factory.entry_state()
+project.factory.blank_state() #Most of its data left uninitialized
+project.factory.full_init_statetate() #Execute through any initializers that need to be run before the main binary's entry point
+project.factory.call_state() #Ready to execute a given function.
+
 #Simulation manager
 #The simulation manager stores all the states across the execution of the binary
 simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
+
+### Calling functions
+
+* You can pass a list of arguments through `args` and a dictionary of environment variables through `env` into `entry_state` and `full_init_state`. The values in these structures can be strings or bitvectors, and will be serialized into the state as the arguments and environment to the simulated execution. The default `args` is an empty list, so if the program you're analyzing expects to find at least an `argv[0]`, you should always provide that!
+* If you'd like to have `argc` be symbolic, you can pass a symbolic bitvector as `argc` to the `entry_state` and `full_init_state` constructors. Be careful, though: if you do this, you should also add a constraint to the resulting state that your value for argc cannot be larger than the number of args you passed into `args`.
+* To use the call state, you should call it with `.call_state(addr, arg1, arg2, ...)`, where `addr` is the address of the function you want to call and `argN` is the Nth argument to that function, either as a python integer, string, or array, or a bitvector. If you want to have memory allocated and actually pass in a pointer to an object, you should wrap it in an PointerWrapper, i.e. `angr.PointerWrapper("point to me!")`. The results of this API can be a little unpredictable, but we're working on it.
 
 ### BitVectors
 
