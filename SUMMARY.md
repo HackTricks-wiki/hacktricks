@@ -498,7 +498,8 @@
 ## Reversing
 
 * [Reversing Tools & Basic Methods](reversing/reversing-tools-basic-methods/README.md)
-  * [Satisfiability Modulo Theories \(SMT\) - Z3](reversing/reversing-tools-basic-methods/satisfiability-modulo-theories-smt-z3.md)
+  * [Angr](reversing/reversing-tools-basic-methods/angr.md)
+  * [Z3 - Satisfiability Modulo Theories \(SMT\)](reversing/reversing-tools-basic-methods/satisfiability-modulo-theories-smt-z3.md)
   * [Cheat Engine](reversing/reversing-tools-basic-methods/cheat-engine.md)
   * [Blobrunner](reversing/reversing-tools-basic-methods/blobrunner.md)
 * [Common API used in Malware](reversing/common-api-used-in-malware.md)
