@@ -1,4 +1,4 @@
-# Satisfiability Modulo Theories \(SMT\) - Z3
+# Z3 - Satisfiability Modulo Theories \(SMT\)
 
 Very basically, this tool will help us to find values for variables that need to satisfy some conditions and calculating them by hand will be so annoying. Therefore, you can indicate to Z3 the conditions the variables need to satisfy and it will find some values \(if possible\).
 
