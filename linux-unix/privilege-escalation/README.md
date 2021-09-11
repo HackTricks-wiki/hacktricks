@@ -1463,7 +1463,7 @@ Files that ships in packages downloaded from distribution repository go into `/u
 **Mestaploit:** _**multi/recon/local\_exploit\_suggester**_  
 **Linux Exploit Suggester:** [https://github.com/mzet-/linux-exploit-suggester](https://github.com/mzet-/linux-exploit-suggester)  
 **EvilAbigail \(physical access\):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)  
-**Recopilation of more scripts**: [https://gh-dark.rauchg.now.sh/1N3/PrivEsc/tree/master/linux](https://gh-dark.rauchg.now.sh/1N3/PrivEsc/tree/master/linux)
+**Recopilation of more scripts**: [https://github.com/1N3/PrivEsc](https://github.com/1N3/PrivEsc)
 
 ### Bibliography
 
