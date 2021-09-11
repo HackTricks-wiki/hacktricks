@@ -211,7 +211,7 @@ _Note that these commands will show a lot of information that will mostly be use
 
 ## Processes
 
-Take a look to **what processes** are being executed and check if any process has **more privileges that it should** \(maybe a tomcat being executed by root?\)
+Take a look to **what processes** are being executed and check if any process has **more privileges than it should** \(maybe a tomcat being executed by root?\)
 
 ```bash
 ps aux
