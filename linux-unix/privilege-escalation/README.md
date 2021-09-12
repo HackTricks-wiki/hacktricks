@@ -286,8 +286,6 @@ Typically, `/dev/mem` is only readable by **root** and **kmem** group.
 strings /dev/mem -n10 | grep -i PASS
 ```
 
-#### 
-
 #### Tools
 
 To dump a process memory you could use:

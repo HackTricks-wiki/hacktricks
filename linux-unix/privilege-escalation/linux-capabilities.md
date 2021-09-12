@@ -57,7 +57,7 @@ capsh --print
 
 **CapAmb**: The _ambient_ capability set applies to all non-SUID binaries without file capabilities. It preserves capabilities when calling `execve`. However, not all capabilities in the ambient set may be preserved because they are being dropped in case they are not present in either the inheritable or permitted capability set. This set is preserved across `execve` calls.
 
-For a detailed explanation of the difference between capabilities in threads and files and how are the capabilities  passed to threads read the following pages:
+For a detailed explanation of the difference between capabilities in threads and files and how are the capabilities passed to threads read the following pages:
 
 * [https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work](https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work)
 * [https://blog.ploetzli.ch/2014/understanding-linux-capabilities/](https://blog.ploetzli.ch/2014/understanding-linux-capabilities/)
@@ -102,11 +102,11 @@ Lets check now the **capabilities** used by `ping`:
 
 ```bash
 cat /proc/9491/status | grep Cap
-CapInh:	0000000000000000
-CapPrm:	0000000000003000
-CapEff:	0000000000000000
-CapBnd:	0000003fffffffff
-CapAmb:	0000000000000000
+CapInh:    0000000000000000
+CapPrm:    0000000000003000
+CapEff:    0000000000000000
+CapBnd:    0000003fffffffff
+CapAmb:    0000000000000000
 
 capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
@@ -128,11 +128,11 @@ $ getpcaps 9562
 Capabilities for `9562': = cap_net_admin,cap_net_raw+ep
 
 $ cat /proc/9562/status | grep Cap
-CapInh:	0000000000000000
-CapPrm:	0000000000003000
-CapEff:	0000000000003000
-CapBnd:	0000003fffffffff
-CapAmb:	0000000000000000
+CapInh:    0000000000000000
+CapPrm:    0000000000003000
+CapEff:    0000000000003000
+CapBnd:    0000003fffffffff
+CapAmb:    0000000000000000
 
 $ capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
@@ -519,7 +519,7 @@ class user_regs_struct(ctypes.Structure):
         ("fs", ctypes.c_ulonglong),
         ("gs", ctypes.c_ulonglong),
     ]
-    
+
 libc = ctypes.CDLL("libc.so.6")
 
 pid=int(sys.argv[1])
@@ -546,7 +546,7 @@ for i in xrange(0,len(shellcode),4):
     shellcode_byte_int=int(shellcode[i:4+i].encode('hex'),16)
     shellcode_byte_little_endian=struct.pack("<I", shellcode_byte_int).rstrip('\x00').encode('hex')
     shellcode_byte=int(shellcode_byte_little_endian,16)
-    
+
     # Inject the byte.
     libc.ptrace(PTRACE_POKETEXT, pid, ctypes.c_void_p(registers.rip+i),shellcode_byte)
 
@@ -744,7 +744,7 @@ And in order to read a file you could do:
 print(open("/etc/shadow", "r").read())
 ```
 
-#### Example with ****Environment \(Docker breakout\)
+#### Example with _\*\*_Environment \(Docker breakout\)
 
 You can check the enabled capabilities inside the docker container using:
 
@@ -761,9 +761,9 @@ gid=0(root)
 groups=0(root)
 ```
 
-Inside the previous output you can see that the **DAC\_READ\_SEARCH** capability is enabled. As a result, the container can **debug processes**. 
+Inside the previous output you can see that the **DAC\_READ\_SEARCH** capability is enabled. As a result, the container can **debug processes**.
 
-You can learn how the following exploiting works in [https://medium.com/@fun\_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) but in resume  **CAP\_DAC\_READ\_SEARCH**  not only allows us to traverse the file system without permission checks, but also explicitly removes any checks to _**open\_by\_handle\_at\(2\)**_ and **could allow our process to sensitive files opened by other processes**.
+You can learn how the following exploiting works in [https://medium.com/@fun\_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) but in resume **CAP\_DAC\_READ\_SEARCH** not only allows us to traverse the file system without permission checks, but also explicitly removes any checks to _**open\_by\_handle\_at\(2\)**_ and **could allow our process to sensitive files opened by other processes**.
 
 The original exploit that abuse this permissions to read files from the host can be found here: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c), the following is a **modified version that allows you to indicate the file you want to read as first argument and dump it in a file.**
 
@@ -1336,14 +1336,14 @@ while True:
         dst_port=tcp_header[0]
         src_port=tcp_header[1]
         flag=" FLAGS: "+getFlag(tcp_header[4])
-    
+
     elif(proto==17):
         protocol="UDP"
         udp_header_packed_ports = frame[ 14 + ip_header_size : 18 + ip_header_size]
         udp_header_ports=struct.unpack("!HH",udp_header_packed_ports)
         dst_port=udp_header[0]
         src_port=udp_header[1]
-    
+
     if (proto == 17 or proto == 6):
         print("Packet: " + str(count) + " Protocol: " + protocol + " Destination Port: " + str(dst_port) + " Source Port: " + str(src_port) + flag)
         count=count+1
