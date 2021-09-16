@@ -15,8 +15,8 @@ It's enough to **generate a list of the most probable phishing names** that an a
 
 For this purpose you can use any of the following tools. Note that these tolls will also perform DNS requests automatically to check if the domain has any IP assigned to it:
 
-* \*\*\*\*[**dnstwist**](https://github.com/elceef/dnstwist)\*\*\*\*
-* [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)\*\*\*\*
+* [**dnstwist**](https://github.com/elceef/dnstwist)
+* [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
 ### Bitflipping
 
