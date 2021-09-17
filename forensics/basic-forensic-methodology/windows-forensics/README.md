@@ -413,7 +413,7 @@ Before Windows Vista the event logs were in binary format and after it, they are
 
 The location of the event files can be found in the SYSTEM registry in **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**
 
-They can be visualized from the Windows Event Viewer \(**`eventvwr.msc`**\) or with other tools like [**Event Log Explorer**](https://eventlogxp.com/)**.**
+They can be visualized from the Windows Event Viewer \(**`eventvwr.msc`**\) or with other tools like [**Event Log Explorer**](https://eventlogxp.com/) **or** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
 
 ### Security
 
