@@ -223,6 +223,7 @@
 * [69/UDP TFTP/Bittorrent-tracker](pentesting/69-udp-tftp.md)
 * [79 - Pentesting Finger](pentesting/pentesting-finger.md)
 * [80,443 - Pentesting Web Methodology](pentesting/pentesting-web/README.md)
+  * [Special HTTP headers](pentesting/pentesting-web/special-http-headers.md)
   * [AEM - Adobe Experience Cloud](pentesting/pentesting-web/aem-adobe-experience-cloud.md)
   * [Apache](pentesting/pentesting-web/apache.md)
   * [Artifactory Hacking guide](pentesting/pentesting-web/artifactory-hacking-guide.md)
