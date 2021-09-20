@@ -500,7 +500,8 @@
 ## Reversing
 
 * [Reversing Tools & Basic Methods](reversing/reversing-tools-basic-methods/README.md)
-  * [Angr](reversing/reversing-tools-basic-methods/angr.md)
+  * [Angr](reversing/reversing-tools-basic-methods/angr/README.md)
+    * [Angr - Examples](reversing/reversing-tools-basic-methods/angr/angr-examples.md)
   * [Z3 - Satisfiability Modulo Theories \(SMT\)](reversing/reversing-tools-basic-methods/satisfiability-modulo-theories-smt-z3.md)
   * [Cheat Engine](reversing/reversing-tools-basic-methods/cheat-engine.md)
   * [Blobrunner](reversing/reversing-tools-basic-methods/blobrunner.md)
