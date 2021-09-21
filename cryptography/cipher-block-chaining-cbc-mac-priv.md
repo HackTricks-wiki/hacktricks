@@ -1,65 +1,54 @@
----
-description: 'https://pentesterlab.com/'
----
-
 # Cipher Block Chaining CBC-MAC
-
-**Post from** [**https://pentesterlab.com/**](https://pentesterlab.com/)\*\*\*\*
 
 ## CBC
 
-The easiest attack to test is that if the cookie just the username encrypted.
-
-If the cookie is only the username \(or the first part of the cookie is the username\) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and bruteforce the first byte of the cookie.
+If the **cookie** is **only** the **username** \(or the first part of the cookie is the username\) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
 
 ## CBC-MAC
 
-CBC-MAC is a method to ensure integrity of a message by encrypting it using CBC mode and keeping the last encrypted block as "signature". This ensures that a malicious user can not modify any part of the data without having to change the signature. The key used for the "encryption" ensures that the signature can't be guessed.
+In cryptography, a **cipher block chaining message authentication code** \(**CBC-MAC**\) is a technique for constructing a message authentication code from a block cipher. The message is encrypted with some block cipher algorithm in CBC mode to create a **chain of blocks such that each block depends on the proper encryption of the previous block**. This interdependence ensures that a **change** to **any** of the plaintext **bits** will cause the **final encrypted block** to **change** in a way that cannot be predicted or counteracted without knowing the key to the block cipher.
 
-However, when using CBC-MAC, the developer needs to be very careful if the message are not of fixed length. In this example, we will use the fact that there is no protection in place to get the application to sign two messages and build another message by concatenating the two messages.
+To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero initialization vector and keeps the last block. The following figure sketches the computation of the CBC-MAC of a message comprising blocks![m\_{1}\\|m\_{2}\\|\cdots \\|m\_{x}](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) using a secret key k and a block cipher E:
 
-## Theory
+![CBC-MAC structure \(en\).svg](https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_%28en%29.svg/570px-CBC-MAC_structure_%28en%29.svg.png)
 
-With CBC-MAC, we can generate two signatures `t` and `t'` for the messages `m` and `m'`. By using `m` and `m'` we can forge another message `m''` that will have the same signature as `m'` \(`t'`\). One thing to keep in mind is that the recommended way to use CBC-MAC is to use a NULL IV.
+## Vulnerability
 
-To keep things simple, we are going to work on a single block for each message.
+With CBC-MAC usually the **IV used is 0**.  
+This is a problem because 2 known messages \(`m1` and `m2`\) independently will generate 2 signatures \(`s1` and `s2`\). So:
 
-We can see below how signing both messages works \(NB: both signatures are completely independent from each other\):
+* `E(m1 XOR 0) = s1`
+* `E(m2 XOR 0) = s2`
 
-![](https://pentesterlab.com/cbc-mac/cbc-mac-1.png)
+Then a message composed by m1 and m2 concatenated \(m3\) will generate 2 signatures \(s31 and s32\):
 
-If we try to concatenate those messages, the signature is no longer valid \(since `t` is now the IV for the second block where it was only NULL before\):
+* `E(m1 XOR 0) = s31 = s1`
+* `E(m2 XOR s1) = s32`
 
-![](https://pentesterlab.com/cbc-mac/cbc-mac-2.png)
+**Which is possible to calculate without knowing the key of the encryption.**
 
-However, if we XOR `m'` and `t`, the signature is now `t'`:
+Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
 
-![](https://pentesterlab.com/cbc-mac/cbc-mac-3.png)
-
-## Implementation
-
-Based on the size of the signature, we can guess that the block size is likely to be 8. With this information, we will split `administrator`:
-
-* `administ`
+* `Administ`
 * `rator\00\00\00`
 
-We can trivially generate the signature for the first block, by just logging in and retrieving the signature `t`.
+You can create a username called **Administ** \(m1\) and retrieve the key \(s1\).  
+Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.  
+now, knowing s1 and s32 you can put them together an generate the encryption of the full name **Administrator**.
 
-For the second block, we want the `m'` XOR `t` to be equal to `rator\00\00\00`. So to generate the second username we will need to XOR `rator\00\00\00` with `t` \(since the application will sign it with a NULL IV instead of `t`\). Once we have this value, we can get the signature `t'`.
+#### Summary
 
-Finally, we just need to concatenate `m` and `m'` to get `administrator` and use `t'` as signature.
+1. Get the signature of username **Administ** \(m1\) which is s1
+2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
+3. Set the cookie to s1 followed by s32 and it will be a valid cookie for the user **Administrator**.
 
-#### Resume
+## Attack Controlling IV
 
-1. Get the signature of username **administ** =  **t**
-2. Get the signature of username **rator\x00\x00\x00 XOR t** = **t'**
-3. Set in the cookie the value **administrator+t'** \(**t'** will be a valid signature of **\(rator\x00\x00\x00 XOR t\) XOR t** = **rator\x00\x00\x00**
+If you can control the used IV the attack could be very easy.  
+If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.  
+Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0\] XOR "A" == IV'\[0\] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
 
-### CBC-MAC simple attack \(controlling IV\)
+## References
 
-If you can control the used IV the attack could be very easy.
-
-To impersonate the user "**administrator**" you can create the user "**Administrator**" and you will have the cookie with the **username+signature** and the cookie with the **IV**.
-
-To generate the cookies of the username "**administrator**" change the first cookie and set the username from "**Administrator**" to "**administrator**". Change the first byte of the cookie of the **IV** so **IV\[0\] XOR "A" == IV'\[0\] XOR "a"**. Using these cookies you can login as administrator.
+More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
 
