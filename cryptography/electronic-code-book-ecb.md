@@ -58,48 +58,18 @@ Then, you can remove the first block of 8B and you will et a valid cookie for th
 \xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
 
-### Moving blocks around
+### Moving blocks
 
-A more complicated way to bypass this is to swap data around. We can make the assumption that the application will use an SQL query to retrieve information from the user based on his `username`. For some databases, when using the type of data `VARCHAR` \(as opposed to `BINARY` for example\), the following will give the same result:
+In many databases it is the same to search for `WHERE username='admin';` or for `WHERE username='admin    ';` _\(Note the extra spaces\)_
 
-```text
-SELECT * FROM users WHERE username='admin';
-```
+So, another way to impersonate the user `admin` would be to:
 
-```text
-SELECT * FROM users WHERE username='admin        ';
-```
+* Generate a username that: `len(<username>) + len(<delimiter) % len(block)`. With a block size of `8B` you can generate username called: `username`       , with the delimiter `|` the chunk `<username><delimiter>` will generate 2 blocks of 8Bs.
+* Then, generate a password that will fill an exact number of blocks containing the username we want to impersonate and spaces, like: `admin`    
 
-The spaces after the value `admin` are ignored during the string comparison. We will use this to play with the encrypted blocks.
+The cookie of this user is going to be composed by 3 blocks: the first 2 is the blocks of the username + delimiter and the third one of the password \(which is faking the username\): `username       |admin`   
 
-Our goal is to end up with the following encrypted data:
-
-```text
-ECB(admin   [separator]password)
-```
-
-We know that our separator is only composed of one byte. We can use this information to create the perfect `username` and `password`to be able to swap the blocks and get the correct forged value.
-
-We need to find a username and a password for which:
-
-* the password starts with `admin` to be used as the new username.
-* the encrypted password should be located at the start of a new block.
-* the `username+delimiter` length should be divisible by the block size \(from previous conditions\)
-
-By playing around, we can see that the following values work:
-
-* a `username` composed of `password` \(8 bytes\) followed by 7 spaces \(1 byte will be used by the delimiter\).
-* a `password` composed of `admin` followed by 3 spaces \(`8 - length("admin")`\).
-
-When creating this user, use a proxy to intercept the request and make sure your browser didn't remove the space characters.
-
-If you create correctly this user, the encrypted information will look like:![License](https://assets.pentesterlab.com/ecb/swap-b.png)
-
-Using some Ruby \(or even with Burp decoder\), you can swap the first 8 bytes with the last 8 bytes to get the following encrypted stream:![License](https://assets.pentesterlab.com/ecb/swap-a.png)
-
-Once you modify your cookie, and you reload the page, you should be logged in as `admin`:
-
-![License](https://assets.pentesterlab.com/ecb/admin.png)
+ **Then, just replace the first block with the last time and will be impersonating the user `admin`: `admin          |username`**
 
 ## References
 
