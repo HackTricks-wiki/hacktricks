@@ -1,7 +1,3 @@
----
-description: 'https://pentesterlab.com/'
----
-
 # Electronic Code Book \(ECB\)
 
 ## ECB
@@ -35,11 +31,11 @@ Now, the attacker just need to discover if the format is `<username><delimiter><
 
 | Username length: | Password length: | Username+Password length: | Cookie's length \(after decoding\): |
 | :--- | :--- | :--- | :--- |
-| 2 | 3 | 5 | 8 |
+| 2 | 2 | 4 | 8 |
 | 3 | 3 | 6 | 8 |
 | 3 | 4 | 7 | 8 |
 | 4 | 4 | 8 | 16 |
-| 4 | 5 | 9 | 16 |
+| 7 | 7 | 14 | 16 |
 
 ## Exploitation of the vulnerability
 
