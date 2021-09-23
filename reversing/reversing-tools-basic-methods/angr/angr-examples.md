@@ -416,5 +416,82 @@ Note that the symbolic file could also contain constant data merged with symboli
 ```
 {% endhint %}
 
+### Applying Constrains
 
+{% hint style="info" %}
+Sometimes simple human operations like compare 2 words of length 16 **char by char** \(loop\), **cost** a lot to a **angr** because it needs to generate branches **exponentially** because it generates 1 branch per if: `2^16`  
+Therefore, it's easier to **ask angr get to a previous point** \(where the real difficult part was already done\) and **set those constrains manually**.
+{% endhint %}
+
+```python
+# After perform some complex poperations to the input the program checks
+# char by char the password against another password saved, like in the snippet:
+#
+# #define REFERENCE_PASSWORD = "AABBCCDDEEFFGGHH";
+# int check_equals_AABBCCDDEEFFGGHH(char* to_check, size_t length) {
+#   uint32_t num_correct = 0;
+#   for (int i=0; i<length; ++i) {
+#     if (to_check[i] == REFERENCE_PASSWORD[i]) {
+#       num_correct += 1;
+#     }
+#   }
+#   return num_correct == length;
+# }
+#
+# ...
+# 
+# char* input = user_input();
+# char* encrypted_input = complex_function(input);
+# if (check_equals_AABBCCDDEEFFGGHH(encrypted_input, 16)) {
+#   puts("Good Job.");
+# } else {
+#   puts("Try again.");
+# }
+#
+# The function checks if *to_check == "AABBCCDDEEFFGGHH". This is very RAM consumming 
+# as the computer needs to branch every time the if statement in the loop was called (16 
+# times), resulting in 2^16 = 65,536 branches, which will take too long of a 
+# time to evaluate for our needs.
+
+import angr
+import claripy
+import sys
+
+def main(argv):
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
+
+  initial_state = project.factory.entry_state()
+
+  simulation = project.factory.simgr(initial_state)
+
+  # Get an address to check after the complex function and before the "easy compare" operation
+  address_to_check_constraint = 0x8048671
+  simulation.explore(find=address_to_check_constraint)
+
+
+  if simulation.found:
+    solution_state = simulation.found[0]
+
+    # Find were the input that is going to be compared is saved in memory
+    constrained_parameter_address = 0x804a050
+    constrained_parameter_size_bytes = 16
+    # Set the bitvector
+    constrained_parameter_bitvector = solution_state.memory.load(
+      constrained_parameter_address,
+      constrained_parameter_size_bytes
+    )
+
+    # Indicate angr that this BV at this point needs to be equal to the password
+    constrained_parameter_desired_value = 'BWYRUBQCMVSBRGFU'.encode()
+    solution_state.add_constraints(constrained_parameter_bitvector == constrained_parameter_desired_value)
+
+    print(solution_state.posix.dumps(sys.stdin.fileno()))
+  else:
+    raise Exception('Could not find the solution')
+
+if __name__ == '__main__':
+  main(sys.argv)
+
+```
 
