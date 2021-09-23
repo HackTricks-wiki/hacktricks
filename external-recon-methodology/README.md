@@ -344,6 +344,15 @@ As you can see there is a lot of different vulnerabilities to search for.
 
 **If you have find any vulnerability thanks to this book, please reference the book in your write-up.**
 
+## **Automatic Tools**
+
+There are several tools out there that will perform part of the proposed actions against a given scope.
+
+* \*\*\*\*[**https://github.com/yogeshojha/rengine**](https://github.com/yogeshojha/rengine)\*\*\*\*
+* \*\*\*\*[**https://github.com/j3ssie/Osmedeus**](https://github.com/j3ssie/Osmedeus)\*\*\*\*
+* \*\*\*\*[**https://github.com/six2dez/reconftw**](https://github.com/six2dez/reconftw)\*\*\*\*
+* \*\*\*\*[**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) ****- A little old and not updated
+
 ## **References**
 
 * **All free courses of** [**@Jhaddix**](https://twitter.com/Jhaddix) **\(like** [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)**\)**
