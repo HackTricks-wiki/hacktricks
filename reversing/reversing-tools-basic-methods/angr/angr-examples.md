@@ -492,6 +492,346 @@ def main(argv):
 
 if __name__ == '__main__':
   main(sys.argv)
+```
+
+{% hint style="danger" %}
+In some scenarios you can activate **veritesting**, which will merge similar status, in order to save useless branches and find the solution: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+{% endhint %}
+
+{% hint style="info" %}
+Another thing you can do in these scenarios is to **hook the function giving angr something it can understand** more easily.
+{% endhint %}
+
+### Simulation Managers
+
+Some simulation managers can be more useful than others. In the previous example there was a problem as a lot of useful branches were created. Here, the **veritesting** technique will merge those and will find a solution.  
+This simulation manager can also be activated with: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+
+```python
+import angr
+import claripy
+import sys
+
+def main(argv):
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
+
+  initial_state = project.factory.entry_state()
+
+  simulation = project.factory.simgr(initial_state)
+  # Set simulation technique
+  simulation.use_technique(angr.exploration_techniques.Veritesting())
+
+
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+
+    return 'Good Job.'.encode() in stdout_output  # :boolean
+
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output  # :boolean
+
+  simulation.explore(find=is_successful, avoid=should_abort)
+
+  if simulation.found:
+    solution_state = simulation.found[0]
+    print(solution_state.posix.dumps(sys.stdin.fileno()))
+  else:
+    raise Exception('Could not find the solution')
+
+
+if __name__ == '__main__':
+  main(sys.argv)
+```
+
+### Hooking/Bypassing one call to a function
+
+```python
+# This level performs the following computations:
+#
+# 1. Get 16 bytes of user input and encrypt it.
+# 2. Save the result of check_equals_AABBCCDDEEFFGGHH (or similar)
+# 3. Get another 16 bytes from the user and encrypt it.
+# 4. Check that it's equal to a predefined password.
+#
+# The ONLY part of this program that we have to worry about is #2. We will be
+# replacing the call to check_equals_ with our own version, using a hook, since
+# check_equals_ will run too slowly otherwise.
+
+import angr
+import claripy
+import sys
+
+def main(argv):
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
+
+  initial_state = project.factory.entry_state()
+
+  # Hook the address of the call to hook indicating th length of the instruction (of the call)
+  check_equals_called_address = 0x80486b8
+  instruction_to_skip_length = 5
+  @project.hook(check_equals_called_address, length=instruction_to_skip_length)
+  def skip_check_equals_(state):
+    #Load the input of the function reading direcly the memory
+    user_input_buffer_address = 0x804a054
+    user_input_buffer_length = 16
+    user_input_string = state.memory.load(
+      user_input_buffer_address,
+      user_input_buffer_length
+    )
+    
+    # Create a simbolic IF that if the loaded string frommemory is the expected
+    # return True (1) if not returns False (0) in eax
+    check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
+
+    state.regs.eax = claripy.If(
+      user_input_string == check_against_string, 
+      claripy.BVV(1, 32), 
+      claripy.BVV(0, 32)
+    )
+
+  simulation = project.factory.simgr(initial_state)
+
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output
+
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output
+
+  simulation.explore(find=is_successful, avoid=should_abort)
+
+  if simulation.found:
+    solution_state = simulation.found[0]
+    solution = solution_state.posix.dumps(sys.stdin.fileno()).decode()
+    print(solution)
+  else:
+    raise Exception('Could not find the solution')
+
+if __name__ == '__main__':
+  main(sys.argv)
+```
+
+### Hooking a function / Simprocedure
+
+```python
+# Hook to the function called check_equals_WQNDNKKWAWOLXBAC
+
+import angr
+import claripy
+import sys
+
+def main(argv):
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
+
+  initial_state = project.factory.entry_state()
+
+  # Define a class and a tun method to hook completelly a function
+  class ReplacementCheckEquals(angr.SimProcedure):
+    # This C code:
+    #
+    # int add_if_positive(int a, int b) {
+    #   if (a >= 0 && b >= 0) return a + b;
+    #   else return 0;
+    # }
+    #
+    # could be simulated with python:
+    #
+    # class ReplacementAddIfPositive(angr.SimProcedure):
+    #   def run(self, a, b):
+    #     if a >= 0 and b >=0:
+    #       return a + b
+    #     else:
+    #       return 0
+    #
+    # run(...) receives the params of the hooked function
+    def run(self, to_check, length):
+      user_input_buffer_address = to_check
+      user_input_buffer_length = length
+      
+      # Read the data from the memory address given to the function
+      user_input_string = self.state.memory.load(
+        user_input_buffer_address,
+        user_input_buffer_length
+      )
+
+      check_against_string = 'WQNDNKKWAWOLXBAC'.encode()
+      
+      # Return 1 if equals to the string, 0 otherways
+      return claripy.If(
+        user_input_string == check_against_string,
+        claripy.BVV(1, 32),
+        claripy.BVV(0, 32)
+      )
+
+
+  # Hook the check_equals symbol. Angr automatically looks up the address 
+  # associated with the symbol. Alternatively, you can use 'hook' instead
+  # of 'hook_symbol' and specify the address of the function. To find the 
+  # correct symbol, disassemble the binary.
+  # (!)
+  check_equals_symbol = 'check_equals_WQNDNKKWAWOLXBAC' # :string
+  project.hook_symbol(check_equals_symbol, ReplacementCheckEquals())
+
+  simulation = project.factory.simgr(initial_state)
+
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output
+
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output
+
+  simulation.explore(find=is_successful, avoid=should_abort)
+
+  if simulation.found:
+    solution_state = simulation.found[0]
+
+    solution = solution_state.posix.dumps(sys.stdin.fileno()).decode()
+    print(solution)
+  else:
+    raise Exception('Could not find the solution')
+
+if __name__ == '__main__':
+  main(sys.argv)
+```
+
+### Simulate scanf with several params
+
+```python
+# This time, the solution involves simply replacing scanf with our own version,
+# since Angr does not support requesting multiple parameters with scanf.
+
+import angr
+import claripy
+import sys
+
+def main(argv):
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
+
+  initial_state = project.factory.entry_state()
+
+  class ReplacementScanf(angr.SimProcedure):
+    # The code uses: 'scanf("%u %u", ...)'
+    def run(self, format_string, param0, param1):
+      scanf0 = claripy.BVS('scanf0', 32)
+      scanf1 = claripy.BVS('scanf1', 32)
+
+      # Get the addresses from the params and store the BVS in memory
+      scanf0_address = param0
+      self.state.memory.store(scanf0_address, scanf0, endness=project.arch.memory_endness)
+      scanf1_address = param1
+      self.state.memory.store(scanf1_address, scanf1, endness=project.arch.memory_endness)
+
+      # Now, we want to 'set aside' references to our symbolic values in the
+      # globals plugin included by default with a state. You will need to
+      # store multiple bitvectors. You can either use a list, tuple, or multiple
+      # keys to reference the different bitvectors.
+      self.state.globals['solutions'] = (scanf0, scanf1)
+
+  scanf_symbol = '__isoc99_scanf'
+  project.hook_symbol(scanf_symbol, ReplacementScanf())
+
+  simulation = project.factory.simgr(initial_state)
+
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output
+
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output
+
+  simulation.explore(find=is_successful, avoid=should_abort)
+
+  if simulation.found:
+    solution_state = simulation.found[0]
+
+    # Grab whatever you set aside in the globals dict.
+    stored_solutions = solution_state.globals['solutions']
+    solution = ' '.join(map(str, map(solution_state.solver.eval, stored_solutions)))
+
+    print(solution)
+  else:
+    raise Exception('Could not find the solution')
+
+if __name__ == '__main__':
+  main(sys.argv)
+```
+
+### Static Binaries
+
+```python
+# This challenge is the exact same as the first challenge, except that it was
+# compiled as a static binary. Normally, Angr automatically replaces standard
+# library functions with SimProcedures that work much more quickly.
+#
+# To solve the challenge, manually hook any standard library c functions that
+# are used. Then, ensure that you begin the execution at the beginning of the
+# main function. Do not use entry_state.
+# 
+# Here are a few SimProcedures Angr has already written for you. They implement
+# standard library functions. You will not need all of them:
+# angr.SIM_PROCEDURES['libc']['malloc']
+# angr.SIM_PROCEDURES['libc']['fopen']
+# angr.SIM_PROCEDURES['libc']['fclose']
+# angr.SIM_PROCEDURES['libc']['fwrite']
+# angr.SIM_PROCEDURES['libc']['getchar']
+# angr.SIM_PROCEDURES['libc']['strncmp']
+# angr.SIM_PROCEDURES['libc']['strcmp']
+# angr.SIM_PROCEDURES['libc']['scanf']
+# angr.SIM_PROCEDURES['libc']['printf']
+# angr.SIM_PROCEDURES['libc']['puts']
+# angr.SIM_PROCEDURES['libc']['exit']
+#
+# As a reminder, you can hook functions with something similar to:
+# project.hook(malloc_address, angr.SIM_PROCEDURES['libc']['malloc']())
+#
+# There are many more, see:
+# https://github.com/angr/angr/tree/master/angr/procedures/libc
+
+import angr
+import sys
+
+def main(argv):
+  path_to_binary = argv[1]
+  project = angr.Project(path_to_binary)
+
+  initial_state = project.factory.entry_state()
+  
+  #Find the addresses were the lib functions are loaded in the binary
+  #For example you could find: call   0x804ed80 <__isoc99_scanf>
+  project.hook(0x804ed40, angr.SIM_PROCEDURES['libc']['printf']())
+  project.hook(0x804ed80, angr.SIM_PROCEDURES['libc']['scanf']())
+  project.hook(0x804f350, angr.SIM_PROCEDURES['libc']['puts']())
+  project.hook(0x8048d10, angr.SIM_PROCEDURES['glibc']['__libc_start_main']())
+
+  simulation = project.factory.simgr(initial_state)
+
+  def is_successful(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Good Job.'.encode() in stdout_output  # :boolean
+
+  def should_abort(state):
+    stdout_output = state.posix.dumps(sys.stdout.fileno())
+    return 'Try again.'.encode() in stdout_output  # :boolean
+
+  simulation.explore(find=is_successful, avoid=should_abort)
+  
+  if simulation.found:
+    solution_state = simulation.found[0]
+    print(solution_state.posix.dumps(sys.stdin.fileno()).decode())
+  else:
+    raise Exception('Could not find the solution')
+
+if __name__ == '__main__':
+  main(sys.argv)
 
 ```
 
