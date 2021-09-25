@@ -513,7 +513,7 @@
 ## Exploiting
 
 * [Linux Exploiting \(Basic\) \(SPA\)](exploiting/linux-exploiting-basic-esp/README.md)
-  * [Format String Template](exploiting/linux-exploiting-basic-esp/format-string-template.md)
+  * [Format Strings Template](exploiting/linux-exploiting-basic-esp/format-strings-template.md)
   * [ROP - call sys\_execve](exploiting/linux-exploiting-basic-esp/rop-syscall-execv.md)
   * [ROP - Leaking LIBC address](exploiting/linux-exploiting-basic-esp/rop-leaking-libc-address.md)
   * [ROP-PWN template](exploiting/linux-exploiting-basic-esp/rop-pwn-template.md)
