@@ -223,6 +223,7 @@
 * [69/UDP TFTP/Bittorrent-tracker](pentesting/69-udp-tftp.md)
 * [79 - Pentesting Finger](pentesting/pentesting-finger.md)
 * [80,443 - Pentesting Web Methodology](pentesting/pentesting-web/README.md)
+  * [403 & 401 Bypasses](pentesting/pentesting-web/403-and-401-bypasses.md)
   * [AEM - Adobe Experience Cloud](pentesting/pentesting-web/aem-adobe-experience-cloud.md)
   * [Apache](pentesting/pentesting-web/apache.md)
   * [Artifactory Hacking guide](pentesting/pentesting-web/artifactory-hacking-guide.md)
@@ -264,6 +265,7 @@
       * [disable\_functions bypass - mod\_cgi](pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-mod_cgi.md)
       * [disable\_functions bypass - PHP 4 &gt;= 4.2.0, PHP 5 pcntl\_exec](pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable_functions-open_basedir-bypass/disable_functions-bypass-php-4-greater-than-4.2.0-php-5-pcntl_exec.md)
   * [Python](pentesting/pentesting-web/python.md)
+  * [Special HTTP headers](pentesting/pentesting-web/special-http-headers.md)
   * [Spring Actuators](pentesting/pentesting-web/spring-actuators.md)
   * [Symphony](pentesting/pentesting-web/symphony.md)
   * [Tomcat](pentesting/pentesting-web/tomcat.md)
@@ -498,7 +500,8 @@
 ## Reversing
 
 * [Reversing Tools & Basic Methods](reversing/reversing-tools-basic-methods/README.md)
-  * [Angr](reversing/reversing-tools-basic-methods/angr.md)
+  * [Angr](reversing/reversing-tools-basic-methods/angr/README.md)
+    * [Angr - Examples](reversing/reversing-tools-basic-methods/angr/angr-examples.md)
   * [Z3 - Satisfiability Modulo Theories \(SMT\)](reversing/reversing-tools-basic-methods/satisfiability-modulo-theories-smt-z3.md)
   * [Cheat Engine](reversing/reversing-tools-basic-methods/cheat-engine.md)
   * [Blobrunner](reversing/reversing-tools-basic-methods/blobrunner.md)

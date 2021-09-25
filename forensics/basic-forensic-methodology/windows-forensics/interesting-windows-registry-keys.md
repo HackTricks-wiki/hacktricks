@@ -16,7 +16,7 @@
 
 ### Last Access Time
 
-* **`System\ControlSet001\Control \Filesystem`**: Last time access \(by default it's disabled with `NtfsDisableLastAccessUpdate=1`, if `0`, then, it's enabled\).
+* **`System\ControlSet001\Control\Filesystem`**: Last time access \(by default it's disabled with `NtfsDisableLastAccessUpdate=1`, if `0`, then, it's enabled\).
   * To enable it: `fsutil behavior set disablelastaccess 0`
 
 ### Shutdown Time

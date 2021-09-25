@@ -1,38 +1,33 @@
----
-description: 'https://pentesterlab.com/'
----
-
 # Padding Oracle
 
-**Post from** [**https://pentesterlab.com/**](https://pentesterlab.com/)\*\*\*\*
+## CBC - Cipher Block Chaining
 
-## Cipher Block Chaining
-
-CBC is an encryption mode in which the message is split into blocks of X bytes length and each block is XORed with the previous encrypted block. The result is then encrypted.
-
-The following schema \(source: [Wikipedia](http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)\) explains this method:
+In CBC, the encryption uses the **previous encrypted block as IV** to XOR with the following block as you can see in the following image taken from [Wikipedia](http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation):
 
 ![CBC encryption](https://assets.pentesterlab.com/padding_oracle/CBC_encryption.png)
 
-During the decryption, the reverse operation is used. The encrypted data is split in block of X bytes. Then the block is decrypted and XORed with the previous encrypted block to get the cleartext. The following schema \(source: [Wikipedia](http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)\) highlights this behavior:
+To decrypt CBC the **opposite** **operations** are done:
 
 ![CBC decryption](https://assets.pentesterlab.com/padding_oracle/CBC_decryption.png)
 
-Since the first block does not have a previous block, an initialization vector \(IV\) is used.
+Notice how it's needed to use an **encryption** **key** and an **IV**.
 
-## Padding
+## Message Padding
 
-As we saw, the encryption is done by blocks of fixed size. To ensure that the cleartext exactly fit in one or multiple blocks, padding is often used. Padding can be done in multiple ways. A common way is to use PKCS7. With PKCS7, the padding will be composed of the same number: the number of bytes missing. For example, if the cleartext is missing 2 bytes, the padding will be `\x02\x02`.
+As the encryption is performed in **fixed** **size** **blocks**, **padding** is usually needed in the **last** **block** to complete its length.  
+Usually **PKCS7** is used, which generates a padding **repeating** the **number** of **bytes** **needed** to **complete** the block. For example, if the last block is missing 3 bytes, the padding will be `\x03\x03\x03`.
 
-Let's look at more examples with a 2 blocks:
+Let's look at more examples with a **2 blocks of length 8bytes**:
 
-| Block \#0 | Block \#1 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Block \#0 |  |  |  |  |  |  |  | Block \#1 |  |  |  |  |  |  |  |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | byte \#0 | byte \#1 | byte \#2 | byte \#3 | byte \#4 | byte \#5 | byte \#6 | byte \#7 | byte \#0 | byte \#1 | byte \#2 | byte \#3 | byte \#4 | byte \#5 | byte \#6 | byte \#7 |
-| 'S' | 'U' | 'P' | 'E' | 'R' | 'S' | 'E' | 'C' | 'R' | 'E' | 'T' | '1' | '2' | '3' | **0x02** | **0x02** |
-| 'S' | 'U' | 'P' | 'E' | 'R' | 'S' | 'E' | 'C' | 'R' | 'E' | 'T' | '1' | '2' | **0x03** | **0x03** | **0x03** |
-| 'S' | 'U' | 'P' | 'E' | 'R' | 'S' | 'E' | 'C' | 'R' | 'E' | 'T' | **0x05** | **0x05** | **0x05** | **0x05** | **0x05** |
-| 'S' | 'U' | 'P' | 'E' | 'R' | 'S' | 'E' | 'C' | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** |
+| P | A | S | S | W | O | R | D | 1 | 2 | 3 | 4 | 5 | 6 | **0x02** | **0x02** |
+| P | A | S | S | W | O | R | D | 1 | 2 | 3 | 4 | 5 | **0x03** | **0x03** | **0x03** |
+| P | A | S | S | W | O | R | D | 1 | 2 | 3 | **0x05** | **0x05** | **0x05** | **0x05** | **0x05** |
+| P | A | S | S | W | O | R | D | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** |
+
+Note how in the last example the **last block was full so another one was generated only with padding**.
 
 ## Padding Oracle
 
@@ -72,54 +67,38 @@ perl ./padBuster.pl http://10.10.181.45/index.php "Nl0OpaQYeGPMJeWSih2iiQ==" 8 -
 
 In **summary**, you can start decrypting the encrypted data by **guessing** the correct **values** that can be used to **create** all the **different paddings**. Then, the padding oracle attack will start **decrypting** bytes **from** the **end** to the start by **guessing** which will be the correct **value** that **creates a padding of 1, 2, 3, etc**.
 
-If we zoom in, we can see that the cleartext byte `C15` is just a XOR between the encrypted byte `E7` from the previous block, and byte `I15` which came out of the block decryption step:
 
-![CBC zoom in](https://assets.pentesterlab.com/padding_oracle/zoomin.png)
 
-This is also valid for all other bytes:
+![CBC decryption](https://assets.pentesterlab.com/padding_oracle/CBC_decryption.png)
 
+Imagine you have some encrypted text that occupies **2 blocks** formed by the bytes from **E0 to E15**.  
+In order to **decrypt** the **last** **block** \(**E8** to **E15**\), the whole block passes through the "block cipher decryption" generating the **intermediary bytes I0 to I15**.  
+Finally, each intermediary byte is **XORed** with the previos encrypted bytes \(E0 to E7\). So:
+
+* `C15 = D(E15) ^ E7 = I15 ^ E7`
 * `C14 = I14 ^ E6`
-* `C13 = I13 ^ E5`
-* `C12 = I12 ^ E4`
+* `C13 = I13 ^ E5` 
+* `C12 = I12 ^ E4` 
 * ...
 
-Now if we modify `E7` and keep changing its value, we will keep getting an invalid padding. Since we need `C15` to be `\x01`. However, there is one value of `E7` that will give us a valid padding. Let's call it `E'7`. With `E'7`, we get a valid padding. And since we know we get a valid padding we know that `C'15` \(as in `C15` for `E'7`\) is `\x01`.
+Now, It's possible to **modify `E7` until `C15` is `0x01`**, which will also be a correct padding. So, in this case: `\x01 = I15 ^ E'7` 
 
-`\x01 = I15 ^ E'7`
+So, finding E'7, it's **possible to calculate I15**: `I15 = 0x01 ^ E'7`
 
-The gives us:
+Which allow us to **calculate C15**: `C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
 
-`I15 = \x01 ^ E'7`
+Knowing **C15**, now it's possible to **calculate C14**, but this time brute-forcing the padding `\x02\x02`.
 
-So we are able to compute `I15`.
+This BF is as complex as the previous one as it's possible to calculate the the `E''15` whose value is 0x02: `E''7 = \x02 ^ I15` so it's just needed to find the **`E'14`** that generates a **`C14` equals to `0x02`**.  
+Then, do the same steps to decrypt C14: **`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`**
 
-Since we know `I15`, we can now compute `C15`
-
-`C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
-
-Now that we have `C15`, we can move to brute-forcing `C14`. First we need to compute another `E7` \(let's call it `E''7`\) that gives us `C15 = \x02`. We need to do that since we want the padding to be `\x02\x02` now. It's really simple to compute using the property above and by replacing the value of `C15` we want \(`\x02`\) and `I15` we now know:
-
-`E''7 = \x02 ^ I15`
-
-After brute force `E6`, to find the value that gives us a valid padding `E''6`, we can re-use the formula:
-
-`C14 = I14 ^ E6`
-
-to get
-
-`I14 = \x02 ^ E''6`
-
-Once we get `I14`, we can compute `C14`:
-
-`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`
-
-Using this method, we can keep going until we get all the ciphertext decrypted.
+**Follow this chain until you decrypt the whole encrypted text.**
 
 ### Detection of the vulnerability
 
-To get started, you can register an account and log in with this account \(to make things easier, you get automatically logged in when you register\).
+Register and account and log in with this account .  
+If you **log in many times** and always get the **same cookie**, there is probably **something** **wrong** in the application. The **cookie sent back should be unique** each time you log in. If the cookie is **always** the **same**, it will probably always be valid and there **won't be anyway to invalidate i**t.
 
-If you create an account and log in two times with this account, you can see that the cookie sent by the application didn't change.If you log in many times and always get the same cookie, there is probably something wrong in the application. The cookie sent back should be unique each time you log in. If the cookie is always the same, it will probably always be valid and there won't be anyway to invalidate it.
-
-Now, if you try to modify the cookie, you can see that you get an error from the application.
+Now, if you try to **modify** the **cookie**, you can see that you get an **error** from the application.  
+But if you BF the padding \(using padbuster for example\) you manage to get another cookie valid for a different user. This scenario is highly probably vulnerable to padbuster.
 

@@ -14,6 +14,11 @@
 * [https://hashkiller.co.uk/Cracker/MD5](https://hashkiller.co.uk/Cracker/MD5)
 * [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html)
 
+## Magic Autosolvers
+
+* \*\*\*\*[**https://github.com/Ciphey/Ciphey**](https://github.com/Ciphey/Ciphey)\*\*\*\*
+* \*\*\*\*[https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) \(Magic module\)
+
 ## Encoders
 
 Most of encoded data can be decoded with these 2 ressources:

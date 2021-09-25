@@ -1408,7 +1408,8 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 
 #### PS
 
-\*\*\*\*[**PowerSploit-Privesc\(PowerUP\)**](https://github.com/PowerShellMafia/PowerSploit) -- Check for misconfigurations and sensitive files \([check here]()\). Detected.  
+\*\*\*\*[**PrivescCheck** ](https://github.com/itm4n/PrivescCheck)  
+****[**PowerSploit-Privesc\(PowerUP\)**](https://github.com/PowerShellMafia/PowerSploit) -- Check for misconfigurations and sensitive files \([check here]()\). Detected.  
 [**JAWS**](https://github.com/411Hall/JAWS) ****-- Check for some possible misconfigurations and gather info \([check here]()\).  
 [**privesc** ](https://github.com/enjoiz/Privesc)-- Check for misconfigurations  
 [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) ****-- It extracts PuTTY, WinSCP, SuperPuTTY, FileZilla, and RDP saved session information. Use **-Thorough** in local.  

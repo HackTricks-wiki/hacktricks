@@ -226,9 +226,25 @@ To find the **entry point** search the functions by `::main` like in:
 In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.  
 Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
 
-## Delphi
+## **Delphi**
 
 For Delphi compiled binaries you can use [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
+
+I you have to reverse a Delphi binary I would suggest you to use the IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)\*\*\*\*
+
+Just press **ATL+f7** \(import python plugin in IDA\) and select the python plugin.
+
+This plugin will execute the binary and resolve function names dynamically at the start of the debugging. After starting the debugging press again the Start button \(the green one or f9\) and a breakpoint will hit in the beginning of the real code.
+
+It is also very interesting because if you press a button in the graphic application the debugger will stop in the function executed by that bottom.
+
+## Golang
+
+I you have to reverse a Golang binary I would suggest you to use the IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+
+Just press **ATL+f7** \(import python plugin in IDA\) and select the python plugin.
+
+This will resolve the names of the functions.
 
 ## GBA - Game Body Advance
 

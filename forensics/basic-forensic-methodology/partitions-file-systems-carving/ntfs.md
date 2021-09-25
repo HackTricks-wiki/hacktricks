@@ -142,7 +142,7 @@ Some interesting attributes:
 
 ![](../../../.gitbook/assets/image%20%28521%29.png)
 
-Another useful tool to analyze the MFT is [**MFT2csv**](https://github.com/jschicht/Mft2Csv).  
+Another useful tool to analyze the MFT is [**MFT2csv**](https://github.com/jschicht/Mft2Csv) ****\(select the mft file or the image and press dump all and extract to extract al the objects\).  
 This program will extract all the MFT data and present it in CSV format. It can also be used to dump the files.
 
 ![](../../../.gitbook/assets/image%20%28514%29.png)

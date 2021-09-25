@@ -1,5 +1,15 @@
 # Docker Breakout
 
+## What is a container
+
+In summary, it's an **isolated** **process** via **cgroups** \(what the process can use, like CPU and RAM\) and **namespaces** \(what the process can see, like directories or other processes\):
+
+```bash
+docker run -dt --rm denial sleep 1234 #Run a large sleep inside a Debian container
+ps -ef | grep 1234 #Get info about the sleep process
+ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the hosts and some may be shred with it)
+```
+
 ## Mounted docker socket
 
 If somehow you find that the **docker socket is mounted** inside the docker container, you will be able to escape from it.  
