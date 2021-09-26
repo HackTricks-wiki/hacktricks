@@ -49,11 +49,13 @@ docker exec -it wordpress bash
 
 ## Images modifications
 
-When you are given an exported docker image \(probably in `.tar` format\) you can use the following command to **extract the modifications**:
+When you are given an exported docker image \(probably in `.tar` format\) you can use [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) to **extract a summary of the modifications**:
 
 ```bash
 docker save <image> > image.tar #Export the image to a .tar file
+container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
+container-diff analyze -t metadata image.tar
 ```
 
 Then, you can **decompress** the image and **access the blobs** to search for suspicious files you may have found in the changes history:
@@ -62,11 +64,26 @@ Then, you can **decompress** the image and **access the blobs** to search for su
 tar -xf image.tar
 ```
 
-In order to find added/modified files in docker images you can also use the [**dive**](https://github.com/wagoodman/dive) utility:
+In order to find added/modified files in docker images you can also use the [**dive**](https://github.com/wagoodman/dive) ****\(download it from [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)\) utility:
 
-![](../../.gitbook/assets/image%20%28425%29.png)
+```bash
+#First you need to load the image in your docker repo
+sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
+Loaded image: flask:latest
+
+#And then open it with dive:
+sudo dive flask:latest
+```
 
 This allow you to **navigate through the different blobs of docker images** and check which files were modified/added. **Red** means added and **yellow** means modified. Use **tab** to move to the other view and **space** to to collapse/open folders.
+
+With die you won't be able to access the content of the different stages of the image. To do so you will need to **decompress each layer and access it**.  
+You can decompress all the layers from an image from the directory where the image was decompressed executing:
+
+```bash
+tar -xf image.tar
+for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
+```
 
 ## Credentials from memory
 
