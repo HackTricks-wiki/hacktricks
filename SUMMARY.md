@@ -516,7 +516,7 @@
   * [Format Strings Template](exploiting/linux-exploiting-basic-esp/format-strings-template.md)
   * [ROP - call sys\_execve](exploiting/linux-exploiting-basic-esp/rop-syscall-execv.md)
   * [ROP - Leaking LIBC address](exploiting/linux-exploiting-basic-esp/rop-leaking-libc-address.md)
-  * [ROP-PWN template](exploiting/linux-exploiting-basic-esp/rop-pwn-template.md)
+  * [ROP - Leaking LIBC template](exploiting/linux-exploiting-basic-esp/rop-leaking-libc-template.md)
   * [Bypassing Canary & PIE](exploiting/linux-exploiting-basic-esp/bypassing-canary-and-pie.md)
   * [Ret2Lib](exploiting/linux-exploiting-basic-esp/ret2lib.md)
   * [Fusion](exploiting/linux-exploiting-basic-esp/fusion.md)
