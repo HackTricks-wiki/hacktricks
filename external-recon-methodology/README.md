@@ -304,7 +304,7 @@ cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 a
 
 Now that you have discovered **all the web servers** present in the scope \(among the **IPs** of the company and all the **domains** and **subdomains**\) you probably **don't know where to start**. So, let's make it simple and start just taking screenshots of all of them. Just by **taking a look** at the **main page** you can find **weird** endpoints that are more **prone** to be **vulnerable**.
 
-To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), ****[**shutter**](https://shutter-project.org/downloads/) ****or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
+To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), **\*\*\[**shutter**\]\(**[https://shutter-project.org/downloads/](https://shutter-project.org/downloads/)**\) \*\***or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
 ## Cloud Assets
 
@@ -351,7 +351,7 @@ There are several tools out there that will perform part of the proposed actions
 * \*\*\*\*[**https://github.com/yogeshojha/rengine**](https://github.com/yogeshojha/rengine)\*\*\*\*
 * \*\*\*\*[**https://github.com/j3ssie/Osmedeus**](https://github.com/j3ssie/Osmedeus)\*\*\*\*
 * \*\*\*\*[**https://github.com/six2dez/reconftw**](https://github.com/six2dez/reconftw)\*\*\*\*
-* \*\*\*\*[**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) ****- A little old and not updated
+* \*\*\*\*[**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) _\*\*_- A little old and not updated
 
 ## **References**
 
