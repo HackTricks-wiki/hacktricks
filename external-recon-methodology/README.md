@@ -288,12 +288,12 @@ _Note that sometimes the subdomain is hosted inside an IP that is not controlled
 
 > We have found all the companies and their assets and we know IP ranges, domains and subdomains inside the scope. It's time to search for web servers.
 
-In the previous steps probably you have already perform some **recon to the IPs and domains discovered**, so you may **already found all the possible web servers**. However, if you haven't we are now going to see some **fast tricks to search for web servers** inside the scope.
+In the previous steps you have probably already performed some **recon of the IPs and domains discovered**, so you may have **already found all the possible web servers**. However, if you haven't we are now going to see some **fast tricks to search for web servers** inside the scope.
 
-Please, note that this will be **oriented to search for web apps**, you should **perform the vulnerability** and **port scanning** also \(**if allowed** by the scope\).
+Please, note that this will be **oriented for web apps discovery**, so you should **perform the vulnerability** and **port scanning** also \(**if allowed** by the scope\).
 
 A **fast method** to discover **ports open** related to **web** servers using [**masscan** can be found here](../pentesting/pentesting-network/#http-port-discovery).  
-Another friendly tool to look for web servers is [**httprobe**](https://github.com/tomnomnom/httprobe) **and** [**fprobe**](https://github.com/theblackturtle/fprobe). You just pass a list of domains and it will try to connect to port 80 \(http\) and 443 \(https\). You can additional indicate to try other ports:
+Another friendly tool to look for web servers is [**httprobe**](https://github.com/tomnomnom/httprobe) **and** [**fprobe**](https://github.com/theblackturtle/fprobe). You just pass a list of domains and it will try to connect to port 80 \(http\) and 443 \(https\). Additionaly, you can indicate to try other ports:
 
 ```bash
 cat /tmp/domains.txt | httprobe #Test all domains inside the file for port 80 and 443
@@ -302,7 +302,7 @@ cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 a
 
 ### Screenshots
 
-Now that you have discovered **all the web servers** running in the scope \(in **IPs** of the company and all the **domains** and **subdomains**\) you probably **don't know where to start**. So, let's make it simple and start just taking screenshots of all of them. Just **taking a look** to the **main page** of all of them you could find **weird** endpoints more **prone** to be **vulnerable**.
+Now that you have discovered **all the web servers** present in the scope \(among the **IPs** of the company and all the **domains** and **subdomains**\) you probably **don't know where to start**. So, let's make it simple and start just taking screenshots of all of them. Just by **taking a look** at the **main page** you can find **weird** endpoints that are more **prone** to be **vulnerable**.
 
 To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), ****[**shutter**](https://shutter-project.org/downloads/) ****or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
