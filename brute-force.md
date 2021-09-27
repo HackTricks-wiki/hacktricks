@@ -526,6 +526,13 @@ Another Luks BF tutorial: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
 
+### PGP/GPG Private key
+
+```bash
+gpg2john private_pgp.key #This will generate the hash, save it in a file
+john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
+```
+
 ## Tools
 
 **Hash examples:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
