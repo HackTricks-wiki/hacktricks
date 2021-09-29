@@ -414,6 +414,7 @@ Check this out before trying to bruteforce a Hash.
 ### ZIP
 
 ```bash
+#sudo apt-get install fcrackzip 
 fcrackzip -u -D -p '/usr/share/wordlists/rockyou.txt' chall.zip
 ```
 
