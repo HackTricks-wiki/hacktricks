@@ -20,8 +20,8 @@ Here you will find the **typical flow** that **you should follow when pentesting
 
 **Click in the title to start!**
 
-If you want to **know** about my **latest modifications**/**additions** or you have **any suggestion for HackTricks or PEASS**, **join the** [**💬**](https://emojipedia.org/speech-balloon/) **\*\*\[**PEASS & HackTricks telegram group here**\]\(**[https://t.me/peass](https://t.me/peass)**\), or** follow me on Twitter ****[**🐦**](https://emojipedia.org/bird/)**\[**@carlospolopm**\]\(**[https://twitter.com/carlospolopm](https://twitter.com/carlospolopm)**\)**.  
-**If you want to** share some tricks with the community **you can also submit** pull requests **to \[**[https://github.com/carlospolop/hacktricks\*\*\]\(https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks**]%28https://github.com/carlospolop/hacktricks)\) **that will be reflected in this book.  
+If you want to **know** about my **latest modifications**/**additions** or you have **any suggestion for HackTricks or PEASS**, **join the** [**💬**](https://emojipedia.org/speech-balloon/) [**PEASS & HackTricks telegram group here**](https://t.me/peass)**, or** follow me on Twitter ****[**🐦**](https://emojipedia.org/bird/)\*\*\*\*[**@carlospolopm**](https://twitter.com/carlospolopm).  
+**If you want to** share some tricks with the community **you can also submit** pull requests **to** [**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks**]%28https://github.com/carlospolop/hacktricks) **that will be reflected in this book.  
 Don't forget to** give ⭐ on the github\*\* to motivate me to continue developing this book.
 
 {% hint style="danger" %}
@@ -32,17 +32,15 @@ Do you use **Hacktricks every day**? Did you find the book **very** **useful**? 
 If you want to know about my **latest modifications**/**additions** or you have **any suggestion for HackTricks** or **PEASS**, **join the** [**💬**](https://emojipedia.org/speech-balloon/)[**telegram group**](https://t.me/peass), or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**  
 If you want to **share some tricks with the community** you can also submit **pull requests** to [**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) that will be reflected in this book and don't forget to **give ⭐** on **github** to **motivate** **me** to continue developing this book.
 
+[**Buy me a coffee here**](https://www.buymeacoffee.com/carlospolop)
+
 ## Corporate Sponsors
 
-### \*\*\*\*[**INE**](https://ine.com/)\*\*\*\*
+### [**INE**](https://ine.com/)
 
 ![](.gitbook/assets/ine_logo-3-.jpg)
 
-[**Buy me a coffee here**](https://www.buymeacoffee.com/carlospolop)
-
-\*\*\*\*[**INE**](https://ine.com/) is a great platform to start learning or **improve** your **IT knowledge** through their huge range of **courses**. I personally like and have completed many from the [**cybersecurity section**](https://ine.com/pages/cybersecurity). **INE** also provides with the official courses to prepare the **certifications** from [**eLearnSecurity**](https://elearnsecurity.com/)**.**
-
-Copyright © Carlos Polop 2020. Except where otherwise specified, the text on [HACK TRICKS](https://github.com/carlospolop/hacktricks) by Carlos Polop is licensed under the [**Commons Clause**](https://commonsclause.com/) \(which allow you to use this content freely WITHOUT commercial use\).
+[**INE**](https://ine.com/) is a great platform to start learning or **improve** your **IT knowledge** through their huge range of **courses**. I personally like and have completed many from the [**cybersecurity section**](https://ine.com/pages/cybersecurity). **INE** also provides with the official courses to prepare the **certifications** from [**eLearnSecurity**](https://elearnsecurity.com/)**.**
 
 #### **Courses and Certifications reviews**
 
@@ -50,7 +48,9 @@ You can find **my reviews of the certifications eMAPT and eWPTXv2** \(and their 
 
 {% page-ref page="courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md" %}
 
-\*\*\*\*
+
+
+Copyright © Carlos Polop 2020. Except where otherwise specified, the text on [HACK TRICKS](https://github.com/carlospolop/hacktricks) by Carlos Polop is licensed under the [**Commons Clause**](https://commonsclause.com/) \(which allow you to use this content freely WITHOUT commercial use\).
 
 **Copyright © Carlos Polop 2021. Except where otherwise specified, the rights of the text on** [**HACKTRICKS**](https://github.com/carlospolop/hacktricks) **by Carlos Polop are reserved.**
 

