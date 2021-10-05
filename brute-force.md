@@ -471,7 +471,7 @@ john jwt.john #It does not work with Kali-John
 
 ```bash
 Format:USUARIO:ID:HASH_LM:HASH_NT:::
-jhon --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
+john --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
 hashcat -a 0 -m 1000 --username file_NTLM.hashes /usr/share/wordlists/rockyou.txt --potfile-path salida_NT.pot
 ```
 
