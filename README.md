@@ -44,6 +44,6 @@ You can find **my reviews of the certifications eMAPT and eWPTXv2** \(and their 
 
 ## License
 
-**Copyright © Carlos Polop 2021. Except where otherwise specified \(the copied information belongs to the original authors\), the text on** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **by Carlos Polop is licensed under the**[ **Attribution-NonCommercial 4.0 International \(CC BY-NC 4.0\)**](https://creativecommons.org/licenses/by-nc/4.0/)**.  
-If you want to use it with commercial purposes, please contact with me.**
+**Copyright © Carlos Polop 2021. Except where otherwise specified \(the external information copied into the book belongs to the original authors\), the text on** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **by Carlos Polop is licensed under the**[ **Attribution-NonCommercial 4.0 International \(CC BY-NC 4.0\)**](https://creativecommons.org/licenses/by-nc/4.0/)**.  
+If you want to use it with commercial purposes, contact me.**
 
