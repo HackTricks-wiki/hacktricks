@@ -188,7 +188,7 @@ action=open Setup.exe
 
 ## Shell Command Files
 
-You can save this as something.scf and once you open the folder explorer will try to resolve the network path for the icon.
+You can save this as `something.scf` and once you open the folder explorer will try to resolve the network path for the icon.
 
 ```text
 [Shell]
