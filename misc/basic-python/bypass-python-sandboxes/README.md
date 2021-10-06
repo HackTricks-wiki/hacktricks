@@ -634,6 +634,8 @@ f(5)
 '''
 c=compile(s, "", "exec")
 
+# __doc__: Get the description of the function, if any
+print.__doc__
 
 # co_consts: Constants
 get_flag.__code__.co_consts
