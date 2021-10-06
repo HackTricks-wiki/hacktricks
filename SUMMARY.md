@@ -488,7 +488,7 @@
 
 ## Cloud Security
 
-* [Cloud security review](cloud-security/cloud-security-review.md)
+* [Cloud Security Review](cloud-security/cloud-security-review.md)
 * [AWS Security](cloud-security/aws-security.md)
 
 ## Physical attacks
