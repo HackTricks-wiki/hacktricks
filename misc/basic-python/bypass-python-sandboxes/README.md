@@ -771,7 +771,9 @@ In the following example we are going to take all the data needed to recreate th
 
 ```python
 fc = get_flag.__code__
+# In a real situation the values like fc.co_argcount are the ones you need to leak
 code_obj = code_type(fc.co_argcount, fc.co_kwonlyargcount, fc.co_nlocals, fc.co_stacksize, fc.co_flags, fc.co_code, fc.co_consts, fc.co_names, fc.co_varnames, fc.co_filename, fc.co_name, fc.co_firstlineno, fc.co_lnotab, cellvars=fc.co_cellvars, freevars=fc.co_freevars)
+
 mydict = {}
 mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
