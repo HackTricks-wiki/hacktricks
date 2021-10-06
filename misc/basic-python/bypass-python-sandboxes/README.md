@@ -558,55 +558,11 @@ class HAL9000(object):
 {whoami.__globals__[server].__dict__[bridge].__dict__[db].__dict__}
 ```
 
-## Compiling Python to Bypass Defenses
+## Dissecting Python Objects
 
-In previous examples at the begging of this post you can see **how to execute any python code using the `compile` function**. This is really interesting because you can **execute whole scripts** with loops and everything in a **one liner** \(and we could do the same using **`exec`**\).  
-Anyway, sometimes it could be useful to **create** a **compiled object** in a local machine and execute it in the **CTF machine** \(for example because we don't have the `compiled` function in the CTF\).
-
-For example, let's compile and execute manually a function that reads _./poc.py_:
-
-```python
-#Locally
-def read():
-    return open("./poc.py",'r').read()
-
-read.__code__.co_code
-'t\x00\x00d\x01\x00d\x02\x00\x83\x02\x00j\x01\x00\x83\x00\x00S'
-```
-
-```python
-#On Remote
-function_type = type(lambda: None)
-code_type = type((lambda: None).__code__) #Get <type 'type'>
-consts = (None, "./poc.py", 'r')
-bytecode = 't\x00\x00d\x01\x00d\x02\x00\x83\x02\x00j\x01\x00\x83\x00\x00S'
-names = ('open','read')
-
-# And execute it using eval/exec
-eval(code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ()))
-
-#You could also execute it directly
-mydict = {}
-mydict['__builtins__'] = __builtins__
-codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ())
-function_type(codeobj, mydict, None, None, None)()
-```
-
-If you cannot access `eval` or `exec` you could create a **proper function**, but calling it directly is usually going to fail with: _constructor not accessible in restricted mode_. So you need a **function not in the restricted environment call this function.**
-
-```python
-#Compile a regular print
-ftype = type(lambda: None)
-ctype = type((lambda: None).func_code)
-f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdin', 'f', 1, ''), {})
-f(42)
-```
-
-### Decompiling Python
-
-Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com/) ****one can **decompile** given compiled python code
-
-## Dissecting functions
+{% hint style="info" %}
+If you want to **learn** about **python bytecode** in depth read these **awesome** post about the topic: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)\*\*\*\*
+{% endhint %}
 
 In some CTFs you could be provided the name of a **custom function where the flag** resides and you need to see the **internals** of the **function** to extract it.
 
@@ -667,10 +623,8 @@ dir(get_flag.__code__)
 
 ### Getting Code Information
 
-, `co_names`, `co_varnames`, `co_cellvars` and `co_freevars`.
-
 ```python
-## ANother example
+## Another example
 s = '''
 a = 5
 b = 'text'
@@ -713,7 +667,7 @@ get_flag.__code__.co_code
 'd\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S'
 ```
 
-**Disassembly a function**
+### **Disassembly a function**
 
 ```python
 import dis
@@ -766,6 +720,109 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
          44 LOAD_CONST          0 (0)
          47 RETURN_VALUE
 ```
+
+## Compiling Python
+
+Now, lets imagine that somehow you can **dump the information about a function that you cannot execute** but you **need** to **execute** it.  
+Like in the following example, you **can access the code object** of that function, but just reading the disassemble you **don't know how to calculate the flag** \(_imagine a more complex `calc_flag` function_\)
+
+```python
+def get_flag(some_input):
+    var1=1
+    var2="secretcode"
+    var3=["some","array"]
+    def calc_flag(flag_rot2):
+        return ''.join(chr(ord(c)-2) for c in flag_rot2)
+    if some_input == var2:
+        return calc_flag("VjkuKuVjgHnci")
+    else:
+        return "Nope"
+```
+
+### Creating the code object
+
+First of all, we need to know **how to create and execute a code object** so we can create one to execute our function leaked:
+
+```python
+code_type = type((lambda: None).__code__)
+code_obj = code_type(co_argcount, co_kwonlyargcount,
+               co_nlocals, co_stacksize, co_flags,
+               co_code, co_consts, co_names,
+               co_varnames, co_filename, co_name,
+               co_firstlineno, co_lnotab, freevars=None, 
+               cellvars=None)
+
+# Execution
+eval(code_obj) #Execute as a whole script
+
+## If you have the code of a function, execute it
+mydict = {}
+mydict['__builtins__'] = __builtins__
+function_type(code_obj, mydict, None, None, None)("secretcode")
+```
+
+### Recreating a leaked function
+
+{% hint style="warning" %}
+In the following example we are going to take all the data needed to recreate the function from the function code object directly. In a **real example**, all the **values** to execute the function **`code_type`** is what **you will need to leak**.
+{% endhint %}
+
+```python
+fc = get_flag.__code__
+code_obj = code_type(fc.co_argcount, fc.co_kwonlyargcount, fc.co_nlocals, fc.co_stacksize, fc.co_flags, fc.co_code, fc.co_consts, fc.co_names, fc.co_varnames, fc.co_filename, fc.co_name, fc.co_firstlineno, fc.co_lnotab, cellvars=fc.co_cellvars, freevars=fc.co_freevars)
+mydict = {}
+mydict['__builtins__'] = __builtins__
+function_type(code_obj, mydict, None, None, None)("secretcode")
+#ThisIsTheFlag
+```
+
+### Bypass Defenses
+
+In previous examples at the begging of this post you can see **how to execute any python code using the `compile` function**. This is really interesting because you can **execute whole scripts** with loops and everything in a **one liner** \(and we could do the same using **`exec`**\).  
+Anyway, sometimes it could be useful to **create** a **compiled object** in a local machine and execute it in the **CTF machine** \(for example because we don't have the `compiled` function in the CTF\).
+
+For example, let's compile and execute manually a function that reads _./poc.py_:
+
+```python
+#Locally
+def read():
+    return open("./poc.py",'r').read()
+
+read.__code__.co_code
+'t\x00\x00d\x01\x00d\x02\x00\x83\x02\x00j\x01\x00\x83\x00\x00S'
+```
+
+```python
+#On Remote
+function_type = type(lambda: None)
+code_type = type((lambda: None).__code__) #Get <type 'type'>
+consts = (None, "./poc.py", 'r')
+bytecode = 't\x00\x00d\x01\x00d\x02\x00\x83\x02\x00j\x01\x00\x83\x00\x00S'
+names = ('open','read')
+
+# And execute it using eval/exec
+eval(code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ()))
+
+#You could also execute it directly
+mydict = {}
+mydict['__builtins__'] = __builtins__
+codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ())
+function_type(codeobj, mydict, None, None, None)()
+```
+
+If you cannot access `eval` or `exec` you could create a **proper function**, but calling it directly is usually going to fail with: _constructor not accessible in restricted mode_. So you need a **function not in the restricted environment call this function.**
+
+```python
+#Compile a regular print
+ftype = type(lambda: None)
+ctype = type((lambda: None).func_code)
+f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdin', 'f', 1, ''), {})
+f(42)
+```
+
+### Decompiling Python
+
+Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com/) ****one can **decompile** given compiled python code
 
 ## References
 
