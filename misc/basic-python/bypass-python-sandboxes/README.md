@@ -495,7 +495,7 @@ You can check the output of this script in this page:
 If you **send** a **string** to python that is going to be **formatted**, you can use `{}` to access **python internal information.** You can use the previous examples to access globals or builtins for example.
 
 {% hint style="info" %}
-However, there is a **limitation**, you can only use the symbols `.[]`, so you **won't be able to execute code**, just to read information.   
+However, there is a **limitation**, you can only use the symbols `.[]`, so you **won't be able to execute arbitrary code**, just to read information.   
 _**If you know how to execute code through this vulnerability, please contact me.**_
 {% endhint %}
 
@@ -522,6 +522,28 @@ get_name_for_avatar(st, people_obj = people)
 Note how you can **access attributes** in a normal way with a **dot** like `people_obj.__init__` and **dict element** with **parenthesis** without quotes `__globals__[CONFIG]`
 
 Also note that you can use `.__dict__` to enumerate elements of an object `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
+
+Some other interesting characteristics from format strings is the possibility of **executing** the **functions** **`str`**, **`repr`** and **`ascii`** in the indicated object by adding **`!s`**, **`!r`**, **`!a`** respectively:
+
+```python
+st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
+get_name_for_avatar(st, people_obj = people)
+```
+
+Moreover, it's possible to **code new formatters** in classes:
+
+```python
+class HAL9000(object):
+    def __format__(self, format):
+        if (format == 'open-the-pod-bay-doors'):
+            return "I'm afraid I can't do that."
+        return 'HAL 9000'
+
+'{:open-the-pod-bay-doors}'.format(HAL9000())
+#I'm afraid I can't do that.
+```
+
+**More examples** about **format** **string** examples can be found in [**https://pyformat.info/**](https://pyformat.info/)\*\*\*\*
 
 ### Sensitive Information Disclosure Payloads
 
