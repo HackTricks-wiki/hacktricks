@@ -558,10 +558,10 @@ class HAL9000(object):
 {whoami.__globals__[server].__dict__[bridge].__dict__[db].__dict__}
 ```
 
-## Compiling Python to bypass Defenses
+## Compiling Python to Bypass Defenses
 
-In a previous example you can see how to execute any python code using the `compile` function. This is really interesting because you can execute whole scripts with loops and everything in a one liner \(and we could do the same using `exec`\).  
-Anyway, sometimes it could be useful to **create** a **compiled object** in a local machine and execute it in the **CTF** \(for example because we don't have the `compiled` function in the CTF\).
+In previous examples at the begging of this post you can see **how to execute any python code using the `compile` function**. This is really interesting because you can **execute whole scripts** with loops and everything in a **one liner** \(and we could do the same using **`exec`**\).  
+Anyway, sometimes it could be useful to **create** a **compiled object** in a local machine and execute it in the **CTF machine** \(for example because we don't have the `compiled` function in the CTF\).
 
 For example, let's compile and execute manually a function that reads _./poc.py_:
 
@@ -604,11 +604,11 @@ f(42)
 
 ### Decompiling Python
 
-Using tools like [https://www.decompiler.com/](https://www.decompiler.com/) one can decompile given compiled python code
+Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com/) ****one can **decompile** given compiled python code
 
 ## Dissecting functions
 
-In some CTFs you could be provided the name of a custom function where the flag resides and you need to see the internals of the function to extract it.
+In some CTFs you could be provided the name of a **custom function where the flag** resides and you need to see the **internals** of the **function** to extract it.
 
 This is the function to inspect:
 
@@ -645,20 +645,71 @@ get_flag.__globals__
 CustomClassObject.__class__.__init__.__globals__
 ```
 
-`__code__` and `func_code`: You can access this to obtain some internal data of the function
+[**See here more places to obtain globals**](./#globals-and-locals)\*\*\*\*
+
+### **Accessing the function code**
+
+**`__code__`** and `func_code`: You can **access** this **attribute** of the function to **obtain the code object** of the function.
 
 ```python
-#Get the options
-dir(get_flag.func_code)
+# In our current example
+get_flag.__code__
+<code object get_flag at 0x7f9ca0133270, file "<stdin>", line 1
+
+# Compiling some python code
+compile("print(5)", "", "single")
+<code object <module> at 0x7f9ca01330c0, file "", line 1>
+
+#Get the attibutes of the code object
+dir(get_flag.__code__)
 ['__class__', '__cmp__', '__delattr__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'co_argcount', 'co_cellvars', 'co_code', 'co_consts', 'co_filename', 'co_firstlineno', 'co_flags', 'co_freevars', 'co_lnotab', 'co_name', 'co_names', 'co_nlocals', 'co_stacksize', 'co_varnames']
-#Get internal varnames
-get_flag.func_code.co_varnames
-('some_input', 'var1', 'var2', 'var3')
-#Get the value of the vars
-get_flag.func_code.co_consts
+```
+
+### Getting Code Information
+
+, `co_names`, `co_varnames`, `co_cellvars` and `co_freevars`.
+
+```python
+## ANother example
+s = '''
+a = 5
+b = 'text'
+def f(x):
+    return x
+f(5)
+'''
+c=compile(s, "", "exec")
+
+
+# co_consts: Constants
+get_flag.__code__.co_consts
 (None, 1, 'secretcode', 'some', 'array', 'THIS-IS-THE-FALG!', 'Nope')
+
+c.co_consts #Remember that the exec mode in compile() generates a bytecode that finally returns None.
+(5, 'text', <code object f at 0x7f9ca0133540, file "", line 4>, 'f', None
+
+# co_names: Names used by the bytecode which can be global variables, functions, and classes or also attributes loaded from objects.
+get_flag.__code__.co_names
+()
+
+c.co_names
+('a', 'b', 'f')
+
+
+#co_varnames: Local names used by the bytecode (arguments first, then the local variables)
+get_flag.__code__.co_varnames
+('some_input', 'var1', 'var2', 'var3')
+
+#co_cellvars: Nonlocal variables These are the local variables of a function accessed by its inner functions.
+get_flag.__code__.co_cellvars
+()
+
+#co_freevars: Free variables are the local variables of an outer function which are accessed by its inner function.
+get_flag.__code__.co_freevars
+()
+
 #Get bytecode
-get_flag.func_code.co_code
+get_flag.__code__.co_code
 'd\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S'
 ```
 
@@ -723,6 +774,4 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 * [https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/](https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/)
 * [https://gynvael.coldwind.pl/n/python\_sandbox\_escape](https://gynvael.coldwind.pl/n/python_sandbox_escape)
 * [https://nedbatchelder.com/blog/201206/eval\_really\_is\_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
-
-\*\*\*\*
 
