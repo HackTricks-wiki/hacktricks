@@ -371,6 +371,8 @@ This is just **awesome**. If you are **looking for an object like globals, built
 {% endhint %}
 
 ```python
+import os, sys
+
 SEARCH_FOR = {
     # Misc
     "__globals__": set(),
