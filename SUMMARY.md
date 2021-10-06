@@ -550,7 +550,8 @@
 
 * [Basic Python](misc/basic-python/README.md)
   * [venv](misc/basic-python/venv.md)
-  * [Bypass Python sandboxes](misc/basic-python/bypass-python-sandboxes.md)
+  * [Bypass Python sandboxes](misc/basic-python/bypass-python-sandboxes/README.md)
+    * [Output Searching Python internals](misc/basic-python/bypass-python-sandboxes/output-searching-python-internals.md)
   * [Magic Methods](misc/basic-python/magic-methods.md)
   * [Web Requests](misc/basic-python/web-requests.md)
   * [Bruteforce hash \(few chars\)](misc/basic-python/bruteforce-hash-few-chars.md)

