@@ -188,7 +188,7 @@ action=open Setup.exe
 
 ## Shell Command Files
 
-It is possible to obtain passwords hashes of domain users or shells when writing permissions given to unauthenticated users. SCF (Shell Command Files) can perform a limited set of operations like showing the Windows desktop or opening a Windows Explorer. Save the code below as `ordinary.scf` and put it into a network share.
+It is possible to obtain passwords hashes of domain users or shells when writing permissions given to unauthenticated users. SCF \(Shell Command Files\) can perform a limited set of operations like showing the Windows desktop or opening a Windows Explorer. Save the code below as `ordinary.scf` and put it into a network share.
 
 ```text
 [Shell]
