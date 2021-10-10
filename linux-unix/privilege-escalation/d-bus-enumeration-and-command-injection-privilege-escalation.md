@@ -300,9 +300,9 @@ _Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) refere
 
 {% code title="d-bus_server.c" %}
 ```c
-//gcc d-bus_server.c -o dbus_server `pkg-config --cflags --libs libsystemd`
 //sudo apt install pkgconf
 //sudo apt install build-essential
+//gcc d-bus_server.c -o dbus_server `pkg-config --cflags --libs libsystemd`
 
 #include <stdio.h>
 #include <stdlib.h>
