@@ -176,7 +176,7 @@ Note the method `.Block` of the interface `htb.oouch.Block` (the one we are inte
 
 With enough privileges (just `send_destination` and `receive_sender` privileges aren't enough) you can **monitor a D-Bus communication**.
 
-In order to **monitor** a **communication** you will need to be **root** or to have **eavesdrop** **privileges :**
+In order to **monitor** a **communication** you will need to be **root** or to have **eavesdrop** **privileges **like in this example:
 
 ```xml
 <policy user="kali">
@@ -187,9 +187,15 @@ In order to **monitor** a **communication** you will need to be **root** or to h
 </policy>
 ```
 
-``
+Different ways to monitor:
 
- In the following example the interface `htb.oouch.Block` is monitored and **the message "**_**lalalalal**_**" is sent through miscommunication**:
+```
+busctl monitor htb.oouch.Block #Monitor only sp
+sudo busctl monitor
+sudo dbus-monitor --system
+```
+
+In the following example the interface `htb.oouch.Block` is monitored and **the message "**_**lalalalal**_**" is sent through miscommunication**:
 
 ```bash
 busctl monitor htb.oouch.Block
