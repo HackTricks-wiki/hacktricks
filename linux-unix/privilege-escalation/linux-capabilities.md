@@ -700,8 +700,7 @@ The blank char before each make word in the Makefile **must be a tab, not spaces
 
 Execute `make` to compile it.
 
-```bash
-// Some 
+```
 ```
 
 Finally, start `nc` inside a shell and **load the module** from another one and you will capture the shell in the nc process:
