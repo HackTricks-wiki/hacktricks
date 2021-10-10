@@ -1,12 +1,6 @@
 # Linux Privilege Escalation
 
 {% hint style="danger" %}
-
-
-
-
-s
-
 Do you use **Hacktricks every day**? Did you find the book **very** **useful**? Would you like to **receive extra help** with cybersecurity questions? Would you like to **find more and higher quality content on Hacktricks**?\
 [**Support Hacktricks through github sponsors**](https://github.com/sponsors/carlospolop) **so we can dedicate more time to it and also get access to the Hacktricks private group where you will get the help you need and much more!**
 {% endhint %}
