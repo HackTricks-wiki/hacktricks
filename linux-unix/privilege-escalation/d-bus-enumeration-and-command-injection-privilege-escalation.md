@@ -189,10 +189,10 @@ In order to **monitor** a **communication** you will need to be **root** or to h
 
 Different ways to monitor:
 
-```
-busctl monitor htb.oouch.Block #Monitor only sp
-sudo busctl monitor
-sudo dbus-monitor --system
+```bash
+busctl monitor htb.oouch.Block #Monitor only specified
+sudo busctl monitor #System level, even if this works you will only see messages you have permissions to see
+sudo dbus-monitor --system #System level
 ```
 
 In the following example the interface `htb.oouch.Block` is monitored and **the message "**_**lalalalal**_**" is sent through miscommunication**:
