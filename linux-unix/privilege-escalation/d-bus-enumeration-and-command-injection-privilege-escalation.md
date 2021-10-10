@@ -12,7 +12,9 @@ Each service is defined by the **objects **and **interfaces** that it exposes. W
 
 I used two tools to communicate with the D-Bus interface: CLI tool named **gdbus**, which allows to easily call D-Bus exposed methods in scripts, and [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), a Python based GUI tool that helps to enumerate the available services on each bus and to see which objects each service contains.
 
-
+```bash
+sudo apt-get install d-feet
+```
 
 ![](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-21.png)
 
@@ -297,6 +299,8 @@ _Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) refere
 ### C code 
 
 ```c
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
