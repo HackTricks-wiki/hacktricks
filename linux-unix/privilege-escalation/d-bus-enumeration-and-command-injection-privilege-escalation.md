@@ -298,8 +298,9 @@ _Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) refere
 
 ### C code 
 
+{% code title="d-bus_server.c" %}
 ```c
-
+//gcc d-bus_server.c -o dbus_server pkg-config --cflags --libs libsystemd
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -436,3 +437,4 @@ finish:
         return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 ```
+{% endcode %}
