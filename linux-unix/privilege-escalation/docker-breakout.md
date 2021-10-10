@@ -518,6 +518,13 @@ This is not a technique to breakout from a Docker container but a security featu
 [apparmor.md](apparmor.md)
 {% endcontent-ref %}
 
+### AuthZ & AuthN
+
+An authorization plugin approves or denies requests to the Docker daemon based on both the current authentication context and the command context. The authentication context contains all user details and the authentication method. The command context contains all the relevant request data.
+
+\
+
+
 ### gVisor
 
 **gVisor** is an application kernel, written in Go, that implements a substantial portion of the Linux system surface. It includes an [Open Container Initiative (OCI)](https://www.opencontainers.org) runtime called `runsc` that provides an **isolation boundary between the application and the host kernel**. The `runsc` runtime integrates with Docker and Kubernetes, making it simple to run sandboxed containers.
