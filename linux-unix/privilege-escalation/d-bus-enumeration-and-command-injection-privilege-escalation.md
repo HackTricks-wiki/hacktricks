@@ -178,6 +178,8 @@ With enough privileges (just `send_destination` and `receive_sender` privileges 
 
 In order to **monitor** a **communication** you will need to be **root. **If you still find problems being root check [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) and [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
 
+
+
 Different ways to monitor:
 
 ```bash
@@ -208,6 +210,26 @@ Monitoring bus message stream.
 ```
 
 You can use `capture` instead of `monitor` to save the results in a pcap file.
+
+#### Filtering all the noise <a href="filtering_all_the_noise" id="filtering_all_the_noise"></a>
+
+If there is just too much information on the bus, pass a match rule like so:
+
+```bash
+dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
+```
+
+Multiple rules can be specified. If a message matches _any_ of the rules, the message will be printed. Like so:
+
+```bash
+dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
+```
+
+```bash
+dbus-monitor "type=method_call" "type=method_return" "type=error"
+```
+
+See the [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html) for more information on match rule syntax.
 
 
 
