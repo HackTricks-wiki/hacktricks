@@ -192,7 +192,7 @@ Different ways to monitor:
 ```bash
 busctl monitor htb.oouch.Block #Monitor only specified
 sudo busctl monitor #System level, even if this works you will only see messages you have permissions to see
-sudo dbus-monitor --system #System level
+sudo dbus-monitor --system #System level, even if this works you will only see messages you have permissions to see
 ```
 
 In the following example the interface `htb.oouch.Block` is monitored and **the message "**_**lalalalal**_**" is sent through miscommunication**:
