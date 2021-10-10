@@ -67,7 +67,7 @@ mkdir -p /mnt/hola
 mount /dev/sda1 /mnt/hola
 ```
 
-And voilà ! You can now acces the filesystem of the host because it is mounted in the `/mnt/hola `folder.
+And voilà ! You can now access the filesystem of the host because it is mounted in the `/mnt/hola `folder.
 
 {% code title="Initial PoC" %}
 ```bash
