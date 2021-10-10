@@ -176,9 +176,16 @@ Note the method `.Block` of the interface `htb.oouch.Block` (the one we are inte
 
 With enough privileges (just `send_destination` and `receive_sender` privileges aren't enough) you can **monitor a D-Bus communication**.
 
-In order to **monitor** a **communication** you will need to be **root** or to have **eavesdrop** **privileges:**
+In order to **monitor** a **communication** you will need to be **root** or to have **eavesdrop** **privileges :**
 
-****
+```xml
+<policy user="kali">
+    <!-- Allow everything to be received -->
+    <allow eavesdrop="true"/>
+    <allow send_destination="htb.oouch.Block"/>
+    <allow receive_sender="htb.oouch.Block"/>
+</policy>
+```
 
 ``
 
