@@ -408,7 +408,7 @@ This will trigger the payload which is present in the main.go file.
 
 For more information: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
-## Docker Auth  Bypass
+## Docker Auth Plugin Bypass
 
 In some occasions, the sysadmin may install some plugins to docker to avoid low privilege users to interact with docker without being able to escalate privileges.
 
