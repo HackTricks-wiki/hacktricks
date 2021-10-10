@@ -704,10 +704,10 @@ Execute `make` to compile it.
 ake[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  Stop.
 
 sudo apt update
- sudo apt full-upgra
+ sudo apt full-upgrade
 ```
 
-Finally, start `nc` inside a shell and **load the module** from another one and you will capture the shell in the nc process:
+ Finally, start `nc` inside a shell and **load the module** from another one and you will capture the shell in the nc process:
 
 ```bash
 #Shell 1
