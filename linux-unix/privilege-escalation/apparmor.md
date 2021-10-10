@@ -220,7 +220,7 @@ docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-
 
 Note that by default **AppArmor** will also **forbid the container to mount** folders from the inside even with SYS_ADMIN capability.
 
-Note that you can 
+Note that you can **add/remove** **capabilities** to the docker container (this will be still restricted by protection methods like **AppArmor** and **Seccomp**)
 
 {% hint style="info" %}
 Usually, when you **find** that you have a **privileged capability** available **inside** a **docker** container **but** some part of the **exploit isn't working**, this will be because docker **apparmor will be preventing it**.
