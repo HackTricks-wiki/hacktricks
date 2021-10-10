@@ -123,6 +123,10 @@ In the following example the **syscalls **of `uname` are discovered:
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 ```
 
+{% hint style="info" %}
+If you are using **Docker just to launch an application**, you can **profile** it with **`strace`** and **just allow the syscalls** it needs
+{% endhint %}
+
 ### Deactivate it in Docker
 
 Launch a container with the flag: **`--security-opt seccomp=unconfined`**
