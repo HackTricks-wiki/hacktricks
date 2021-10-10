@@ -178,7 +178,9 @@ With enough privileges (just `send_destination` and `receive_sender` privileges 
 
 In order to **monitor** a **communication** you will need to be **root. **If you still find problems being root check [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) and [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
 
-
+{% hint style="warning" %}
+If you know how to configure a D-Bus config file to** allow non root users to sniff **the communication please **contact me**!
+{% endhint %}
 
 Different ways to monitor:
 
