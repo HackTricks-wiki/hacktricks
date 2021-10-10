@@ -408,7 +408,7 @@ This will trigger the payload which is present in the main.go file.
 
 For more information: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
-## Docker API Firewall Bypass
+## Docker Auth  Bypass
 
 In some occasions, the sysadmin may install some plugins to docker to avoid low privilege users to interact with docker without being able to escalate privileges.
 
@@ -522,8 +522,9 @@ This is not a technique to breakout from a Docker container but a security featu
 
 An authorization plugin **approves** or **denies** **requests** to the Docker **daemon** based on both the current **authentication** context and the **command** **context**. The **authentication** **context** contains all **user details** and the **authentication** **method**. The **command context** contains all the **relevant** **request** data.
 
-\
-
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
+{% endcontent-ref %}
 
 ### gVisor
 
