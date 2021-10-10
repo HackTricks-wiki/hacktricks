@@ -222,7 +222,9 @@ Note that by default **AppArmor** will also **forbid the container to mount** fo
 
 Note that you can **add/remove** **capabilities** to the docker container (this will be still restricted by protection methods like **AppArmor** and **Seccomp**):
 
-* `--cap-add=SYS_ADMIN`_ _give_ _SYS_ADMIN cap
+* `--cap-add=SYS_ADMIN`_ _give_ _`SYS_ADMIN` cap
+* `--cap-add=ALL`_ _give_ _all caps
+* `--cap-drop=ALL --cap-add=SYS_PTRACE` drop all caps and only give 
 
 {% hint style="info" %}
 Usually, when you **find** that you have a **privileged capability** available **inside** a **docker** container **but** some part of the **exploit isn't working**, this will be because docker **apparmor will be preventing it**.
