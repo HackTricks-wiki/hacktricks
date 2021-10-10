@@ -176,21 +176,12 @@ Note the method `.Block` of the interface `htb.oouch.Block` (the one we are inte
 
 With enough privileges (just `send_destination` and `receive_sender` privileges aren't enough) you can **monitor a D-Bus communication**.
 
-In order to **monitor** a **communication** you will need to be **root** 
-
-```xml
-<policy user="kali">
-    <!-- Allow everything to be received -->
-    <allow eavesdrop="true"/>
-    <allow send_destination="htb.oouch.Block"/>
-    <allow receive_sender="htb.oouch.Block"/>
-</policy>
-```
+In order to **monitor** a **communication** you will need to be **root. **If you still find problems being root check [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) and [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
 
 Different ways to monitor:
 
 ```bash
-busctl monitor htb.oouch.Block #Monitor only specified
+sudo busctl monitor htb.oouch.Block #Monitor only specified
 sudo busctl monitor #System level, even if this works you will only see messages you have permissions to see
 sudo dbus-monitor --system #System level, even if this works you will only see messages you have permissions to see
 ```
