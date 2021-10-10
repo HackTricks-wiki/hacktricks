@@ -174,7 +174,13 @@ Note the method `.Block` of the interface `htb.oouch.Block` (the one we are inte
 
 ### Monitor/Capture Interface
 
-With enough privileges (just `send_destination` and `receive_sender` privileges aren't enough) you can monitor a D-Bus communication. In the following example the interface `htb.oouch.Block` is monitored and **the message "**_**lalalalal**_**" is sent through miscommunication**:
+With enough privileges (just `send_destination` and `receive_sender` privileges aren't enough) you can **monitor a D-Bus communication**. In the following example the interface
+
+`In or`
+
+``
+
+`htb.oouch.Block` is monitored and **the message "**_**lalalalal**_**" is sent through miscommunication**:
 
 ```bash
 busctl monitor htb.oouch.Block
@@ -196,6 +202,8 @@ Monitoring bus message stream.
 ```
 
 You can use `capture` instead of `monitor` to save the results in a pcap file.
+
+
 
 ### More
 
