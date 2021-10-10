@@ -322,7 +322,9 @@ User=bob
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ```
 
-## Malicious Use
+##
+
+## CapabilitMalicious Use
 
 Capabilities are useful when you **want to restrict your own processes after performing privileged operations** (e.g. after setting up chroot and binding to a socket). However, they can be exploited by passing them malicious commands or arguments which are then run as root.
 
