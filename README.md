@@ -14,8 +14,6 @@ Here you can find a little **introduction:**
 
 ## [**Pentesting Methodology**](pentesting-methodology.md)
 
-## [**Pentesting Methodology**](pentesting-methodology.md)
-
 Here you will find the **typical flow** that **you should follow when pentesting** one or more **machines**.
 
 **Click in the title to start!**
