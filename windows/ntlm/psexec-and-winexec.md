@@ -9,7 +9,7 @@
 
 ## **Manually PsExec'ing**
 
-First let's assume we have a payload executable we generated with msfvenom and obfuscated with Veil \(so AV doesn't flag it\). In this case, I created a meterpreter reverse\_http payload and called it 'met8888.exe'
+First let's assume we have a payload executable we generated with msfvenom and obfuscated with Veil (so AV doesn't flag it). In this case, I created a meterpreter reverse_http payload and called it 'met8888.exe'
 
 **Copy the binary**. From our "jarrieta" command prompt, simply copy the binary to the ADMIN$. Really though, it could be copied and hidden anywhere on the filesystem.
 
@@ -33,7 +33,5 @@ Extracted from here: [https://blog.ropnop.com/using-credentials-to-own-windows-b
 
 **You could also use the Windows Sysinternals binary PsExec.exe:**
 
-![](../../.gitbook/assets/image%20%28151%29.png)
-
-
+![](<../../.gitbook/assets/image (165).png>)
 

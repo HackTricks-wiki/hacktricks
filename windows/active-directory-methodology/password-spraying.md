@@ -2,12 +2,12 @@
 
 ## **Password Spraying**
 
-Once you have found several **valid usernames** you can try the most **common passwords** \(keep in mind the password policy of the environment\) with each of the discovered users.  
+Once you have found several **valid usernames** you can try the most **common passwords** (keep in mind the password policy of the environment) with each of the discovered users.\
 By **default** the **minimum** **password** **length** is **7**.
 
 Lists of common usernames could also be useful: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Notice that you **could lockout some accounts if you try several wrong passwords** \(by default more than 10\).
+Notice that you **could lockout some accounts if you try several wrong passwords** (by default more than 10).
 
 ### Get password policy
 
@@ -25,7 +25,7 @@ Using **crackmapexec:**
 crackmapexec smb <IP> -u users.txt -p passwords.txt
 ```
 
-Using [kerbrute](https://github.com/TarlogicSecurity/kerbrute)\(python\) - NOT RECOMMENDED SOMETIMES DOESN'T WORK
+Using [kerbrute](https://github.com/TarlogicSecurity/kerbrute)(python) - NOT RECOMMENDED SOMETIMES DOESN'T WORK
 
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
@@ -34,7 +34,7 @@ python kerbrute.py -domain jurassic.park -users users.txt -password Password123 
 
 **Kerbrute** also tells if a username is valid.
 
-Using [kerbrute](https://github.com/ropnop/kerbrute)\(Go\)
+Using [kerbrute](https://github.com/ropnop/kerbrute)(Go)
 
 ```bash
 ./kerbrute_linux_amd64 passwordspray -d lab.ropnop.com domain_users.txt Password123
@@ -53,7 +53,7 @@ With [Rubeus](https://github.com/Zer1t0/Rubeus) version with brute module:
 
 With the `scanner/smb/smb_login` module of Metasploit:
 
-![](../../.gitbook/assets/image%20%28234%29.png)
+![](<../../.gitbook/assets/image (132).png>)
 
 With [Invoke-DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1)
 
@@ -61,7 +61,7 @@ With [Invoke-DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpra
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 
-or **spray** \(read next section\).
+or **spray** (read next section).
 
 ### Lockout check
 
@@ -77,11 +77,11 @@ spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod
 
 There are multiples tools for password spraying outlook.
 
-* With [MSF Owa\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-* with [MSF Owa\_ews\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-* With [Ruler](https://github.com/sensepost/ruler) \(reliable!\)
-* With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) \(Powershell\)
-* With [MailSniper](https://github.com/dafthack/MailSniper) \(Powershell\)
+* With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
+* with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+* With [Ruler](https://github.com/sensepost/ruler) (reliable!)
+* With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
+* With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
 To use any of these tools, you need a user list and a password / a small list of passwords to spray.
 
@@ -110,4 +110,3 @@ $ ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords pass
 * [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
 * www.blackhillsinfosec.com/?p=5296
 * [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
-

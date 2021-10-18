@@ -5,27 +5,37 @@
 * JAMF Pro: `jamf checkJSSConnection`
 * Kandji
 
-If you manage to **compromise admin credentials** to access the management platform, you can **potentially compromise all the computers** by distributing your malware in the machines.
+If you manage to** compromise admin credentials** to access the management platform, you can **potentially compromise all the computers** by distributing your malware in the machines.
 
 For red teaming in MacOS environments it's highly recommended to have some understanding of how the MDMs work:
 
-{% page-ref page="macos-mdm/" %}
+{% content-ref url="macos-mdm/" %}
+[macos-mdm](macos-mdm/)
+{% endcontent-ref %}
 
 And also about **MacOS** "special" **network** **protocols**:
 
-{% page-ref page="macos-protocols.md" %}
+{% content-ref url="macos-protocols.md" %}
+[macos-protocols.md](macos-protocols.md)
+{% endcontent-ref %}
 
 ## Active Directory
 
 In some occasions you will find that the **MacOS computer is connected to an AD**. In this scenario you should try to **enumerate** the active directory as you are use to it. Find some **help** in the following pages:
 
-{% page-ref page="../../pentesting/pentesting-ldap.md" %}
+{% content-ref url="../../pentesting/pentesting-ldap.md" %}
+[pentesting-ldap.md](../../pentesting/pentesting-ldap.md)
+{% endcontent-ref %}
 
-{% page-ref page="../../windows/active-directory-methodology/" %}
+{% content-ref url="../../windows/active-directory-methodology/" %}
+[active-directory-methodology](../../windows/active-directory-methodology/)
+{% endcontent-ref %}
 
-{% page-ref page="../../pentesting/pentesting-kerberos-88/" %}
+{% content-ref url="../../pentesting/pentesting-kerberos-88/" %}
+[pentesting-kerberos-88](../../pentesting/pentesting-kerberos-88/)
+{% endcontent-ref %}
 
-Some **local MacOS tool** that may also help you is `dscl`:
+Some **local MacOS tool **that may also help you is `dscl`:
 
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
@@ -34,12 +44,12 @@ dscl "/Active Directory/[Domain]/All Domains" ls /
 Also there are some tools prepared for MacOS to automatically enumerate the AD and play with kerberos:
 
 * [**Machound**](https://github.com/XMCyber/MacHound): MacHound is an extension to the Bloodhound audting tool allowing collecting and ingesting of Active Directory relationships on MacOS hosts.
-* \*\*\*\*[**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost is an Objective-C project designed to interact with the Heimdal krb5 APIs on macOS. The goal of the project is to enable better security testing around Kerberos on macOS devices using native APIs without requiring any other framework or packages on the target.
-* \*\*\*\*[**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation \(JXA\) tool to do Active Directory enumeration.
+* ****[**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost is an Objective-C project designed to interact with the Heimdal krb5 APIs on macOS. The goal of the project is to enable better security testing around Kerberos on macOS devices using native APIs without requiring any other framework or packages on the target.
+* ****[**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) tool to do Active Directory enumeration.
 
 ### Domain Information
 
-```text
+```
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
 
@@ -51,8 +61,8 @@ The three types of MacOS users are:
 * **Network Users** — Volatile Active Directory users who require a connection to the DC server to authenticate.
 * **Mobile Users** — Active Directory users with a local backup for their credentials and files.
 
-The local information about users and groups is stored in in the folder _/var/db/dslocal/nodes/Default._  
-For example, the info about user called _mark_ is stored in _/var/db/dslocal/nodes/Default/users/mark.plist_ and the info about the group _admin_ is in _/var/db/dslocal/nodes/Default/groups/admin.plist_.
+The local information about users and groups is stored in in the folder _/var/db/dslocal/nodes/Default._\
+__For example, the info about user called _mark_ is stored in _/var/db/dslocal/nodes/Default/users/mark.plist_ and the info about the group _admin_ is in _/var/db/dslocal/nodes/Default/groups/admin.plist_.
 
 In addition to using the HasSession and AdminTo edges, **MacHound adds three new edges** to the Bloodhound database:
 
@@ -86,15 +96,14 @@ More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Dis
 
 ## External Services
 
-MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** \(like github, aws...\) via OneLogin:
+MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** (like github, aws...) via OneLogin:
 
-![](../../.gitbook/assets/image%20%28562%29.png)
+![](<../../.gitbook/assets/image (563).png>)
 
-### 
+###
 
 ## References
 
 * [https://www.youtube.com/watch?v=IiMladUbL6E](https://www.youtube.com/watch?v=IiMladUbL6E)
 * [https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
 * [https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
-

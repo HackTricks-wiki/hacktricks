@@ -2,9 +2,9 @@
 
 ## Golden ticket
 
-A valid **TGT as any user** can be created **using the NTLM hash of the krbtgt AD account**. The advantage of forging a TGT instead of TGS is being **able to access any service** \(or machine\) in the domain and the impersonated user.
+A valid **TGT as any user **can be created **using the NTLM hash of the krbtgt AD account**. The advantage of forging a TGT instead of TGS is being **able to access any service** (or machine) in the domain and the impersonated user.
 
-The **krbtgt** account **NTLM hash** can be **obtained** from the **lsass process** or from the **NTDS.dit file** of any DC in the domain. It is also possible to get that NTLM through a **DCsync attack**, which can be performed either with the [lsadump::dcsync](https://github.com/gentilkiwi/mimikatz/wiki/module-~-lsadump) module of Mimikatz or the impacket example [secretsdump.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/secretsdump.py). Usually, **domain admin privileges or similar are required**, no matter what technique is used.
+The **krbtgt **account **NTLM hash** can be **obtained **from the **lsass process** or from the **NTDS.dit file **of any DC in the domain. It is also possible to get that NTLM through a **DCsync attack**, which can be performed either with the [lsadump::dcsync](https://github.com/gentilkiwi/mimikatz/wiki/module-\~-lsadump) module of Mimikatz or the impacket example [secretsdump.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/secretsdump.py). Usually, **domain admin privileges or similar are required**, no matter what technique is used.
 
 {% code title="From Linux" %}
 ```bash
@@ -22,7 +22,7 @@ klist #List tickets in memory
 ```
 {% endcode %}
 
-**Once** you have the **golden Ticket injected**, you can access the shared files **\(C$\)**, and execute services and WMI, so you could use **psexec** or **wmiexec** to obtain a shell \(looks like yo can not get a shell via winrm\).
+**Once **you have the **golden Ticket injected**, you can access the shared files **(C$)**, and execute services and WMI, so you could use **psexec **or **wmiexec **to obtain a shell (looks like yo can not get a shell via winrm).
 
 ### Mitigation
 
@@ -32,5 +32,4 @@ Golden ticket events ID:
 * 4672: Admin Logon
 * `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-\*\*\*\*[**More information about Golden Ticket in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)\*\*\*\*
-
+****[**More information about Golden Ticket in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)****

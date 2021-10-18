@@ -2,46 +2,13 @@
 
 ## Capabilities
 
-Normally the root user (or any ID with UID of 0) gets a special treatment when running processes. The kernel and applications are usually programmed to skip the restriction of some activities when seeing this user ID. In other words, this user is allowed to do (almost) anything.
-
-Linux capabilities provide a subset of the available root privileges to a process. This effectively breaks up root privileges into smaller and distinctive units. Each of these units can then be independently be granted to processes. This way the full set of privileges is reduced and decreasing the risks of exploitation.
+Linux capabilities **provide a subset of the available root privileges** to a process. This effectively breaks up root privileges into smaller and distinctive units. Each of these units can then be independently be granted to processes. This way the full set of privileges is reduced and decreasing the risks of exploitation.
 
 ### Why capabilities?
 
 To better understand how Linux capabilities work, let’s have a look first at the problem it tries to solve.
 
 Let’s assume we are running a process as a normal user. This means we are non-privileged. We can only access data that owned by us, our group, or which is marked for access by all users. At some point in time, our process needs a little bit more permissions to fulfill its duties, like opening a network socket. The problem is that normal users can not open a socket, as this requires root permissions.
-
-### List Capabilities
-
-```bash
-#You list all the capabilities with
-capsh --print
-```
-
-**Here you can find some capabilities with short descriptions**
-
-| Capabilities name       | Description                                                                                                                                 |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| CAP_AUDIT_CONTROL       | Allow to enable/disable kernel auditing                                                                                                     |
-| CAP_AUDIT_WRITE         | Helps to write records to kernel auditing log                                                                                               |
-| CAP_BLOCK_SUSPEND       | This feature can block system suspends                                                                                                      |
-| **CAP_CHOWN**           | Allow user to make arbitrary change to files UIDs and GIDs (full filesystem access)                                                         |
-| **CAP_DAC_OVERRIDE**    | This helps to bypass file read, write and execute permission checks (full filesystem access)                                                |
-| **CAP_DAC_READ_SEARCH** | This only bypass file and directory read/execute permission checks                                                                          |
-| CAP_FOWNER              | This enables to bypass permission checks on operations that normally require the filesystem UID of the process to match the UID of the file |
-| CAP_KILL                | Allow the sending of signals to processes belonging to others                                                                               |
-| CAP_SETGID              | Allow changing of the GID                                                                                                                   |
-| **CAP_SETUID**          | Allow changing of the UID (set UID of root in you process)                                                                                  |
-| CAP_SETPCAP             | Helps to transferring and removal of current set to any PID                                                                                 |
-| CAP_IPC_LOCK            | This helps to lock memory                                                                                                                   |
-| CAP_MAC_ADMIN           | Allow MAC configuration or state changes                                                                                                    |
-| **CAP_NET_RAW**         | Use RAW and PACKET sockets (sniff traffic)                                                                                                  |
-| CAP_NET_BIND_SERVICE    | SERVICE Bind a socket to internet domain privileged ports                                                                                   |
-| CAP_SYS_CHROOT          | Ability to call chroot()                                                                                                                    |
-| **CAP_SYS_ADMIN**       | Mount/Unmount filesystems                                                                                                                   |
-| **CAP_SYS_PTRACE**      | Debug processes (inject shellcodes)                                                                                                         |
-| **CAP_SYS_MODULE**      | Insert kernel modules                                                                                                                       |
 
 ### Capabilities Sets
 
@@ -68,6 +35,10 @@ For a detailed explanation of the difference between capabilities in threads and
 
 To see the capabilities for a particular process, use the **status** file in the /proc directory. As it provides more details, let’s limit it only to the information related to Linux capabilities.\
 Note that for all running processes capability information is maintained per thread, for binaries in the file system it’s stored in extended attributes.
+
+You can find the capabilities defined in /usr/include/linux/capability.h
+
+You can find the capabilities of the current process in `cat /proc/self/status` or doing `capsh --print` and of other users in `/proc/<pid>/status`
 
 ```bash
 cat /proc/1234/status | grep Cap
@@ -322,9 +293,26 @@ User=bob
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ```
 
-##
+## Capabilities in Docker Containers
 
-## CapabilitMalicious Use
+By default Docker assigns a few capabilities to the containers. It's very easy to check which capabilities are these by running:
+
+```bash
+docker run --rm -it  r.j3ss.co/amicontained bash
+Capabilities:
+	BOUNDING -> chown dac_override fowner fsetid kill setgid setuid setpcap net_bind_service net_raw sys_chroot mknod audit_write setfcap
+
+# Add a capabilities
+docker run --rm -it --cap-add=SYS_ADMIN r.j3ss.co/amicontained bash
+
+# Add all capabilities
+docker run --rm -it --cap-add=ALL r.j3ss.co/amicontained bash
+
+# Remove all and add only one
+docker run --rm -it  --cap-drop=ALL --cap-add=SYS_PTRACE r.j3ss.co/amicontained bash
+```
+
+## Malicious Use
 
 Capabilities are useful when you **want to restrict your own processes after performing privileged operations** (e.g. after setting up chroot and binding to a socket). However, they can be exploited by passing them malicious commands or arguments which are then run as root.
 
@@ -926,7 +914,7 @@ int main(int argc, char * argv[]) {
 I exploit needs to find a pointer to something mounted on the host. The original exploit used the file `/.dockerinit` and this modified version uses `/etc/hostname`. **If the exploit isn't working** maybe you need to set a different file. To find a file that is mounted in the host just execute `mount` command:
 {% endhint %}
 
-![](<../../.gitbook/assets/image (407).png>)
+![](<../../.gitbook/assets/image (407) (2).png>)
 
 **The code of this technique was copied from the laboratory of "Abusing DAC_READ_SEARCH Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
 

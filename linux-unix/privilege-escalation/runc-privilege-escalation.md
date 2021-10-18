@@ -2,9 +2,11 @@
 
 ## Basic information
 
-If you want to learn more about **runc** check the following page:
+If you want to learn more about **runc **check the following page:
 
-{% page-ref page="../../pentesting/2375-pentesting-docker.md" %}
+{% content-ref url="../../pentesting/2375-pentesting-docker.md" %}
+[2375-pentesting-docker.md](../../pentesting/2375-pentesting-docker.md)
+{% endcontent-ref %}
 
 ## PE
 
@@ -35,10 +37,8 @@ runc run demo
 ```
 
 {% hint style="danger" %}
-This won't always work as the default operation of runc is to run as root, so running it as an unprivileged user simply cannot work \(unless you have a rootless configuration\). Making a rootless configuration the default isn't generally a good idea because there are quite a few restrictions inside rootless containers that don't apply outside rootless containers.
+This won't always work as the default operation of runc is to run as root, so running it as an unprivileged user simply cannot work (unless you have a rootless configuration). Making a rootless configuration the default isn't generally a good idea because there are quite a few restrictions inside rootless containers that don't apply outside rootless containers.
 {% endhint %}
-
-
 
 
 

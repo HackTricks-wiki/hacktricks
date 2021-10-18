@@ -164,8 +164,8 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 
 If you are inside a docker container you can try to escape from it:
 
-{% content-ref url="docker-breakout.md" %}
-[docker-breakout.md](docker-breakout.md)
+{% content-ref url="docker-breakout/" %}
+[docker-breakout](docker-breakout/)
 {% endcontent-ref %}
 
 ## Drives
@@ -1122,7 +1122,7 @@ In **newest versions** you will be able to **connect** to screen sessions only o
 screen -ls
 ```
 
-![](<../../.gitbook/assets/image (327).png>)
+![](<../../.gitbook/assets/image (130).png>)
 
 **Attach to a session**
 
@@ -1143,7 +1143,7 @@ ps aux | grep tmux #Search for tmux consoles not using default folder for socket
 tmux -S /tmp/dev_sess ls #List using that socket, you can start a tmux session in that socket with: tmux -S /tmp/dev_sess
 ```
 
-![](<../../.gitbook/assets/image (126).png>)
+![](<../../.gitbook/assets/image (131).png>)
 
 **Attach to a session**
 

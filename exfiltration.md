@@ -1,6 +1,6 @@
 # Exfiltration
 
-## Copy&Paste Base64
+## Copy\&Paste Base64
 
 #### Linux
 
@@ -11,7 +11,7 @@ base64 -d file #Decode file
 
 #### Windows
 
-```text
+```
 certutil -encode payload.dll payload.b64
 certutil -decode payload.b64 payload.dll
 ```
@@ -46,7 +46,7 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 
 ### Upload files
 
-\*\*\*\*[**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)\*\*\*\*
+****[**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)****
 
 ### **HTTPS Server**
 
@@ -70,21 +70,21 @@ httpd.serve_forever()
 
 ## FTP
 
-### FTP server \(python\)
+### FTP server (python)
 
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
 
-### FTP server \(NodeJS\)
+### FTP server (NodeJS)
 
-```text
+```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
 
-### FTP server \(pure-ftp\)
+### FTP server (pure-ftp)
 
 ```bash
 apt-get update && apt-get install pure-ftp
@@ -128,7 +128,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
 
-Or create a **smb** share **using samba**:
+Or create a **smb **share **using samba**:
 
 ```bash
 apt-get install samba
@@ -220,7 +220,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 
 ## TFTP
 
-By default in XP and 2003 \(in others it need to be explicitly added during installation\)
+By default in XP and 2003 (in others it need to be explicitly added during installation)
 
 In Kali, **start TFTP server**:
 
@@ -298,13 +298,13 @@ This is a crazy technique that works on Windows 32 bit machines. Basically the i
 
 `Debug.exe` can only assemble 64 kb. So we need to use files smaller than that. We can use upx to compress it even more. So let's do that:
 
-```text
+```
 upx -9 nc.exe
 ```
 
 Now it only weights 29 kb. Perfect. So now let's disassemble it:
 
-```text
+```
 wine exe2bat.exe nc.exe nc.txt
 ```
 
@@ -313,4 +313,3 @@ Now we just copy-paste the text into our windows-shell. And it will automaticall
 ## DNS
 
 [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
-

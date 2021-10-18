@@ -1,12 +1,10 @@
 # D-Bus Enumeration & Command Injection Privilege Escalation
 
-**The examples of this page are based on the Oouch box from HTB.**
-
 ## **GUI enumeration**
 
 **(This enumeration info was taken from **[**https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/**](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)**)**
 
-Ubuntu desktop utilizes D-Bus as its inter-process communications (IPC) mediator. On Ubuntu, there are several message buses that run concurrently: A system bus, which is mainly used by privileged services to expose system-wide relevant services, and one session bus for each logged in user, which exposes services that are only relevant to that specific user. Since we will try to elevate our privileges, we will mainly focus on the system bus as the services there tend to run with higher privileges (i.e. root). Note that the D-Bus architecture utilizes one ‘router’ per session bus, which redirects client messages to the relevant services they are trying to interact with. Clients need to specify the address of the service to which they want to send messages.
+Ubuntu desktop utilizes D-Bus as its inter-process communications (IPC) mediator. On Ubuntu, there are several message buses that run concurrently: A system bus, which is mainly used by **privileged services to expose system-wide relevant services**, and one session bus for each logged in user, which exposes services that are only relevant to that specific user. Since we will try to elevate our privileges, we will mainly focus on the system bus as the services there tend to run with higher privileges (i.e. root). Note that the D-Bus architecture utilizes one ‘router’ per session bus, which redirects client messages to the relevant services they are trying to interact with. Clients need to specify the address of the service to which they want to send messages.
 
 Each service is defined by the **objects **and **interfaces** that it exposes. We can think of objects as instances of classes in standard OOP languages. Each unique instance is identified by its **object path** – a string which resembles a file system path that uniquely identifies each object that the service exposes. A standard interface that will help with our research is the **org.freedesktop.DBus.Introspectable** interface. It contains a single method, Introspect, which returns an XML representation of the methods, signals and properties supported by the object. This blog post focuses on methods and ignores properties and signals.
 
@@ -24,9 +22,9 @@ _Figure 1. D-Feet main window_
 
 _Figure 2. D-Feet interface window_
 
-D-Feet is an excellent tool that proved essential during my research. On the left pane in Figure 1 you can see all the various services that have registered with the D-Bus daemon system bus (note the select System Bus button on the top). I selected the **org.debin.apt** service, and D-Feet automatically queried the service for all the available objects. Once I selected a specific object, the set of all interfaces, with their respective methods properties and signals are listed, as seen in Figure 2. Note that we also get the signature of each IPC exposed method.
+On the left pane in Figure 1 you can see all the various services that have registered with the D-Bus daemon system bus (note the select System Bus button on the top). I selected the **org.debin.apt** service, and D-Feet automatically **queried the service for all the available objects**. Once I selected a specific object, the set of all interfaces, with their respective methods properties and signals are listed, as seen in Figure 2. Note that we also get the signature of each **IPC exposed method**.
 
-We can also see the pid of the process that hosts each service, as well as its command line. This is a very useful feature, since we can validate that the target service we are inspecting indeed runs with higher privileges. Some services on the System bus don’t run as root, and thus are less interesting to research.
+We can also see the** pid of the process** that hosts each service, as well as its **command line**. This is a very useful feature, since we can validate that the target service we are inspecting indeed runs with higher privileges. Some services on the System bus don’t run as root, and thus are less interesting to research.
 
 D-Feet also allows one to call the various methods. In the method input screen we can specify a list of Python expressions, delimited by commas, to be interpreted as the parameters to the invoked function, shown in Figure 3. Python types are marshaled to D-Bus types and passed to the service.
 
@@ -40,7 +38,7 @@ Some methods require authentication before allowing us to invoke them. We will i
 
 _Figure 4. A method that requires authorization_
 
-Also note that some of the services query another D-Bus service named org.freedeskto.PolicyKit1 whether a user should be allowed to perform certain actions or not. We will come back to this later in this blog post.
+Also note that some of the services query another D-Bus service named org.freedeskto.PolicyKit1 whether a user should be allowed to perform certain actions or not.
 
 ## **Cmd line Enumeration**
 
@@ -71,6 +69,10 @@ org.freedesktop.PolicyKit1               - -               -                (act
 org.freedesktop.hostname1                - -               -                (activatable) -                         - 
 org.freedesktop.locale1                  - -               -                (activatable) -                         - 
 ```
+
+#### Connections
+
+When a process sets up a connection to a bus, the bus assigns to the connection a special bus name called _unique connection name_. Bus names of this type are immutable—it's guaranteed they won't change as long as the connection exists—and, more importantly, they can't be reused during the bus lifetime. This means that no other connection to that bus will ever have assigned such unique connection name, even if the same process closes down the connection to the bus and creates a new one. Unique connection names are easily recognizable because they start with the—otherwise forbidden—colon character.
 
 ### Service Object Info
 
@@ -241,7 +243,7 @@ See the [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification
 
 ## **Vulnerable Scenario**
 
-As user **qtc inside the host "oouch" **you can find an **unexpected D-Bus config file** located in_ /etc/dbus-1/system.d/htb.oouch.Block.conf_:
+As user **qtc inside the host "oouch" from HTB **you can find an **unexpected D-Bus config file** located in_ /etc/dbus-1/system.d/htb.oouch.Block.conf_:
 
 ```markup
 <?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->

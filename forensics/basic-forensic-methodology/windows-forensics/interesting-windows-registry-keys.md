@@ -16,29 +16,29 @@
 
 ### Last Access Time
 
-* **`System\ControlSet001\Control\Filesystem`**: Last time access \(by default it's disabled with `NtfsDisableLastAccessUpdate=1`, if `0`, then, it's enabled\).
+* **`System\ControlSet001\Control\Filesystem`**: Last time access (by default it's disabled with `NtfsDisableLastAccessUpdate=1`, if `0`, then, it's enabled).
   * To enable it: `fsutil behavior set disablelastaccess 0`
 
 ### Shutdown Time
 
 * `System\ControlSet001\Control\Windows`: Shutdown time
-* `System\ControlSet001\Control\Watchdog\Display`: Shutdown count \(only XP\)
+* `System\ControlSet001\Control\Watchdog\Display`: Shutdown count (only XP)
 
 ### Network Information
 
 * **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**: Network interfaces
 * **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Unmanaged` & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed` & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Nla\Cache`**: First and last time a network connection was performed and connections through VPN
-* **`Software\Microsoft\WZCSVC\Parameters\Interfaces{GUID}` \(for XP\) & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles`**: Network type \(0x47-wireless, 0x06-cable, 0x17-3G\) an category \(0-Public, 1-Private/Home, 2-Domain/Work\) and last connections
+* **`Software\Microsoft\WZCSVC\Parameters\Interfaces{GUID}` (for XP) & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles`**: Network type (0x47-wireless, 0x06-cable, 0x17-3G) an category (0-Public, 1-Private/Home, 2-Domain/Work) and last connections
 
 ### Shared Folders
 
-* **`System\ControlSet001\Services\lanmanserver\Shares\`**: Share folders and their configurations. If **Client Side Caching** \(CSCFLAGS\) is enabled, then, a copy of the shared files will be saved in the clients and server in `C:\Windows\CSC` 
-  * CSCFlag=0 -&gt; By default the user needs to indicate the files that he wants to cache
-  * CSCFlag=16 -&gt; Automatic caching documents. “All files and programs that users open from the shared folder are automatically available offline” with the “optimize for performance" unticked.
-  * CSCFlag=32 -&gt; Like the previous options by “optimize for performance”  is ticked
-  * CSCFlag=48 -&gt; Cache is disabled.
+* **`System\ControlSet001\Services\lanmanserver\Shares\`**: Share folders and their configurations. If **Client Side Caching** (CSCFLAGS) is enabled, then, a copy of the shared files will be saved in the clients and server in `C:\Windows\CSC` 
+  * CSCFlag=0 -> By default the user needs to indicate the files that he wants to cache
+  * CSCFlag=16 -> Automatic caching documents. “All files and programs that users open from the shared folder are automatically available offline” with the “optimize for performance" unticked.
+  * CSCFlag=32 -> Like the previous options by “optimize for performance”  is ticked
+  * CSCFlag=48 -> Cache is disabled.
   * CSCFlag=2048: This setting is only on Win 7 & 8 and is the default setting until you disable “Simple file sharing” or use the “advanced” sharing option. It also appears to be the default setting for the “Homegroup”
-  * CSCFlag=768 -&gt; This setting was only seen on shared Print devices.
+  * CSCFlag=768 -> This setting was only seen on shared Print devices.
 
 ### AutoStart programs
 
@@ -54,7 +54,7 @@
 
 ### Typed Paths
 
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: Paths types in the explorer \(only W10\)
+* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: Paths types in the explorer (only W10)
 
 ### Recent Docs
 
@@ -75,7 +75,7 @@
 
 Indicates the path from where the executable was executed
 
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\Op enSaveMRU` \(XP\)
+* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\Op enSaveMRU` (XP)
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\Op enSavePidlMRU`
 
 Indicates files opened inside an opened Window
@@ -93,7 +93,7 @@ The GUID is the id of the application. Data saved:
 
 * Last Run Time
 * Run Count
-* GUI application name \(this contains the abs path and more information\)
+* GUI application name (this contains the abs path and more information)
 * Focus time and Focus name
 
 ## Shellbags
@@ -110,50 +110,50 @@ Desktop Access:
 * `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU`
 * `NTUSER.DAT\Software\Microsoft\Windows\Shell\Bags`
 
-To analyze the Shellbags you can use [**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md) **\*\*and you will be able to find the** MAC time of the folder **and also the** creation date and modified date of the shellbag **which are related with the** first time the folder was accessed and the last time\*\*.
+To analyze the Shellbags you can use [**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md) **\*\*and you will be able to find the **MAC time of the folder** and also the **creation date and modified date of the shellbag** which are related with the **first time the folder was accessed and the last time\*\*.
 
 Note 2 things from the following image:
 
 1. We know the **name of the folders of the USB** that was inserted in **E:**
 2. We know when the **shellbag was created and modified** and when the folder was created an accessed
 
-![](../../../.gitbook/assets/image%20%28475%29.png)
+![](<../../../.gitbook/assets/image (475).png>)
 
 ## USB information
 
 ### Device Info
 
-The registry `HKLM\SYSTEM\ControlSet001\Enum\USBSTOR` monitors each USB device that has been connected to the PC.  
+The registry `HKLM\SYSTEM\ControlSet001\Enum\USBSTOR` monitors each USB device that has been connected to the PC.\
 Within this registry it's possible to find:
 
 * The manufacturer's name
 * The product name and version
 * The Device Class ID
-* The volume name \(in the following images the volume name is the highlighted subkey\)
+* The volume name (in the following images the volume name is the highlighted subkey)
 
-![](../../../.gitbook/assets/image%20%28489%29.png)
+![](<../../../.gitbook/assets/image (477).png>)
 
-![](../../../.gitbook/assets/image%20%28479%29%20%281%29.png)
+![](<../../../.gitbook/assets/image (479) (1) (1).png>)
 
 Moreover, checking the registry `HKLM\SYSTEM\ControlSet001\Enum\USB` and comparing the values of the sub-keys it's possible to find the VID value
 
-![](../../../.gitbook/assets/image%20%28476%29.png)
+![](<../../../.gitbook/assets/image (478).png>)
 
 With the previous information the registry `SOFTWARE\Microsoft\Windows Portable Devices\Devices` can be used to obtain the **`{GUID}`**:
 
-![](../../../.gitbook/assets/image%20%28486%29.png)
+![](<../../../.gitbook/assets/image (480).png>)
 
 ### User that used the device
 
-Having the **{GUID}** of the device it's now possible to **check all the NTUDER.DAT hives of all the users** searching for the GUID until you find it in one of them \(`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\Mountpoints2`\)
+Having the **{GUID}** of the device it's now possible to **check all the NTUDER.DAT hives of all the users** searching for the GUID until you find it in one of them (`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\Mountpoints2`)
 
-![](../../../.gitbook/assets/image%20%28485%29.png)
+![](<../../../.gitbook/assets/image (481).png>)
 
 ### Last mounted
 
-Checking the registry `System\MoutedDevices` it's possible to find out **which device was the last one mounted**. In the following image check how the last device mounted in `E:` is the Thoshiba one \(using the tool Registry Explorer\).
+Checking the registry `System\MoutedDevices` it's possible to find out **which device was the last one mounted**. In the following image check how the last device mounted in `E:` is the Thoshiba one (using the tool Registry Explorer).
 
-![](../../../.gitbook/assets/image%20%28483%29%20%281%29.png)
+![](<../../../.gitbook/assets/image (483) (1).png>)
 
 ### Volume Serial Number
 
@@ -173,5 +173,4 @@ In `System\ControlSet001\Enum\USBSTOR{VEN_PROD_VERSION}{USB serial}\Properties{8
 * 0066 -- Last connection
 * 0067 -- Disconnection
 
-![](../../../.gitbook/assets/image%20%28488%29.png)
-
+![](<../../../.gitbook/assets/image (482).png>)

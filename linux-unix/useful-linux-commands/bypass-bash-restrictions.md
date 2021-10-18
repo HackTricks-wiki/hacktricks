@@ -128,7 +128,7 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 
 ## DNS data exfiltration
 
-You could use **burpcollab** or [**pingb**](http://pingb.in/) ****for example.
+You could use **burpcollab** or [**pingb**](http://pingb.in)** **for example.
 
 ## Polyglot command injection
 
@@ -139,11 +139,10 @@ You could use **burpcollab** or [**pingb**](http://pingb.in/) ****for example.
 
 ## References & More
 
-{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection\#exploits" caption="" %}
+{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits" %}
 
-{% embed url="https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet" caption="" %}
+{% embed url="https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet" %}
 
-{% embed url="https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0" caption="" %}
+{% embed url="https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0" %}
 
-{% embed url="https://www.secjuice.com/web-application-firewall-waf-evasion/" caption="" %}
-
+{% embed url="https://www.secjuice.com/web-application-firewall-waf-evasion/" %}

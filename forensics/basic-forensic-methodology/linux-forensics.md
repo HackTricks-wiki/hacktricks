@@ -4,7 +4,7 @@
 
 ### Basic Information
 
-First of all, it's recommended to have some **USB** with **good known binaries and libraries on it** \(you can just get a ubuntu and copy the folders _/bin_, _/sbin_, _/lib,_ and _/lib64_\), then mount the USN, and modify the env variables to use those binaries:
+First of all, it's recommended to have some **USB **with **good known binaries and libraries on it** (you can just get a ubuntu and copy the folders _/bin_, _/sbin_, _/lib,_ and _/lib64_), then mount the USN, and modify the env variables to use those binaries:
 
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
@@ -35,21 +35,21 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 
 While obtaining the basic information you should check for weird things like:
 
-* **root processes** usually run with low PIDS, so if you find a root process with a big PID you may suspect
-* Check **registered logins** of users without a shell inside `/etc/passwd`
-* Check for **password hashes** inside `/etc/shadow` for users without a shell
+* **root processes **usually run with low PIDS, so if you find a root process with a big PID you may suspect
+* Check **registered logins **of users without a shell inside `/etc/passwd`
+* Check for **password hashes **inside `/etc/shadow` for users without a shell
 
 ### Memory Dump
 
-In order to obtain the memory of the running system it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).  
-In order to **compile** it you need to use the **exact same kernel** the victim machine is using.
+In order to obtain the memory of the running system it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).\
+In order to **compile **it you need to use the **exact same kernel** the victim machine is using.
 
 {% hint style="info" %}
 Remember that you **cannot install LiME or any other thing** in the victim machine it will make several changes to it
 {% endhint %}
 
-So, if you have an identical version of Ubuntu you can use `apt-get install lime-forensics-dkms`  
-In other cases you need to download [**LiME**](https://github.com/504ensicsLabs/LiME) from github can compile it with correct kernel headers. In order to **obtain the exact kernel headers** of the victim machine, you can just **copy the directory** `/lib/modules/<kernel version>` to your machine, and then **compile** LiME using them:
+So, if you have an identical version of Ubuntu you can use `apt-get install lime-forensics-dkms`\
+In other cases you need to download [**LiME**](https://github.com/504ensicsLabs/LiME) from github can compile it with correct kernel headers. In order to **obtain the exact kernel headers** of the victim machine, you can just **copy the directory **`/lib/modules/<kernel version>` to your machine, and then **compile **LiME using them:
 
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
@@ -58,18 +58,18 @@ sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 
 LiME supports 3 **formats**:
 
-* Raw \(every segment concatenated together\)
-* Padded \(same as raw, but with zeroes in right bits\)
-* Lime \(recommended format with metadata
+* Raw (every segment concatenated together)
+* Padded (same as raw, but with zeroes in right bits)
+* Lime (recommended format with metadata
 
-LiME can also be use to **send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
+LiME can also be use to** send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
 
 ### Disk Imaging
 
 #### Shutting down
 
-First of all you will need to **shutdown the system**. This isn't always an option as some times system will be a production server that the company cannot afford to shutdown.  
-There are **2 ways** of shutting down the system, a **normal shutdown** and a **"plug the plug" shutdown**. The first one will allow the **processes to terminate as usual** and the **filesystem** to be **synchronized**, but I will also allow the possible **malware** to **destroy evidences**. The "pull the plug" approach may carry **some information loss** \(as we have already took an image of the memory not much info is going to be lost\) and the **malware won't have any opportunity** to do anything about it. Therefore, if you **suspect** that there may be a **malware**, just execute the **`sync`** **command** on the system and pull the plug.
+First of all you will need to** shutdown the system**. This isn't always an option as some times system will be a production server that the company cannot afford to shutdown.\
+There are **2 ways** of shutting down the system, a **normal shutdown** and a **"plug the plug" shutdown**. The first one will allow the **processes to terminate as usual** and the **filesystem **to be **synchronized**, but I will also allow the possible **malware **to **destroy evidences**. The "pull the plug" approach may carry **some information loss** (as we have already took an image of the memory not much info is going to be lost) and the **malware won't have any opportunity** to do anything about it. Therefore, if you **suspect **that there may be a **malware**, just execute the **`sync`** **command **on the system and pull the plug.
 
 #### Taking an image of the disk
 
@@ -159,13 +159,15 @@ debsums | grep -v "OK$" #apt-get install debsums
 
 Read the following page to learn about tools that can be useful to find malware:
 
-{% page-ref page="malware-analysis.md" %}
+{% content-ref url="malware-analysis.md" %}
+[malware-analysis.md](malware-analysis.md)
+{% endcontent-ref %}
 
 ## Search installed programs
 
 ### Package Manager
 
-On Debian-based systems, the _**/var/ lib/dpkg/status**_ file contains details about installed packages and the _**/var/log/dpkg.log**_ file records information when a package is installed.  
+On Debian-based systems, the _**/var/ lib/dpkg/status**_ file contains details about installed packages and the _**/var/log/dpkg.log**_ file records information when a package is installed.\
 On RedHat and related Linux distributions the **`rpm -qa --root=/ mntpath/var/lib/rpm`** command will list the contents of an RPM database on a subject systems.
 
 ```bash
@@ -184,7 +186,7 @@ rpm -qa --root=/ mntpath/var/lib/rpm
 ls /opt /usr/local
 ```
 
-Another good idea is to **check** the **common folders** inside **$PATH** for **binaries not related** to **installed packages:**
+Another good idea is to **check **the **common folders **inside **$PATH** for **binaries not related** to **installed packages:**
 
 ```bash
 #Both lines are going to print the executables in /sbin non related to installed packages
@@ -234,7 +236,7 @@ On Linux systems, kernel modules are commonly used as rootkit components to malw
 There are several configuration files that Linux uses to automatically launch an executable when a user logs into the system that may contain traces of malware.
 
 * _**/etc/profile.d/\***_ , _**/etc/profile**_ , _**/etc/bash.bashrc**_ are executed when any user account logs in.
-* _**∼/.bashrc**_ , _**∼/.bash\_profile**_ , _**~/.profile**_ ,  _**∼/.config/autostart**_ are executed when the specific user logs in.
+* _**∼/.bashrc **_, _**∼/.bash_profile**_ , _**\~/.profile**_ ,  _**∼/.config/autostart**_ are executed when the specific user logs in.
 * _**/etc/rc.local**_ It is traditionally executed after all the normal system services are started, at the end of the process of switching to a multiuser runlevel.
 
 ## Examine Logs
@@ -243,24 +245,24 @@ Look in all available log files on the compromised system for traces of maliciou
 
 ### Pure Logs
 
-**Logon** events recorded in the system and security logs, including logons via the network, can reveal that **malware** or an **intruder gained access** to a compromised system via a given account at a specific time. Other events around the time of a malware infection can be captured in system logs, including the **creation** of a **new** **service** or new accounts around the time of an incident.  
+**Logon **events recorded in the system and security logs, including logons via the network, can reveal that **malware **or an **intruder gained access **to a compromised system via a given account at a specific time. Other events around the time of a malware infection can be captured in system logs, including the **creation **of a **new** **service **or new accounts around the time of an incident.\
 Interesting system logons:
 
-*  **/var/log/syslog** \(debian\) ****or **/var/log/messages** \(Redhat\)
+*  **/var/log/syslog **(debian)** **or **/var/log/messages **(Redhat)
   * Shows general messages and info regarding the system. Basically a data log of all activity throughout the global system.
-*  **/var/log/auth.log** \(debian\) ****or **/var/log/secure** \(Redhat\)
+*  **/var/log/auth.log **(debian)** **or **/var/log/secure **(Redhat)
   * Keep authentication logs for both successful or failed logins, and authentication processes. Storage depends on system type.
   * `cat /var/log/auth.log | grep -iE "session opened for|accepted password|new session|not in sudoers"`
 * **/var/log/boot.log**: start-up messages and boot info.
-* **/var/log/maillog** or **var/log/mail.log:** is for mail server logs, handy for postfix, smtpd, or email-related services info running on your server.
-* **/var/log/kern.log**: keeps in Kernel logs and warning info. Kernel activity logs \(e.g., dmesg, kern.log, klog\) can show that a particular service crashed repeatedly, potentially indicating that an unstable trojanized version was installed.
+* **/var/log/maillog **or **var/log/mail.log:** is for mail server logs, handy for postfix, smtpd, or email-related services info running on your server.
+* **/var/log/kern.log**: keeps in Kernel logs and warning info. Kernel activity logs (e.g., dmesg, kern.log, klog) can show that a particular service crashed repeatedly, potentially indicating that an unstable trojanized version was installed.
 * **/var/log/dmesg**: a repository for device driver messages. Use **dmesg** to see messages in this file.
 * **/var/log/faillog:** records info on failed logins. Hence, handy for examining potential security breaches like login credential hacks and brute-force attacks.
-* **/var/log/cron**: keeps a record of Crond-related messages \(cron jobs\). Like when the cron daemon started a job.
+* **/var/log/cron**: keeps a record of Crond-related messages (cron jobs). Like when the cron daemon started a job.
 * **/var/log/daemon.log:** keeps track of running background services but doesn’t represent them graphically.
 * **/var/log/btmp**: keeps a note of all failed login attempts.
-* **/var/log/httpd/**: a directory containing error\_log and access\_log files of the Apache httpd daemon. Every error that httpd comes across is kept in the **error\_log** file. Think of memory problems and other system-related errors. **access\_log** logs all requests which come in via HTTP.
-* **/var/log/mysqld.log** or **/var/log/mysql.log** : MySQL log file that records every  debug, failure and success message, including starting, stopping and restarting of MySQL daemon mysqld. The system decides on the directory. RedHat, CentOS, Fedora, and other RedHat-based systems use /var/log/mariadb/mariadb.log. However, Debian/Ubuntu use /var/log/mysql/error.log directory.
+* **/var/log/httpd/**: a directory containing error_log and access_log files of the Apache httpd daemon. Every error that httpd comes across is kept in the **error_log **file. Think of memory problems and other system-related errors. **access_log** logs all requests which come in via HTTP.
+* **/var/log/mysqld.log **or** /var/log/mysql.log **: MySQL log file that records every  debug, failure and success message, including starting, stopping and restarting of MySQL daemon mysqld. The system decides on the directory. RedHat, CentOS, Fedora, and other RedHat-based systems use /var/log/mariadb/mariadb.log. However, Debian/Ubuntu use /var/log/mysql/error.log directory.
 * **/var/log/xferlog**: keeps FTP file transfer sessions. Includes info like file names and user-initiated FTP transfers.
 * **/var/log/\*** : You should always check for unexpected logs in this directory
 
@@ -272,48 +274,48 @@ Linux system logs and audit subsystems may be disabled or deleted in an intrusio
 
 Many Linux systems are configured to maintain a command history for each user account:
 
-* ~/.bash\_history
-* ~/.history
-* ~/.sh\_history
-* ~/.\*\_history
+* \~/.bash_history
+* \~/.history
+* \~/.sh_history
+* \~/.\*\_history
 
 ### Logins
 
-Using the command `last -Faiwx` it's possible to get the list of users that have logged in.  
+Using the command `last -Faiwx` it's possible to get the list of users that have logged in.\
 It's recommended to check if those logins make sense:
 
 * Any unknown user?
 * Any user that shouldn't have a shell has logged in?
 
-This is important as **attackers** some times may copy `/bin/bash` inside `/bin/false` so users like **lightdm** may be **able to login**.
+This is important as **attackers **some times may copy `/bin/bash` inside `/bin/false` so users like **lightdm **may be **able to login**.
 
 Note that you can also **take a look to this information reading the logs**.
 
 ### Application Traces
 
-* **SSH**: Connections to systems made using SSH to and from a compromised system result in entries being made in files for each user account \(_**∼/.ssh/authorized\_keys**_ and _**∼/.ssh/known\_keys**_\). These entries can reveal the hostname or IP address of the remote hosts.
+* **SSH**: Connections to systems made using SSH to and from a compromised system result in entries being made in files for each user account (_**∼/.ssh/authorized_keys**_ and _**∼/.ssh/known_keys**_). These entries can reveal the hostname or IP address of the remote hosts.
 * **Gnome Desktop**: User accounts may have a _**∼/.recently-used.xbel**_ file that contains information about files that were recently accessed using applications running in the Gnome desktop.
 * **VIM**: User accounts may have a _**∼/.viminfo**_ file that contains details about the use of VIM, including search string history and paths to files that were opened using vim.
 * **Open Office**: Recent files.
-* **MySQL**: User accounts may have a _**∼/.mysql\_history**_ file that contains queries executed using MySQL.
+* **MySQL**: User accounts may have a _**∼/.mysql_history**_ file that contains queries executed using MySQL.
 * **Less**: User accounts may have a _**∼/.lesshst**_ file that contains details about the use of less, including search string history and shell commands executed via less
 
 ### USB Logs
 
- [**usbrip**](https://github.com/snovvcrash/usbrip) is a small piece of software written in pure Python 3 which parses Linux log files \(`/var/log/syslog*` or `/var/log/messages*` depending on the distro\) for constructing USB event history tables.
+ [**usbrip**](https://github.com/snovvcrash/usbrip) is a small piece of software written in pure Python 3 which parses Linux log files (`/var/log/syslog*` or `/var/log/messages*` depending on the distro) for constructing USB event history tables.
 
-It is interesting to **know all the USBs that have been used** and it will be more useful if you have an authorized list of USB to find "violation events" \(the use of USBs that aren't inside that list\).
+It is interesting to **know all the USBs that have been used** and it will be more useful if you have an authorized list of USB to find "violation events" (the use of USBs that aren't inside that list).
 
 ### Installation
 
-```text
+```
 pip3 install usbrip
 usbrip ids download #Downloal USB ID database
 ```
 
 ### Examples
 
-```text
+```
 usbrip events history #Get USB history of your curent linux machine
 usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR user
 #Search for vid and/or pid
@@ -325,31 +327,31 @@ More examples and info inside the github: [https://github.com/snovvcrash/usbrip]
 
 ## Review User Accounts and Logon Activities
 
-Examine the _**/etc/passwd**_, _**/etc/shadow**_ and **security logs** for unusual names or accounts created and/or used in close proximity to known unauthorized events. Also check possible sudo brute-force attacks.  
-Moreover, check files like _**/etc/sudoers**_ and _**/etc/groups**_ for unexpected privileges given to users.  
-Finally look for accounts with **no passwords** or **easily guessed** passwords.
+Examine the _**/etc/passwd**_, _**/etc/shadow**_ and** security logs** for unusual names or accounts created and/or used in close proximity to known unauthorized events. Also check possible sudo brute-force attacks.\
+Moreover, check files like _**/etc/sudoers**_ and _**/etc/groups**_ for unexpected privileges given to users.\
+Finally look for accounts with **no passwords **or **easily guessed **passwords.
 
 ## Examine File System
 
-File system data structures can provide substantial amounts of **information** related to a **malware** incident, including the **timing** of events and the actual **content** of **malware**.  
-**Malware** is increasingly being designed to **thwart file system analysis**. Some malware alter date-time stamps on malicious files to make it more difficult to find them with time line analysis. Other malicious code is designed to only store certain information in memory to minimize the amount of data stored in the file system.  
+File system data structures can provide substantial amounts of **information **related to a **malware **incident, including the **timing **of events and the actual **content **of **malware**.\
+**Malware **is increasingly being designed to **thwart file system analysis**. Some malware alter date-time stamps on malicious files to make it more difficult to find them with time line analysis. Other malicious code is designed to only store certain information in memory to minimize the amount of data stored in the file system.\
 To deal with such anti-forensic techniques, it is necessary to pay **careful attention to time line analysis** of file system date-time stamps and to files stored in common locations where malware might be found.
 
-* Using **autopsy** you can see the timeline of events that may be useful to discover suspicions activity. You can also use the `mactime` feature from **Sleuth Kit** directly.
-* Check for **unexpected scripts** inside **$PATH** \(maybe some sh or php scripts?\)
+* Using **autopsy **you can see the timeline of events that may be useful to discover suspicions activity. You can also use the `mactime` feature from **Sleuth Kit **directly.
+* Check for **unexpected scripts **inside **$PATH** (maybe some sh or php scripts?)
 * Files in `/dev` use to be special files, you may find non-special files here related to malware.
-* Look for unusual or **hidden files** and **directories**, such as “.. ” \(dot dot space\) or “..^G ” \(dot dot control-G\)
+* Look for unusual or **hidden files **and **directories**, such as “.. ” (dot dot space) or “..^G ” (dot dot control-G)
 * setuid copies of /bin/bash on the system `find / -user root -perm -04000 –print`
 * Review date-time stamps of deleted **inodes for large numbers of files being deleted around the same time**, which might indicate malicious activity such as installation of a rootkit or trojanized service.
 * Because inodes are allocated on a next available basis, **malicious files placed on the system at around the same time may be assigned consecutive inodes**. Therefore, after one component of malware is located, it can be productive to inspect neighbouring inodes.
 * Also check directories like _/bin_ or _/sbin_ as the **modified and/or changed time** of new or modified files me be interesting.
-* It's interesting to see the files and folders of a directory **sorted by creation date** instead alphabetically to see which files/folders are more recent \(last ones usually\).
+* It's interesting to see the files and folders of a directory **sorted by creation date** instead alphabetically to see which files/folders are more recent (last ones usually).
 
-You can check the most recent files of a folder using `ls -laR --sort=time /bin`  
+You can check the most recent files of a folder using `ls -laR --sort=time /bin`\
 You can check the inodes of the files inside a folder using `ls -lai /bin |sort -n` 
 
 {% hint style="info" %}
-Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modify at the **same time** of the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
+Note that an **attacker **can **modify **the **time **to make **files appear** **legitimate**, but he **cannot **modify the **inode**. If you find that a **file **indicates that it was created and modify at the **same time **of the rest of the files in the same folder, but the **inode **is **unexpectedly bigger**, then the **timestamps of that file were modified**.
 {% endhint %}
 
 ## Compare files of different filesystem versions
@@ -376,14 +378,13 @@ git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2
 
 **`-diff-filter=[(A|C|D|M|R|T|U|X|B)…​[*]]`**
 
-Select only files that are Added \(`A`\), Copied \(`C`\), Deleted \(`D`\), Modified \(`M`\), Renamed \(`R`\), have their type \(i.e. regular file, symlink, submodule, …​\) changed \(`T`\), are Unmerged \(`U`\), are Unknown \(`X`\), or have had their pairing Broken \(`B`\). Any combination of the filter characters \(including none\) can be used. When `*` \(All-or-none\) is added to the combination, all paths are selected if there is any file that matches other criteria in the comparison; if there is no file that matches other criteria, nothing is selected.
+Select only files that are Added (`A`), Copied (`C`), Deleted (`D`), Modified (`M`), Renamed (`R`), have their type (i.e. regular file, symlink, submodule, …​) changed (`T`), are Unmerged (`U`), are Unknown (`X`), or have had their pairing Broken (`B`). Any combination of the filter characters (including none) can be used. When `*` (All-or-none) is added to the combination, all paths are selected if there is any file that matches other criteria in the comparison; if there is no file that matches other criteria, nothing is selected.
 
 Also, **these upper-case letters can be downcased to exclude**. E.g. `--diff-filter=ad` excludes added and deleted paths.
 
-Note that not all diffs can feature all types. For instance, diffs from the index to the working tree can never have Added entries \(because the set of paths included in the diff is limited by what is in the index\). Similarly, copied and renamed entries cannot appear if detection for those types is disabled.
+Note that not all diffs can feature all types. For instance, diffs from the index to the working tree can never have Added entries (because the set of paths included in the diff is limited by what is in the index). Similarly, copied and renamed entries cannot appear if detection for those types is disabled.
 
 ## References
 
-* [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems\_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
+* [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
 * [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
-
