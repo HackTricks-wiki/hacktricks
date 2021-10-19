@@ -313,3 +313,41 @@ gcloud beta secrets versions access 1 --secret="[SECRET NAME]"
 ```
 
 Note that changing a secret entry will create a new version, so it's worth changing the `1` in the command above to a `2` and so on.
+
+## Search Local Secrets
+
+```
+TARGET_DIR="/path/to/whatever"
+
+# Service account keys
+grep -Pzr "(?s){[^{}]*?service_account[^{}]*?private_key.*?}" \
+    "$TARGET_DIR"
+
+# Legacy GCP creds
+grep -Pzr "(?s){[^{}]*?client_id[^{}]*?client_secret.*?}" \
+    "$TARGET_DIR"
+
+# Google API keys
+grep -Pr "AIza[a-zA-Z0-9\\-_]{35}" \
+    "$TARGET_DIR"
+
+# Google OAuth tokens
+grep -Pr "ya29\.[a-zA-Z0-9_-]{100,200}" \
+    "$TARGET_DIR"
+
+# Generic SSH keys
+grep -Pzr "(?s)-----BEGIN[ A-Z]*?PRIVATE KEY[a-zA-Z0-9/\+=\n-]*?END[ A-Z]*?PRIVATE KEY-----" \
+    "$TARGET_DIR"
+
+# Signed storage URLs
+grep -Pir "storage.googleapis.com.*?Goog-Signature=[a-f0-9]+" \
+    "$TARGET_DIR"
+
+# Signed policy documents in HTML
+grep -Pzr '(?s)<form action.*?googleapis.com.*?name="signature" value=".*?">' \
+    "$TARGET_DIR"
+```
+
+## References
+
+* [https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/#reviewing-stackdriver-logging](https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/#reviewing-stackdriver-logging)

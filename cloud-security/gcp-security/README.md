@@ -22,12 +22,12 @@ A virtual machine (called a Compute Instance) is a resource. A resource resides 
 There are** three types** of roles in IAM:
 
 * **Basic/Primitive roles**, which include the **Owner**, **Editor**, and **Viewer** roles that existed prior to the introduction of IAM.
-* **Predefined roles**, which provide granular access for a specific service and are managed by Google Cloud. There are a lot of predefined roles, you can **see all of them with the privileges they have **[**here**](https://cloud.google.com/iam/docs/understanding-roles#predefined_roles).
+* **Predefined roles**, which provide granular access for a specific service and are managed by Google Cloud. There are a lot of predefined roles, you can **see all of them with the privileges they have **[**here**](https://cloud.google.com/iam/docs/understanding-roles#predefined\_roles).
 * **Custom roles**, which provide granular access according to a user-specified list of permissions.
 
 There are thousands of permissions in GCP. In order to check if a role has a permissions you can [**search the permission here**](https://cloud.google.com/iam/docs/permissions-reference) and see which roles have it.
 
-**You can also **[**search here predefined roles**](https://cloud.google.com/iam/docs/understanding-roles#product_specific_documentation)** offered by each product.**
+**You can also **[**search here predefined roles**](https://cloud.google.com/iam/docs/understanding-roles#product\_specific\_documentation)** offered by each product.**
 
 #### Basic roles
 
@@ -66,7 +66,7 @@ gcloud compute instances get-iam-policy [INSTANCE] --zone [ZONE]
 
 ### **Service accounts**
 
-Virtual machine instances are usually **assigned a service account**. Every GCP project has a [default service account](https://cloud.google.com/compute/docs/access/service-accounts#default_service_account), and this will be assigned to new Compute Instances unless otherwise specified. Administrators can choose to use either a custom account or no account at all. This service account** can be used by any user or application on the machine** to communicate with the Google APIs. You can run the following command to see what accounts are available to you:
+Virtual machine instances are usually **assigned a service account**. Every GCP project has a [default service account](https://cloud.google.com/compute/docs/access/service-accounts#default\_service\_account), and this will be assigned to new Compute Instances unless otherwise specified. Administrators can choose to use either a custom account or no account at all. This service account** can be used by any user or application on the machine** to communicate with the Google APIs. You can run the following command to see what accounts are available to you:
 
 ```
 gcloud auth list
@@ -91,7 +91,7 @@ If `gcloud auth list` returns **multiple** accounts **available**, something int
 
 The **service account** on a GCP Compute Instance will **use** **OAuth** to communicate with the Google Cloud APIs. When [access scopes](https://cloud.google.com/compute/docs/access/service-accounts#accesscopesiam) are used, the OAuth token that is generated for the instance will **have a **[**scope**](https://oauth.net/2/scope/)** limitation included**. This defines **what API endpoints it can authenticate to**. It does **NOT define the actual permissions**.
 
-When using a **custom service account**, Google [recommends](https://cloud.google.com/compute/docs/access/service-accounts#service_account_permissions) that access scopes are not used and to **rely totally on IAM**. The web management portal actually enforces this, but access scopes can still be applied to instances using custom service accounts programatically.
+When using a **custom service account**, Google [recommends](https://cloud.google.com/compute/docs/access/service-accounts#service\_account\_permissions) that access scopes are not used and to **rely totally on IAM**. The web management portal actually enforces this, but access scopes can still be applied to instances using custom service accounts programatically.
 
 There are three options when setting an access scope on a VM instance:
 
@@ -155,7 +155,7 @@ This token is the **combination of the service account and access scopes** assig
 
 When using one of Google's official GCP client libraries, the code will automatically go **searching for credentials** following a strategy called [Application Default Credentials](https://cloud.google.com/docs/authentication/production).
 
-1. First, it will check would be the [**source code itself**](https://cloud.google.com/docs/authentication/production#passing_the_path_to_the_service_account_key_in_code). Developers can choose to statically point to a service account key file.
+1. First, it will check would be the [**source code itself**](https://cloud.google.com/docs/authentication/production#passing\_the\_path\_to\_the\_service\_account\_key\_in\_code). Developers can choose to statically point to a service account key file.
 2. The next is an **environment variable called `GOOGLE_APPLICATION_CREDENTIALS`**. This can be set to point to a **service account key file**.
 3. Finally, if neither of these are provided, the application will revert to using the **default token provided by the metadata server** as described in the section above.
 
@@ -163,7 +163,7 @@ Finding the actual **JSON file with the service account credentials** is general
 
 ### **Networking**
 
-Compute Instances are connected to networks called VPCs or [Virtual Private Clouds](https://cloud.google.com/vpc/docs/vpc). [GCP firewall](https://cloud.google.com/vpc/docs/firewalls) rules are defined at this network level but are applied individually to a Compute Instance. Every network, by default, has two [implied firewall rules](https://cloud.google.com/vpc/docs/firewalls#default_firewall_rules): allow outbound and deny inbound.
+Compute Instances are connected to networks called VPCs or [Virtual Private Clouds](https://cloud.google.com/vpc/docs/vpc). [GCP firewall](https://cloud.google.com/vpc/docs/firewalls) rules are defined at this network level but are applied individually to a Compute Instance. Every network, by default, has two [implied firewall rules](https://cloud.google.com/vpc/docs/firewalls#default\_firewall\_rules): allow outbound and deny inbound.
 
 Each GCP project is provided with a VPC called `default`, which applies the following rules to all instances:
 
@@ -208,7 +208,7 @@ What we are really interested in is other firewall rules that have been intentio
 
 Unfortunately, there isn't a simple `gcloud` command to spit out all Compute Instances with open ports on the internet. You have to connect the dots between firewall rules, network tags, services accounts, and instances.
 
-We've automated this completely using [this python script](https://gitlab.com/gitlab-com/gl-security/gl-redteam/gcp_firewall_enum) which will export the following:
+We've automated this completely using [this python script](https://gitlab.com/gitlab-com/gl-security/gl-redteam/gcp\_firewall\_enum) which will export the following:
 
 * CSV file showing instance, public IP, allowed TCP, allowed UDP
 * nmap scan to target all instances on ports ingress allowed from the public internet (0.0.0.0/0)
@@ -360,8 +360,8 @@ $ sudo find / -name "gcloud"
 You can manually inspect the files inside, but these are generally the ones with the secrets:
 
 * \~/.config/gcloud/credentials.db
-* \~/.config/gcloud/legacy_credentials/\[ACCOUNT]/adc.json
-* \~/.config/gcloud/legacy_credentials/\[ACCOUNT]/.boto
+* \~/.config/gcloud/legacy\_credentials/\[ACCOUNT]/adc.json
+* \~/.config/gcloud/legacy\_credentials/\[ACCOUNT]/.boto
 * \~/.credentials.json
 
 Now, you have the option of looking for clear text credentials in these files or simply copying the entire `gcloud` folder to a machine you control and running `gcloud auth list` to see what accounts are now available to you.
@@ -370,7 +370,7 @@ Now, you have the option of looking for clear text credentials in these files or
 
 Impersonating a service account can be very useful to **obtain new and better privileges**.
 
-There are three ways in which you can [impersonate another service account](https://cloud.google.com/iam/docs/understanding-service-accounts#impersonating_a_service_account):
+There are three ways in which you can [impersonate another service account](https://cloud.google.com/iam/docs/understanding-service-accounts#impersonating\_a\_service\_account):
 
 * Authentication **using RSA private keys** (covered [above](./#bypassing-access-scopes))
 * Authorization **using Cloud IAM policies** (covered [here](gcp-iam-escalation.md#iam.serviceaccounttokencreator))
@@ -394,7 +394,7 @@ This is the **highest level you can assign using the gcloud tool**.
 
 ### Spreading to Workspace via domain-wide delegation of authority <a href="spreading-to-g-suite-via-domain-wide-delegation-of-authority" id="spreading-to-g-suite-via-domain-wide-delegation-of-authority"></a>
 
-[**Workspace**](https://gsuite.google.com) is Google's c**ollaboration and productivity platform** which consists of things like Gmail, Google Calendar, Google Drive, Google Docs, etc. 
+[**Workspace**](https://gsuite.google.com) is Google's c**ollaboration and productivity platform** which consists of things like Gmail, Google Calendar, Google Drive, Google Docs, etc.&#x20;
 
 **Service accounts** in GCP can be granted the **rights to programatically access user data** in Workspace by impersonating legitimate users. This is known as [domain-wide delegation](https://developers.google.com/admin-sdk/reports/v1/guides/delegation). This includes actions like **reading** **email** in GMail, accessing Google Docs, and even creating new user accounts in the G Suite organization.
 
@@ -408,11 +408,11 @@ To create this relation it's needed to **enable it in GCP and also in Workforce*
 
 To test this access you'll need the** service account credentials exported in JSON** format. You may have acquired these in an earlier step, or you may have the access required now to create a key for a service account you know to have domain-wide delegation enabled.
 
-This topic is a bit tricky… your service account has something called a "client_email" which you can see in the JSON credential file you export. It probably looks something like `account-name@project-name.iam.gserviceaccount.com`. If you try to access Workforce API calls directly with that email, even with delegation enabled, you will fail. This is because the Workforce directory will not include the GCP service account's email addresses. Instead, to interact with Workforce, we need to actually impersonate valid Workforce users.
+This topic is a bit tricky… your service account has something called a "client\_email" which you can see in the JSON credential file you export. It probably looks something like `account-name@project-name.iam.gserviceaccount.com`. If you try to access Workforce API calls directly with that email, even with delegation enabled, you will fail. This is because the Workforce directory will not include the GCP service account's email addresses. Instead, to interact with Workforce, we need to actually impersonate valid Workforce users.
 
 What you really want to do is to **impersonate a user with administrative access**, and then use that access to do something like **reset a password, disable multi-factor authentication, or just create yourself a shiny new admin account**.
 
-Gitlab've created [this Python script](https://gitlab.com/gitlab-com/gl-security/gl-redteam/gcp_misc/blob/master/gcp_delegation.py) that can do two things - list the user directory and create a new administrative account. Here is how you would use it:
+Gitlab've created [this Python script](https://gitlab.com/gitlab-com/gl-security/gl-redteam/gcp\_misc/blob/master/gcp\_delegation.py) that can do two things - list the user directory and create a new administrative account. Here is how you would use it:
 
 ```bash
 # Validate access only
@@ -437,7 +437,13 @@ You can try this script across a range of email addresses to impersonate **vario
 
 If you have success creating a new admin account, you can log on to the [Google admin console](https://admin.google.com) and have full control over everything in G Suite for every user - email, docs, calendar, etc. Go wild.
 
+### Looting
 
+If you have compromised some account there are several GCP services you might be able to access and extract sensitive information from them:
+
+{% content-ref url="gcp-looting.md" %}
+[gcp-looting.md](gcp-looting.md)
+{% endcontent-ref %}
 
 ## References
 

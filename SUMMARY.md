@@ -499,6 +499,7 @@
   * [GCP - Local Privilege Escalation / SSH Pivoting](cloud-security/gcp-security/gcp-local-privilege-escalation-ssh-pivoting.md)
   * [GCP - IAM Escalation](cloud-security/gcp-security/gcp-iam-escalation.md)
   * [GCP - Looting](cloud-security/gcp-security/gcp-looting.md)
+  * [Interesting IAM Permissions](cloud-security/gcp-security/interesting-iam-permissions.md)
 
 ## Physical attacks
 
