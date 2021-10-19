@@ -220,8 +220,6 @@ We've automated this completely using [this python script](https://gitlab.com/gi
 Remember that in all those **resources belonging to a project** you can use the parameter `--project <project-name>` to enumerate the resources that belongs to that specific project.
 {% endhint %}
 
-### Resource hierarchy
-
 ### IAM
 
 | Description                                                                                                                        | Command                                                                |
@@ -257,6 +255,8 @@ Remember that in all those **resources belonging to a project** you can use the 
 | List **images**                  | `gcloud compute images list`                                                                              |
 | List **subnets**                 | `gcloud compute networks subnets list`                                                                    |
 
+## Unauthenticated Attacks
+
 ## Local Privilege Escalation / SSH Pivoting
 
 Supposing that you have compromised a VM in GCP, there are some **GCP privileges** that can allow you to **escalate privileges locally, into other machines and also pivot to other VMs**:
@@ -267,11 +267,15 @@ Supposing that you have compromised a VM in GCP, there are some **GCP privileges
 
 ## Cloud privilege escalation <a href="cloud-privilege-escalation" id="cloud-privilege-escalation"></a>
 
-### IAM permissions <a href="organization-level-iam-permissions" id="organization-level-iam-permissions"></a>
+### GCP Interesting Permissions <a href="organization-level-iam-permissions" id="organization-level-iam-permissions"></a>
 
 The most common way once you have obtained some cloud credentials of has compromised some service running inside a cloud is to **abuse miss-configured privileges **the compromised account may have. So, the first thing you should do is to enumerate your privileges.
 
 Moreover, during this enumeration, remember that **permissions can be set at the highest level of "Organization"** as well.
+
+{% content-ref url="gcp-interesting-permissions.md" %}
+[gcp-interesting-permissions.md](gcp-interesting-permissions.md)
+{% endcontent-ref %}
 
 ### Bypassing access scopes <a href="bypassing-access-scopes" id="bypassing-access-scopes"></a>
 

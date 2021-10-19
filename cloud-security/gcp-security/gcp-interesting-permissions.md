@@ -82,6 +82,20 @@ This means that as part of creating certain resources, you must “actAs” the 
 
 **There are multiple individual methods that use **_**iam.serviceAccounts.actAs**_**, so depending on your own permissions, you may only be able to exploit one (or more) of these methods below**. These methods are slightly different in that they **require multiple permissions to exploit, rather than a single permission** like all of the previous methods.
 
+## cloudbuild
+
+### cloudbuild.builds.create
+
+You can find the exploit script [here on our GitHub](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/cloudbuild.builds.create.py). This script accepts GCP credentials and an HTTP(S) URL, and will exfiltrate the access token belonging to the Cloud Build Service Account to the URL supplied. If you don’t supply that URL, you must specify the IP and port of the current server and an HTTP server will automatically be launched to listen for the token to be received. Remember, you need the “cloudbuild.builds.create” permission for it to work.
+
+To use the script, just run it with the compromised GCP credentials you gained access to and set up an HTTP(S) listener on a public-facing server (or use the built-in server on the current host). The token will be sent to that server in the body of a POST request.
+
+![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/cloudbuild.builds.create.png)
+
+Now that we have the token, we can begin making API calls as the Cloud Build Service account and hopefully find something juicy with these extra permissions!
+
+For a more indepth explanation visit [https://rhinosecuritylabs.com/gcp/iam-privilege-escalation-gcp-cloudbuild/](https://rhinosecuritylabs.com/gcp/iam-privilege-escalation-gcp-cloudbuild/)
+
 ## cloudfunctions
 
 ### cloudfunctions.functions.create (iam.serviceAccounts.actAs)
@@ -247,3 +261,9 @@ A few that are worth looking into for privilege escalation are listed here:
   * Modify the policy of a Cloud Function to allow yourself to invoke it.
 
 There are tens of resources types with this kind of permission, you can find all of them in [https://cloud.google.com/iam/docs/permissions-reference](https://cloud.google.com/iam/docs/permissions-reference) searching for setIamPolicy.
+
+An **example** of privilege escalation abusing .setIamPolicy (in this case in a bucket) can be found here:
+
+{% content-ref url="gcp-buckets-brute-force-and-privilege-escalation.md" %}
+[gcp-buckets-brute-force-and-privilege-escalation.md](gcp-buckets-brute-force-and-privilege-escalation.md)
+{% endcontent-ref %}

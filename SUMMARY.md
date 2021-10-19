@@ -500,6 +500,7 @@
   * [GCP - IAM Escalation](cloud-security/gcp-security/gcp-iam-escalation.md)
   * [GCP - Looting](cloud-security/gcp-security/gcp-looting.md)
   * [GCP - Interesting Permissions](cloud-security/gcp-security/gcp-interesting-permissions.md)
+  * [GCP - Buckets Brute-Force & Privilege Escalation](cloud-security/gcp-security/gcp-buckets-brute-force-and-privilege-escalation.md)
 
 ## Physical attacks
 
