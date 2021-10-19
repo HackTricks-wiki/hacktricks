@@ -1,2 +1,0 @@
-# Interesting IAM Permissions
-

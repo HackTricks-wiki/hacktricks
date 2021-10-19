@@ -7,7 +7,7 @@ Docker engine does the heavy lifting of running and managing Containers. Docker 
 Finally, an **auth plugin** can be used to **limit the actions** users can perform.\
 
 
-![](<../../../.gitbook/assets/image (625).png>)
+![](<../../../.gitbook/assets/image (625) (1).png>)
 
 ### **Docker engine secure access**
 
@@ -102,7 +102,7 @@ When I changed Docker host, I had to move the root keys and repository keys to o
 
 ### Namespaces
 
-**Namespaces** are a feature of the Linux kernel that **partitions kernel resources** such that one set of **processes** **sees** one set of **resources** while **another** set of **processes** sees a **different** set of resources. The feature works by having the same namespace for a set of resources and processes, but those namespaces refer to distinct resources. Resources may exist in multiple spaces. 
+**Namespaces** are a feature of the Linux kernel that **partitions kernel resources** such that one set of **processes** **sees** one set of **resources** while **another** set of **processes** sees a **different** set of resources. The feature works by having the same namespace for a set of resources and processes, but those namespaces refer to distinct resources. Resources may exist in multiple spaces.&#x20;
 
 Docker makes use of the following Linux kernel Namespaces to achieve Container isolation:
 
@@ -202,7 +202,7 @@ docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 
 Where your file specifies your secrets as key-value pair.
 
-These secrets are excluded from the image build cache. and from the final image. 
+These secrets are excluded from the image build cache. and from the final image.&#x20;
 
 If you need your **secret in your running container**, and not just when building your image, use **Docker Compose or Kubernetes**.
 
@@ -245,12 +245,12 @@ If you’re using [Kubernetes](https://kubernetes.io/docs/concepts/configuration
 ### Summary Tips
 
 * **Do not use the `--privileged` flag or mount a **[**Docker socket inside the container**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** The docker socket allows for spawning containers, so it is an easy way to take full control of the host, for example, by running another container with the `--privileged` flag.
-* Do **not run as root inside the container. Use a **[**different user**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user)** and **[**user namespaces**](https://docs.docker.com/engine/security/userns-remap/)**.** The root in the container is the same as on host unless remapped with user namespaces. It is only lightly restricted by, primarily, Linux namespaces, capabilities, and cgroups.
+* Do **not run as root inside the container. Use a **[**different user**](https://docs.docker.com/develop/develop-images/dockerfile\_best-practices/#user)** and **[**user namespaces**](https://docs.docker.com/engine/security/userns-remap/)**.** The root in the container is the same as on host unless remapped with user namespaces. It is only lightly restricted by, primarily, Linux namespaces, capabilities, and cgroups.
 * [**Drop all capabilities**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities)** (`--cap-drop=all`) and enable only those that are required** (`--cap-add=...`). Many of workloads don’t need any capabilities and adding them increases the scope of a potential attack.
 * [**Use the “no-new-privileges” security option**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/)** **to prevent processes from gaining more privileges, for example through suid binaries.
 * ****[**Limit resources available to the container**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Resource limits can protect the machine from denial of service attacks.
 * **Adjust **[**seccomp**](https://docs.docker.com/engine/security/seccomp/)**, **[**AppArmor**](https://docs.docker.com/engine/security/apparmor/)** (or SELinux) **profiles to restrict the actions and syscalls available for the container to the minimum required.
-* **Use **[**official docker images**](https://docs.docker.com/docker-hub/official_images/) **and require signatures **or build your own based on them. Don’t inherit or use [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) images. Also store root keys, passphrase in a safe place. Docker has plans to manage keys with UCP.
+* **Use **[**official docker images**](https://docs.docker.com/docker-hub/official\_images/) **and require signatures **or build your own based on them. Don’t inherit or use [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) images. Also store root keys, passphrase in a safe place. Docker has plans to manage keys with UCP.
 * **Regularly** **rebuild** your images to **apply security patches to the host an images.**
 * Manage your **secrets wisely** so it's difficult to the attacker to access them.
 * If you **exposes the docker daemon use HTTPS** with client & server authentication.
@@ -284,5 +284,5 @@ If you have access to the docker socket or have access to a user in the **docker
 * [https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)
 * [https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/)
 * [https://sreeninet.wordpress.com/2016/03/06/docker-security-part-4container-image/](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-4container-image/)
-* [https://en.wikipedia.org/wiki/Linux_namespaces](https://en.wikipedia.org/wiki/Linux_namespaces)
+* [https://en.wikipedia.org/wiki/Linux\_namespaces](https://en.wikipedia.org/wiki/Linux\_namespaces)
 * [https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57](https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57)
