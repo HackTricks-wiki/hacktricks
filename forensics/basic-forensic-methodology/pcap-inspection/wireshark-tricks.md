@@ -61,11 +61,11 @@ Under _**Statistics --> I/O Graph **_you can find a **graph of the communication
 Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
 Other interesting filters:
 
-*  `(http.request or ssl.handshake.type == 1) and !(udp.port eq 1900)`
+* &#x20;`(http.request or ssl.handshake.type == 1) and !(udp.port eq 1900)`
   * HTTP and initial HTTPS traffic
-*  `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
+* &#x20;`(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
   * HTTP and initial HTTPS traffic + TCP SYN
-*  `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
+* &#x20;`(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
   * HTTP and initial HTTPS traffic + TCP SYN + DNS requests
 
 ### Search
