@@ -115,6 +115,8 @@ The following **permissions are required** for this method:
 
 The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/cloudfunctions.functions.update.py).
 
+## compute
+
 ### compute.instances.create (iam.serviceAccounts.actAs)
 
 This method **creates a new Compute Engine instance with a specified Service Account**, then **sends the token** belonging to that Service Account to an **external server.**
@@ -133,6 +135,8 @@ The following **permissions are required** for this method:
 
 The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/compute.instances.create.py).
 
+## run
+
 ### run.services.create (iam.serviceAccounts.actAs)
 
 Similar to the _cloudfunctions.functions.create_ method, this method creates a **new Cloud Run Service **that, when invoked, **returns the Service Account’s** access token by accessing the metadata API of the server it is running on. A Cloud Run service will be deployed and a request can be performed to it to get the token.
@@ -148,6 +152,8 @@ The following **permissions are required** for this method:
 This method uses an included Docker image that must be built and hosted to exploit correctly. The image is designed to tell Cloud Run to respond with the Service Account’s access token when an HTTP request is made.
 
 The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/run.services.create.py) and the Docker image can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/tree/master/ExploitScripts/CloudRunDockerImage).
+
+## Cloudscheduler
 
 ### cloudscheduler.jobs.create (iam.serviceAccounts.actAs)
 
@@ -170,3 +176,74 @@ The following permissions are required for this method:
 To escalate our privileges with this method, we just need to **craft the HTTP request of the API we want to hit as the Service Account we pass in**. Instead of a script, you can just use the gcloud command above.
 
 A similar method may be possible with Cloud Tasks, but we were not able to do it in our testing.
+
+## orgpolicy
+
+### orgpolicy.policy.set
+
+This method does **not necessarily grant you more IAM permissions**, but it may **disable some barriers **that are preventing certain actions. For example, there is an Organization Policy constraint named _appengine.disableCodeDownload_ that prevents App Engine source code from being downloaded by users of the project. If this was enabled, you would not be able to download that source code, but you could use _orgpolicy.policy.set_ to disable the constraint and then continue with the source code download.
+
+![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image5-1.png)
+
+The screenshot above shows that the _appengine.disableCodeDownload_ constraint is enforced, which means it is preventing us from downloading the source code. Using _orgpolicy.policy.set_, we can disable that enforcement and then continue on to download the source code.
+
+The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/orgpolicy.policy.set.py).
+
+## serviceusage
+
+### serviceusage.apiKeys.create
+
+There is another method of authenticating with GCP APIs known as API keys. By default, they are created with no restrictions, which means they have access to the entire GCP project they were created in. We can capitalize on that fact by creating a new API key that may have more privileges than our own user. There is no official API for this, so a custom HTTP request needs to be sent to _https://apikeys.clients6.google.com/_ (or _https://apikeys.googleapis.com/_). This was discovered by monitoring the HTTP requests and responses while browsing the GCP web console. For documentation on the restrictions associated with API keys, visit [this link](https://cloud.google.com/docs/authentication/api-keys).
+
+The following screenshot shows how you would create an API key in the web console.
+
+![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image6-1.png)
+
+With the undocumented API that was discovered, we can also create API keys through the API itself.
+
+![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image3-1.png)
+
+The screenshot above shows a POST request being sent to retrieve a new API key for the project.
+
+The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/serviceusage.apiKeys.create.py).
+
+### serviceusage.apiKeys.list
+
+Another undocumented API was found for listing API keys that have already been created (this can also be done in the web console). Because you can still see the API key’s value after its creation, we can pull all the API keys in the project.
+
+![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image4-1.png)
+
+The screenshot above shows that the request is exactly the same as before, it just is a GET request instead of a POST request. This only shows a single key, but if there were additional keys in the project, those would be listed too.
+
+The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/serviceusage.apiKeys.list.py).
+
+## storage
+
+### storage.hmacKeys.create
+
+There is a feature of Cloud Storage, “interoperability”, that provides a way for Cloud Storage to interact with storage offerings from other cloud providers, like AWS S3. As part of that, there are HMAC keys that can be created for both Service Accounts and regular users. We can **escalate Cloud Storage permissions by creating an HMAC key for a higher-privileged Service Account**.&#x20;
+
+HMAC keys belonging to your user cannot be accessed through the API and must be accessed through the web console, but what’s nice is that both the access key and secret key are available at any point. This means we could take an existing pair and store them for backup access to the account. HMAC keys belonging to Service Accounts **can** be accessed through the API, but after creation, you are not able to see the access key and secret again.
+
+![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image2-1.png)
+
+The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/storage.hmacKeys.create.py).
+
+## \*.setIamPolicy
+
+If you owns a user that has the **`setIamPolicy`** permission in a resource you can **escalate privileges in that resource **because you will be able to change the IAM policy of that resource and give you more privileges over it.
+
+A few that are worth looking into for privilege escalation are listed here:
+
+* _resourcemanager.organizations.setIamPolicy_
+  * Attach IAM roles to your user at the Organization level.
+* _resourcemanager.folders.setIamPolicy_
+  * Attach IAM roles to your user at the Folder level.
+* _resourcemanager.projects.setIamPolicy_
+  * Attach IAM roles to your user at the Project level.
+* _iam.serviceAccounts.setIamPolicy_
+  * Attach IAM roles to your user at the Service Account level.
+* _cloudfunctions.functions.setIamPolicy_
+  * Modify the policy of a Cloud Function to allow yourself to invoke it.
+
+There are tens of resources types with this kind of permission, you can find all of them in [https://cloud.google.com/iam/docs/permissions-reference](https://cloud.google.com/iam/docs/permissions-reference) searching for setIamPolicy.
