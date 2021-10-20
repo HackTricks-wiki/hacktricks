@@ -4,11 +4,11 @@
 
 In CBC mode the **previous encrypted block is used as IV **to XOR with the next block:
 
-![CBC encryption](https://assets.pentesterlab.com/padding_oracle/CBC_encryption.png)
+![CBC encryption](https://defuse.ca/images/cbc_encryption.png)
 
 To decrypt CBC the **opposite** **operations** are done:
 
-![CBC decryption](https://assets.pentesterlab.com/padding_oracle/CBC_decryption.png)
+![CBC decryption](https://defuse.ca/images/cbc_decryption.png)
 
 Notice how it's needed to use an **encryption** **key** and an **IV**.
 
