@@ -370,6 +370,7 @@
 * [Cookies Hacking](pentesting-web/hacking-with-cookies/README.md)
   * [Cookie Tossing](pentesting-web/hacking-with-cookies/cookie-tossing.md)
   * [Cookie Jar Overflow](pentesting-web/hacking-with-cookies/cookie-jar-overflow.md)
+  * [Cookie Bomb](pentesting-web/hacking-with-cookies/cookie-bomb.md)
 * [CORS - Misconfigurations & Bypass](pentesting-web/cors-bypass.md)
 * [CRLF (%0D%0A) Injection](pentesting-web/crlf-0d-0a.md)
 * [Cross-site WebSocket hijacking (CSWSH)](pentesting-web/cross-site-websocket-hijacking-cswsh.md)
