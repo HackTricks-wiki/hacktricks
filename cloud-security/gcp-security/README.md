@@ -257,6 +257,10 @@ Remember that in all those **resources belonging to a project** you can use the 
 
 ## Unauthenticated Attacks
 
+{% content-ref url="gcp-buckets-brute-force-and-privilege-escalation.md" %}
+[gcp-buckets-brute-force-and-privilege-escalation.md](gcp-buckets-brute-force-and-privilege-escalation.md)
+{% endcontent-ref %}
+
 ## Local Privilege Escalation / SSH Pivoting
 
 Supposing that you have compromised a VM in GCP, there are some **GCP privileges** that can allow you to **escalate privileges locally, into other machines and also pivot to other VMs**:
