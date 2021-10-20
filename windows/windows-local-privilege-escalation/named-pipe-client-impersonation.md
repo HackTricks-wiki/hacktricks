@@ -1,6 +1,6 @@
 # Named Pipe Client Impersonation
 
-**This information was copied from** [**https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation**](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)\*\*\*\*
+**This information was copied from **[**https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation**](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)****
 
 ## Overview
 
@@ -89,19 +89,19 @@ int main()
 
 Below shows the named pipe server and named pipe client working as expected:
 
-![](../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22%20%282%29.png)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22.png>)
 
 Worth nothing that the named pipes communication by default uses SMB protocol:
 
-![](../../.gitbook/assets/screenshot-from-2019-04-04-23-51-48.png)
+![](<../../.gitbook/assets/Screenshot from 2019-04-04 23-51-48.png>)
 
 Checking how the process maintains a handle to our named pipe `mantvydas-first-pipe`:
 
-![](../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22%20%281%29.png)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (1).png>)
 
 Similary, we can see the client having an open handle to the named pipe:
 
-![](../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22.png)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (2).png>)
 
 We can even see our pipe with powershell:
 
@@ -109,12 +109,12 @@ We can even see our pipe with powershell:
 ((Get-ChildItem \\.\pipe\).name)[-1..-5]
 ```
 
-![](../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22%20%283%29.png)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (3).png>)
 
 ## Token Impersonation
 
 {% hint style="info" %}
-Note that in order to impersonate the token of the client process you need to have \(the server process creating the pipe\) the **`SeImpersonate`** token privilege
+Note that in order to impersonate the token of the client process you need to have (the server process creating the pipe) the**` SeImpersonate`** token privilege
 {% endhint %}
 
 It is possible for the named pipe server to impersonate the named pipe client's security context by leveraging a `ImpersonateNamedPipeClient` API call which in turn changes the named pipe server's current thread's token with that of the named pipe client's token.
@@ -161,4 +161,3 @@ int main() {
 ```
 
 Running the server and connecting to it with the client that is running under administrator@offense.local security context, we can see that the main thread of the named server pipe assumed the token of the named pipe client - offense\administrator, although the PipeServer.exe itself is running under ws01\mantvydas security context. Sounds like a good way to escalate privileges?
-

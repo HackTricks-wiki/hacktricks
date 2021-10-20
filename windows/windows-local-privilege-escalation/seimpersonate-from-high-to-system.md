@@ -2,8 +2,8 @@
 
 ### Code
 
-The following code was copied from [here](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). It allows to **indicate a Process ID as argument** and a CMD **running as the user** of the indicated process will be run.  
-Running in a High Integrity process you can **indicate the PID of a process running as System** \(like winlogon, wininit\) and execute a cmd.exe as system.
+The following code was copied from [here](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). It allows to **indicate a Process ID as argument** and a CMD **running as the user** of the indicated process will be run.\
+Running in a High Integrity process you can** indicate the PID of a process running as System **(like winlogon, wininit) and execute a cmd.exe as system.
 
 ```cpp
 impersonateuser.exe 1234
@@ -155,25 +155,23 @@ On some occasions you may try to impersonate System and it won't work showing an
 [-] CreateProcessWithTokenW Error: 1326
 ```
 
-This means that even if you are running on a High Integrity level **you don't have enough permissions**.  
-Let's check current Administrator permissions over `svchost.exe` processes with **processes explorer** \(or you can also use process hacker\):
+This means that even if you are running on a High Integrity level **you don't have enough permissions**.\
+Let's check current Administrator permissions over `svchost.exe` processes with **processes explorer** (or you can also use process hacker):
 
 1. Select a process of `svchost.exe`
-2. Right Click --&gt; Properties
+2. Right Click --> Properties
 3. Inside "Security" Tab click in the bottom right the button "Permissions"
 4. Click on "Advanced"
 5. Select "Administrators" and click on "Edit"
 6. Click on "Show advanced permissions"
 
-![](../../.gitbook/assets/image%20%28353%29.png)
+![](<../../.gitbook/assets/image (322).png>)
 
-The previous image contains all the privileges that "Administrators" have over the selected process \(as you can see in case of `svchost.exe` they only have "Query" privileges\)
+The previous image contains all the privileges that "Administrators" have over the selected process (as you can see in case of `svchost.exe` they only have "Query" privileges)
 
 See the privileges "Administrators" have over `winlogon.exe`:
 
-![](../../.gitbook/assets/image%20%28354%29.png)
+![](<../../.gitbook/assets/image (323).png>)
 
 Inside that process "Administrators" can "Read Memory" and "Read Permissions" which probably allows Administrators to impersonate the token used by this process.
-
-
 

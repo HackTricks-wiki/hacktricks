@@ -1,10 +1,10 @@
 # Angr - Examples
 
 {% hint style="info" %}
-If the program is using **`scanf`** to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
+If the program is using **`scanf` **to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
 {% endhint %}
 
-### Input to reach address \(indicating the address\)
+### Input to reach address (indicating the address)
 
 ```python
 import angr
@@ -39,7 +39,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Input to reach address \(indicating prints\)
+### Input to reach address (indicating prints)
 
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
@@ -206,11 +206,11 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-In this scenario, the input was taken with `scanf("%u %u")` and the value `"1 1"` was given, so the values **`0x00000001`** of the stack come from the **user input**. You can see how this values starts in `$ebp - 8`. Therefore, in the code we have **subtracted 8 bytes to `$esp` \(as in that moment `$ebp` and `$esp` had the same value\)** and then we have pushed the BVS.
+In this scenario, the input was taken with` scanf("%u %u")` and the value `"1 1"` was given, so the values **`0x00000001`** of the stack come from the **user input**. You can see how this values starts in `$ebp - 8`. Therefore, in the code we have **subtracted 8 bytes to `$esp` (as in that moment `$ebp` and `$esp` had the same value)** and then we have pushed the BVS.
 
-![](../../../.gitbook/assets/image%20%28613%29.png)
+![](<../../../.gitbook/assets/image (614).png>)
 
-### Static Memory values \(Global variables\)
+### Static Memory values (Global variables)
 
 ```python
 import angr
@@ -273,7 +273,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-### Dynamic Memory Values \(Malloc\)
+### Dynamic Memory Values (Malloc)
 
 ```python
 import angr
@@ -419,8 +419,8 @@ Note that the symbolic file could also contain constant data merged with symboli
 ### Applying Constrains
 
 {% hint style="info" %}
-Sometimes simple human operations like compare 2 words of length 16 **char by char** \(loop\), **cost** a lot to a **angr** because it needs to generate branches **exponentially** because it generates 1 branch per if: `2^16`  
-Therefore, it's easier to **ask angr get to a previous point** \(where the real difficult part was already done\) and **set those constrains manually**.
+Sometimes simple human operations like compare 2 words of length 16 **char by char** (loop), **cost **a lot to a **angr **because it needs to generate branches **exponentially **because it generates 1 branch per if: `2^16`\
+Therefore, it's easier to **ask angr get to a previous point** (where the real difficult part was already done) and **set those constrains manually**.
 {% endhint %}
 
 ```python
@@ -504,7 +504,7 @@ Another thing you can do in these scenarios is to **hook the function giving ang
 
 ### Simulation Managers
 
-Some simulation managers can be more useful than others. In the previous example there was a problem as a lot of useful branches were created. Here, the **veritesting** technique will merge those and will find a solution.  
+Some simulation managers can be more useful than others. In the previous example there was a problem as a lot of useful branches were created. Here, the **veritesting **technique will merge those and will find a solution.\
 This simulation manager can also be activated with: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 ```python
@@ -834,4 +834,3 @@ if __name__ == '__main__':
   main(sys.argv)
 
 ```
-

@@ -6,7 +6,7 @@ If you belong to _**lxd**_ **or** _**lxc**_ **group**, you can become root
 
 ### Method 1
 
-You can install in your machine this distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)\(follow the instructions of the github\):
+You can install in your machine this distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(follow the instructions of the github):
 
 ```bash
 sudo su
@@ -45,8 +45,8 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 
 {% hint style="danger" %}
-If you find this error _**Error: No storage pool found. Please create a new storage pool**_  
-Run **`lxc init`** and **repeat** the previous chunk of commands
+If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
+Run **`lxc init`** and **repeat **the previous chunk of commands
 {% endhint %}
 
 Execute the container:
@@ -85,7 +85,7 @@ lxc start mycontainer
 lxc exec mycontainer /bin/sh
 ```
 
-Alternatively [https://github.com/initstring/lxd\_root](https://github.com/initstring/lxd_root)
+Alternatively [https://github.com/initstring/lxd_root](https://github.com/initstring/lxd_root)
 
 ## With internet
 
@@ -101,5 +101,4 @@ lxc exec test bash
 
 ## Other Refs
 
-{% embed url="https://reboare.github.io/lxd/lxd-escape.html" caption="" %}
-
+{% embed url="https://reboare.github.io/lxd/lxd-escape.html" %}

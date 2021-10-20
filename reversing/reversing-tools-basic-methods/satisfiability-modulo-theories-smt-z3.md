@@ -1,6 +1,6 @@
-# Z3 - Satisfiability Modulo Theories \(SMT\)
+# Z3 - Satisfiability Modulo Theories (SMT)
 
-Very basically, this tool will help us to find values for variables that need to satisfy some conditions and calculating them by hand will be so annoying. Therefore, you can indicate to Z3 the conditions the variables need to satisfy and it will find some values \(if possible\).
+Very basically, this tool will help us to find values for variables that need to satisfy some conditions and calculating them by hand will be so annoying. Therefore, you can indicate to Z3 the conditions the variables need to satisfy and it will find some values (if possible).
 
 ## Basic Operations
 
@@ -80,7 +80,7 @@ print(simplify(a == b)) #This is False
 
 ### Signed/Unsigned Numbers
 
-Z3 provides special signed versions of arithmetical operations where it makes a difference whether the **bit-vector is treated as signed or unsigned**. In Z3Py, the operators **&lt;, &lt;=, &gt;, &gt;=, /, % and &gt;&gt;** correspond to the **signed** versions. The corresponding **unsigned** operators are **ULT, ULE, UGT, UGE, UDiv, URem and LShR.**
+Z3 provides special signed versions of arithmetical operations where it makes a difference whether the **bit-vector is treated as signed or unsigned**. In Z3Py, the operators **<, <=, >, >=, /, % and >>** correspond to the **signed **versions. The corresponding **unsigned **operators are **ULT, ULE, UGT, UGE, UDiv, URem and LShR.**
 
 ```python
 from z3 import *
@@ -102,7 +102,7 @@ solve(ULT(x, 0))
 
 ### Functions
 
-**Interpreted functio**ns such as arithmetic where the **function +** has a **fixed standard interpretation** \(it adds two numbers\). **Uninterpreted functions** and constants are **maximally flexible**; they allow **any interpretation** that is **consistent** with the **constraints** over the function or constant.
+**Interpreted functio**ns such as arithmetic where the **function +** has a **fixed standard interpretation** (it adds two numbers). **Uninterpreted functions **and constants are **maximally flexible**; they allow **any interpretation **that is **consistent **with the **constraints **over the function or constant.
 
 Example: f applied twice to x results in x again, but f applied once to x is different from x.
 
@@ -182,4 +182,3 @@ else:
 ## References
 
 * [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-

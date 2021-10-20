@@ -2,11 +2,13 @@
 
 ## Basic Information
 
-**AppArmor** is a kernel enhancement to confine **programs** to a **limited** set of **resources**. It's a Mandatory Access Control or **MAC** that binds **access control** attributes **to programs rather than to users**.  
-AppArmor confinement is provided via **profiles loaded into the kernel**, typically on boot.  
+**AppArmor** is a kernel enhancement to confine **programs** to a **limited** set of **resources **with **per-program profiles**. Profiles can **allow** **capabilities** like network access, raw socket access, and the permission to read, write, or execute files on matching paths.
+
+It's a Mandatory Access Control or **MAC** that binds **access control** attributes **to programs rather than to users**.\
+AppArmor confinement is provided via **profiles loaded into the kernel**, typically on boot.\
 AppArmor profiles can be in one of **two modes**:
 
-* **Enforcement**: Profiles loaded in enforcement mode will result in **enforcement of the policy** defined in the profile **as well as reporting** policy violation attempts \(either via syslog or auditd\).
+* **Enforcement**: Profiles loaded in enforcement mode will result in **enforcement of the policy** defined in the profile **as well as reporting** policy violation attempts (either via syslog or auditd).
 * **Complain**: Profiles in complain mode **will not enforce policy** but instead **report** policy **violation** attempts.
 
 AppArmor differs from some other MAC systems on Linux: it is **path-based**, it allows mixing of enforcement and complain mode profiles, it uses include files to ease development, and it has a far lower barrier to entry than other popular MAC systems.
@@ -20,7 +22,7 @@ AppArmor differs from some other MAC systems on Linux: it is **path-based**, it 
 
 ### Profiles path
 
-Apparmor profiles are usually saved in _**/etc/apparmor.d/**_  
+Apparmor profiles are usually saved in _**/etc/apparmor.d/**_\
 With `sudo aa-status` you will be able to list the binaries that are restricted by some profile. If you can change the char "/" for a dot of the path of each listed binary and you will obtain the name of the apparmor profile inside the mentioned folder.
 
 For example, a **apparmor** profile for _/usr/bin/man_ will be located in _/etc/apparmor.d/usr.bin.man_
@@ -39,23 +41,23 @@ aa-mergeprof  #used to merge the policies
 
 ## Creating a profile
 
-* In order to indicate the affected executable, **absolute paths and wildcards** are allowed \(for file globbing\) for specifying files.
+* In order to indicate the affected executable, **absolute paths and wildcards** are allowed (for file globbing) for specifying files.
 * To indicate the access the binary will have over **files** the following **access controls** can be used: 
-  * **r** \(read\)
-  * **w** \(write\)
-  * **m** \(memory map as executable\)
-  * **k** \(file locking\)
-  * **l** \(creation hard links\)
-  * **ix** \(to execute another program with the new program inheriting policy\)
-  * **Px** \(execute under another profile, after cleaning the environment\)
-  * **Cx** \(execute under a child profile, after cleaning the environment\)
-  * **Ux** \(execute unconfined, after cleaning the environment\)
-* **Variables** can be defined in the profiles and can be manipulated from outside the profile. For example: @{PROC} and @{HOME} \(add \#include &lt;tunables/global&gt; to the profile file\)
+  * **r** (read)
+  * **w** (write)
+  * **m** (memory map as executable)
+  * **k** (file locking)
+  * **l** (creation hard links)
+  * **ix** (to execute another program with the new program inheriting policy)
+  * **Px** (execute under another profile, after cleaning the environment)
+  * **Cx** (execute under a child profile, after cleaning the environment)
+  * **Ux** (execute unconfined, after cleaning the environment)
+* **Variables** can be defined in the profiles and can be manipulated from outside the profile. For example: @{PROC} and @{HOME} (add #include \<tunables/global> to the profile file)
 * **Deny rules are supported to override allow rules**.
 
 ### aa-genprof
 
-To easily start creating a profile apparmor can help you. It's possible to make **apparmor inspect the actions performed by a binary and then let you decide which actions you want to allow or deny**.  
+To easily start creating a profile apparmor can help you. It's possible to make **apparmor inspect the actions performed by a binary and then let you decide which actions you want to allow or deny**.\
 You just need to run:
 
 ```bash
@@ -184,12 +186,12 @@ apparmor module is loaded.
    docker-default
 ```
 
-By default **Apparmor docker-default profile** is generated from [https://github.com/moby/moby/blob/master/profiles/apparmor/template.go](https://github.com/moby/moby/blob/master/profiles/apparmor/template.go)
+By default **Apparmor docker-default profile** is generated from [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
 **docker-default profile Summary**:
 
 * **Access** to all **networking**
-* **No capability** is defined \(However, some capabilities will come from including basic base rules i.e. \#include &lt;abstractions/base&gt; \)
+* **No capability** is defined (However, some capabilities will come from including basic base rules i.e. #include \<abstractions/base> )
 * **Writing** to any **/proc** file is **not allowed**
 * Other **subdirectories**/**files** of /**proc** and /**sys** are **denied** read/write/lock/link/execute access
 * **Mount** is **not allowed**
@@ -202,7 +204,7 @@ Once you **run a docker container** you should see the following output:
    docker-default (825)
 ```
 
-Note that **apparmor will even block capabilities privileges** granted to the container by default. For example, it will be able to **block permission to write inside /proc even if the SYS\_ADMIN capability is granted** because by default docker apparmor profile denies this access:
+Note that **apparmor will even block capabilities privileges** granted to the container by default. For example, it will be able to **block permission to write inside /proc even if the SYS_ADMIN capability is granted** because by default docker apparmor profile denies this access:
 
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
@@ -216,7 +218,13 @@ You need to **disable apparmor** to bypass its restrictions:
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
 
-Note that by default **AppArmor** will also **forbid the container to mount** folders from the inside even with SYS\_ADMIN capability.
+Note that by default **AppArmor** will also **forbid the container to mount** folders from the inside even with SYS_ADMIN capability.
+
+Note that you can **add/remove** **capabilities** to the docker container (this will be still restricted by protection methods like **AppArmor** and **Seccomp**):
+
+* `--cap-add=SYS_ADMIN`_ _give_ _`SYS_ADMIN` cap
+* `--cap-add=ALL`_ _give_ _all caps
+* `--cap-drop=ALL --cap-add=SYS_PTRACE` drop all caps and only give `SYS_PTRACE`
 
 {% hint style="info" %}
 Usually, when you **find** that you have a **privileged capability** available **inside** a **docker** container **but** some part of the **exploit isn't working**, this will be because docker **apparmor will be preventing it**.
@@ -239,4 +247,3 @@ find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 ```
 
 In the weird case you can **modify the apparmor docker profile and reload it.** You could remove the restrictions and "bypass" them.
-

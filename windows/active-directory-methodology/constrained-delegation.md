@@ -4,14 +4,14 @@
 
 Using this a Domain admin can allow 3rd parties to impersonate a user or computer against a service of a machine.
 
-* **Service for User to self \(**_**S4U2self**_**\):** If a **service account** has a _userAccountControl_ value containing [TRUSTED\_TO\_AUTH\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300%28v=vs.85%29.aspx) \(T2A4D\), then it can obtains a TGS for itself \(the service\) on behalf of any other user.
-* **Service for User to Proxy\(**_**S4U2proxy**_**\):** A **service account** could obtain a TGS on behalf any user to the service set in **msDS-AllowedToDelegateTo.** To do so, it first need a TGS from that user to itself, but it can use S4U2self to obtain that TGS before requesting the other one.
+* **Service for User to self (**_**S4U2self**_**): **If a **service account **has a _userAccountControl _value containing [TRUSTED_TO_AUTH_FOR_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx) (T2A4D), then it can obtains a TGS for itself (the service) on behalf of any other user.
+* **Service for User to Proxy(**_**S4U2proxy**_**): **A **service account **could obtain a TGS on behalf any user to the service set in **msDS-AllowedToDelegateTo. **To do so, it first need a TGS from that user to itself, but it can use S4U2self to obtain that TGS before requesting the other one.
 
-**Note**: If a user is marked as ‘_Account is sensitive and cannot be delegated_ ’ in AD, you will **not be able to impersonate** them.
+**Note**: If a user is marked as ‘_Account is sensitive and cannot be delegated _’ in AD, you will **not be able to impersonate** them.
 
-This means that if you **compromise the hash of the service** you can **impersonate users** and obtain **access** on their behalf to the **service configured** \(possible **privesc**\).  
-Also, you **won't only have access to the service that user is able to impersonate, but also to any service that uses the same account as the allowed one** \(because the SPN is not being checked, only privileges\). For example, if you have access to **CIFS service** you can also have access to **HOST service**.  
-Moreover, notice that if you have access to **LDAP service on DC**, you will have enough privileges to exploit a **DCSync**.
+This means that if you **compromise the hash of the service** you can **impersonate users **and obtain **access **on their behalf to the **service configured **(possible **privesc**).\
+Also, you **won't only have access to the service that user is able to impersonate, but also to any service that uses the same account as the allowed one **(because the SPN is not being checked, only privileges). For example, if you have access to **CIFS service **you can also have access to** HOST service**.\
+Moreover, notice that if you have access to** LDAP service on DC**, you will have enough privileges to exploit a **DCSync**.
 
 {% code title="Enumerate from Powerview" %}
 ```bash
@@ -52,5 +52,4 @@ Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.
 * Limit DA/Admin logins to specific services
 * Set "Account is sensitive and cannot be delegated" for privileged accounts.
 
-\*\*\*\*[**More information in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)\*\*\*\*
-
+****[**More information in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)****

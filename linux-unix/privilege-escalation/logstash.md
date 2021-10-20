@@ -20,7 +20,7 @@ The pipeline configuration file **/etc/logstash/pipelines.yml** specifies the lo
   pipeline.workers: 6
 ```
 
-In here you can find the paths to the **.conf** files, which contain the configured pipelines. If the **Elasticsearch output module** is used, **pipelines** are likely to **contain** valid **credentials** for an Elasticsearch instance. Those credentials have often more privileges, since Logstash has to write data to Elasticsearch. If wildcards are used, Logstash tries to run all pipelines located in that folder matching the wildcard.
+In here you can find the paths to the **.conf** files, which contain the configured pipelines. If the **Elasticsearch output module **is used, **pipelines **are likely to **contain **valid **credentials **for an Elasticsearch instance. Those credentials have often more privileges, since Logstash has to write data to Elasticsearch. If wildcards are used, Logstash tries to run all pipelines located in that folder matching the wildcard.
 
 ### Privesc with writable pipelines
 
@@ -28,7 +28,7 @@ Before trying to elevate your own privileges you should check which user is runn
 
 Check whether you have **one** of the required rights:
 
-* You have **write permissions** on a pipeline **.conf** file **or**
+* You have **write permissions **on a pipeline **.conf** file **or**
 * **/etc/logstash/pipelines.yml** contains a wildcard and you are allowed to write into the specified folder
 
 Further **one** of the requirements must be met:
@@ -63,4 +63,3 @@ If no wildcard is used, you can apply those changes to an existing pipeline conf
 ## References
 
 * [https://insinuator.net/2021/01/pentesting-the-elk-stack/](https://insinuator.net/2021/01/pentesting-the-elk-stack/)
-

