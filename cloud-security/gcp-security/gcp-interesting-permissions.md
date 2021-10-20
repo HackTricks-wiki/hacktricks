@@ -18,7 +18,7 @@ In the following example [this script](https://github.com/RhinoSecurityLabs/GCP-
 
 You can use this permission to **update the “includedPermissons” on your role**, so you can get any permission you want.
 
-![](<../../.gitbook/assets/image (627).png>)
+![](<../../.gitbook/assets/image (627) (1).png>)
 
 ```
 gcloud iam roldes update <rol name> --project <project> --add-permissions <permission>
