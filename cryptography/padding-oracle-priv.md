@@ -2,7 +2,7 @@
 
 ## CBC - Cipher Block Chaining
 
-In CBC mode the **previous encrypted block is used as IV **to XOR with the next block:
+In CBC mode the **previous encrypted block is used as IV** to XOR with the next block:
 
 ![CBC encryption](https://defuse.ca/images/cbc_encryption.png)
 
