@@ -94,57 +94,6 @@ curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/?re
     -H "Metadata-Flavor: Google"
 ```
 
-## Serial Console Logs
-
-Compute instances may be **writing output from the OS and BIOS to serial ports**. Serial console logs may expose **sensitive information** from the system logs which low privileged user may not usually see, but with the appropriate IAM permissions you may be able to read them.
-
-You can use the following [gcloud command](https://cloud.google.com/sdk/gcloud/reference/compute/instances/get-serial-port-output) to query the serial port logs:
-
-```
-gcloud compute instances get-serial-port-output instance-name \
-  --port port \
-  --start start \
-  --zone zone
-```
-
-```
-$ gcloud compute images export --image test-image \
-    --export-format qcow2 --destination-uri [BUCKET]
-```
-
-You can then [export](https://cloud.google.com/sdk/gcloud/reference/compute/images/export) the virtual disks from any image in multiple formats. The following command would export the image `test-image` in qcow2 format, allowing you to download the file and build a VM locally for further investigation:
-
-```
-$ gcloud compute images list --no-standard-images
-```
-
-## Custom Images <a href="reviewing-custom-images" id="reviewing-custom-images"></a>
-
-**Custom compute images may contain sensitive details **or other vulnerable configurations that you can exploit. You can query the list of non-standard images in a project with the following command:
-
-```
-gcloud compute images list --no-standard-images
-```
-
-You can then** **[**export**](https://cloud.google.com/sdk/gcloud/reference/compute/images/export)** the virtual disks **from any image in multiple formats. The following command would export the image `test-image` in qcow2 format, allowing you to download the file and build a VM locally for further investigation:
-
-```
-gcloud compute images export --image test-image \
-    --export-format qcow2 --destination-uri [BUCKET]
-```
-
-## Custom Instance Templates
-
-An [instance template](https://cloud.google.com/compute/docs/instance-templates/) defines instance properties to help deploy consistent configurations. These may contain the same types of sensitive data as a running instance's custom metadata. You can use the following commands to investigate:
-
-```bash
-# List the available templates
-$ gcloud compute instance-templates list
-
-# Get the details of a specific template
-$ gcloud compute instance-templates describe [TEMPLATE NAME]
-```
-
 ## Stackdriver logging
 
 [Stackdriver](https://cloud.google.com/stackdriver/) is Google's general-purpose infrastructure logging suite which might be capturing sensitive information like syslog-like capabilities that report individual commands run inside Compute Instances, HTTP requests sent to load balancers or App Engine applications, network packet metadata for VPC communications, and more.
