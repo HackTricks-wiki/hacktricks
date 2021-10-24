@@ -504,7 +504,8 @@
   * [GCP - Looting](cloud-security/gcp-security/gcp-looting.md)
   * [GCP - Interesting Permissions](cloud-security/gcp-security/gcp-interesting-permissions.md)
   * [GCP - Buckets Brute-Force & Privilege Escalation](cloud-security/gcp-security/gcp-buckets-brute-force-and-privilege-escalation.md)
-  * [GCP - Compute & Network Enumeration](cloud-security/gcp-security/page-1.md)
+  * [GCP - Compute Enumeration](cloud-security/gcp-security/gcp-compute-enumeration.md)
+  * [GCP - Network Enumeration](cloud-security/gcp-security/gcp-network-enumeration.md)
 
 ## Physical attacks
 
