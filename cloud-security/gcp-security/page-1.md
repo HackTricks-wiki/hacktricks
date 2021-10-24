@@ -72,6 +72,25 @@ You can then [export](https://cloud.google.com/sdk/gcloud/reference/compute/imag
 $ gcloud compute images list --no-standard-images
 ```
 
+### **Steal gcloud authorizations**
+
+It's quite possible that** other users on the same box have been running `gcloud`** commands using an account more powerful than your own. You'll **need local root** to do this.
+
+First, find what `gcloud` config directories exist in users' home folders.
+
+```
+$ sudo find / -name "gcloud"
+```
+
+You can manually inspect the files inside, but these are generally the ones with the secrets:
+
+* \~/.config/gcloud/credentials.db
+* \~/.config/gcloud/legacy\_credentials/\[ACCOUNT]/adc.json
+* \~/.config/gcloud/legacy\_credentials/\[ACCOUNT]/.boto
+* \~/.credentials.json
+
+Now, you have the option of looking for clear text credentials in these files or simply copying the entire `gcloud` folder to a machine you control and running `gcloud auth list` to see what accounts are now available to you.
+
 ## Images
 
 ### Custom Images
@@ -108,3 +127,17 @@ $ gcloud compute instance-templates list
 # Get the details of a specific template
 $ gcloud compute instance-templates describe [TEMPLATE NAME]
 ```
+
+## More Enumeration
+
+| Description            | Command                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Stop** an instance   | `gcloud compute instances stop instance-2`                                                                |
+| **Start** an instance  | `gcloud compute instances start instance-2`                                                               |
+| **Create** an instance | `gcloud compute instances create vm1 --image image-1 --tags test --zone "<zone>" --machine-type f1-micro` |
+| **Download** files     | `gcloud compute copy-files example-instance:~/REMOTE-DIR ~/LOCAL-DIR --zone us-central1-a`                |
+| **Upload** files       | `gcloud compute copy-files ~/LOCAL-FILE-1 example-instance:~/REMOTE-DIR --zone us-central1-a`             |
+| List all **disks**     | `gcloud compute disks list`                                                                               |
+| List all disk types    | `gcloud compute disk-types list`                                                                          |
+| List all **snapshots** | `gcloud compute snapshots list`                                                                           |
+| **Create** snapshot    | `gcloud compute disks snapshot --snapshotname --zone $zone`                                               |
