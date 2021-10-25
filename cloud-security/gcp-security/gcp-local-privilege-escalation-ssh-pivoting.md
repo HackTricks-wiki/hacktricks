@@ -16,6 +16,20 @@ Running `gsutil ls` from the command line returns nothing, as the service accoun
 
 You may be able to find this bucket name inside a script (in bash, Python, Ruby...).
 
+## Custom Metadata
+
+Administrators can add [custom metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata#custom) at the instance and project level. This is simply a way to pass **arbitrary key/value pairs into an instance**, and is commonly used for environment variables and startup/shutdown scripts.
+
+```bash
+# view project metadata
+curl "http://metadata.google.internal/computeMetadata/v1/project/attributes/?recursive=true&alt=text" \
+    -H "Metadata-Flavor: Google"
+
+# view instance metadata
+curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/?recursive=true&alt=text" \
+    -H "Metadata-Flavor: Google"
+```
+
 ## Modifying the metadata <a href="modifying-the-metadata" id="modifying-the-metadata"></a>
 
 If you can **modify the instance's metadata**, there are numerous ways to escalate privileges locally. There are a few scenarios that can lead to a service account with this permission:

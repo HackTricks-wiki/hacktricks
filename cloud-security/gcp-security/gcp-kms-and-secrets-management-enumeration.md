@@ -34,3 +34,7 @@ gcloud beta secrets versions access 1 --secret="[SECRET NAME]"
 ```
 
 Note that changing a secret entry will create a new version, so it's worth changing the `1` in the command above to a `2` and so on.
+
+## References
+
+* [https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/#reviewing-stackdriver-logging](https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/#reviewing-stackdriver-logging)

@@ -334,19 +334,7 @@ curl https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=$TOKEN
 
 You should see `https://www.googleapis.com/auth/cloud-platform` listed in the scopes, which means you are **not limited by any instance-level access scopes**. You now have full power to use all of your assigned IAM permissions.
 
-### Custom Metadata
 
-Administrators can add [custom metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata#custom) at the instance and project level. This is simply a way to pass **arbitrary key/value pairs into an instance**, and is commonly used for environment variables and startup/shutdown scripts.
-
-```bash
-# view project metadata
-curl "http://metadata.google.internal/computeMetadata/v1/project/attributes/?recursive=true&alt=text" \
-    -H "Metadata-Flavor: Google"
-
-# view instance metadata
-curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/?recursive=true&alt=text" \
-    -H "Metadata-Flavor: Google"
-```
 
 ### Service account impersonation <a href="service-account-impersonation" id="service-account-impersonation"></a>
 

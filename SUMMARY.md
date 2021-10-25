@@ -501,13 +501,14 @@
 * [GCP Security](cloud-security/gcp-security/README.md)
   * [GCP - Local Privilege Escalation / SSH Pivoting](cloud-security/gcp-security/gcp-local-privilege-escalation-ssh-pivoting.md)
   * [GCP - IAM Escalation](cloud-security/gcp-security/gcp-iam-escalation.md)
-  * [GCP - Looting](cloud-security/gcp-security/gcp-looting.md)
+  * [GCP - Other Services Enumeration](cloud-security/gcp-security/gcp-looting.md)
   * [GCP - Interesting Permissions](cloud-security/gcp-security/gcp-interesting-permissions.md)
   * [GCP - Buckets:  Brute-Force, Privilege Escalation & Enumeration](cloud-security/gcp-security/gcp-buckets-brute-force-and-privilege-escalation.md)
   * [GCP - Compute Enumeration](cloud-security/gcp-security/gcp-compute-enumeration.md)
   * [GCP - Network Enumeration](cloud-security/gcp-security/gcp-network-enumeration.md)
   * [GCP - KMS & Secrets Management Enumeration](cloud-security/gcp-security/gcp-kms-and-secrets-management-enumeration.md)
   * [GCP - Databases Enumeration](cloud-security/gcp-security/gcp-databases-enumeration.md)
+  * [GCP - Serverless Code Exec Services Enumeration](cloud-security/gcp-security/gcp-serverless-code-exec-services-enumeration.md)
 
 ## Physical attacks
 
