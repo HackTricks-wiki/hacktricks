@@ -1,4 +1,4 @@
-# GCP - Compute & Network Enumeration
+# GCP - Compute Enumeration
 
 ## Compute instances
 
@@ -72,24 +72,13 @@ You can then [export](https://cloud.google.com/sdk/gcloud/reference/compute/imag
 $ gcloud compute images list --no-standard-images
 ```
 
-### **Steal gcloud authorizations**
+### Local Privilege Escalation and Pivoting
 
-It's quite possible that** other users on the same box have been running `gcloud`** commands using an account more powerful than your own. You'll **need local root** to do this.
+If you compromises a compute instance you should also check the actions mentioned in this page:
 
-First, find what `gcloud` config directories exist in users' home folders.
-
-```
-$ sudo find / -name "gcloud"
-```
-
-You can manually inspect the files inside, but these are generally the ones with the secrets:
-
-* \~/.config/gcloud/credentials.db
-* \~/.config/gcloud/legacy\_credentials/\[ACCOUNT]/adc.json
-* \~/.config/gcloud/legacy\_credentials/\[ACCOUNT]/.boto
-* \~/.credentials.json
-
-Now, you have the option of looking for clear text credentials in these files or simply copying the entire `gcloud` folder to a machine you control and running `gcloud auth list` to see what accounts are now available to you.
+{% content-ref url="gcp-local-privilege-escalation-ssh-pivoting.md" %}
+[gcp-local-privilege-escalation-ssh-pivoting.md](gcp-local-privilege-escalation-ssh-pivoting.md)
+{% endcontent-ref %}
 
 ## Images
 

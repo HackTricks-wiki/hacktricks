@@ -507,7 +507,7 @@
   * [GCP - Compute Enumeration](cloud-security/gcp-security/gcp-compute-enumeration.md)
   * [GCP - Network Enumeration](cloud-security/gcp-security/gcp-network-enumeration.md)
   * [GCP - KMS & Secrets Management Enumeration](cloud-security/gcp-security/gcp-kms-and-secrets-management-enumeration.md)
-  * [GCP - Databases](cloud-security/gcp-security/gcp-databases.md)
+  * [GCP - Databases Enumeration](cloud-security/gcp-security/gcp-databases-enumeration.md)
 
 ## Physical attacks
 

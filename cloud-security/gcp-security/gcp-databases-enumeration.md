@@ -1,4 +1,4 @@
-# GCP - Databases
+# GCP - Databases Enumeration
 
 Google has [a handful of database technologies](https://cloud.google.com/products/databases/) that you may have access to via the default service account or another set of credentials you have compromised thus far.
 
@@ -15,6 +15,7 @@ Cloud SQL instances are **fully managed, relational MySQL, PostgreSQL and SQL Se
 gcloud sql instances list
 gcloud sql databases list --instance [INSTANCE]
 gcloud sql backups list --instance [INSTANCE]
+gcloud sql export sql <DATABASE_INSTANCE> gs://<CLOUD_STORAGE_BUCKET>/cloudsql/export.sql.gz --database <DATABASE_NAME>
 ```
 
 ### [Cloud Spanner](https://cloud.google.com/sdk/gcloud/reference/spanner/)
@@ -44,16 +45,24 @@ gcloud bigtable backups list --instance [INSTANCE]
 Cloud Firestore is a flexible, scalable database for mobile, web, and server development from Firebase and Google Cloud. Like Firebase Realtime Database, it keeps your data in sync across client apps through realtime listeners and offers offline support for mobile and web so you can build responsive apps that work regardless of network latency or Internet connectivity. Cloud Firestore also offers seamless integration with other Firebase and Google Cloud products, including Cloud Functions. [Learn more](https://firebase.google.com/docs/firestore).
 
 ```
+gcloud firestore indexes composite list
+gcloud firestore indexes fields list
+gcloud firestore export gs://my-source-project-export/export-20190113_2109 --collection-ids='cameras','radios'
 ```
 
-\
-&#x20;
+### [Firebase](https://cloud.google.com/sdk/gcloud/reference/firebase/)
 
-### &#x20;
+The Firebase Realtime Database is a cloud-hosted NoSQL database that lets you store and sync data between your users in realtime. [Learn more](https://firebase.google.com/products/realtime-database/).
 
+### Memorystore
 
+Reduce latency with scalable, secure, and highly available in-memory service for [**Redis**](https://cloud.google.com/sdk/gcloud/reference/redis) and [**Memcached**](https://cloud.google.com/sdk/gcloud/reference/memcache). Learn more.
 
-* [Cloud Firestore](https://cloud.google.com/sdk/gcloud/reference/firestore/)
-* [Firebase](https://cloud.google.com/sdk/gcloud/reference/firebase/)
-* There are more databases
+```
+gcloud memcache instances list --region [region]
+# You should try to nnect to the memcache instances to access the data
+
+gcloud redis instances list --region [region]
+gcloud redis instances export gs://my-bucket/my-redis-instance.rdb my-redis-instance --region=us-central1
+```
 
