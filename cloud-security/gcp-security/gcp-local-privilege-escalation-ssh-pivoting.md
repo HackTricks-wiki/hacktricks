@@ -29,7 +29,7 @@ When using a custom service account, **one** of the following IAM permissions **
 * `compute.instances.setMetadata` (to affect a single instance)
 * `compute.projects.setCommonInstanceMetadata` (to affect all instances in the project)
 
-Although Google [recommends](https://cloud.google.com/compute/docs/access/service-accounts#associating\_a\_service\_account\_to\_an\_instance) not using access scopes for custom service accounts, it is still possible to do so. You'll need one of the following **access scopes**:
+Although Google [recommends](https://cloud.google.com/compute/docs/access/service-accounts#associating_a_service_account_to_an_instance) not using access scopes for custom service accounts, it is still possible to do so. You'll need one of the following **access scopes**:
 
 * `https://www.googleapis.com/auth/compute`
 * `https://www.googleapis.com/auth/cloud-platfo`rm
@@ -46,7 +46,7 @@ So, if you can **modify custom instance metadata** with your service account, yo
 
 ### **Add SSH key to existing privileged user**
 
-Let's start by adding our own key to an existing account, as that will probably make the least noise.&#x20;
+Let's start by adding our own key to an existing account, as that will probably make the least noise. 
 
 **Check the instance for existing SSH keys**. Pick one of these users as they are likely to have sudo rights.
 
@@ -139,7 +139,7 @@ This will **generate a new SSH key, add it to your existing user, and add your e
 
 [OS Login](https://cloud.google.com/compute/docs/oslogin/) is an alternative to managing SSH keys. It links a** Google user or service account to a Linux identity**, relying on IAM permissions to grant or deny access to Compute Instances.
 
-OS Login is [enabled](https://cloud.google.com/compute/docs/instances/managing-instance-access#enable\_oslogin) at the project or instance level using the metadata key of `enable-oslogin = TRUE`.
+OS Login is [enabled](https://cloud.google.com/compute/docs/instances/managing-instance-access#enable_oslogin) at the project or instance level using the metadata key of `enable-oslogin = TRUE`.
 
 OS Login with two-factor authentication is [enabled](https://cloud.google.com/compute/docs/oslogin/setup-two-factor-authentication) in the same manner with the metadata key of `enable-oslogin-2fa = TRUE`.
 
@@ -150,7 +150,7 @@ The following two **IAM permissions control SSH access to instances with OS Logi
 
 Unlike managing only with SSH keys, these permissions allow the administrator to control whether or not `sudo` is granted.
 
-If your service account has these permissions.** You can simply run the `gcloud compute ssh [INSTANCE]`** command to [connect manually as the service account](https://cloud.google.com/compute/docs/instances/connecting-advanced#sa\_ssh\_manual). **Two-factor **is **only** enforced when using **user accounts**, so that should not slow you down even if it is assigned as shown above.
+If your service account has these permissions.** You can simply run the `gcloud compute ssh [INSTANCE]`** command to [connect manually as the service account](https://cloud.google.com/compute/docs/instances/connecting-advanced#sa_ssh_manual). **Two-factor **is **only** enforced when using **user accounts**, so that should not slow you down even if it is assigned as shown above.
 
 Similar to using SSH keys from metadata, you can use this strategy to **escalate privileges locally and/or to access other Compute Instances** on the network.
 
@@ -165,56 +165,3 @@ gcloud compute project-info add-metadata --metadata-from-file ssh-keys=meta.txt
 ```
 
 If you're really bold, you can also just type `gcloud compute ssh [INSTANCE]` to use your current username on other boxes.
-
-## Search for Keys in the filesystem
-
-It's quite possible that** other users on the same box have been running `gcloud`** commands using an account more powerful than your own. You'll **need local root** to do this.
-
-First, find what `gcloud` config directories exist in users' home folders.
-
-```
-sudo find / -name "gcloud"
-```
-
-You can manually inspect the files inside, but these are generally the ones with the secrets:
-
-* \~/.config/gcloud/credentials.db
-* \~/.config/gcloud/legacy\_credentials/\[ACCOUNT]/adc.json
-* \~/.config/gcloud/legacy\_credentials/\[ACCOUNT]/.boto
-* \~/.credentials.json
-
-Now, you have the option of looking for clear text credentials in these files or simply copying the entire `gcloud` folder to a machine you control and running `gcloud auth list` to see what accounts are now available to you.
-
-### More API Keys regexes
-
-```bash
-TARGET_DIR="/path/to/whatever"
-
-# Service account keys
-grep -Pzr "(?s){[^{}]*?service_account[^{}]*?private_key.*?}" \
-    "$TARGET_DIR"
-
-# Legacy GCP creds
-grep -Pzr "(?s){[^{}]*?client_id[^{}]*?client_secret.*?}" \
-    "$TARGET_DIR"
-
-# Google API keys
-grep -Pr "AIza[a-zA-Z0-9\\-_]{35}" \
-    "$TARGET_DIR"
-
-# Google OAuth tokens
-grep -Pr "ya29\.[a-zA-Z0-9_-]{100,200}" \
-    "$TARGET_DIR"
-
-# Generic SSH keys
-grep -Pzr "(?s)-----BEGIN[ A-Z]*?PRIVATE KEY[a-zA-Z0-9/\+=\n-]*?END[ A-Z]*?PRIVATE KEY-----" \
-    "$TARGET_DIR"
-
-# Signed storage URLs
-grep -Pir "storage.googleapis.com.*?Goog-Signature=[a-f0-9]+" \
-    "$TARGET_DIR"
-
-# Signed policy documents in HTML
-grep -Pzr '(?s)<form action.*?googleapis.com.*?name="signature" value=".*?">' \
-    "$TARGET_DIR"
-```
