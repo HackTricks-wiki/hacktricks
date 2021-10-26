@@ -1,6 +1,6 @@
 # Mimikatz
 
-The content of this page was copied [adsecurity.org](https://adsecurity.org/?page_id=1821)
+The content of this page was copied [adsecurity.org](https://adsecurity.org/?page\_id=1821)
 
 ## LM and Clear-Text in memory
 
@@ -8,7 +8,7 @@ Starting with Windows 8.1 and Windows Server 2012 R2, the LM hash and “clear-t
 
 In order to prevent the “clear-text” password from being placed in LSASS, the following registry key needs to be set to “0” (Digest Disabled):
 
-_HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest “UseLogonCredential”(DWORD)_
+_HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest “UseLogonCredential”(DWORD)_
 
 ## **Mimikatz & LSA Protection:**
 
@@ -18,8 +18,8 @@ _The LSA, which includes the Local Security Authority Server Service (LSASS) pro
 
 Enabling LSA protection:
 
-1. Open the Registry Editor (RegEdit.exe), and navigate to the registry key that is located at: HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa and Set the value of the registry key to: “RunAsPPL”=dword:00000001.
-2. Create a new GPO and browse to Computer Configuration, Preferences, Windows Settings. Right-click Registry, point to New, and then click Registry Item. The New Registry Properties dialog box appears. In the Hive list, click HKEY_LOCAL_MACHINE. In the Key Path list, browse to SYSTEM\CurrentControlSet\Control\Lsa.  In the Value name box, type RunAsPPL. In the Value type box, click the REG_DWORD. In the Value data box, type 00000001.Click OK.
+1. Open the Registry Editor (RegEdit.exe), and navigate to the registry key that is located at: HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa and Set the value of the registry key to: “RunAsPPL”=dword:00000001.
+2. Create a new GPO and browse to Computer Configuration, Preferences, Windows Settings. Right-click Registry, point to New, and then click Registry Item. The New Registry Properties dialog box appears. In the Hive list, click HKEY\_LOCAL\_MACHINE. In the Key Path list, browse to SYSTEM\CurrentControlSet\Control\Lsa.  In the Value name box, type RunAsPPL. In the Value type box, click the REG\_DWORD. In the Value data box, type 00000001.Click OK.
 
 LSA Protection prevents non-protected processes from interacting with LSASS. Mimikatz can still bypass this with a driver (“!+”).
 
@@ -159,7 +159,7 @@ This requires full AD admin rights or KRBTGT pw hash.\
 DCShadow temporarily sets the computer to be a “DC” for the purposes of replication:
 
 * Creates 2 objects in the AD forest Configuration partition.
-* Updates the SPN of the computer used to include “GC” (Global Catalog) and “E3514235-4B06-11D1-AB04-00C04FC2DCD2” (AD Replication). More info on Kerberos Service Principal Names in the [ADSecurity SPN section](https://adsecurity.org/?page_id=183).
+* Updates the SPN of the computer used to include “GC” (Global Catalog) and “E3514235-4B06-11D1-AB04-00C04FC2DCD2” (AD Replication). More info on Kerberos Service Principal Names in the [ADSecurity SPN section](https://adsecurity.org/?page\_id=183).
 * Pushes the updates to DCs via DrsReplicaAdd and KCC.
 * Removes the created objects from the Configuration partition.
 
@@ -312,6 +312,10 @@ Find a domain admin credential on the box and use that token: _token::elevate /d
 **TS::Sessions **– List TS/RDP sessions.
 
 ![](https://adsecurity.org/wp-content/uploads/2017/11/Mimikatz-TS-Sessions.png)
+
+### Vault
+
+`mimikatz.exe "privilege::debug" "token::elevate" "vault::cred /patch" "exit"` - Get passwords of scheduled tasks
 
 \
 \
