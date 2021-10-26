@@ -1,5 +1,7 @@
 # GCP Security
 
+![](<../../.gitbook/assets/image (629).png>)
+
 ## Security concepts <a href="security-concepts" id="security-concepts"></a>
 
 ### **Resource hierarchy**
@@ -240,6 +242,11 @@ Remember that in all those **resources belonging to a project** you can use the 
 [gcp-buckets-brute-force-and-privilege-escalation.md](gcp-buckets-brute-force-and-privilege-escalation.md)
 {% endcontent-ref %}
 
+## Generic GCP Security Checklists
+
+* [Google Cloud Computing Platform CIS Benchmark](https://www.cisecurity.org/cis-benchmarks/)
+* [https://github.com/doitintl/secure-gcp-reference](https://github.com/doitintl/secure-gcp-reference)
+
 ## Local Privilege Escalation / SSH Pivoting
 
 Supposing that you have compromised a VM in GCP, there are some **GCP privileges** that can allow you to **escalate privileges locally, into other machines and also pivot to other VMs**:
@@ -247,6 +254,8 @@ Supposing that you have compromised a VM in GCP, there are some **GCP privileges
 {% content-ref url="gcp-local-privilege-escalation-ssh-pivoting.md" %}
 [gcp-local-privilege-escalation-ssh-pivoting.md](gcp-local-privilege-escalation-ssh-pivoting.md)
 {% endcontent-ref %}
+
+If you have found some [**SSRF vulnerability in a GCP environment check this page**](../../pentesting-web/ssrf-server-side-request-forgery.md#6440).
 
 ## Cloud privilege escalation <a href="cloud-privilege-escalation" id="cloud-privilege-escalation"></a>
 
@@ -409,7 +418,27 @@ If you have success creating a new admin account, you can log on to the [Google 
 
 ### Looting
 
-If you have compromised some account there are several GCP services you might be able to access and extract sensitive information from them:
+Another promising way to **escalate privileges inside the cloud is to enumerate as much sensitive information as possible** from the services that are being used. Here you can find some enumeration recommendations for some GCP services, but more could be used so feel free to submit PRs indicating ways to enumerate more services:
+
+{% content-ref url="gcp-compute-enumeration.md" %}
+[gcp-compute-enumeration.md](gcp-compute-enumeration.md)
+{% endcontent-ref %}
+
+{% content-ref url="gcp-network-enumeration.md" %}
+[gcp-network-enumeration.md](gcp-network-enumeration.md)
+{% endcontent-ref %}
+
+{% content-ref url="gcp-kms-and-secrets-management-enumeration.md" %}
+[gcp-kms-and-secrets-management-enumeration.md](gcp-kms-and-secrets-management-enumeration.md)
+{% endcontent-ref %}
+
+{% content-ref url="gcp-databases-enumeration.md" %}
+[gcp-databases-enumeration.md](gcp-databases-enumeration.md)
+{% endcontent-ref %}
+
+{% content-ref url="gcp-serverless-code-exec-services-enumeration.md" %}
+[gcp-serverless-code-exec-services-enumeration.md](gcp-serverless-code-exec-services-enumeration.md)
+{% endcontent-ref %}
 
 {% content-ref url="gcp-looting.md" %}
 [gcp-looting.md](gcp-looting.md)

@@ -1,8 +1,10 @@
-# GCP - Buckets:  Brute-Force, Privilege Escalation & Enumeration
+# GCP - Buckets: Brute-Force, Privilege Escalation & Enumeration
 
 ## Brute-Force
 
 As other clouds, GCP also offers Buckets to its users. These buckets might be  (to list the content, read, write...).
+
+![](<../../.gitbook/assets/image (628).png>)
 
 The following tools can be used to generate variations of the name given and search for miss-configured buckets with that names:
 

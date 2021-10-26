@@ -10,6 +10,8 @@ As an example, you can follow [Google's documentation](https://cloud.google.com/
 
 Cloud SQL instances are **fully managed, relational MySQL, PostgreSQL and SQL Server databases**. Google handles replication, patch management and database management to ensure availability and performance.[Learn more](https://cloud.google.com/sql/docs/)
 
+If you find any of these instances in use, you could try to **access it from the internet** as they might be miss-configured and accessible.
+
 ```bash
 # Cloud SQL
 gcloud sql instances list

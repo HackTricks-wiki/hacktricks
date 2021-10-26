@@ -79,6 +79,18 @@ If you find a filestore available in the project, you can **mount it** from with
 gcloud filestore instances list --format=json
 ```
 
+## Containers
+
+```bash
+gcloud container images list
+gcloud container subnets list
+gcloud container clusters list
+gcloud container clusters get-credentials [NAME]
+
+# Run a container locally
+docker run --rm -ti gcr.io/<project-name>/secret:v1 sh
+```
+
 ## Kubernetes
 
 First, you can check to see if any Kubernetes clusters exist in your project.
