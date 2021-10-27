@@ -420,6 +420,10 @@ If you have success creating a new admin account, you can log on to the [Google 
 
 Another promising way to **escalate privileges inside the cloud is to enumerate as much sensitive information as possible** from the services that are being used. Here you can find some enumeration recommendations for some GCP services, but more could be used so feel free to submit PRs indicating ways to enumerate more services:
 
+{% hint style="info" %}
+Note that you can enumerate most resources with `list` (list items of that type), `describe` (describe parent and children items) and  `get-iam-policy` (get policy attached to that specific resource).&#x20;
+{% endhint %}
+
 {% content-ref url="gcp-compute-enumeration.md" %}
 [gcp-compute-enumeration.md](gcp-compute-enumeration.md)
 {% endcontent-ref %}

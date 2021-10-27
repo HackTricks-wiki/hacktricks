@@ -60,11 +60,32 @@ The Firebase Realtime Database is a cloud-hosted NoSQL database that lets you st
 
 Reduce latency with scalable, secure, and highly available in-memory service for [**Redis**](https://cloud.google.com/sdk/gcloud/reference/redis) and [**Memcached**](https://cloud.google.com/sdk/gcloud/reference/memcache). Learn more.
 
-```
+```bash
 gcloud memcache instances list --region [region]
-# You should try to nnect to the memcache instances to access the data
+# You should try to connect to the memcache instances to access the data
 
 gcloud redis instances list --region [region]
 gcloud redis instances export gs://my-bucket/my-redis-instance.rdb my-redis-instance --region=us-central1
 ```
 
+### [Bigquery](https://cloud.google.com/bigquery/docs/bq-command-line-tool)
+
+BigQuery is a fully-managed enterprise data warehouse that helps you manage and analyze your data with built-in features like machine learning, geospatial analysis, and business intelligence. BigQuery’s serverless architecture lets you use SQL queries to answer your organization’s biggest questions with zero infrastructure management. BigQuery’s scalable, distributed analysis engine lets you query terabytes in seconds and petabytes in minutes. [Learn more](https://cloud.google.com/bigquery/docs/introduction).
+
+```bash
+bq ls -p #List rojects
+bq ls -a #List all datasets
+bq ls #List datasets from current project
+bq ls <dataset_name> #List tables inside the DB
+
+# Show information
+bq show "<proj_name>:<dataset_name>"
+bq show "<proj_name>:<dataset_name>.<table_name>"
+bq show --encryption_service_account
+
+bq query '<query>' #Query inside the dataset
+
+# Dump the table or dataset
+bq extract ds.table gs://mybucket/table.csv
+bq extract -m ds.model gs://mybucket/model
+```
