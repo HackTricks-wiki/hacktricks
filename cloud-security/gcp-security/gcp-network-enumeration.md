@@ -17,3 +17,5 @@ gcloud compute networks subnets describe <name> --region <region>
 # List FW rules in networks
 gcloud compute firewall-rules list
 ```
+
+You easily find compute instances with open firewall rules with [https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_firewall\_enum](https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_firewall\_enum)

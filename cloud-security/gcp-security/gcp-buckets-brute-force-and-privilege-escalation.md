@@ -1,6 +1,19 @@
-# GCP - Buckets: Brute-Force, Privilege Escalation & Enumeration
+# GCP - Buckets: Public Assets Brute-Force & Discovery, & Buckets Privilege Escalation
 
-## Brute-Force
+## Public Assets Discovery
+
+One way to discover public cloud resources that belongs to a company is to scrape their webs looking for them. Tools like [**CloudScraper**](https://github.com/jordanpotti/CloudScraper) will scrape the web an search for **links to public cloud resources** (in this case this tools searches `['amazonaws.com', 'digitaloceanspaces.com', 'windows.net', 'storage.googleapis.com', 'aliyuncs.com']`)
+
+Note that other cloud resources could be searched for and that some times these resources are hidden behind **subdomains that are pointing them via CNAME registry**.
+
+## Public Resources Brute-Force
+
+### Buckets, Firebase, Apps & Cloud Functions
+
+* [https://github.com/initstring/cloud\_enum](https://github.com/initstring/cloud\_enum): This tool in GCP brute-force Buckets, Firebase Realtime Databases, Google App Engine sites, and Cloud Functions
+* [https://github.com/0xsha/CloudBrute](https://github.com/0xsha/CloudBrute): This tool in GCP brute-force Buckets and Apps.
+
+### Buckets
 
 As other clouds, GCP also offers Buckets to its users. These buckets might be  (to list the content, read, write...).
 
@@ -9,7 +22,6 @@ As other clouds, GCP also offers Buckets to its users. These buckets might be  (
 The following tools can be used to generate variations of the name given and search for miss-configured buckets with that names:
 
 * [https://github.com/RhinoSecurityLabs/GCPBucketBrute](https://github.com/RhinoSecurityLabs/GCPBucketBrute)
-* [https://github.com/initstring/cloud\_enum](https://github.com/initstring/cloud\_enum)
 
 ## Privilege Escalation
 
@@ -32,37 +44,6 @@ gsutil iam ch group:allAuthenticatedUsers:admin gs://BUCKET_NAME
 ```
 
 One of the main attractions to escalating from a LegacyBucketOwner to Storage Admin is the ability to use the “storage.buckets.delete” privilege. In theory, you could **delete the bucket after escalating your privileges, then you could create the bucket in your own account to steal the name**.
-
-## Authenticated Enumeration
-
-Default configurations permit read access to storage. This means that you may **enumerate ALL storage buckets in the project**, including **listing** and **accessing** the contents inside.
-
-This can be a MAJOR vector for privilege escalation, as those buckets can contain secrets.
-
-The following commands will help you explore this vector:
-
-```bash
-# List all storage buckets in project
-gsutil ls
-
-# Get detailed info on all buckets in project
-gsutil ls -L
-
-# List contents of a specific bucket (recursive, so careful!)
-gsutil ls -r gs://bucket-name/
-
-# Cat the context of a file without copying it locally
-gsutil cat gs://bucket-name/folder/object
-
-# Copy an object from the bucket to your local storage for review
-gsutil cp gs://bucket-name/folder/object ~/
-```
-
-If you get a permission denied error listing buckets you may still have access to the content. So, now that you know about the name convention of the buckets you can generate a list of possible names and try to access them:
-
-```bash
-for i in $(cat wordlist.txt); do gsutil ls -r gs://"$i"; done
-```
 
 ## References
 

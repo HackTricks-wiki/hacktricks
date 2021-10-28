@@ -218,9 +218,12 @@ We've automated this completely using [this python script](https://gitlab.com/gi
 
 ## Enumeration
 
-{% hint style="info" %}
-Remember that in all those **resources belonging to a project** you can use the parameter `--project <project-name>` to enumerate the resources that belongs to that specific project.
-{% endhint %}
+### Automatic Tools
+
+* [https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_enum:](https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_enum:) Bash script to enumerate a GCP environment using gcloud cli and saving the results in
+* [https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation:](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation:) Scripts to enumerate high IAM privileges and to escalate privileges in GCP abusing them (I couldn’t make run the enumerate script)
+* [https://github.com/lyft/cartography:](https://github.com/lyft/cartography:) Tool to enumerate and print in a graph resources and relations of different cloud platforms
+* [https://github.com/RyanJarv/awesome-cloud-sec:](https://github.com/RyanJarv/awesome-cloud-sec:) This is a list of cloud security tools
 
 ### IAM
 
@@ -423,6 +426,10 @@ Another promising way to **escalate privileges inside the cloud is to enumerate 
 {% hint style="info" %}
 Note that you can enumerate most resources with `list` (list items of that type), `describe` (describe parent and children items) and  `get-iam-policy` (get policy attached to that specific resource).&#x20;
 {% endhint %}
+
+{% content-ref url="gcp-buckets-enumeration.md" %}
+[gcp-buckets-enumeration.md](gcp-buckets-enumeration.md)
+{% endcontent-ref %}
 
 {% content-ref url="gcp-compute-enumeration.md" %}
 [gcp-compute-enumeration.md](gcp-compute-enumeration.md)
