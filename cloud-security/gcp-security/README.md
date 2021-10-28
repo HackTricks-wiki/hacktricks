@@ -227,17 +227,19 @@ We've automated this completely using [this python script](https://gitlab.com/gi
 
 ### IAM
 
-| Description                                                                                                                        | Command                                                                |
-| ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| List **roles**                                                                                                                     | `gcloud iam roles list --filter='etag:AA=='`                           |
-| Get **description** and permissions of a role                                                                                      | gcloud iam roles describe roles/container.admin                        |
-| Get iam **policy** of a **organisation**                                                                                           | `gcloud organizations get-iam-policy`                                  |
-| Get iam **policy** of a **project**                                                                                                | `gcloud projects get-iam-policy <project-id>`                          |
-| Get iam **policy** of a **folder**                                                                                                 | `gcloud resource-manager folders get-iam-policy`                       |
-| [**Testable permissions**](https://cloud.google.com/iam/docs/reference/rest/v1/permissions/queryTestablePermissions) on a resource | `gcloud iam list-testable-permissions --filter "NOT apiDisabled: true` |
-| List of **grantable** **roles** for a resource                                                                                     | `gcloud iam list-grantable-roles <project URL>`                        |
-| List **custom** **roles** on a project                                                                                             | `gcloud iam roles list --project $PROJECT_ID`                          |
-| List **service accounts**                                                                                                          | `gcloud iam service-accounts list`                                     |
+| Description                                                                                                                        | Command                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| List **roles**                                                                                                                     | `gcloud iam roles list --filter='etag:AA=='`                                                     |
+| Get **description** and permissions of a role                                                                                      | gcloud iam roles describe roles/container.admin                                                  |
+| Get iam **policy** of a **organisation**                                                                                           | `gcloud organizations get-iam-policy`                                                            |
+| Get iam **policy** of a **project**                                                                                                | `gcloud projects get-iam-policy <project-id>`                                                    |
+| Get iam **policy** of a **folder**                                                                                                 | `gcloud resource-manager folders get-iam-policy`                                                 |
+| Get **members** of a **group**                                                                                                     | `gcloud identity groups memberships search-transitive-memberships --group-email=email@group.com` |
+| Get **permissions** of a **role**                                                                                                  | `gcloud iam roles describe roles/accessapproval.approver`                                        |
+| [**Testable permissions**](https://cloud.google.com/iam/docs/reference/rest/v1/permissions/queryTestablePermissions) on a resource | `gcloud iam list-testable-permissions --filter "NOT apiDisabled: true`                           |
+| List of **grantable** **roles** for a resource                                                                                     | `gcloud iam list-grantable-roles <project URL>`                                                  |
+| List **custom** **roles** on a project                                                                                             | `gcloud iam roles list --project $PROJECT_ID`                                                    |
+| List **service accounts**                                                                                                          | `gcloud iam service-accounts list`                                                               |
 
 ## Unauthenticated Attacks
 
