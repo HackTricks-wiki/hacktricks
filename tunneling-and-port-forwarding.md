@@ -32,7 +32,7 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 
 ### Port2hostnet \(proxychains\)
 
-Local Port --&gt; Compromised host\(SSH\) --&gt; Wherever
+Local Port --&gt; Compromised host \(SSH\) --&gt; Wherever
 
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
