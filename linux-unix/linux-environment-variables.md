@@ -4,7 +4,7 @@
 
 The **global variables **will be** inherited **by **child processes**.
 
-You can create a Global variable for your current session doing:
+You can create a global variable for your current session doing:
 
 ```bash
 export MYGLOBAL="hello world"
@@ -136,6 +136,6 @@ One, two and three backgrounded jobs:
 
 ![](<../.gitbook/assets/image (89).png>)
 
-One background job, one stopped and last command dind't finish correctly:
+One background job, one stopped and last command didn't finish correctly:
 
 ![](<../.gitbook/assets/image (90).png>)

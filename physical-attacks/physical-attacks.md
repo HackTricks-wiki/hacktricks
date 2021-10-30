@@ -111,8 +111,8 @@ With administrators privileges and powershell you could make a copy of the SAM f
 
 Bitlocker uses **2 passwords**. The one used by the **user**, and the **recovery** password \(48 digits\).
 
-If you are lucky and inside the current session of Windows exists the file _**C:\Windows\MEMORY.DMP**_ \(It is a memory dump\) you could try to **search inside of it the recovery password**. You can **get this file** and a **copy of the filesytem** and then use _Elcomsoft Forensic Disk Dercyptor_ to get the content \(this will only work if the password is inside the memory dump\).  
-You coud also **force the memory dump** using _**NotMyFault**_ of _Sysinternals,_ but this will reboot the system and has to be executed as Administrator.
+If you are lucky and inside the current session of Windows exists the file _**C:\Windows\MEMORY.DMP**_ \(It is a memory dump\) you could try to **search inside of it the recovery password**. You can **get this file** and a **copy of the filesytem** and then use _Elcomsoft Forensic Disk Decryptor_ to get the content \(this will only work if the password is inside the memory dump\).
+You could also **force the memory dump** using _**NotMyFault**_ of _Sysinternals,_ but this will reboot the system and has to be executed as Administrator.
 
 You could also try a **bruteforce attack** using _**Passware Kit Forensic**_.
 
