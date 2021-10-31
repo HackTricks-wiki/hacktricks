@@ -18,6 +18,7 @@
 
 * ****[**https://github.com/Ciphey/Ciphey**](https://github.com/Ciphey/Ciphey)****
 * ****[https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) (Magic module)
+* [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 
 ## Encoders
 
@@ -45,8 +46,14 @@ Check all bases with: [https://github.com/mufeedvh/basecrack](https://github.com
 
 * **Base32** \[_A-Z2-7=_]
   * `NBXWYYLDMFZGCY3PNRQQ====`
-* **Base58** \[_123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz_]
+* **Base45** \[]
+  * `59DPVDGPCVKEUPCPVD`
+* **Base58 (bitcoin)** \[_123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz_]
   * `2yJiRg5BF9gmsU6AC`
+* **Base58 (flickr)** \[_123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ_]
+  * `2YiHqF5bf9FLSt6ac`
+* **Base58 (ripple)** \[_rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz_]
+  * `pyJ5RgnBE9gm17awU`
 * **Base62** \[_0-9A-Za-z_]
   * `g2AextRZpBKRBzQ9`
 * **Base64** \[_A-Za-z0-9+/=_]
