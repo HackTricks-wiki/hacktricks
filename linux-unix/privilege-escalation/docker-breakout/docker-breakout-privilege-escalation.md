@@ -6,6 +6,7 @@
 * ****[**CDK**](https://github.com/cdk-team/CDK#installationdelivery): This tool is pretty **useful to enumerate the container you are into even try to escape automatically**
 * ****[**amicontained**](https://github.com/genuinetools/amicontained): Useful tool to get the privileges the container has in order to find ways to escape from it
 * ****[**deepce**](https://github.com/stealthcopter/deepce): Tool to enumerate and escape from containers
+* ****[**grype**](https://github.com/anchore/grype): Get the CVEs contained in the software installed in the image
 
 ## Mounted docker socket
 

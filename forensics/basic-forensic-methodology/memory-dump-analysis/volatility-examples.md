@@ -119,7 +119,7 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 
 #### KDBG
 
-The **kernel debugger block** (named KdDebuggerDataBlock of the type \_KDDEBUGGER_DATA64, or **KDBG **by volatility) is important for many things that Volatility and debuggers do. For example, it has a reference to the PsActiveProcessHead which is the list head of all processes required for process listing.
+The **kernel debugger block** (named KdDebuggerDataBlock of the type \_KDDEBUGGER\_DATA64, or **KDBG **by volatility) is important for many things that Volatility and debuggers do. For example, it has a reference to the PsActiveProcessHead which is the list head of all processes required for process listing.
 
 ## OS Information
 
@@ -334,7 +334,7 @@ Volatility allows to check to which process does a string belongs to.
 {% tab title="vol3" %}
 ```bash
 strings file.dmp > /tmp/strings.txt
-./vol.py -f /tmp/file.dmp windows.strings.Strings --string-file /tmp/strings.txt
+./vol.py -f /tmp/file.dmp windows.strings.Strings --strings-file /tmp/strings.txt
 ```
 {% endtab %}
 
@@ -368,7 +368,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
- **Windows** systems maintain a set of **keys** in the registry database (**UserAssist keys**) to keep track of programs that executed. The number of executions and last execution date and time are available in these **keys**.
+&#x20;**Windows** systems maintain a set of **keys** in the registry database (**UserAssist keys**) to keep track of programs that executed. The number of executions and last execution date and time are available in these **keys**.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -599,7 +599,7 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 ### Scanning with yara
 
 Use this script to download and merge all the yara malware rules from github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-Create the _**rules **_directory and execute it. This will create a file called _**malware_rules.yar**_ which contains all the yara rules for malware.
+Create the _**rules **_directory and execute it. This will create a file called _**malware\_rules.yar**_ which contains all the yara rules for malware.
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -687,7 +687,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-It's possible to **read from memory the bash history.** You could also dump the _.bash_history_ file, but it was disabled you will be glad you can use this volatility module
+It's possible to **read from memory the bash history.** You could also dump the _.bash\_history_ file, but it was disabled you will be glad you can use this volatility module
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -769,5 +769,5 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
 
-The MBR holds the information on how the logical partitions, containing [file systems](https://en.wikipedia.org/wiki/File_system), are organized on that medium. The MBR also contains executable code to function as a loader for the installed operating system—usually by passing control over to the loader's [second stage](https://en.wikipedia.org/wiki/Second-stage_boot_loader), or in conjunction with each partition's [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR). This MBR code is usually referred to as a [boot loader](https://en.wikipedia.org/wiki/Boot_loader). From [here](https://en.wikipedia.org/wiki/Master_boot_record).
+The MBR holds the information on how the logical partitions, containing [file systems](https://en.wikipedia.org/wiki/File\_system), are organized on that medium. The MBR also contains executable code to function as a loader for the installed operating system—usually by passing control over to the loader's [second stage](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader), or in conjunction with each partition's [volume boot record](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR). This MBR code is usually referred to as a [boot loader](https://en.wikipedia.org/wiki/Boot\_loader). From [here](https://en.wikipedia.org/wiki/Master\_boot\_record).
 
