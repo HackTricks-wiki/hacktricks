@@ -201,7 +201,7 @@ Gatekeeper builds upon **File Quarantine.**\
 When a user executes a "quarantined" file, **Gatekeeper** is the one that **performs the mentioned actions** to allow the execution of the file.
 
 {% hint style="info" %}
- **Checking** the **validity** of code signatures is a **resource-intensive** process that includes generating cryptographic **hashes** of the code and all its bundled resources. Furthermore, checking certificate validity involves doing an **online check** to Apple's servers to see if it has been revoked after it was issued. For these reasons, a full code signature and notarization check is **impractical to run every time an app is launched**.
+&#x20;**Checking** the **validity** of code signatures is a **resource-intensive** process that includes generating cryptographic **hashes** of the code and all its bundled resources. Furthermore, checking certificate validity involves doing an **online check** to Apple's servers to see if it has been revoked after it was issued. For these reasons, a full code signature and notarization check is **impractical to run every time an app is launched**.
 
 Therefore, these checks are **only run when executing apps with the quarantined attribute.**
 
@@ -334,7 +334,7 @@ Bypasses examples:
 ### SIP - System Integrity Protection
 
 This protection was enabled to **help keep root level malware from taking over certain parts** of the operating system. Although this means **applying limitations to the root user** many find it to be worthwhile trade off.\
-The most notable of these limitations are that **users can no longer create, modify, or delete files inside** of the following four directories in general: 
+The most notable of these limitations are that **users can no longer create, modify, or delete files inside** of the following four directories in general:&#x20;
 
 * /System
 * /bin
@@ -377,13 +377,15 @@ System Integrity Protection status: enabled.
 ```
 
 If you want to **disable** **it**, you need to put the computer in recovery mode (start it pressing command+R) and execute: `csrutil disable` \
-You can also maintain it **enable but without debugging protections **doing: 
+You can also maintain it **enable but without debugging protections **doing:&#x20;
 
 ```bash
 csrutil enable --without debug
 ```
 
 For more **information about SIP** read the following response: [https://apple.stackexchange.com/questions/193368/what-is-the-rootless-feature-in-el-capitan-really](https://apple.stackexchange.com/questions/193368/what-is-the-rootless-feature-in-el-capitan-really)
+
+This post about a** SIP bypass vulnerability** is also very interesting: [https://www.microsoft.com/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/](https://www.microsoft.com/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)
 
 ### Apple Binary Signatures
 
@@ -402,7 +404,7 @@ spctl --assess --verbose /Applications/Safari.app
 
 ## Installed Software & Services
 
-Check for **suspicious** applications installed and **privileges** over the.installed resources: 
+Check for **suspicious** applications installed and **privileges** over the.installed resources:&#x20;
 
 ```bash
 system_profiler SPApplicationsDataType #Installed Apps
@@ -842,7 +844,7 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 The attacker still needs to gain access to the system as well as escalate to **root** privileges in order to run **keychaindump**. This approach comes with its own conditions. As mentioned earlier, **upon login your keychain is unlocked by default** and remains unlocked while you use your system. This is for convenience so that the user doesn’t need to enter their password every time an application wishes to access the keychain. If the user has changed this setting and chosen to lock the keychain after every use, keychaindump will no longer work; it relies on an unlocked keychain to function.
 
-It’s important to understand how Keychaindump extracts passwords out of memory. The most important process in this transaction is the ”**securityd**“ **process**. Apple refers to this process as a **security context daemon for authorization and cryptographic operations**. The Apple developer libraries don’t say a whole lot about it; however, they do tell us that securityd handles access to the keychain. In his research, Juuso refers to the **key needed to decrypt the keychain as ”The Master Key“**. A number of steps need to be taken to acquire this key as it is derived from the user’s OS X login password. If you want to read the keychain file you must have this master key. The following steps can be done to acquire it. **Perform a scan of securityd’s heap (keychaindump does this with the vmmap command)**. Possible master keys are stored in an area flagged as MALLOC_TINY. You can see the locations of these heaps yourself with the following command:
+It’s important to understand how Keychaindump extracts passwords out of memory. The most important process in this transaction is the ”**securityd**“ **process**. Apple refers to this process as a **security context daemon for authorization and cryptographic operations**. The Apple developer libraries don’t say a whole lot about it; however, they do tell us that securityd handles access to the keychain. In his research, Juuso refers to the **key needed to decrypt the keychain as ”The Master Key“**. A number of steps need to be taken to acquire this key as it is derived from the user’s OS X login password. If you want to read the keychain file you must have this master key. The following steps can be done to acquire it. **Perform a scan of securityd’s heap (keychaindump does this with the vmmap command)**. Possible master keys are stored in an area flagged as MALLOC\_TINY. You can see the locations of these heaps yourself with the following command:
 
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
@@ -943,29 +945,29 @@ First of all, is **more common **to find that **MacOS binaries indicates the ful
 
 However, there are 2 types of dylib hijacking:
 
-* **Missing weak linked libraries**: This means that the application will try to load a library that doesn't exist configured with **LC_LOAD_WEAK_DYLIB**. Then, **if an attacker places a dylib where it's expected it will be loaded**.
+* **Missing weak linked libraries**: This means that the application will try to load a library that doesn't exist configured with **LC\_LOAD\_WEAK\_DYLIB**. Then, **if an attacker places a dylib where it's expected it will be loaded**.
   * The fact that the link is "weak" means that the application will continue running even if the library isn't found.
-* **Configured with @rpath**: The path to the library configured contains "**@rpath**" and it's configured with **multiple** **LC_RPATH** containing **paths**. Therefore, **when loading **the dylib, the loader is going to **search** (in order)** through all the paths** specified in the **LC_RPATH** **configurations**. If anyone is missing and **an attacker can place a dylib there** and it will be loaded.
+* **Configured with @rpath**: The path to the library configured contains "**@rpath**" and it's configured with **multiple** **LC\_RPATH** containing **paths**. Therefore, **when loading **the dylib, the loader is going to **search** (in order)** through all the paths** specified in the **LC\_RPATH** **configurations**. If anyone is missing and **an attacker can place a dylib there** and it will be loaded.
 
 The way to **escalate privileges** abusing this functionality would be in the rare case that an **application** being executed **by** **root** is **looking** for some **library in some folder where the attacker has write permissions.**
 
 **A nice scanner to find missing libraries in applications is **[**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html)** or a **[**CLI version**](https://github.com/pandazheng/DylibHijack)**.**\
 **A nice report with technical details about this technique can be found **[**here**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x)**.**
 
-### **DYLD_INSERT_LIBRARIES**
+### **DYLD\_INSERT\_LIBRARIES**
 
-> This is a colon separated **list of dynamic libraries** to l**oad before the ones specified in the program**. This lets you test new modules of existing dynamic shared libraries that are used in flat-namespace images by loading a temporary dynamic shared library with just the new modules. Note that this has no effect on images built a two-level namespace images using a dynamic shared library unless DYLD_FORCE_FLAT_NAMESPACE is also used.
+> This is a colon separated **list of dynamic libraries** to l**oad before the ones specified in the program**. This lets you test new modules of existing dynamic shared libraries that are used in flat-namespace images by loading a temporary dynamic shared library with just the new modules. Note that this has no effect on images built a two-level namespace images using a dynamic shared library unless DYLD\_FORCE\_FLAT\_NAMESPACE is also used.
 
-This is like the [**LD_PRELOAD on Linux**](../../linux-unix/privilege-escalation/#ld_preload).
+This is like the [**LD\_PRELOAD on Linux**](../../linux-unix/privilege-escalation/#ld\_preload).
 
 This technique may be also** used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
 
 {% hint style="info" %}
-Since 2012 when [OSX.FlashBack.B](https://www.f-secure.com/v-descs/trojan-downloader_osx_flashback_b.shtml) \[22] abused this technique, **Apple has drastically reduced the “power” **of the DYLD_INSERT_LIBRARIES. 
+Since 2012 when [OSX.FlashBack.B](https://www.f-secure.com/v-descs/trojan-downloader\_osx\_flashback\_b.shtml) \[22] abused this technique, **Apple has drastically reduced the “power” **of the DYLD\_INSERT\_LIBRARIES.&#x20;
 
-For example the dynamic loader (dyld) ignores the DYLD_INSERT_LIBRARIES environment variable in a wide range of cases, such as setuid and platform binaries. And, starting with macOS Catalina, only 3rd-party applications that are not compiled with the hardened runtime (which “protects the runtime integrity of software” \[22]), or have an exception such as the com.apple.security.cs.allow-dyld-environment-variables entitlement) are susceptible to dylib insertions. 
+For example the dynamic loader (dyld) ignores the DYLD\_INSERT\_LIBRARIES environment variable in a wide range of cases, such as setuid and platform binaries. And, starting with macOS Catalina, only 3rd-party applications that are not compiled with the hardened runtime (which “protects the runtime integrity of software” \[22]), or have an exception such as the com.apple.security.cs.allow-dyld-environment-variables entitlement) are susceptible to dylib insertions.&#x20;
 
-For more details on the security features afforded by the hardened runtime, see Apple’s documentation: “[Hardened Runtime](https://developer.apple.com/documentation/security/hardened_runtime)” 
+For more details on the security features afforded by the hardened runtime, see Apple’s documentation: “[Hardened Runtime](https://developer.apple.com/documentation/security/hardened\_runtime)”&#x20;
 {% endhint %}
 
 ## Interesting Information in Databases
@@ -1080,7 +1082,7 @@ mal.scpt: AppleScript compiled
 
 and tin this case the content cannot be decompiled even with `osadecompile`
 
-However, there are still some tools that can be used to understand this kind of executables, [**read this research for more info**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)). The tool [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) with [**aevt_decompile**](https://github.com/SentineLabs/aevt_decompile) will be very useful to understand how the script works.
+However, there are still some tools that can be used to understand this kind of executables, [**read this research for more info**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)). The tool [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) with [**aevt\_decompile**](https://github.com/SentineLabs/aevt\_decompile) will be very useful to understand how the script works.
 
 ## MacOS Red Teaming
 
@@ -1093,7 +1095,7 @@ Red Teaming in **environments where MacOS** is used instead of Windows can be ve
 ## MacOS Automatic Enumeration Tools
 
 * **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
-* **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
+* **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum\_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum\_osx.rb)
 * **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
 ## Specific MacOS Commands
