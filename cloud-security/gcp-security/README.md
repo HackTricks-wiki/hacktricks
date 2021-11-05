@@ -1,6 +1,6 @@
 # GCP Security
 
-![](<../../.gitbook/assets/image (629) (1).png>)
+![](<../../.gitbook/assets/image (629) (1) (1).png>)
 
 ## Security concepts <a href="security-concepts" id="security-concepts"></a>
 

@@ -79,7 +79,7 @@ In order to make sure that the expired domain that you are going to buy **has al
 * [https://hunter.io/](https://hunter.io)
 * [https://anymailfinder.com/](https://anymailfinder.com)
 
-In order to **discover more** valid email addresses or **verify the ones** you have already discovered you can check if you can brute-force them smtp servers of the victim. [Learn how to verify/discover email address here](../pentesting/pentesting-smtp/#username-bruteforce-enumeration).\
+In order to **discover more** valid email addresses or **verify the ones** you have already discovered you can check if you can brute-force them smtp servers of the victim. [Learn how to verify/discover email address here](broken-reference).\
 Moreover, don't forget that if the users use **any web portal to access their mails**, you can check if it's vulnerable to **username brute force**, and exploit the vulnerability if possible.
 
 ## Configuring GoPhish
@@ -252,8 +252,8 @@ Set a rDNS (PTR) record that resolves the IP address of the VPS to the domain na
 
 You must **configure a SPF record for the new domain**. If you don't know what is a SPF record read the following page:
 
-{% content-ref url="../pentesting/pentesting-smtp/" %}
-[pentesting-smtp](../pentesting/pentesting-smtp/)
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
 {% endcontent-ref %}
 
 You can use [https://www.spfwizard.net/](https://www.spfwizard.net) to generate your SPF policy (use the IP of the VPS machine)
@@ -270,8 +270,8 @@ v=spf1 mx a ip4:ip.ip.ip.ip ?all
 
 You must **configure a DMARC record for the new domain**. If you don't know what is a DMARC record read the following page:
 
-{% content-ref url="../pentesting/pentesting-smtp/" %}
-[pentesting-smtp](../pentesting/pentesting-smtp/)
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
 {% endcontent-ref %}
 
 You have to create a new DNS TXT record pointing the hostname `_dmarc.<domain>` with the following content:
@@ -284,8 +284,8 @@ v=DMARC1; p=none
 
 You must **configure a DKIM for the new domain**. If you don't know what is a DMARC record read the following page:
 
-{% content-ref url="../pentesting/pentesting-smtp/" %}
-[pentesting-smtp](../pentesting/pentesting-smtp/)
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
 {% endcontent-ref %}
 
 This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)

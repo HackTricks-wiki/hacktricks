@@ -2,7 +2,7 @@
 
 ## Global variables
 
-The **global variables **will be** inherited **by **child processes**.
+The \*\*global variables **will be** inherited \*\*by **child processes**.
 
 You can create a global variable for your current session doing:
 
@@ -43,9 +43,9 @@ cat /proc/`python -c "import os; print(os.getppid())"`/environ
 
 #### **Files that affect behavior of every user:**
 
-* _**/etc/bash.bashrc**_** **: This file is read whenever an interactive shell is started (normal terminal) and all the commands specified in here are executed.
+* _**/etc/bash.bashrc**_\*\* \*\*: This file is read whenever an interactive shell is started (normal terminal) and all the commands specified in here are executed.
 * _**/etc/profile and /etc/profile.d/\***_**:** This file is read every time a user logs in. Thus all the commands executed in here will execute only once at the time of user logging in.
-  *   **Example: **
+  *   \*\*Example: \*\*
 
       `/etc/profile.d/somescript.sh`
 
@@ -57,10 +57,10 @@ cat /proc/`python -c "import os; print(os.getppid())"`/environ
 
 #### **Files that affect behavior for only a specific user:**
 
-* _**\~/.bashrc**_** :** This file behaves the same way _/etc/bash.bashrc_ file works but it is executed only for a specific user. If you want to create an environment for yourself go ahead and modify or create this file in your home directory.
-* _**\~/.profile, \~/.bash_profile, \~/.bash_login**_**:** These files are same as _/etc/profile_. The difference comes in the way it is executed. This file is executed only when a user in whose home directory this file exists, logs in.
+* _**\~/.bashrc**_\*\* :\*\* This file behaves the same way _/etc/bash.bashrc_ file works but it is executed only for a specific user. If you want to create an environment for yourself go ahead and modify or create this file in your home directory.
+* _**\~/.profile, \~/.bash\_profile, \~/.bash\_login**_**:** These files are same as _/etc/profile_. The difference comes in the way it is executed. This file is executed only when a user in whose home directory this file exists, logs in.
 
-**Extracted from: **[**here**](https://codeburst.io/linux-environment-variables-53cea0245dc9)** and **[**here**](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)****
+**Extracted from: **[**here**](https://codeburst.io/linux-environment-variables-53cea0245dc9)** and **[**here**](https://www.gnu.org/software/bash/manual/html\_node/Bash-Startup-Files.html)
 
 ## Common variables
 
@@ -69,7 +69,7 @@ From: [https://geek-university.com/linux/common-environment-variables/](https://
 * **DISPLAY** – the display used by **X**. This variable is usually set to **:0.0**, which means the first display on the current computer.
 * **EDITOR** – the user’s preferred text editor.
 * **HISTFILESIZE** – the maximum number of lines contained in the history file.
-* **HISTSIZE - **Number of lines added to the history file when the user finish his session
+* \*\*HISTSIZE - \*\*Number of lines added to the history file when the user finish his session
 * **HOME** – your home directory.
 * **HOSTNAME** – the hostname of the computer.
 * **LANG** – your current language.
@@ -77,7 +77,7 @@ From: [https://geek-university.com/linux/common-environment-variables/](https://
 * **MANPATH** – the list of directories to search for manual pages.
 * **OSTYPE** – the type of operating system.
 * **PS1** – the default prompt in bash.
-* **PATH - **stores the path of all the directories which holds binary files you want to execute just by specifying the name of the file and not by relative or absolute path.
+* \*\*PATH - \*\*stores the path of all the directories which holds binary files you want to execute just by specifying the name of the file and not by relative or absolute path.
 * **PWD** – the current working directory.
 * **SHELL** – the path to the current command shell (for example, **/bin/bash**).
 * **TERM** – the current terminal type (for example, **xterm**).
@@ -88,7 +88,7 @@ From: [https://geek-university.com/linux/common-environment-variables/](https://
 
 ### **HISTFILESIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** the **history file** (\~/.bash_history) **will be deleted**.
+Change the **value of this variable to 0**, so when you **end your session** the **history file** (\~/.bash\_history) **will be deleted**.
 
 ```bash
 export HISTFILESIZE=0
@@ -96,13 +96,13 @@ export HISTFILESIZE=0
 
 ### **HISTSIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** any command will be added to the **history file** (\~/.bash_history).
+Change the **value of this variable to 0**, so when you **end your session** any command will be added to the **history file** (\~/.bash\_history).
 
 ```bash
 export HISTSIZE=0
 ```
 
-### http_proxy
+### http\_proxy
 
 The processes will use the **proxy** declared here to connect to internet through **http**.
 
@@ -110,7 +110,7 @@ The processes will use the **proxy** declared here to connect to internet throug
 export http_proxy="http://10.10.10.10:8080"
 ```
 
-### https_proxy
+### https\_proxy
 
 The processes will use the **proxy** declared here to connect to internet through **https**.
 
@@ -122,7 +122,7 @@ export https_proxy="http://10.10.10.10:8080"
 
 Change how your prompt looks.
 
-**I have created **[**this one**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808) (based on another, read the code).
+\*\*I have created \*\*[**this one**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808) (based on another, read the code).
 
 Root:
 

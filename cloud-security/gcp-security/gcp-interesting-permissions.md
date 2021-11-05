@@ -8,7 +8,7 @@ These techniques were copied from [https://rhinosecuritylabs.com/gcp/privilege-e
 
 This single permission lets you **launch new deployments** of resources into GCP a**s the **_**\<project number>@cloudservices.gserviceaccount.com**_** Service Account**, which, by default, is granted the Editor role on the project.
 
-![](<../../.gitbook/assets/image (626).png>)
+![](<../../.gitbook/assets/image (626) (1).png>)
 
 In the following example [this script](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/deploymentmanager.deployments.create.py) is used to deploy a compute instance, but any resource listed in `gcloud deployment-manager types list`_ _could be actually deployed:
 
@@ -18,7 +18,7 @@ In the following example [this script](https://github.com/RhinoSecurityLabs/GCP-
 
 You can use this permission to **update the “includedPermissons” on your role**, so you can get any permission you want.
 
-![](<../../.gitbook/assets/image (627) (1).png>)
+![](<../../.gitbook/assets/image (627) (1) (1).png>)
 
 ```
 gcloud iam roldes update <rol name> --project <project> --add-permissions <permission>

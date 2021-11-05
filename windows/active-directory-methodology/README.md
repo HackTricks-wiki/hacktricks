@@ -18,7 +18,7 @@ Main concepts of an Active Directory:
 
 1. **Directory** – Contains all the information about the objects of the Active directory
 2. **Object** – An object references almost anything inside the directory (a user, group, shared folder...)
-3. **Domain** – The objects of the directory are contained inside the domain. Inside a "forest" more than one domain can exist and each of them will have their own objects collection. 
+3. **Domain** – The objects of the directory are contained inside the domain. Inside a "forest" more than one domain can exist and each of them will have their own objects collection.&#x20;
 4. **Tree** – Group of domains with the same root. Example: _dom.local, email.dom.local, www.dom.local_
 5. **Forest** – The forest is the highest level of the organization hierarchy and is composed by a group of trees. The trees are connected by trust relationships.
 
@@ -32,7 +32,7 @@ Active Directory provides several different services, which fall under the umbre
 6. **DNS Service** – Used to resolve domain names.
 
 AD DS is included with Windows Server (including Windows Server 10) and is designed to manage client systems. While systems running the regular version of Windows do not have the administrative features of AD DS, they do support Active Directory. This means any Windows computer can connect to a Windows workgroup, provided the user has the correct login credentials.\
-**From:** [**https://techterms.com/definition/active_directory**](https://techterms.com/definition/active_directory)
+**From:** [**https://techterms.com/definition/active\_directory**](https://techterms.com/definition/active\_directory)
 
 ### **Kerberos Authentication**
 
@@ -52,7 +52,7 @@ If you just have access to an AD environment but you don't have any credentials/
   * `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
   * `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
   * `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-  * [**A more detailed guide on how to enumerate a SMB server can be found here.**](../../pentesting/pentesting-smb.md)
+  * [**A more detailed guide on how to enumerate a SMB server can be found here.**](broken-reference)
 * **Enumerate Ldap**:
   * `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
   * [**A more detailed guide on how to enumerate LDAP can be found here.**](../../pentesting/pentesting-ldap.md)
@@ -64,7 +64,7 @@ If you just have access to an AD environment but you don't have any credentials/
 
 ### User enumeration
 
-When an **invalid username is requested** the server will respond using the **Kerberos error** code _**KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN**_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response **or** the error _**KRB5KDC_ERR_PREAUTH_REQUIRED**_, indicating that the user is required to perform pre-authentication.
+When an **invalid username is requested** the server will respond using the **Kerberos error** code _**KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN**_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response **or** the error _**KRB5KDC\_ERR\_PREAUTH\_REQUIRED**_, indicating that the user is required to perform pre-authentication.
 
 ```
 nmap -p 88 --script=krb5-enum-users --script-args="krb5-enum-users.realm='DOMAIN'" <IP>
@@ -81,7 +81,7 @@ You could also use the **impacket script of ASREPRoast** to enumerate valid user
 
 Ok, so you know you have already a valid username but no passwords...Then try:
 
-* [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _**DONT_REQ_PREAUTH**_ you can **request a AS_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
+* [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _**DONT\_REQ\_PREAUTH**_ you can **request a AS\_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
 * [**Password Spraying**](password-spraying.md): Let's **try** the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy)
 * A final option if the accounts cannot be locked is the [**traditional bruteforce**](password-spraying.md)****
 
@@ -154,7 +154,7 @@ Also, if a MSSQL instance is trusted (database link) by a different MSSQL instan
 
 ### **Unconstrained Delegation**
 
-**If you find any Computer object with the attribute** [ADS_UF_TRUSTED_FOR_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.\
+**If you find any Computer object with the attribute** [ADS\_UF\_TRUSTED\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.\
 So, if a **Domain Admin logins onto the computer**, you will be able to dump his TGT and impersonate him using [Pass the Ticket](pass-the-ticket.md).\
 Thanks to constrained delegation you could even **automatically compromise a Print Server** (hopefully it will be a DC).\
 [**More information about this technique here.**](unconstrained-delegation.md)
@@ -275,13 +275,13 @@ A trust relationship can also be **transitive** (A trust B, B trust C, then A tr
 1. **Enumerate** the trusting relationships
 2. Check if any **security principal** (user/group/computer) has **access** to resources of the **other domain**, maybe by ACE entries or by being in groups of the other domain. Look for **relationships across domains** (the trust was created for this probably).
    1. kerberoast in this case could be another option.
-3. **Compromise** the **accounts** which can **pivot** through domains. 
+3. **Compromise** the **accounts** which can **pivot** through domains.&#x20;
 
 There are three **main** ways that security principals (users/groups/computer) from one domain can have access into resources in another foreign/trusting domain:
 
 * They can be added to **local groups** on individual machines, i.e. the local “Administrators” group on a server.
 * They can be added to **groups in the foreign domain**. There are some caveats depending on trust type and group scope, described shortly.
-* They can be added as principals in an **access control list**, most interesting for us as principals in **ACEs** in a **DACL**. For more background on ACLs/DACLs/ACEs, check out the “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” whitepaper.
+* They can be added as principals in an **access control list**, most interesting for us as principals in **ACEs** in a **DACL**. For more background on ACLs/DACLs/ACEs, check out the “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an\_ace\_up\_the\_sleeve.pdf)” whitepaper.
 
 ### Child-to-Parent forest privilege escalation
 
@@ -371,7 +371,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:<current
 **For user objects:**
 
 * ObjectSID (different from the domain)
-* lastLogon, lastlogontimestamp 
+* lastLogon, lastlogontimestamp&#x20;
 * Logoncount (very low number is suspicious)
 * whenCreated
 * Badpwdcount (very low number is suspicious)

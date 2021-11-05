@@ -7,7 +7,7 @@ Docker engine does the heavy lifting of running and managing Containers. Docker 
 Finally, an **auth plugin** can be used to **limit the actions** users can perform.\
 
 
-![](<../../../.gitbook/assets/image (625) (1).png>)
+![](<../../../.gitbook/assets/image (625) (1) (1).png>)
 
 ### **Docker engine secure access**
 
