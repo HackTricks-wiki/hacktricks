@@ -469,7 +469,7 @@
     * [Wifi Pcap Analysis](forensics/basic-forensic-methodology/pcap-inspection/wifi-pcap-analysis.md)
     * [Wireshark tricks](forensics/basic-forensic-methodology/pcap-inspection/wireshark-tricks.md)
   * [Specific Software/File-Type Tricks](forensics/basic-forensic-methodology/specific-software-file-type-tricks/README.md)
-    * [.pyc](forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
+    * [Decompile compiled python binaries (exe, elf) - Retreive from .pyc](forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
     * [Browser Artifacts](forensics/basic-forensic-methodology/specific-software-file-type-tricks/browser-artifacts.md)
     * [Desofuscation vbs (cscript.exe)](forensics/basic-forensic-methodology/specific-software-file-type-tricks/desofuscation-vbs-cscript.exe.md)
     * [Local Cloud Storage](forensics/basic-forensic-methodology/specific-software-file-type-tricks/local-cloud-storage.md)

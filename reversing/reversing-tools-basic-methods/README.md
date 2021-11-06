@@ -201,14 +201,14 @@ The **Create Dump** option will dump the final shellcode if any change is done t
 
 ### Disassembling using CyberChef
 
-Upload you shellcode file as input and use the following receipt to decompile it: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](https://gchq.github.io/CyberChef/#recipe=To_Hex\('Space',0\)Disassemble_x86\('32','Full%20x86%20architecture',16,0,true,true\))
+Upload you shellcode file as input and use the following receipt to decompile it: [https://gchq.github.io/CyberChef/#recipe=To\_Hex('Space',0)Disassemble\_x86('32','Full%20x86%20architecture',16,0,true,true)](https://gchq.github.io/CyberChef/#recipe=To\_Hex\('Space',0\)Disassemble\_x86\('32','Full%20x86%20architecture',16,0,true,true\))
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
 This obfuscator **modify all the instructions for `mov`**(yeah, really cool). It also uses interruptions to change executions flows. For more information about how does it works:
 
-* [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
-* [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas\_2015\_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas\_2015\_the_movfuscator.pdf)
+* [https://www.youtube.com/watch?v=2VF\_wPkiBJY](https://www.youtube.com/watch?v=2VF\_wPkiBJY)
+* [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas\_2015\_the\_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas\_2015\_the\_movfuscator.pdf)
 
 If you are lucky [demovfuscator ](https://github.com/kirschju/demovfuscator)will deofuscate the binary. It has several dependencies
 
@@ -219,7 +219,7 @@ apt-get install libz3-dev
 
 And [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html) 
+If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)&#x20;
 
 ## Rust
 
@@ -249,6 +249,14 @@ I you have to reverse a Golang binary I would suggest you to use the IDA plugin 
 Just press** ATL+f7 **(import python plugin in IDA) and select the python plugin.
 
 This will resolve the names of the functions.
+
+## Compiled Python
+
+In this page you can find how to get the python code from an ELF/EXE python compiled binary:
+
+{% content-ref url="../../forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md" %}
+[.pyc.md](../../forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
+{% endcontent-ref %}
 
 ## GBA - Game Body Advance
 
@@ -307,7 +315,7 @@ void FUN_080015a8(void)
   uVar4 = DAT_030004d8;
 ```
 
- It's found this code:
+&#x20;It's found this code:
 
 ```c
   do {
@@ -369,5 +377,5 @@ So, in this challenge, knowing the values of the buttons, you needed to** press 
 
 ## Courses
 
-* [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
+* [https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering)
 * [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
