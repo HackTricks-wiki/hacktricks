@@ -30,9 +30,9 @@ DPAPI is utilized to protect the following personal data:
 An example of a successful and clever way to protect data using DPAPI is the implementation of the auto-completion password encryption algorithm in Internet Explorer. To encrypt the login and password for a certain web page, it calls the CryptProtectData function, where in the optional entropy parameter it specifies the address of the web page. Thus, unless one knows the original URL where the password was entered, nobody, not even Internet Explorer itself, can decrypt that data back.
 {% endhint %}
 
-## Master Keys 
+## Master Keys&#x20;
 
-The DPAPI keys used for encrypting the user's RSA keys are stored under `%APPDATA%\Microsoft\Protect\{SID}` directory, where {SID} is the [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier) of that user. **The DPAPI key is stored in the same file as the master key that protects the users private keys**. It usually is 64 bytes of random data. (Notice that this directory is protected so you cannot list it using`dir` from the cmd, but you can list it from PS).
+The DPAPI keys used for encrypting the user's RSA keys are stored under `%APPDATA%\Microsoft\Protect\{SID}` directory, where {SID} is the [Security Identifier](https://en.wikipedia.org/wiki/Security\_Identifier) of that user. **The DPAPI key is stored in the same file as the master key that protects the users private keys**. It usually is 64 bytes of random data. (Notice that this directory is protected so you cannot list it using`dir` from the cmd, but you can list it from PS).
 
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
@@ -47,7 +47,7 @@ This is what a bunch of Master Keys of a user will looks like:
 
 ![](<../../.gitbook/assets/image (324).png>)
 
-Usually **each master keys is an encrypted symmetric key that can decrypt other content**. Therefore, **extracting **the **encrypted Master Key **is interesting in order to **decrypt **later that **other content **encrypted with it. 
+Usually **each master keys is an encrypted symmetric key that can decrypt other content**. Therefore, **extracting **the **encrypted Master Key **is interesting in order to **decrypt **later that **other content **encrypted with it.&#x20;
 
 ### Extract a master key
 
@@ -118,6 +118,10 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 
 You can find an example of how to encrypt and decyrpt data with DAPI using mimikatz and C++ in [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)\
 You can find an example on how to encrypt and decrypt data with DPAPI using C# in [https://docs.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection](https://docs.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection)
+
+## DonPAPI
+
+****[**DonPAPI**](https://github.com/login-securite/DonPAPI) can dump secrets protected by DPAPI automatically.
 
 ## References
 
