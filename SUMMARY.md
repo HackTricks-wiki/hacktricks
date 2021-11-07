@@ -445,6 +445,7 @@
   * [Server Side XSS (Dynamic PDF)](pentesting-web/xss-cross-site-scripting/server-side-xss-dynamic-pdf.md)
   * [XSS Tools](pentesting-web/xss-cross-site-scripting/xss-tools.md)
   * [Iframes in XSS and CSP](pentesting-web/xss-cross-site-scripting/iframes-in-xss-and-csp.md)
+  * [Other JS Tricks](pentesting-web/xss-cross-site-scripting/other-js-tricks.md)
 * [XSSI (Cross-Site Script Inclusion)](pentesting-web/xssi-cross-site-script-inclusion.md)
 * [XS-Search](pentesting-web/xs-search.md)
 
