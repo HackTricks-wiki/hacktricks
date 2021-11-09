@@ -429,6 +429,8 @@ Another promising way to **escalate privileges inside the cloud is to enumerate 
 Note that you can enumerate most resources with `list` (list items of that type), `describe` (describe parent and children items) and  `get-iam-policy` (get policy attached to that specific resource).&#x20;
 {% endhint %}
 
+There is a gcloud API endpoint that aims to **list all the resources the accessible from the used user accoun**t, it's in alpha bet and only supports a couple of resources, but maybe in the future you can list all you have access to with it: [https://helpmanual.io/man1/gcloud\_alpha\_resources\_list/](https://helpmanual.io/man1/gcloud\_alpha\_resources\_list/)&#x20;
+
 {% content-ref url="gcp-buckets-enumeration.md" %}
 [gcp-buckets-enumeration.md](gcp-buckets-enumeration.md)
 {% endcontent-ref %}
