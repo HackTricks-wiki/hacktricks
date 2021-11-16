@@ -82,6 +82,27 @@ This means that as part of creating certain resources, you must “actAs” the 
 
 **There are multiple individual methods that use **_**iam.serviceAccounts.actAs**_**, so depending on your own permissions, you may only be able to exploit one (or more) of these methods below**. These methods are slightly different in that they **require multiple permissions to exploit, rather than a single permission** like all of the previous methods.
 
+### iam.serviceAccounts.getOpenIdToken
+
+This permission can be used to generate an OpenID JWT. These are used to assert identity and do not necessarily carry any implicit authorization against a resource.
+
+According to this [**interesting post**](https://medium.com/google-cloud/authenticating-using-google-openid-connect-tokens-e7675051213b), it's necessary to indicate the audience (service against you want to use the token to authenticate to) and you will receive a JWT signed by google indicating the service account and the audience of the JWT.
+
+Then you can just use it to access the service with:
+
+```
+curl -v -H "Authorization: Bearer id_token" https://some-cloud-run-uc.a.run.app
+```
+
+Some services that support authentication via this kind of tokens are:
+
+* [Google Cloud Run](https://cloud.google.com/run/)
+* [Google Cloud Functions](https://cloud.google.com/functions/docs/)
+* [Google Identity Aware Proxy](https://cloud.google.com/iap/docs/authentication-howto)
+* [Google Cloud Endpoints](https://cloud.google.com/endpoints/docs/openapi/authenticating-users-google-id) (if using Google OIDC)
+
+You can find an example on how to create and OpenID token behalf a service account [**here**](https://github.com/carlospolop-forks/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.getOpenIdToken.py).
+
 ## cloudbuild
 
 ### cloudbuild.builds.create
