@@ -388,6 +388,7 @@
   * [Basic .Net deserialization (ObjectDataProvider gadget, ExpandedWrapper, and Json.Net)](pentesting-web/deserialization/basic-.net-deserialization-objectdataprovider-gadgets-expandedwrapper-and-json.net.md)
   * [Exploiting \_\_VIEWSTATE knowing the secrets](pentesting-web/deserialization/exploiting-\_\_viewstate-knowing-the-secret.md)
   * [Exploiting \_\_VIEWSTATE without knowing the secrets](pentesting-web/deserialization/exploiting-\_\_viewstate-parameter.md)
+  * [Python Yaml Deserialization](pentesting-web/deserialization/python-yaml-deserialization.md)
 * [Domain/Subdomain takeover](pentesting-web/domain-subdomain-takeover.md)
 * [Email Header Injection](pentesting-web/email-header-injection.md)
 * [File Inclusion/Path traversal](pentesting-web/file-inclusion/README.md)
