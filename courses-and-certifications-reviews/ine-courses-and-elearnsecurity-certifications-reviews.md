@@ -48,3 +48,9 @@ The exam was composed of a **few web applications full of vulnerabilities**. In 
 **I reported more than 10 unique vulnerabilities** (most of them high/critical and presented in different places of the webs), including the read of the flag and several ways to gain RCE and I passed.
 
 **All the vulnerabilities I reported could be found explained in the **[**Web Application Penetration Testing eXtreme course**](https://my.ine.com/CyberSecurity/courses/630a470a/web-application-penetration-testing-extreme)**. **However, order to pass this exam I think that you **don't only need to know about web vulnerabilities**, but you need to be **experienced exploiting them**. So, if you are doing the course, at least practice with the labs and potentially play with other platform where you can improve your skills exploiting web vulnerabilities.
+
+## Course: **Data Science on the Google Cloud Platform**
+
+\
+It's a very interesting basic course about **how to use the ML environment provided by Google** using services such as big-query (to store al load results), Google Deep Learning APIs (Google Vision API, Google Speech API, Google Natural Language API and Google Video Intelligence API) and even how to train your own model.
+
