@@ -207,8 +207,14 @@ use auxiliary/scanner/mongodb/mongodb_login
 ### MySQL
 
 ```bash
+# hydra
 hydra -L usernames.txt -P pass.txt <IP> mysql
+
+# msfconsole
 msf> use auxiliary/scanner/mysql/mysql_login; set VERBOSE false
+
+# medusa
+medusa -h <IP/Host> -u <username> -P <password_list> <-f | to stop medusa on first success attempt> -t <threads> -M mysql
 ```
 
 ### OracleSQL
