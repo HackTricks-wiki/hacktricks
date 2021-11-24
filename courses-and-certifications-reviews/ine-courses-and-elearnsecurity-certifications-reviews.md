@@ -54,3 +54,24 @@ The exam was composed of a **few web applications full of vulnerabilities**. In 
 \
 It's a very interesting basic course about **how to use the ML environment provided by Google** using services such as big-query (to store al load results), Google Deep Learning APIs (Google Vision API, Google Speech API, Google Natural Language API and Google Video Intelligence API) and even how to train your own model.
 
+## Course: **Machine Learning with scikit-learn Starter Pass**
+
+In the course [**Machine Learning with scikit-learn Starter Pass**](https://my.ine.com/DataScience/courses/58c4e71b/machine-learning-with-scikit-learn-starter-pass)** **you will learn, as the name indicates, **how to use scikit-learn to create Machine Learning models**.&#x20;
+
+It's definitely recommended for people that haven't use scikit-learn (but know python)
+
+## **Course: Classification Algorithms**
+
+The** **[**Classification Algorithms course**](https://my.ine.com/DataScience/courses/2c6de5ea/classification-algorithms)** **is a great course for people that is **starting to learn about machine learning**. Here you will find information about the main classification algorithms you need to know and some mathematical concepts like **logistic regression** and **gradient descent**, **KNN**, **SVM**, and **Decision trees**.
+
+It also shows how to **create models** with with **scikit-learn.**
+
+## Course: **Decision Trees**
+
+The [**Decision Trees course**](https://my.ine.com/DataScience/courses/83fcfd52/decision-trees) was very useful to improve my knowledge about **Decision and Regressions Trees**, **when** are they **useful**, **how** they **work** and how to properly **tune them**.
+
+It also explains **how to create tree models** with scikit-learn different techniques to **measure how good the created model is** and how to **visualize the tree**.
+
+The only drawback I could find was in some cases some lack of mathematical explanations about how the used algorithm works. However, this course is** pretty useful for people that are learning about Machine Learning**.
+
+## &#x20;
