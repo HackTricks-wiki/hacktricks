@@ -355,6 +355,7 @@
 * [44818/UDP/TCP - Pentesting EthernetIP](pentesting/44818-ethernetip.md)
 * [47808/udp - Pentesting BACNet](pentesting/47808-udp-bacnet.md)
 * [50030,50060,50070,50075,50090 - Pentesting Hadoop](pentesting/50030-50060-50070-50075-50090-pentesting-hadoop.md)
+* [Pentesting Remote GdbServer](pentesting/pentesting-remote-gdbserver.md)
 
 ## Pentesting Web
 
