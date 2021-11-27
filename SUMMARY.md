@@ -391,7 +391,7 @@
   * [Exploiting \_\_VIEWSTATE without knowing the secrets](pentesting-web/deserialization/exploiting-\_\_viewstate-parameter.md)
   * [Python Yaml Deserialization](pentesting-web/deserialization/python-yaml-deserialization.md)
 * [Domain/Subdomain takeover](pentesting-web/domain-subdomain-takeover.md)
-* [Email Header Injection](pentesting-web/email-header-injection.md)
+* [Email Injections](pentesting-web/email-header-injection.md)
 * [File Inclusion/Path traversal](pentesting-web/file-inclusion/README.md)
   * [phar:// deserialization](pentesting-web/file-inclusion/phar-deserialization.md)
 * [File Upload](pentesting-web/file-upload/README.md)
