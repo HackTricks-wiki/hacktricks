@@ -1,6 +1,6 @@
 # Cloud Security Review
 
-**Check for nice cloud hacking tricks in** [**https://hackingthe.cloud/aws/general-knowledge/connection-tracking/**](https://hackingthe.cloud/aws/general-knowledge/connection-tracking/)
+**Check for nice cloud hacking tricks in** [**https://hackingthe.cloud**](https://hackingthe.cloud)
 
 ## Generic tools
 
