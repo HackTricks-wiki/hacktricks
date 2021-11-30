@@ -59,6 +59,18 @@ You can **compare the permissions** of each role in this table [https://docs.git
 
 You can also **create your own roles** in _https://github.com/organizations/\<org\_name>/settings/roles_
 
+### Groups
+
+You can **list the groups created in an organization** in _https://github.com/orgs/\<org\_name>/teams_. Note that to see the groups which are children of other groups you need to access each parent group
+
+![](<../../.gitbook/assets/image (630).png>)
+
+### Users
+
+The users of an organization can be **listed** in _https://github.com/orgs/\<org\_name>/people._
+
+In the information of each user you can see the **teams the user is member of**, and the **repos the user has access to**.
+
 ## Github Authentication
 
 Github offers different ways to authenticate to your account and perform actions on your behalf.
@@ -114,6 +126,7 @@ Some security recommendations:
 * Don't build a GitHub App if you _only_ want to act as a GitHub user and do everything that user can do.
 * If you are using your app with GitHub Actions and want to modify workflow files, you must authenticate on behalf of the user with an OAuth token that includes the `workflow` scope. The user must have admin or write permission to the repository that contains the workflow file. For more information, see "[Understanding scopes for OAuth apps](https://docs.github.com/en/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/#available-scopes)."
 * **More** in [here](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps#about-github-apps).
+*
 
 ## References
 

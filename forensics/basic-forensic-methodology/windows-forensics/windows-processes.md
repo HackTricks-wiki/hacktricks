@@ -62,7 +62,7 @@ Keep in mind that this process is highly attacked to dump passwords.
 
 This is the **Generic Service Host Process**.\
 It hosts multiple DLL services in one shared process.\
-Usually you will find that **svchost.exe** is launched with `-k` flag. This will launch a query to the registry **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost **where there will be a key with the argument mentioned in -k that will contain the services to launch in the same process.
+Usually you will find that **svchost.exe** is launched with `-k` flag. This will launch a query to the registry **HKEY\_LOCAL\_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** where there will be a key with the argument mentioned in -k that will contain the services to launch in the same process.
 
 For example: `-k UnistackSvcGroup` will launch: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
 
@@ -79,7 +79,7 @@ In W8 is called taskhostex.exe and in W10 taskhostw.exe.
 
 This is the process responsible for the **user's desktop** and launching files via file extensions.\
 **Only 1** process should be spawned **per logged on user.**\
-This is run from **userinit.exe** which should be terminated, so **no parent **should appear for this process.
+This is run from **userinit.exe** which should be terminated, so **no parent** should appear for this process.
 
 ## Catching Malicious Processes
 

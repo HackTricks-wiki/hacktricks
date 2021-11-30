@@ -25,7 +25,7 @@ The following tools can be used to generate variations of the name given and sea
 
 ## Privilege Escalation
 
-If the bucket policy allowed either “allUsers” or “allAuthenticatedUsers” to **write to their bucket policy **(the **storage.buckets.setIamPolicy** permission)**, **then anyone can modify the bucket policy and grant himself full access.
+If the bucket policy allowed either “allUsers” or “allAuthenticatedUsers” to **write to their bucket policy** (the **storage.buckets.setIamPolicy** permission)**,** then anyone can modify the bucket policy and grant himself full access.
 
 ### Check Permissions
 

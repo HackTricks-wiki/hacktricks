@@ -2,8 +2,8 @@
 
 ## DSRM Credentials
 
-There is a **local administrator** account inside each **DC**. Having admin privileges in this machine you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password **so you can remotely access to this local Administrator user.\
-First we need to **dump **the **hash **of the **local Administrator **user inside the DC:
+There is a **local administrator** account inside each **DC**. Having admin privileges in this machine you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password** so you can remotely access to this local Administrator user.\
+First we need to **dump** the **hash** of the **local Administrator** user inside the DC:
 
 ```bash
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'

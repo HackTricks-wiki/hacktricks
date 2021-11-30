@@ -34,9 +34,9 @@ If you want to **share some tricks with the community** you can also submit **pu
 
 ****[**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentestings, Red teams and training.
 
-You can check their** blog** in [**https://blog.stmcyber.com**](https://blog.stmcyber.com)****
+You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stmcyber.com)****
 
-**STM Cyber **also support cybersecurity open source projects like HackTricks :)
+**STM Cyber** also support cybersecurity open source projects like HackTricks :)
 
 ### [**INE**](https://ine.com)
 
@@ -44,7 +44,7 @@ You can check their** blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 [**INE**](https://ine.com) is a great platform to start learning or **improve** your **IT knowledge** through their huge range of **courses**. I personally like and have completed many from the [**cybersecurity section**](https://ine.com/pages/cybersecurity). **INE** also provides with the official courses to prepare the **certifications** from [**eLearnSecurity**](https://elearnsecurity.com)**.**
 
-**INE **also support cybersecurity open source projects like HackTricks :)
+**INE** also support cybersecurity open source projects like HackTricks :)
 
 #### **Courses and Certifications reviews**
 
@@ -56,5 +56,5 @@ You can find **my reviews of the certifications eMAPT and eWPTXv2** (and their *
 
 ## License
 
-**Copyright © Carlos Polop 2021. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on **[**HACK TRICKS**](https://github.com/carlospolop/hacktricks)** by Carlos Polop is licensed under the**[** Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
+**Copyright © Carlos Polop 2021. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **by Carlos Polop is licensed under the**[ **Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
 **If you want to use it with commercial purposes, contact me.**

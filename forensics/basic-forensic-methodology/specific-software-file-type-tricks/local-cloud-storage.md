@@ -19,7 +19,7 @@ Once you have found the CID it's recommended to **search files containing this I
 ## Google Drive
 
 In Widows you can find the main Google Drive folder in `\Users\<username>\AppData\Local\Google\Drive\user_default`\
-This folder contains a file called Sync_log.log with information like the email address of the account, filenames, timestamps, MD5 hashes of the files...\
+This folder contains a file called Sync\_log.log with information like the email address of the account, filenames, timestamps, MD5 hashes of the files...\
 Even deleted files appears in that log file with it's corresponding MD5.
 
 The file **`Cloud_graph\Cloud_graph.db`** is a sqlite database which contains the table **`cloud_graph_entry`**\
@@ -56,16 +56,16 @@ However, the main information is:
 
 Apart from that information, in order to decrypt the databases you still need:
 
-* The** encrypted DPAPI key**: You can find it in the registry inside `NTUSER.DAT\Software\Dropbox\ks\client` (export this data as binary)
+* The **encrypted DPAPI key**: You can find it in the registry inside `NTUSER.DAT\Software\Dropbox\ks\client` (export this data as binary)
 * The **`SYSTEM`** and **`SECURITY`** hives
 * The **DPAPI master keys**: Which can be found in `\Users\<username>\AppData\Roaming\Microsoft\Protect`
 * The **username** and **password** of the Windows user
 
-Then you can use the tool [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
+Then you can use the tool [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi\_data\_decryptor.html)**:**
 
 ![](<../../../.gitbook/assets/image (448).png>)
 
-If everything goes as expected, the tool will indicate the** primary key** that you need to **use to recover the original one**. To recover the original one, just use this [cyber_chef receipt](https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2\_key\(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D\)) putting the primary key as the "passphrase" inside the receipt.
+If everything goes as expected, the tool will indicate the **primary key** that you need to **use to recover the original one**. To recover the original one, just use this [cyber\_chef receipt](https://gchq.github.io/CyberChef/#recipe=Derive\_PBKDF2\_key\(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D\)) putting the primary key as the "passphrase" inside the receipt.
 
 The resulting hex is the final key used to encrypt the databases which can be decrypted with:
 
@@ -77,21 +77,21 @@ The **`config.dbx`** database contains:
 
 * **Email**: The email of the user
 * **usernamedisplayname**: The name of the user
-* **dropbox_path**: Path where the dropbox folder is located
-* **Host_id: Hash** used to authenticate to the cloud. This can only be revoked from the web.
-* **Root_ns**: User identifier
+* **dropbox\_path**: Path where the dropbox folder is located
+* **Host\_id: Hash** used to authenticate to the cloud. This can only be revoked from the web.
+* **Root\_ns**: User identifier
 
 The **`filecache.db`** database contains information about all the files and folders synchronized with Dropbox. The table `File_journal` is the one with more useful information:
 
-* **Server_path**: Path where the file is located inside the server (this path is preceded by the `host_id` of the client) .
-* **local_sjid**: Version of the file
-* **local_mtime**: Modification date
-* **local_ctime**: Creation date
+* **Server\_path**: Path where the file is located inside the server (this path is preceded by the `host_id` of the client) .
+* **local\_sjid**: Version of the file
+* **local\_mtime**: Modification date
+* **local\_ctime**: Creation date
 
 Other tables inside this database contain more interesting information:
 
-* **block_cache**: hash of all the files and folder of Dropbox
-* **block_ref**: Related the hash ID of the table `block_cache` with the file ID in the table `file_journal`
-* **mount_table**: Share folders of dropbox
-* **deleted_fields**: Dropbox deleted files
-* **date_added**
+* **block\_cache**: hash of all the files and folder of Dropbox
+* **block\_ref**: Related the hash ID of the table `block_cache` with the file ID in the table `file_journal`
+* **mount\_table**: Share folders of dropbox
+* **deleted\_fields**: Dropbox deleted files
+* **date\_added**

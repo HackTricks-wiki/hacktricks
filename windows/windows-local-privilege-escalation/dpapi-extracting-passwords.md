@@ -7,7 +7,7 @@ While creating this post mimikatz was having problems with every action that int
 Its primary use in the Windows operating system is to **perform symmetric encryption of asymmetric private keys**, using a user or system secret as a significant contribution of entropy.\
 **DPAPI allows developers to encrypt keys using a symmetric key derived from the user's logon secrets**, or in the case of system encryption, using the system's domain authentication secrets.
 
-This makes very easy to developer to **save encrypted data** in the computer **without **needing to **worry **how to **protect **the **encryption** **key**.
+This makes very easy to developer to **save encrypted data** in the computer **without** needing to **worry** how to **protect** the **encryption** **key**.
 
 ## What does DPAPI protect?
 
@@ -47,7 +47,7 @@ This is what a bunch of Master Keys of a user will looks like:
 
 ![](<../../.gitbook/assets/image (324).png>)
 
-Usually **each master keys is an encrypted symmetric key that can decrypt other content**. Therefore, **extracting **the **encrypted Master Key **is interesting in order to **decrypt **later that **other content **encrypted with it.&#x20;
+Usually **each master keys is an encrypted symmetric key that can decrypt other content**. Therefore, **extracting** the **encrypted Master Key** is interesting in order to **decrypt** later that **other content** encrypted with it.&#x20;
 
 ### Extract a master key
 
@@ -108,7 +108,7 @@ Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
 
-You can use **mimikatz module** `dpapi::cred` with the appropiate` /masterkey` to decrypt:
+You can use **mimikatz module** `dpapi::cred` with the appropiate `/masterkey` to decrypt:
 
 ```
 dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>

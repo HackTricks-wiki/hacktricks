@@ -12,15 +12,15 @@
 
 So, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)is an amazing tool which can enumerate a domain automatically, save all the information, find possible privilege escalation paths and show all the information using graphs.
 
-Booldhound is composed of 2 main parts: The **ingestors **and the **visualisation application**.\
-The **ingestors **are called SharpHound and are the applications (PS1 and C# exe) used to **enumerate the domain and extract all the information **in a format that the visualisation application will understand.\
+Booldhound is composed of 2 main parts: The **ingestors** and the **visualisation application**.\
+The **ingestors** are called SharpHound and are the applications (PS1 and C# exe) used to **enumerate the domain and extract all the information** in a format that the visualisation application will understand.\
 The **visualisation application uses neo4j** to show how all the information is related and to show different ways to escalate privileges in the domain.
 
 ## Installation
 
 You can download the [Ingestors from the github](https://github.com/BloodHoundAD/BloodHound/tree/master/Ingestors).
 
-To install the visualisation application you will need to install **neo4j **and the **bloodhound application**.\
+To install the visualisation application you will need to install **neo4j** and the **bloodhound application**.\
 The easiest way to do this is just doing:
 
 ```
@@ -28,9 +28,9 @@ apt-get install bloodhound
 ```
 
 But, at the time of this writing, this wont install the latest bloodhound, so you may need to **download a pre-compiled bloodhound latest version** from: [https://github.com/BloodHoundAD/BloodHound/releases](https://github.com/BloodHoundAD/BloodHound/releases) or [compile it from the source](https://github.com/BloodHoundAD/BloodHound/wiki/Building-BloodHound-from-source).\
-You can **download the community version of neo4j **from [here](https://neo4j.com/download-center/#community).
+You can **download the community version of neo4j** from [here](https://neo4j.com/download-center/#community).
 
-**If **you **download **by your own** bloodhound from releases** and n**eo4j from the web** page (instead of using `apt-get`) you will need to **decompress **the downloaded **files **to access the executables.
+**If** you **download** by your own **bloodhound from releases** and n**eo4j from the web** page (instead of using `apt-get`) you will need to **decompress** the downloaded **files** to access the executables.
 
 ## Visualisation app Execution
 

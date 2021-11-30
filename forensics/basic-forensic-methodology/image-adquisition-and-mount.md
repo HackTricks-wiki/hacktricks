@@ -27,7 +27,7 @@ ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 --descript
 
 ### EWF
 
-You can generate a dick image using the[** ewf tools**](https://github.com/libyal/libewf).
+You can generate a dick image using the[ **ewf tools**](https://github.com/libyal/libewf).
 
 ```bash
 ewfacquire /dev/sdb

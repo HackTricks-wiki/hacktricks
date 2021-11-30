@@ -1,6 +1,6 @@
 # Memory dump analysis
 
-Start **searching **for **malware **inside the pcap. Use the **tools **mentioned in [**Malware Analysis**](../malware-analysis.md).
+Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).
 
 ## [Volatility](volatility-examples.md)
 
@@ -25,7 +25,7 @@ You can also load the exception and see the decompiled instructions
 
 Anyway Visual Studio isn't the best tool to perform a analysis in depth of the dump.
 
-You should **open **it using **IDA **or **Radare **to inspection it in **depth**.
+You should **open** it using **IDA** or **Radare** to inspection it in **depth**.
 
 
 

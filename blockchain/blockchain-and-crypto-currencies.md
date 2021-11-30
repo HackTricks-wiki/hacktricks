@@ -5,8 +5,8 @@
 * **Smart contract**: Smart contracts are simply **programs stored on a blockchain that run when predetermined conditions are met**. They typically are used to automate the **execution** of an **agreement** so that all participants can be immediately certain of the outcome, without any intermediary’s involvement or time loss. (From [here](https://www.ibm.com/topics/smart-contracts)).
   * Basically, a smart contract is a **piece of code** that is going to be executed when people access and accept the contract. Smart contracts **run in blockchains** (so the results are stored inmutable) and can be read by the people before accepting them.
 * **dApps**: **Decentralised applications** are implemented on top of **smart** **contracts**. They usually have a front-end where the user can interact with the app, the **back-end** is public (so it can be audited) and is implemented as a **smart contract**. Sometimes the use of a database is needed, Ethereum blockchain allocates certain storage to each account.
-* **Tokens & coins**: A **coin** is a cryptocurrency that act as **digital** **money** and a **token** is something that **represents **some **value** but it's not a coin.
-  * **Utility Tokens**: These tokens allow the user to** access certain service later** (it's something that have some value in a specific environment).
+* **Tokens & coins**: A **coin** is a cryptocurrency that act as **digital** **money** and a **token** is something that **represents** some **value** but it's not a coin.
+  * **Utility Tokens**: These tokens allow the user to **access certain service later** (it's something that have some value in a specific environment).
   * **Security Tokens**: These represents the **ownership** or some asset.
 * **DeFi**: **Decentralized Finance**.
 * **DEX: Decentralized Exchange Platforms**.
@@ -14,7 +14,7 @@
 
 ## Consensus Mechanisms
 
-For a blockchain transaction to be recognized, it must be **appended** to the **blockchain**. Validators (miners) carry out this appending; in most protocols, they **receive a reward** for doing so. For the blockchain to remain secure, it must have a mechanism to **prevent a malicious user or group from taking over a majority of validation**. 
+For a blockchain transaction to be recognized, it must be **appended** to the **blockchain**. Validators (miners) carry out this appending; in most protocols, they **receive a reward** for doing so. For the blockchain to remain secure, it must have a mechanism to **prevent a malicious user or group from taking over a majority of validation**.&#x20;
 
 Proof of work, another commonly used consensus mechanism, uses a validation of computational prowess to verify transactions, requiring a potential attacker to acquire a large fraction of the computational power of the validator network.
 
@@ -25,9 +25,9 @@ The **miners** will **select several transactions** and then start **computing t
 
 ### Proof Of Stake (PoS)
 
-PoS accomplishes this by **requiring that validators have some quantity of blockchain tokens**, requiring **potential attackers to acquire a large fraction of the tokens **on the blockchain to mount an attack.\
+PoS accomplishes this by **requiring that validators have some quantity of blockchain tokens**, requiring **potential attackers to acquire a large fraction of the tokens** on the blockchain to mount an attack.\
 In this kind of consensus, the more tokens a miner has, the more probably it will be that the miner will be asked to create the next block.\
-Compared with PoW, this greatly **reduced the energy consumption **the miners are expending.
+Compared with PoW, this greatly **reduced the energy consumption** the miners are expending.
 
 ## Bitcoin
 
@@ -70,14 +70,14 @@ Each bitcoin transaction has several fields:
 
 * **Inputs**: The amount and address **from** where **bitcoins** are **being** transferred
 * **Outputs**: The address and amounts that each **transferred** to **each** **output**
-* **Fee: **The amount of **money** that is **payed** to the **miner** of the transaction
-* **Script_sig**: Script signature of the transaction
-* **Script_type**: Type of transaction
+* **Fee:** The amount of **money** that is **payed** to the **miner** of the transaction
+* **Script\_sig**: Script signature of the transaction
+* **Script\_type**: Type of transaction
 
 There are **2 main types** of transactions:
 
 * **P2PKH: "Pay To Public Key Hash"**: This is how transactions are made. You are requiring the **sender** to supply a valid **signature** (from the private key) and **public** **key**. The transaction output script will use the signature and public key and through some cryptographic functions will check **if it matches** with the public key hash, if it does, then the **funds** will be **spendable**. This method conceals your public key in the form of a hash for extra security.
-* **P2SH: "Pay To Script Hash": **The outputs of a transaction are just **scripts **(this means the person how want this money send a script) that, if are **executed with specific parameters, will result in a boolean of `true` or `false`**. If a miner runs the output script with the supplied parameters and results in `true`, the **money will be sent to your desired output**. `P2SH` is used for **multi-signature** wallets making the output scripts** logic that checks for multiple signatures before accepting the transaction**. `P2SH` can also be used to allow anyone, or no one, to spend the funds. If the output script of a P2SH transaction is just `1` for true, then attempting to spend the output without supplying parameters will just result in `1` making the money spendable by anyone who tries. This also applies to scripts that return `0`, making the output spendable by no one.
+* **P2SH: "Pay To Script Hash":** The outputs of a transaction are just **scripts** (this means the person how want this money send a script) that, if are **executed with specific parameters, will result in a boolean of `true` or `false`**. If a miner runs the output script with the supplied parameters and results in `true`, the **money will be sent to your desired output**. `P2SH` is used for **multi-signature** wallets making the output scripts **logic that checks for multiple signatures before accepting the transaction**. `P2SH` can also be used to allow anyone, or no one, to spend the funds. If the output script of a P2SH transaction is just `1` for true, then attempting to spend the output without supplying parameters will just result in `1` making the money spendable by anyone who tries. This also applies to scripts that return `0`, making the output spendable by no one.
 
 ### Lightning Network
 
@@ -86,7 +86,7 @@ This **improves** bitcoin blockchain **speed** (it just on allow 7 payments per 
 
 ![](<../.gitbook/assets/image (611).png>)
 
-Normal use of the Lightning Network consists of **opening a payment channel** by committing a funding transaction to the relevant base blockchain (layer 1), followed by making** any number **of Lightning Network **transactions** that update the tentative distribution of the channel's funds **without broadcasting those to the blockchain**, optionally followed by closing the payment channel by **broadcasting** the **final** **version** of the settlement transaction to distribute the channel's funds.
+Normal use of the Lightning Network consists of **opening a payment channel** by committing a funding transaction to the relevant base blockchain (layer 1), followed by making **any number** of Lightning Network **transactions** that update the tentative distribution of the channel's funds **without broadcasting those to the blockchain**, optionally followed by closing the payment channel by **broadcasting** the **final** **version** of the settlement transaction to distribute the channel's funds.
 
 Note that any of the both members of the channel can stop and send the final state of the channel to the blockchain at any time.
 
@@ -98,7 +98,7 @@ Theoretically the inputs of one transaction can belong to different users, but i
 
 ### UTXO Change Address Detection
 
-**UTXO** means** Unspent Transaction Outputs** (UTXOs). In a transaction that uses the output from a previous transaction as an input, the **whole output need to be spent** (to avoid double-spend attacks). Therefore, if the intention was to **send** just **part** of the money from that output to an address and **keep** the **other** **part**,** 2 different outputs **will appear: the **intended** one and a **random new change address** where the rest of the money will be saved.
+**UTXO** means **Unspent Transaction Outputs** (UTXOs). In a transaction that uses the output from a previous transaction as an input, the **whole output need to be spent** (to avoid double-spend attacks). Therefore, if the intention was to **send** just **part** of the money from that output to an address and **keep** the **other** **part**, **2 different outputs** will appear: the **intended** one and a **random new change address** where the rest of the money will be saved.
 
 Then, a watcher can make the assumption that **the new change address generated belong to the owner of the UTXO**.
 
@@ -108,7 +108,7 @@ Some people gives data about theirs bitcoin addresses in different webs on Inter
 
 ### Transaction Graphs
 
-By representing the transactions in graphs, i**t's possible to know with certain probability to where the money of an account were**. Therefore, it's possible to know something about **users** that are **related** in the blockchain. 
+By representing the transactions in graphs, i**t's possible to know with certain probability to where the money of an account were**. Therefore, it's possible to know something about **users** that are **related** in the blockchain.&#x20;
 
 ### **Unnecessary input heuristic**
 
@@ -140,8 +140,8 @@ The correct behaviour by wallets is to not spend coins that have landed on an al
 ### Other Blockchain Analysis
 
 * **Exact Payment Amounts**: In order to avoid transactions with a change, the payment needs to be equal to the UTXO (which is highly unexpected). Therefore, a **transaction with no change address are probably transfer between 2 addresses of the same user**.
-* **Round Numbers**: In a transaction, if one of the outputs is a "**round number**", it's highly probable that this is a **payment to a human that put that **"round number" **price**, so the other part must be the leftover.
-* **Wallet fingerprinting: **A careful analyst sometimes deduce which software created a certain transaction, because the many **different wallet softwares don't always create transactions in exactly the same way**. Wallet fingerprinting can be used to detect change outputs because a change output is the one spent with the same wallet fingerprint.
+* **Round Numbers**: In a transaction, if one of the outputs is a "**round number**", it's highly probable that this is a **payment to a human that put that** "round number" **price**, so the other part must be the leftover.
+* **Wallet fingerprinting:** A careful analyst sometimes deduce which software created a certain transaction, because the many **different wallet softwares don't always create transactions in exactly the same way**. Wallet fingerprinting can be used to detect change outputs because a change output is the one spent with the same wallet fingerprint.
 * **Amount & Timing correlations**: If the person that performed the transaction **discloses** the **time** and/or **amount** of the transaction, it can be easily **discoverable**.
 
 ### Traffic analysis
@@ -160,14 +160,14 @@ For more attacks read [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it
 
 ### Obtaining Bitcoins Anonymously
 
-* **Cash trades: **Buy bitcoin using cash.
-* **Cash substitute: **Buy gift cards or similar and exchange them for bitcoin online.
-* **Mining: **Mining is the most anonymous way to obtain bitcoin. This applies to solo-mining as [mining pools](https://en.bitcoin.it/wiki/Pooled_mining) generally know the hasher's IP address.
-* **Stealing: **In theory another way of obtaining anonymous bitcoin is to steal them.
+* **Cash trades:** Buy bitcoin using cash.
+* **Cash substitute:** Buy gift cards or similar and exchange them for bitcoin online.
+* **Mining:** Mining is the most anonymous way to obtain bitcoin. This applies to solo-mining as [mining pools](https://en.bitcoin.it/wiki/Pooled\_mining) generally know the hasher's IP address.
+* **Stealing:** In theory another way of obtaining anonymous bitcoin is to steal them.
 
 ### Mixers
 
-A user would** send bitcoins to a mixing service** and the service would **send different bitcoins back to the user**, minus a fee. In theory an adversary observing the blockchain would be** unable to link** the incoming and outgoing transactions.
+A user would **send bitcoins to a mixing service** and the service would **send different bitcoins back to the user**, minus a fee. In theory an adversary observing the blockchain would be **unable to link** the incoming and outgoing transactions.
 
 However, the user needs to trust the mixing service to return the bitcoin and also to not be saving logs about the relations between the money received and sent.\
 Some other services can be also used as mixers, like Bitcoin casinos where you can send bitcoins and retrieve them later.
@@ -180,13 +180,13 @@ This offers a new level of privacy, however, **some** **transactions** where som
 Examples of (likely) CoinJoin transactions IDs on bitcoin's blockchain are `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
 [**https://coinjoin.io/en**](https://coinjoin.io/en)****\
-**Similar to coinjoin but better and for ethereum you have **[**Tornado Cash**](https://tornado.cash)** (the money is given from miners, so it jus appear in your waller).**
+**Similar to coinjoin but better and for ethereum you have** [**Tornado Cash**](https://tornado.cash) **(the money is given from miners, so it jus appear in your waller).**
 
 ### PayJoin
 
-The type of CoinJoin discussed in the previous section can be easily identified as such by checking for the multiple outputs with the same value. 
+The type of CoinJoin discussed in the previous section can be easily identified as such by checking for the multiple outputs with the same value.&#x20;
 
-PayJoin (also called pay-to-end-point or P2EP) is a special type of CoinJoin between two parties where one party pays the other. The transaction then **doesn't have the distinctive multiple outputs **with the same value, and so is not obviously visible as an equal-output CoinJoin. Consider this transaction:
+PayJoin (also called pay-to-end-point or P2EP) is a special type of CoinJoin between two parties where one party pays the other. The transaction then **doesn't have the distinctive multiple outputs** with the same value, and so is not obviously visible as an equal-output CoinJoin. Consider this transaction:
 
 ```
 2 btc --> 3 btc
@@ -201,10 +201,10 @@ If PayJoin transactions became even moderately used then it would make the **com
 
 ### Wallet Synchronization
 
-Bitcoin wallets must somehow obtain information about their balance and history. As of late-2018 the most practical and private existing solutions are to use a **full node wallet **(which is maximally private) and **client-side block filtering** (which is very good).
+Bitcoin wallets must somehow obtain information about their balance and history. As of late-2018 the most practical and private existing solutions are to use a **full node wallet** (which is maximally private) and **client-side block filtering** (which is very good).
 
-* **Full node: **Full nodes download the entire blockchain which contains every on-chain [transaction](https://en.bitcoin.it/wiki/Transaction) that has ever happened in bitcoin. So an adversary watching the user's internet connection will not be able to learn which transactions or addresses the user is interested in. 
-* **Client-side block filtering: **Client-side block filtering works by having **filters** created that contains all the **addresses** for every transaction in a block. The filters can test whether an** element is in the set**; false positives are possible but not false negatives. A lightweight wallet would **download** all the filters for every **block** in the **blockchain** and check for matches with its **own** **addresses**. Blocks which contain matches would be downloaded in full from the peer-to-peer network, and those blocks would be used to obtain the wallet's history and current balance.
+* **Full node:** Full nodes download the entire blockchain which contains every on-chain [transaction](https://en.bitcoin.it/wiki/Transaction) that has ever happened in bitcoin. So an adversary watching the user's internet connection will not be able to learn which transactions or addresses the user is interested in.&#x20;
+* **Client-side block filtering:** Client-side block filtering works by having **filters** created that contains all the **addresses** for every transaction in a block. The filters can test whether an **element is in the set**; false positives are possible but not false negatives. A lightweight wallet would **download** all the filters for every **block** in the **blockchain** and check for matches with its **own** **addresses**. Blocks which contain matches would be downloaded in full from the peer-to-peer network, and those blocks would be used to obtain the wallet's history and current balance.
 
 ### Tor
 
@@ -228,7 +228,7 @@ If change avoidance is not an option then **creating more than one change output
 
 ## Monero
 
-When Monero was developed, the gaping need for **complete anonymity **was what it sought to resolve, and to a large extent, it has filled that void.
+When Monero was developed, the gaping need for **complete anonymity** was what it sought to resolve, and to a large extent, it has filled that void.
 
 ## Ethereum
 
@@ -248,7 +248,7 @@ When Jordan sends the money, 1.00231 ETH will be deducted from Jordan's account.
 
 Additionally, Jordan can also set a max fee (`maxFeePerGas`) for the transaction. The difference between the max fee and the actual fee is refunded to Jordan, i.e. `refund = max fee - (base fee + priority fee)`. Jordan can set a maximum amount to pay for the transaction to execute and not worry about overpaying "beyond" the base fee when the transaction is executed.
 
-As the base fee is calculated by the network based on demand for block space, this last param: maxFeePerGas helps to control the maximum fee that is going to be payed. 
+As the base fee is calculated by the network based on demand for block space, this last param: maxFeePerGas helps to control the maximum fee that is going to be payed.&#x20;
 
 ### Transactions
 
@@ -272,10 +272,10 @@ Note that there isn't any field for the origin address, this is because this can
 
 ## References
 
-* [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
+* [https://en.wikipedia.org/wiki/Proof\_of\_stake](https://en.wikipedia.org/wiki/Proof\_of\_stake)
 * [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)
 * [https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
 * [https://ethereum.org/en/developers/docs/transactions/](https://ethereum.org/en/developers/docs/transactions/)
 * [https://ethereum.org/en/developers/docs/gas/](https://ethereum.org/en/developers/docs/gas/)
-* [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
+* [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced\_address\_reuse)
 

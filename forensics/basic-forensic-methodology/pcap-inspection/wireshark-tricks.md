@@ -34,25 +34,25 @@ Under _**Statistics --> Protocol Hierarchy**_ you can find the **protocols** **i
 
 #### Conversations
 
-Under _**Statistics --> Conversations **_you can find a **summary of the conversations** in the communication and data about them.
+Under _**Statistics --> Conversations**_ you can find a **summary of the conversations** in the communication and data about them.
 
 ![](<../../../.gitbook/assets/image (573).png>)
 
 #### **Endpoints**
 
-Under _**Statistics --> Endpoints **_you can find a **summary of the endpoints** in the communication and data about each of them.
+Under _**Statistics --> Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
 
 ![](<../../../.gitbook/assets/image (575).png>)
 
 #### DNS info
 
-Under _**Statistics --> DNS **_you can find statistics about the DNS request captured.
+Under _**Statistics --> DNS**_ you can find statistics about the DNS request captured.
 
 ![](<../../../.gitbook/assets/image (577).png>)
 
 #### I/O Graph
 
-Under _**Statistics --> I/O Graph **_you can find a **graph of the communication.**
+Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication.**
 
 ![](<../../../.gitbook/assets/image (574).png>)
 
@@ -71,7 +71,7 @@ Other interesting filters:
 ### Search
 
 If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_\
-__You can add new layers to the main information bar_ (No., Time, Source...) _pressing _right bottom _and _Edit Column_
+__You can add new layers to the main information bar _(No., Time, Source...)_ pressing _right bottom_ and _Edit Column_
 
 Practice: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)
 
@@ -120,7 +120,7 @@ A file of shared keys will looks like this:
 
 ![](<../../../.gitbook/assets/image (99).png>)
 
-To import this in wireshark go to _edit>preference>protocol>ssl> _and import it in (Pre)-Master-Secret log filename:
+To import this in wireshark go to _edit>preference>protocol>ssl>_ and import it in (Pre)-Master-Secret log filename:
 
 ![](<../../../.gitbook/assets/image (100).png>)
 

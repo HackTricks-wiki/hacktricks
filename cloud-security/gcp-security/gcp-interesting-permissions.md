@@ -10,7 +10,7 @@ This single permission lets you **launch new deployments** of resources into GCP
 
 ![](<../../.gitbook/assets/image (626) (1).png>)
 
-In the following example [this script](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/deploymentmanager.deployments.create.py) is used to deploy a compute instance, but any resource listed in `gcloud deployment-manager types list`_ _could be actually deployed:
+In the following example [this script](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/deploymentmanager.deployments.create.py) is used to deploy a compute instance, but any resource listed in `gcloud deployment-manager types list` __ could be actually deployed:
 
 ## IAM
 
@@ -62,7 +62,7 @@ The exploit script for this method can be found [here](https://github.com/RhinoS
 
 ### iam.serviceAccounts.signBlob
 
-The _iam.serviceAccounts.signBlob_ permission “allows signing of arbitrary payloads” in GCP. This means we can **create a signed blob that requests an access token from the Service Account **we are targeting.
+The _iam.serviceAccounts.signBlob_ permission “allows signing of arbitrary payloads” in GCP. This means we can **create a signed blob that requests an access token from the Service Account** we are targeting.
 
 ![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image4-1000x168.png)
 
@@ -125,7 +125,7 @@ For this method, we will be **creating a new Cloud Function with an associated S
 
 The **required permissions** for this method are as follows:
 
-* _cloudfunctions.functions.call _**OR**_ cloudfunctions.functions.setIamPolicy_
+* _cloudfunctions.functions.call_ **OR** _cloudfunctions.functions.setIamPolicy_
 * _cloudfunctions.functions.create_
 * _cloudfunctions.functions.sourceCodeSet_
 * _iam.serviceAccounts.actAs_
@@ -174,13 +174,13 @@ The exploit script for this method can be found [here](https://github.com/RhinoS
 
 ### run.services.create (iam.serviceAccounts.actAs)
 
-Similar to the _cloudfunctions.functions.create_ method, this method creates a **new Cloud Run Service **that, when invoked, **returns the Service Account’s** access token by accessing the metadata API of the server it is running on. A Cloud Run service will be deployed and a request can be performed to it to get the token.
+Similar to the _cloudfunctions.functions.create_ method, this method creates a **new Cloud Run Service** that, when invoked, **returns the Service Account’s** access token by accessing the metadata API of the server it is running on. A Cloud Run service will be deployed and a request can be performed to it to get the token.
 
 The following **permissions are required** for this method:
 
 * _run.services.create_
 * _iam.serviceaccounts.actAs_
-* _run.services.setIamPolicy _**OR**_ run.routes.invoke_
+* _run.services.setIamPolicy_ **OR** _run.routes.invoke_
 
 ![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image8-1000x503.png)
 
@@ -216,7 +216,7 @@ A similar method may be possible with Cloud Tasks, but we were not able to do it
 
 ### orgpolicy.policy.set
 
-This method does **not necessarily grant you more IAM permissions**, but it may **disable some barriers **that are preventing certain actions. For example, there is an Organization Policy constraint named _appengine.disableCodeDownload_ that prevents App Engine source code from being downloaded by users of the project. If this was enabled, you would not be able to download that source code, but you could use _orgpolicy.policy.set_ to disable the constraint and then continue with the source code download.
+This method does **not necessarily grant you more IAM permissions**, but it may **disable some barriers** that are preventing certain actions. For example, there is an Organization Policy constraint named _appengine.disableCodeDownload_ that prevents App Engine source code from being downloaded by users of the project. If this was enabled, you would not be able to download that source code, but you could use _orgpolicy.policy.set_ to disable the constraint and then continue with the source code download.
 
 ![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image5-1.png)
 
@@ -266,7 +266,7 @@ The exploit script for this method can be found [here](https://github.com/RhinoS
 
 ## \*.setIamPolicy
 
-If you owns a user that has the **`setIamPolicy`** permission in a resource you can **escalate privileges in that resource **because you will be able to change the IAM policy of that resource and give you more privileges over it.
+If you owns a user that has the **`setIamPolicy`** permission in a resource you can **escalate privileges in that resource** because you will be able to change the IAM policy of that resource and give you more privileges over it.
 
 A few that are worth looking into for privilege escalation are listed here:
 

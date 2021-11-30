@@ -2,8 +2,8 @@
 
 ## Timestamps
 
-An attacker may be interested in** changing the timestamps of files** to avoid being detected.\
-It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION`_ _and_ _`$FILE_NAME`.
+An attacker may be interested in **changing the timestamps of files** to avoid being detected.\
+It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` __ and __ `$FILE_NAME`.
 
 Both attributes have 4 timestamps: **Modification**, **access**, **creation**, and **MFT registry modification** (MACE or MACB).
 
@@ -24,7 +24,7 @@ The previous image is the **output** shown by the **tool** where it can be obser
 
 ### $LogFile
 
-All metadata changes to a file system are logged to ensure the consistent recovery of critical file system structures after a system crash. This is called [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging).\
+All metadata changes to a file system are logged to ensure the consistent recovery of critical file system structures after a system crash. This is called [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead\_logging).\
 The logged metadata is stored in a file called “**$LogFile**”, which is found in a root directory of an NTFS file system.\
 It's possible to use tools like [LogFileParser](https://github.com/jschicht/LogFileParser) to parse this file and find changes.
 
@@ -66,11 +66,11 @@ Then, it's possible to retrieve the slack space using tools like FTK Imager. Not
 ## UsbKill
 
 This is a tool that will **turn off the computer is any change in the USB** ports is detected.\
-A way to discover this would be to inspect the running processes and** review each python script running**.
+A way to discover this would be to inspect the running processes and **review each python script running**.
 
 ## Live Linux Distributions
 
-These distros are **executed inside the RAM** memory. The only way to detect them is** in case the NTFS file-system is mounted with write permissions**. If it's mounted just with read permissions it won't be possible to detect the intrusion.
+These distros are **executed inside the RAM** memory. The only way to detect them is **in case the NTFS file-system is mounted with write permissions**. If it's mounted just with read permissions it won't be possible to detect the intrusion.
 
 ## Secure Deletion
 
@@ -111,7 +111,7 @@ Whenever a folder is opened from an NTFS volume on a Windows NT server, the syst
 ### Delete USB History
 
 All the **USB Device Entries** are stored in Windows Registry Under **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device in your PC or Laptop. You can find this key here H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
-You may also use the tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) to be sure you have deleted them (and to delete them).
+You may also use the tool [**USBDeview**](https://www.nirsoft.net/utils/usb\_devices\_view.html) to be sure you have deleted them (and to delete them).
 
 Another file that saves information about the USBs is the file `setupapi.dev.log` inside `C:\Windows\INF`. This should also be deleted.
 

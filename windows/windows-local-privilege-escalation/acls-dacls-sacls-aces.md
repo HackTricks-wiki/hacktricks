@@ -6,8 +6,8 @@ An **ACL is an ordered list of ACEs** that define the protections that apply to 
 
 An object’s security descriptor can contain **two ACLs**:
 
-1. A **DACL **that **identifies **the **users **and **groups **that are **allowed **or **denied **access
-2. A **SACL **that controls **how **access is **audited**
+1. A **DACL** that **identifies** the **users** and **groups** that are **allowed** or **denied** access
+2. A **SACL** that controls **how** access is **audited**
 
 When a user tries to access a file, the Windows system runs an AccessCheck and compares the security descriptor with the users access token and evaluates if the user is granted access and what kind of access depending on the ACEs set.
 
@@ -21,7 +21,7 @@ SACLs makes it possible to monitor access to secured objects. ACEs in a SACL det
 
 ## How the System Uses ACLs
 
-Each **user logged **onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
 
 When a thread tries to access a securable object, the LSASS (Local Security Authority) either grants or denies access. To do this, the **LSASS searches the DACL** (Discretionary Access Control List) in the SDS data stream, looking for ACEs that apply to the thread.
 
@@ -41,9 +41,9 @@ Because the **system stops checking ACEs when the requested access is explicitly
 
 The preferred order of ACEs in a DACL is called the "canonical" order. For Windows 2000 and Windows Server 2003, the canonical order is the following:
 
-1. All **explicit **ACEs are placed in a group **before **any **inherited **ACEs.
-2. Within the group of **explicit **ACEs, **access-denied** ACEs are placed **before access-allowed **ACEs.
-3. Within the **inherited **group, ACEs that are inherited from the **child object's parent come first**, and **then **ACEs inherited from the **grandparent**, **and so **on up the tree of objects. After that,** access-denied** ACEs are placed **before access-allowed** ACEs.
+1. All **explicit** ACEs are placed in a group **before** any **inherited** ACEs.
+2. Within the group of **explicit** ACEs, **access-denied** ACEs are placed **before access-allowed** ACEs.
+3. Within the **inherited** group, ACEs that are inherited from the **child object's parent come first**, and **then** ACEs inherited from the **grandparent**, **and so** on up the tree of objects. After that, **access-denied** ACEs are placed **before access-allowed** ACEs.
 
 The following figure shows the canonical order of ACEs:
 
@@ -53,7 +53,7 @@ The following figure shows the canonical order of ACEs:
 
 The canonical order ensures that the following takes place:
 
-* An explicit** access-denied ACE is enforced regardless of any explicit access-allowed ACE**. This means that the object's owner can define permissions that allow access to a group of users and deny access to a subset of that group.
+* An explicit **access-denied ACE is enforced regardless of any explicit access-allowed ACE**. This means that the object's owner can define permissions that allow access to a group of users and deny access to a subset of that group.
 * All **explicit ACEs are processed before any inherited ACE**. This is consistent with the concept of discretionary access control: access to a child object (for example a file) is at the discretion of the child's owner, not the owner of the parent object (for example a folder). The owner of a child object can define permissions directly on the child. The result is that the effects of inherited permissions are modified.
 
 ### GUI Example
@@ -108,7 +108,7 @@ ACEs are fundamentally alike. What sets them apart is the degree of control they
 
 A generic ACE offers limited control over the kinds of child objects that can inherit them. Essentially, they can distinguish only between containers and noncontainers.
 
-For example, the DACL (Discretionary Access Control List) on a Folder object in NTFS can include a generic ACE that allows a group of users to list the folder's contents. Because listing a folder's contents is an operation that can be performed only on a Container object, the ACE that allows the operation can be flagged as a CONTAINER_INHERIT_ACE. Only Container objects in the folder (that is, only other Folder objects) inherit the ACE. Noncontainer objects (that is, File objects) do not inherit the ACE of the parent object.
+For example, the DACL (Discretionary Access Control List) on a Folder object in NTFS can include a generic ACE that allows a group of users to list the folder's contents. Because listing a folder's contents is an operation that can be performed only on a Container object, the ACE that allows the operation can be flagged as a CONTAINER\_INHERIT\_ACE. Only Container objects in the folder (that is, only other Folder objects) inherit the ACE. Noncontainer objects (that is, File objects) do not inherit the ACE of the parent object.
 
 A generic ACE applies to an entire object. If a generic ACE gives a particular user Read access, the user can read all the information that is associated with the object — both data and properties. This is not a serious limitation for most object types. File objects, for example, have few properties, which are all used for describing characteristics of the object rather than for storing information. Most of the information in a File object is stored as object data; therefore, there is little need for separate controls on a file's properties.
 
