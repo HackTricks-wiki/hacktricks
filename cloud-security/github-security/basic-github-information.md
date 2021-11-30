@@ -129,6 +129,10 @@ Some security recommendations:
 * If you are using your app with GitHub Actions and want to modify workflow files, you must authenticate on behalf of the user with an OAuth token that includes the `workflow` scope. The user must have admin or write permission to the repository that contains the workflow file. For more information, see "[Understanding scopes for OAuth apps](https://docs.github.com/en/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/#available-scopes)."
 * **More** in [here](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps#about-github-apps).
 
+### Github Actions
+
+This **isn't a way to authenticate in github**, but a **malicious** Github Action could get **unauthorised access to github** and **depending** on the **privileges** given to the Action several **different attacks** could be done. See below for more information.
+
 ## Git Actions
 
 Git actions allows to automate the **execution of code when an event happen**. Usually the code executed is **somehow related to the code of the repository** (maybe build a docker container or check that the PR doesn't contain secrets).
@@ -199,6 +203,35 @@ A **malicious Github Action** run could be **abused** by the attacker to:
 * **Steal all the secrets** the Action has access to
 * **Move laterally** if the Action is executed inside a **third party infrastructure** where the SA token used to run the machine can be accessed (probably via the metadata service)
 * **Abuse the token** used by the **workflow** to **steal the code of the repo** where the Action is executed or **even modify it**.
+{% endhint %}
+
+## Branch Protections
+
+Branch protections are designed to **not give complete control of a repository** to the users. The goal is to **put several protection methods before being able to write code inside some branch**.
+
+The **branch protections of a repository** can be found in _https://github.com/\<orgname>/\<reponame>/settings/branches_
+
+{% hint style="info" %}
+It's **not possible to set a branch protection at organization level**. So all of them must be declared on each repo.
+{% endhint %}
+
+Different protections can be applied to a branch (like to master):
+
+* You can **require a PR before merging** (so you cannot directly merge code over the branch). If this is select different other protections can be in place:
+  * **Require a number of approvals**. It's very common to require 1 or 2 more people to approve your PR so a single user isn't capable of merge code directly.
+  * **Dismiss approvals when new commits are pushed**. If not, a user may approve legit code and then the user could add malicious code and merge it.
+  * **Require reviews from Code Owners**. At least 1 code owner of the repo needs to approve the PR (so "random" users cannot approve it)
+  * **Restrict who can dismiss pull request reviews.** You can specify people or teams allowed to dismiss pull request reviews.
+  * **Allow specified actors to bypass pull request requirements**. These users will be able to bypass previous restrictions.
+* **Require status checks to pass before merging.** Some checks needs to pass before being able to merge the commit (like a github action checking there isn't any cleartext secret).
+* **Require conversation resolution before merging**. All comments on the code needs to be resolved before the PR can be merged.
+* **Require signed commits**. The commits need to be signed.
+* **Require linear history.** Prevent merge commits from being pushed to matching branches.
+* **Include administrators**. If this isn't set, admins can bypass the restrictions.
+* **Restrict who can push to matching branches**. Restrict who can send a PR.
+
+{% hint style="info" %}
+As you can see, even if you managed to obtain some credentials of a user, **repos might be protected avoiding you to pushing code to master** for example to compromise the CI/CD pipeline.
 {% endhint %}
 
 ## References
