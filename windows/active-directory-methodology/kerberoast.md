@@ -2,7 +2,7 @@
 
 ## Kerberoast
 
-The goal of **Kerberoasting** is to harvest **TGS tickets for services that run on behalf of user accounts** in the AD, not computer accounts. Thus, **part** of these TGS **tickets are** **encrypted** with **keys** derived from user passwords. As a consequence, their credentials could be **cracked offline**.\
+The goal of **Kerberoasting **is to harvest** TGS tickets for services that run on behalf of user accounts** in the AD, not computer accounts. Thus, **part **of these TGS **tickets are** **encrypted **with **keys **derived from user passwords. As a consequence, their credentials could be **cracked offline**.\
 You can know that a **user account** is being used as a **service** because the property **"ServicePrincipalName"** is **not null**.
 
 Therefore, to perform Kerberoasting, only a domain account that can request for TGSs is necessary, which is anyone since no special privileges are required.
@@ -56,9 +56,9 @@ If you have **enough permissions** over a user you can **make it kerberoastable*
  Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
 
-You can find useful **tools** for **kerberoast** attacks here: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
+You can find useful **tools **for **kerberoast **attacks here: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-If you find this **error** from Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** it because of your local time, you need to synchronise the host with the DC: `ntpdate <IP of DC>`
+If you find this **error **from Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** it because of your local time, you need to synchronise the host with the DC: `ntpdate <IP of DC>`
 
 ### Mitigation
 
@@ -79,4 +79,4 @@ Kerberoast is very stealthy if exploitable
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```
 
-**More information about Kerberoasting in ired.team in** [**here** ](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)**and** [**here**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)**.**
+**More information about Kerberoasting in ired.team in **[**here **](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)**and **[**here**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)**.**

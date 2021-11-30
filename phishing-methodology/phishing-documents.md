@@ -17,7 +17,7 @@ DOCX files referencing a remote template (File –Options –Add-ins –Manage: 
 ### Word with external image
 
 Go to: _Insert --> Quick Parts --> Field_\
-_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ [http://\<ip>/whatever](http://\<ip>/whatever)
+_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**: _[http://\<ip>/whatever](http://\<ip>/whatever)
 
 ![](<../.gitbook/assets/image (316).png>)
 

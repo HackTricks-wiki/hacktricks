@@ -2,7 +2,7 @@
 
 ## Basic information
 
-Go to the following link to learn **what is containerd** and `ctr`:
+Go to the following link to learn **what is containerd **and `ctr`:
 
 {% content-ref url="../../pentesting/2375-pentesting-docker.md" %}
 [2375-pentesting-docker.md](../../pentesting/2375-pentesting-docker.md)
@@ -41,7 +41,7 @@ You can run a privileged container as:
  ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
 
-Then you can use some of the techniques mentioned in the following page to **escape from it abusing privileged capabilities**:
+Then you can use some of the techniques mentioned in the following page to** escape from it abusing privileged capabilities**:
 
 {% content-ref url="docker-breakout/" %}
 [docker-breakout](docker-breakout/)

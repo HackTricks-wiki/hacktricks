@@ -49,15 +49,15 @@ The settings here configured will indicate the following permissions of members 
 
 By default repository roles are created:
 
-* **Read**: Recommended for non-code contributors who want to view or discuss your project
-* **Triage**: Recommended for contributors who need to proactively manage issues and pull requests without write access
-* **Write**: Recommended for contributors who actively push to your project
-* **Maintain**: Recommended for project managers who need to manage the repository without access to sensitive or destructive actions
-* **Admin**: Recommended for people who need full access to the project, including sensitive and destructive actions like managing security or deleting a repository
+* **Read**: Recommended for **non-code contributors** who want to view or discuss your project
+* **Triage**: Recommended for **contributors who need to proactively manage issues and pull requests** without write access
+* **Write**: Recommended for contributors who **actively push to your project**
+* **Maintain**: Recommended for **project managers who need to manage the repository** without access to sensitive or destructive actions
+* **Admin**: Recommended for people who need **full access to the project**, including sensitive and destructive actions like managing security or deleting a repository
 
-You can compaIt's possIt re the permissions of each role in this table [https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role)
+You can **compare the permissions** of each role in this table [https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization#permissions-for-each-role)
 
-
+You can also **create your own roles** in _https://github.com/organizations/\<org\_name>/settings/roles_
 
 ## Github Authentication
 

@@ -4,7 +4,7 @@ in this scenario we are going to suppose that you **have compromised a non privi
 
 Amazingly, GPC permissions of the compute engine you have compromised may help you to **escalate privileges locally inside a machine**. Even if that won't always be very helpful in a cloud environment, it's good to know it's possible.
 
-## Read the scripts <a href="#follow-the-scripts" id="follow-the-scripts"></a>
+## Read the scripts <a href="follow-the-scripts" id="follow-the-scripts"></a>
 
 **Compute Instances** are probably there to **execute some scripts** to perform actions with their service accounts.
 
@@ -30,7 +30,7 @@ curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/?re
     -H "Metadata-Flavor: Google"
 ```
 
-## Modifying the metadata <a href="#modifying-the-metadata" id="modifying-the-metadata"></a>
+## Modifying the metadata <a href="modifying-the-metadata" id="modifying-the-metadata"></a>
 
 If you can **modify the instance's metadata**, there are numerous ways to escalate privileges locally. There are a few scenarios that can lead to a service account with this permission:
 
@@ -48,7 +48,7 @@ Although Google [recommends](https://cloud.google.com/compute/docs/access/servic
 * `https://www.googleapis.com/auth/compute`
 * `https://www.googleapis.com/auth/cloud-platfo`rm
 
-## **Add SSH keys**&#x20;
+## **Add SSH keys **
 
 ### **Add SSH keys to custom metadata**
 
@@ -101,7 +101,7 @@ bob:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2fNZlw22d3mIAcfRV24bmIrOUn8l9qgOGj1LQ
 alice:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDnthNXHxi31LX8PlsGdIF/wlWmI0fPzuMrv7Z6rqNNgDYOuOFTpM1Sx/vfvezJNY+bonAPhJGTRCwAwytXIcW6JoeX5NEJsvEVSAwB1scOSCEAMefl0FyIZ3ZtlcsQ++LpNszzErreckik3aR+7LsA2TCVBjdlPuxh4mvWBhsJAjYS7ojrEAtQsJ0mBSd20yHxZNuh7qqG0JTzJac7n8S5eDacFGWCxQwPnuINeGoacTQ+MWHlbsYbhxnumWRvRiEm7+WOg2vPgwVpMp4sgz0q5r7n/l7YClvh/qfVquQ6bFdpkVaZmkXoaO74Op2Sd7C+MBDITDNZPpXIlZOf4OLb alice
 ```
 
-Now, you can **re-write the SSH key metadata** for your instance with the following command:
+Now, you can** re-write the SSH key metadata** for your instance with the following command:
 
 ```bash
 gcloud compute instances add-metadata [INSTANCE] --metadata-from-file ssh-keys=meta.txt
@@ -151,7 +151,7 @@ This will **generate a new SSH key, add it to your existing user, and add your e
 
 ## **Using OS Login**
 
-[OS Login](https://cloud.google.com/compute/docs/oslogin/) is an alternative to managing SSH keys. It links a **Google user or service account to a Linux identity**, relying on IAM permissions to grant or deny access to Compute Instances.
+[OS Login](https://cloud.google.com/compute/docs/oslogin/) is an alternative to managing SSH keys. It links a** Google user or service account to a Linux identity**, relying on IAM permissions to grant or deny access to Compute Instances.
 
 OS Login is [enabled](https://cloud.google.com/compute/docs/instances/managing-instance-access#enable\_oslogin) at the project or instance level using the metadata key of `enable-oslogin = TRUE`.
 
@@ -164,11 +164,11 @@ The following two **IAM permissions control SSH access to instances with OS Logi
 
 Unlike managing only with SSH keys, these permissions allow the administrator to control whether or not `sudo` is granted.
 
-If your service account has these permissions. **You can simply run the `gcloud compute ssh [INSTANCE]`** command to [connect manually as the service account](https://cloud.google.com/compute/docs/instances/connecting-advanced#sa\_ssh\_manual). **Two-factor** is **only** enforced when using **user accounts**, so that should not slow you down even if it is assigned as shown above.
+If your service account has these permissions.** You can simply run the `gcloud compute ssh [INSTANCE]`** command to [connect manually as the service account](https://cloud.google.com/compute/docs/instances/connecting-advanced#sa\_ssh\_manual). **Two-factor **is **only** enforced when using **user accounts**, so that should not slow you down even if it is assigned as shown above.
 
 Similar to using SSH keys from metadata, you can use this strategy to **escalate privileges locally and/or to access other Compute Instances** on the network.
 
-## SSH keys at project level <a href="#sshing-around" id="sshing-around"></a>
+## SSH keys at project level <a href="sshing-around" id="sshing-around"></a>
 
 Following the details mentioned in the previous section you can try to compromise more VMs.
 
@@ -182,7 +182,7 @@ If you're really bold, you can also just type `gcloud compute ssh [INSTANCE]` to
 
 ## Search for Keys in the filesystem
 
-It's quite possible that **other users on the same box have been running `gcloud`** commands using an account more powerful than your own. You'll **need local root** to do this.
+It's quite possible that** other users on the same box have been running `gcloud`** commands using an account more powerful than your own. You'll **need local root** to do this.
 
 First, find what `gcloud` config directories exist in users' home folders.
 

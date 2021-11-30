@@ -2,11 +2,11 @@
 
 ### Host header
 
-Several times the back-end trust the H**ost header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).&#x20;
+Several times the back-end trust the H**ost header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2). 
 
 ### Session booleans
 
-Some times when you complete some verification correctly the back-end will **just add a boolean with the value "True" to a security attribute your session**. Then, a different endpoint will know if you successfully passed that check.\
+Some times when you complete some verification correctly the back-end will** just add a boolean with the value "True" to a security attribute your session**. Then, a different endpoint will know if you successfully passed that check.\
 However, if you **pass the check** and your sessions is granted that "True" value in the security attribute, you can try to **access other resources** that **depends on the same attribute** but that you **shouldn't have permissions** to access. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
 ### Register functionality

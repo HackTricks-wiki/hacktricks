@@ -1,6 +1,6 @@
 # Create MSI with WIX
 
-**Tutorial copied from** [**https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root**](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)\
+**Tutorial copied from **[**https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root**](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)\
 In order to create the msi we will use [wixtools](http://wixtoolset.org) , you can use other msi builders but they didn’t work for me.\
 Check [this page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) for some wix msi usage examples.\
 We will create an msi that executes our lnk file :
@@ -37,7 +37,7 @@ fail_here
 </Wix>
 ```
 
-&#x20;We will use `candle.exe` from wixtools to create a wixobject from `msi.xml`
+ We will use `candle.exe` from wixtools to create a wixobject from `msi.xml`
 
 ```markup
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml

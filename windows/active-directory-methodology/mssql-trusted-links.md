@@ -2,8 +2,8 @@
 
 ## MSSQL Trusted Links
 
-If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA). \
-Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. This trusts can be chained and at some point the user might be able to find some misconfigured database where he can execute commands.
+If a user has privileges to** access MSSQL instances**, he could be able to use it to** execute commands** in the MSSQL host (if running as SA). \
+Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to** use the trust relationship to execute queries also in the other instance**. This trusts can be chained and at some point the user might be able to find some misconfigured database where he can execute commands.
 
 **The links between databases work even across forest trusts.**
 
@@ -70,11 +70,11 @@ msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
 
-Notice that metasploit will try to abuse only the `openquery()` function in MSSQL (so, if you can't execute command with `openquery()` you will need to try the `EXECUTE` method **manually** to execute commands, see more below.)
+Notice that metasploit will try to abuse only the `openquery()` function in MSSQL (so, if you can't execute command with `openquery()` you will need to try the `EXECUTE `method **manually **to execute commands, see more below.)
 
 ### Manual - Openquery()
 
-From Linux you could obtain a MSSQL console shell with **sqsh** and **mssqlclient.py** and run queries like:
+From Linux you could obtain a MSSQL console shell with **sqsh** and** mssqlclient.py** and run queries like:
 
 ```bash
 select * from openquery("DOMINIO\SERVER1",'select * from openquery("DOMINIO\SERVER2",''select * from master..sysservers'')')

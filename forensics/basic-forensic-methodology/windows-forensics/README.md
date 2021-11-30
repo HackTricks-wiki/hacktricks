@@ -16,7 +16,7 @@ This database can be open with a SQLite tool or with the tool [**WxTCmd**](https
 
 ### ADS/Alternate Data Streams
 
-Files downloaded may contain the **ADS Zone.Identifier** indicating **how** was **downloaded** (from the intranet, Internet...) and some software (like browser) usually put even **more** **information** like the **URL** from where the file was downloaded.
+Files downloaded may contain the **ADS Zone.Identifier** indicating **how **was **downloaded **(from the intranet, Internet...) and some software (like browser) usually put even **more** **information **like the **URL **from where the file was downloaded.
 
 ## **File Backups**
 
@@ -45,7 +45,7 @@ These backups are usually located in the `\System Volume Information` from the r
 
 ![](<../../../.gitbook/assets/image (520).png>)
 
-Mounting the forensics image with the **ArsenalImageMounter**, the tool [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow\_copy\_view.html) can be used to inspect a shadow copy and even **extract the files** from the shadow copy backups.
+Mounting the forensics image with the **ArsenalImageMounter**, the tool [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) can be used to inspect a shadow copy and even **extract the files** from the shadow copy backups.
 
 ![](<../../../.gitbook/assets/image (521).png>)
 
@@ -147,7 +147,7 @@ Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about whe
 The 'Plug and Play Cleanup' scheduled task is responsible for **clearing** legacy versions of drivers. It would appear (based upon reports online) that it also picks up **drivers which have not been used in 30 days**, despite its description stating that "the most current version of each driver package will be kept". As such, **removable devices which have not been connected for 30 days may have their drivers removed**.\
 The scheduled task itself is located at ‘C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup’, and its content is displayed below:
 
-![](https://2.bp.blogspot.com/-wqYubtuR\_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
+![](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
 The task references 'pnpclean.dll' which is responsible for performing the cleanup activity additionally we see that the ‘UseUnifiedSchedulingEngine’ field is set to ‘TRUE’ which specifies that the generic task scheduling engine is used to manage the task. The ‘Period’ and ‘Deadline’ values of 'P1M' and 'P2M' within ‘MaintenanceSettings’ instruct Task Scheduler to execute the task once every month during regular Automatic maintenance and if it fails for 2 consecutive months, to start attempting the task during.\
 **This section was copied from** [**here**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)**.**
@@ -169,7 +169,7 @@ This application saves the emails in HTML or text. You can find the emails insid
 
 The **metadata** of the emails and the **contacts** can be found inside the **EDB database**: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
 
-**Change the extension** of the file from `.vol` to `.edb` and you can use the tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html) to open it. Inside the `Message` table you can see the emails.
+**Change the extension** of the file from `.vol` to `.edb` and you can use the tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) to open it. Inside the `Message` table you can see the emails.
 
 ### Microsoft Outlook
 
@@ -217,7 +217,7 @@ It is possible to read this file with the tool [**Thumbsviewer**](https://thumbs
 
 ### Thumbcache
 
-Beginning with Windows Vista, **thumbnail previews are stored in a centralized location on the system**. This provides the system with access to images independent of their location, and addresses issues with the locality of Thumbs.db files. The cache is stored at **`%userprofile%\AppData\Local\Microsoft\Windows\Explorer`** as a number of files with the label **thumbcache\_xxx.db** (numbered by size); as well as an index used to find thumbnails in each sized database.
+Beginning with Windows Vista, **thumbnail previews are stored in a centralized location on the system**. This provides the system with access to images independent of their location, and addresses issues with the locality of Thumbs.db files. The cache is stored at **`%userprofile%\AppData\Local\Microsoft\Windows\Explorer`** as a number of files with the label **thumbcache_xxx.db** (numbered by size); as well as an index used to find thumbnails in each sized database.
 
 * Thumbcache\_32.db -> small
 * Thumbcache\_96.db -> medium
@@ -333,7 +333,7 @@ It gives the information:
 
 This information is updated every 60mins.
 
-You can obtain the date from this file using the tool [**srum\_dump**](https://github.com/MarkBaggett/srum-dump).
+You can obtain the date from this file using the tool [**srum_dump**](https://github.com/MarkBaggett/srum-dump).
 
 ```bash
 .\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -t SRUM_TEMPLATE.xlsx -o C:\Users\student\Desktop\srum
@@ -347,13 +347,13 @@ The cache stores various file metadata depending on the operating system, such a
 
 * File Full Path
 * File Size
-* **$Standard\_Information** (SI) Last Modified time
+* **$Standard_Information** (SI) Last Modified time
 * Shimcache Last Updated time
 * Process Execution Flag
 
 This information can be found in the registry in:
 
-* `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache`&#x20;
+* `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` 
   * XP (96 entries)
 * `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`
   * Server 2003 (512 entries)
@@ -417,7 +417,7 @@ Before Windows Vista the event logs were in binary format and after it, they are
 
 The location of the event files can be found in the SYSTEM registry in **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**
 
-They can be visualized from the Windows Event Viewer (**`eventvwr.msc`**) or with other tools like [**Event Log Explorer**](https://eventlogxp.com) **or** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
+They can be visualized from the Windows Event Viewer (**`eventvwr.msc`**) or with other tools like [**Event Log Explorer**](https://eventlogxp.com)** or **[**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
 
 ### Security
 
@@ -460,7 +460,7 @@ The Status and sub status information of the event s can indicate more details a
 
 ### Recovering Windows Events
 
-It's highly recommended to turn off the suspicious PC by **unplugging it** to maximize the probabilities of recovering the Windows Events. In case they were deleted, a tool that can be useful to try to recover them is [**Bulk\_extractor**](../partitions-file-systems-carving/file-data-carving-recovery-tools.md#bulk-extractor) indicating the **evtx** extension.
+It's highly recommended to turn off the suspicious PC by **unplugging it** to maximize the probabilities of recovering the Windows Events. In case they were deleted, a tool that can be useful to try to recover them is [**Bulk_extractor**](../partitions-file-systems-carving/file-data-carving-recovery-tools.md#bulk-extractor) indicating the **evtx** extension.
 
 ## Identifying Common Attacks with Windows Events
 
@@ -478,7 +478,7 @@ This event is recorded by the EventID 4616 inside the Security Event log.
 The following System EventIDs are useful:
 
 * 20001 / 20003 / 10000: First time it was used
-* 10100: Driver update&#x20;
+* 10100: Driver update 
 
 The EventID 112 from DeviceSetupManager contains the timestamp of each USB device inserted.
 

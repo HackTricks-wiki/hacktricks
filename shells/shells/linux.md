@@ -1,10 +1,10 @@
 # Shells - Linux
 
-**If you have questions about any of these shells you could check them with** [**https://explainshell.com/**](https://explainshell.com)****
+**If you have questions about any of these shells you could check them with **[**https://explainshell.com/**](https://explainshell.com)****
 
 ## Full TTY
 
-**Once you get a reverse shell**[ **read this page to obtain a full TTY**](full-ttys.md)**.**
+**Once you get a reverse shell**[** read this page to obtain a full TTY**](full-ttys.md)**.**
 
 ## Bash | sh
 

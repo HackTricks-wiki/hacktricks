@@ -1,6 +1,6 @@
 # AppendData/AddSubdirectory permission over service registry
 
-**Information copied from** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)****
+**Information copied from **[**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)****
 
 According to the output of the script, the current user has some write permissions on two registry keys:
 
@@ -41,7 +41,7 @@ What does this mean exactly? It means that we cannot just modify the `ImagePath`
 
 Does it mean that it was indeed a false positive? Surely not. Let the fun begin!
 
-### RTFM <a href="#rtfm" id="rtfm"></a>
+### RTFM <a href="rtfm" id="rtfm"></a>
 
 At this point, we know that we can create arbirary subkeys under `HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper` but we cannot modify existing subkeys and values. These already existing subkeys are `Parameters` and `Security`, which are quite common for Windows services.
 
@@ -87,7 +87,7 @@ DWORD APIENTRY ClosePerfData();
 
 I think that’s enough with the theory, it’s time to start writing some code!
 
-### Writing a Proof-of-Concept <a href="#writing-a-proof-of-concept" id="writing-a-proof-of-concept"></a>
+### Writing a Proof-of-Concept <a href="writing-a-proof-of-concept" id="writing-a-proof-of-concept"></a>
 
 Thanks to all the bits and pieces I was able to collect throughout the documentation, writing a simple Proof-of-Concept DLL should be pretty straightforward. But still, we need a plan!
 
@@ -230,7 +230,7 @@ If you want to see the full code, I uploaded it [here](https://gist.github.com/i
 
 Finally, we can select _**Release/x64**_ and “_**Build the solution**_”. This will produce our DLL file: `.\DllRpcEndpointMapperPoc\x64\Release\DllRpcEndpointMapperPoc.dll`.
 
-### Testing the PoC <a href="#testing-the-poc" id="testing-the-poc"></a>
+### Testing the PoC <a href="testing-the-poc" id="testing-the-poc"></a>
 
 Before going any further, I always make sure that my payload is working properly by testing it separately. The little time spent here can save a lot of time afterwards by preventing you from going down a rabbit hole during a hypothetical debug phase. To do so, we can simply use `rundll32.exe` and pass the name of the DLL and the name of an exported function as the parameters.
 
@@ -240,7 +240,7 @@ C:\Users\lab-user\Downloads\>rundll32 DllRpcEndpointMapperPoc.dll,OpenPerfData
 
 ![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/09\_test-poc-rundll32.gif)
 
-Great, the log file was created and, if we open it, we can see two entries. The first one was written when the DLL was loaded by `rundll32.exe`. The second one was written when `OpenPerfData` was called. Looks good! ![:slightly\_smiling\_face:](https://github.githubassets.com/images/icons/emoji/unicode/1f642.png)
+Great, the log file was created and, if we open it, we can see two entries. The first one was written when the DLL was loaded by `rundll32.exe`. The second one was written when `OpenPerfData` was called. Looks good! ![:slightly_smiling_face:](https://github.githubassets.com/images/icons/emoji/unicode/1f642.png)
 
 ```
 [21:25:34] - PID=3040 - PPID=2964 - USER='lab-user' - CMD='rundll32  DllRpcEndpointMapperPoc.dll,OpenPerfData' - METHOD='DllMain'
@@ -251,7 +251,7 @@ Ok, now we can focus on the actual vulnerability and start by creating the requi
 
 ![](https://itm4n.github.io/assets/posts/2020-11-12-windows-registry-rpceptmapper-eop/10\_powershell-new-item-access-denied.png)
 
-`Requested registry access is not allowed`… Hmmm, ok… It looks like it won’t be that easy after all. ![:stuck\_out\_tongue:](https://github.githubassets.com/images/icons/emoji/unicode/1f61b.png)
+`Requested registry access is not allowed`… Hmmm, ok… It looks like it won’t be that easy after all. ![:stuck_out_tongue:](https://github.githubassets.com/images/icons/emoji/unicode/1f61b.png)
 
 I didn’t really investigate this issue but my guess is that when we call `New-Item`, `powershell.exe` actually tries to open the parent registry key with some flags that correspond to permissions we don’t have.
 
@@ -291,7 +291,7 @@ Remove-ItemProperty -Path "HKLM:$($ServiceKey)" -Name "Close" -Force
 
 The last step now, **how do we trick the RPC Endpoint Mapper service into loading our Performace DLL?** Unfortunately, I haven’t kept track of all the different things I tried. It would have been really interesting in the context of this blog post to highlight how tedious and time consuming research can sometimes be. Anyway, one thing I found along the way is that you can query _Perfomance Counters_ using WMI (_Windows Management Instrumentation_), which isn’t too surprising after all. More info here: [_WMI Performance Counter Types_](https://docs.microsoft.com/en-us/windows/win32/wmisdk/wmi-performance-counter-types).
 
-> _Counter types appear as the CounterType qualifier for properties in_ [_Win32\_PerfRawData_](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-perfrawdata) _classes, and as the CookingType qualifier for properties in_ [_Win32\_PerfFormattedData_](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-perfformatteddata) _classes._
+> _Counter types appear as the CounterType qualifier for properties in _[_Win32\_PerfRawData_](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-perfrawdata)_ classes, and as the CookingType qualifier for properties in _[_Win32\_PerfFormattedData_](https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-perfformatteddata)_ classes._
 
 So, I first enumerated the WMI classes that are related to _Performace Data_ in PowerShell using the following command.
 
@@ -331,7 +331,7 @@ Get-WmiObject Win32_PerfRawData
 Get-WmiObject Win32_PerfFormattedData
 ```
 
-### Conclusion <a href="#conclusion" id="conclusion"></a>
+### Conclusion <a href="conclusion" id="conclusion"></a>
 
 I don’t know how this vulnerability has gone unnoticed for so long. One explanation is that other tools probably looked for full write access in the registry, whereas `AppendData/AddSubdirectory` was actually enough in this case. Regarding the “misconfiguration” itself, I would assume that the registry key was set this way for a specific purpose, although I can’t think of a concrete scenario in which users would have any kind of permissions to modify a service’s configuration.
 

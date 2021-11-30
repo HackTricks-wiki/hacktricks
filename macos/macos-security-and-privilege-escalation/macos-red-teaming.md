@@ -5,7 +5,7 @@
 * JAMF Pro: `jamf checkJSSConnection`
 * Kandji
 
-If you manage to **compromise admin credentials** to access the management platform, you can **potentially compromise all the computers** by distributing your malware in the machines.
+If you manage to** compromise admin credentials** to access the management platform, you can **potentially compromise all the computers** by distributing your malware in the machines.
 
 For red teaming in MacOS environments it's highly recommended to have some understanding of how the MDMs work:
 
@@ -35,7 +35,7 @@ In some occasions you will find that the **MacOS computer is connected to an AD*
 [pentesting-kerberos-88](../../pentesting/pentesting-kerberos-88/)
 {% endcontent-ref %}
 
-Some **local MacOS tool** that may also help you is `dscl`:
+Some **local MacOS tool **that may also help you is `dscl`:
 
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /

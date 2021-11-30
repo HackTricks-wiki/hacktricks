@@ -32,14 +32,14 @@ When a function is called in a binary that uses objective-C, the compiled code i
 
 The params this function expects are:
 
-* The first parameter (**self**) is "a pointer that points to the **instance of the class that is to receive the message**". Or more simply put, it’s the object that the method is being invoked upon. If the method is a class method, this will be an instance of the class object (as a whole), whereas for an instance method, self  will point to an instantiated instance of the class as an object.&#x20;
-* The second parameter, (**op**), is "the selector of the method that handles the message". Again, more simply put, this is just the **name of the method.**&#x20;
-* The remaining parameters are any **values that are required by the method** (op).
+* The first parameter (**self**) is "a pointer that points to the **instance of the class that is to receive the message**". Or more simply put, it’s the object that the method is being invoked upon. If the method is a class method, this will be an instance of the class object (as a whole), whereas for an instance method, self  will point to an instantiated instance of the class as an object. 
+* The second parameter, (**op**), is "the selector of the method that handles the message". Again, more simply put, this is just the **name of the method.** 
+* The remaining parameters are any** values that are required by the method** (op).
 
-| **Argument**      | **Register**                                                    | **(for) objc\_msgSend**                                |
+| **Argument  **    | **Register**                                                    | **(for) objc_msgSend**                                 |
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **1st argument**  | **rdi**                                                         | **self: object that the method is being invoked upon** |
-| **2nd argument**  | **rsi**                                                         | **op: name of the method**                             |
+| **1st argument ** | **rdi**                                                         | **self: object that the method is being invoked upon** |
+| **2nd argument ** | **rsi**                                                         | **op: name of the method**                             |
 | **3rd argument**  | **rdx**                                                         | **1st argument to the method**                         |
 | **4th argument**  | **rcx**                                                         | **2nd argument to the method**                         |
 | **5th argument**  | **r8**                                                          | **3rd argument to the method**                         |
@@ -50,12 +50,12 @@ The params this function expects are:
 
 * Check for high entropy
 * Check the strings (is there is almost no understandable string, packed)
-* The UPX packer for MacOS generates a section called "\_\_XHDR"
+* The UPX packer for MacOS generates a section called "\__XHDR"
 
 ## Dynamic Analysis
 
 {% hint style="warning" %}
-Note that in order to debug binaries, **SIP needs to be disabled** (`csrutil disable` or `csrutil enable --without debug`) or to copy the binaries to a temporary folder and **remove the signature** with `codesign --remove-signature <binary-path>` or allow the debugging of the binary (you can use [this script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
+Note that in order to debug binaries, **SIP needs to be disabled **(`csrutil disable` or `csrutil enable --without debug`) or to copy the binaries to a temporary folder and **remove the signature **with `codesign --remove-signature <binary-path> `or allow the debugging of the binary (you can use [this script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
 {% endhint %}
 
 {% hint style="warning" %}
@@ -79,7 +79,7 @@ ktrace trace -s -S -t c -c ls | grep "ls("
 
 ### dtrace
 
-It allows users access to applications at an extremely **low level** and provides a way for users to **trace** **programs** and even change their execution flow. Dtrace uses **probes** which are **placed throughout the kernel** and are at locations such as the beginning and end of system calls.
+It allows users access to applications at an extremely **low level **and provides a way for users to **trace** **programs** and even change their execution flow. Dtrace uses **probes** which are **placed throughout the kernel** and are at locations such as the beginning and end of system calls.
 
 The available probes of dtrace can be obtained with:
 
@@ -154,7 +154,7 @@ sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 
 ****[**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) allows to monitor file events (such as creation, modifications, and deletions) providing detailed information about such events.
 
-### fs\_usage
+### fs_usage
 
 Allows to follow actions performed by processes:
 
@@ -170,7 +170,7 @@ It also checks the binary processes against **virustotal** and show information 
 
 ### lldb
 
-**lldb** is the de **facto tool** for **macOS** binary **debugging**.
+**lldb** is the de **facto tool **for **macOS** binary **debugging**.
 
 ```bash
 lldb ./malware.bin
@@ -193,11 +193,11 @@ lldb -n malware.bin --waitfor
 | **x/s \<reg/memory address>** | Display the memory as a null-terminated string.                                                                                                                                                                                                                                                                                                                                                                                       |
 | **x/i \<reg/memory address>** | Display the memory as assembly instruction.                                                                                                                                                                                                                                                                                                                                                                                           |
 | **x/b \<reg/memory address>** | Display the memory as byte.                                                                                                                                                                                                                                                                                                                                                                                                           |
-| **print object (po)**         | <p>This will print the object referenced by the param</p><p>po $raw</p><p><code>{</code></p><p> <code>dnsChanger =  {</code></p><p>   <code>"affiliate" = "";</code></p><p>   <code>"blacklist_dns" = ();</code></p><p>Note that most of Apple’s Objective-C APIs or methods return objects, and thus should be displayed via the “print object” (po) command. If po doesn't produce a meaningful output use <code>x/b</code><br></p> |
+| **print object (po)**         | <p>This will print the object referenced by the param</p><p>po $raw</p><p><code>{</code></p><p><code> dnsChanger =  {</code></p><p><code>   "affiliate" = "";</code></p><p><code>   "blacklist_dns" = ();</code></p><p>Note that most of Apple’s Objective-C APIs or methods return objects, and thus should be displayed via the “print object” (po) command. If po doesn't produce a meaningful output use <code>x/b</code><br></p> |
 | **memory write**              | memory write 0x100600000 -s 4 0x41414141 #Write AAAA in that address                                                                                                                                                                                                                                                                                                                                                                  |
 
 {% hint style="info" %}
-When calling the **`objc_sendMsg`** function, the **rsi** register holds the **name of the method** as a null-terminated (“C”) string. To print the name via lldb do:
+When calling the **`objc_sendMsg`** function, the **rsi** register holds the **name of the method **as a null-terminated (“C”) string. To print the name via lldb do:
 
 `(lldb) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 
@@ -217,16 +217,16 @@ When calling the **`objc_sendMsg`** function, the **rsi** register holds the **n
 * It's also possible to find **if a process is being debugged** with a simple code such us:
   * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
 * It can also invoke the **`ptrace`** system call with the **`PT_DENY_ATTACH`** flag. This **prevents** a deb**u**gger from attaching and tracing.
-  * You can check if the **`sysctl` ** or**`ptrace`** function is being **imported** (but the malware could import it dynamically)
+  * You can check if the **`sysctl` **or**`ptrace`** function is being **imported** (but the malware could import it dynamically)
   * As noted in this writeup, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-    “_The message Process # exited with **status = 45 (0x0000002d)** is usually a tell-tale sign that the debug target is using **PT\_DENY\_ATTACH**_”
+    “_The message Process # exited with **status = 45 (0x0000002d)** is usually a tell-tale sign that the debug target is using **PT_DENY_ATTACH**_”
 
 ## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html#:\~:text=ReportCrash%20analyzes%20crashing%20processes%20and%20saves%20a%20crash%20report%20to%20disk.\&text=ReportCrash%20also%20records%20the%20identity,when%20a%20crash%20is%20detected.)
 
 ReportCrash **analyzes crashing processes and saves a crash report to disk**. A crash report contains information that can **help a developer diagnose** the cause of a crash.\
-For applications and other processes **running in the per-user launchd context**, ReportCrash runs as a LaunchAgent and saves crash reports in the user's `~/Library/Logs/DiagnosticReports/`\
+For applications and other processes** running in the per-user launchd context**, ReportCrash runs as a LaunchAgent and saves crash reports in the user's `~/Library/Logs/DiagnosticReports/`\
 For daemons, other processes **running in the system launchd context** and other privileged processes, ReportCrash runs as a LaunchDaemon and saves crash reports in the system's `/Library/Logs/DiagnosticReports`
 
 If you are worried about crash reports **being sent to Apple** you can disable them. If not, crash reports can be useful to **figure out how a server crashed**.
@@ -251,7 +251,7 @@ While fuzzing in a MacOS it's important to not allow the Mac to sleep:
 
 #### SSH Disconnect
 
-If you are fuzzing via a SSH connection it's important to make sure the session isn't going to day. So change the sshd\_config file with:
+If you are fuzzing via a SSH connection it's important to make sure the session isn't going to day. So change the sshd_config file with:
 
 * TCPKeepAlive Yes
 * ClientAliveInterval 0
@@ -264,7 +264,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 
 ### Internal Handlers
 
-[**Checkout this section**](./#file-extensions-apps) **** to find out how you can find which app is responsible of **handling the specified scheme or protocol**.
+[**Checkout this section**](./#file-extensions-apps)** **to find out how you can find which app is responsible of **handling the specified scheme or protocol**.
 
 ### Enumerating Network Processes
 

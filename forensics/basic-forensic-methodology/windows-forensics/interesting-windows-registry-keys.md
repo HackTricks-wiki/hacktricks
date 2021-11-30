@@ -32,7 +32,7 @@
 
 ### Shared Folders
 
-* **`System\ControlSet001\Services\lanmanserver\Shares\`**: Share folders and their configurations. If **Client Side Caching** (CSCFLAGS) is enabled, then, a copy of the shared files will be saved in the clients and server in `C:\Windows\CSC`&#x20;
+* **`System\ControlSet001\Services\lanmanserver\Shares\`**: Share folders and their configurations. If **Client Side Caching** (CSCFLAGS) is enabled, then, a copy of the shared files will be saved in the clients and server in `C:\Windows\CSC` 
   * CSCFlag=0 -> By default the user needs to indicate the files that he wants to cache
   * CSCFlag=16 -> Automatic caching documents. “All files and programs that users open from the shared folder are automatically available offline” with the “optimize for performance" unticked.
   * CSCFlag=32 -> Like the previous options by “optimize for performance”  is ticked
@@ -42,10 +42,10 @@
 
 ### AutoStart programs
 
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`&#x20;
-* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`&#x20;
-* `Software\Microsoft\Windows\CurrentVersion\Runonce`&#x20;
-* `Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run`&#x20;
+* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run` 
+* `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce` 
+* `Software\Microsoft\Windows\CurrentVersion\Runonce` 
+* `Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run` 
 * `Software\Microsoft\Windows\CurrentVersion\Run`
 
 ### Explorer Searches
@@ -110,7 +110,7 @@ Desktop Access:
 * `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU`
 * `NTUSER.DAT\Software\Microsoft\Windows\Shell\Bags`
 
-To analyze the Shellbags you can use [**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md) **\*\*and you will be able to find the** MAC time of the folder **and also the** creation date and modified date of the shellbag **which are related with the** first time the folder was accessed and the last time\*\*.
+To analyze the Shellbags you can use [**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md) **\*\*and you will be able to find the **MAC time of the folder** and also the **creation date and modified date of the shellbag** which are related with the **first time the folder was accessed and the last time\*\*.
 
 Note 2 things from the following image:
 

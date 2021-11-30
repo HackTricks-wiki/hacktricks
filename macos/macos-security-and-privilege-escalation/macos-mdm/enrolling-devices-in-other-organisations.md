@@ -2,10 +2,10 @@
 
 ## Intro
 
-As **** [**previously commented**](./#what-is-mdm-mobile-device-management)**,** in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+As** **[**previously commented**](./#what-is-mdm-mobile-device-management)**,** in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
 Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected.
 
-**The following research is taken from** [**https://duo.com/labs/research/mdm-me-maybe**](https://duo.com/labs/research/mdm-me-maybe)****
+**The following research is taken from **[**https://duo.com/labs/research/mdm-me-maybe**](https://duo.com/labs/research/mdm-me-maybe)****
 
 ## Reversing the process
 
@@ -47,7 +47,7 @@ rsi = @selector(sendConfigurationInfoToRemote);
 rsi = @selector(sendFailureNoticeToRemote);
 ```
 
-Since the **Absinthe** scheme is what appears to be used to authenticate requests to the DEP service, **reverse engineering** this scheme would allow us to make our own authenticated requests to the DEP API. This proved to be **time consuming**, though, mostly because of the number of steps involved in authenticating requests. Rather than fully reversing how this scheme works, we opted to explore other methods of inserting arbitrary serial numbers as part of the _Activation Record_ request.
+Since the **Absinthe** scheme is what appears to be used to authenticate requests to the DEP service, **reverse engineering **this scheme would allow us to make our own authenticated requests to the DEP API. This proved to be **time consuming**, though, mostly because of the number of steps involved in authenticating requests. Rather than fully reversing how this scheme works, we opted to explore other methods of inserting arbitrary serial numbers as part of the _Activation Record_ request.
 
 ### MITMing DEP Requests
 
@@ -60,7 +60,7 @@ sn": "
 }
 ```
 
-Since the API at _iprofiles.apple.com_ uses [Transport Layer Security](https://en.wikipedia.org/wiki/Transport\_Layer\_Security) (TLS), we needed to enable SSL Proxying in Charles for that host to see the plain text contents of the SSL requests.
+Since the API at _iprofiles.apple.com_ uses [Transport Layer Security](https://en.wikipedia.org/wiki/Transport_Layer_Security) (TLS), we needed to enable SSL Proxying in Charles for that host to see the plain text contents of the SSL requests.
 
 However, the `-[MCTeslaConfigurationFetcher connection:willSendRequestForAuthenticationChallenge:]` method checks the validity of the server certificate, and will abort if server trust cannot be verified.
 
@@ -82,7 +82,7 @@ ManagedClient.app/Contents/Resources/English.lproj/Errors.strings
 <snip>
 ```
 
-The _Errors.strings_ file can be [printed in a human-readable format](https://duo.com/labs/research/mdm-me-maybe#error\_strings\_output) with the built-in `plutil` command.
+The _Errors.strings_ file can be [printed in a human-readable format](https://duo.com/labs/research/mdm-me-maybe#error_strings_output) with the built-in `plutil` command.
 
 ```
 $ plutil -p /System/Library/CoreServices/ManagedClient.app/Contents/Resources/English.lproj/Errors.strings
@@ -118,7 +118,7 @@ One of the benefits of this method over modifying the binaries and re-signing th
 
 **System Integrity Protection**
 
-In order to instrument system binaries, (such as `cloudconfigurationd`) on macOS, [System Integrity Protection](https://support.apple.com/en-us/HT204899) (SIP) must be disabled. SIP is a security technology that protects system-level files, folders, and processes from tampering, and is enabled by default on OS X 10.11 “El Capitan” and later. [SIP can be disabled](https://developer.apple.com/library/archive/documentation/Security/Conceptual/System\_Integrity\_Protection\_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html) by booting into Recovery Mode and running the following command in the Terminal application, then rebooting:
+In order to instrument system binaries, (such as `cloudconfigurationd`) on macOS, [System Integrity Protection](https://support.apple.com/en-us/HT204899) (SIP) must be disabled. SIP is a security technology that protects system-level files, folders, and processes from tampering, and is enabled by default on OS X 10.11 “El Capitan” and later. [SIP can be disabled](https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html) by booting into Recovery Mode and running the following command in the Terminal application, then rebooting:
 
 ```
 csrutil enable --without debug
@@ -415,7 +415,7 @@ Although some of this information might be publicly available for certain organi
 
 #### Rogue DEP Enrollment
 
-The [Apple MDM protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf) supports - but does not require - user authentication prior to MDM enrollment via [HTTP Basic Authentication](https://en.wikipedia.org/wiki/Basic\_access\_authentication). **Without authentication, all that's required to enroll a device in an MDM server via DEP is a valid, DEP-registered serial number**. Thus, an attacker that obtains such a serial number, (either through [OSINT](https://en.wikipedia.org/wiki/Open-source\_intelligence), social engineering, or by brute-force), will be able to enroll a device of their own as if it were owned by the organization, as long as it's not currently enrolled in the MDM server. Essentially, if an attacker is able to win the race by initiating the DEP enrollment before the real device, they're able to assume the identity of that device.
+The [Apple MDM protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf) supports - but does not require - user authentication prior to MDM enrollment via [HTTP Basic Authentication](https://en.wikipedia.org/wiki/Basic_access_authentication). **Without authentication, all that's required to enroll a device in an MDM server via DEP is a valid, DEP-registered serial number**. Thus, an attacker that obtains such a serial number, (either through [OSINT](https://en.wikipedia.org/wiki/Open-source_intelligence), social engineering, or by brute-force), will be able to enroll a device of their own as if it were owned by the organization, as long as it's not currently enrolled in the MDM server. Essentially, if an attacker is able to win the race by initiating the DEP enrollment before the real device, they're able to assume the identity of that device.
 
 Organizations can - and do - leverage MDM to deploy sensitive information such as device and user certificates, VPN configuration data, enrollment agents, Configuration Profiles, and various other internal data and organizational secrets. Additionally, some organizations elect not to require user authentication as part of MDM enrollment. This has various benefits, such as a better user experience, and not having to [expose the internal authentication server to the MDM server to handle MDM enrollments that take place outside of the corporate network](https://docs.simplemdm.com/article/93-ldap-authentication-with-apple-dep).
 

@@ -10,7 +10,7 @@ From a security researcher’s perspective, **Mac OS X feels just like a FreeBSD
 
 ### Mach
 
-Mach was originated as a UNIX-compatible **operating system** back in 1984. One of its primary design **goals** was to be a **microkernel**; that is, to **minimize** the amount of code running in the **kernel** and allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level** Mach tasks.
+Mach was originated as a UNIX-compatible** operating system **back in 1984. One of its primary design **goals** was to be a **microkernel**; that is, to **minimize** the amount of code running in the **kernel** and allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level** Mach tasks.
 
 **In XNU, Mach is responsible for many of the low-level operations** you expect from a kernel, such as processor scheduling and multitasking and virtual- memory management.
 
@@ -29,7 +29,7 @@ To get an idea of just how complicated the interaction between these two sets of
 
 ### I/O Kit - Drivers
 
-I/O Kit is the open-source, object-oriented, **device-driver framework** in the XNU kernel and is responsible for the addition and management of **dynamically loaded device drivers**. These drivers allow for modular code to be added to the kernel dynamically for use with different hardware, for example. They are located in:
+I/O Kit is the open-source, object-oriented, **device-driver framework **in the XNU kernel and is responsible for the addition and management of **dynamically loaded device drivers**. These drivers allow for modular code to be added to the kernel dynamically for use with different hardware, for example. They are located in:
 
 * `/System/Library/Extensions`
   * KEXT files built into the OS X operating system.
@@ -78,7 +78,7 @@ On the **other** hand, many familiar pieces of Mac OS X are **not open source**.
 
 ### **Universal binaries**
 
-Mac OS binaries usually are compiled as universal binaries. **** A **universal binary** can **support multiple architectures in the same file**.
+Mac OS binaries usually are compiled as universal binaries.** **A **universal binary** can **support multiple architectures in the same file**.
 
 ```bash
 file /bin/ls
@@ -138,14 +138,14 @@ struct load_command {
 ```
 
 A **common** type of load command is **LC\_SEGMENT/LC\_SEGMENT\_64**, which **describes** a **segment:** \
-_A segment defines a **range of bytes** in a Mach-O file and the **addresses** and **memory**  **protection**  **attributes** at which those bytes are **mapped into** virtual memory when the dynamic linker loads the application._
+_A segment defines a **range of bytes **in a Mach-O file and the **addresses** and **memory** **protection** **attributes** at which those bytes are **mapped into **virtual memory when the dynamic linker loads the application._
 
 ![](<../../.gitbook/assets/image (557).png>)
 
 Common segments:
 
-* **`__TEXT`**: Contains **executable** **code** and **data** that is **read-only.** Common sections of this segment:
-  * `__text`: **** Compiled binary code
+* **`__TEXT`**: Contains **executable** **code** and **data** that is **read-only. **Common sections of this segment:
+  * `__text`:** **Compiled binary code
   * `__const`: Constant data
   * `__cstring`: String constants
 * **`__DATA`**: Contains data that is **writable.**
@@ -154,8 +154,8 @@ Common segments:
   * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Information used by the Objective-C runtime&#x20;
 * **`__LINKEDIT`**: Contains information for the linker (dyld) such as, "symbol, string, and relocation table entries."
 * **`__OBJC`**: Contains information used by the Objective-C runtime. Though this information might also be found in the \_\_DATA segment, within various in \_\_objc\_\* sections.
-* **`LC_MAIN`**: Contains the entrypoint in the **entryoff attribute.** At load time, **dyld** simply **adds** this value to the (in-memory) **base of the binary**, then **jumps** to this instruction to kickoff execution of the binary’s code.
-*   **`LC_LOAD_DYLIB`**: **** This load command describes a **dynamic** **library** dependency which **instructs** the **loader** (dyld) to l**oad and link said library**. There is a LC\_LOAD\_DYLIB load command **for each library** that the Mach-O binary requires.
+* **`LC_MAIN`**: Contains the entrypoint in the **entryoff attribute. **At load time, **dyld** simply **adds** this value to the (in-memory) **base of the binary**, then **jumps** to this instruction to kickoff execution of the binary’s code.
+*   **`LC_LOAD_DYLIB`**:** **This load command describes a **dynamic** **library** dependency which **instructs** the **loader** (dyld) to l**oad and link said library**. There is a LC\_LOAD\_DYLIB load command **for each library **that the Mach-O binary requires.
 
     * This load command is a structure of type **`dylib_command`** (which contains a struct dylib, describing the actual dependent dynamic library):
 
@@ -261,12 +261,12 @@ Note that this names can be obfuscated to make the reversing of the binary more 
 
 There are some projects that allow to generate a binary executable by MacOS containing script code which will be executed. Some examples are:
 
-* **Platypus**: Generate MacOS binary executing **** shell scripts, Python, Perl, Ruby, PHP, Swift, Expect, Tcl, AWK, JavaScript, AppleScript or any other user-specified interpreter.
+* **Platypus**: Generate MacOS binary executing** **shell scripts, Python, Perl, Ruby, PHP, Swift, Expect, Tcl, AWK, JavaScript, AppleScript or any other user-specified interpreter.
   * **It saves the script in `Contents/Resources/script`. So finding this script is a good indicator that Platypus was used.**
-* **PyInstaller:** Python
-  * Ways to detect this is the use of the embedded **** string **“Py\_SetPythonHome”** or a a **call** into a function named **`pyi_main`.**
-* **Electron:** JavaScript, HTML, and CSS.
-  * These binaries will use **Electron Framework.framework**. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in `.asar` files. These binaries will use Electron Framework.framework. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in **`.asar` files**. It's possible **unpack** such archives via the **asar** node module, or the **npx** **utility:** `npx asar extract StrongBox.app/Contents/Resources/app.asar appUnpacked`\
+* **PyInstaller: **Python
+  * Ways to detect this is the use of the embedded** **string** “Py\_SetPythonHome” **or a a **call** into a function named **`pyi_main`.**
+* **Electron: **JavaScript, HTML, and CSS.
+  * These binaries will use **Electron Framework.framework**. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in `.asar` files. These binaries will use Electron Framework.framework. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in **`.asar` files**. It's possible **unpack** such archives via the **asar** node module, or the **npx** **utility: **`npx asar extract StrongBox.app/Contents/Resources/app.asar appUnpacked`\
 
 
 ## References

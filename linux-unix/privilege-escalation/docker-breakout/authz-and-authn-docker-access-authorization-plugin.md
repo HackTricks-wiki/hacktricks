@@ -1,6 +1,6 @@
 # AuthZ& AuthN - Docker Access Authorization Plugin
 
-**Docker’s** out-of-the-box **authorization** model is **all or nothing**. Any user with permission to access the Docker daemon can **run any** Docker client **command**. The same is true for callers using Docker’s Engine API to contact the daemon. If you require **greater access control**, you can create **authorization plugins** and add them to your Docker daemon configuration. Using an authorization plugin, a Docker administrator can **configure granular access** policies for managing access to the Docker daemon.
+**Docker’s** out-of-the-box **authorization** model is **all or nothing**. Any user with permission to access the Docker daemon can **run any** Docker client **command**. The same is true for callers using Docker’s Engine API to contact the daemon. If you require **greater access control**, you can create **authorization plugins** and add them to your Docker daemon configuration. Using an authorization plugin, a Docker administrator can **configure granular access **policies for managing access to the Docker daemon.
 
 ## Basic architecture
 
@@ -10,11 +10,11 @@ When an **HTTP** **request** is made to the Docker **daemon** through the CLI or
 
 The sequence diagrams below depict an allow and deny authorization flow:
 
-![Authorization Allow flow](https://docs.docker.com/engine/extend/images/authz\_allow.png)
+![Authorization Allow flow](https://docs.docker.com/engine/extend/images/authz_allow.png)
 
-![Authorization Deny flow](https://docs.docker.com/engine/extend/images/authz\_deny.png)
+![Authorization Deny flow](https://docs.docker.com/engine/extend/images/authz_deny.png)
 
-Each request sent to the plugin **includes the authenticated user, the HTTP headers, and the request/response body**. Only the **user name** and the **authentication method** used are passed to the plugin. Most importantly, **no** user **credentials** or tokens are passed. Finally, **not all request/response bodies are sent** to the authorization plugin. Only those request/response bodies where the `Content-Type` is either `text/*` or `application/json` are sent.
+Each request sent to the plugin **includes the authenticated user, the HTTP headers, and the request/response body**. Only the **user name** and the **authentication method **used are passed to the plugin. Most importantly, **no** user **credentials** or tokens are passed. Finally, **not all request/response bodies are sent** to the authorization plugin. Only those request/response bodies where the `Content-Type` is either `text/*` or `application/json` are sent.
 
 For commands that can potentially hijack the HTTP connection (`HTTP Upgrade`), such as `exec`, the authorization plugin is only called for the initial HTTP requests. Once the plugin approves the command, authorization is not applied to the rest of the flow. Specifically, the streaming data is not passed to the authorization plugins. For commands that return chunked HTTP response, such as `logs` and `events`, only the HTTP request is sent to the authorization plugins.
 
@@ -32,11 +32,11 @@ The plugin [**authz**](https://github.com/twistlock/authz) allows you to create 
 
 This is an example that will allow Alice and Bob can create new containers: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
 
-In the page [route\_parser.go](https://github.com/twistlock/authz/blob/master/core/route\_parser.go) you can find the relation between the requested URL and the action. In the page [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) you can find the relation between the action name and the action
+In the page [route_parser.go](https://github.com/twistlock/authz/blob/master/core/route_parser.go) you can find the relation between the requested URL and the action. In the page [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) you can find the relation between the action name and the action
 
 ### Simple Plugin Tutorial
 
-You can find an **easy to understand plugin** with detailed information about installation and debugging here: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)****
+You can find an** easy to understand plugin** with detailed information about installation and debugging here: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)****
 
 Read the `README` and the `plugin.go` code to understand how is it working.
 
@@ -46,7 +46,7 @@ Read the `README` and the `plugin.go` code to understand how is it working.
 
 The main things to check are the **which endpoints are allowed** and **which values of HostConfig are allowed**.
 
-To perform this enumeration you can **use the tool** [**https://github.com/carlospolop/docker\_auth\_profiler**](https://github.com/carlospolop/docker\_auth\_profiler)**.**
+To perform this enumeration you can **use the tool **[**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
 
 ### disallowed `run --privileged`
 
@@ -127,7 +127,7 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 ```
 
 {% hint style="warning" %}
-Note how in this example we are using the **`Binds`** param as a root level key in the JSON but in the API it appears under the key **`HostConfig`**
+Note how in this example we are using the **`Binds `**param as a root level key in the JSON but in the API it appears under the key **`HostConfig`**
 {% endhint %}
 
 #### Binds in HostConfig
@@ -156,7 +156,7 @@ curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '
 
 ### Unchecked JSON Attribute
 
-It's possible that when the sysadmin configured the docker firewall he **forgot about some important attribute of a parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Capabilities**" inside "**HostConfig**". In the following example it's possible to abuse this misconfiguration to create and run a container with the **SYS\_MODULE** capability:
+It's possible that when the sysadmin configured the docker firewall he **forgot about some important attribute of a parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Capabilities**" inside "**HostConfig**". In the following example it's possible to abuse this misconfiguration to create and run a container with the **SYS_MODULE** capability:
 
 ```bash
 docker version
@@ -196,4 +196,4 @@ Remember to **re-enable the plugin after escalating**, or a **restart of docker 
 
 ## References
 
-* [https://docs.docker.com/engine/extend/plugins\_authorization/](https://docs.docker.com/engine/extend/plugins\_authorization/)
+* [https://docs.docker.com/engine/extend/plugins_authorization/](https://docs.docker.com/engine/extend/plugins_authorization/)

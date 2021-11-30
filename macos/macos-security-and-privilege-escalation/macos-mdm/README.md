@@ -4,7 +4,7 @@
 
 ### What is MDM (Mobile Device Management)?
 
-[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile\_device\_management) (MDM) is a technology commonly used to **administer end-user computing devices** such as mobile phones, laptops, desktops and tablets. In the case of Apple platforms like iOS, macOS and tvOS, it refers to a specific set of features, APIs and techniques used by administrators to manage these devices. Management of devices via MDM requires a compatible commercial or open-source MDM server that implements support for the [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf).
+[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) is a technology commonly used to **administer end-user computing devices** such as mobile phones, laptops, desktops and tablets. In the case of Apple platforms like iOS, macOS and tvOS, it refers to a specific set of features, APIs and techniques used by administrators to manage these devices. Management of devices via MDM requires a compatible commercial or open-source MDM server that implements support for the [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf).
 
 * A way to achieve **centralized device management**
 * Requires an **MDM server** which implements support for the MDM protocol
@@ -12,7 +12,7 @@
 
 ### Basics What is DEP (Device Enrolment Program)?
 
-The [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP\_Guide.pdf) (DEP) is a service offered by Apple that **simplifies** Mobile Device Management (MDM) **enrollment** by offering **zero-touch configuration** of iOS, macOS, and tvOS devices. Unlike more traditional deployment methods, which require the end-user or administrator to take action to configure a device, or manually enroll with an MDM server, DEP aims to bootstrap this process, **allowing the user to unbox a new Apple device and have it configured for use in the organization almost immediately**.
+The [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) is a service offered by Apple that **simplifies** Mobile Device Management (MDM) **enrollment** by offering **zero-touch configuration** of iOS, macOS, and tvOS devices. Unlike more traditional deployment methods, which require the end-user or administrator to take action to configure a device, or manually enroll with an MDM server, DEP aims to bootstrap this process, **allowing the user to unbox a new Apple device and have it configured for use in the organization almost immediately**.
 
 Administrators can leverage DEP to automatically enroll devices in their organization’s MDM server. Once a device is enrolled, **in many cases it is treated as a “trusted”** device owned by the organization, and could receive any number of certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).
 
@@ -21,7 +21,7 @@ Administrators can leverage DEP to automatically enroll devices in their organiz
 * Can also be useful for **reprovisioning** workflows (**wiped** with fresh install of the OS)
 
 {% hint style="danger" %}
-Unfortunately, if an organization has not taken additional steps to **protect their MDM enrollment**, a simplified end-user enrollment process through DEP can also mean a simplified process for **attackers to enroll a device of their choosing in the organization’s MDM** server, assuming the "identity" of a corporate device.
+Unfortunately, if an organization has not taken additional steps to** protect their MDM enrollment**, a simplified end-user enrollment process through DEP can also mean a simplified process for** attackers to enroll a device of their choosing in the organization’s MDM** server, assuming the "identity" of a corporate device.
 {% endhint %}
 
 ### Basics What is SCEP (Simple Certificate Enrolment Protocol)?
@@ -106,7 +106,7 @@ It follows a few steps to get the Activation Record performed by **`MCTeslaConfi
 5. Make the request
    1. POST to [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) sending the data `{ "action": "RequestProfileConfiguration", "sn": "" }`
    2. The JSON payload is encrypted using Absinthe (**`NACSign`**)
-   3. All requests over HTTPs, built-in root certificates are used&#x20;
+   3. All requests over HTTPs, built-in root certificates are used 
 
 ![](<../../../.gitbook/assets/image (566) (1).png>)
 
@@ -121,7 +121,7 @@ The response is a JSON dictionary with some important data like:
 
 * Request sent to **url provided in DEP profile**.
 * **Anchor certificates** are used to **evaluate trust** if provided.
-  * Reminder: the **anchor\_certs** property of the DEP profile
+  * Reminder: the **anchor_certs** property of the DEP profile
 * **Request is a simple .plist** with device identification
   * Examples: **UDID, OS version**.
 * CMS-signed, DER-encoded

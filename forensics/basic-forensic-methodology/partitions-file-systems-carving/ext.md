@@ -2,7 +2,7 @@
 
 ## Ext - Extended Filesystem
 
-**Ext2** is the most common filesystem for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
+**Ext2 **is the most common filesystem for **not journaling **partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling **and are used usually for the **rest partitions**.
 
 All block groups in the filesystem have the same size and are stored sequentially. This allows the kernel to easily derive the location of a block group in a disk from its integer index.
 
@@ -19,7 +19,7 @@ Every block group contains the following pieces of information:
 
 ### Ext Optional Features
 
-**Features affect where** the data is located, **how** the data is stored in inodes and some of them might supply **additional metadata** for analysis, therefore features are important in Ext.
+**Features affect where **the data is located, **how **the data is stored in inodes and some of them might supply **additional metadata **for analysis, therefore features are important in Ext.
 
 Ext has optional features that your OS may or may not support, there are 3 possibilities:
 
@@ -27,13 +27,13 @@ Ext has optional features that your OS may or may not support, there are 3 possi
 * Incompatible
 * Compatible Read Only: It can be mounted but not for writing
 
-If there are **incompatible** features you won't be able to mount the filesystem as the OS won't know how the access the data.
+If there are **incompatible **features you won't be able to mount the filesystem as the OS won't know how the access the data.
 
 {% hint style="info" %}
 Suspected attacker might have non-standard extensions
 {% endhint %}
 
-**Any utility** that reads the **superblock** will be able to indicate the **features** of a **Ext filesystem**, but you could also use `file -sL /dev/sd*`
+**Any utility **that reads the **superblock **will be able to indicate the **features **of a **Ext filesystem**, but you could also use `file -sL /dev/sd*`
 
 ### Superblock
 
@@ -59,16 +59,16 @@ fsstat -o <offsetstart> /pat/to/filesystem-file.ext
 ```
 
 You can also use the free gui application: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
-Or you can also use **python** to obtain the superblock information: [https://pypi.org/project/superblock/](https://pypi.org/project/superblock/)
+Or you can also use **python **to obtain the superblock information: [https://pypi.org/project/superblock/](https://pypi.org/project/superblock/)
 
 ### inodes
 
-The **inodes** contain the list of **blocks** that **contains** the actual **data** of a **file**.\
-If the file is big, and inode **may contain pointers** to **other inodes** that points to the blocks/more inodes containing the file data.
+The **inodes **contain the list of **blocks **that **contains **the actual **data **of a **file**.\
+If the file is big, and inode **may contain pointers **to **other inodes **that points to the blocks/more inodes containing the file data.
 
 ![](<../../../.gitbook/assets/image (416).png>)
 
-In **Ext2** and **Ext3** inodes are of size **128B**, **Ext4** currently uses **156B** but allocates **256B** on disk to allow a future expansion.
+In **Ext2 **and **Ext3 **inodes are of size **128B**, **Ext4 **currently uses **156B **but allocates **256B **on disk to allow a future expansion.
 
 Inode structure:
 
@@ -140,7 +140,7 @@ Knowing the inode number you can easily find it's index:
 
 * **Block group** where an inode belongs: (Inode number - 1) / (Inodes per group)
 * **Index inside it's group**: (Inode number - 1) mod(Inodes/groups)
-* **Offset** into **inode table**: Inode number \* (Inode size)
+* **Offset **into **inode table**: Inode number \* (Inode size)
 * The "-1" is because the inode 0 is undefined (not used)
 
 ```bash
@@ -190,7 +190,7 @@ Directories
 Can be stored in
 
 * Extra space between inodes (256 - inode size, usually = 100)
-* A data block pointed to by file\_acl in inode
+* A data block pointed to by file_acl in inode
 
 Can be used to store anything as a users attribute if name starts with "user".
 
@@ -216,7 +216,7 @@ getdattr -n 'user.secret' file.txt #Get extended attribute called "user.secret"
 
 ### Filesystem View
 
-In order to see the contents of the file system you can **use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
+In order to see the contents of the file system you can** use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
 Or you can mount it in your linux using `mount` command.
 
-[https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.](https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.)
+[https://piazza.com/class_profile/get_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.](https://piazza.com/class_profile/get_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.)

@@ -46,7 +46,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 
 {% hint style="danger" %}
 If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
-Run **`lxc init`** and **repeat** the previous chunk of commands
+Run **`lxc init`** and **repeat **the previous chunk of commands
 {% endhint %}
 
 Execute the container:
@@ -85,7 +85,7 @@ lxc start mycontainer
 lxc exec mycontainer /bin/sh
 ```
 
-Alternatively [https://github.com/initstring/lxd\_root](https://github.com/initstring/lxd\_root)
+Alternatively [https://github.com/initstring/lxd_root](https://github.com/initstring/lxd_root)
 
 ## With internet
 

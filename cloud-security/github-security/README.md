@@ -2,10 +2,16 @@
 
 ## What is Github
 
-(From [here](https://kinsta.com/knowledgebase/what-is-github/))At a high level, GitHub is a website and cloud-based service that helps developers store and manage their code, as well as track and control changes to their code. To understand exactly what GitHub is, you need to know two connected principles:
+(From [here](https://kinsta.com/knowledgebase/what-is-github/)) At a high level, GitHub is a website and cloud-based service that helps developers store and manage their code, as well as track and control changes to their code. To understand exactly what GitHub is, you need to know two connected principles:
 
 * Version control
 * Git
+
+### Basic Information
+
+{% content-ref url="basic-github-information.md" %}
+[basic-github-information.md](basic-github-information.md)
+{% endcontent-ref %}
 
 ## External Recon
 
@@ -39,10 +45,4 @@ Tools (each tool contains its list of regexes):
 * [https://github.com/michenriksen/gitrob](https://github.com/michenriksen/gitrob)
 * [https://github.com/anshumanbh/git-all-secrets](https://github.com/anshumanbh/git-all-secrets)
 * [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
-* [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
-
-## Basic Information
-
-###
-
-\
+* [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)\

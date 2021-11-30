@@ -6,7 +6,7 @@ This machine was categorised as easy and it was pretty easy.
 
 ## Enumeration
 
-I started **enumerating the machine using my tool** [**Legion**](https://github.com/carlospolop/legion):
+I started **enumerating the machine using my tool **[**Legion**](https://github.com/carlospolop/legion):
 
 ![](<../../.gitbook/assets/image (79) (2).png>)
 
@@ -18,13 +18,13 @@ So, I launched legion to enumerate the HTTP service:
 
 Note that in the image you can see that `robots.txt` contains the string `Wubbalubbadubdub`
 
-After some seconds I reviewed what `disearch` has already discovered :
+After some seconds I reviewed what `disearch `has already discovered :
 
 ![](<../../.gitbook/assets/image (235).png>)
 
 ![](<../../.gitbook/assets/image (236).png>)
 
-And as you may see in the last image a **login** page was discovered.
+And as you may see in the last image a **login **page was discovered.
 
 Checking the source code of the root page, a username is discovered: `R1ckRul3s`
 

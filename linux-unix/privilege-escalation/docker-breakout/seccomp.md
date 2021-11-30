@@ -2,7 +2,7 @@
 
 ## Basic Information
 
-**Seccomp** or Secure Computing mode, in summary, is a feature of Linux kernel which can act as **syscall filter**.\
+**Seccomp **or Secure Computing mode, in summary, is a feature of Linux kernel which can act as **syscall filter**.\
 Seccomp has 2 modes.
 
 **seccomp** (short for **secure computing mode**) is a computer security facility in the **Linux** **kernel**. seccomp allows a process to make a one-way transition into a "secure" state where **it cannot make any system calls except** `exit()`, `sigreturn()`, `read()` and `write()` to **already-open** file descriptors. Should it attempt any other system calls, the **kernel** will **terminate** the **process** with SIGKILL or SIGSYS. In this sense, it does not virtualize the system's resources but isolates the process from them entirely.
@@ -13,7 +13,7 @@ seccomp mode is **enabled via the `prctl(2)` system call** using the `PR_SET_SEC
 
 ### **Original/Strict Mode**
 
-In this mode **** Seccomp **only allow the syscalls**  `exit()`, `sigreturn()`, `read()` and `write()` to already-open file descriptors. If any other syscall is made, the process is killed using SIGKILL
+In this mode** **Seccomp **only allow the syscalls**  `exit()`, `sigreturn()`, `read()` and `write()` to already-open file descriptors. If any other syscall is made, the process is killed using SIGKILL
 
 {% code title="seccomp_strict.c" %}
 ```c
@@ -105,7 +105,7 @@ void main(void) {
 
 ## Seccomp in Docker
 
-**Seccomp-bpf** is supported by **Docker** to restrict the **syscalls** from the containers effectively decreasing the surface area. You can find the **syscalls blocked** by **default** in [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) and the **default seccomp profile** can be found here [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json).\
+**Seccomp-bpf** is supported by **Docker **to restrict the **syscalls **from the containers effectively decreasing the surface area. You can find the **syscalls blocked **by **default **in [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) and the **default seccomp profile **can be found here [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json).\
 You can run a docker container with a **different seccomp** policy with:
 
 ```bash
@@ -115,9 +115,9 @@ docker run --rm \
              hello-world
 ```
 
-If you want for example to **forbid** a container of executing some **syscall** like `uname` you could download the default profile from [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) and just **remove the `uname` string from the list**.\
+If you want for example to **forbid **a container of executing some **syscall **like` uname` you could download the default profile from [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) and just **remove the `uname` string from the list**.\
 If you want to make sure that **some binary doesn't work inside a a docker container** you could use strace to list the syscalls the binary is using and then forbid them.\
-In the following example the **syscalls** of `uname` are discovered:
+In the following example the **syscalls **of `uname` are discovered:
 
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname

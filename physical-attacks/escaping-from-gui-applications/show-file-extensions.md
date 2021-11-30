@@ -41,4 +41,4 @@ That's it. You should now be able to see the true extensions of the files in you
 
 Copyright © 2008-2018 by Christopher Heng. All rights reserved. Get more "How To" guides and tutorials from [https://www.howtohaven.com/](https://www.howtohaven.com).
 
-**This article can be found at** [**https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml**](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)****
+**This article can be found at **[**https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml**](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)****

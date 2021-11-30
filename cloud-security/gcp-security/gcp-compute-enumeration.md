@@ -84,13 +84,13 @@ If you compromises a compute instance you should also check the actions mentione
 
 ### Custom Images
 
-**Custom compute images may contain sensitive details** or other vulnerable configurations that you can exploit. You can query the list of non-standard images in a project with the following command:
+**Custom compute images may contain sensitive details **or other vulnerable configurations that you can exploit. You can query the list of non-standard images in a project with the following command:
 
 ```
 gcloud compute images list --no-standard-images
 ```
 
-You can then **** [**export**](https://cloud.google.com/sdk/gcloud/reference/compute/images/export) **the virtual disks** from any image in multiple formats. The following command would export the image `test-image` in qcow2 format, allowing you to download the file and build a VM locally for further investigation:
+You can then** **[**export**](https://cloud.google.com/sdk/gcloud/reference/compute/images/export)** the virtual disks **from any image in multiple formats. The following command would export the image `test-image` in qcow2 format, allowing you to download the file and build a VM locally for further investigation:
 
 ```bash
 gcloud compute images export --image test-image \

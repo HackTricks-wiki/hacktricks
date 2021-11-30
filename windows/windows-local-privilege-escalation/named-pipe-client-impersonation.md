@@ -1,6 +1,6 @@
 # Named Pipe Client Impersonation
 
-**This information was copied from** [**https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation**](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)****
+**This information was copied from **[**https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation**](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)****
 
 ## Overview
 
@@ -114,12 +114,12 @@ We can even see our pipe with powershell:
 ## Token Impersonation
 
 {% hint style="info" %}
-Note that in order to impersonate the token of the client process you need to have (the server process creating the pipe) the **`SeImpersonate`** token privilege
+Note that in order to impersonate the token of the client process you need to have (the server process creating the pipe) the**` SeImpersonate`** token privilege
 {% endhint %}
 
 It is possible for the named pipe server to impersonate the named pipe client's security context by leveraging a `ImpersonateNamedPipeClient` API call which in turn changes the named pipe server's current thread's token with that of the named pipe client's token.
 
-We can update the the named pipe server's code like this to achieve the impersonation - note that modifications are seen in line 25 and below:&#x20;
+We can update the the named pipe server's code like this to achieve the impersonation - note that modifications are seen in line 25 and below: 
 
 ```cpp
 int main() {

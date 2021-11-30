@@ -10,7 +10,7 @@ If at some point inside a web page any sensitive information is located on a GET
 
 ### Mitigation
 
-You can make the browser follow a **Referrer-policy** that could **avoid** the sensitive information to be sent to other web applications:
+You can make the browser follow a **Referrer-policy** that could **avoid **the sensitive information to be sent to other web applications:
 
 ```
 Referrer-Policy: no-referrer

@@ -2,7 +2,7 @@
 
 ## Access Tokens
 
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+Each **user logged **onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
 
 You can see this information executing `whoami /all`
 
@@ -50,24 +50,24 @@ SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
 
-&#x20;or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+ or using_ Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
 ![](<../../.gitbook/assets/image (321).png>)
 
 ### Local administrator
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
+When a local administrator logins,** two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute **anything **as administrator **("Run as Administrator" for example) the **UAC **will be used to ask for permission.\
 If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs.md#uac)**.**
 
 ### Credentials user impersonation
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
+If you have** valid credentials of any other user**, you can **create **a **new logon session **with those credentials :
 
 ```
 runas /user:domain\username cmd.exe
 ```
 
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
+The **access token** has also a **reference **of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
 You can launch a process that **uses different credentials for accessing network services** using:
 
 ```
@@ -81,18 +81,18 @@ This is useful if you have useful credentials to access objects in the network b
 There are two types of tokens available:
 
 * **Primary token**: Primary tokens can only be **associated to processes**, and they represent a process's security subject. The creation of primary tokens and their association to processes are both privileged operations, requiring two different privileges in the name of privilege separation - the typical scenario sees the authentication service creating the token, and a logon service associating it to the user's operating system shell. Processes initially inherit a copy of the parent process's primary token.
-*   **Impersonation token**: Impersonation is a security concept implemented in Windows NT that **allows** a server application to **temporarily** "**be**" **the client** in terms of access to secure objects. Impersonation has **four possible levels**:&#x20;
+*   **Impersonation token**: Impersonation is a security concept implemented in Windows NT that **allows **a server application to **temporarily **"**be**" **the client **in terms of access to secure objects. Impersonation has **four possible levels**: 
 
     * **anonymous**, giving the server the access of an anonymous/unidentified user
     * **identification**, letting the server inspect the client's identity but not use that identity to access objects
     * **impersonation**, letting the server act on behalf of the client
-    * **delegation**, same as impersonation but extended to remote systems to which the server connects (through the preservation of credentials).&#x20;
+    * **delegation**, same as impersonation but extended to remote systems to which the server connects (through the preservation of credentials). 
 
     The client can choose the maximum impersonation level (if any) available to the server as a connection parameter. Delegation and impersonation are privileged operations (impersonation initially was not, but historical carelessness in the implementation of client APIs failing to restrict the default level to "identification", letting an unprivileged server impersonate an unwilling privileged client, called for it). **Impersonation tokens can only be associated to threads**, and they represent a client process's security subject. Impersonation tokens are usually created and associated to the current thread implicitly, by IPC mechanisms such as DCE RPC, DDE and named pipes.
 
 #### Impersonate Tokens
 
-Using the _**incognito**_** module** of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+Using the _**incognito **_**module **of metasploit if you have enough privileges you can easily **list **and **impersonate **other **tokens**. This could be useful to perform** actions as if you where the other user**. You could also **escalate privileges **with this technique.
 
 ### Token Privileges
 

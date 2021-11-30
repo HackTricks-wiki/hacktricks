@@ -2,7 +2,7 @@
 
 ## Basic information
 
-If you want to learn more about **runc** check the following page:
+If you want to learn more about **runc **check the following page:
 
 {% content-ref url="../../pentesting/2375-pentesting-docker.md" %}
 [2375-pentesting-docker.md](../../pentesting/2375-pentesting-docker.md)

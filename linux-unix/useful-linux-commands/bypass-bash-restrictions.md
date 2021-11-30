@@ -128,7 +128,7 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 
 ## DNS data exfiltration
 
-You could use **burpcollab** or [**pingb**](http://pingb.in) **** for example.
+You could use **burpcollab** or [**pingb**](http://pingb.in)** **for example.
 
 ## Polyglot command injection
 
