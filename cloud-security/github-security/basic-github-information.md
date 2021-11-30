@@ -98,6 +98,7 @@ Oauth applications may ask you for permissions **to access part of your github i
 * You can **create** your own **Oauth applications** in [https://github.com/settings/developers](https://github.com/settings/developers)
 * You can see all the **Oauth applications that has access to your account**  in [https://github.com/settings/applications](https://github.com/settings/applications)
 * You can see the **scopes that Oauth Apps can ask for** in [https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps](https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps)
+* You can see third party access of applications in an **organization** in _https://github.com/organizations/\<org\_name>/settings/oauth\_application\_policy_
 
 Some **security recommendations**:
 
@@ -115,6 +116,7 @@ Github applications can ask for permissions to **access your github information 
 * The GitHub App should **connect to a personal account or an organisation**.
 * You can create your own Github application in [https://github.com/settings/apps](https://github.com/settings/apps)
 * You can see all the **Github applications that has access to your account**  in [https://github.com/settings/apps/authorizations](https://github.com/settings/apps/authorizations)
+* You can see installed apps in an **organization** in _https://github.com/organizations/\<org\_name>/settings/installations_
 
 Some security recommendations:
 
@@ -126,7 +128,78 @@ Some security recommendations:
 * Don't build a GitHub App if you _only_ want to act as a GitHub user and do everything that user can do.
 * If you are using your app with GitHub Actions and want to modify workflow files, you must authenticate on behalf of the user with an OAuth token that includes the `workflow` scope. The user must have admin or write permission to the repository that contains the workflow file. For more information, see "[Understanding scopes for OAuth apps](https://docs.github.com/en/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/#available-scopes)."
 * **More** in [here](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps#about-github-apps).
-*
+
+## Git Actions
+
+Git actions allows to automate the **execution of code when an event happen**. Usually the code executed is **somehow related to the code of the repository** (maybe build a docker container or check that the PR doesn't contain secrets).
+
+### Configuration
+
+In _https://github.com/organizations/\<org\_name>/settings/actions_ it's possible to check the **configuration of the github actions** for the organization.
+
+It's possible to disallow the use of github actions completely, **allow all github actions**, or just allow certain actions.
+
+It's also possible to configure **who needs approval to run a Github Action** and the **permissions of the  **_**GITHUB\_TOKEN**_** of a Github Action when it's run**.
+
+### Git Secrets
+
+Github Action usually need some kind of secrets to interact with github or third party applications. To **avoid putting them in clear-text** in the repo, github allow to put them as **Secrets**.
+
+These secrets can be configured **for the repo or for all the organization**. Then, in order for the **Action to be able to access the secret** you need to declare it like:
+
+```yaml
+steps:
+  - name: Hello world action
+    with: # Set the secret as an input
+      super_secret: ${{ secrets.SuperSecret }}
+    env: # Or as an environment variable
+      super_secret: ${{ secrets.SuperSecret }}
+```
+
+#### Example using Bash <a href="#example-using-bash" id="example-using-bash"></a>
+
+```yaml
+steps:
+  - shell: bash
+    env:
+      SUPER_SECRET: ${{ secrets.SuperSecret }}
+    run: |
+      example-command "$SUPER_SECRET"
+```
+
+{% hint style="warning" %}
+Secrets **can only be accessed from the Github Actions** that have them declared.
+
+Once configured in the repo or the organizations **users of github won't be able to access them again**, they just will be able to **change them**.
+{% endhint %}
+
+Therefore, the **only way to steal github secrets is to be able to access the machine that is executing the Github Action** (in that scenario you will be able to access only the secrets declared for the Action).
+
+### Git Action Box
+
+A Github Action can be **executed inside the github environment** or can be executed in a **third party infrastructure** configured by the user.
+
+Several organizations will allow to run Github Actions in a **third party infrastructure** as it use to be **cheaper**.
+
+You can **list the self-hosted runners** of an organization in _https://github.com/organizations/\<org\_name>/settings/actions/runners_
+
+The way to find which **Github Actions are being executed in non-github infrastructure** is to search for `runs-on: self-hosted` in the Github Action configuration yaml.
+
+It's **not possible to run a Github Action of an organization inside a self hosted box** of a different organization because **a unique token is generated for the Runner** when configuring it to know where the runner belongs.
+
+If the custom **Github Runner is configured in a machine inside AWS or GCP** for example, the Action **could have access to the metadata endpoint** and **steal the token of the service account** the machine is running with.
+
+### Git Action Compromise
+
+If all actions (or a malicious action) are allowed a user could use a **Github action** that is **malicious** and will **compromise** the **container** where it's being executed.
+
+{% hint style="danger" %}
+A **malicious Github Action** run could be **abused** by the attacker to:
+
+* **Steal all the secrets** the Action has access to
+* **Move laterally** if the Action is executed inside a **third party infrastructure** where the SA token used to run the machine can be accessed (probably via the metadata service)
+* **Abuse the token** used by the **workflow** to **steal the code of the repo** where the Action is executed or **even modify it**.
+{% endhint %}
 
 ## References
 
@@ -134,4 +207,5 @@ Some security recommendations:
 * [https://docs.github.com/en/enterprise-server@3.3/admin/user-management/managing-users-in-your-enterprise/roles-in-an-enterprise](https://docs.github.com/en/enterprise-server@3.3/admin/user-management/managing-users-in-your-enterprise/roles-in-an-enterprise)[https://docs.github.com/en/enterprise-server](https://docs.github.com/en/enterprise-server@3.3/admin/user-management/managing-users-in-your-enterprise/roles-in-an-enterprise)
 * [https://docs.github.com/en/get-started/learning-about-github/access-permissions-on-github](https://docs.github.com/en/get-started/learning-about-github/access-permissions-on-github)
 * [https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-user-account/managing-user-account-settings/permission-levels-for-user-owned-project-boards](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-user-account/managing-user-account-settings/permission-levels-for-user-owned-project-boards)
+* [https://docs.github.com/en/actions/security-guides/encrypted-secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
 
