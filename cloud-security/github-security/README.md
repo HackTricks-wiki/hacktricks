@@ -48,6 +48,14 @@ Tools (each tool contains its list of regexes):
 
 ### With User Credentials
 
+If you somehow already have credentials for a user inside an organization you can **just login** and check which **enterprise and organization roles you have**, if you are a raw member, check which **permissions raw members have**, in which **groups** you are, which **permissions you have** over which **repos,** and **how are the repos protected.**
+
+Note that **2FA may be used** so you will only be able to access this information if you can also **pass that check**.
+
+{% hint style="info" %}
+Note that if you **manage to steal the `user_session` cookie** (currently configured with SameSite: Lax) you can **completely impersonate the user** without needing credentials or 2FA.
+{% endhint %}
+
 ### With User SSH Key
 
 #### GPG Keys
