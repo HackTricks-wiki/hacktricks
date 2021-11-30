@@ -493,6 +493,8 @@
   * [Basic Captcha Breaker](a.i.-exploiting/bra.i.nsmasher-presentation/basic-captcha-breaker.md)
   * [BIM Bruteforcer](a.i.-exploiting/bra.i.nsmasher-presentation/bim-bruteforcer.md)
   * [Hybrid Malware Classifier Part 1](a.i.-exploiting/bra.i.nsmasher-presentation/hybrid-malware-classifier-part-1.md)
+  * [ML Basics](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/README.md)
+    * [Feature Engineering](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/feature-engineering.md)
 
 ## Blockchain
 
