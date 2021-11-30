@@ -6,9 +6,9 @@
 
 ## Chroot limitation
 
-From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations):  The chroot mechanism is** not intended to defend** against intentional tampering by **privileged **(**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.
+From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations):  The chroot mechanism is **not intended to defend** against intentional tampering by **privileged** (**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.
 
-Therefore, if you are **root **inside a chroot you **can escape **creating **another chroot**. However, in several cases inside the first chroot you won't be able to execute the chroot command, therefore you will need to compile a binary like the following one and run it:
+Therefore, if you are **root** inside a chroot you **can escape** creating **another chroot**. However, in several cases inside the first chroot you won't be able to execute the chroot command, therefore you will need to compile a binary like the following one and run it:
 
 {% code title="break_chroot.c" %}
 ```c
@@ -144,9 +144,9 @@ Tricks about escaping from python jails in the following page:
 
 ## Lua Jails
 
-In this page you can find the global functions you have access to inside lua: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
+In this page you can find the global functions you have access to inside lua: [https://www.gammon.com.au/scripts/doc.php?general=lua\_base](https://www.gammon.com.au/scripts/doc.php?general=lua\_base)
 
-**Eval **with command execution**:**
+**Eval** with command execution**:**
 
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()

@@ -3,7 +3,7 @@
 ### Code
 
 The following code was copied from [here](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). It allows to **indicate a Process ID as argument** and a CMD **running as the user** of the indicated process will be run.\
-Running in a High Integrity process you can** indicate the PID of a process running as System **(like winlogon, wininit) and execute a cmd.exe as system.
+Running in a High Integrity process you can **indicate the PID of a process running as System** (like winlogon, wininit) and execute a cmd.exe as system.
 
 ```cpp
 impersonateuser.exe 1234

@@ -4,7 +4,7 @@
 
 This attack aims to **use the user NTLM hash to request Kerberos tickets**, as an alternative to the common Pass The Hash over NTLM protocol. Therefore, this could be especially **useful in networks where NTLM protocol is disabled** and only **Kerberos is allowed** as authentication protocol.
 
-In order to perform this attack, the** NTLM hash (or password) of the target user account is needed**. Thus, once a user hash is obtained, a TGT can be requested for that account. Finally, it is possible to **access **any service or machine** where the user account has permissions**.
+In order to perform this attack, the **NTLM hash (or password) of the target user account is needed**. Thus, once a user hash is obtained, a TGT can be requested for that account. Finally, it is possible to **access** any service or machine **where the user account has permissions**.
 
 ```
 python getTGT.py jurassic.park/velociraptor -hashes :2a3de7fe356ee524cc9f3d579f2e0aa7
@@ -12,7 +12,7 @@ export KRB5CCNAME=/root/impacket-examples/velociraptor.ccache
 python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```
 
-You can **specify **`-aesKey [AES key]` to specify to use **AES256**. \
+You can **specify** `-aesKey [AES key]` to specify to use **AES256**. \
 You can also use the ticket with other tools like: as smbexec.py or wmiexec.py
 
 Possible problems:

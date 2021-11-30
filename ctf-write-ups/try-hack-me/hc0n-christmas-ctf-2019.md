@@ -4,7 +4,7 @@
 
 ## Enumeration
 
-I started **enumerating the machine using my tool **[**Legion**](https://github.com/carlospolop/legion):
+I started **enumerating the machine using my tool** [**Legion**](https://github.com/carlospolop/legion):
 
 ![](<../../.gitbook/assets/image (244).png>)
 
@@ -16,7 +16,7 @@ In the web page you can **register new users**, and I noticed that **the length 
 
 ![](<../../.gitbook/assets/image (246).png>)
 
-And if you change some **byte **of the **cookie **you get this error:
+And if you change some **byte** of the **cookie** you get this error:
 
 ![](<../../.gitbook/assets/image (247).png>)
 

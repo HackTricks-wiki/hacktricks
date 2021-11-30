@@ -99,7 +99,7 @@ ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 
 ### Resource Forks or MacOS ADS
 
-This is a way to obtain **Alternate Data Streams in MacOS **machines. You can save content inside an extended attribute called **com.apple.ResourceFork** inside a file by saving it in **file/..namedfork/rsrc**.
+This is a way to obtain **Alternate Data Streams in MacOS** machines. You can save content inside an extended attribute called **com.apple.ResourceFork** inside a file by saving it in **file/..namedfork/rsrc**.
 
 ```bash
 echo "Hello" > a.txt
@@ -186,18 +186,18 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 
 [**In this talk**](https://www.youtube.com/watch?v=T5xfL9tEg44) Jeremy Brown talks about this protections and a bug that allowed to bypass them.
 
-_**Gatekeeper**_ is designed to ensure that, by default, **only trusted software runs on a user’s Mac**. Gatekeeper is used when a user **downloads** and **opens** an app, a plug-in or an installer package from outside the App Store. Gatekeeper verifies that the software is **signed by** an** identified developer**, is **notarised** by Apple to be **free of known malicious content**, and **hasn’t been altered**. Gatekeeper also **requests user approval **before opening downloaded software for the first time to make sure the user hasn’t been tricked into running executable code they believed to simply be a data file.
+_**Gatekeeper**_ is designed to ensure that, by default, **only trusted software runs on a user’s Mac**. Gatekeeper is used when a user **downloads** and **opens** an app, a plug-in or an installer package from outside the App Store. Gatekeeper verifies that the software is **signed by** an **identified developer**, is **notarised** by Apple to be **free of known malicious content**, and **hasn’t been altered**. Gatekeeper also **requests user approval** before opening downloaded software for the first time to make sure the user hasn’t been tricked into running executable code they believed to simply be a data file.
 
 ### Notarizing
 
 In order for an **app to be notarised by Apple**, the developer needs to send the app for review. Notarization is **not App Review**. The Apple notary service is an **automated system** that **scans your software for malicious content**, checks for code-signing issues, and returns the results to you quickly. If there are no issues, the notary service generates a ticket for you to staple to your software; the notary service also **publishes that ticket online where Gatekeeper can find it**.
 
-When the user first installs or runs your software, the presence of a ticket (either online or attached to the executable) **tells Gatekeeper that Apple notarized the software**. **Gatekeeper then places descriptive information in the initial launch dialog **indicating that Apple has already checked for malicious content.
+When the user first installs or runs your software, the presence of a ticket (either online or attached to the executable) **tells Gatekeeper that Apple notarized the software**. **Gatekeeper then places descriptive information in the initial launch dialog** indicating that Apple has already checked for malicious content.
 
 ### File Quarantine
 
 Gatekeeper builds upon **File Quarantine.**\
-****Upon download of an application, a particular **extended file attribute** ("quarantine flag") can be **added** to the **downloaded** **file**. This attribute** is added by the application that downloads the file**, such as a **web** **browser** or email client, but is not usually added by others like common BitTorrent client software.\
+****Upon download of an application, a particular **extended file attribute** ("quarantine flag") can be **added** to the **downloaded** **file**. This attribute **is added by the application that downloads the file**, such as a **web** **browser** or email client, but is not usually added by others like common BitTorrent client software.\
 When a user executes a "quarantined" file, **Gatekeeper** is the one that **performs the mentioned actions** to allow the execution of the file.
 
 {% hint style="info" %}
@@ -257,7 +257,7 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 
 ### XProtect
 
-**X-Protect** is also part of Gatekeeper.** It's Apple’s built in malware scanner. **It keeps track of known malware hashes and patterns.\
+**X-Protect** is also part of Gatekeeper. **It's Apple’s built in malware scanner.** It keeps track of known malware hashes and patterns.\
 You can get information about the latest XProtect update running:
 
 ```bash
@@ -270,7 +270,7 @@ Should malware make its way onto a Mac, macOS also includes technology to remedi
 
 ### Automatic Security Updates
 
-Apple issues the **updates for XProtect and MRT automatically **based on the latest threat intelligence available. By default, macOS checks for these updates **daily**. Notarisation updates are distributed using CloudKit sync and are much more frequent.
+Apple issues the **updates for XProtect and MRT automatically** based on the latest threat intelligence available. By default, macOS checks for these updates **daily**. Notarisation updates are distributed using CloudKit sync and are much more frequent.
 
 ### TCC
 
@@ -377,7 +377,7 @@ System Integrity Protection status: enabled.
 ```
 
 If you want to **disable** **it**, you need to put the computer in recovery mode (start it pressing command+R) and execute: `csrutil disable` \
-You can also maintain it **enable but without debugging protections **doing:&#x20;
+You can also maintain it **enable but without debugging protections** doing:&#x20;
 
 ```bash
 csrutil enable --without debug
@@ -385,7 +385,7 @@ csrutil enable --without debug
 
 For more **information about SIP** read the following response: [https://apple.stackexchange.com/questions/193368/what-is-the-rootless-feature-in-el-capitan-really](https://apple.stackexchange.com/questions/193368/what-is-the-rootless-feature-in-el-capitan-really)
 
-This post about a** SIP bypass vulnerability** is also very interesting: [https://www.microsoft.com/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/](https://www.microsoft.com/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)
+This post about a **SIP bypass vulnerability** is also very interesting: [https://www.microsoft.com/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/](https://www.microsoft.com/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)
 
 ### Apple Binary Signatures
 
@@ -432,7 +432,7 @@ An **ASEP** is a location on the system that could lead to the **execution** of 
 
 ### Launchd
 
-**`launchd`** is the **first** **process** executed by OX S kernel at startup and the last one to finish at shut down. It should always have the **PID 1**. This process will **read and execute **the configurations indicated in the **ASEP** **plists** in:
+**`launchd`** is the **first** **process** executed by OX S kernel at startup and the last one to finish at shut down. It should always have the **PID 1**. This process will **read and execute** the configurations indicated in the **ASEP** **plists** in:
 
 * `/Library/LaunchAgents`: Per-user agents installed by the admin
 * `/Library/LaunchDaemons`: System-wide daemons installed by the admin
@@ -469,7 +469,7 @@ The **main difference between agents and daemons is that agents are loaded when 
 There are cases where an **agent needs to be executed before the user logins**, these are called **PreLoginAgents**. For example, this is useful to provide assistive technology at login. They can be found also in `/Library/LaunchAgents`(see [**here**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) an example).
 
 {% hint style="info" %}
-New Daemons or Agents config files will be **loaded after next reboot or using **`launchctl load <target.plist>` It's **also possible to load .plist files without that extension** with `launchctl -F <file>` (however those plist files won't be automatically loaded after reboot).\
+New Daemons or Agents config files will be **loaded after next reboot or using** `launchctl load <target.plist>` It's **also possible to load .plist files without that extension** with `launchctl -F <file>` (however those plist files won't be automatically loaded after reboot).\
 It's also possible to **unload** with `launchctl unload <target.plist>` (the process pointed by it will be terminated),
 
 To **ensure** that there isn't **anything** (like an override) **preventing** an **Agent** or **Daemon** **from** **running** run: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
@@ -501,7 +501,7 @@ There you can find the regular **cron** **jobs**, the **at** **jobs** (not very 
 
 ### kext
 
-In order to install a KEXT as a startup item, it needs to be** installed in one of the following locations**:
+In order to install a KEXT as a startup item, it needs to be **installed in one of the following locations**:
 
 * `/System/Library/Extensions`
   * KEXT files built into the OS X operating system.
@@ -522,7 +522,7 @@ For more information about [**kernel extensions check this section**](mac-os-arc
 
 ### **Login Items**
 
-In System Preferences -> Users & Groups -> **Login Items **you can find  **items to be executed when the user logs in**.\
+In System Preferences -> Users & Groups -> **Login Items** you can find  **items to be executed when the user logs in**.\
 It it's possible to list them, add and remove from the command line:
 
 ```bash
@@ -615,7 +615,7 @@ ls -l /private/var/db/emondClients
 
 A **StartupItem** is a **directory** that gets **placed** in one of these two folders. `/Library/StartupItems/` or `/System/Library/StartupItems/`
 
-After placing a new directory in one of these two locations, **two more items **need to be placed inside that directory. These two items are a **rc script** **and a plist** that holds a few settings. This plist must be called “**StartupParameters.plist**”.
+After placing a new directory in one of these two locations, **two more items** need to be placed inside that directory. These two items are a **rc script** **and a plist** that holds a few settings. This plist must be called “**StartupParameters.plist**”.
 
 {% code title="StartupParameters.plist" %}
 ```markup
@@ -663,7 +663,7 @@ RunService "$1"
 **This isn't working in modern MacOS versions**
 {% endhint %}
 
-It's also possible to place here **commands that will be executed at startup. **Example os regular rc.common script:
+It's also possible to place here **commands that will be executed at startup.** Example os regular rc.common script:
 
 ```bash
 ##
@@ -941,18 +941,18 @@ This makes the password pretty easy to recover, for example using scripts like [
 As in Windows, in MacOS you can also **hijack dylibs** to make **applications** **execute** **arbitrary** **code**.\
 However, the way **MacOS** applications **load** libraries is **more restricted** than in Windows. This implies that **malware** developers can still use this technique for **stealth**, but the probably to be able to **abuse this to escalate privileges is much lower**.
 
-First of all, is **more common **to find that **MacOS binaries indicates the full path** to the libraries to load. And second, **MacOS never search** in the folders of the **$PATH **for libraries.
+First of all, is **more common** to find that **MacOS binaries indicates the full path** to the libraries to load. And second, **MacOS never search** in the folders of the **$PATH** for libraries.
 
 However, there are 2 types of dylib hijacking:
 
 * **Missing weak linked libraries**: This means that the application will try to load a library that doesn't exist configured with **LC\_LOAD\_WEAK\_DYLIB**. Then, **if an attacker places a dylib where it's expected it will be loaded**.
   * The fact that the link is "weak" means that the application will continue running even if the library isn't found.
-* **Configured with @rpath**: The path to the library configured contains "**@rpath**" and it's configured with **multiple** **LC\_RPATH** containing **paths**. Therefore, **when loading **the dylib, the loader is going to **search** (in order)** through all the paths** specified in the **LC\_RPATH** **configurations**. If anyone is missing and **an attacker can place a dylib there** and it will be loaded.
+* **Configured with @rpath**: The path to the library configured contains "**@rpath**" and it's configured with **multiple** **LC\_RPATH** containing **paths**. Therefore, **when loading** the dylib, the loader is going to **search** (in order) **through all the paths** specified in the **LC\_RPATH** **configurations**. If anyone is missing and **an attacker can place a dylib there** and it will be loaded.
 
 The way to **escalate privileges** abusing this functionality would be in the rare case that an **application** being executed **by** **root** is **looking** for some **library in some folder where the attacker has write permissions.**
 
-**A nice scanner to find missing libraries in applications is **[**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html)** or a **[**CLI version**](https://github.com/pandazheng/DylibHijack)**.**\
-**A nice report with technical details about this technique can be found **[**here**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x)**.**
+**A nice scanner to find missing libraries in applications is** [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) **or a** [**CLI version**](https://github.com/pandazheng/DylibHijack)**.**\
+**A nice report with technical details about this technique can be found** [**here**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x)**.**
 
 ### **DYLD\_INSERT\_LIBRARIES**
 
@@ -960,10 +960,10 @@ The way to **escalate privileges** abusing this functionality would be in the ra
 
 This is like the [**LD\_PRELOAD on Linux**](../../linux-unix/privilege-escalation/#ld\_preload).
 
-This technique may be also** used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
+This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
 
 {% hint style="info" %}
-Since 2012 when [OSX.FlashBack.B](https://www.f-secure.com/v-descs/trojan-downloader\_osx\_flashback\_b.shtml) \[22] abused this technique, **Apple has drastically reduced the “power” **of the DYLD\_INSERT\_LIBRARIES.&#x20;
+Since 2012 when [OSX.FlashBack.B](https://www.f-secure.com/v-descs/trojan-downloader\_osx\_flashback\_b.shtml) \[22] abused this technique, **Apple has drastically reduced the “power”** of the DYLD\_INSERT\_LIBRARIES.&#x20;
 
 For example the dynamic loader (dyld) ignores the DYLD\_INSERT\_LIBRARIES environment variable in a wide range of cases, such as setuid and platform binaries. And, starting with macOS Catalina, only 3rd-party applications that are not compiled with the hardened runtime (which “protects the runtime integrity of software” \[22]), or have an exception such as the com.apple.security.cs.allow-dyld-environment-variables entitlement) are susceptible to dylib insertions.&#x20;
 
@@ -986,7 +986,7 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 
 You can find the Notifications data in `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
-Most of the interesting information is going to be in **blob**. So you will need to **extract** that content and **transform** it to **human** **readable **or use **`strings`**. To access it you can do:
+Most of the interesting information is going to be in **blob**. So you will need to **extract** that content and **transform** it to **human** **readable** or use **`strings`**. To access it you can do:
 
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
@@ -1057,8 +1057,8 @@ grep -A3 CFBundleTypeExtensions Info.plist  | grep string
 
 ## Apple Scripts
 
-It's a scripting language used for task automation** interacting with remote processes**. It makes pretty easy to **ask other processes to perform some actions**. **Malware** may abuse these features to abuse functions exported by other processes.\
-For example, a malware could **inject arbitrary JS code in browser opened pages**. Or **auto click **some allow permissions requested to the user;
+It's a scripting language used for task automation **interacting with remote processes**. It makes pretty easy to **ask other processes to perform some actions**. **Malware** may abuse these features to abuse functions exported by other processes.\
+For example, a malware could **inject arbitrary JS code in browser opened pages**. Or **auto click** some allow permissions requested to the user;
 
 ```bash
 tell window 1 of process “SecurityAgent” 
@@ -1071,7 +1071,7 @@ Find more info about malware using applescripts [**here**](https://www.sentinelo
 
 Apple scripts may be easily "**compiled**". These versions can be easily "**decompiled**" with `osadecompile`
 
-However, this scripts can also be** exported as "Read only" **(via the "Export..." option):
+However, this scripts can also be **exported as "Read only"** (via the "Export..." option):
 
 ![](<../../.gitbook/assets/image (556).png>)
 

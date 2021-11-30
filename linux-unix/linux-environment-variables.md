@@ -60,7 +60,7 @@ cat /proc/`python -c "import os; print(os.getppid())"`/environ
 * _**\~/.bashrc**_\*\* :\*\* This file behaves the same way _/etc/bash.bashrc_ file works but it is executed only for a specific user. If you want to create an environment for yourself go ahead and modify or create this file in your home directory.
 * _**\~/.profile, \~/.bash\_profile, \~/.bash\_login**_**:** These files are same as _/etc/profile_. The difference comes in the way it is executed. This file is executed only when a user in whose home directory this file exists, logs in.
 
-**Extracted from: **[**here**](https://codeburst.io/linux-environment-variables-53cea0245dc9)** and **[**here**](https://www.gnu.org/software/bash/manual/html\_node/Bash-Startup-Files.html)
+**Extracted from:** [**here**](https://codeburst.io/linux-environment-variables-53cea0245dc9) **and** [**here**](https://www.gnu.org/software/bash/manual/html\_node/Bash-Startup-Files.html)
 
 ## Common variables
 

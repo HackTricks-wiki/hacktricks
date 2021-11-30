@@ -210,7 +210,7 @@ NetSync provides a simple way to use a DC computer account password data to impe
 
 **LSADUMP::Secrets** – get the SysKey to decrypt SECRETS entries (from registry or hives).
 
-**LSADUMP::SetNTLM **– Ask a server to set a new password/ntlm for one user.
+**LSADUMP::SetNTLM** – Ask a server to set a new password/ntlm for one user.
 
 [**LSADUMP::Trust**](https://adsecurity.org/?p=1588) – Ask LSA Server to retrieve Trust Auth Information (normal or patch on the fly).
 
@@ -280,11 +280,11 @@ Command:  _mimikatz sekurlsa::tickets exit_
 
 The Mimikatz SID module replaces MISC::AddSID. Use SID::Patch to patch the ntds service.
 
-**SID::add **– Add a SID to SIDHistory of an object
+**SID::add** – Add a SID to SIDHistory of an object
 
 [![Mimikatz-SID-add](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-SID-add.png)](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-SID-add.png)
 
-**SID::modify **– Modify object SID of an object
+**SID::modify** – Modify object SID of an object
 
 [![Mimikatz-SID-Modify](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-SID-Modify.png)](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-SID-Modify.png)
 
@@ -309,7 +309,7 @@ Find a domain admin credential on the box and use that token: _token::elevate /d
 
 [![Mimikatz-TS-MultiRDP](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-TS-MultiRDP.png)](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-TS-MultiRDP.png)
 
-**TS::Sessions **– List TS/RDP sessions.
+**TS::Sessions** – List TS/RDP sessions.
 
 ![](https://adsecurity.org/wp-content/uploads/2017/11/Mimikatz-TS-Sessions.png)
 

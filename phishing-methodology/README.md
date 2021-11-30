@@ -129,7 +129,7 @@ Then add the domain to the following files:
 
 **Change also the values of the following variables inside /etc/postfix/main.cf**
 
-`myhostname = <domain>  `\
+`myhostname = <domain>`  \
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
 Finally modify the files **`/etc/hostname`** and **`/etc/mailname`** to your domain name and **restart your VPS.**
@@ -465,7 +465,7 @@ You can **buy a domain with a very similar name** to the victims domain **and/or
 
 ### Evaluate the phishing
 
-Use [**Phishious **](https://github.com/Rices/Phishious)to evaluate if your email is going to end in the spam folder or if it's going to be blocked or successful.
+Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your email is going to end in the spam folder or if it's going to be blocked or successful.
 
 ## References
 

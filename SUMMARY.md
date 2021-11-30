@@ -520,7 +520,8 @@
   * [GCP - Databases Enumeration](cloud-security/gcp-security/gcp-databases-enumeration.md)
   * [GCP - Serverless Code Exec Services Enumeration](cloud-security/gcp-security/gcp-serverless-code-exec-services-enumeration.md)
   * [GCP - Buckets Enumeration](cloud-security/gcp-security/gcp-buckets-enumeration.md)
-* [Github Security](cloud-security/github-security.md)
+* [Github Security](cloud-security/github-security/README.md)
+  * [Basic Github Information](cloud-security/github-security/basic-github-information.md)
 
 ## Physical attacks
 

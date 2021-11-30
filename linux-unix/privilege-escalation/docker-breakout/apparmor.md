@@ -2,7 +2,7 @@
 
 ## Basic Information
 
-**AppArmor** is a kernel enhancement to confine **programs** to a **limited** set of **resources **with **per-program profiles**. Profiles can **allow** **capabilities** like network access, raw socket access, and the permission to read, write, or execute files on matching paths.
+**AppArmor** is a kernel enhancement to confine **programs** to a **limited** set of **resources** with **per-program profiles**. Profiles can **allow** **capabilities** like network access, raw socket access, and the permission to read, write, or execute files on matching paths.
 
 It's a Mandatory Access Control or **MAC** that binds **access control** attributes **to programs rather than to users**.\
 AppArmor confinement is provided via **profiles loaded into the kernel**, typically on boot.\
@@ -42,7 +42,7 @@ aa-mergeprof  #used to merge the policies
 ## Creating a profile
 
 * In order to indicate the affected executable, **absolute paths and wildcards** are allowed (for file globbing) for specifying files.
-* To indicate the access the binary will have over **files** the following **access controls** can be used: 
+* To indicate the access the binary will have over **files** the following **access controls** can be used:&#x20;
   * **r** (read)
   * **w** (write)
   * **m** (memory map as executable)
@@ -204,7 +204,7 @@ Once you **run a docker container** you should see the following output:
    docker-default (825)
 ```
 
-Note that **apparmor will even block capabilities privileges** granted to the container by default. For example, it will be able to **block permission to write inside /proc even if the SYS_ADMIN capability is granted** because by default docker apparmor profile denies this access:
+Note that **apparmor will even block capabilities privileges** granted to the container by default. For example, it will be able to **block permission to write inside /proc even if the SYS\_ADMIN capability is granted** because by default docker apparmor profile denies this access:
 
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
@@ -218,12 +218,12 @@ You need to **disable apparmor** to bypass its restrictions:
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
 
-Note that by default **AppArmor** will also **forbid the container to mount** folders from the inside even with SYS_ADMIN capability.
+Note that by default **AppArmor** will also **forbid the container to mount** folders from the inside even with SYS\_ADMIN capability.
 
 Note that you can **add/remove** **capabilities** to the docker container (this will be still restricted by protection methods like **AppArmor** and **Seccomp**):
 
-* `--cap-add=SYS_ADMIN`_ _give_ _`SYS_ADMIN` cap
-* `--cap-add=ALL`_ _give_ _all caps
+* `--cap-add=SYS_ADMIN` __ give __ `SYS_ADMIN` cap
+* `--cap-add=ALL` __ give __ all caps
 * `--cap-drop=ALL --cap-add=SYS_PTRACE` drop all caps and only give `SYS_PTRACE`
 
 {% hint style="info" %}

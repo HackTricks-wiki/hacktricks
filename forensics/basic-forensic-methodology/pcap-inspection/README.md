@@ -28,7 +28,7 @@ You can find some Wireshark trick in:
 
 ### Xplico Framework
 
-****[**Xplico **](https://github.com/xplico/xplico)_(only linux)_** **can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico extracts each email (POP, IMAP, and SMTP protocols), all HTTP contents, each VoIP call (SIP), FTP, TFTP, and so on.
+****[**Xplico** ](https://github.com/xplico/xplico)_(only linux)_ **** can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico extracts each email (POP, IMAP, and SMTP protocols), all HTTP contents, each VoIP call (SIP), FTP, TFTP, and so on.
 
 #### Install
 
@@ -46,18 +46,18 @@ sudo apt-get install xplico
 /etc/init.d/xplico start
 ```
 
-Access to _**127.0.0.1:9876 **_with credentials _**xplico:xplico**_
+Access to _**127.0.0.1:9876**_ with credentials _**xplico:xplico**_
 
 Then create a **new case**, create a **new session** inside the case and **upload the pcap** file.
 
 ### NetworkMiner
 
-Like Xplico it is a tool to **analyze and extract objects from pcaps**. It has a free edition that you can **download **[**here**](https://www.netresec.com/?page=NetworkMiner). It works with **Windows**.\
+Like Xplico it is a tool to **analyze and extract objects from pcaps**. It has a free edition that you can **download** [**here**](https://www.netresec.com/?page=NetworkMiner). It works with **Windows**.\
 This tool is also useful to get **other information analysed** from the packets in order to be able to know what was happening there in a **quick** way.
 
 ### NetWitness Investigator
 
-You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware)** (It works in Windows)**.\
+You can download [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(It works in Windows)**.\
 This is another useful tool that **analyse the packets** and sort the information in a useful way to **know what is happening inside**.
 
 ![](<../../../.gitbook/assets/image (567) (1) (1).png>)
@@ -118,7 +118,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ### YaraPcap
 
-****[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) is a tool that 
+****[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) is a tool that&#x20;
 
 * Reads a PCAP File and Extracts Http Streams.
 * gzip deflates any compressed streams
@@ -138,7 +138,7 @@ Check if you can find any fingerprint of a known malware:
 
 > Zeek is a passive, open-source network traffic analyzer. Many operators use Zeek as a network security monitor (NSM) to support investigations of suspicious or malicious activity. Zeek also supports a wide range of traffic analysis tasks beyond the security domain, including performance measurement and troubleshooting.
 
-Basically, logs created by `zeek` aren't **pcaps**. Therefore you will need to use **other tools** to analyse the logs where the **information **about the pcaps are.
+Basically, logs created by `zeek` aren't **pcaps**. Therefore you will need to use **other tools** to analyse the logs where the **information** about the pcaps are.
 
 ### Connections Info
 

@@ -9,6 +9,6 @@ For example, in the following image you can see that and If that is never going 
 
 ### Macro Forms
 
-Using the **GetObject** function it's possible to obtain data from forms of the macro. This can be used to difficult the analysis. The following is a photo of a macro form used to **hide data inside text boxes **(a text box can be hiding other text boxes):
+Using the **GetObject** function it's possible to obtain data from forms of the macro. This can be used to difficult the analysis. The following is a photo of a macro form used to **hide data inside text boxes** (a text box can be hiding other text boxes):
 
 ![](<../.gitbook/assets/image (374).png>)

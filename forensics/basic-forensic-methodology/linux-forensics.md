@@ -4,7 +4,7 @@
 
 ### Basic Information
 
-First of all, it's recommended to have some **USB **with **good known binaries and libraries on it** (you can just get a ubuntu and copy the folders _/bin_, _/sbin_, _/lib,_ and _/lib64_), then mount the USN, and modify the env variables to use those binaries:
+First of all, it's recommended to have some **USB** with **good known binaries and libraries on it** (you can just get a ubuntu and copy the folders _/bin_, _/sbin_, _/lib,_ and _/lib64_), then mount the USN, and modify the env variables to use those binaries:
 
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
@@ -35,21 +35,21 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 
 While obtaining the basic information you should check for weird things like:
 
-* **root processes **usually run with low PIDS, so if you find a root process with a big PID you may suspect
-* Check **registered logins **of users without a shell inside `/etc/passwd`
-* Check for **password hashes **inside `/etc/shadow` for users without a shell
+* **root processes** usually run with low PIDS, so if you find a root process with a big PID you may suspect
+* Check **registered logins** of users without a shell inside `/etc/passwd`
+* Check for **password hashes** inside `/etc/shadow` for users without a shell
 
 ### Memory Dump
 
 In order to obtain the memory of the running system it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).\
-In order to **compile **it you need to use the **exact same kernel** the victim machine is using.
+In order to **compile** it you need to use the **exact same kernel** the victim machine is using.
 
 {% hint style="info" %}
 Remember that you **cannot install LiME or any other thing** in the victim machine it will make several changes to it
 {% endhint %}
 
 So, if you have an identical version of Ubuntu you can use `apt-get install lime-forensics-dkms`\
-In other cases you need to download [**LiME**](https://github.com/504ensicsLabs/LiME) from github can compile it with correct kernel headers. In order to **obtain the exact kernel headers** of the victim machine, you can just **copy the directory **`/lib/modules/<kernel version>` to your machine, and then **compile **LiME using them:
+In other cases you need to download [**LiME**](https://github.com/504ensicsLabs/LiME) from github can compile it with correct kernel headers. In order to **obtain the exact kernel headers** of the victim machine, you can just **copy the directory** `/lib/modules/<kernel version>` to your machine, and then **compile** LiME using them:
 
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
@@ -62,14 +62,14 @@ LiME supports 3 **formats**:
 * Padded (same as raw, but with zeroes in right bits)
 * Lime (recommended format with metadata
 
-LiME can also be use to** send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
+LiME can also be use to **send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
 
 ### Disk Imaging
 
 #### Shutting down
 
-First of all you will need to** shutdown the system**. This isn't always an option as some times system will be a production server that the company cannot afford to shutdown.\
-There are **2 ways** of shutting down the system, a **normal shutdown** and a **"plug the plug" shutdown**. The first one will allow the **processes to terminate as usual** and the **filesystem **to be **synchronized**, but I will also allow the possible **malware **to **destroy evidences**. The "pull the plug" approach may carry **some information loss** (as we have already took an image of the memory not much info is going to be lost) and the **malware won't have any opportunity** to do anything about it. Therefore, if you **suspect **that there may be a **malware**, just execute the **`sync`** **command **on the system and pull the plug.
+First of all you will need to **shutdown the system**. This isn't always an option as some times system will be a production server that the company cannot afford to shutdown.\
+There are **2 ways** of shutting down the system, a **normal shutdown** and a **"plug the plug" shutdown**. The first one will allow the **processes to terminate as usual** and the **filesystem** to be **synchronized**, but I will also allow the possible **malware** to **destroy evidences**. The "pull the plug" approach may carry **some information loss** (as we have already took an image of the memory not much info is going to be lost) and the **malware won't have any opportunity** to do anything about it. Therefore, if you **suspect** that there may be a **malware**, just execute the **`sync`** **command** on the system and pull the plug.
 
 #### Taking an image of the disk
 
@@ -186,7 +186,7 @@ rpm -qa --root=/ mntpath/var/lib/rpm
 ls /opt /usr/local
 ```
 
-Another good idea is to **check **the **common folders **inside **$PATH** for **binaries not related** to **installed packages:**
+Another good idea is to **check** the **common folders** inside **$PATH** for **binaries not related** to **installed packages:**
 
 ```bash
 #Both lines are going to print the executables in /sbin non related to installed packages
@@ -236,7 +236,7 @@ On Linux systems, kernel modules are commonly used as rootkit components to malw
 There are several configuration files that Linux uses to automatically launch an executable when a user logs into the system that may contain traces of malware.
 
 * _**/etc/profile.d/\***_ , _**/etc/profile**_ , _**/etc/bash.bashrc**_ are executed when any user account logs in.
-* _**∼/.bashrc **_, _**∼/.bash\_profile**_ , _**\~/.profile**_ ,  _**∼/.config/autostart**_ are executed when the specific user logs in.
+* _**∼/.bashrc**_ , _**∼/.bash\_profile**_ , _**\~/.profile**_ ,  _**∼/.config/autostart**_ are executed when the specific user logs in.
 * _**/etc/rc.local**_ It is traditionally executed after all the normal system services are started, at the end of the process of switching to a multiuser runlevel.
 
 ## Examine Logs
@@ -245,24 +245,24 @@ Look in all available log files on the compromised system for traces of maliciou
 
 ### Pure Logs
 
-**Logon **events recorded in the system and security logs, including logons via the network, can reveal that **malware **or an **intruder gained access **to a compromised system via a given account at a specific time. Other events around the time of a malware infection can be captured in system logs, including the **creation **of a **new** **service **or new accounts around the time of an incident.\
+**Logon** events recorded in the system and security logs, including logons via the network, can reveal that **malware** or an **intruder gained access** to a compromised system via a given account at a specific time. Other events around the time of a malware infection can be captured in system logs, including the **creation** of a **new** **service** or new accounts around the time of an incident.\
 Interesting system logons:
 
-* &#x20;**/var/log/syslog **(debian)** **or **/var/log/messages **(Redhat)
+* &#x20;**/var/log/syslog** (debian) **** or **/var/log/messages** (Redhat)
   * Shows general messages and info regarding the system. Basically a data log of all activity throughout the global system.
-* &#x20;**/var/log/auth.log **(debian)** **or **/var/log/secure **(Redhat)
+* &#x20;**/var/log/auth.log** (debian) **** or **/var/log/secure** (Redhat)
   * Keep authentication logs for both successful or failed logins, and authentication processes. Storage depends on system type.
   * `cat /var/log/auth.log | grep -iE "session opened for|accepted password|new session|not in sudoers"`
 * **/var/log/boot.log**: start-up messages and boot info.
-* **/var/log/maillog **or **var/log/mail.log:** is for mail server logs, handy for postfix, smtpd, or email-related services info running on your server.
+* **/var/log/maillog** or **var/log/mail.log:** is for mail server logs, handy for postfix, smtpd, or email-related services info running on your server.
 * **/var/log/kern.log**: keeps in Kernel logs and warning info. Kernel activity logs (e.g., dmesg, kern.log, klog) can show that a particular service crashed repeatedly, potentially indicating that an unstable trojanized version was installed.
 * **/var/log/dmesg**: a repository for device driver messages. Use **dmesg** to see messages in this file.
 * **/var/log/faillog:** records info on failed logins. Hence, handy for examining potential security breaches like login credential hacks and brute-force attacks.
 * **/var/log/cron**: keeps a record of Crond-related messages (cron jobs). Like when the cron daemon started a job.
 * **/var/log/daemon.log:** keeps track of running background services but doesn’t represent them graphically.
 * **/var/log/btmp**: keeps a note of all failed login attempts.
-* **/var/log/httpd/**: a directory containing error\_log and access\_log files of the Apache httpd daemon. Every error that httpd comes across is kept in the **error\_log **file. Think of memory problems and other system-related errors. **access\_log** logs all requests which come in via HTTP.
-* **/var/log/mysqld.log **or** /var/log/mysql.log **: MySQL log file that records every  debug, failure and success message, including starting, stopping and restarting of MySQL daemon mysqld. The system decides on the directory. RedHat, CentOS, Fedora, and other RedHat-based systems use /var/log/mariadb/mariadb.log. However, Debian/Ubuntu use /var/log/mysql/error.log directory.
+* **/var/log/httpd/**: a directory containing error\_log and access\_log files of the Apache httpd daemon. Every error that httpd comes across is kept in the **error\_log** file. Think of memory problems and other system-related errors. **access\_log** logs all requests which come in via HTTP.
+* **/var/log/mysqld.log** or **/var/log/mysql.log** : MySQL log file that records every  debug, failure and success message, including starting, stopping and restarting of MySQL daemon mysqld. The system decides on the directory. RedHat, CentOS, Fedora, and other RedHat-based systems use /var/log/mariadb/mariadb.log. However, Debian/Ubuntu use /var/log/mysql/error.log directory.
 * **/var/log/xferlog**: keeps FTP file transfer sessions. Includes info like file names and user-initiated FTP transfers.
 * **/var/log/\*** : You should always check for unexpected logs in this directory
 
@@ -287,7 +287,7 @@ It's recommended to check if those logins make sense:
 * Any unknown user?
 * Any user that shouldn't have a shell has logged in?
 
-This is important as **attackers **some times may copy `/bin/bash` inside `/bin/false` so users like **lightdm **may be **able to login**.
+This is important as **attackers** some times may copy `/bin/bash` inside `/bin/false` so users like **lightdm** may be **able to login**.
 
 Note that you can also **take a look to this information reading the logs**.
 
@@ -327,20 +327,20 @@ More examples and info inside the github: [https://github.com/snovvcrash/usbrip]
 
 ## Review User Accounts and Logon Activities
 
-Examine the _**/etc/passwd**_, _**/etc/shadow**_ and** security logs** for unusual names or accounts created and/or used in close proximity to known unauthorized events. Also check possible sudo brute-force attacks.\
+Examine the _**/etc/passwd**_, _**/etc/shadow**_ and **security logs** for unusual names or accounts created and/or used in close proximity to known unauthorized events. Also check possible sudo brute-force attacks.\
 Moreover, check files like _**/etc/sudoers**_ and _**/etc/groups**_ for unexpected privileges given to users.\
-Finally look for accounts with **no passwords **or **easily guessed **passwords.
+Finally look for accounts with **no passwords** or **easily guessed** passwords.
 
 ## Examine File System
 
-File system data structures can provide substantial amounts of **information **related to a **malware **incident, including the **timing **of events and the actual **content **of **malware**.\
-**Malware **is increasingly being designed to **thwart file system analysis**. Some malware alter date-time stamps on malicious files to make it more difficult to find them with time line analysis. Other malicious code is designed to only store certain information in memory to minimize the amount of data stored in the file system.\
+File system data structures can provide substantial amounts of **information** related to a **malware** incident, including the **timing** of events and the actual **content** of **malware**.\
+**Malware** is increasingly being designed to **thwart file system analysis**. Some malware alter date-time stamps on malicious files to make it more difficult to find them with time line analysis. Other malicious code is designed to only store certain information in memory to minimize the amount of data stored in the file system.\
 To deal with such anti-forensic techniques, it is necessary to pay **careful attention to time line analysis** of file system date-time stamps and to files stored in common locations where malware might be found.
 
-* Using **autopsy **you can see the timeline of events that may be useful to discover suspicions activity. You can also use the `mactime` feature from **Sleuth Kit **directly.
-* Check for **unexpected scripts **inside **$PATH** (maybe some sh or php scripts?)
+* Using **autopsy** you can see the timeline of events that may be useful to discover suspicions activity. You can also use the `mactime` feature from **Sleuth Kit** directly.
+* Check for **unexpected scripts** inside **$PATH** (maybe some sh or php scripts?)
 * Files in `/dev` use to be special files, you may find non-special files here related to malware.
-* Look for unusual or **hidden files **and **directories**, such as “.. ” (dot dot space) or “..^G ” (dot dot control-G)
+* Look for unusual or **hidden files** and **directories**, such as “.. ” (dot dot space) or “..^G ” (dot dot control-G)
 * setuid copies of /bin/bash on the system `find / -user root -perm -04000 –print`
 * Review date-time stamps of deleted **inodes for large numbers of files being deleted around the same time**, which might indicate malicious activity such as installation of a rootkit or trojanized service.
 * Because inodes are allocated on a next available basis, **malicious files placed on the system at around the same time may be assigned consecutive inodes**. Therefore, after one component of malware is located, it can be productive to inspect neighbouring inodes.
@@ -351,7 +351,7 @@ You can check the most recent files of a folder using `ls -laR --sort=time /bin`
 You can check the inodes of the files inside a folder using `ls -lai /bin |sort -n`&#x20;
 
 {% hint style="info" %}
-Note that an **attacker **can **modify **the **time **to make **files appear** **legitimate**, but he **cannot **modify the **inode**. If you find that a **file **indicates that it was created and modify at the **same time **of the rest of the files in the same folder, but the **inode **is **unexpectedly bigger**, then the **timestamps of that file were modified**.
+Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modify at the **same time** of the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
 {% endhint %}
 
 ## Compare files of different filesystem versions
