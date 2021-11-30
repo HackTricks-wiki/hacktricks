@@ -414,7 +414,7 @@
 * [PostMessage Vulnerabilities](pentesting-web/postmessage-vulnerabilities.md)
 * [Race Condition](pentesting-web/race-condition.md)
 * [Rate Limit Bypass](pentesting-web/rate-limit-bypass.md)
-* [Registration Vulnerabilities](pentesting-web/registration-vulnerabilities.md)
+* [Registration & Takeover Vulnerabilities](pentesting-web/registration-vulnerabilities.md)
 * [Regular expression Denial of Service - ReDoS](pentesting-web/regular-expression-denial-of-service-redos.md)
 * [Reset/Forgotten Password Bypass](pentesting-web/reset-password.md)
 * [SAML Attacks](pentesting-web/saml-attacks/README.md)
