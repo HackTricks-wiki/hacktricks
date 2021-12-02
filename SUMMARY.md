@@ -486,24 +486,6 @@
     * [Windows Processes](forensics/basic-forensic-methodology/windows-forensics/windows-processes.md)
     * [Interesting Windows Registry Keys](forensics/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys.md)
 
-## A.I. Exploiting
-
-* [BRA.I.NSMASHER Presentation](a.i.-exploiting/bra.i.nsmasher-presentation/README.md)
-  * [Basic Bruteforcer](a.i.-exploiting/bra.i.nsmasher-presentation/basic-bruteforcer.md)
-  * [Basic Captcha Breaker](a.i.-exploiting/bra.i.nsmasher-presentation/basic-captcha-breaker.md)
-  * [BIM Bruteforcer](a.i.-exploiting/bra.i.nsmasher-presentation/bim-bruteforcer.md)
-  * [Hybrid Malware Classifier Part 1](a.i.-exploiting/bra.i.nsmasher-presentation/hybrid-malware-classifier-part-1.md)
-  * [ML Basics](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/README.md)
-    * [Feature Engineering](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/feature-engineering.md)
-
-## Blockchain
-
-* [Blockchain & Crypto Currencies](blockchain/blockchain-and-crypto-currencies.md)
-
-## Courses and Certifications Reviews
-
-* [INE Courses and eLearnSecurity Certifications Reviews](courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md)
-
 ## Cloud Security
 
 * [Cloud Security Review](cloud-security/cloud-security-review.md)
@@ -522,6 +504,24 @@
   * [GCP - Buckets Enumeration](cloud-security/gcp-security/gcp-buckets-enumeration.md)
 * [Github Security](cloud-security/github-security/README.md)
   * [Basic Github Information](cloud-security/github-security/basic-github-information.md)
+
+## A.I. Exploiting
+
+* [BRA.I.NSMASHER Presentation](a.i.-exploiting/bra.i.nsmasher-presentation/README.md)
+  * [Basic Bruteforcer](a.i.-exploiting/bra.i.nsmasher-presentation/basic-bruteforcer.md)
+  * [Basic Captcha Breaker](a.i.-exploiting/bra.i.nsmasher-presentation/basic-captcha-breaker.md)
+  * [BIM Bruteforcer](a.i.-exploiting/bra.i.nsmasher-presentation/bim-bruteforcer.md)
+  * [Hybrid Malware Classifier Part 1](a.i.-exploiting/bra.i.nsmasher-presentation/hybrid-malware-classifier-part-1.md)
+  * [ML Basics](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/README.md)
+    * [Feature Engineering](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/feature-engineering.md)
+
+## Blockchain
+
+* [Blockchain & Crypto Currencies](blockchain/blockchain-and-crypto-currencies.md)
+
+## Courses and Certifications Reviews
+
+* [INE Courses and eLearnSecurity Certifications Reviews](courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md)
 
 ## Physical attacks
 
