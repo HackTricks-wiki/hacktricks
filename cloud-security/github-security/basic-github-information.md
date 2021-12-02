@@ -116,7 +116,6 @@ Github applications can ask for permissions to **access your github information 
 * The GitHub App should **connect to a personal account or an organisation**.
 * You can create your own Github application in [https://github.com/settings/apps](https://github.com/settings/apps)
 * You can see all the **Github applications that has access to your account**  in [https://github.com/settings/apps/authorizations](https://github.com/settings/apps/authorizations)
-* These are the **API Endpoints for Github Applications** [https://docs.github.com/en/rest/overview/endpoints-available-for-github-app](https://docs.github.com/en/rest/overview/endpoints-available-for-github-apps). Depending on the permissions of the App it will be able to access some of them
 * You can see installed apps in an **organization** in _https://github.com/organizations/\<org\_name>/settings/installations_
 
 Some security recommendations:
