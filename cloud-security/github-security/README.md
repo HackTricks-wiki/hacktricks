@@ -1,6 +1,6 @@
 # Github Security
 
-## What is Github
+## [#with-user-credentials](./#with-user-credentials "mention")What is Github
 
 (From [here](https://kinsta.com/knowledgebase/what-is-github/)) At a high level, **GitHub is a website and cloud-based service that helps developers store and manage their code, as well as track and control changes to their code**.
 
@@ -46,6 +46,8 @@ Tools (each tool contains its list of regexes):
 
 ## Internal Recon
 
+For this scenario we are going to suppose that you have obtained some access to a github account.
+
 ### With User Credentials
 
 If you somehow already have credentials for a user inside an organization you can **just login** and check which **enterprise and organization roles you have**, if you are a raw member, check which **permissions raw members have**, in which **groups** you are, which **permissions you have** over which **repos,** and **how are the repos protected.**
@@ -55,6 +57,8 @@ Note that **2FA may be used** so you will only be able to access this informatio
 {% hint style="info" %}
 Note that if you **manage to steal the `user_session` cookie** (currently configured with SameSite: Lax) you can **completely impersonate the user** without needing credentials or 2FA.
 {% endhint %}
+
+Check the section below about [**branch protections bypasses**](./#branch-protection-bypass) in case it's useful.
 
 ### With User SSH Key
 
@@ -92,9 +96,21 @@ A User token looks like this: `ghp_EfHnQFcFHX6fGIu5mpduvRiYR584kK0dX123`
 
 ### With Oauth Application
 
+For an introduction about [**Github Oauth Applications check the basic information**](basic-github-information.md#oauth-applications).
 
+An attacker might create a **malicious Oauth Application** to access privileged data/actions of the users that accepts them probably as part of a phishing campaign.
+
+These are the [scopes an Oauth application can request](https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps). A should always check the scopes requested before accepting them.
+
+Moreover, as explained in the basic information, **organizations can give/deny access to third party applications** to information/repos/actions related with the organisation.
 
 ### With Github Application
+
+For an introduction about [**Github Applications check the basic information**](basic-github-information.md#github-applications).
+
+An attacker might create a **malicious Github Application** to access privileged data/actions of the users that accepts them probably as part of a phishing campaign.
+
+Moreover, as explained in the basic information, **organizations can give/deny access to third party applications** to information/repos/actions related with the organisation.
 
 ### With Malicious Github Action
 
@@ -178,4 +194,13 @@ jobs:
           secret_postgress_pass: ${{secrets.POSTGRESS_PASSWORDyaml}}
 ```
 
-### Bypassing Branch Protection
+### Branch Protection Bypass
+
+* **Require a number of approvals**: If you compromised several accounts you might just accept your PRs from other accounts. If you just have the account from where you created the PR you cannot accept your own PR. However, if you have access to a **Github Action** environment inside the repo, using the GITHUB\_TOKEN you might be able to **approve your PR** and get 1 approval this way.
+  * _Note for this and for the Code Owners restriction that usually a user won't be able to approve his own PRs, but if you are, you can abuse it to accept your PRs._
+* **Dismiss approvals when new commits are pushed**: If this isn’t set, you can submit legit code, wait till someone approves it, and put malicious code and merge it into the protected branch.
+* **Require reviews from Code Owners**: If this is activated and you are a Code Owner, you could make a **Github Action create your PR and then approve it yourself**.
+* **Allow specified actors to bypass pull request requirements**: If you are one of these actors you can bypass pull request protections.
+* **Include administrators**: If this isn’t set and you are admin of the repo, you can bypass this branch protections.
+* **PR Hijacking**: You could be able to **modify the PR of someone else** adding malicious code, approving the resulting PR yourself and merging everything.
+* **Removing Branch Protections**: If you are an **admin of the repo you can disable the protections**, merge your PR and set the protections back.
