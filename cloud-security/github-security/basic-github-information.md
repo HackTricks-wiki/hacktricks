@@ -2,11 +2,11 @@
 
 ## Basic Structure
 
-The basic github environment structure of a big **company** is to own an **enterprise** which owns **several organizations** and each of them may contain **several repositories** and **several groups.**. Smaller companies may just **own one organization and no enterprises**.
+The basic github environment structure of a big **company** is to own an **enterprise** which owns **several organizations** and each of them may contain **several repositories** and **several teams.**. Smaller companies may just **own one organization and no enterprises**.
 
 From a user point of view a **user** can be a **member** of **different enterprises and organizations**. Within them the user may have **different enterprise, organization and repository roles**.
 
-Moreover, a user may be **part of different groups** with different enterprise, organization or repository roles.
+Moreover, a user may be **part of different teams** with different enterprise, organization or repository roles.
 
 And finally **repositories may have special protection mechanisms**.
 
@@ -59,9 +59,9 @@ You can **compare the permissions** of each role in this table [https://docs.git
 
 You can also **create your own roles** in _https://github.com/organizations/\<org\_name>/settings/roles_
 
-### Groups
+### Teams
 
-You can **list the groups created in an organization** in _https://github.com/orgs/\<org\_name>/teams_. Note that to see the groups which are children of other groups you need to access each parent group
+You can **list the teams created in an organization** in _https://github.com/orgs/\<org\_name>/teams_. Note that to see the teams which are children of other teams you need to access each parent team.
 
 ![](<../../.gitbook/assets/image (630).png>)
 
@@ -116,6 +116,7 @@ Github applications can ask for permissions to **access your github information 
 * The GitHub App should **connect to a personal account or an organisation**.
 * You can create your own Github application in [https://github.com/settings/apps](https://github.com/settings/apps)
 * You can see all the **Github applications that has access to your account**  in [https://github.com/settings/apps/authorizations](https://github.com/settings/apps/authorizations)
+* These are the **API Endpoints for Github Applications** [https://docs.github.com/en/rest/overview/endpoints-available-for-github-app](https://docs.github.com/en/rest/overview/endpoints-available-for-github-apps). Depending on the permissions of the App it will be able to access some of them
 * You can see installed apps in an **organization** in _https://github.com/organizations/\<org\_name>/settings/installations_
 
 Some security recommendations:
