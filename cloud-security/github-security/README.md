@@ -256,6 +256,12 @@ For an introduction about [**Github Environment check the basic information**](b
 
 In case an environment can be **accessed from all the branches**, it's **isn't protected** and you can easily access the secrets inside the environment. Note that you might find repos where **all the branches are protected** (by specifying its names or by using `*`) in that scenario, **find a branch were you can push code** and you can **exfiltrate** the secrets creating a new github action (or modifying one).
 
-Note, that you might find the edge case where **all the branches are protected** (via wildcard `*`) it's specified **who can push code to the branches** (_you can specify that in the branch protection_) and your user isn't listed. You can still run a custom github action because you can create a branch and use the push trigger over itself. The **branch protection allows the push to a new branch so the github action will be triggered**.
+Note, that you might find the edge case where **all the branches are protected** (via wildcard `*`) it's specified **who can push code to the branches** (_you can specify that in the branch protection_) and **your user isn't allowed**. You can still run a custom github action because you can create a branch and use the push trigger over itself. The **branch protection allows the push to a new branch so the github action will be triggered**.
 
-Note that after the creation of the branch the branch protection will apply to the new branch and you won't be able to modify it, but for that time you will have already dumped the secrets.
+```yaml
+  push: # Run it when a push is made to a branch
+    branches:
+      - current_branch_name #Use '**' to run when a push is made to any branch
+```
+
+Note that **after the creation** of the branch the **branch protection will apply to the new branch** and you won't be able to modify it, but for that time you will have already dumped the secrets.
