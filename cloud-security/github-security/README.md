@@ -126,16 +126,19 @@ In case members of an organization can **create new repos** and you can execute 
 
 If you can **create a new branch in a repository that already contains a Github Action** configured, you can **modify** it, **upload** the content, and then **execute that action from the new branch**. This way you can **exfiltrate repository and organization level secrets** (but you need to know how they are called).
 
-You can make the modified action executable manually or when you create a PR to master (depending on how noisy you want to be):
+You can make the modified action executable **manually,** when a **PR is created** or when **some code is pushed** (depending on how noisy you want to be):
 
 ```yaml
 on:
-  workflow_dispatch:
-
-on:
-  pull_request:
+  workflow_dispatch: # Launch manually
+  pull_request: #Run it when a PR is created to a branch
     branches:
       - master
+  push: # Run it when a push is made to a branch
+    branches:
+      - current_branch_name
+
+# Use '**' instead of a branh name to trigger the action in all the cranches
 ```
 
 #### Github Action Injection/Backdoor
@@ -149,7 +152,7 @@ cat /proc/*/environ | grep -i secret #Suposing the env variable name contains "s
 
 #### GITHUB\_TOKEN
 
-This "**secret**" (coming from `${{ secrets.GITHUB_TOKEN }}` and `${{ github.token }}`) is widely used to **give** (mostly read) to the **Action access to the repo**. This token is the same one a **Github Application will use**, so it can access the same endpoints: [https://docs.github.com/en/rest/overview/endpoints-available-for-github-apps](https://docs.github.com/en/rest/overview/endpoints-available-for-github-apps)
+This "**secret**" (coming from `${{ secrets.GITHUB_TOKEN }}` and `${{ github.token }}`) is given by default read and **write permissions** **to the repo**. This token is the same one a **Github Application will use**, so it can access the same endpoints: [https://docs.github.com/en/rest/overview/endpoints-available-for-github-apps](https://docs.github.com/en/rest/overview/endpoints-available-for-github-apps)
 
 You can see the possible **permissions** of this token in: [https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github\_token](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github\_token)
 
@@ -192,7 +195,13 @@ Note that in several occasions you will be able to find **github user tokens ins
 ```yaml
 name: list_env
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Launch manually
+  pull_request: #Run it when a PR is created to a branch
+    branches:
+      - '**'
+  push: # Run it when a push is made to a branch
+    branches:
+      - '**'
 jobs:     
   List_env:
     runs-on: ubuntu-latest
@@ -210,7 +219,13 @@ jobs:
 ```yaml
 name: revshell
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Launch manually
+  pull_request: #Run it when a PR is created to a branch
+    branches:
+      - '**'
+  push: # Run it when a push is made to a branch
+    branches:
+      - '**'
 jobs:     
   create_pull_request:
     runs-on: ubuntu-latest
@@ -224,7 +239,7 @@ jobs:
 
 ### Branch Protection Bypass
 
-* **Require a number of approvals**: If you compromised several accounts you might just accept your PRs from other accounts. If you just have the account from where you created the PR you cannot accept your own PR. However, if you have access to a **Github Action** environment inside the repo, using the GITHUB\_TOKEN you might be able to **approve your PR** and get 1 approval this way.
+* **Require a number of approvals**: If you compromised several accounts you might just accept your PRs from other accounts. If you just have the account from where you created the PR you cannot accept your own PR. However, if you have access to a **Github Action** environment inside the repo, using the **GITHUB\_TOKEN** you might be able to **approve your PR** and get 1 approval this way.
   * _Note for this and for the Code Owners restriction that usually a user won't be able to approve his own PRs, but if you are, you can abuse it to accept your PRs._
 * **Dismiss approvals when new commits are pushed**: If this isn’t set, you can submit legit code, wait till someone approves it, and put malicious code and merge it into the protected branch.
 * **Require reviews from Code Owners**: If this is activated and you are a Code Owner, you could make a **Github Action create your PR and then approve it yourself**.
@@ -232,3 +247,15 @@ jobs:
 * **Include administrators**: If this isn’t set and you are admin of the repo, you can bypass this branch protections.
 * **PR Hijacking**: You could be able to **modify the PR of someone else** adding malicious code, approving the resulting PR yourself and merging everything.
 * **Removing Branch Protections**: If you are an **admin of the repo you can disable the protections**, merge your PR and set the protections back.
+* **Bypassing push protections**: If a repo **only allows certain users** to send push (merge code) in  branches (the branch protection might be protecting all the branches specifying the wildcard `*`).&#x20;
+  * If you have **write access over the repo but you are not allowed to push code** because of the branch protection, you can still **create a new branch** and within it create a **github action that is triggered when code is pushed**. As the **branch protection won't protect the branch until it's created**, this first code push to the branch will **execute the github action**.
+
+### Bypass Environments Protections
+
+For an introduction about [**Github Environment check the basic information**](basic-github-information.md#git-environments).
+
+In case an environment can be **accessed from all the branches**, it's **isn't protected** and you can easily access the secrets inside the environment. Note that you might find repos where **all the branches are protected** (by specifying its names or by using `*`) in that scenario, **find a branch were you can push code** and you can **exfiltrate** the secrets creating a new github action (or modifying one).
+
+Note, that you might find the edge case where **all the branches are protected** (via wildcard `*`) it's specified **who can push code to the branches** (_you can specify that in the branch protection_) and your user isn't listed. You can still run a custom github action because you can create a branch and use the push trigger over itself. The **branch protection allows the push to a new branch so the github action will be triggered**.
+
+Note that after the creation of the branch the branch protection will apply to the new branch and you won't be able to modify it, but for that time you will have already dumped the secrets.
