@@ -31,6 +31,8 @@ There are thousands of permissions in GCP. In order to check if a role has a per
 
 **You can also** [**search here predefined roles**](https://cloud.google.com/iam/docs/understanding-roles#product\_specific\_documentation) **offered by each product.**
 
+**You can find a** [**list of all the granular permissions here**](https://cloud.google.com/iam/docs/custom-roles-permissions-support)**.**
+
 #### Basic roles
 
 | Name             | Title  | Permissions                                                                                                                                                                                                                                        |
