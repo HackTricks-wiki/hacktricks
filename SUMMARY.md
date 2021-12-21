@@ -211,7 +211,7 @@
   * [Scanner and Fax](pentesting/pentesting-printers/scanner-and-fax.md)
 * [Pentesting SAP](pentesting/pentesting-sap.md)
 * [Pentesting Kubernetes](pentesting/pentesting-kubernetes/README.md)
-  * [Enumeration from a Pod](pentesting/pentesting-kubernetes/enumeration-from-a-pod.md)
+  * [Kubernetes Enumeration](pentesting/pentesting-kubernetes/enumeration-from-a-pod.md)
   * [Hardening Roles/ClusterRoles](pentesting/pentesting-kubernetes/hardening-roles-clusterroles.md)
   * [Pentesting Kubernetes from the outside](pentesting/pentesting-kubernetes/pentesting-kubernetes-from-the-outside.md)
 * [7/tcp/udp - Pentesting Echo](pentesting/7-tcp-udp-pentesting-echo.md)
