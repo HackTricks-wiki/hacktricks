@@ -17,14 +17,6 @@ Organization
 
 A virtual machine (called a Compute Instance) is a resource. A resource resides in a project, probably alongside other Compute Instances, storage buckets, etc.
 
-### **IAM Policies, Bindings and Memberships**
-
-In GCP there are different ways to grant a principal access over a resource:
-
-* **Memberships**: You set **principals as members of roles** **without restrictions** over the role or the principals. You can put a user as a member of a role and then put a group as a member of the same role and also set those principals (user and group) as member of other roles.
-* **Bindings**: Several **principals can be binded to a role**. Those **principals can still be binded or be members of other roles**. However, if a principal which isn’t binded to the role is set as **member of a binded role**, the next time the **binding is applied, the membership will disappear**.
-* **Policies**: A policy is **authoritative**, it indicates roles and principals and then, **those principals cannot have more roles and those roles cannot have more principals** unless that policy is modified (not even in other policies, bindings or memberships). Therefore, when a role or principal is specified in policy all its privileges are **limited by that policy**. Obviously, this can be bypassed in case the principal is given the option to modify the policy or privilege escalation permissions (like create a new principal and bind him a new role).
-
 ### **IAM Roles**
 
 There are **three types** of roles in IAM:
@@ -77,6 +69,14 @@ gcloud compute instances get-iam-policy [INSTANCE] --zone [ZONE]
 ### **Organization Policies**
 
 The IAM policies indicates the permissions principals has over resources via roles which ara assigned granular permissions. Organization policies **restrict how those service can be used or which features are enabled disabled**. This helps in order to improve the least privilege of each resource in the gcp environment.
+
+### **Terraform IAM Policies, Bindings and Memberships**
+
+As defined by terraform in [https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google\_project\_iam](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google\_project\_iam) using terraform with GCP there are different ways to grant a principal access over a resource:
+
+* **Memberships**: You set **principals as members of roles** **without restrictions** over the role or the principals. You can put a user as a member of a role and then put a group as a member of the same role and also set those principals (user and group) as member of other roles.
+* **Bindings**: Several **principals can be binded to a role**. Those **principals can still be binded or be members of other roles**. However, if a principal which isn’t binded to the role is set as **member of a binded role**, the next time the **binding is applied, the membership will disappear**.
+* **Policies**: A policy is **authoritative**, it indicates roles and principals and then, **those principals cannot have more roles and those roles cannot have more principals** unless that policy is modified (not even in other policies, bindings or memberships). Therefore, when a role or principal is specified in policy all its privileges are **limited by that policy**. Obviously, this can be bypassed in case the principal is given the option to modify the policy or privilege escalation permissions (like create a new principal and bind him a new role).
 
 ### **Service accounts**
 

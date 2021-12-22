@@ -180,6 +180,19 @@ Once configured in the repo or the organizations **users of github won't be able
 
 Therefore, the **only way to steal github secrets is to be able to access the machine that is executing the Github Action** (in that scenario you will be able to access only the secrets declared for the Action).
 
+### Git Environments
+
+Github allows to create **environments** where you can save **secrets**. Then, you can give the github action access to the secrets inside the environment with something like:
+
+```yaml
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    environment: env_name
+```
+
+You can configure an environment to be **accessed** by **all branches** (default), **only protected** branches or **specify** which branches can access it.
+
 ### Git Action Box
 
 A Github Action can be **executed inside the github environment** or can be executed in a **third party infrastructure** configured by the user.

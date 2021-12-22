@@ -213,7 +213,7 @@
 * [Pentesting Kubernetes](pentesting/pentesting-kubernetes/README.md)
   * [Kubernetes Enumeration](pentesting/pentesting-kubernetes/enumeration-from-a-pod.md)
   * [Abusing Roles/ClusterRoles](pentesting/pentesting-kubernetes/hardening-roles-clusterroles.md)
-  * [Pentesting Kubernetes from the outside](pentesting/pentesting-kubernetes/pentesting-kubernetes-from-the-outside.md)
+  * [Pentesting Kubernetes Services](pentesting/pentesting-kubernetes/pentesting-kubernetes-from-the-outside.md)
   * [Kubernetes Role-Based Access Control (RBAC)](pentesting/pentesting-kubernetes/kubernetes-role-based-access-control-rbac.md)
   * [Attacking Kubernetes from inside a Pod](pentesting/pentesting-kubernetes/attacking-kubernetes-from-inside-a-pod.md)
   * [Kubernetes Basics](pentesting/pentesting-kubernetes/kubernetes-basics.md)
