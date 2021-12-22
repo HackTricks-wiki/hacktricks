@@ -212,7 +212,7 @@
 * [Pentesting SAP](pentesting/pentesting-sap.md)
 * [Pentesting Kubernetes](pentesting/pentesting-kubernetes/README.md)
   * [Kubernetes Enumeration](pentesting/pentesting-kubernetes/enumeration-from-a-pod.md)
-  * [Hardening Roles/ClusterRoles](pentesting/pentesting-kubernetes/hardening-roles-clusterroles.md)
+  * [Abusing Roles/ClusterRoles](pentesting/pentesting-kubernetes/hardening-roles-clusterroles.md)
   * [Pentesting Kubernetes from the outside](pentesting/pentesting-kubernetes/pentesting-kubernetes-from-the-outside.md)
 * [7/tcp/udp - Pentesting Echo](pentesting/7-tcp-udp-pentesting-echo.md)
 * [21 - Pentesting FTP](pentesting/pentesting-ftp/README.md)
