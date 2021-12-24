@@ -830,7 +830,31 @@ f(42)
 
 ## Decompiling Compiled Python
 
-Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com) **** one can **decompile** given compiled python code
+Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com) **** one can **decompile** given compiled python code.
+
+**Check out this tutorial**:
+
+{% content-ref url="../../../forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md" %}
+[.pyc.md](../../../forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
+{% endcontent-ref %}
+
+## Misc Python
+
+### Assert
+
+Python executed with optimizations with the param `-O` will remove asset statements and any code conditional on the value of **debug**.\
+Therefore, checks like
+
+```python
+def check_permission(super_user):
+    try:
+        assert(super_user)
+        print("\nYou are a super user\n")
+    except AssertionError:
+        print(f"\nNot a Super User!!!\n")
+```
+
+will be bypassed&#x20;
 
 ## References
 
@@ -839,3 +863,4 @@ Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com) *
 * [https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/](https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/)
 * [https://gynvael.coldwind.pl/n/python\_sandbox\_escape](https://gynvael.coldwind.pl/n/python\_sandbox\_escape)
 * [https://nedbatchelder.com/blog/201206/eval\_really\_is\_dangerous.html](https://nedbatchelder.com/blog/201206/eval\_really\_is\_dangerous.html)
+* [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
