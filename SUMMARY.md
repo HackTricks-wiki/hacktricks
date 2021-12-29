@@ -217,6 +217,7 @@
   * [Kubernetes Role-Based Access Control (RBAC)](pentesting/pentesting-kubernetes/kubernetes-role-based-access-control-rbac.md)
   * [Attacking Kubernetes from inside a Pod](pentesting/pentesting-kubernetes/attacking-kubernetes-from-inside-a-pod.md)
   * [Kubernetes Basics](pentesting/pentesting-kubernetes/kubernetes-basics.md)
+  * [Exposing Services in Kubernetes](pentesting/pentesting-kubernetes/exposing-services-in-kubernetes.md)
 * [7/tcp/udp - Pentesting Echo](pentesting/7-tcp-udp-pentesting-echo.md)
 * [21 - Pentesting FTP](pentesting/pentesting-ftp/README.md)
   * [FTP Bounce attack - Scan](pentesting/pentesting-ftp/ftp-bounce-attack.md)
