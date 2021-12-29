@@ -64,6 +64,29 @@ Then, you can **decompress** the image and **access the blobs** to search for su
 tar -xf image.tar
 ```
 
+### Basic Analysis
+
+You can get **basic information** from the image running:
+
+```bash
+docker inspect <image> 
+```
+
+You can also get a summary **history of changes** with:
+
+```bash
+docker history --no-trunc <image>
+```
+
+You can also generate a **dockerfile from an image** with:
+
+```bash
+alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock --rm alpine/dfimage"
+dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
+```
+
+### Dive
+
 In order to find added/modified files in docker images you can also use the [**dive**](https://github.com/wagoodman/dive) **** (download it from [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) utility:
 
 ```bash
