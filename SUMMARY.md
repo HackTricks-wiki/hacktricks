@@ -221,6 +221,7 @@
   * [Exposing Services in Kubernetes](pentesting/pentesting-kubernetes/exposing-services-in-kubernetes.md)
   * [Kubernetes Hardening](pentesting/pentesting-kubernetes/kubernetes-hardening/README.md)
     * [Monitoring with Falco](pentesting/pentesting-kubernetes/kubernetes-hardening/monitoring-with-falco.md)
+    * [Kubernetes SecurityContext(s)](pentesting/pentesting-kubernetes/kubernetes-hardening/kubernetes-securitycontext-s.md)
     * [Kubernetes NetworkPolicies](pentesting/pentesting-kubernetes/kubernetes-hardening/kubernetes-networkpolicies.md)
 * [7/tcp/udp - Pentesting Echo](pentesting/7-tcp-udp-pentesting-echo.md)
 * [21 - Pentesting FTP](pentesting/pentesting-ftp/README.md)
