@@ -37,6 +37,7 @@
     * [Seccomp](linux-unix/privilege-escalation/docker-breakout/seccomp.md)
     * [AppArmor](linux-unix/privilege-escalation/docker-breakout/apparmor.md)
     * [Namespaces](linux-unix/privilege-escalation/docker-breakout/namespaces.md)
+    * [Docker --privileged](linux-unix/privilege-escalation/docker-breakout/docker-privileged.md)
   * [electron/CEF/chromium debugger abuse](linux-unix/privilege-escalation/electron-cef-chromium-debugger-abuse.md)
   * [Escaping from Jails](linux-unix/privilege-escalation/escaping-from-limited-bash.md)
   * [Cisco - vmanage](linux-unix/privilege-escalation/cisco-vmanage.md)

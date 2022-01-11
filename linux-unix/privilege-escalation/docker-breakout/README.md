@@ -145,7 +145,7 @@ Capabilities allow **finer control for the capabilities that can be allowed** fo
 
 ### Seccomp in Docker
 
-This is not a technique to breakout from a Docker container but a security feature that Docker uses and you should know about as it might prevent you from breaking out from docker:
+This is a security feature that allows Docker to **limit the syscalls** that can be used inside the container:
 
 {% content-ref url="seccomp.md" %}
 [seccomp.md](seccomp.md)
@@ -153,10 +153,20 @@ This is not a technique to breakout from a Docker container but a security featu
 
 ### AppArmor in Docker
 
-This is not a technique to breakout from a Docker container but a security feature that Docker uses and you should know about as it might prevent you from breaking out from docker:
+**AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**.:
 
 {% content-ref url="apparmor.md" %}
 [apparmor.md](apparmor.md)
+{% endcontent-ref %}
+
+### SELinux in Docker
+
+[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) is a **labeling** **system**. Every **process** and every **file** system object has a **label**. SELinux policies define rules about what a **process label is allowed to do with all of the other labels** on the system.
+
+Container engines launch **container processes with a single confined SELinux label**, usually `container_t`, and then set the container inside of the container to be labeled `container_file_t`. The SELinux policy rules basically say that the **`container_t` processes can only read/write/execute files labeled `container_file_t`**.
+
+{% content-ref url="../selinux.md" %}
+[selinux.md](../selinux.md)
 {% endcontent-ref %}
 
 ### AuthZ & AuthN
@@ -167,7 +177,19 @@ An authorization plugin **approves** or **denies** **requests** to the Docker **
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
 {% endcontent-ref %}
 
-### no-new-privileges
+## Interesting Docker Flags
+
+### --privileged flag
+
+In the following page you can learn **what does the `--privileged` flag imply**:
+
+{% content-ref url="docker-privileged.md" %}
+[docker-privileged.md](docker-privileged.md)
+{% endcontent-ref %}
+
+### --security-opt
+
+#### no-new-privileges
 
 If you are running a container where an attacker manages to get access as a low privilege user. If you have a **miss-configured suid binary**, the attacker may abuse it and **escalate privileges inside** the container. Which, may allow him to escape from it.
 
@@ -176,6 +198,27 @@ Running the container with the **`no-new-privileges`** option enabled will **pre
 ```
 docker run -it --security-opt=no-new-privileges:true nonewpriv
 ```
+
+#### Other
+
+```bash
+#You can manually add/drop capabilities with
+--cap-add
+--cap-drop
+
+# You can manually disable seccomp in docker with
+--security-opt seccomp=unconfined
+
+# You can manually disable seccomp in docker with
+--security-opt apparmor=unconfined
+
+# You can manually disable selinux in docker with
+--security-opt label:disable
+```
+
+For more **`--security-opt`** options check: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
+
+## Other Security Considerations
 
 ### Managing Secrets
 

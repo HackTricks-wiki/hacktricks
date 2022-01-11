@@ -36,7 +36,7 @@ In case the **docker socket is in an unexpected place** you can still communicat
 
 You should check the capabilities of the container, if it has any of the following ones, you might be able to scape from it: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE`**
 
-You can check currently container capabilities using previously mentioned automatic tools or:
+You can check currently container capabilities using **previously mentioned automatic tools** or:
 
 ```bash
 capsh --print
@@ -63,7 +63,7 @@ mkdir -p /mnt/hola
 mount /dev/sda1 /mnt/hola
 ```
 
-And voilà ! You can now access the filesystem of the host because it is mounted in the `/mnt/hola `folder.
+And voilà ! You can now access the filesystem of the host because it is mounted in the `/mnt/hola` folder.
 
 #### Other escapes without mounting the host filesystem
 
@@ -271,7 +271,7 @@ findme
 
 This changes the requirement for the attack from knowing the full path, relative to the container host, of a file within the container, to knowing the pid of _any_ process running in the container.
 
-#### Pid Bashing <a href="pid-bashing" id="pid-bashing"></a>
+#### Pid Bashing <a href="#pid-bashing" id="pid-bashing"></a>
 
 This is actually the easy part, process ids in Linux are numerical and assigned sequentially. The `init` process is assigned process id `1` and all subsequent processes are assigned incremental ids. To identify the host process id of a process within a container, a brute force incremental search can be used:Container
 
@@ -291,7 +291,7 @@ root@host:~$ cat /proc/${COUNTER}/root/findme
 findme
 ```
 
-#### Putting it All Together <a href="putting-it-all-together" id="putting-it-all-together"></a>
+#### Putting it All Together <a href="#putting-it-all-together" id="putting-it-all-together"></a>
 
 To complete this attack the brute force technique can be used to guess the pid for the path `/proc/<pid>/root/payload.sh`, with each iteration writing the guessed pid path to the cgroups `release_agent` file, triggering the `release_agent`, and seeing if an output file is created.
 
@@ -388,8 +388,6 @@ root         9     2  0 11:25 ?        00:00:00 [mm_percpu_wq]
 root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
-
-###
 
 ### Runc exploit (CVE-2019-5736)
 

