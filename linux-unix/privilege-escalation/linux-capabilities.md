@@ -278,6 +278,10 @@ capsh --print
 Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 ```
 
+{% hint style="danger" %}
+You can **only add capabilities that are present** in both the permitted and the inheritable sets.
+{% endhint %}
+
 ### Capability-aware/Capability-dumb binaries
 
 The **capability-aware binaries won't use the new capabilities** given by the environment, however the **capability dumb binaries will us**e them as they won't reject them. This makes capability-dumb binaries vulnerable inside a special environment that grant capabilities to binaries.
