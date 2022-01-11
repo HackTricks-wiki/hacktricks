@@ -1258,6 +1258,41 @@ Note that if you set a new capability to the binary with CAP\_SETFCAP, you will 
 
 Once you have [SETUID capability](linux-capabilities.md#cap\_setuid) you can go to its section to see how to escalate privileges.
 
+#### Example with environment (Docker breakout)
+
+By default the capability **CAP\_SETFCAP is given to the proccess inside the container in Docker**. You can check that doing something like:
+
+```bash
+cat /proc/`pidof bash`/status | grep Cap
+CapInh: 00000000a80425fb
+CapPrm: 00000000a80425fb
+CapEff: 00000000a80425fb
+CapBnd: 00000000a80425fb
+CapAmb: 0000000000000000
+                                                                                                                     
+apsh --decode=00000000a80425fb         
+0x00000000a80425fb=cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
+```
+
+This capability allow to **give any other capability to binaries**, so we could think about **escaping** from the container **abusing any of the other capability breakouts** mentioned in this page.\
+However, if you try to give for example the capabilities CAP\_SYS\_ADMIN and CAP\_SYS\_PTRACE to the gdb binary, you will find that you can give them, but the **binary won’t be able to execute after this**:
+
+```bash
+getcap /usr/bin/gdb
+/usr/bin/gdb = cap_sys_ptrace,cap_sys_admin+eip
+
+setcap cap_sys_admin,cap_sys_ptrace+eip /usr/bin/gdb
+
+/usr/bin/gdb
+bash: /usr/bin/gdb: Operation not permitted
+```
+
+After investigating I read this: _Permitted: This is a **limiting superset for the effective capabilities** that the thread may assume. It is also a limiting superset for the capabilities that may be added to the inheri‐table set by a thread that **does not have the CAP\_SETPCAP** capability in its effective set._\
+It looks like the Permitted capabilities limit the ones that can be used.\
+However, Docker also grants the **CAP\_SETPCAP** by default, so you might be able to **set new capabilities inside the inheritables ones**.\
+However, in the documentation of this cap: _CAP\_SETPCAP : \[…] **add any capability from the calling thread’s bounding** set to its inheritable set_.\
+It looks like we can only add to the inheritable set capabilities from the bounding set. Which means that **we cannot put new capabilities like CAP\_SYS\_ADMIN or CAP\_SYS\_PTRACE in the inherit set to escalate privileges**.
+
 ### CAP\_KILL
 
 **This means that it's possible to kill any process.** You cannot escalate privileges directly with this capability.

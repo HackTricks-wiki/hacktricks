@@ -306,8 +306,8 @@ If you’re using [Kubernetes](https://kubernetes.io/docs/concepts/configuration
 
 If you are **inside a docker container** or you have access to a user in the **docker group**, you could try to **escape and escalate privileges**:
 
-{% content-ref url="docker-breakout-privilege-escalation/" %}
-[docker-breakout-privilege-escalation](docker-breakout-privilege-escalation/)
+{% content-ref url="docker-breakout-privilege-escalation.md" %}
+[docker-breakout-privilege-escalation.md](docker-breakout-privilege-escalation.md)
 {% endcontent-ref %}
 
 ## Docker Authentication Plugin Bypass

@@ -621,6 +621,12 @@ Now, you can execute commands on the container from this `socat` connection.
 
 Note that if you have write permissions over the docker socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-pe/#docker-group). If the [**docker API is listening in a port** you can also be able to compromise it](../../pentesting/2375-pentesting-docker.md#compromising).
 
+Check **more ways to break out from docker or abuse i to escalate privileges** in:
+
+{% content-ref url="docker-breakout/" %}
+[docker-breakout](docker-breakout/)
+{% endcontent-ref %}
+
 ### Containerd (ctr) privilege escalation
 
 If you find that you can use the **`ctr`** command read the following page as **you may be able to abuse it to escalate privileges**:

