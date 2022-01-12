@@ -8,7 +8,7 @@
 * ****[**deepce**](https://github.com/stealthcopter/deepce): Tool to enumerate and escape from containers
 * ****[**grype**](https://github.com/anchore/grype): Get the CVEs contained in the software installed in the image
 
-## Mounted docker socket
+## Mounted Docker Socket Escape
 
 If somehow you find that the **docker socket is mounted** inside the docker container, you will be able to escape from it.\
 This usually happen in docker containers that for some reason need to connect to docker daemon to perform actions.
@@ -32,7 +32,7 @@ docker run -it -v /:/host/ ubuntu:18.04 chroot /host/ bash
 In case the **docker socket is in an unexpected place** you can still communicate with it using the **`docker`** command with the parameter **`-H unix:///path/to/docker.sock`**
 {% endhint %}
 
-## Container Capabilities
+## Capabilities Abuse Escape
 
 You should check the capabilities of the container, if it has any of the following ones, you might be able to scape from it: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE`**
 
@@ -48,7 +48,7 @@ In the following page you can **learn more about linux capabilities** and how to
 [linux-capabilities.md](../linux-capabilities.md)
 {% endcontent-ref %}
 
-## Privileged Containers
+## Escape from Privileged Containers
 
 A privileged container can be created with the flag `--privileged` or disabling specific defenses:
 
@@ -274,6 +274,17 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
 
+### Host Networking
+
+If a container was configured with the Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), that container's network stack is not isolated from the Docker host (the container shares the host's networking namespace), and the container does not get its own IP-address allocated. In other words, the **container binds all services directly to the host's IP**. Furthermore the container can **intercept ALL network traffic that the host** is sending and receiving on shared interface `tcpdump -i eth0`.
+
+For instance, you can use this to **sniff and even spoof traffic** between host and metadata instance.
+
+Example:
+
+* [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
+* [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata\_MITM\_root\_EKS\_GKE/)
+
 ### Runc exploit (CVE-2019-5736)
 
 In case you can execute `docker exec` as root (probably with sudo), you try to escalate privileges escaping from a container abusing CVE-2019-5736 (exploit [here](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). This technique will basically **overwrite** the _**/bin/sh**_ binary of the **host** **from a container**, so anyone executing docker exec may trigger the payload.
@@ -297,3 +308,4 @@ There are other CVEs the container can be vulnerable too
 * [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 * [https://ajxchapman.github.io/containers/2020/11/19/privileged-container-escape.html](https://ajxchapman.github.io/containers/2020/11/19/privileged-container-escape.html)
 * [https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d](https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d)
+* [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/host-networking-driver](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/host-networking-driver)
