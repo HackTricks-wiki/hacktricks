@@ -195,11 +195,6 @@ smakam14@jungle1:/usr$ cat /proc/8955/uid_map
 As we can see above, userid 0(root) in container 1 is mapped to userid 231072 in host machine.\
 In the current Docker user namespace implementation, UID and GID mapping happens at Docker daemon level. There is work ongoing to allow the mappings to be done at Container level so that multi-tenant support is possible.
 
-### CGroup Namespace
-
-Each cgroup namespace has its **own set of cgroup root directories**. These root directories are the base points for the relative locations displayed in the corresponding records in the `/proc/[pid]/cgroup` file. When a process creates a new cgroup namespace using clone(2) or unshare(2) with the CLONE\_NEWCGROUP flag, its current cgroups directories become the cgroup root directories of the new namespace. (This applies both for the cgroups version 1 hierarchies and the cgroups version 2 unified hierarchy.)
-
 ## References
 
 * [https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)
-* [https://man7.org/linux/man-pages/man7/cgroup\_namespaces.7.html](https://man7.org/linux/man-pages/man7/cgroup\_namespaces.7.html)

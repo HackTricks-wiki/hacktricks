@@ -260,7 +260,7 @@ $ docker run --rm -it --security-opt apparmor:mydocker -v ~/haproxy:/localhost b
 chmod: /etc/hostname: Permission denied
 ```
 
-### AppArmor Docker Breakout
+### AppArmor Docker Bypass1
 
 You can find which **apparmor profile is running a container** using:
 
@@ -277,3 +277,7 @@ find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 ```
 
 In the weird case you can **modify the apparmor docker profile and reload it.** You could remove the restrictions and "bypass" them.
+
+### AppArmor Docker Bypass2
+
+**AppArmor is path based**, this means that even if it might be **protecting** files inside a directory like **`/proc`** if you can **configure how the container is going to be run**, you could **mount** the proc directory of the host inside **`/host/proc`** and it **won't be protected by AppArmor anymore**.

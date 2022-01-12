@@ -4,6 +4,8 @@
 
 Due to the lack of namespace support, the exposure of `/proc` and `/sys` offers a source of significant attack surface and information disclosure. Numerous files within the `procfs` and `sysfs` offer a risk for container escape, host modification or basic information disclosure which could facilitate other attacks.
 
+In order to abuse these techniques might be enough just to **miss-configure something like `-v /proc:/host/proc`** as AppArmor does not protect `/host/proc` because **AppArmor is path based**
+
 ## procfs
 
 ### /proc/sys
@@ -40,7 +42,10 @@ ls -l `cat /proc/sys/kernel/modprobe`
 
 #### /proc/sys/fs/binfmt\_misc
 
-[/proc/sys/fs/binfmt\_misc](https://man7.org/linux/man-pages/man5/proc.5.html) allows executing miscellaneous binary formats, which typically means various interpreters can be registered for non-native binary formats (such as Java) based on their magic number. While this path is typically writable by AppArmor rules, NCC is not aware of any exploits, although it is not likely required for most container applications.
+[/proc/sys/fs/binfmt\_misc](https://man7.org/linux/man-pages/man5/proc.5.html) allows executing miscellaneous binary formats, which typically means various **interpreters can be registered for non-native binary** formats (such as Java) based on their magic number. You can make the kernel execute a binary registering it as handlers.\
+You can find an exploit in [https://github.com/toffan/binfmt\_misc](https://github.com/toffan/binfmt\_misc): _Poor man's rootkit, leverage_ [_binfmt\_misc_](https://github.com/torvalds/linux/raw/master/Documentation/admin-guide/binfmt-misc.rst)_'s_ [_credentials_](https://github.com/torvalds/linux/blame/3bdb5971ffc6e87362787c770353eb3e54b7af30/Documentation/binfmt\_misc.txt#L62) _option to escalate privilege through any suid binary (and to get a root shell) if `/proc/sys/fs/binfmt_misc/register` is writeable._
+
+For a more in depth explanation of this technique check [https://www.youtube.com/watch?v=WBC7hhgMvQQ](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### /proc/config.gz
 

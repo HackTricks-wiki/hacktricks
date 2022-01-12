@@ -130,6 +130,7 @@ debugfs /dev/sda1
 # docker run --rm -it --privileged ubuntu bash
 
 # Finds + enables a cgroup release_agent
+## Looks for something like: /sys/fs/cgroup/*/release_agent
 d=`dirname $(ls -x /s*/fs/c*/*/r* |head -n1)`
 # Enables notify_on_release in the cgroup
 mkdir -p $d/w;echo 1 >$d/w/notify_on_release
@@ -312,17 +313,6 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
 
-### Host Networking
-
-If a container was configured with the Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), that container's network stack is not isolated from the Docker host (the container shares the host's networking namespace), and the container does not get its own IP-address allocated. In other words, the **container binds all services directly to the host's IP**. Furthermore the container can **intercept ALL network traffic that the host** is sending and receiving on shared interface `tcpdump -i eth0`.
-
-For instance, you can use this to **sniff and even spoof traffic** between host and metadata instance.
-
-Example:
-
-* [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
-* [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata\_MITM\_root\_EKS\_GKE/)
-
 ### Sensitive Mounts
 
 There are several files that might mounted that give **information about the underlaying host**. Some of them may even indicate **something to be executed by the host when something happens** (which will allow a attacker to escape from the container).\
@@ -340,6 +330,17 @@ However, you can find **other sensitive files** to check for in this page:
 [sensitive-mounts.md](docker-breakout-privilege-escalation/sensitive-mounts.md)
 {% endcontent-ref %}
 
+### Host Networking
+
+If a container was configured with the Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), that container's network stack is not isolated from the Docker host (the container shares the host's networking namespace), and the container does not get its own IP-address allocated. In other words, the **container binds all services directly to the host's IP**. Furthermore the container can **intercept ALL network traffic that the host** is sending and receiving on shared interface `tcpdump -i eth0`.
+
+For instance, you can use this to **sniff and even spoof traffic** between host and metadata instance.
+
+Example:
+
+* [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
+* [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata\_MITM\_root\_EKS\_GKE/)
+
 ### Runc exploit (CVE-2019-5736)
 
 In case you can execute `docker exec` as root (probably with sudo), you try to escalate privileges escaping from a container abusing CVE-2019-5736 (exploit [here](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). This technique will basically **overwrite** the _**/bin/sh**_ binary of the **host** **from a container**, so anyone executing docker exec may trigger the payload.
@@ -354,8 +355,20 @@ This will trigger the payload which is present in the main.go file.
 For more information: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
 {% hint style="info" %}
-There are other CVEs the container can be vulnerable too
+There are other CVEs the container can be vulnerable too, you can find a list in [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
 {% endhint %}
+
+### Container Breakout through Usermode helper Template
+
+If you are in **userspace** (**no kernel exploit** involved) the way to find new escapes mainly involve the following actions:
+
+* Find the **path of the containers filesystem** inside the host
+  * You can do this via **mount**, or via **brute-force PIDs** as explained in the second release\_agent exploit
+* Find some functionality where you can **indicate the path of a script to be executed by a host process (helper)** if something happens
+  * You should be able to **execute the trigger from inside the host**
+  * You need to know where the containers files are located inside the host to indicate a script you write inside the host
+* Have **enough capabilities and disabled protections** to be able to abuse that functionality
+  * You might need to **mount things** o perform **special privileged actions** you cannot do in a default docker container
 
 ## References
 
