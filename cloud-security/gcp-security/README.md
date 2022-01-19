@@ -259,6 +259,14 @@ We've automated this completely using [this python script](https://gitlab.com/gi
 [gcp-buckets-brute-force-and-privilege-escalation.md](gcp-buckets-brute-force-and-privilege-escalation.md)
 {% endcontent-ref %}
 
+#### Phishing
+
+You could **OAuth phish** a user with high privileges.
+
+#### Dorks
+
+* **Github**: auth\_provider\_x509\_cert\_url extension:json
+
 ## Generic GCP Security Checklists
 
 * [Google Cloud Computing Platform CIS Benchmark](https://www.cisecurity.org/cis-benchmarks/)
