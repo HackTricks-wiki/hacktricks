@@ -116,6 +116,12 @@ python3 favihash.py -f https://target/favicon.ico -t targets.txt -s
 
 Simply said, favihash will allow us to discover domains that have the same favicon icon hash as our target.
 
+Moreover, you can also search technologies using the favicon hash as explained in [**this blog post**](https://medium.com/@Asm0d3us/weaponizing-favicon-ico-for-bugbounties-osint-and-what-not-ace3c214e139). That means that if you know the **hash of the favicon of a vulnerable version of a web tech** you can search if in shodan and **find more vulnerable places**:
+
+```bash
+hodan search org:"Target" http.favicon.hash:116323821 --fields ip_str,port --separator " " | awk '{print $1":"$2}'
+```
+
 ### Other ways
 
 **Note that you can use this technique to discover more domain names every time you find a new domain.**
@@ -308,7 +314,7 @@ To perform the proposed idea you can use [**EyeWitness**](https://github.com/For
 
 ## Cloud Assets
 
-Just with some **specific keywords** identifying the company it's possible to enumerate possible cloud assets belonging to them with tools like [**cloud_enum**](https://github.com/initstring/cloud_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper) **or** [**cloudlist**](https://github.com/projectdiscovery/cloudlist)**.**
+Just with some **specific keywords** identifying the company it's possible to enumerate possible cloud assets belonging to them with tools like [**cloud\_enum**](https://github.com/initstring/cloud\_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper) **or** [**cloudlist**](https://github.com/projectdiscovery/cloudlist)**.**
 
 ## Recapitulation 1
 
@@ -331,7 +337,7 @@ Then, it's time for the real Bug Bounty hunt! In this methodology I'm **not goin
 [github-leaked-secrets.md](github-leaked-secrets.md)
 {% endcontent-ref %}
 
-You can also search for leaked secrets in all open repository platforms using: [https://searchcode.com/?q=auth_key](https://searchcode.com/?q=auth_key)
+You can also search for leaked secrets in all open repository platforms using: [https://searchcode.com/?q=auth\_key](https://searchcode.com/?q=auth\_key)
 
 ## [**Pentesting Web Methodology**](../pentesting/pentesting-web/)
 
