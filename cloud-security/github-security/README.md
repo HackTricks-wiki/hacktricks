@@ -243,6 +243,7 @@ jobs:
   * _Note for this and for the Code Owners restriction that usually a user won't be able to approve his own PRs, but if you are, you can abuse it to accept your PRs._
 * **Dismiss approvals when new commits are pushed**: If this isn’t set, you can submit legit code, wait till someone approves it, and put malicious code and merge it into the protected branch.
 * **Require reviews from Code Owners**: If this is activated and you are a Code Owner, you could make a **Github Action create your PR and then approve it yourself**.
+  * When a **CODEOWNER file is missconfigured** Github doesn't complain but it does't use it. Therefore, if it's missconfigured it's **Code Owners protection isn't applied.**
 * **Allow specified actors to bypass pull request requirements**: If you are one of these actors you can bypass pull request protections.
 * **Include administrators**: If this isn’t set and you are admin of the repo, you can bypass this branch protections.
 * **PR Hijacking**: You could be able to **modify the PR of someone else** adding malicious code, approving the resulting PR yourself and merging everything.
