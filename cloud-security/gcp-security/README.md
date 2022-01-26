@@ -259,6 +259,14 @@ We've automated this completely using [this python script](https://gitlab.com/gi
 [gcp-buckets-brute-force-and-privilege-escalation.md](gcp-buckets-brute-force-and-privilege-escalation.md)
 {% endcontent-ref %}
 
+#### Phishing
+
+You could **OAuth phish** a user with high privileges.
+
+#### Dorks
+
+* **Github**: auth\_provider\_x509\_cert\_url extension:json
+
 ## Generic GCP Security Checklists
 
 * [Google Cloud Computing Platform CIS Benchmark](https://www.cisecurity.org/cis-benchmarks/)
@@ -282,8 +290,8 @@ The most common way once you have obtained some cloud credentials of has comprom
 
 Moreover, during this enumeration, remember that **permissions can be set at the highest level of "Organization"** as well.
 
-{% content-ref url="gcp-interesting-permissions.md" %}
-[gcp-interesting-permissions.md](gcp-interesting-permissions.md)
+{% content-ref url="gcp-interesting-permissions/" %}
+[gcp-interesting-permissions](gcp-interesting-permissions/)
 {% endcontent-ref %}
 
 ### Bypassing access scopes <a href="#bypassing-access-scopes" id="bypassing-access-scopes"></a>
@@ -369,7 +377,7 @@ Impersonating a service account can be very useful to **obtain new and better pr
 There are three ways in which you can [impersonate another service account](https://cloud.google.com/iam/docs/understanding-service-accounts#impersonating\_a\_service\_account):
 
 * Authentication **using RSA private keys** (covered [above](./#bypassing-access-scopes))
-* Authorization **using Cloud IAM policies** (covered [here](gcp-iam-escalation.md#iam.serviceaccounttokencreator))
+* Authorization **using Cloud IAM policies** (covered [here](broken-reference))
 * **Deploying jobs on GCP services** (more applicable to the compromise of a user account)
 
 ### Granting access to management console <a href="#granting-access-to-management-console" id="granting-access-to-management-console"></a>
