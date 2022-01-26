@@ -36,6 +36,8 @@ If you have the _**iam.serviceAccounts.implicitDelegation**_** permission on a S
 
 You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/5-iam.serviceAccounts.implicitDelegation.sh) and a python script to abuse this privilege [**here**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.implicitDelegation.py). For more information check the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/).
 
+Note that according to the [**documentation**](https://cloud.google.com/iam/docs/understanding-service-accounts), the delegation only works to generate a token using the [**generateAccessToken()**](https://cloud.google.com/iam/credentials/reference/rest/v1/projects.serviceAccounts/generateAccessToken) method.
+
 ### iam.serviceAccounts.signBlob
 
 The _iam.serviceAccounts.signBlob_ permission “allows signing of arbitrary payloads” in GCP. This means we can **create an unsigined JWT of the SA and then send it as a blob to get the JWT signed** by the SA **** we are targeting. For more information [**read this**](https://medium.com/google-cloud/using-serviceaccountactor-iam-role-for-account-impersonation-on-google-cloud-platform-a9e7118480ed).
@@ -58,7 +60,7 @@ gcloud iam service-accounts add-iam-policy-binding "${VICTIM_SA}@${PROJECT_ID}.i
 	--role="roles/iam.serviceAccountTokenCreator"
 ```
 
-You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/d-iam.serviceAccounts.setIamPolicy.sh).
+You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/d-iam.serviceAccounts.setIamPolicy.sh)**.**
 
 ### iam.serviceAccounts.actAs
 
@@ -96,3 +98,32 @@ Some services that support authentication via this kind of tokens are:
 
 You can find an example on how to create and OpenID token behalf a service account [**here**](https://github.com/carlospolop-forks/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.getOpenIdToken.py).
 
+## resourcemanager
+
+### resourcemanager.organizations.setIamPolicy
+
+Like in the exploitation of [**iam.serviceAccounts.setIamPolicy**](gcp-privesc-to-other-principals.md#iam.serviceaccounts.setiampolicy), this permission allows you to **modify** your **permissions** against **any resource** at **organization** level. So, you can follow the same exploitation example.
+
+### resourcemanager.folders.setIamPolicy
+
+Like in the exploitation of [**iam.serviceAccounts.setIamPolicy**](gcp-privesc-to-other-principals.md#iam.serviceaccounts.setiampolicy), this permission allows you to **modify** your **permissions** against **any resource** at **folder** level. So, you can follow the same exploitation example.
+
+### resourcemanager.projects.setIamPolicy
+
+Like in the exploitation of [**iam.serviceAccounts.setIamPolicy**](gcp-privesc-to-other-principals.md#iam.serviceaccounts.setiampolicy), this permission allows you to **modify** your **permissions** against **any resource** at **project** level. So, you can follow the same exploitation example.
+
+## deploymentmanager
+
+### deploymentmanager.deployments.create
+
+This single permission lets you **launch new deployments** of resources into GCP with arbitrary service accounts. You could for example launch a compute instance with a SA to escalate to it.
+
+You could actually **launch any resource** listed in `gcloud deployment-manager types list`
+
+In the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/) following[ **script**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/deploymentmanager.deployments.create.py) is used to deploy a compute instance, however that script won't work. Check a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/1-deploymentmanager.deployments.create.sh)**.**
+
+### deploymentmanager.deployments.**update**
+
+This is like the previous abuse but instead of creating a new deployment, you modifies one already existing (so be careful)
+
+Check a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/e-deploymentmanager.deployments.update.sh)**.**

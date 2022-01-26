@@ -497,6 +497,7 @@
   * [GCP - Other Services Enumeration](cloud-security/gcp-security/gcp-looting.md)
   * [GCP - Abuse GCP Permissions](cloud-security/gcp-security/gcp-interesting-permissions/README.md)
     * [GCP - Privesc to other Principals](cloud-security/gcp-security/gcp-interesting-permissions/gcp-privesc-to-other-principals.md)
+    * [GCP - Privesc to Resources](cloud-security/gcp-security/gcp-interesting-permissions/gcp-privesc-to-resources.md)
   * [GCP - Buckets: Public Assets Brute-Force & Discovery, & Buckets Privilege Escalation](cloud-security/gcp-security/gcp-buckets-brute-force-and-privilege-escalation.md)
   * [GCP - Compute Enumeration](cloud-security/gcp-security/gcp-compute-enumeration.md)
   * [GCP - Network Enumeration](cloud-security/gcp-security/gcp-network-enumeration.md)
