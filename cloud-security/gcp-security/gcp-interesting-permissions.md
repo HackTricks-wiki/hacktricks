@@ -1,80 +1,66 @@
 # GCP - Interesting Permissions
 
-These techniques were copied from [https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/) and [https://rhinosecuritylabs.com/cloud-security/privilege-escalation-google-cloud-platform-part-2/](https://rhinosecuritylabs.com/cloud-security/privilege-escalation-google-cloud-platform-part-2/#gcp-privesc-scanner)
+{% hint style="info" %}
+The permissions between parenthesis indicate the permissions needed to exploit the vulnerability with `gcloud`. Those might not be needed if exploiting it through the API.
+{% endhint %}
 
 ## deploymentmanager
 
 ### deploymentmanager.deployments.create
 
-This single permission lets you **launch new deployments** of resources into GCP a**s the **_**\<project number>@cloudservices.gserviceaccount.com**_** Service Account**, which, by default, is granted the Editor role on the project.
+This single permission lets you **launch new deployments** of resources into GCP with arbitrary service accounts. You could for example launch a compute instance with a SA to escalate to it.
 
-![](<../../.gitbook/assets/image (626) (1).png>)
+You could actually **launch any resource** listed in `gcloud deployment-manager types list`
 
-In the following example [this script](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/deploymentmanager.deployments.create.py) is used to deploy a compute instance, but any resource listed in `gcloud deployment-manager types list` __ could be actually deployed:
+In the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/) following[ **script**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/deploymentmanager.deployments.create.py) is used to deploy a compute instance, however that script won't work. Check a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/1-deploymentmanager.deployments.create.sh)**.**
 
 ## IAM
 
-### iam.roles.update
+### iam.roles.update (iam.roles.get)
 
-You can use this permission to **update the “includedPermissons” on your role**, so you can get any permission you want.
+If you have the mentioned permissions you will be able to update a role assigned to you and give you extra permissions to other resources like:
 
-![](<../../.gitbook/assets/image (627) (1) (1) (1).png>)
-
-```
+```bash
 gcloud iam roldes update <rol name> --project <project> --add-permissions <permission>
 ```
 
-You can find a script to abuse this privilege [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.roles.update.py).
+You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](gcp-interesting-permissions.md#deploymentmanager) and a python script to abuse this privilege [**here**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.roles.update.py). For more information check the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/).
 
-### iam.serviceAccounts.getAccessToken
+### iam.serviceAccounts.getAccessToken  (iam.serviceAccounts.get)
 
 This permission allows to **request an access token that belongs to a Service Account**, so it's possible to request an access token of a Service Account with more privileges than ours.
 
-The following screenshot shows an example of it, where the “iamcredentials” API is targeted to generate a new token. You can even specify the associated scopes for the token.
-
-![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image11-1000x208.png)
-
-The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.getAccessToken.py).
+You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/4-iam.serviceAccounts.getAccessToken.sh) and a python script to abuse this privilege [**here**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.getAccessToken.py). For more information check the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/).
 
 ### iam.serviceAccountKeys.create
 
-This permission allows us to do something similar to the previous method, but instead of an access token, we are **creating a user-managed key for a Service Account**, which will allow us to access GCP as that Service Account. The screenshot below shows us using the gcloud CLI to create a new Service Account key. Afterwards, we would just use this key to authenticate with the API.
+This permission allows us to do something similar to the previous method, but instead of an access token, we are **creating a user-managed key for a Service Account**, which will allow us to access GCP as that Service Account.
 
-![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image3-1000x98.png)
-
-```
+```bash
 gcloud iam service-accounts keys create --iam-account <name>
 ```
 
-The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccountKeys.create.py).
+You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/3-iam.serviceAccountKeys.create.sh) and a python script to abuse this privilege [**here**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccountKeys.create.py). For more information check the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/).
 
 ### iam.serviceAccounts.implicitDelegation
 
-If you have the _iam.serviceAccounts.implicitDelegation_ permission on another Service Account that has the _iam.serviceAccounts.getAccessToken_ permission on a third Service Account, then you can use implicitDelegation to create a token for that third Service Account. Here is a diagram to help explain.
+If you have the _**iam.serviceAccounts.implicitDelegation**_** permission on a Service Account** that has the _**iam.serviceAccounts.getAccessToken**_** permission on a third Service Account**, then you can use implicitDelegation to **create a token for that third Service Account**. Here is a diagram to help explain.
 
 ![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image2-500x493.png)
 
-The following screenshot shows a Service Account (Service Account A) making a request to the “iamcredentials” API to generate an access token for the “test-project” Service Account (Service Account C). The “scc-user” Service Account (Service Account B) is specified in the POST body as a “delegate”, meaning you are using your implicitDelegation permission on “scc-user” (Service Account B) to create an access token for “test-project” (Service Account C). Next, a request is made to the “tokeninfo” endpoint to verify the validity of the received token.
-
-![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image10-1000x417.png)
-
-The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.implicitDelegation.py).
+You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/5-iam.serviceAccounts.implicitDelegation.sh) and a python script to abuse this privilege [**here**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.implicitDelegation.py). For more information check the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/).
 
 ### iam.serviceAccounts.signBlob
 
-The _iam.serviceAccounts.signBlob_ permission “allows signing of arbitrary payloads” in GCP. This means we can **create a signed blob that requests an access token from the Service Account** we are targeting.
+The _iam.serviceAccounts.signBlob_ permission “allows signing of arbitrary payloads” in GCP. This means we can **create an unsigined JWT of the SA and then send it as a blob to get the JWT signed** by the SA **** we are targeting. For more information [**read this**](https://medium.com/google-cloud/using-serviceaccountactor-iam-role-for-account-impersonation-on-google-cloud-platform-a9e7118480ed).
 
-![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image4-1000x168.png)
-
-The exploit scripts for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.signBlob-accessToken.py) and [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.signBlob-gcsSignedUrl.py).
+You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/6-iam.serviceAccounts.signBlob.sh) and a python script to abuse this privilege [**here**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.signBlob-accessToken.py) and [**here**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.signBlob-gcsSignedUrl.py). For more information check the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/).
 
 ### iam.serviceAccounts.signJwt
 
-Similar to how the previous method worked by signing arbitrary payloads, this method works by signing well-formed JSON web tokens (JWTs). The script for this method will sign a well-formed JWT and **request a new access token belonging to the Service Account with it**.
+Similar to how the previous method worked by signing arbitrary payloads, this method works by signing well-formed JSON web tokens (JWTs). The difference with the previous method is that **instead of making google sign a blob containing a JWT, we use the signJWT method that already expects a JWT**. This makes it easier to use but you can only sign JWT instead of any bytes.
 
-![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image5-1000x78.png)
-
-The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.signJWT.py).
+You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/7-iam.serviceAccounts.signJWT.sh) and a python script to abuse this privilege [**here**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.signJWT.py). For more information check the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/).
 
 ### iam.serviceAccounts.actAs
 
@@ -86,11 +72,20 @@ This means that as part of creating certain resources, you must “actAs” the 
 
 This permission can be used to generate an OpenID JWT. These are used to assert identity and do not necessarily carry any implicit authorization against a resource.
 
-According to this [**interesting post**](https://medium.com/google-cloud/authenticating-using-google-openid-connect-tokens-e7675051213b), it's necessary to indicate the audience (service against you want to use the token to authenticate to) and you will receive a JWT signed by google indicating the service account and the audience of the JWT.
+According to this [**interesting post**](https://medium.com/google-cloud/authenticating-using-google-openid-connect-tokens-e7675051213b), it's necessary to indicate the audience (service where you want to use the token to authenticate to) and you will receive a JWT signed by google indicating the service account and the audience of the JWT.
+
+You can generate an OpenIDToken (if you have the access) with:
+
+```bash
+# First activate the SA with iam.serviceAccounts.getOpenIdToken over the other SA
+gcloud auth activate-service-account --key-file=/path/to/svc_account.json
+# Then, generate token
+gcloud auth print-identity-token "${ATTACK_SA}@${PROJECT_ID}.iam.gserviceaccount.com" --audiences=https://example.com
+```
 
 Then you can just use it to access the service with:
 
-```
+```bash
 curl -v -H "Authorization: Bearer id_token" https://some-cloud-run-uc.a.run.app
 ```
 
@@ -115,7 +110,7 @@ To use the script, just run it with the compromised GCP credentials you gained a
 
 Now that we have the token, we can begin making API calls as the Cloud Build Service account and hopefully find something juicy with these extra permissions!
 
-For a more indepth explanation visit [https://rhinosecuritylabs.com/gcp/iam-privilege-escalation-gcp-cloudbuild/](https://rhinosecuritylabs.com/gcp/iam-privilege-escalation-gcp-cloudbuild/)
+For a more in-depth explanation visit [https://rhinosecuritylabs.com/gcp/iam-privilege-escalation-gcp-cloudbuild/](https://rhinosecuritylabs.com/gcp/iam-privilege-escalation-gcp-cloudbuild/)
 
 ## cloudfunctions
 
@@ -288,3 +283,8 @@ An **example** of privilege escalation abusing .setIamPolicy (in this case in a 
 {% content-ref url="gcp-buckets-brute-force-and-privilege-escalation.md" %}
 [gcp-buckets-brute-force-and-privilege-escalation.md](gcp-buckets-brute-force-and-privilege-escalation.md)
 {% endcontent-ref %}
+
+## References
+
+* [https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/)
+* [https://rhinosecuritylabs.com/cloud-security/privilege-escalation-google-cloud-platform-part-2/](https://rhinosecuritylabs.com/cloud-security/privilege-escalation-google-cloud-platform-part-2/#gcp-privesc-scanner)
