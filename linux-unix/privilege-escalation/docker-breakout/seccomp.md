@@ -162,3 +162,5 @@ Following output shows the “docker inspect” displaying the profile:
 ### Deactivate it in Docker
 
 Launch a container with the flag: **`--security-opt seccomp=unconfined`**
+
+Also, note that when Docker (or other CRIs) are used in a **Kubernetes** cluster, the **seccomp filter is disabled by default**

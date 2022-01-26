@@ -150,6 +150,8 @@ Seccomp_filters:	0
 --security-opt seccomp=unconfined
 ```
 
+Also, note that when Docker (or other CRIs) are used in a **Kubernetes** cluster, the **seccomp filter is disabled by default**
+
 ### AppArmor
 
 **AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**. When you run with the `--privileged` flag, this protection is disabled.&#x20;
