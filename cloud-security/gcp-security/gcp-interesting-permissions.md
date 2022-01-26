@@ -1,5 +1,23 @@
 # GCP - Interesting Permissions
 
+## Introduction to GCP Privilege Escalation <a href="#introduction-to-gcp-privilege-escalation" id="introduction-to-gcp-privilege-escalation"></a>
+
+GCP, as any other cloud, have some **principals**: users, groups and service accounts, and some **resources** like compute engine, cloud functions…\
+Then, via roles, **permissions are granted to those principals over the resources**. This is the way to specify the permissions a principal has over a resource in GCP.\
+There are certain permissions that will allow a user to **get even more permissions** on the resource or third party resources, and that’s what is called **privilege escalation** (also, the exploitation the vulnerabilities to get more permissions).
+
+Therefore, I would like to separate GCP privilege escalation techniques in **2 groups**:
+
+* **Privesc to a principal**: This will allow you to **impersonate another principal**, and therefore act like it with all his permissions. e.g.: Abuse _getAccessToken_ to impersonate a service account.
+* **Privesc on the resource**: This will allow you to **get more permissions over the specific resource**. e.g.: you can abuse _setIamPolicy_ permission over cloudfunctions to allow you to trigger the function.
+  * Note that some **resources permissions will also allow you to attach an arbitrary service account** to the resource. This means that you will be able to launch a resource with a SA, get into the resource, and **steal the SA token**. Therefore, this will allow to escalate to a principal via a resource escalation. This has happened in several resources previously, but now it’s less frequent (but can still happen).
+
+Obviously, the most interesting privilege escalation techniques are the ones of the **second group** because it will allow you to **get more privileges outside of the resources you already have** some privileges over. However, note that **escalating in resources** may give you also access to **sensitive information** or even to **other principals** (maybe via reading a secret that contains a token of a SA).
+
+{% hint style="warning" %}
+It's important to note also that in **GCP Service Accounts are both principals and permissions**, so escalating privileges in a SA will allow you to impersonate it also.
+{% endhint %}
+
 {% hint style="info" %}
 The permissions between parenthesis indicate the permissions needed to exploit the vulnerability with `gcloud`. Those might not be needed if exploiting it through the API.
 {% endhint %}
@@ -61,6 +79,18 @@ You can find a script to automate the [**creation, exploit and cleaning of a vul
 Similar to how the previous method worked by signing arbitrary payloads, this method works by signing well-formed JSON web tokens (JWTs). The difference with the previous method is that **instead of making google sign a blob containing a JWT, we use the signJWT method that already expects a JWT**. This makes it easier to use but you can only sign JWT instead of any bytes.
 
 You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/7-iam.serviceAccounts.signJWT.sh) and a python script to abuse this privilege [**here**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccounts.signJWT.py). For more information check the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/).
+
+### iam.serviceAccounts.setIamPolicy <a href="#iam.serviceaccounts.setiampolicy" id="iam.serviceaccounts.setiampolicy"></a>
+
+This permission allows to **add IAM policies to service accounts**. You can abuse it to **grant yourself** the permissions you need to impersonate the service account. In the following example we are granting ourselves the “roles/iam.serviceAccountTokenCreator” role over the interesting SA:
+
+```bash
+gcloud iam service-accounts add-iam-policy-binding "${VICTIM_SA}@${PROJECT_ID}.iam.gserviceaccount.com" \
+	--member="user:username@domain.com" \
+	--role="roles/iam.serviceAccountTokenCreator"
+```
+
+You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/d-iam.serviceAccounts.setIamPolicy.sh).
 
 ### iam.serviceAccounts.actAs
 
@@ -221,6 +251,10 @@ The exploit script for this method can be found [here](https://github.com/RhinoS
 
 ## serviceusage
 
+The following permissions are useful to create and steal API keys, not this from the docs: _An API key is a simple encrypted string that **identifies an application without any principal**. They are useful for accessing **public data anonymously**, and are used to **associate** API requests with your project for quota and **billing**._
+
+Therefore, with an API key you can make that company pay for your use of the API, but you won't be able to escalate privileges.
+
 ### serviceusage.apiKeys.create
 
 There is another method of authenticating with GCP APIs known as API keys. By default, they are created with no restrictions, which means they have access to the entire GCP project they were created in. We can capitalize on that fact by creating a new API key that may have more privileges than our own user. There is no official API for this, so a custom HTTP request needs to be sent to _https://apikeys.clients6.google.com/_ (or _https://apikeys.googleapis.com/_). This was discovered by monitoring the HTTP requests and responses while browsing the GCP web console. For documentation on the restrictions associated with API keys, visit [this link](https://cloud.google.com/docs/authentication/api-keys).
@@ -246,6 +280,10 @@ The screenshot above shows that the request is exactly the same as before, it ju
 The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/serviceusage.apiKeys.list.py).
 
 ## apikeys
+
+The following permissions are useful to create and steal API keys, not this from the docs: _An API key is a simple encrypted string that **identifies an application without any principal**. They are useful for accessing **public data anonymously**, and are used to **associate** API requests with your project for quota and **billing**._
+
+Therefore, with an API key you can make that company pay for your use of the API, but you won't be able to escalate privileges.
 
 ### apikeys.keys.create <a href="#apikeys.keys.create" id="apikeys.keys.create"></a>
 
@@ -293,6 +331,8 @@ gcloud alpha services api-keys lookup AIzaSyD[...]uE8Y
 name: projects/5[...]6/locations/global/keys/28d[...]e0e
 parent: projects/5[...]6/locations/global
 ```
+
+In this scenario it could also be interesting to run the tool [https://github.com/ozguralp/gmapsapiscanner](https://github.com/ozguralp/gmapsapiscanner) and check what you can access with the API key
 
 ## storage
 
