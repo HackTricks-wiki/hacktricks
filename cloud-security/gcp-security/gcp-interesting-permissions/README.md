@@ -22,6 +22,22 @@ It's important to note also that in **GCP Service Accounts are both principals a
 The permissions between parenthesis indicate the permissions needed to exploit the vulnerability with `gcloud`. Those might not be needed if exploiting it through the API.
 {% endhint %}
 
+## Privilege Escalation to Principals
+
+Check all the **known permissions** that will allow you to **escalate privileges over other principals** in:
+
+{% content-ref url="gcp-privesc-to-other-principals.md" %}
+[gcp-privesc-to-other-principals.md](gcp-privesc-to-other-principals.md)
+{% endcontent-ref %}
+
+## Privilege Escalation to Resources
+
+Check all the **known permissions** that will allow you to **escalate privileges over other resources** in:
+
+{% content-ref url="gcp-privesc-to-resources.md" %}
+[gcp-privesc-to-resources.md](gcp-privesc-to-resources.md)
+{% endcontent-ref %}
+
 ## cloudbuild
 
 ### cloudbuild.builds.create

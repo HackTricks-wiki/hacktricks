@@ -1,5 +1,10 @@
 # GCP - Privesc to other Principals
 
+{% hint style="info" %}
+GCP has **hundreds of permissions**. This is just a list containing the **known** ones that could allow you to escalate to other principals.\
+If you know about any other permissions not mentioned here, **please send a PR to add it** or let me know and I will add it.
+{% endhint %}
+
 ## IAM
 
 ### iam.roles.update (iam.roles.get)
