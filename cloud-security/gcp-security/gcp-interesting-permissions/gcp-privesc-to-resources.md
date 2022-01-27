@@ -219,6 +219,12 @@ An **example** of privilege escalation abusing .setIamPolicy (in this case in a 
 [gcp-buckets-brute-force-and-privilege-escalation.md](../gcp-buckets-brute-force-and-privilege-escalation.md)
 {% endcontent-ref %}
 
+## Generic Interesting Permissions
+
+### \*.create, \*.update
+
+These permissions can be very useful to try to escalate privileges in resources by **creating a new one or updating a new one**. These can of permissions are specially useful if you also has the permission **iam.serviceAccounts.actAs** over a Service Account and the resource you have .create/.update over can attach a service account.
+
 ## References
 
 * [https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/)

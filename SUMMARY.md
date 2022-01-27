@@ -37,7 +37,6 @@
       * [release\_agent exploit - Relative Paths to PIDs](linux-unix/privilege-escalation/docker-breakout/docker-breakout-privilege-escalation/release\_agent-exploit-relative-paths-to-pids.md)
       * [Docker release\_agent cgroups escape](linux-unix/privilege-escalation/docker-breakout/docker-breakout-privilege-escalation/docker-release\_agent-cgroups-escape.md)
       * [Sensitive Mounts](linux-unix/privilege-escalation/docker-breakout/docker-breakout-privilege-escalation/sensitive-mounts.md)
-      * [Page 1](linux-unix/privilege-escalation/docker-breakout/docker-breakout-privilege-escalation/page-1.md)
     * [Seccomp](linux-unix/privilege-escalation/docker-breakout/seccomp.md)
     * [AppArmor](linux-unix/privilege-escalation/docker-breakout/apparmor.md)
     * [Namespaces](linux-unix/privilege-escalation/docker-breakout/namespaces.md)
