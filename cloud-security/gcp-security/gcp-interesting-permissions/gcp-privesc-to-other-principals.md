@@ -33,6 +33,8 @@ gcloud iam service-accounts keys create --iam-account <name>
 
 You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/3-iam.serviceAccountKeys.create.sh) and a python script to abuse this privilege [**here**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.serviceAccountKeys.create.py). For more information check the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/).
 
+Note that **iam.serviceAccountKeys.update won't work to modify the key** of a SA because to do that the permissions iam.serviceAccountKeys.create is also needed.
+
 ### iam.serviceAccounts.implicitDelegation
 
 If you have the _**iam.serviceAccounts.implicitDelegation**_** permission on a Service Account** that has the _**iam.serviceAccounts.getAccessToken**_** permission on a third Service Account**, then you can use implicitDelegation to **create a token for that third Service Account**. Here is a diagram to help explain.
@@ -132,3 +134,22 @@ In the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escal
 This is like the previous abuse but instead of creating a new deployment, you modifies one already existing (so be careful)
 
 Check a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/e-deploymentmanager.deployments.update.sh)**.**
+
+### deploymentmanager.deployments.**setIamPolicy**
+
+This is like the previous abuse but instead of directly creating a new deployment, you first give you that access and then abuses the permission as explained in the previos _deploymentmanager.deployments.create_ section.
+
+## cloudbuild
+
+### cloudbuild.builds.create
+
+With this permission you can **submit a cloud build**. The cloudbuild machine will have in it’s filesystem by **default a token of the powerful cloudbuild Service Account**: `<PROJECT_NUMBER>@cloudbuild.gserviceaccount.com` . However, you can **indicate any service account inside the project** in the cloudbuild configuration.\
+Therefore, you can just make the machine exfiltrate to your server the token or **get a reverse shell inside of it and get yourself the token** (the file containing the token might change).
+
+You can find the original exploit script [**here on GitHub**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/cloudbuild.builds.create.py) **** (but the location it's taking the token from didn't work for me). Therefore, check a script to automate the [**creation, exploit and cleaning of a vuln environment here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/f-cloudbuild.builds.create.sh) **** and a python script to get a reverse shell inside of the cloudbuild machine and [**steal it here**](https://github.com/carlospolop/gcp\_privesc\_scripts/blob/main/tests/f-cloudbuild.builds.create.py) **** (in the code you can find how to specify other service accounts)**.**
+
+For a more in-depth explanation visit [https://rhinosecuritylabs.com/gcp/iam-privilege-escalation-gcp-cloudbuild/](https://rhinosecuritylabs.com/gcp/iam-privilege-escalation-gcp-cloudbuild/)
+
+### cloudbuild.builds.update
+
+**Potentially** with this permission you will be able to **update a cloud build and just steal the service account token** like it was performed with the previous permission (but unfortunately at the time of this writing I couldn't find any way to call that API).

@@ -204,6 +204,16 @@ HMAC keys belonging to your user cannot be accessed through the API and must be 
 
 The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/storage.hmacKeys.create.py).
 
+## secretmanager
+
+### secretmanager.secrets.get
+
+This give you access to read the secrets from the secret manager.
+
+### secretmanager.secrets.setIamPolicy
+
+This give you access to give you access to read the secrets from the secret manager.
+
 ## \*.setIamPolicy
 
 If you owns a user that has the **`setIamPolicy`** permission in a resource you can **escalate privileges in that resource** because you will be able to change the IAM policy of that resource and give you more privileges over it.
@@ -224,6 +234,10 @@ An **example** of privilege escalation abusing .setIamPolicy (in this case in a 
 ### \*.create, \*.update
 
 These permissions can be very useful to try to escalate privileges in resources by **creating a new one or updating a new one**. These can of permissions are specially useful if you also has the permission **iam.serviceAccounts.actAs** over a Service Account and the resource you have .create/.update over can attach a service account.
+
+### \*ServiceAccount\*
+
+This permission will usually let you **access or modify a Service Account in some resource** (e.g.: compute.instances.setServiceAccount). This **could lead to a privilege escalation** vector, but it will depend on each case.
 
 ## References
 
