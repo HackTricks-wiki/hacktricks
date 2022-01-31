@@ -28,7 +28,7 @@ You can find some Wireshark trick in:
 
 ### Xplico Framework
 
-****[**Xplico** ](https://github.com/xplico/xplico)_(only linux)_ **** can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico extracts each email (POP, IMAP, and SMTP protocols), all HTTP contents, each VoIP call (SIP), FTP, TFTP, and so on.
+****[**Xplico** ](https://github.com/xplico/xplico)_(only linux)_ can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico extracts each email (POP, IMAP, and SMTP protocols), all HTTP contents, each VoIP call (SIP), FTP, TFTP, and so on.
 
 #### Install
 

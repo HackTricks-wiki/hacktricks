@@ -63,7 +63,7 @@ So, start by performing a scan of type "**Unknown initial value**":
 
 ![](<../../.gitbook/assets/image (589).png>)
 
-Then, make the value change, indicate **how** the **value** **changed** (in my case it was decreased by 1) **** and perform a **next scan**:
+Then, make the value change, indicate **how** the **value** **changed** (in my case it was decreased by 1) and perform a **next scan**:
 
 ![](<../../.gitbook/assets/image (590).png>)
 

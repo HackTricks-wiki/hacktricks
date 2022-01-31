@@ -248,9 +248,9 @@ Look in all available log files on the compromised system for traces of maliciou
 **Logon** events recorded in the system and security logs, including logons via the network, can reveal that **malware** or an **intruder gained access** to a compromised system via a given account at a specific time. Other events around the time of a malware infection can be captured in system logs, including the **creation** of a **new** **service** or new accounts around the time of an incident.\
 Interesting system logons:
 
-* &#x20;**/var/log/syslog** (debian) **** or **/var/log/messages** (Redhat)
+* &#x20;**/var/log/syslog** (debian) or **/var/log/messages** (Redhat)
   * Shows general messages and info regarding the system. Basically a data log of all activity throughout the global system.
-* &#x20;**/var/log/auth.log** (debian) **** or **/var/log/secure** (Redhat)
+* &#x20;**/var/log/auth.log** (debian) or **/var/log/secure** (Redhat)
   * Keep authentication logs for both successful or failed logins, and authentication processes. Storage depends on system type.
   * `cat /var/log/auth.log | grep -iE "session opened for|accepted password|new session|not in sudoers"`
 * **/var/log/boot.log**: start-up messages and boot info.

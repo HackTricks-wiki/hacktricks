@@ -88,4 +88,4 @@ Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](http
 ## Reference
 
 * Take a look to this table defining Windows tokens: [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin)
-* Take a look to [**this paper**](https://github.com/hatRiot/token-priv/blob/master/abusing\_token\_eop\_1.0.txt) **** about privesc with tokens**.**
+* Take a look to [**this paper**](https://github.com/hatRiot/token-priv/blob/master/abusing\_token\_eop\_1.0.txt) about privesc with tokens**.**

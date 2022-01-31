@@ -264,7 +264,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 
 ### Internal Handlers
 
-[**Checkout this section**](./#file-extensions-apps) **** to find out how you can find which app is responsible of **handling the specified scheme or protocol**.
+[**Checkout this section**](./#file-extensions-apps) to find out how you can find which app is responsible of **handling the specified scheme or protocol**.
 
 ### Enumerating Network Processes
 

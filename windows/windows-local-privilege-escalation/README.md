@@ -1431,21 +1431,21 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 
 ****[**PrivescCheck** ](https://github.com/itm4n/PrivescCheck)****\
 ****[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) -- Check for misconfigurations and sensitive files ([check here](broken-reference)). Detected.\
-[**JAWS**](https://github.com/411Hall/JAWS) **** -- Check for some possible misconfigurations and gather info ([check here](broken-reference)).\
+[**JAWS**](https://github.com/411Hall/JAWS) -- Check for some possible misconfigurations and gather info ([check here](broken-reference)).\
 [**privesc** ](https://github.com/enjoiz/Privesc)-- Check for misconfigurations\
-[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **** -- It extracts PuTTY, WinSCP, SuperPuTTY, FileZilla, and RDP saved session information. Use **-Thorough** in local.\
-[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **** -- Extracts crendentials from Credential Manager. Detected.\
-[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **** -- Spray gathered passwords across domain\
-[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **** -- Inveigh is a PowerShell ADIDNS/LLMNR/mDNS/NBNS spoofer and man-in-the-middle tool.\
+[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) -- It extracts PuTTY, WinSCP, SuperPuTTY, FileZilla, and RDP saved session information. Use **-Thorough** in local.\
+[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) -- Extracts crendentials from Credential Manager. Detected.\
+[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) -- Spray gathered passwords across domain\
+[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) -- Inveigh is a PowerShell ADIDNS/LLMNR/mDNS/NBNS spoofer and man-in-the-middle tool.\
 [**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) -- Basic privesc Windows enumeration\
 [~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock)  ~~****~~  -- Search for known privesc vulnerabilities (DEPRECATED for Watson)\
 [~~**WINspect**~~](https://github.com/A-mIn3/WINspect) ~~****~~ -- Local checks **(Need Admin rights)**
 
 #### Exe
 
-[**Watson**](https://github.com/rasta-mouse/Watson) **** -- Search for known privesc vulnerabilities (needs to be compiled using VisualStudio) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
-[**SeatBelt**](https://github.com/GhostPack/Seatbelt) **** -- Enumerates the host searching for misconfigurations (more a gather info tool than privesc) (needs to be compiled) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
-****[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **** -- Extracts credentials from lots of softwares (precompiled exe in github)\
+[**Watson**](https://github.com/rasta-mouse/Watson) -- Search for known privesc vulnerabilities (needs to be compiled using VisualStudio) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
+[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Enumerates the host searching for misconfigurations (more a gather info tool than privesc) (needs to be compiled) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
+****[**LaZagne**](https://github.com/AlessandroZ/LaZagne) -- Extracts credentials from lots of softwares (precompiled exe in github)\
 [~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) ~~****~~ -- Check for misconfiguration (executable precompiled in github). Not recommended. It does not work well in Win10.\
 [~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Check for possible misconfigurations (exe from python). Not recommended. It does not work well in Win10.
 

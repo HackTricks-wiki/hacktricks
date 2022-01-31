@@ -13,7 +13,7 @@ seccomp mode is **enabled via the `prctl(2)` system call** using the `PR_SET_SEC
 
 ### **Original/Strict Mode**
 
-In this mode **** Seccomp **only allow the syscalls**  `exit()`, `sigreturn()`, `read()` and `write()` to already-open file descriptors. If any other syscall is made, the process is killed using SIGKILL
+In this mode Seccomp **only allow the syscalls**  `exit()`, `sigreturn()`, `read()` and `write()` to already-open file descriptors. If any other syscall is made, the process is killed using SIGKILL
 
 {% code title="seccomp_strict.c" %}
 ```c

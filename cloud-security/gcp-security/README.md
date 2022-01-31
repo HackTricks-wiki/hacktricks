@@ -310,7 +310,7 @@ Also keep an eye out for instances that have the default service account assigne
 
 Google states very clearly [**"Access scopes are not a security mechanism… they have no effect when making requests not authenticated through OAuth"**](https://cloud.google.com/compute/docs/access/service-accounts#accesscopesiam).
 
-Therefore, if you **find a** [**service account key**](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) **** stored on the instance you can bypass the limitation. These are **RSA private keys** that can be used to authenticate to the Google Cloud API and **request a new OAuth token with no scope limitations**.
+Therefore, if you **find a** [**service account key**](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) stored on the instance you can bypass the limitation. These are **RSA private keys** that can be used to authenticate to the Google Cloud API and **request a new OAuth token with no scope limitations**.
 
 Check if any service account has exported a key at some point with:
 

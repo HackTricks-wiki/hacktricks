@@ -38,7 +38,7 @@ In this exam I **missed the opportunity to exploit more vulnerabilities**, howev
 This course is the one meant to **prepare** you for the **eWPTXv2** **certificate** **exam**. \
 Even having been working as web pentester for several years before doing the course, it taught me several **neat hacking tricks about "weird" web vulnerabilities and ways to bypass protections**. Moreover, the course contains **pretty nice labs where you can practice what you learn**, and that is always helpful to fully understand the vulnerabilities.
 
-I think this course **isn't for web hacking beginners** (there are other INE courses for that like [**Web Application Penetration Testing**](https://my.ine.com/CyberSecurity/courses/38316560/web-application-penetration-testing)**).** However, **** if you aren't a beginner, independently on the hacking web "level" you think you have, **I definitely recommend you to take a look to the course** because I'm sure you **will learn new things** like I did.
+I think this course **isn't for web hacking beginners** (there are other INE courses for that like [**Web Application Penetration Testing**](https://my.ine.com/CyberSecurity/courses/38316560/web-application-penetration-testing)**).** However, if you aren't a beginner, independently on the hacking web "level" you think you have, **I definitely recommend you to take a look to the course** because I'm sure you **will learn new things** like I did.
 
 ### [eWPTXv2](https://elearnsecurity.com/product/ewptxv2-certification/)
 
@@ -56,13 +56,13 @@ It's a very interesting basic course about **how to use the ML environment provi
 
 ## Course: **Machine Learning with scikit-learn Starter Pass**
 
-In the course [**Machine Learning with scikit-learn Starter Pass**](https://my.ine.com/DataScience/courses/58c4e71b/machine-learning-with-scikit-learn-starter-pass) **** you will learn, as the name indicates, **how to use scikit-learn to create Machine Learning models**.&#x20;
+In the course [**Machine Learning with scikit-learn Starter Pass**](https://my.ine.com/DataScience/courses/58c4e71b/machine-learning-with-scikit-learn-starter-pass) you will learn, as the name indicates, **how to use scikit-learn to create Machine Learning models**.&#x20;
 
 It's definitely recommended for people that haven't use scikit-learn (but know python)
 
 ## **Course: Classification Algorithms**
 
-The **** [**Classification Algorithms course**](https://my.ine.com/DataScience/courses/2c6de5ea/classification-algorithms) **** is a great course for people that is **starting to learn about machine learning**. Here you will find information about the main classification algorithms you need to know and some mathematical concepts like **logistic regression** and **gradient descent**, **KNN**, **SVM**, and **Decision trees**.
+The [**Classification Algorithms course**](https://my.ine.com/DataScience/courses/2c6de5ea/classification-algorithms) is a great course for people that is **starting to learn about machine learning**. Here you will find information about the main classification algorithms you need to know and some mathematical concepts like **logistic regression** and **gradient descent**, **KNN**, **SVM**, and **Decision trees**.
 
 It also shows how to **create models** with with **scikit-learn.**
 

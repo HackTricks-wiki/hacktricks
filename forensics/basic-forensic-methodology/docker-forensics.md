@@ -87,7 +87,7 @@ dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 
 ### Dive
 
-In order to find added/modified files in docker images you can also use the [**dive**](https://github.com/wagoodman/dive) **** (download it from [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) utility:
+In order to find added/modified files in docker images you can also use the [**dive**](https://github.com/wagoodman/dive) (download it from [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) utility:
 
 ```bash
 #First you need to load the image in your docker repo

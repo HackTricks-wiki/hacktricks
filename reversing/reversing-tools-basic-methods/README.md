@@ -181,7 +181,7 @@ You can see the stack for example inside a hex dump:
 
 ### Deobfuscating shellcode and getting executed functions
 
-You should try **** [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7\&pid=152).\
+You should try [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7\&pid=152).\
 It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.
 
 ```bash
@@ -264,8 +264,8 @@ If you get the **binary** of a GBA game you can use different tools to **emulate
 
 * ****[**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - Contains a debugger with interface
 * ****[**mgba** ](https://mgba.io)- Contains a CLI debugger
-* ****[**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) **** - Ghidra plugin
-* [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) **** - Ghidra plugin
+* ****[**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
+* [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
 
 In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_** ** you can see how to press the Game Boy Advance **buttons**
 

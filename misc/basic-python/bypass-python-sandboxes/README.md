@@ -830,7 +830,7 @@ f(42)
 
 ## Decompiling Compiled Python
 
-Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com) **** one can **decompile** given compiled python code.
+Using tools like [**https://www.decompiler.com/**](https://www.decompiler.com) one can **decompile** given compiled python code.
 
 **Check out this tutorial**:
 

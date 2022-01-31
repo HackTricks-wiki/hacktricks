@@ -90,7 +90,7 @@ If you compromises a compute instance you should also check the actions mentione
 gcloud compute images list --no-standard-images
 ```
 
-You can then **** [**export**](https://cloud.google.com/sdk/gcloud/reference/compute/images/export) **the virtual disks** from any image in multiple formats. The following command would export the image `test-image` in qcow2 format, allowing you to download the file and build a VM locally for further investigation:
+You can then [**export**](https://cloud.google.com/sdk/gcloud/reference/compute/images/export) **the virtual disks** from any image in multiple formats. The following command would export the image `test-image` in qcow2 format, allowing you to download the file and build a VM locally for further investigation:
 
 ```bash
 gcloud compute images export --image test-image \

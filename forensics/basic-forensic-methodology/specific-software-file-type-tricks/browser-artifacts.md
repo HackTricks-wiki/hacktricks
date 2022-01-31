@@ -48,7 +48,7 @@ Inside the folder **of each profile** (_\~/.mozilla/firefox/\<ProfileName>/_) pa
 * _**handlers.json**_ : Protocol handlers (like, which app is going to handle _mailto://_ protocol)
 * _**persdict.dat**_ : Words added to the dictionary
 * _**addons.json**_ and _**extensions.sqlite** _ : Installed addons and extensions
-* _**cookies.sqlite**_ : Contains **cookies.** [**MZCookiesView**](https://www.nirsoft.net/utils/mzcv.html) **** can be used in Windows to inspect this file.
+* _**cookies.sqlite**_ : Contains **cookies.** [**MZCookiesView**](https://www.nirsoft.net/utils/mzcv.html) can be used in Windows to inspect this file.
 *   _**cache2/entries**_ or _**startupCache**_ : Cache data (\~350MB). Tricks like **data carving** can also be used to obtain the files saved in the cache. [MozillaCacheView](https://www.nirsoft.net/utils/mozilla\_cache\_viewer.html) can be used to see the **files saved in the cache**.
 
     &#x20;Information that can be obtained:
@@ -96,7 +96,7 @@ Most of the information will be saved inside the _**Default/**_ or _**ChromeDefa
   * Reloaded
 * _**Cookies**_ : Cookies. [ChromeCookiesView](https://www.nirsoft.net/utils/chrome\_cookies\_view.html) can be used to inspect the cookies.
 * _**Cache**_ : Cache. In Windows you can use the tool [ChromeCacheView](https://www.nirsoft.net/utils/chrome\_cache\_view.html) to inspect the ca
-* _**Bookmarks**_ : **** Bookmarks&#x20;
+* _**Bookmarks**_ : Bookmarks&#x20;
 * _**Web Data**_ : Form History
 * _**Favicons**_ : Favicons
 * _**Login Data**_ : Login information (usernames, passwords...)

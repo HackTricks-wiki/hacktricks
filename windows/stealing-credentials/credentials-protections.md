@@ -37,7 +37,7 @@ From [https://www.itprotoday.com/windows-10/what-credential-guard](https://www.i
 More information and a PS1 script to enable Credential Guard [can be found here](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
 In this case **Mimikatz cannot do much to bypass** this and extract the hashes from LSASS. But you could always add your **custom SSP** and **capture the credentials** when a user tries to login in **clear-text**.\
-More information about **** [**SSP and how to do this here**](../active-directory-methodology/custom-ssp.md).
+More information about [**SSP and how to do this here**](../active-directory-methodology/custom-ssp.md).
 
 Credentials Guard could be **enable in different ways**. To check if it was enabled using the registry you could check the value of the key _**LsaCfgFlags**_ in _**HKLM\System\CurrentControlSet\Control\LSA**_. If the value is **"1"** the it is active with UEFI lock, if **"2"** is active without lock and if **"0"** it's not enabled.\
 This is **not enough to enable Credentials Guard** (but it's a strong indicator).\
