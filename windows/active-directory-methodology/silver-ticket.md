@@ -114,7 +114,7 @@ In the following examples lets imagine that the ticket is retrieved impersonatin
 
 ### CIFS
 
-With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** \(if they are exposed\) and copy files to ay part of the remote filesystem just doing something like:
+With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** \(if they are exposed\) and copy files to a part of the remote filesystem just doing something like:
 
 ```bash
 dir \\vulnerable.computer\C$
