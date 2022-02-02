@@ -46,7 +46,7 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 
 ### Upload files
 
-****[**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)****
+[**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 
 ### **HTTPS Server**
 
@@ -60,12 +60,35 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 # then in your browser, visit:
 #    https://localhost:443
 
+#### PYTHON 2
 import BaseHTTPServer, SimpleHTTPServer
 import ssl
 
 httpd = BaseHTTPServer.HTTPServer(('0.0.0.0', 443), SimpleHTTPServer.SimpleHTTPRequestHandler)
 httpd.socket = ssl.wrap_socket (httpd.socket, certfile='./server.pem', server_side=True)
 httpd.serve_forever()
+####
+
+#### PYTHON3
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import ssl
+
+httpd = HTTPServer(('0.0.0.0', 443), BaseHTTPRequestHandler)
+httpd.socket = ssl.wrap_socket(httpd.socket, certfile="./server.pem", server_side=True)
+httpd.serve_forever()
+####
+
+#### USING FLASK
+from flask import Flask, redirect, request
+from urllib.parse import quote
+app = Flask(__name__)    
+@app.route('/')    
+def root():    
+    print(request.get_json())
+    return "OK"
+if __name__ == "__main__":    
+    app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
+####
 ```
 
 ## FTP
@@ -128,7 +151,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
 
-Or create a **smb **share **using samba**:
+Or create a \*\*smb \*\*share **using samba**:
 
 ```bash
 apt-get install samba
