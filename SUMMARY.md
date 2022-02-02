@@ -339,6 +339,7 @@
 * [5800,5801,5900,5901 - Pentesting VNC](pentesting/pentesting-vnc.md)
 * [5984,6984 - Pentesting CouchDB](pentesting/5984-pentesting-couchdb.md)
 * [5985,5986 - Pentesting WinRM](pentesting/5985-5986-pentesting-winrm.md)
+* [5985,5986 - Pentesting OMI](pentesting/5985-5986-pentesting-omi.md)
 * [6000 - Pentesting X11](pentesting/6000-pentesting-x11.md)
 * [6379 - Pentesting Redis](pentesting/6379-pentesting-redis.md)
 * [8009 - Pentesting Apache JServ Protocol (AJP)](pentesting/8009-pentesting-apache-jserv-protocol-ajp.md)
