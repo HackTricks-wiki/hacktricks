@@ -66,7 +66,7 @@ perl ./padBuster.pl http://10.10.10.10/index.php "" 8 -encoding 0 -cookies "hcon
 
 In **summary**, you can start decrypting the encrypted data by guessing the correct values that can be used to create all the **different paddings**. Then, the padding oracle attack will start decrypting bytes from the end to the start by guessing which will be the correct value that **creates a padding of 1, 2, 3, etc**.
 
-![](<../.gitbook/assets/image (629) (1).png>)
+![](<../.gitbook/assets/image (629) (1) (1).png>)
 
 Imagine you have some encrypted text that occupies **2 blocks** formed by the bytes from **E0 to E15**.\
 In order to **decrypt** the **last** **block** (**E8** to **E15**), the whole block passes through the "block cipher decryption" generating the **intermediary bytes I0 to I15**.\

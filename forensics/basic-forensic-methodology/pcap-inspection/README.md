@@ -6,9 +6,9 @@ A note about **PCAP** vs **PCAPNG**: there are two versions of the PCAP file for
 
 ## Online tools for pcaps
 
-* If the header of your pcap is **broken** you should try to **fix** it using: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)****
-* Extract **information** and search for **malware** inside a pcap in [**PacketTotal**](https://packettotal.com)****
-* Search for **malicious activity** using [**www.virustotal.com**](https://www.virustotal.com) and [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)****
+* If the header of your pcap is **broken** you should try to **fix** it using: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)\*\*\*\*
+* Extract **information** and search for **malware** inside a pcap in [**PacketTotal**](https://packettotal.com)\*\*\*\*
+* Search for **malicious activity** using [**www.virustotal.com**](https://www.virustotal.com) and [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)\*\*\*\*
 
 ## Extract Information
 
@@ -28,7 +28,7 @@ You can find some Wireshark trick in:
 
 ### Xplico Framework
 
-****[**Xplico** ](https://github.com/xplico/xplico)_(only linux)_ can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico extracts each email (POP, IMAP, and SMTP protocols), all HTTP contents, each VoIP call (SIP), FTP, TFTP, and so on.
+\*\*\*\*[**Xplico** ](https://github.com/xplico/xplico)_(only linux)_ can **analyze** a **pcap** and extract information from it. For example, from a pcap file Xplico extracts each email (POP, IMAP, and SMTP protocols), all HTTP contents, each VoIP call (SIP), FTP, TFTP, and so on.
 
 #### Install
 
@@ -118,7 +118,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ### YaraPcap
 
-****[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) is a tool that&#x20;
+\*\*\*\*[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) is a tool that
 
 * Reads a PCAP File and Extracts Http Streams.
 * gzip deflates any compressed streams
@@ -211,7 +211,6 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 rita show-exploded-dns -H --limit 10 zeek_logs
 
 
-
 ```
 
 ## Other pcap analysis tricks
@@ -227,4 +226,3 @@ rita show-exploded-dns -H --limit 10 zeek_logs
 {% content-ref url="usb-keystrokes.md" %}
 [usb-keystrokes.md](usb-keystrokes.md)
 {% endcontent-ref %}
-
