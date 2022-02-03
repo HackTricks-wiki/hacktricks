@@ -353,6 +353,7 @@
 * [10000 - Pentesting Network Data Management Protocol (ndmp)](pentesting/10000-network-data-management-protocol-ndmp.md)
 * [11211 - Pentesting Memcache](pentesting/11211-memcache.md)
 * [15672 - Pentesting RabbitMQ Management](pentesting/15672-pentesting-rabbitmq-management.md)
+* [24007,24008,24009,49152 - Pentesting GlusterFS](pentesting/24007-24008-24009-49152-pentesting-glusterfs.md)
 * [27017,27018 - Pentesting MongoDB](pentesting/27017-27018-mongodb.md)
 * [44134 - Pentesting Tiller (Helm)](pentesting/44134-pentesting-tiller-helm.md)
 * [44818/UDP/TCP - Pentesting EthernetIP](pentesting/44818-ethernetip.md)
