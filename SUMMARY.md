@@ -523,6 +523,7 @@
     * [Kubernetes SecurityContext(s)](pentesting/pentesting-kubernetes/kubernetes-hardening/kubernetes-securitycontext-s.md)
     * [Kubernetes NetworkPolicies](pentesting/pentesting-kubernetes/kubernetes-hardening/kubernetes-networkpolicies.md)
   * [Kubernetes Access to other Clouds](cloud-security/pentesting-kubernetes/kubernetes-access-to-other-clouds.md)
+  * [Namespace Escalation](cloud-security/pentesting-kubernetes/namespace-escalation.md)
 * [Cloud Security Review](cloud-security/cloud-security-review.md)
 * [AWS Security](cloud-security/aws-security.md)
 
