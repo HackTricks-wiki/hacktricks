@@ -546,6 +546,21 @@ gpg2john private_pgp.key #This will generate the hash, save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 ```
 
+### Open Office Pwd Protected Column
+
+If you have xlsx file with a column protected by password you can unprotect it:
+
+* **Upload it to google drive** and the password will be automatically removed
+* To **remove** it **manually**:
+
+```bash
+unzip file.xlsx
+grep -R "sheetProtection" ./*
+# Find something like: <sheetProtection algorithmName="SHA-512"hashValue="hFq32ZstMEekuneGzHEfxeBZh3hnmO9nvv8qVHV8Ux+t+39/22E3pfr8aSuXISfrRV9UVfNEzidgv+Uvf8C5Tg" saltValue="U9oZfaVCkz5jWdhs9AA8nA" spinCount="100000" sheet="1" objects="1" scenarios="1"/>
+# Remove that line and rezip the file
+zip -r file.xls .
+```
+
 ## Tools
 
 **Hash examples:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
