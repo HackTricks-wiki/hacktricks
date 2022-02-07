@@ -561,6 +561,13 @@ grep -R "sheetProtection" ./*
 zip -r file.xls .
 ```
 
+### PFX Certificates
+
+```bash
+# From https://github.com/Ridter/p12tool
+./p12tool crack -c staff.pfx -f /usr/share/wordlists/rockyou.txt
+```
+
 ## Tools
 
 **Hash examples:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
