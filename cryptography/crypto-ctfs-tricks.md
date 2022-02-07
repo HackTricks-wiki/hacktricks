@@ -17,8 +17,8 @@
 ## Magic Autosolvers
 
 * ****[**https://github.com/Ciphey/Ciphey**](https://github.com/Ciphey/Ciphey)****
-* ****[https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) (Magic module)
-* [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
+* ****[https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)**** (Magic module)
+* ****[https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)****
 
 ## Encoders
 
@@ -40,30 +40,59 @@ Most of encoded data can be decoded with these 2 ressources:
 
 * [http://rumkin.com/tools/cipher/atbash.php](http://rumkin.com/tools/cipher/atbash.php)
 
-### Similar to BASE64
+### Base Encodings Autosolver
 
-Check all bases with: [https://github.com/mufeedvh/basecrack](https://github.com/mufeedvh/basecrack)
+Check all these bases with: [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 
+* **Ascii85**
+  * `BQ%]q@psCd@rH0l`
+* **Base26** \[_A-Z_]
+  * `BQEKGAHRJKHQMVZGKUXNT`
 * **Base32** \[_A-Z2-7=_]
   * `NBXWYYLDMFZGCY3PNRQQ====`
-* **Base45** \[]
+* **Zbase32** \[_ybndrfg8ejkmcpqxot1uwisza345h769_]
+  * `pbzsaamdcf3gna5xptoo====`
+* **Base32 Geohash** \[_0-9b-hjkmnp-z_]
+  * `e1rqssc3d5t62svgejhh====`
+* **Base32 Crockford** \[_0-9A-HJKMNP-TV-Z_]
+  * `D1QPRRB3C5S62RVFDHGG====`
+* **Base32 Extended Hexadecimal** \[_0-9A-V_]
+  * `D1NMOOB3C5P62ORFDHGG====`
+* **Base45** \[_0-9A-Z $%*+-./:_]
   * `59DPVDGPCVKEUPCPVD`
-* **Base58 (bitcoin)** \[_123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz_]
+* **Base58 (bitcoin)** \[_1-9A-HJ-NP-Za-km-z_]
   * `2yJiRg5BF9gmsU6AC`
-* **Base58 (flickr)** \[_123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ_]
+* **Base58 (flickr)** \[_1-9a-km-zA-HJ-NP-Z_]
   * `2YiHqF5bf9FLSt6ac`
-* **Base58 (ripple)** \[_rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz_]
+* **Base58 (ripple)** \[_rpshnaf39wBUDNEGHJKLM4PQ-T7V-Z2b-eCg65jkm8oFqi1tuvAxyz_]
   * `pyJ5RgnBE9gm17awU`
 * **Base62** \[_0-9A-Za-z_]
   * `g2AextRZpBKRBzQ9`
 * **Base64** \[_A-Za-z0-9+/=_]
   * `aG9sYWNhcmFjb2xh`
-* **Base85 --> Like Ascii85**
+* **Base67** \[_A-Za-z0-9-_.!~_]
+  * `NI9JKX0cSUdqhr!p`
+* **Base85 (Ascii85)** \[_!\"#$%&'()*+,-./0-9:;<=>?@A-Z[\\]^\_`a-u_]
+  * `BQ%]q@psCd@rH0l`
+* **Base85 (Adobe)** \[_!\"#$%&'()*+,-./0-9:;<=>?@A-Z[\\]^\_`a-u_]
+  * `<~BQ%]q@psCd@rH0l~>`
+* **Base85 (IPv6 or RFC1924)** \[_0-9A-Za-z!#$%&()*+-;<=>?@^_`{|}~_]
+  * `Xm4y`V_|Y(V{dF>`
+* **Base85 (xbtoa)** \[_!\"#$%&'()*+,-./0-9:;<=>?@A-Z[\\]^\_`a-u_]
+  * `xbtoa Begin\nBQ%]q@psCd@rH0l\nxbtoa End N 12 c E 1a S 4e6 R 6991d`
+* **Base85 (XML)** \[_0-9A-Za-y!#$()*+,-./:;=?@^`{|}~z\__]
+  * `Xm4y|V{~Y+V}dF?`
+* **Base91** \[_A-Za-z0-9!#$%&()*+,./:;<=>?@[]^\_`{|}~"_]
+  * `frDg[*jNN!7&BQM`
+* **Base100** \[]
+  * `👟👦👣👘👚👘👩👘👚👦👣👘`
+* **Base122** \[]
+  * `4F ˂r0Xmvc`
 * **ATOM-128** \[_/128GhIoPQROSTeUbADfgHijKLM+n0pFWXY456xyzB7=39VaqrstJklmNuZvwcdEC_]
   * `MIc3KiXa+Ihz+lrXMIc3KbCC`
 * **HAZZ15** \[_HNO4klm6ij9n+J2hyf0gzA8uvwDEq3X1Q7ZKeFrWcVTts/MRGYbdxSo=ILaUpPBC5_]
   * `DmPsv8J7qrlKEoY7`
-* **MEGAN35** \[_3GHIJKLMNOPQRSTUb=cdefghijklmnopWXYZ/12+406789VaqrstuvwxyzABCDEF5_]
+* **MEGAN35** \[_3G-Ub=c-pW-Z/12+406-9Vaq-zA-F5_]
   * `kLD8iwKsigSalLJ5`
 * **ZONG22** \[_ZKj9n+yf0wDVX1s/5YbdxSo=ILaUpPBCHg8uvNO4klm6iJGhQ7eFrWczAMEq3RTt2_]
   * `ayRiIo1gpO+uUc7g`
