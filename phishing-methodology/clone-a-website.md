@@ -16,7 +16,7 @@ wget -mk -nH
 
 ```bash
 #https://github.com/imthaghost/goclone
-oclone <url>
+goclone <url>
 ```
 
 ### Social Engineering Toolit
