@@ -214,6 +214,26 @@ This give you access to read the secrets from the secret manager.
 
 This give you access to give you access to read the secrets from the secret manager.
 
+## container
+
+### container.clusters.get
+
+This permission allows to **gather credentials for the Kubernetes cluster** using something like:
+
+```bash
+gcloud container clusters get-credentials <cluster_name> --zone <zone>
+```
+
+Without extra permissions, the credentials are pretty basic as you can **just list some resource**, but hey are useful to find miss-configurations in the environment.
+
+{% hint style="info" %}
+Note that **kubernetes clusters might be configured to be private**, that will disallow that access to the Kube-API server from the Internet.
+{% endhint %}
+
+### container.clusters.getCredentials
+
+Apparently this permission might be useful to gather basic auth credentials (auth method that isn't supported anymore by GKE if you use the latest GKE versions)
+
 ## \*.setIamPolicy
 
 If you owns a user that has the **`setIamPolicy`** permission in a resource you can **escalate privileges in that resource** because you will be able to change the IAM policy of that resource and give you more privileges over it.
