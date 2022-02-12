@@ -17,7 +17,7 @@ gcloud iam roldes update <rol name> --project <project> --add-permissions <permi
 
 You can find a script to automate the [**creation, exploit and cleaning of a vuln environment here**](gcp-privesc-to-other-principals.md#deploymentmanager) and a python script to abuse this privilege [**here**](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/iam.roles.update.py). For more information check the [**original research**](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/).
 
-### iam.serviceAccounts.getAccessToken  (iam.serviceAccounts.get)
+### iam.serviceAccounts.getAccessToken (iam.serviceAccounts.get)
 
 This permission allows to **request an access token that belongs to a Service Account**, so it's possible to request an access token of a Service Account with more privileges than ours.
 
@@ -37,7 +37,7 @@ Note that **iam.serviceAccountKeys.update won't work to modify the key** of a SA
 
 ### iam.serviceAccounts.implicitDelegation
 
-If you have the _**iam.serviceAccounts.implicitDelegation**_** permission on a Service Account** that has the _**iam.serviceAccounts.getAccessToken**_** permission on a third Service Account**, then you can use implicitDelegation to **create a token for that third Service Account**. Here is a diagram to help explain.
+If you have the _**iam.serviceAccounts.implicitDelegation**_\*\* permission on a Service Account\*\* that has the _**iam.serviceAccounts.getAccessToken**_\*\* permission on a third Service Account\*\*, then you can use implicitDelegation to **create a token for that third Service Account**. Here is a diagram to help explain.
 
 ![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image2-500x493.png)
 
@@ -73,7 +73,7 @@ You can find a script to automate the [**creation, exploit and cleaning of a vul
 
 This means that as part of creating certain resources, you must “actAs” the Service Account for the call to complete successfully. For example, when starting a new Compute Engine instance with an attached Service Account, you need _iam.serviceAccounts.actAs_ on that Service Account. This is because without that permission, users could escalate permissions with fewer permissions to start with.
 
-**There are multiple individual methods that use **_**iam.serviceAccounts.actAs**_**, so depending on your own permissions, you may only be able to exploit one (or more) of these methods below**. These methods are slightly different in that they **require multiple permissions to exploit, rather than a single permission** like all of the previous methods.
+**There are multiple individual methods that use \_iam.serviceAccounts.actAs**\_**, so depending on your own permissions, you may only be able to exploit one (or more) of these methods below**. These methods are slightly different in that they **require multiple permissions to exploit, rather than a single permission** like all of the previous methods.
 
 ### iam.serviceAccounts.getOpenIdToken
 
@@ -153,6 +153,70 @@ For a more in-depth explanation visit [https://rhinosecuritylabs.com/gcp/iam-pri
 ### cloudbuild.builds.update
 
 **Potentially** with this permission you will be able to **update a cloud build and just steal the service account token** like it was performed with the previous permission (but unfortunately at the time of this writing I couldn't find any way to call that API).
+
+## container
+
+### container.clusters.get
+
+This permission allows to **gather credentials for the Kubernetes cluster** using something like:
+
+```bash
+gcloud container clusters get-credentials <cluster_name> --zone <zone>
+```
+
+Without extra permissions, the credentials are pretty basic as you can **just list some resource**, but hey are useful to find miss-configurations in the environment.
+
+{% hint style="info" %}
+Note that **kubernetes clusters might be configured to be private**, that will disallow that access to the Kube-API server from the Internet.
+{% endhint %}
+
+### container.clusters.getCredentials
+
+Apparently this permission might be useful to gather auth credentials (basic auth method isn't supported anymore by GKE if you use the latest GKE versions).
+
+### container.roles.escalate/container.clusterRoles.escalate
+
+**Kubernetes** by default **prevents** principals from being able to **create** or **update** **Roles** and **ClusterRoles** with **more permissions** that the ones the principal has. However, a **GCP** principal with that permissions will be **able to create/update Roles/ClusterRoles with more permissions** that ones he held, effectively bypassing the Kubernetes protection against this behaviour.
+
+**container.roles.create** and/or **container.roles.update** are also **necessary** to perform those privilege escalation actions.
+
+### container.roles.bind/container.clusterRoles.bind
+
+**Kubernetes** by default **prevents** principals from being able to **create** or **update** **RoleBindings** and **ClusterRoleBindings** to give **more permissions** that the ones the principal has. However, a **GCP** principal with that permissions will be **able to create/update RolesBindings/ClusterRolesBindings with more permissions** that ones he has, effectively bypassing the Kubernetes protection against this behaviour.
+
+**container.roleBindings.create** and/or **container.roleBindings.update** are also **necessary** to perform those privilege escalation actions.
+
+### container.cronJobs.create, container.cronJobs.update container.daemonSets.create, container.daemonSets.update container.deployments.create, container.deployments.update container.jobs.create, container.jobs.update container.pods.create, container.pods.update container.replicaSets.create, container.replicaSets.update container.replicationControllers.create, container.replicationControllers.update container.scheduledJobs.create, container.scheduledJobs.update container.statefulSets.create, container.statefulSets.update
+
+All these permissions are going to allow you to **create or update a resource** where you can **define** a **pod**. Defining a pod you can **specify the SA** that is going to be **attached** and the **image** that is going to be **run**, therefore you can run an image that is going to **exfiltrate the token of the SA to your server** allowing you to escalate to any service account.\
+For more information check:
+
+{% content-ref url="../../../pentesting/pentesting-kubernetes/hardening-roles-clusterroles/" %}
+[hardening-roles-clusterroles](../../../pentesting/pentesting-kubernetes/hardening-roles-clusterroles/)
+{% endcontent-ref %}
+
+As we are in a GCP environment, you will also be able to **get the nodepool GCP SA** from the **metadata** service and **escalate privileges in GC**P (by default the compute SA is used).
+
+### container.secrets.get, container.secrets.list
+
+As [**explained in this page**](../../../pentesting/pentesting-kubernetes/hardening-roles-clusterroles/#listing-secrets), with these permissions you can **read** the **tokens** of all the **SAs of kubernetes**, so you can escalate to them.
+
+### container.pods.exec
+
+With this permission you will be able to **exec into pods**, which gives you **access** to all the **Kubernetes SAs running in pods** to escalate privileges within K8s, but also you will be able to **steal** the **GCP Service Account** of the **NodePool**, **escalating privileges in GCP**.
+
+### container.pods.portForward
+
+As [**explained in this page**](../../../pentesting/pentesting-kubernetes/hardening-roles-clusterroles/#port-forward), with these permissions you can **access local services** running in **pods** that might allow you to **escalate privileges in Kubernetes** (and in **GCP** if somehow you manage to talk to the metadata service)**.**
+
+### container.serviceAccounts.createToken
+
+Because of the **name** of the **permission**, it **looks like that it will allow you to generate tokens of the K8s Service Accounts**, so you will be able to **privesc to any SA** inside Kubernetes. However, I couldn't find any API endpoint to use it, so let me know if you find it.
+
+### container.mutatingWebhookConfigurations.create, container.mutatingWebhookConfigurations.update
+
+These permissions might allow you to escalate privileges in Kubernetes, but more probably, you could abuse them to **persist in the cluster**.\
+For more information [**follow this link**](../../../pentesting/pentesting-kubernetes/hardening-roles-clusterroles/#malicious-admission-controller).
 
 ## References
 
