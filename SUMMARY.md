@@ -497,7 +497,6 @@
 ## Cloud Security
 
 * [GCP Security](cloud-security/gcp-security/README.md)
-  * [GCP - Local Privilege Escalation / SSH Pivoting](cloud-security/gcp-security/gcp-local-privilege-escalation-ssh-pivoting.md)
   * [GCP - Other Services Enumeration](cloud-security/gcp-security/gcp-looting.md)
   * [GCP - Abuse GCP Permissions](cloud-security/gcp-security/gcp-interesting-permissions/README.md)
     * [GCP - Privesc to other Principals](cloud-security/gcp-security/gcp-interesting-permissions/gcp-privesc-to-other-principals.md)
@@ -509,6 +508,7 @@
   * [GCP - Databases Enumeration](cloud-security/gcp-security/gcp-databases-enumeration.md)
   * [GCP - Serverless Code Exec Services Enumeration](cloud-security/gcp-security/gcp-serverless-code-exec-services-enumeration.md)
   * [GCP - Buckets Enumeration](cloud-security/gcp-security/gcp-buckets-enumeration.md)
+  * [GCP - Local Privilege Escalation / SSH Pivoting](cloud-security/gcp-security/gcp-local-privilege-escalation-ssh-pivoting.md)
 * [Github Security](cloud-security/github-security/README.md)
   * [Basic Github Information](cloud-security/github-security/basic-github-information.md)
 * [Kubernetes Security](pentesting/pentesting-kubernetes/README.md)

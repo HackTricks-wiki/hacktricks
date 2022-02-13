@@ -154,6 +154,38 @@ For a more in-depth explanation visit [https://rhinosecuritylabs.com/gcp/iam-pri
 
 **Potentially** with this permission you will be able to **update a cloud build and just steal the service account token** like it was performed with the previous permission (but unfortunately at the time of this writing I couldn't find any way to call that API).
 
+## compute
+
+### compute.projects.setCommonInstanceMetadata
+
+With that permission you can **modify** the **metadata** information of an **instance** and change the **authorized keys of a user**, or **create** a **new user with sudo** permissions. Therefore, you will be able to exec via SSH into any VM instance and steal the GCP Service Account the Instance is running with.\
+Limitations:
+
+* Note that GCP Service Accounts running in VM instances by default have a **very limited scope**
+* You will need to be **able to contact the SSH** server to login
+
+For more information about how to exploit this permission check:
+
+{% content-ref url="../gcp-local-privilege-escalation-ssh-pivoting.md" %}
+[gcp-local-privilege-escalation-ssh-pivoting.md](../gcp-local-privilege-escalation-ssh-pivoting.md)
+{% endcontent-ref %}
+
+### compute.instances.setMetadata
+
+This permission gives the **same privileges as the previous permission** but over a specific instances instead to a whole project. The **same exploits and limitations applies**.
+
+### compute.instances.setIamPolicy
+
+This kind of permission will allow you to **grant yourself a role with the previous permissions** and escalate privileges abusing them.
+
+### **compute.instances.osLogin**
+
+If OSLogin is enabled in the instance, with this permission you can just run **`gcloud compute ssh [INSTANCE]`** and connect to the instance. You won't have root privs inside the instance.
+
+### **compute.instances.osAdminLogin**
+
+If OSLogin is enabled in the instance, with this permission you can just run **`gcloud compute ssh [INSTANCE]`** and connect to the instance. You will have root privs inside the instance.
+
 ## container
 
 ### container.clusters.get

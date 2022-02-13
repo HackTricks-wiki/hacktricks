@@ -48,8 +48,6 @@ Although Google [recommends](https://cloud.google.com/compute/docs/access/servic
 * `https://www.googleapis.com/auth/compute`
 * `https://www.googleapis.com/auth/cloud-platfo`rm
 
-## **Add SSH keys**&#x20;
-
 ### **Add SSH keys to custom metadata**
 
 **Linux** **systems** on GCP will typically be running [Python Linux Guest Environment for Google Compute Engine](https://github.com/GoogleCloudPlatform/compute-image-packages/tree/master/packages/python-google-compute-engine#accounts) scripts. One of these is the [accounts daemon](https://github.com/GoogleCloudPlatform/compute-image-packages/tree/master/packages/python-google-compute-engine#accounts), which **periodically** **queries** the instance metadata endpoint for **changes to the authorized SSH public keys**.
@@ -149,26 +147,7 @@ gcloud compute ssh [INSTANCE NAME]
 
 This will **generate a new SSH key, add it to your existing user, and add your existing username to the `google-sudoers` group**, and start a new SSH session. While it is quick and easy, it may end up making more changes to the target system than the previous methods.
 
-## **Using OS Login**
-
-[OS Login](https://cloud.google.com/compute/docs/oslogin/) is an alternative to managing SSH keys. It links a **Google user or service account to a Linux identity**, relying on IAM permissions to grant or deny access to Compute Instances.
-
-OS Login is [enabled](https://cloud.google.com/compute/docs/instances/managing-instance-access#enable\_oslogin) at the project or instance level using the metadata key of `enable-oslogin = TRUE`.
-
-OS Login with two-factor authentication is [enabled](https://cloud.google.com/compute/docs/oslogin/setup-two-factor-authentication) in the same manner with the metadata key of `enable-oslogin-2fa = TRUE`.
-
-The following two **IAM permissions control SSH access to instances with OS Login enabled**. They can be applied at the project or instance level:
-
-* **roles/compute.osLogin** (no sudo)
-* **roles/compute.osAdminLogin** (has sudo)
-
-Unlike managing only with SSH keys, these permissions allow the administrator to control whether or not `sudo` is granted.
-
-If your service account has these permissions. **You can simply run the `gcloud compute ssh [INSTANCE]`** command to [connect manually as the service account](https://cloud.google.com/compute/docs/instances/connecting-advanced#sa\_ssh\_manual). **Two-factor** is **only** enforced when using **user accounts**, so that should not slow you down even if it is assigned as shown above.
-
-Similar to using SSH keys from metadata, you can use this strategy to **escalate privileges locally and/or to access other Compute Instances** on the network.
-
-## SSH keys at project level <a href="#sshing-around" id="sshing-around"></a>
+### SSH keys at project level <a href="#sshing-around" id="sshing-around"></a>
 
 Following the details mentioned in the previous section you can try to compromise more VMs.
 
@@ -179,6 +158,25 @@ gcloud compute project-info add-metadata --metadata-from-file ssh-keys=meta.txt
 ```
 
 If you're really bold, you can also just type `gcloud compute ssh [INSTANCE]` to use your current username on other boxes.
+
+## **Using OS Login**
+
+****[**OS Login**](https://cloud.google.com/compute/docs/oslogin/) **** is an alternative to managing SSH keys. It links a **Google user or service account to a Linux identity**, relying on IAM permissions to grant or deny access to Compute Instances.
+
+OS Login is [enabled](https://cloud.google.com/compute/docs/instances/managing-instance-access#enable\_oslogin) at the project or instance level using the metadata key of `enable-oslogin = TRUE`.
+
+OS Login with two-factor authentication is [enabled](https://cloud.google.com/compute/docs/oslogin/setup-two-factor-authentication) in the same manner with the metadata key of `enable-oslogin-2fa = TRUE`.
+
+The following two **IAM permissions control SSH access to instances with OS Login enabled**. They can be applied at the project or instance level:
+
+* **compute.instances.osLogin** (no sudo)
+* **compute.instances.osAdminLogin** (has sudo)
+
+Unlike managing only with SSH keys, these permissions allow the administrator to control whether or not `sudo` is granted.
+
+If your service account has these permissions. **You can simply run the `gcloud compute ssh [INSTANCE]`** command to [connect manually as the service account](https://cloud.google.com/compute/docs/instances/connecting-advanced#sa\_ssh\_manual). **Two-factor** is **only** enforced when using **user accounts**, so that should not slow you down even if it is assigned as shown above.
+
+Similar to using SSH keys from metadata, you can use this strategy to **escalate privileges locally and/or to access other Compute Instances** on the network.
 
 ## Search for Keys in the filesystem
 
