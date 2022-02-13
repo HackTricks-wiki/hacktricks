@@ -280,7 +280,7 @@ Supposing that you have compromised a VM in GCP, there are some **GCP privileges
 [gcp-local-privilege-escalation-ssh-pivoting.md](gcp-local-privilege-escalation-ssh-pivoting.md)
 {% endcontent-ref %}
 
-If you have found some [**SSRF vulnerability in a GCP environment check this page**](../../pentesting-web/ssrf-server-side-request-forgery.md#6440).
+If you have found some [**SSRF vulnerability in a GCP environment check this page**](../../pentesting-web/ssrf-server-side-request-forgery/#6440).
 
 ## Cloud privilege escalation <a href="#cloud-privilege-escalation" id="cloud-privilege-escalation"></a>
 
@@ -368,8 +368,6 @@ curl https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=$TOKEN
 
 You should see `https://www.googleapis.com/auth/cloud-platform` listed in the scopes, which means you are **not limited by any instance-level access scopes**. You now have full power to use all of your assigned IAM permissions.
 
-
-
 ### Service account impersonation <a href="#service-account-impersonation" id="service-account-impersonation"></a>
 
 Impersonating a service account can be very useful to **obtain new and better privileges**.
@@ -377,7 +375,7 @@ Impersonating a service account can be very useful to **obtain new and better pr
 There are three ways in which you can [impersonate another service account](https://cloud.google.com/iam/docs/understanding-service-accounts#impersonating\_a\_service\_account):
 
 * Authentication **using RSA private keys** (covered [above](./#bypassing-access-scopes))
-* Authorization **using Cloud IAM policies** (covered [here](broken-reference))
+* Authorization **using Cloud IAM policies** (covered [here](broken-reference/))
 * **Deploying jobs on GCP services** (more applicable to the compromise of a user account)
 
 ### Granting access to management console <a href="#granting-access-to-management-console" id="granting-access-to-management-console"></a>
@@ -398,7 +396,7 @@ This is the **highest level you can assign using the gcloud tool**.
 
 ### Spreading to Workspace via domain-wide delegation of authority <a href="#spreading-to-g-suite-via-domain-wide-delegation-of-authority" id="spreading-to-g-suite-via-domain-wide-delegation-of-authority"></a>
 
-[**Workspace**](https://gsuite.google.com) is Google's c**ollaboration and productivity platform** which consists of things like Gmail, Google Calendar, Google Drive, Google Docs, etc.&#x20;
+[**Workspace**](https://gsuite.google.com) is Google's c**ollaboration and productivity platform** which consists of things like Gmail, Google Calendar, Google Drive, Google Docs, etc.
 
 **Service accounts** in GCP can be granted the **rights to programatically access user data** in Workspace by impersonating legitimate users. This is known as [domain-wide delegation](https://developers.google.com/admin-sdk/reports/v1/guides/delegation). This includes actions like **reading** **email** in GMail, accessing Google Docs, and even creating new user accounts in the G Suite organization.
 
@@ -446,10 +444,10 @@ If you have success creating a new admin account, you can log on to the [Google 
 Another promising way to **escalate privileges inside the cloud is to enumerate as much sensitive information as possible** from the services that are being used. Here you can find some enumeration recommendations for some GCP services, but more could be used so feel free to submit PRs indicating ways to enumerate more services:
 
 {% hint style="info" %}
-Note that you can enumerate most resources with `list` (list items of that type), `describe` (describe parent and children items) and  `get-iam-policy` (get policy attached to that specific resource).&#x20;
+Note that you can enumerate most resources with `list` (list items of that type), `describe` (describe parent and children items) and `get-iam-policy` (get policy attached to that specific resource).
 {% endhint %}
 
-There is a gcloud API endpoint that aims to **list all the resources the accessible from the used user accoun**t, it's in alpha bet and only supports a couple of resources, but maybe in the future you can list all you have access to with it: [https://helpmanual.io/man1/gcloud\_alpha\_resources\_list/](https://helpmanual.io/man1/gcloud\_alpha\_resources\_list/)&#x20;
+There is a gcloud API endpoint that aims to **list all the resources the accessible from the used user accoun**t, it's in alpha bet and only supports a couple of resources, but maybe in the future you can list all you have access to with it: [https://helpmanual.io/man1/gcloud\_alpha\_resources\_list/](https://helpmanual.io/man1/gcloud\_alpha\_resources\_list/)
 
 {% content-ref url="gcp-buckets-enumeration.md" %}
 [gcp-buckets-enumeration.md](gcp-buckets-enumeration.md)
