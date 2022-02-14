@@ -154,6 +154,38 @@ For a more in-depth explanation visit [https://rhinosecuritylabs.com/gcp/iam-pri
 
 **Potentially** with this permission you will be able to **update a cloud build and just steal the service account token** like it was performed with the previous permission (but unfortunately at the time of this writing I couldn't find any way to call that API).
 
+## compute
+
+### compute.projects.setCommonInstanceMetadata
+
+With that permission you can **modify** the **metadata** information of an **instance** and change the **authorized keys of a user**, or **create** a **new user with sudo** permissions. Therefore, you will be able to exec via SSH into any VM instance and steal the GCP Service Account the Instance is running with.\
+Limitations:
+
+* Note that GCP Service Accounts running in VM instances by default have a **very limited scope**
+* You will need to be **able to contact the SSH** server to login
+
+For more information about how to exploit this permission check:
+
+{% content-ref url="../gcp-local-privilege-escalation-ssh-pivoting.md" %}
+[gcp-local-privilege-escalation-ssh-pivoting.md](../gcp-local-privilege-escalation-ssh-pivoting.md)
+{% endcontent-ref %}
+
+### compute.instances.setMetadata
+
+This permission gives the **same privileges as the previous permission** but over a specific instances instead to a whole project. The **same exploits and limitations applies**.
+
+### compute.instances.setIamPolicy
+
+This kind of permission will allow you to **grant yourself a role with the previous permissions** and escalate privileges abusing them.
+
+### **compute.instances.osLogin**
+
+If OSLogin is enabled in the instance, with this permission you can just run **`gcloud compute ssh [INSTANCE]`** and connect to the instance. You won't have root privs inside the instance.
+
+### **compute.instances.osAdminLogin**
+
+If OSLogin is enabled in the instance, with this permission you can just run **`gcloud compute ssh [INSTANCE]`** and connect to the instance. You will have root privs inside the instance.
+
 ## container
 
 ### container.clusters.get
@@ -178,13 +210,14 @@ Apparently this permission might be useful to gather auth credentials (basic aut
 
 **Kubernetes** by default **prevents** principals from being able to **create** or **update** **Roles** and **ClusterRoles** with **more permissions** that the ones the principal has. However, a **GCP** principal with that permissions will be **able to create/update Roles/ClusterRoles with more permissions** that ones he held, effectively bypassing the Kubernetes protection against this behaviour.
 
-**container.roles.create** and/or **container.roles.update** are also **necessary** to perform those privilege escalation actions.
+**container.roles.create** and/or **container.roles.update** OR **container.clusterRoles.create** and/or **container.clusterRoles.update** respectively are also **necessary** to perform those privilege escalation actions.\
+
 
 ### container.roles.bind/container.clusterRoles.bind
 
 **Kubernetes** by default **prevents** principals from being able to **create** or **update** **RoleBindings** and **ClusterRoleBindings** to give **more permissions** that the ones the principal has. However, a **GCP** principal with that permissions will be **able to create/update RolesBindings/ClusterRolesBindings with more permissions** that ones he has, effectively bypassing the Kubernetes protection against this behaviour.
 
-**container.roleBindings.create** and/or **container.roleBindings.update** are also **necessary** to perform those privilege escalation actions.
+**container.roleBindings.create** and/or **container.roleBindings.update** OR **container.clusterRoleBindings.create** and/or **container.clusterRoleBindings.update** respectively **** are also **necessary** to perform those privilege escalation actions.
 
 ### container.cronJobs.create, container.cronJobs.update container.daemonSets.create, container.daemonSets.update container.deployments.create, container.deployments.update container.jobs.create, container.jobs.update container.pods.create, container.pods.update container.replicaSets.create, container.replicaSets.update container.replicationControllers.create, container.replicationControllers.update container.scheduledJobs.create, container.scheduledJobs.update container.statefulSets.create, container.statefulSets.update
 
