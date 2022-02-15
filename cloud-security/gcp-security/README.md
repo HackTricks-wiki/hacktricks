@@ -282,7 +282,7 @@ Supposing that you have compromised a VM in GCP, there are some **GCP privileges
 
 If you have found some [**SSRF vulnerability in a GCP environment check this page**](../../pentesting-web/ssrf-server-side-request-forgery/#6440).
 
-## Cloud privilege escalation <a href="#cloud-privilege-escalation" id="cloud-privilege-escalation"></a>
+## GCP Post Exploitation <a href="#cloud-privilege-escalation" id="cloud-privilege-escalation"></a>
 
 ### GCP Interesting Permissions <a href="#organization-level-iam-permissions" id="organization-level-iam-permissions"></a>
 
@@ -475,6 +475,12 @@ There is a gcloud API endpoint that aims to **list all the resources the accessi
 
 {% content-ref url="gcp-looting.md" %}
 [gcp-looting.md](gcp-looting.md)
+{% endcontent-ref %}
+
+### Persistance
+
+{% content-ref url="gcp-persistance.md" %}
+[gcp-persistance.md](gcp-persistance.md)
 {% endcontent-ref %}
 
 ## References
