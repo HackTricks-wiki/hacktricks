@@ -224,15 +224,15 @@ Apparently this permission might be useful to gather auth credentials (basic aut
 All these permissions are going to allow you to **create or update a resource** where you can **define** a **pod**. Defining a pod you can **specify the SA** that is going to be **attached** and the **image** that is going to be **run**, therefore you can run an image that is going to **exfiltrate the token of the SA to your server** allowing you to escalate to any service account.\
 For more information check:
 
-{% content-ref url="../../../pentesting/pentesting-kubernetes/hardening-roles-clusterroles/" %}
-[hardening-roles-clusterroles](../../../pentesting/pentesting-kubernetes/hardening-roles-clusterroles/)
+{% content-ref url="../../pentesting-kubernetes/abusing-roles-clusterroles-in-kubernetes/" %}
+[abusing-roles-clusterroles-in-kubernetes](../../pentesting-kubernetes/abusing-roles-clusterroles-in-kubernetes/)
 {% endcontent-ref %}
 
 As we are in a GCP environment, you will also be able to **get the nodepool GCP SA** from the **metadata** service and **escalate privileges in GC**P (by default the compute SA is used).
 
 ### container.secrets.get, container.secrets.list
 
-As [**explained in this page**](../../../pentesting/pentesting-kubernetes/hardening-roles-clusterroles/#listing-secrets), with these permissions you can **read** the **tokens** of all the **SAs of kubernetes**, so you can escalate to them.
+As [**explained in this page**](../../pentesting-kubernetes/abusing-roles-clusterroles-in-kubernetes/#listing-secrets), with these permissions you can **read** the **tokens** of all the **SAs of kubernetes**, so you can escalate to them.
 
 ### container.pods.exec
 
@@ -240,7 +240,7 @@ With this permission you will be able to **exec into pods**, which gives you **a
 
 ### container.pods.portForward
 
-As [**explained in this page**](../../../pentesting/pentesting-kubernetes/hardening-roles-clusterroles/#port-forward), with these permissions you can **access local services** running in **pods** that might allow you to **escalate privileges in Kubernetes** (and in **GCP** if somehow you manage to talk to the metadata service)**.**
+As [**explained in this page**](../../pentesting-kubernetes/abusing-roles-clusterroles-in-kubernetes/#port-forward), with these permissions you can **access local services** running in **pods** that might allow you to **escalate privileges in Kubernetes** (and in **GCP** if somehow you manage to talk to the metadata service)**.**
 
 ### container.serviceAccounts.createToken
 
@@ -249,7 +249,7 @@ Because of the **name** of the **permission**, it **looks like that it will allo
 ### container.mutatingWebhookConfigurations.create, container.mutatingWebhookConfigurations.update
 
 These permissions might allow you to escalate privileges in Kubernetes, but more probably, you could abuse them to **persist in the cluster**.\
-For more information [**follow this link**](../../../pentesting/pentesting-kubernetes/hardening-roles-clusterroles/#malicious-admission-controller).
+For more information [**follow this link**](../../pentesting-kubernetes/abusing-roles-clusterroles-in-kubernetes/#malicious-admission-controller).
 
 ## References
 
