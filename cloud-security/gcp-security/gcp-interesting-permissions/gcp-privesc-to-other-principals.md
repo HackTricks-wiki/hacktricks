@@ -251,6 +251,30 @@ Because of the **name** of the **permission**, it **looks like that it will allo
 These permissions might allow you to escalate privileges in Kubernetes, but more probably, you could abuse them to **persist in the cluster**.\
 For more information [**follow this link**](../../pentesting-kubernetes/abusing-roles-clusterroles-in-kubernetes/#malicious-admission-controller).
 
+## storage
+
+### storage.hmacKeys.create
+
+There is a feature of Cloud Storage, “interoperability”, that provides a way for Cloud Storage to interact with storage offerings from other cloud providers, like AWS S3. As part of that, there are HMAC keys that can be created for both Service Accounts and regular users. We can **escalate Cloud Storage permissions by creating an HMAC key for a higher-privileged Service Account**.&#x20;
+
+HMAC keys belonging to your user cannot be accessed through the API and must be accessed through the web console, but what’s nice is that both the access key and secret key are available at any point. This means we could take an existing pair and store them for backup access to the account. HMAC keys belonging to Service Accounts **can** be accessed through the API, but after creation, you are not able to see the access key and secret again.
+
+![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image2-1.png)
+
+The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/storage.hmacKeys.create.py).
+
+## storage.objects Write permission
+
+If you can modify or add objects in buckets you might be able to escalate your privileges to other resources that are using the bucket to store code that they execute.
+
+### Composer
+
+**Composer** is **Apache Airflow** managed inside GCP. It has several interesting features:
+
+* It runs inside a **GKE cluster**, so the **SA the cluster uses is accesible** by the code running inside Composer
+* It stores the **code in a bucket**, therefore, **anyone with write access over that bucket** is going to be able change/add a DGA code (the code Apache Airflow will execute)\
+  Then, if you have **write access over the bucket Composer is using** to store the code you can **privesc to the SA running in the GKE cluster**.
+
 ## References
 
 * [https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/](https://rhinosecuritylabs.com/gcp/privilege-escalation-google-cloud-platform-part-1/)

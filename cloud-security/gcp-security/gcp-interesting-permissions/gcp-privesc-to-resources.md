@@ -192,18 +192,6 @@ parent: projects/5[...]6/locations/global
 
 In this scenario it could also be interesting to run the tool [https://github.com/ozguralp/gmapsapiscanner](https://github.com/ozguralp/gmapsapiscanner) and check what you can access with the API key
 
-## storage
-
-### storage.hmacKeys.create
-
-There is a feature of Cloud Storage, “interoperability”, that provides a way for Cloud Storage to interact with storage offerings from other cloud providers, like AWS S3. As part of that, there are HMAC keys that can be created for both Service Accounts and regular users. We can **escalate Cloud Storage permissions by creating an HMAC key for a higher-privileged Service Account**.&#x20;
-
-HMAC keys belonging to your user cannot be accessed through the API and must be accessed through the web console, but what’s nice is that both the access key and secret key are available at any point. This means we could take an existing pair and store them for backup access to the account. HMAC keys belonging to Service Accounts **can** be accessed through the API, but after creation, you are not able to see the access key and secret again.
-
-![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image2-1.png)
-
-The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/storage.hmacKeys.create.py).
-
 ## secretmanager
 
 ### secretmanager.secrets.get
