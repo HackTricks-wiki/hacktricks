@@ -1,9 +1,25 @@
 # Workspace Security
 
-## Google Groups Privesc
+## Password Spraying
+
+In order to test passwords with all the emails you found (or you have generated based in a email name pattern you might have discover) you can use a tool like [https://github.com/ustayready/CredKing](https://github.com/ustayready/CredKing) who will use AWS lambdas to change IP address.
+
+## Google Groups Abuse
+
+### Privesc
 
 By default in workspace a **group** can be **freely accessed** by any member of the organization.\
 Workspace also allow to **grant permission to groups** (even GCP permissions), so if groups can be joined and they have extra permissions, an attacker may **abuse that path to escalate privileges**.
+
+You potentially need access to the console to join groups that allow to be joined by anyone in the org.
+
+### Invite to groups
+
+Apparently by default you **can create groups and invite people to them**. You can then modify the email that will be sent to the user **adding some links** and the **email will come from google**, so it will looks **legit**.
+
+## Hangout Phishing
+
+You can modify an email account maybe naming it "Google Security" and adding some Google logos, and then send an invitation to talk to someone and they will think they are talking to google: [https://www.youtube.com/watch?v=KTVHLolz6cE\&t=904s](https://www.youtube.com/watch?v=KTVHLolz6cE\&t=904s)&#x20;
 
 ## Oauth Apps
 
@@ -50,11 +66,11 @@ If someone creates a **copy** of that **document** that **contained the App Scri
 
 This method will be able to bypass also the Workspace admin restriction:
 
-![](<../../.gitbook/assets/image (662).png>)
+![](<../.gitbook/assets/image (662).png>)
 
 But can be prevented with:
 
-![](<../../.gitbook/assets/image (632).png>)
+![](<../.gitbook/assets/image (632).png>)
 
 ### Shared Document Unverified Prompt Bypass
 
@@ -72,6 +88,11 @@ This also means that if an **App Script already existed** and people has **grant
 {% endhint %}
 
 ## Post-Exploitation
+
+### Privesc to GCP
+
+* Abusing the **google groups privesc** you might be able to escalate to a group with some kind of privileged access to GCP
+* Abusing **OAuth applications** you might be able to impersonate users and access to GCP on their behalf
 
 ### Google Drive
 

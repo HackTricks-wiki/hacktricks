@@ -510,7 +510,7 @@
   * [GCP - Buckets Enumeration](cloud-security/gcp-security/gcp-buckets-enumeration.md)
   * [GCP - Local Privilege Escalation / SSH Pivoting](cloud-security/gcp-security/gcp-local-privilege-escalation-ssh-pivoting.md)
   * [GCP - Persistance](cloud-security/gcp-security/gcp-persistance.md)
-  * [Workspace Security](cloud-security/gcp-security/workspace-security.md)
+* [Workspace Security](cloud-security/workspace-security.md)
 * [Github Security](cloud-security/github-security/README.md)
   * [Basic Github Information](cloud-security/github-security/basic-github-information.md)
 * [Kubernetes Security](pentesting/pentesting-kubernetes/README.md)
