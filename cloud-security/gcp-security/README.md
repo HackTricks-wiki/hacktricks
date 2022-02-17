@@ -483,6 +483,18 @@ There is a gcloud API endpoint that aims to **list all the resources the accessi
 [gcp-persistance.md](gcp-persistance.md)
 {% endcontent-ref %}
 
+## Capture gcloud, gsutil... network
+
+```bash
+gcloud config set proxy/address 127.0.0.1
+gcloud config set proxy/port 8080
+gcloud config set proxy/type http
+gcloud config set auth/disable_ssl_validation True
+
+# If you don't want to completely disable ssl_validation use:
+gcloud config set core/custom_ca_certs_file cert.pem
+```
+
 ## References
 
 * [https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/](https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/)
