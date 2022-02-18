@@ -493,6 +493,13 @@ gcloud config set auth/disable_ssl_validation True
 
 # If you don't want to completely disable ssl_validation use:
 gcloud config set core/custom_ca_certs_file cert.pem
+
+# Back to normal
+gcloud config unset proxy/address
+gcloud config unset proxy/port
+gcloud config unset proxy/type
+gcloud config unset auth/disable_ssl_validation
+gcloud config unset core/custom_ca_certs_file
 ```
 
 ## References
