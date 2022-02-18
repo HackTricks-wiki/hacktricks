@@ -11,15 +11,32 @@ In order to test passwords with all the emails you found (or you have generated 
 By default in workspace a **group** can be **freely accessed** by any member of the organization.\
 Workspace also allow to **grant permission to groups** (even GCP permissions), so if groups can be joined and they have extra permissions, an attacker may **abuse that path to escalate privileges**.
 
-You potentially need access to the console to join groups that allow to be joined by anyone in the org.
+You potentially need access to the console to join groups that allow to be joined by anyone in the org. Check groups information in [**https://groups.google.com/all-groups**](https://groups.google.com/all-groups).
 
 ### Invite to groups
 
-Apparently by default you **can create groups and invite people to them**. You can then modify the email that will be sent to the user **adding some links** and the **email will come from google**, so it will looks **legit**.
+Apparently by default you [**can create groups**](https://groups.google.com/all-groups) **and invite people to them**. You can then modify the email that will be sent to the user **adding some links** and the **email will come from google**, so it will looks **legit**.
+
+### Access Groups Mail info
+
+Again, from [**https://groups.google.com/all-groups**](https://groups.google.com/all-groups) **** you can see the history of mails sent to the mail groups the user is member of, and you might find **credentials** or other **sensitive data**.
 
 ## Hangout Phishing
 
-You can modify an email account maybe naming it "Google Security" and adding some Google logos, and then send an invitation to talk to someone and they will think they are talking to google: [https://www.youtube.com/watch?v=KTVHLolz6cE\&t=904s](https://www.youtube.com/watch?v=KTVHLolz6cE\&t=904s)&#x20;
+You might be able either to directly talk with a person just having his email address or sending an invitation to talk. Either way, modify an email account maybe naming it "Google Security" and adding some Google logos, and the people will think they are talking to google: [https://www.youtube.com/watch?v=KTVHLolz6cE\&t=904s](https://www.youtube.com/watch?v=KTVHLolz6cE\&t=904s)
+
+### Google Doc Phishing
+
+You can create an **apparently legitimate document** and the in a comment **mention some email (like +user@gmail.com)**. Google will **send an email to that email address** notifying that he was mentioned in the document. You can **put a link in that document** to try to make the persona access it.
+
+### Google Calendar Phishing
+
+You can **create a calendar event** and add as many email address of the company you are attacking as you have. Schedule this calendar event in **5 or 15 min** from the current time. Make the event looks legit and **put a comment indicating that they need to read something** (with the **phishing link**).\
+To make it looks less suspicious:
+
+* Set that the **receivers cannot see the other invited people**
+* Do **NOT send emails notifying about the event**. Then, the people will only see their warning about a meeting in 5mins and that they need to read that link.
+* Apparently using the API you can set to **True** that **people** has **accepted** the event and even create **comments on their behalf**.
 
 ## Oauth Apps
 
@@ -94,6 +111,31 @@ This also means that if an **App Script already existed** and people has **grant
 * Abusing the **google groups privesc** you might be able to escalate to a group with some kind of privileged access to GCP
 * Abusing **OAuth applications** you might be able to impersonate users and access to GCP on their behalf
 
+### Maintaining Persistence inside a Google account
+
+If you managed to **compromise a google user session** and the user had **2FA**, you can **generate** an [**app password**](https://support.google.com/accounts/answer/185833?hl=en) and **regenerate the 2FA backup codes** to know that even if the user change the password you **will be able to access his account**. Another option **instead** of **regenerating** the codes is to **enrol your own authenticator** app in the 2FA.
+
+### Maintaining Persistence via OAuth Apps
+
+If you have **compromised the account of a user,** you can just **accept** to grant all the possible permissions to an **OAuth App**. The only problem is that Workspace can configure to **disallow external and/or internal OAuth apps** without being reviewed.\
+It is pretty common to not trust by default external OAuth apps but trust internal ones, so if you have **enough permissions to generate a new OAuth application** inside the organization and external apps are disallowed, generate it and **use that new internal OAuth app to maintain persistence**.
+
+### Maintaining Persistence via delegation
+
+You can just delegate the account to a different account controlled by the attacker
+
+### Maintaining Persistence via Android App
+
+If you have a **session inside victims google account** you can browse to the **Play Store** and **install** a **malware** you have already uploaded it directly **in the phone** to maintain persistence and access the victims phone.
+
+### Download Everything Google Knows about and account
+
+If you have a **session inside victims google account** you can download everything Google saves about that account from [**https://takeout.google.com**](https://takeout.google.com/u/1/?pageId=none)****
+
+### **Administrate Workspace**
+
+In [**https://admin.google.com**/](https://admin.google.com), if you have enough permissions you might be able to modify setting in the Workspace of the whole organization.
+
 ### Google Drive
 
 When **sharing** a document yo can **specify** the **people** that can access it one by one, **share** it with your **entire company** (**or** with some specific **groups**) by **generating a link**.
@@ -114,11 +156,27 @@ Some proposed ways to find all the documents:
   * Hide password reset emails
 * Create **forwarding address to send sensitive information** (You need manual access)
   * Create a forwarding address to send emails that contains the word "password" for example
+* Add recovery email/phone under attackers control
+* Grab all the email addresses
 
 ### App Scripts
 
 * Create **time-based triggers** to main **persistance**
   * The docs mention that to use `ScriptApp.newTrigger("funcion")` you need the **scope** `script.scriptapp`, but **apparently thats not necessary** as long as you have declare some other scope..
+
+## Account Compromised Recovery
+
+* Log out of all sessions
+* Change user password
+* Generate new 2FA backup codes
+* Remove App passwords
+* Remove OAuth apps
+* Remove 2FA devices
+* Remove email forwarders
+* Remove emails filters
+* Remove recovery email/phones
+* Remove bad Android Apps
+* Remove bad account delegations
 
 ## References
 

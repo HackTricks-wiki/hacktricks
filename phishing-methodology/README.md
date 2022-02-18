@@ -79,7 +79,7 @@ In order to make sure that the expired domain that you are going to buy **has al
 * [https://hunter.io/](https://hunter.io)
 * [https://anymailfinder.com/](https://anymailfinder.com)
 
-In order to **discover more** valid email addresses or **verify the ones** you have already discovered you can check if you can brute-force them smtp servers of the victim. [Learn how to verify/discover email address here](broken-reference).\
+In order to **discover more** valid email addresses or **verify the ones** you have already discovered you can check if you can brute-force them smtp servers of the victim. [Learn how to verify/discover email address here](broken-reference/).\
 Moreover, don't forget that if the users use **any web portal to access their mails**, you can check if it's vulnerable to **username brute force**, and exploit the vulnerability if possible.
 
 ## Configuring GoPhish
@@ -123,13 +123,13 @@ Start installing: `apt-get install postfix`
 
 Then add the domain to the following files:
 
-* **/etc/postfix/virtual\_domains**&#x20;
+* **/etc/postfix/virtual\_domains**
 * **/etc/postfix/transport**
 * **/etc/postfix/virtual\_regexp**
 
 **Change also the values of the following variables inside /etc/postfix/main.cf**
 
-`myhostname = <domain>`  \
+`myhostname = <domain>`\
 `mydestination = $myhostname, <domain>, localhost.com, localhost`
 
 Finally modify the files **`/etc/hostname`** and **`/etc/mailname`** to your domain name and **restart your VPS.**
@@ -250,11 +250,7 @@ Set a rDNS (PTR) record that resolves the IP address of the VPS to the domain na
 
 ### Sender Policy Framework (SPF) Record
 
-You must **configure a SPF record for the new domain**. If you don't know what is a SPF record read the following page:
-
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
-{% endcontent-ref %}
+You must **configure a SPF record for the new domain**. If you don't know what is a SPF record [**read this page**](../pentesting/pentesting-smtp/#spf).
 
 You can use [https://www.spfwizard.net/](https://www.spfwizard.net) to generate your SPF policy (use the IP of the VPS machine)
 
@@ -268,11 +264,7 @@ v=spf1 mx a ip4:ip.ip.ip.ip ?all
 
 ### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
 
-You must **configure a DMARC record for the new domain**. If you don't know what is a DMARC record read the following page:
-
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
-{% endcontent-ref %}
+You must **configure a DMARC record for the new domain**. If you don't know what is a DMARC record [**read this page**](../pentesting/pentesting-smtp/#dmarc).
 
 You have to create a new DNS TXT record pointing the hostname `_dmarc.<domain>` with the following content:
 
@@ -282,11 +274,7 @@ v=DMARC1; p=none
 
 ### DomainKeys Identified Mail (DKIM)
 
-You must **configure a DKIM for the new domain**. If you don't know what is a DMARC record read the following page:
-
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
-{% endcontent-ref %}
+You must **configure a DKIM for the new domain**. If you don't know what is a DMARC record [**read this page**](../pentesting/pentesting-smtp/#dkim).
 
 This tutorial is based on: [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
 
@@ -443,7 +431,7 @@ If for any reason you want to clone the website check the following page:
 
 The previous attack is pretty clever as you are faking a real website and gathering the information set by the user. Unfortunately, if the user didn't put the correct password or if the application you faked is configured with 2FA, **this information won't allow you to impersonate the tricked user**.
 
-This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2) are useful. This tool will allow you to generate a MitM like attack. Basically, the attacks works in the following way:
+This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2) or [**CredSniper**](https://github.com/ustayready/CredSniper) are useful. This tool will allow you to generate a MitM like attack. Basically, the attacks works in the following way:
 
 1. You **impersonate the login** form of the real webpage.
 2. The user **send** his **credentials** to your fake page and the tool send those to the real webpage, **checking if the credentials work**.
