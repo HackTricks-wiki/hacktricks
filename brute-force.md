@@ -198,6 +198,12 @@ jwt-cracker "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibm
 nmap --script ldap-brute -p 389 <IP>
 ```
 
+### MQTT
+
+```
+ncrack mqtt://127.0.0.1 --user test –P /root/Desktop/pass.txt -v
+```
+
 ### Mongo
 
 ```bash
