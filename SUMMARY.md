@@ -622,6 +622,7 @@
 * [More Tools](todo/more-tools.md)
 * [MISC](todo/misc.md)
 * [Pentesting DNS](todo/pentesting-dns.md)
+* [Hardware Hacking](todo/hardware-hacking.md)
 
 ***
 
