@@ -263,6 +263,29 @@ HMAC keys belonging to your user cannot be accessed through the API and must be 
 
 The exploit script for this method can be found [here](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation/blob/master/ExploitScripts/storage.hmacKeys.create.py).
 
+### storage.objects.get
+
+This permission allows you to **download files stored inside Gcp Storage**. This will potentially allow you to escalate privileges because in some occasions **sensitive information is saved there**. Moreover, some Gcp services stores their information in buckets:
+
+* **GCP Composer**: When you create a Composer Environment the **code of all the DAGs** will be saved inside a **bucket**. These tasks might contain interesting information inside of their code.
+* **GCR (Container Registry)**: The **image** of the containers are stored inside **buckets**, which means that if you can read the buckets you will be able to download the images and **search for leaks and/or source code**.
+
+### storage.objects.create, storage.objects.delete
+
+In order to **create a new object** inside a bucket you need `storage.objects.create` and, according to [the docs](https://cloud.google.com/storage/docs/access-control/iam-permissions#object\_permissions), you need also `storage.objects.delete` to **modify** an existent object.
+
+A very **common exploitation** of buckets where you can write in cloud is in case the **bucket is saving web server files**, you might be able to **store new code** that will be used by the web application.
+
+Moreover, several GCP services also **store code inside buckets** that later is **executed**:
+
+* **GCP Composer**: The **DAG code** is **stored in GCP Storage**. This **code** is later **executed** inside the **K8s environment** used by composer, and has also **access to a GCP SA**. Therefore, modifying this code you might be able to get inside the composer k8s env and steal the token of the GCP SA used.
+* **GCR (Container Registry)**: The **container images are stored inside buckets**. So if you have write access over them, you could **modify the images** and execute your own code whenever that container is used.
+  * The bucket used by GCR will have an URL similar to `gs://<eu/usa/asia/nothing>.artifacts.<project>.appspot.com` (The top level subdomains are specified [here](https://cloud.google.com/container-registry/docs/pushing-and-pulling)).
+
+### storage.objects.setIamPolicy
+
+You can give you permission to **abuse any of the previous scenarios of this section**.
+
 ## storage.objects Write permission
 
 If you can modify or add objects in buckets you might be able to escalate your privileges to other resources that are using the bucket to store code that they execute.
