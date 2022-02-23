@@ -31,7 +31,7 @@ gcloud spanner databases list --instance [INSTANCE]
 gcloud spanner backups list --instance [INSTANCE]
 ```
 
-### [Cloud Bigtable](https://cloud.google.com/sdk/gcloud/reference/bigtable/) <a href="cloud-bigtable" id="cloud-bigtable"></a>
+### [Cloud Bigtable](https://cloud.google.com/sdk/gcloud/reference/bigtable/) <a href="#cloud-bigtable" id="cloud-bigtable"></a>
 
 A fully managed, scalable NoSQL database service for large analytical and operational workloads with up to 99.999% availability. [Learn more](https://cloud.google.com/bigtable).
 
@@ -89,3 +89,5 @@ bq query '<query>' #Query inside the dataset
 bq extract ds.table gs://mybucket/table.csv
 bq extract -m ds.model gs://mybucket/model
 ```
+
+Big query SQL Injection: [https://ozguralp.medium.com/bigquery-sql-injection-cheat-sheet-65ad70e11eac](https://ozguralp.medium.com/bigquery-sql-injection-cheat-sheet-65ad70e11eac)
