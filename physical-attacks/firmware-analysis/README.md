@@ -8,6 +8,28 @@ Devices store firmware in **nonvolatile memory**, such as ROM, EPROM, or flash m
 
 It’s important to **examine** the **firmware** and then attempt to **modify** it, because we can uncover many security issues during this process.
 
+## **Information gathering and reconnaissance**
+
+During this stage, collect as much information about the target as possible to understand its overall composition underlying technology. Attempt to gather the following:
+
+* Supported CPU architecture(s)
+* Operating system platform
+* Bootloader configurations
+* Hardware schematics
+* Datasheets
+* Lines-of-code (LoC) estimates
+* Source code repository location
+* Third-party components
+* Open source licenses (e.g. GPL)
+* Changelogs
+* FCC IDs
+* Design and data flow diagrams
+* Threat models
+* Previous penetration testing reports
+* Bug tracking tickets (e.g. Jira and bug bounty platforms such as BugCrowd or HackerOne)
+
+Where possible, acquire data using open source intelligence (OSINT) tools and techniques. If open source software is used, download the repository and perform both manual as well as automated static analysis against the code base. Sometimes, open source software projects already use free static analysis tools provided by vendors that provide scan results such as [Coverity Scan](https://scan.coverity.com) and [Semmle’s LGTM](https://lgtm.com/#explore).
+
 ## Getting the Firmware
 
 There are different ways with different difficulty levels to download the firmware
