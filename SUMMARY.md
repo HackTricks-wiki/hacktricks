@@ -556,6 +556,9 @@
 * [Physical Attacks](physical-attacks/physical-attacks.md)
 * [Escaping from KIOSKs](physical-attacks/escaping-from-gui-applications/README.md)
   * [Show file extensions](physical-attacks/escaping-from-gui-applications/show-file-extensions.md)
+* [Firmware Analysis](physical-attacks/firmware-analysis/README.md)
+  * [Bootloader testing](physical-attacks/firmware-analysis/bootloader-testing.md)
+  * [Firmware Integrity](physical-attacks/firmware-analysis/firmware-integrity.md)
 
 ## Reversing
 

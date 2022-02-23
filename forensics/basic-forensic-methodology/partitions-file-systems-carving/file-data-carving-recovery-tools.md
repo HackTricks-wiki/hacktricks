@@ -60,6 +60,23 @@ It comes with GUI and CLI version. You can select the **file-types** you want Ph
 
 ![](<../../../.gitbook/assets/image (524).png>)
 
+### binvis
+
+Check the [code](https://code.google.com/archive/p/binvis/) and the [web page tool](https://binvis.io/#/).
+
+#### Features of BinVis
+
+* visual and active **structure viewer**
+* multiple plots for different focus points
+* focusing on portions of a sample
+* **seeing stings and ressources**, in PE or ELF executables e. g.
+* getting **patterns** for cryptanalysis on files
+* **spotting** packer or encoder algorithms
+* **identify** Steganography by patterns
+* **visual** binary-diffing
+
+BinVis is a great **start-point to get familiar with an unknown target** in a black-boxing scenario.
+
 ## Specific Data Carving Tools
 
 ### FindAES
