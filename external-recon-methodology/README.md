@@ -206,6 +206,10 @@ You found **dev-int.bigcompanycdn.com**, make a Shodan query like the following:
 * http.html:”dev-int.bigcompanycdn.com”
 * http.html:”[https://dev-int-bigcompanycdn.com”](https://dev-int-bigcompanycdn.xn--com-9o0a)
 
+It is possible to use Shodan from the official CLI to quickly analyze all IPs in a file and see which ones have open ports/ vulnerabilities.
+
+* https://book.hacktricks.xyz/external-recon-methodology
+
 ### DNS Brute force
 
 Let's try to find new **subdomains** brute-forcing DNS servers using possible subdomain names.\
@@ -356,10 +360,10 @@ As you can see there is a lot of different vulnerabilities to search for.
 
 There are several tools out there that will perform part of the proposed actions against a given scope.
 
-* \*\*\*\*[**https://github.com/yogeshojha/rengine**](https://github.com/yogeshojha/rengine)\*\*\*\*
-* \*\*\*\*[**https://github.com/j3ssie/Osmedeus**](https://github.com/j3ssie/Osmedeus)\*\*\*\*
-* \*\*\*\*[**https://github.com/six2dez/reconftw**](https://github.com/six2dez/reconftw)\*\*\*\*
-* \*\*\*\*[**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) _\*\*_- A little old and not updated
+* [**https://github.com/yogeshojha/rengine**](https://github.com/yogeshojha/rengine)
+* [**https://github.com/j3ssie/Osmedeus**](https://github.com/j3ssie/Osmedeus)
+* [**https://github.com/six2dez/reconftw**](https://github.com/six2dez/reconftw)
+* [**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) - A little old and not updated
 
 ## **References**
 
