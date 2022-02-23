@@ -242,7 +242,7 @@ You should test if the device is doing any kind of **firmware integrity tests**,
 [firmware-integrity.md](firmware-integrity.md)
 {% endcontent-ref %}
 
-Firmware update vulnerabilities usually occurs because, the integrity of the firmware might not be validated, use unencrypted network protocols, use of hardcoded credentials, an insecure authentication to the cloud component that hosts the firmware, and even excessive and insecure logging, allow physical updates without verifications.
+Firmware update vulnerabilities usually occurs because, the **integrity** of the **firmware** might **not** be **validated**, use **unencrypted** **network** protocols, use of **hardcoded** **credentials**, an **insecure authentication** to the cloud component that hosts the firmware, and even excessive and insecure **logging** (sensitive data), allow **physical updates** without verifications.
 
 ## **Runtime analysis**
 
@@ -298,6 +298,11 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
   * [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
 * Damn Vulnerable IoT Device (DVID)
   * [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
+
+## References
+
+* [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+* [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 
 ## Trainning and Cert
 
