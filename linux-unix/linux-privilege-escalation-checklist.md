@@ -12,7 +12,7 @@ Do you use **Hacktricks every day**? Did you find the book **very** **useful**? 
 If you want to know about my **latest modifications**/**additions** or you have **any suggestion for HackTricks** or **PEASS**, **join the** [**💬**](https://emojipedia.org/speech-balloon/)[**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass), or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**\
 If you want to **share some tricks with the community** you can also submit **pull requests** to [**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) that will be reflected in this book and don't forget to **give ⭐** on **github** to **motivate** **me** to continue developing this book.
 
-### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)****
+### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
 ### [System Information](privilege-escalation/#system-information)
 
@@ -21,7 +21,7 @@ If you want to **share some tricks with the community** you can also submit **pu
 * [ ] Check [**env variables**](privilege-escalation/#env-info), any sensitive detail?
 * [ ] Search for [**kernel exploits**](privilege-escalation/#kernel-exploits) **using scripts** (DirtyCow?)
 * [ ] **Check** if the [**sudo version** is vulnerable](privilege-escalation/#sudo-version)
-* [ ] ****[**Dmesg** signature verification failed](privilege-escalation/#dmesg-signature-verification-failed) error?
+* [ ] [**Dmesg** signature verification failed](privilege-escalation/#dmesg-signature-verification-failed)
 * [ ] More system enum ([date, system stats, cpu info, printers](privilege-escalation/#more-system-enumeration))
 * [ ] [Enumerate more defenses](privilege-escalation/#enumerate-possible-defenses)
 
@@ -36,7 +36,7 @@ If you want to **share some tricks with the community** you can also submit **pu
 * [ ] **Check for**[ **useful software**](privilege-escalation/#useful-software) **installed**
 * [ ] **Check for** [**vulnerable software**](privilege-escalation/#vulnerable-software-installed) **installed**
 
-### ****[Processes](privilege-escalation/#processes)
+### [Processes](privilege-escalation/#processes)
 
 * [ ] Is  any **unknown software running**?
 * [ ] Is any software with **more privileges that it should have running**?
@@ -96,11 +96,11 @@ If you want to **share some tricks with the community** you can also submit **pu
 * [ ] Can you execute **any comand with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
 * [ ] Is any **exploitable suid binary**? ([**GTFOBins**](https://gtfobins.github.io))
 * [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/#sudo-execution-bypassing-paths)?
-* [ ] ****[**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
-* [ ] ****[**SUID binary specifying path**](privilege-escalation/#suid-binary-with-command-path)? Bypass
-* [ ] ****[**LD\_PRELOAD vuln**](privilege-escalation/#ld\_preload)****
-* [ ] ****[**Lack of .so library in SUID binary**](privilege-escalation/#suid-binary-so-injection) from a writable folder?
-* [ ] ****[**SUDO tokens available**](privilege-escalation/#reusing-sudo-tokens)? [**Can you create a SUDO token**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
+* [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
+* [ ] [**SUID binary specifying path**](privilege-escalation/#suid-binary-with-command-path)? Bypass
+* [ ] [**LD\_PRELOAD vuln**](privilege-escalation/#ld\_preload)****
+* [ ] [**Lack of .so library in SUID binary**](privilege-escalation/#suid-binary-so-injection) from a writable folder?
+* [ ] [**SUDO tokens available**](privilege-escalation/#reusing-sudo-tokens)? [**Can you create a SUDO token**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
 * [ ] Can you [**read or modify sudoers files**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
 * [ ] Can you [**modify /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
 * [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) command
@@ -115,12 +115,12 @@ If you want to **share some tricks with the community** you can also submit **pu
 
 ### [Open Shell sessions](privilege-escalation/#open-shell-sessions)
 
-* [ ] **screen**?
-* [ ] **tmux**?
+* [ ] **screen**
+* [ ] **tmux**
 
 ### [SSH](privilege-escalation/#ssh)
 
-* [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)****
+* [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
 * [ ] ****[**SSH Interesting configuration values**](privilege-escalation/#ssh-interesting-configuration-values)****
 
 ### [Interesting Files](privilege-escalation/#interesting-files)
@@ -151,9 +151,9 @@ If you want to **share some tricks with the community** you can also submit **pu
 * [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?
 
 If you want to **know** about my **latest modifications**/**additions** or you have **any suggestion for HackTricks or PEASS**, join the [💬](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass), or **follow me on Twitter** [🐦](https://emojipedia.org/bird/)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**\
-****If you want to **share some tricks with the community** you can also submit **pull requests** to [**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) that will be reflected in this book.\
+If you want to **share some tricks with the community** you can also submit **pull requests** to [**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) that will be reflected in this book.\
 Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
 
 ![](<../.gitbook/assets/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67 (6) (4) (3).png>)
 
-​[**Buy me a coffee here**](https://www.buymeacoffee.com/carlospolop)****
+​[**Buy me a coffee here**](https://www.buymeacoffee.com/carlospolop)
