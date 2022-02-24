@@ -12,13 +12,15 @@
 
 So, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)is an amazing tool which can enumerate a domain automatically, save all the information, find possible privilege escalation paths and show all the information using graphs.
 
-Booldhound is composed of 2 main parts: The **ingestors** and the **visualisation application**.\
-The **ingestors** are called SharpHound and are the applications (PS1 and C# exe) used to **enumerate the domain and extract all the information** in a format that the visualisation application will understand.\
+Booldhound is composed of 2 main parts: **ingestors** and the **visualisation application**.
+
+The **ingestors** are used to **enumerate the domain and extract all the information** in a format that the visualisation application will understand.
+
 The **visualisation application uses neo4j** to show how all the information is related and to show different ways to escalate privileges in the domain.
 
 ## Installation
 
-You can download the [Ingestors from the github](https://github.com/BloodHoundAD/BloodHound/tree/master/Ingestors).
+1. Bloodhound 
 
 To install the visualisation application you will need to install **neo4j** and the **bloodhound application**.\
 The easiest way to do this is just doing:
@@ -26,11 +28,26 @@ The easiest way to do this is just doing:
 ```
 apt-get install bloodhound
 ```
-
-But, at the time of this writing, this wont install the latest bloodhound, so you may need to **download a pre-compiled bloodhound latest version** from: [https://github.com/BloodHoundAD/BloodHound/releases](https://github.com/BloodHoundAD/BloodHound/releases) or [compile it from the source](https://github.com/BloodHoundAD/BloodHound/wiki/Building-BloodHound-from-source).\
 You can **download the community version of neo4j** from [here](https://neo4j.com/download-center/#community).
 
-**If** you **download** by your own **bloodhound from releases** and n**eo4j from the web** page (instead of using `apt-get`) you will need to **decompress** the downloaded **files** to access the executables.
+2. Ingestors
+
+You can download the Ingestors from:
+- https://github.com/BloodHoundAD/SharpHound/releases
+- https://github.com/BloodHoundAD/BloodHound/releases
+- https://github.com/fox-it/BloodHound.py
+
+3. Learn the path from the graph
+
+Bloodhound come with various queries to highlight sensitive compromission path. 
+It it possible to add custom queries to enhance the search and correlation between objects and more!
+
+This repo has a nice collections of queries: https://github.com/CompassSecurity/BloodHoundQueries
+
+<u>Installation process</u>:
+```sh
+$ curl -o "~/.config/bloodhound/customqueries.json" "https://raw.githubusercontent.com/CompassSecurity/BloodHoundQueries/master/customqueries.json"
+```
 
 ## Visualisation app Execution
 
@@ -55,9 +72,7 @@ bloodhound
 
 You will be prompted for the database credentials: **neo4j:\<Your new password>**
 
-****\
-****\
-****And bloodhound will be ready to ingest data.
+And bloodhound will be ready to ingest data.
 
 ![](<../../.gitbook/assets/image (171).png>)
 
@@ -65,7 +80,6 @@ You will be prompted for the database credentials: **neo4j:\<Your new password>*
 
 ### Windows
 
-You can download the [Ingestors from the github](https://github.com/BloodHoundAD/BloodHound/tree/master/Collectors).\
 They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
 
 ```
@@ -73,13 +87,13 @@ They have several options but if you want to run SharpHound from a PC joined to 
 Invoke-BloodHound -CollectionMethod All
 ```
 
+> You can read more about **CollectionMethod** and loop session [here](https://bloodhound.readthedocs.io/en/latest/data-collection/sharphound-all-flags.html)
+
 If you wish to execute SharpHound using different credentials you can create a CMD netonly session and run SharpHound from there:
 
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
-
-You could also use other parameters like: **DomainController**, **Domain**, **LdapUsername**, **LdapPassword...**
 
 ****[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)****
 
