@@ -58,66 +58,74 @@ If you just have access to an AD environment but you don't have any credentials/
   * [**A more detailed guide on how to enumerate LDAP can be found here.**](../../pentesting/pentesting-ldap.md)
 * **Poison the network**
   * Gather credentials [**impersonating services with Responder**](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
-  * Access host by [abusing the relay attack](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)****
+  * Access host by [abusing the relay attack](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
   * Gather credentials **exposing** [**fake UPnP services with evil-S**](../../pentesting/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
-* **OSINT**: Try to **extract possible usernames** from services (mainly web) inside the domain environments and also from the publicly available web pages of the company. If you find the complete names of company workers, you could try different AD **username conventions (**[**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/)**)**. The most common conventions are: _NameSurname_, _Name.Surname_, _NamSur_ (3letters of each), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random letters and 3 random numbers_ (abc123). **This script can generate those username conventions.** : (**[**ADGenerator**](https://github.com/w0Tx/generate-ad-username)**) You could also try **statistically most used usernames**: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames) **Read the following Username enumeration section to learn how to find if a username is valid or not.**
+* [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology): 
+  * Extract usernames/names from internal documents, social media, services (mainly web) inside the domain environments and also from the publicly available.
+  * If you find the complete names of company workers, you could try different AD **username conventions ([**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/)**). The most common conventions are: _NameSurname_, _Name.Surname_, _NamSur_ (3letters of each), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random letters and 3 random numbers_ (abc123). 
+  * Tools: 
+    * [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
+    * [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
 
 ### User enumeration
 
-When an **invalid username is requested** the server will respond using the **Kerberos error** code _**KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN**_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response **or** the error _**KRB5KDC\_ERR\_PREAUTH\_REQUIRED**_, indicating that the user is required to perform pre-authentication.
+When an **invalid username is requested** the server will respond using the **Kerberos error** code *KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN*, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response or the error *KRB5KDC\_ERR\_PREAUTH\_REQUIRED*, indicating that the user is required to perform pre-authentication.
 
 ```
+./kerbrute_linux_amd64 userenum -d lab.ropnop.com usernames.txt
 nmap -p 88 --script=krb5-enum-users --script-args="krb5-enum-users.realm='DOMAIN'" <IP>
 Nmap -p 88 --script=krb5-enum-users --script-args krb5-enum-users.realm='<domain>',userdb=/root/Desktop/usernames.txt <IP>
 msf> use auxiliary/gather/kerberos_enumusers
-./kerbrute_linux_amd64 userenum -d lab.ropnop.com usernames.txt
 crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
-enum4linux -U 10.10.10.161 | grep 'user:' | sed 's/user:\[//g' | sed 's/\]//g' | awk '{print $1}'
 ```
-
-You could also use the **impacket script of ASREPRoast** to enumerate valid usernames.
 
 ### Knowing one or several usernames
 
-Ok, so you know you have already a valid username but no passwords...Then try:
+Ok, so you know you have already a valid username but no passwords... Then try:
 
-* [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _**DONT\_REQ\_PREAUTH**_ you can **request a AS\_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
-* [**Password Spraying**](password-spraying.md): Let's **try** the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy)
-* A final option if the accounts cannot be locked is the [**traditional bruteforce**](password-spraying.md)****
+* [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute *DONT\_REQ\_PREAUTH* you can **request a AS\_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
+* [**Password Spraying**](password-spraying.md): Let's try the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy!) or could login with empty password: [Invoke-SprayEmptyPassword.ps1](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1).
 
-## Enumerating Active Directory (Some creds/Session)
+## Enumerating Active Directory WITH credentials/session
 
 For this phase you need to have **compromised the credentials or a session of a valid domain account.**
+If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
 
 ### Enumeration
 
-If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.\
-Regarding [**ASREPRoast**](asreproast.md)you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account (if you know it). It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser`or `wmic useraccount get name,sid`). In_\* linux\\_\* you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username`
+#### Extracting all domain users
+
+It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser`or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
 
 Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
 
-* You could use some[ Windows binaries from the CMD to perform a basic recon](../basic-cmd-for-pentesters.md#domain-info), but using [powershell for recon](../basic-powershell-for-pentesters/) will probably be stealthier, and you could even [**use powerview**](../basic-powershell-for-pentesters/powerview.md) **to extract more detailed information**. Always **learn what a CMD or powershell/powerview command does** before executing it, this way you will know **how stealth are you being**.
-* Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a **try**.
-* If you are using **Linux**, you could also [enumerate the domain using **pywerview**](https://github.com/the-useless-one/pywerview)**.**
-* You could also **try** [**https://github.com/tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
+Regarding [**ASREPRoast**](asreproast.md)you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords. 
+
+* You could use some[Windows binaries from the CMD to perform a basic recon](../basic-cmd-for-pentesters.md#domain-info), but using [powershell for recon](../basic-powershell-for-pentesters/) will probably be stealthier, and you could even [**use powerview**](../basic-powershell-for-pentesters/powerview.md) **to extract more detailed information**. Always **learn what a CMD or powershell/powerview command does** before executing it, this way you will know **how stealth are you being**.
+* Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a **try**. Find where users can RDP, find path to other groups, etc.
+* Look in the LDAP database, with **ldapsearch** or **AdExplorer.exe** to look for credentials in fields *userPassword* & *unixUserPassword*, or even for *Description*.
+* If you are using **Linux**, you could also enumerate the domain using [the-useless-one/pywerview](https://github.com/the-useless-one/pywerview).
+* You could also try automated tools as:
+  * [tomcarver16/ADSearch](https://github.com/tomcarver16/ADSearch)
+  * [61106960/adPEAS](https://github.com/61106960/adPEAS)
 
 **Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.**
 
 ### **Kerberoast**
 
-The goal of **Kerberoasting** is to harvest **TGS tickets for services that run on behalf of user accounts** in the AD, not computer accounts. Thus, **part** of these TGS **tickets** are **encrypted** with **keys** derived from user passwords. As a consequence, their credentials could be **cracked offline**.\
-You can know that a **user account** is being used as a **service** because the property **"ServicePrincipalName"** is **not null**.\
-**Find more information about this attack** [**in the Kerberoast page**](kerberoast.md)**.**
+The goal of Kerberoasting is to harvest **TGS tickets for services that run on behalf of domain user accounts**, not computer accounts. Thus, part of these TGS tickets are **encrypted wit keys derived from user passwords**. As a consequence, their credentials could be **cracked offline**.
+You can know that a **user account** is being used as a **service** because the property **"ServicePrincipalName"** is **not null**.
+**Find more information about this attack [**in the Kerberoast page**](kerberoast.md).**
+
+### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
+
+Once you have obtained some credentials you could check if you have access to any **machine**. For that matter, you could use **CrackMapExec** to attempt connecting on several servers with different protocols, accordingly to your ports scans.
 
 ### Local Privilege Escalation
 
-If you have compromised credentials or a session as a regular domain user and you have **access** with this user to **any machine in the domain** you should try to find your way to **escalate privileges locally**. This is because only with admin privileges you will be able to **dump hashes of other users** in memory (LSASS) and locally (SAM).\
-There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/) and a [**checklist**](../checklist-windows-privilege-escalation.md)**. Also, don't forget to use** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
+If you have compromised credentials or a session as a regular domain user and you have **access** with this user to **any machine in the domain** you should try to find your way to **escalate privileges locally and looting for credentials**. This is because only with local administrator privileges you will be able to **dump hashes of other users** in memory (LSASS) and locally (SAM).
 
-### Win-RM
-
-Once you have obtained some credentials you could check if you have **access** to any **machine** using the **win-rm service**.\
-[**More information about how to use and abuse win-rm here.**](../../pentesting/5985-5986-pentesting-winrm.md)
+There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/) and a [**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to use [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
 ## Privesc on Active Directory (Some "privileged" Creds/Session)
 
