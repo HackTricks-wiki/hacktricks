@@ -4,7 +4,7 @@
 
 ### [https://www.hackthebox.eu/](https://www.hackthebox.eu) & [https://academy.hackthebox.eu/catalogue](https://academy.hackthebox.eu/catalogue)
 
-Hackthebox has online machines to hack, it's the best way to learn by practicing. If you are new I would recommend you learning by doing retired machines following Ippsec videos.
+Hackthebox has online machines to hack, it's the best place to learn by practicing. If you are new I would recommend you learning by doing retired machines following Ippsec videos.
 
 HackTheBox academy is the new platform to learn hacking in a more guided way, also a great resource if you want to practice hacking some specific technology!
 
