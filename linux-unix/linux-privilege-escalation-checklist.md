@@ -31,14 +31,14 @@ If you want to **share some tricks with the community** you can also submit **pu
 * [ ] **Any unmounted drive?**
 * [ ] **Any creds in fstab?**
 
-### ****[**Installed Software**](privilege-escalation/#installed-software)****
+### [**Installed Software**](privilege-escalation/#installed-software)
 
 * [ ] **Check for**[ **useful software**](privilege-escalation/#useful-software) **installed**
 * [ ] **Check for** [**vulnerable software**](privilege-escalation/#vulnerable-software-installed) **installed**
 
 ### [Processes](privilege-escalation/#processes)
 
-* [ ] Is  any **unknown software running**?
+* [ ] Is any **unknown software running**?
 * [ ] Is any software with **more privileges that it should have running**?
 * [ ] Search for **exploits for running processes** (specially if running of versions)
 * [ ] Can you **modify the binary** of any running process?
@@ -98,7 +98,7 @@ If you want to **share some tricks with the community** you can also submit **pu
 * [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/#sudo-execution-bypassing-paths)?
 * [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
 * [ ] [**SUID binary specifying path**](privilege-escalation/#suid-binary-with-command-path)? Bypass
-* [ ] [**LD\_PRELOAD vuln**](privilege-escalation/#ld\_preload)****
+* [ ] [**LD\_PRELOAD vuln**](privilege-escalation/#ld\_preload)\*\*\*\*
 * [ ] [**Lack of .so library in SUID binary**](privilege-escalation/#suid-binary-so-injection) from a writable folder?
 * [ ] [**SUDO tokens available**](privilege-escalation/#reusing-sudo-tokens)? [**Can you create a SUDO token**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
 * [ ] Can you [**read or modify sudoers files**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
@@ -121,7 +121,7 @@ If you want to **share some tricks with the community** you can also submit **pu
 ### [SSH](privilege-escalation/#ssh)
 
 * [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
-* [ ] ****[**SSH Interesting configuration values**](privilege-escalation/#ssh-interesting-configuration-values)****
+* [ ] [**SSH Interesting configuration values**](privilege-escalation/#ssh-interesting-configuration-values)
 
 ### [Interesting Files](privilege-escalation/#interesting-files)
 
@@ -138,14 +138,14 @@ If you want to **share some tricks with the community** you can also submit **pu
 * [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
 * [ ] **Generic search**
 
-### ****[**Writable Files**](privilege-escalation/#writable-files)****
+### [**Writable Files**](privilege-escalation/#writable-files)
 
 * [ ] **Modify python library** to execute arbitrary commands?
 * [ ] Can you **modify log files**? **Logtotten** exploit
 * [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
 * [ ] Can you [**write in ini, int.d, systemd or rc.d files**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
 
-### ****[**Other tricks**](privilege-escalation/#other-tricks)****
+### [**Other tricks**](privilege-escalation/#other-tricks)
 
 * [ ] Can you [**abuse NFS to escalate privileges**](privilege-escalation/#nfs-privilege-escalation)?
 * [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?
@@ -154,6 +154,6 @@ If you want to **know** about my **latest modifications**/**additions** or you h
 If you want to **share some tricks with the community** you can also submit **pull requests** to [**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) that will be reflected in this book.\
 Don't forget to **give ⭐ on the github** to motivate me to continue developing this book.
 
-![](<../.gitbook/assets/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67 (6) (4) (3).png>)
+![](<../.gitbook/assets/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67 (6) (4) (1) (1) (3).png>)
 
 ​[**Buy me a coffee here**](https://www.buymeacoffee.com/carlospolop)
