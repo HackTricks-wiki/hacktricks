@@ -10,15 +10,13 @@ I also wants to say **thanks to all the people that share cyber-security related
 
 ### BIO
 
-If for some weird reason you are interested in knowing about my bio here you have a summary:
-
-* I've worked in different companies as sysadmin, developer and **pentester**.
+* I've worked in different companies as sysadmin, developer and **pentester**
 * I'm a **Telecommunications Engineer** with a **Masters** in **Cybersecurity**
-* Relevant certifications: **OSCP, OSWE**, **CRTP, eMAPT, eWPTXv2** and Professional Drone pilot.
-* I speak **Spanish** and **English** and little of French (some day I will improve that).
+* Relevant certifications: **OSCP, OSWE**, **CRTP, eMAPT, eWPTXv2** and Professional Drone pilot
+* I speak **Spanish** and **English** and little of French (some day I will improve that)
 * I'm a **CTF player**
 * I'm very proud of this **book** and my **PEASS** (I'm talking about these peass: [https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite))
-* And I really enjoy researching, playing CTFs, pentesting and everything related to **hacking**.
+* And I really enjoy researching, playing CTFs, pentesting and everything related to **hacking**
 
 ### Support HackTricks
 
