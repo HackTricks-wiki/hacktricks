@@ -41,9 +41,10 @@ Therefore, it's possible to indicate the type of container each step needs to be
 
 ```yaml
 jobs:
-- name: hello-world-job
+- name: escape
   plan:
-  - task: hello-world-task
+  - task: escape-task
+    privileged: true
     config:
       # Tells Concourse which type of worker this task should run on
       platform: linux
@@ -51,11 +52,13 @@ jobs:
         type: registry-image
         source:
           repository: busybox # images are pulled from docker hub by default
-      # The command Concourse will run inside the container
-      # echo "Hello world!"
       run:
-        path: echo
-        args: ["Hello world!"]
+        path: sh
+        args:
+        - -cx
+        - |
+          ls -l .
+          echo "hello from another step!" > the-artifact/message
 ```
 
 ```bash
@@ -68,46 +71,7 @@ fly -t tutorial trigger-job --job hello-world/hello-world-job --watch
 
 ### Bash script with output/input pipeline
 
-```yaml
-jobs:
-- name: hello-world-job
-  plan:
-  - task: hello-world-task
-    config:
-      platform: linux
-      image_resource:
-        type: registry-image
-        source:
-          repository: busybox
-      outputs:
-      - name: the-artifact
-      run:
-        # This is a neat way of embedding a script into a task
-        path: sh
-        args:
-        - -cx
-        - |
-          ls -l .
-          echo "hello from another step!" > the-artifact/message
-  # Add a second task that reads the contents of the-artifact/message
-  - task: read-the-artifact
-    config:
-      platform: linux
-      image_resource:
-        type: registry-image
-        source:
-          repository: busybox
-      # To recieve "the-artifact", specify it as an input
-      inputs:
-      - name: the-artifact
-      run:
-        path: sh
-        args:
-        - -cx
-        - |
-          ls -l .
-          cat the-artifact/message
-```
+It's possible to **save the results of one task in a file** and indicate that it's an output and then indicate the input of the next task as the output of the previous task. What concourse does is to **mount the directory of the previous task in the new task where you can access the files created by the previous task**.
 
 ### Triggers
 
@@ -134,10 +98,12 @@ Concourse comes with five roles:
 Moreover, the **permissions of the roles owner, member, pipeline-operator and viewer can be modified** configuring RBAC (configuring more specifically it's actions). Read more about it in: [https://concourse-ci.org/user-roles.html](https://concourse-ci.org/user-roles.html)
 {% endhint %}
 
+Note that Concourse **groups pipelines inside Teams**. Therefore users belonging to a Team will be able to manage those pipelines and **several Teams** might exist. A user can belong to several Teams and have different permissions inside each of them.
+
 ## Vars & Credential Manager
 
 In the YAML configs you can configure values using the syntax `((`_`source-name`_`:`_`secret-path`_`.`_`secret-field`_`))`.\
-The **source-name is optional**, and if omitted, he [cluster-wide credential manager](https://concourse-ci.org/vars.html#cluster-wide-credential-manager) will be used, or the value may be provided [statically](https://concourse-ci.org/vars.html#static-vars).\
+The **source-name is optional**, and if omitted, the [cluster-wide credential manager](https://concourse-ci.org/vars.html#cluster-wide-credential-manager) will be used, or the value may be provided [statically](https://concourse-ci.org/vars.html#static-vars).\
 The **optional **_**secret-field**_ specifies a field on the fetched secret to read. If omitted, the credential manager may choose to read a 'default field' from the fetched credential if the field exists.\
 Moreover, the _**secret-path**_ and _**secret-field**_ may be surrounded by double quotes `"..."` if they **contain special characters** like `.` and `:`. For instance, `((source:"my.secret"."field:1"))` will set the _secret-path_ to `my.secret` and the _secret-field_ to `field:1`.
 
@@ -192,10 +158,51 @@ In order to enumerate a concourse environment you first need to **gather valid c
 * Get **role** of the user against the indicated target:
   * `fly -t <target> userinfo`
 
+### Teams & Users
+
+* Get a list of the Teams
+  * `fly -t <target> teams`
+* Get roles inside team
+  * `fly -t <target> get-team -n <team-name>`
+* Get a list of users
+  * `fly -t <target> active-users`
+
 ### Pipelines
 
 * **List** pipelines:
-  * `fly pipelines`
+  * `fly -t <target> pipelines -a`
 * **Get** pipeline yaml (**sensitive information** might be found in the definition):
-  * `fly get-pipeline -p <pipeline-name>`
+  * `fly -t <target> get-pipeline -p <pipeline-name>`
+* Get all pipeline **config declared vars**
+  * `for pipename in $(fly -t <target> pipelines | grep -Ev "^id" | awk '{print $2}'); do echo $pipename; fly -t <target> get-pipeline -p $pipename -j | grep -Eo '"vars":[^}]+'; done`
+* Get all the **pipelines secret names used** (if you can create/modify a job or hijack a container you could exfiltrate them):
 
+```bash
+rm /tmp/secrets.txt;
+for pipename in $(fly -t onelogin pipelines | grep -Ev "^id" | awk '{print $2}'); do 
+    echo $pipename;
+    fly -t onelogin get-pipeline -p $pipename | grep -Eo '\(\(.*\)\)' | sort | uniq | tee -a /tmp/secrets.txt;
+    echo "";
+done
+echo ""
+echo "ALL SECRETS"
+cat /tmp/secrets.txt | sort | uniq
+rm /tmp/secrets.txt
+```
+
+### Containers & Workers
+
+* List **containers**:
+  * `fly -t <target> containers`
+* List **workers**:
+  * `fly -t <target> workers`
+
+## Concourse Attacks
+
+### Session inside running or recently run container
+
+If you have enough privileges (**member role or more**) you will be able to **list pipelines and roles** and just get a **session inside** the `<pipeline>/<job>` **container** using:
+
+```bash
+fly -t tutorial intercept --job pipeline-name/job-name
+```
