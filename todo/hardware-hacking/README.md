@@ -8,7 +8,7 @@ Generally, the line is held high (at a logical 1 value) while UART is in the idl
 
 We call the most common configuration 8N1: eight data bits, no parity, and one stop bit. For example, if we wanted to send the character C, or 0x43 in ASCII, in an 8N1 UART configuration, we would send the following bits: 0 (the start bit); 0, 1, 0, 0, 0, 0, 1, 1 (the value of 0x43 in binary), and 0 (the stop bit).
 
-![](<../.gitbook/assets/image (648).png>)
+![](<../../.gitbook/assets/image (648).png>)
 
 Hardware tools to communicate with UART:
 
