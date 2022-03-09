@@ -45,7 +45,8 @@ With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with t
 
 ![](<../../.gitbook/assets/image (652).png>)
 
-* After recovering the bytes you might need to process them someway. For example, in Manchester codification a up+down will be a 1 or 0 and a down+up will be the other one. So pairs of 1s and 0s (ups and downs) will be a real 1 or a real 0.
+* **After recovering the bits you might need to process them someway**. For example, in Manchester codification a up+down will be a 1 or 0 and a down+up will be the other one. So pairs of 1s and 0s (ups and downs) will be a real 1 or a real 0.
+* Even if a signal is using Manchester codification (it's impossible to find more than two 0s or 1s in a row), you might **find several 1s or 0s together in the preamble**!
 
 ### Uncovering modulation type with IQ
 
@@ -56,11 +57,14 @@ If you are checking a signal there are different ways to try to figure out what 
 
 * **Detecting AM**: If in the IQ graph appears for example **2 circles** (probably one in 0 and other in a different amplitude), it could means that this is an AM signal. This is because in the IQ graph the distance between the 0 and the circle is the amplitude of the signal, so it's easy to visualize different amplitudes being used.
 * **Detecting PM**: Like in the previous image, if you find small circles not related between them it probably means that a phase modulation is used. This is because in the IQ graph, the angle between the point and the 0,0 is the phase of the signal, so that means that 4 different phases are used.
+  * Note that if the information is hidden in the fact that a phase is changed and not in the phase itself, you won't see different phases clearly differentiated.
 * **Detecting FM**: IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
   Therefore, to identify FM, you should **only see basically a circle** in this graph.\
   Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
 
 ## AM Example
+
+{% file src="../../.gitbook/assets/sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw" %}
 
 ### Uncovering AM
 
@@ -136,6 +140,8 @@ If the signal has more than 1 bit per symbol (for example 2), SigDigger has **no
 Also, use **codifications** such as **Manchester**, and **up+down** can be **1 or 0** and an down+up can be a 1 or 0. In those cases you need to **treat the obtained ups (1) and downs (0)** to substitute the pairs of 01 or 10 as 0s or 1s.
 
 ## FM Example
+
+{% file src="../../.gitbook/assets/sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw" %}
 
 ### Uncovering FM
 
