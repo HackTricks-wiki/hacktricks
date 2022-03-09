@@ -30,7 +30,7 @@ If you want to **share some tricks with the community** you can also submit **pu
 
 ### [STM Cyber](https://www.stmcyber.com)
 
-![](<.gitbook/assets/image (642) (1).png>)
+![](<.gitbook/assets/image (642) (1) (1).png>)
 
 [**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentestings, Red teams and training.
 

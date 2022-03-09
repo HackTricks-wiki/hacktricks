@@ -12,7 +12,7 @@ To connect with the bus pirate you can follow the docs:
 
 In this case I'm going to connect to an EPROM: ATMEL901 24C256 PU27:
 
-![](<../../.gitbook/assets/image (465).png>)
+![](<../../.gitbook/assets/image (465) (2).png>)
 
 To talk with bus pirate I used Tera Term connected to the pirate bus COM port with a Setup --> Serial Port --> Speed of 115200.\
 In the following communication you can find how to prepare the bus pirate to talk I2C and how to write and read from the memory (Comments appear using "#", don't expect that part in the communication):
@@ -120,7 +120,7 @@ NACK
 
 In this scenario we are going to sniff the I2C communication between the arduino and the previous EPROM, you just need to communicate both devices and then connect the bus pirate to the SCL, SDA and GND pins:
 
-![](<../../.gitbook/assets/image (201).png>)
+![](<../../.gitbook/assets/image (201) (2).png>)
 
 ```bash
 I2C>m
