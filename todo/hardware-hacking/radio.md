@@ -20,6 +20,16 @@ In the GUI behaviour it's recommended to enable a few things if your PC support 
 If you realise that your PC is not capturing things try to disable OpenGL and lowering the sample rate.
 {% endhint %}
 
+### Uses
+
+* Just to **capture some time of a signal and analyze it** just maintain the button "Push to capture" as long as you need.
+
+![](<../../.gitbook/assets/image (631).png>)
+
+* The **Tuner** of SigDigger helps to **capture better signals** (but it can also degrade them). Ideally start with 0 and keep **making it bigger until** you find the **noise** introduce is **bigger** than the **improvement of the signal** you need).
+
+![](<../../.gitbook/assets/image (658).png>)
+
 ### Synchronize with radio channel
 
 With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with the channel you want to hear, configure "Baseband audio preview" option, configure the bandwith to get all the info being sent and then set the Tuner to the level before the noise is really starting to increase:
@@ -31,7 +41,7 @@ With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with t
 * When a device is sending bursts of information, usually the **first part is going to be a preamble** so you **don't** need to **worry** if you **don't find information** in there **or if there are some errors** there.
 * In frames of information you usually should **find different frames well aligned between them**:
 
-![](<../../.gitbook/assets/image (659).png>)
+![](<../../.gitbook/assets/image (660).png>)
 
 ![](<../../.gitbook/assets/image (652).png>)
 
@@ -46,6 +56,9 @@ If you are checking a signal there are different ways to try to figure out what 
 
 * **Detecting AM**: If in the IQ graph appears for example **2 circles** (probably one in 0 and other in a different amplitude), it could means that this is an AM signal. This is because in the IQ graph the distance between the 0 and the circle is the amplitude of the signal, so it's easy to visualize different amplitudes being used.
 * **Detecting PM**: Like in the previous image, if you find small circles not related between them it probably means that a phase modulation is used. This is because in the IQ graph, the angle between the point and the 0,0 is the phase of the signal, so that means that 4 different phases are used.
+* **Detecting FM**: IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
+  Therefore, to identify FM, you should **only see basically a circle** in this graph.\
+  Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
 
 ## AM Example
 
@@ -106,7 +119,7 @@ Having found this is an **AM modulated** signal and the **symbol rate** (and kno
 
 Pressing sample this appears:
 
-![](<../../.gitbook/assets/image (658).png>)
+![](<../../.gitbook/assets/image (659).png>)
 
 Now, to make SigDigger understand **where is the range** of the level carrying information you need to click on the **lower level** and maintain clicked until the biggest level:
 
@@ -166,7 +179,7 @@ And this is would be phase histogram (which makes very clear the signal is not m
 
 IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
 Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-Moreover,
+Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
 
 ![](<../../.gitbook/assets/image (643).png>)
 
