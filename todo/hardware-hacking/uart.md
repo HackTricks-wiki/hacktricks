@@ -9,6 +9,7 @@ It's important to note that in this protocol you need to connect the TX of one d
 In this scenario we are going to sniff the UART communication of the Arduino that is sending all the prints of the program to the Serial Monitor.
 
 ```bash
+# Check the modes
 UART>m
 1. HiZ
 2. 1-WIRE
@@ -23,6 +24,7 @@ UART>m
 11. DIO
 x. exit(without change)
 
+# Select UART
 (1)>3
 Set serial port speed: (bps)
  1. 300
@@ -36,12 +38,16 @@ Set serial port speed: (bps)
  9. 115200
 10. BRG raw value
 
+# Select the speed the communication is occurring on (you BF all this until you find readable things)
+## Or you could later use the macro (4) to try to find the speed
 (1)>5
 Data bits and parity:
  1. 8, NONE *default
  2. 8, EVEN
  3. 8, ODD
  4. 9, NONE
+ 
+ # From now on pulse enter for default
 (1)>
 Stop bits:
  1. 1 *default
@@ -59,9 +65,13 @@ Select output type:
 Clutch disengaged!!!
 To finish setup, start up the power supplies with command 'W'
 Ready
+
+# Start
 UART>W
 POWER SUPPLIES ON
 Clutch engaged!!!
+
+# Use macro (2) to read the data of the bus (live monitor)
 UART>(2)
 Raw UART input
 Any key to exit
