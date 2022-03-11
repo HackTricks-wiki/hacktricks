@@ -630,6 +630,8 @@
   * [I2C](todo/hardware-hacking/i2c.md)
   * [UART](todo/hardware-hacking/uart.md)
   * [Radio](todo/hardware-hacking/radio.md)
+  * [JTAG](todo/hardware-hacking/jtag.md)
+  * [SPI](todo/hardware-hacking/spi.md)
 
 ***
 

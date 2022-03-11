@@ -76,13 +76,13 @@ Checking AM info with [**SigDigger** ](https://github.com/BatchDrake/SigDigger)a
 
 And this is how part of the symbol looks like with the waveform:
 
-![](<../../.gitbook/assets/image (650).png>)
+![](<../../.gitbook/assets/image (650) (1).png>)
 
 #### Checking the Histogram
 
 You can **select the whole signal** where information is located, select **Amplitude** mode and **Selection** and click on **Histogram.** You can observer that 2 clear levels are only found
 
-![](<../../.gitbook/assets/image (647).png>)
+![](<../../.gitbook/assets/image (647) (1).png>)
 
 For example, if you select Frequency instead of Amplitude in this AM signal you find just 1 frequency (no way information modulated in frequency is just using 1 freq).
 
@@ -163,7 +163,7 @@ This is because I capture the signal in booth frequencies, therefore one is appr
 
 If the synchronized frequency is **closer to one frequency than to the other** you can easily see the 2 different frequencies:
 
-![](<../../.gitbook/assets/image (648).png>)
+![](<../../.gitbook/assets/image (648) (1).png>)
 
 ![](<../../.gitbook/assets/image (634).png>)
 
@@ -179,7 +179,7 @@ In this case if you check the **Amplitude histogram** you will find **only one a
 
 And this is would be phase histogram (which makes very clear the signal is not modulated in phase):
 
-![](<../../.gitbook/assets/image (201).png>)
+![](<../../.gitbook/assets/image (201) (2).png>)
 
 #### With IQ
 
@@ -187,7 +187,7 @@ IQ doesn't have a field to identify frequencies (distance to centre is amplitude
 Therefore, to identify FM, you should **only see basically a circle** in this graph.\
 Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
 
-![](<../../.gitbook/assets/image (643).png>)
+![](<../../.gitbook/assets/image (643) (1).png>)
 
 ### Get Symbol Rate
 

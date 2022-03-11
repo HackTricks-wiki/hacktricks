@@ -6,6 +6,49 @@
 
 ## Bus Pirate
 
+To test a Bus Pirate is working, connect +5V with VPU and 3.3V with ADC and access the bus pirate (Using Tera Term for example) and use the command `~`:
+
+```bash
+# Use command
+HiZ>~
+Disconnect any devices
+Connect (Vpu to +5V) and (ADC to +3.3V)
+Space to continue
+# Press space
+Ctrl
+AUX OK
+MODE LED OK
+PULLUP H OK
+PULLUP L OK
+VREG OK
+ADC and supply
+5V(4.96) OK
+VPU(4.96) OK
+3.3V(3.26) OK
+ADC(3.27) OK
+Bus high
+MOSI OK
+CLK OK
+MISO OK
+CS OK
+Bus Hi-Z 0
+MOSI OK
+CLK OK
+MISO OK
+CS OK
+Bus Hi-Z 1
+MOSI OK
+CLK OK
+MISO OK
+CS OK
+MODE and VREG LEDs should be on!
+Any key to exit
+#Press space
+Found 0 errors.
+```
+
+As you can see in the previous command line it said that it found 0 errors. This is very useful to know it's working after buying it or after flashing a firmware.
+
 To connect with the bus pirate you can follow the docs:
 
 ![](<../../.gitbook/assets/image (307).png>)
@@ -120,7 +163,7 @@ NACK
 
 In this scenario we are going to sniff the I2C communication between the arduino and the previous EPROM, you just need to communicate both devices and then connect the bus pirate to the SCL, SDA and GND pins:
 
-![](<../../.gitbook/assets/image (201) (2).png>)
+![](<../../.gitbook/assets/image (201) (2) (1).png>)
 
 ```bash
 I2C>m
