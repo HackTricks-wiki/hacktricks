@@ -180,7 +180,7 @@ rpm -qa --root=/ mntpath/var/lib/rpm
 
 ### Other
 
-**Not all installed programs will be listed by the above commands** because some applications are not available as packages for certain systems and must be installed from source. Therefore, a review of locations such as _**/usr/local**_ and _**/opt**_ may reveal other applications that have been compiled and installed from source code.&#x20;
+**Not all installed programs will be listed by the above commands** because some applications are not available as packages for certain systems and must be installed from source. Therefore, a review of locations such as _**/usr/local**_ and _**/opt**_ may reveal other applications that have been compiled and installed from source code.
 
 ```bash
 ls /opt /usr/local
@@ -195,6 +195,10 @@ find /sbin/ -exec dpkg -S {} \; | grep "no path found"
 #RedHat
 find /sbin/ –exec rpm -qf {} \; | grep "is not"
 ```
+
+## Recover Deleted Running Binaries
+
+![](<../../.gitbook/assets/image (641).png>)
 
 ## Inspect AutoStart locations
 
@@ -219,9 +223,9 @@ ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Libra
 It is extremely common for malware to entrench itself as a new, unauthorized service. Linux has a number of scripts that are used to start services as the computer boots. The initialization startup script _**/etc/inittab**_ calls other scripts such as rc.sysinit and various startup scripts under the _**/etc/rc.d/**_ directory, or _**/etc/rc.boot/**_ in some older versions. On other versions of Linux, such as Debian, startup scripts are stored in the _**/etc/init.d/**_ directory. In addition, some common services are enabled in _**/etc/inetd.conf**_ or _**/etc/xinetd/**_ depending on the version of Linux. Digital investigators should inspect each of these startup scripts for anomalous entries.
 
 * _**/etc/inittab**_
-* _**/etc/rc.d/**_&#x20;
+* _**/etc/rc.d/**_
 * _**/etc/rc.boot/**_
-* _**/etc/init.d/**_&#x20;
+* _**/etc/init.d/**_
 * _**/etc/inetd.conf**_
 * _**/etc/xinetd/**_
 * _**/etc/systemd/system**_
@@ -236,7 +240,7 @@ On Linux systems, kernel modules are commonly used as rootkit components to malw
 There are several configuration files that Linux uses to automatically launch an executable when a user logs into the system that may contain traces of malware.
 
 * _**/etc/profile.d/\***_ , _**/etc/profile**_ , _**/etc/bash.bashrc**_ are executed when any user account logs in.
-* _**∼/.bashrc**_ , _**∼/.bash\_profile**_ , _**\~/.profile**_ ,  _**∼/.config/autostart**_ are executed when the specific user logs in.
+* _**∼/.bashrc**_ , _**∼/.bash\_profile**_ , _**\~/.profile**_ , _**∼/.config/autostart**_ are executed when the specific user logs in.
 * _**/etc/rc.local**_ It is traditionally executed after all the normal system services are started, at the end of the process of switching to a multiuser runlevel.
 
 ## Examine Logs
@@ -248,9 +252,9 @@ Look in all available log files on the compromised system for traces of maliciou
 **Logon** events recorded in the system and security logs, including logons via the network, can reveal that **malware** or an **intruder gained access** to a compromised system via a given account at a specific time. Other events around the time of a malware infection can be captured in system logs, including the **creation** of a **new** **service** or new accounts around the time of an incident.\
 Interesting system logons:
 
-* &#x20;**/var/log/syslog** (debian) or **/var/log/messages** (Redhat)
+* **/var/log/syslog** (debian) or **/var/log/messages** (Redhat)
   * Shows general messages and info regarding the system. Basically a data log of all activity throughout the global system.
-* &#x20;**/var/log/auth.log** (debian) or **/var/log/secure** (Redhat)
+* **/var/log/auth.log** (debian) or **/var/log/secure** (Redhat)
   * Keep authentication logs for both successful or failed logins, and authentication processes. Storage depends on system type.
   * `cat /var/log/auth.log | grep -iE "session opened for|accepted password|new session|not in sudoers"`
 * **/var/log/boot.log**: start-up messages and boot info.
@@ -262,7 +266,7 @@ Interesting system logons:
 * **/var/log/daemon.log:** keeps track of running background services but doesn’t represent them graphically.
 * **/var/log/btmp**: keeps a note of all failed login attempts.
 * **/var/log/httpd/**: a directory containing error\_log and access\_log files of the Apache httpd daemon. Every error that httpd comes across is kept in the **error\_log** file. Think of memory problems and other system-related errors. **access\_log** logs all requests which come in via HTTP.
-* **/var/log/mysqld.log** or **/var/log/mysql.log** : MySQL log file that records every  debug, failure and success message, including starting, stopping and restarting of MySQL daemon mysqld. The system decides on the directory. RedHat, CentOS, Fedora, and other RedHat-based systems use /var/log/mariadb/mariadb.log. However, Debian/Ubuntu use /var/log/mysql/error.log directory.
+* **/var/log/mysqld.log** or **/var/log/mysql.log** : MySQL log file that records every debug, failure and success message, including starting, stopping and restarting of MySQL daemon mysqld. The system decides on the directory. RedHat, CentOS, Fedora, and other RedHat-based systems use /var/log/mariadb/mariadb.log. However, Debian/Ubuntu use /var/log/mysql/error.log directory.
 * **/var/log/xferlog**: keeps FTP file transfer sessions. Includes info like file names and user-initiated FTP transfers.
 * **/var/log/\*** : You should always check for unexpected logs in this directory
 
@@ -302,7 +306,7 @@ Note that you can also **take a look to this information reading the logs**.
 
 ### USB Logs
 
-&#x20;[**usbrip**](https://github.com/snovvcrash/usbrip) is a small piece of software written in pure Python 3 which parses Linux log files (`/var/log/syslog*` or `/var/log/messages*` depending on the distro) for constructing USB event history tables.
+[**usbrip**](https://github.com/snovvcrash/usbrip) is a small piece of software written in pure Python 3 which parses Linux log files (`/var/log/syslog*` or `/var/log/messages*` depending on the distro) for constructing USB event history tables.
 
 It is interesting to **know all the USBs that have been used** and it will be more useful if you have an authorized list of USB to find "violation events" (the use of USBs that aren't inside that list).
 
@@ -348,7 +352,7 @@ To deal with such anti-forensic techniques, it is necessary to pay **careful att
 * It's interesting to see the files and folders of a directory **sorted by creation date** instead alphabetically to see which files/folders are more recent (last ones usually).
 
 You can check the most recent files of a folder using `ls -laR --sort=time /bin`\
-You can check the inodes of the files inside a folder using `ls -lai /bin |sort -n`&#x20;
+You can check the inodes of the files inside a folder using `ls -lai /bin |sort -n`
 
 {% hint style="info" %}
 Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modify at the **same time** of the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
