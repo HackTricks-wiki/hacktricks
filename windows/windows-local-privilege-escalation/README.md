@@ -8,7 +8,7 @@ Do you use **Hacktricks every day**? Did you find the book **very** **useful**? 
 If you want to know about my **latest modifications**/**additions** or you have **any suggestion for HackTricks** or **PEASS**, **join the** [**💬**](https://emojipedia.org/speech-balloon/)[**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass), or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**\
 If you want to **share some tricks with the community** you can also submit **pull requests** to [**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) that will be reflected in this book and don't forget to **give ⭐** on **github** to **motivate** **me** to continue developing this book.
 
-### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)****
+### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 ## Initial Windows Theory
 
@@ -71,7 +71,7 @@ Get-Hotfix -description "Security update" #List only "Security Update" patches
 
 **Github repos of exploits:**
 
-* ****[https://github.com/nomi-sec/PoC-in-GitHub](https://github.com/nomi-sec/PoC-in-GitHub)
+* [https://github.com/nomi-sec/PoC-in-GitHub](https://github.com/nomi-sec/PoC-in-GitHub)
 * [https://github.com/abatchy17/WindowsExploits](https://github.com/abatchy17/WindowsExploits)
 * [https://github.com/SecWiki/windows-kernel-exploits](https://github.com/SecWiki/windows-kernel-exploits)
 
@@ -132,7 +132,7 @@ To view the last 15 events from PowersShell logs you can execute:
 Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
 ```
 
-### PowerShell  **Script Block Logging**
+### PowerShell **Script Block Logging**
 
 It records block of code as they are executed therefore it captures the complete activity and full content of the script. It maintains the complete audit trail of each activity which can be used later in forensics and to study the malicious behavior. It records all the activity at time of execution thus provides the complete details.
 
@@ -144,7 +144,7 @@ reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\Script
 ```
 
 The Script Block logging events can be found in Windows Event viewer under following path: _Application and Sevices Logs > Microsoft > Windows > Powershell > Operational_\
-__To view the last 20 events you can use:
+\_\_To view the last 20 events you can use:
 
 ```bash
 Get-WinEvent -LogName "Microsoft-Windows-Powershell/Operational" | select -first 20 | Out-Gridview
@@ -194,8 +194,8 @@ Read the research here:
 
 #### WSUS CVE-2020-1013
 
-****[**Read the complete report here**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).\
-Basically, this is the flaw that this bug exploits:&#x20;
+[**Read the complete report here**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).\
+Basically, this is the flaw that this bug exploits:
 
 > If we have the power to modify our local user proxy, and Windows Updates uses the proxy configured in Internet Explorer’s settings, we therefore have the power to run [PyWSUS](https://github.com/GoSecure/pywsus) locally to intercept our own traffic and run code as an elevated user on our asset.
 >
@@ -205,7 +205,7 @@ You can exploit this vulnerability using the tool [**WSUSpicious**](https://gith
 
 ## AlwaysInstallElevated
 
-**If** these 2 registers are **enabled** (value is **0x1**), then users of any privilege can **install** (execute) ** `*.msi`** files as NT AUTHORITY\\**SYSTEM**.
+**If** these 2 registers are **enabled** (value is **0x1**), then users of any privilege can **install** (execute) \*\* `*.msi`\*\* files as NT AUTHORITY\\**SYSTEM**.
 
 ```bash
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
@@ -247,7 +247,7 @@ Read this tutorial to learn how to create a MSI wrapper using this tools. Note t
 
 ### MSI Installation
 
-To execute the **installation** of the **malicious `.msi` ** file in **background:**
+To execute the **installation** of the \*\*malicious `.msi` \*\* file in **background:**
 
 ```
 msiexec /quiet /qn /i C:\Users\Steve.INFERNO\Downloads\alwe.msi
@@ -304,7 +304,7 @@ reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ### Credentials Guard
 
 **Credential Guard** is a new feature in Windows 10 (Enterprise and Education edition) that helps to protect your credentials on a machine from threats such as pass the hash.\
-****[**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)****
+[**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
 
 ```
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
@@ -514,7 +514,7 @@ accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 
 ### Enable service
 
-If you are having this error (for example with SSDPSRV):&#x20;
+If you are having this error (for example with SSDPSRV):
 
 _System error 1058 has occurred._\
 _The service cannot be started, either because it is disabled or because it has no enabled devices associated with it._
@@ -565,7 +565,7 @@ Other Permissions can be used to escalate privileges:\
 ### Services binaries weak permissions
 
 **Check if you can modify the binary that is executed by a service** or if you have **write permissions on the folder** where the binary is located ([**DLL Hijacking**](dll-hijacking.md))**.**\
-****You can get every binary that is executed by a service using **wmic** (not in system32) and check your permissions using **icacls**:
+You can get every binary that is executed by a service using **wmic** (not in system32) and check your permissions using **icacls**:
 
 ```bash
 for /f "tokens=2 delims='='" %a in ('wmic service list full^|find /i "pathname"^|find /i /v "system32"') do @echo %a >> %temp%\perm.txt
@@ -610,8 +610,6 @@ If you have this permission over a registry this means to **you can create sub r
 {% content-ref url="appenddata-addsubdirectory-permission-over-service-registry.md" %}
 [appenddata-addsubdirectory-permission-over-service-registry.md](appenddata-addsubdirectory-permission-over-service-registry.md)
 {% endcontent-ref %}
-
-
 
 ### Unquoted Service Paths
 
@@ -779,7 +777,7 @@ Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 
 ### Firewall Rules
 
-****[**Check this page for Firewall related commands**](../basic-cmd-for-pentesters.md#firewall) **(list rules, create rules, turn off, turn off...)**
+[**Check this page for Firewall related commands**](../basic-cmd-for-pentesters.md#firewall) **(list rules, create rules, turn off, turn off...)**
 
 More[ commands for network enumeration here](../basic-cmd-for-pentesters.md#network)
 
@@ -790,7 +788,7 @@ C:\Windows\System32\bash.exe
 C:\Windows\System32\wsl.exe
 ```
 
-&#x20;Binary `bash.exe` can also be found in `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe`
+Binary `bash.exe` can also be found in `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe`
 
 If you get root user you can listen on any port (the first time you use `nc.exe` to listen on a port it will ask via GUI if `nc` should be allowed by the firewall).
 
@@ -803,7 +801,7 @@ wsl python -c 'BIND_OR_REVERSE_SHELL_PYTHON_CODE'
 
 To easily start bash as root, you can try `--default-user root`
 
-&#x20;You can explore the `WSL` filesystem in the folder `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
+You can explore the `WSL` filesystem in the folder `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
 
 ## Windows Credentials
 
@@ -860,7 +858,7 @@ In theory, the Data Protection API can enable symmetric encryption of any kind o
 
 **DPAPI allows developers to encrypt keys using a symmetric key derived from the user's logon secrets**, or in the case of system encryption, using the system's domain authentication secrets.
 
-&#x20;The DPAPI keys used for encrypting the user's RSA keys are stored under `%APPDATA%\Microsoft\Protect\{SID}` directory, where {SID} is the [Security Identifier](https://en.wikipedia.org/wiki/Security\_Identifier) of that user. **The DPAPI key is stored in the same file as the master key that protects the users private keys**. It usually is 64 bytes of random data. (Notice that this directory is protected so you cannot list it using`dir` from the cmd, but you can list it from PS).
+The DPAPI keys used for encrypting the user's RSA keys are stored under `%APPDATA%\Microsoft\Protect\{SID}` directory, where {SID} is the [Security Identifier](https://en.wikipedia.org/wiki/Security\_Identifier) of that user. **The DPAPI key is stored in the same file as the master key that protects the users private keys**. It usually is 64 bytes of random data. (Notice that this directory is protected so you cannot list it using`dir` from the cmd, but you can list it from PS).
 
 ```
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
@@ -1026,7 +1024,7 @@ reg query HKCU\Software\SimonTatham\PuTTY\SshHostKeys\
 
 ### SSH keys in registry
 
-SSH private keys can be stored inside the registry key `HKCU\Software\OpenSSH\Agent\Keys`  so you should check if there is anything interesting in there:
+SSH private keys can be stored inside the registry key `HKCU\Software\OpenSSH\Agent\Keys` so you should check if there is anything interesting in there:
 
 ```
 reg query HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys
@@ -1064,7 +1062,7 @@ dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>n
 
 You can also search for these files using **metasploit**: _post/windows/gather/enum\_unattend_
 
-Example content_:_
+Example content\_:\_
 
 ```markup
 <component name="Microsoft-Windows-Shell-Setup" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64">
@@ -1117,7 +1115,7 @@ Search for a file called **SiteList.xml**
 
 Before KB2928120 (see MS14-025), some Group Policy Preferences could be configured with a custom account. This feature was mainly used to deploy a custom local administrator account on a group of machines. There were two problems with this approach though. First, since the Group Policy Objects are stored as XML files in SYSVOL, any domain user can read them. The second problem is that the password set in these GPPs is AES256-encrypted with a default key, which is publicly documented. This means that any authenticated user could potentially access very sensitive data and elevate their privileges on their machine or even the domain. This function will check whether any locally cached GPP file contains a non-empty "cpassword" field. If so, it will decrypt it and return a custom PS object containing some information about the GPP along with the location of the file.
 
-Search in ** **_**C:\ProgramData\Microsoft\Group Policy\history** _ or in _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (previous to W Vista)_ for these files:
+Search in \*\* **\_**C:\ProgramData\Microsoft\Group Policy\history\*\* \_ or in _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (previous to W Vista)_ for these files:
 
 * Groups.xml
 * Services.xml
@@ -1301,7 +1299,7 @@ reg query "HKCU\Software\TightVNC\Server"
 reg query "HKCU\Software\OpenSSH\Agent\Key"
 ```
 
-[**Extract openssh keys from registry.**](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)****
+[**Extract openssh keys from registry.**](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
 
 ### Browsers History
 
@@ -1311,7 +1309,7 @@ Also check for the history, bookmarks and favourites of the browsers so maybe so
 Tools to extract passwords from browsers:
 
 * Mimikatz: `dpapi::chrome`
-* [**SharpWeb**](https://github.com/djhohnstein/SharpWeb)****
+* [**SharpWeb**](https://github.com/djhohnstein/SharpWeb)
 
 ### **Generic Password search in files and registry**
 
@@ -1358,7 +1356,7 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ## Leaked Handlers
 
 Imagine that **a process running as SYSTEM open a new process** (`OpenProcess()`) with **full access**. The same process **also create a new process** (`CreateProcess()`) **with low privileges but inheriting all the open handles of the main process**.\
-Then, if you have **full access to the low privileged process**, you can grab the **open handle to the privileged process created** with `OpenProcess()` and **inject a shellcode**. \
+Then, if you have **full access to the low privileged process**, you can grab the **open handle to the privileged process created** with `OpenProcess()` and **inject a shellcode**.\
 [Read this example for more information about **how to detect and exploit this vulnerability**.](leaked-handle-exploitation.md)\
 [Read this **other post for a more complete explanation on how to test and abuse more open handlers of processes and threads inherited with different levels of permissions (not only full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
@@ -1372,7 +1370,7 @@ When a **client writes on a pipe**, the **server** that created the pipe can **i
 
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
-****[**Read this to learn about Integrity Levels**](integrity-levels.md) **and** [**this to learn what is UAC**](../authentication-credentials-uac-and-efs.md#uac)**, then read how to**[ **bypass it**](../authentication-credentials-uac-and-efs.md#uac)**.**
+[**Read this to learn about Integrity Levels**](integrity-levels.md) **and** [**this to learn what is UAC**](../authentication-credentials-uac-and-efs.md#uac)**, then read how to**[ **bypass it**](../authentication-credentials-uac-and-efs.md#uac)**.**
 
 ## **From High Integrity to System**
 
@@ -1387,7 +1385,7 @@ sc start newservicename
 
 ### AlwaysInstallElevated
 
-From a High Integrity process you could try to **enable the AlwaysInstallElevated registry entries** and **install** a reverse shell using a _**.msi**_ wrapper. \
+From a High Integrity process you could try to **enable the AlwaysInstallElevated registry entries** and **install** a reverse shell using a _**.msi**_ wrapper.\
 [More information about the registry keys involved and how to install a _.msi_ package here.](./#alwaysinstallelevated)
 
 ### High + SeImpersonate privilege to System
@@ -1402,7 +1400,7 @@ Using this technique is usually **selected any process running as SYSTEM with al
 
 ### **Named Pipes**
 
-This technique is used by meterpreter to escalate in `getsystem`. The technique consists on **creating a pipe and then create/abuse a service to write on that pipe**. Then, the **server** that created the pipe using the **`SeImpersonate` ** privilege will be able to **impersonate the token** of the pipe client (the service) obtaining SYSTEM privileges.\
+This technique is used by meterpreter to escalate in `getsystem`. The technique consists on **creating a pipe and then create/abuse a service to write on that pipe**. Then, the **server** that created the pipe using the \*\*`SeImpersonate` \*\* privilege will be able to **impersonate the token** of the pipe client (the service) obtaining SYSTEM privileges.\
 If you want to [**learn more about name pipes you should read this**](./#named-pipe-client-impersonation).\
 If you want to read an example of [**how to go from high integrity to System using name pipes you should read this**](from-high-integrity-to-system-with-name-pipes.md).
 
@@ -1415,9 +1413,9 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 
 {% embed url="https://github.com/sailay1996/RpcSsImpersonator" %}
 
-### &#x20;From LOCAL SERVICE or NETWORK SERVICE to full privs
+### From LOCAL SERVICE or NETWORK SERVICE to full privs
 
-**Read:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)****
+**Read:** [**https://github.com/itm4n/FullPowers**](https://github.com/itm4n/FullPowers)
 
 ## More help
 
@@ -1425,33 +1423,33 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 
 ## Useful tools
 
-#### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)****
+#### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 #### PS
 
-****[**PrivescCheck** ](https://github.com/itm4n/PrivescCheck)****\
-****[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) -- Check for misconfigurations and sensitive files ([check here](broken-reference)). Detected.\
-[**JAWS**](https://github.com/411Hall/JAWS) -- Check for some possible misconfigurations and gather info ([check here](broken-reference)).\
-[**privesc** ](https://github.com/enjoiz/Privesc)-- Check for misconfigurations\
-[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) -- It extracts PuTTY, WinSCP, SuperPuTTY, FileZilla, and RDP saved session information. Use **-Thorough** in local.\
-[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) -- Extracts crendentials from Credential Manager. Detected.\
-[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) -- Spray gathered passwords across domain\
-[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) -- Inveigh is a PowerShell ADIDNS/LLMNR/mDNS/NBNS spoofer and man-in-the-middle tool.\
-[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) -- Basic privesc Windows enumeration\
-[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock)  ~~****~~  -- Search for known privesc vulnerabilities (DEPRECATED for Watson)\
-[~~**WINspect**~~](https://github.com/A-mIn3/WINspect) ~~****~~ -- Local checks **(Need Admin rights)**
+[**PrivescCheck**](https://github.com/itm4n/PrivescCheck)\
+[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Check for misconfigurations and sensitive files (**[**check here**](broken-reference/)**). Detected.**\
+[**JAWS**](https://github.com/411Hall/JAWS) **-- Check for some possible misconfigurations and gather info (**[**check here**](broken-reference/)**).**\
+[**privesc** ](https://github.com/enjoiz/Privesc)**-- Check for misconfigurations**\
+[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- It extracts PuTTY, WinSCP, SuperPuTTY, FileZilla, and RDP saved session information. Use -Thorough in local.**\
+[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Extracts crendentials from Credential Manager. Detected.**\
+[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Spray gathered passwords across domain**\
+[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh is a PowerShell ADIDNS/LLMNR/mDNS/NBNS spoofer and man-in-the-middle tool.**\
+[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Basic privesc Windows enumeration**\
+[~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- Search for known privesc vulnerabilities (DEPRECATED for Watson)\
+[~~**WINspect**~~](https://github.com/A-mIn3/WINspect)  -- Local checks **(Need Admin rights)**
 
 #### Exe
 
 [**Watson**](https://github.com/rasta-mouse/Watson) -- Search for known privesc vulnerabilities (needs to be compiled using VisualStudio) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
 [**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Enumerates the host searching for misconfigurations (more a gather info tool than privesc) (needs to be compiled) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
-****[**LaZagne**](https://github.com/AlessandroZ/LaZagne) -- Extracts credentials from lots of softwares (precompiled exe in github)\
-[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) ~~****~~ -- Check for misconfiguration (executable precompiled in github). Not recommended. It does not work well in Win10.\
+[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Extracts credentials from lots of softwares (precompiled exe in github)**\
+[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- Check for misconfiguration (executable precompiled in github). Not recommended. It does not work well in Win10.\
 [~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Check for possible misconfigurations (exe from python). Not recommended. It does not work well in Win10.
 
 #### Bat
 
-****[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Tool created based in this post (it does not need accesschk to work properly but it can use it).
+[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Tool created based in this post (it does not need accesschk to work properly but it can use it).
 
 #### Local
 
