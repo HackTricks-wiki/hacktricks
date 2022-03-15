@@ -51,7 +51,7 @@ As you can see in the previous command line it said that it found 0 errors. This
 
 To connect with the bus pirate you can follow the docs:
 
-![](<../../.gitbook/assets/image (307).png>)
+![](<../../.gitbook/assets/image (307) (2).png>)
 
 In this case I'm going to connect to an EPROM: ATMEL901 24C256 PU27:
 

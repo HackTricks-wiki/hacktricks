@@ -17,6 +17,6 @@ In Arduino, after connecting the cables (pin 2 to 11 to JTAG pins and Arduino GN
 Configure **"No line ending" and 115200baud**.\
 Send the command s to start scanning:
 
-![](<../../.gitbook/assets/image (651).png>)
+![](<../../.gitbook/assets/image (651) (1).png>)
 
 If you are contacting a JTAG, you will find one or several **lines starting by FOUND!** indicating the pins of JTAG.
