@@ -1,10 +1,37 @@
 # Concourse
 
-## Introduction
+**Concourse allows you to build pipelines to automatically run tests, actions and build images whenever you need it (time based, when something happens...)**
 
-Concourse is a pipeline-based continuous thing-doer.
+## Architecture
 
-### Installation for testing
+![](<../.gitbook/assets/image (651).png>)
+
+### ATC: web UI & build scheduler
+
+The ATC is the heart of Concourse. It runs the **web UI and API** and is responsible for all pipeline **scheduling**. It **connects to PostgreSQL**, which it uses to store pipeline data (including build logs).
+
+The [checker](https://concourse-ci.org/checker.html)'s responsibility is to continously checks for new versions of resources. The [scheduler](https://concourse-ci.org/scheduler.html) is responsible for scheduling builds for a job and the [build tracker](https://concourse-ci.org/build-tracker.html) is responsible for running any scheduled builds. The [garbage collector](https://concourse-ci.org/garbage-collector.html) is the cleanup mechanism for removing any unused or outdated objects, such as containers and volumes.
+
+### TSA: worker registration & forwarding
+
+The TSA is a **custom-built SSH server** that is used solely for securely **registering** [**workers**](https://concourse-ci.org/internals.html#architecture-worker) with the [ATC](https://concourse-ci.org/internals.html#component-atc).
+
+The TSA by **default listens on port `2222`**, and is usually colocated with the [ATC](https://concourse-ci.org/internals.html#component-atc) and sitting behind a load balancer.
+
+The **TSA implements CLI over the SSH connection,** supporting [**these commands**](https://concourse-ci.org/internals.html#component-tsa).
+
+### Workers
+
+In order to execute tasks concourse must have some workers. These workers **register themselves** via the [TSA](https://concourse-ci.org/internals.html#component-tsa) and run the services [**Garden**](https://github.com/cloudfoundry-incubator/garden) and [**Baggageclaim**](https://github.com/concourse/baggageclaim).
+
+* **Garden**: This is the **Container Manage AP**I, usually run in **port 7777** via **HTTP**.
+* **Baggageclaim**: This is the **Volume Management API**, usually run in **port 7788** via **HTTP**.
+
+## Testing Environment
+
+### Running Concourse
+
+#### With Docker-Compose
 
 This docker-compose file simplifies the installation to do some tests with concourse:
 
@@ -15,6 +42,62 @@ docker-compose up -d
 
 You can download the command line `fly` for your OS from the web in `127.0.0.1:8080`
 
+#### With Kubernetes (Recommended)
+
+You can easily deploy concourse in **Kubernetes** (in **minikube** for example) using the helm-chart: [**concourse-chart**](https://github.com/concourse/concourse-chart).
+
+```bash
+brew install helm
+helm repo add concourse https://concourse-charts.storage.googleapis.com/
+helm install concourse-release concourse/concourse
+# concourse-release will be the prefix name for the concourse elements in k8s
+# After installing you will find the indications to connect to it in the console
+
+# If you need to delete it
+helm delete my-release
+```
+
+After generating the concourse env, you could generate a secret and give a access to the SA running in concourse web to access K8s secrets:
+
+```yaml
+echo 'apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: read-secrets
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-secrets-concourse
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: read-secrets
+subjects:
+- kind: ServiceAccount
+  name: concourse-release-web
+  namespace: default
+  
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: super
+  namespace: concourse-release-main
+type: Opaque
+data:
+  secret: MWYyZDFlMmU2N2Rm
+
+' | kubectl apply -f -
+```
+
 ### Create Pipeline
 
 A pipeline is made of a list of [Jobs](https://concourse-ci.org/jobs.html) which contains an ordered list of [Steps](https://concourse-ci.org/steps.html).
@@ -23,7 +106,7 @@ A pipeline is made of a list of [Jobs](https://concourse-ci.org/jobs.html) which
 
 Several different type of steps can be used:
 
-* the [`task` step](https://concourse-ci.org/task-step.html) runs a [task](https://concourse-ci.org/tasks.html)
+* **the** [**`task` step**](https://concourse-ci.org/task-step.html) **runs a** [**task**](https://concourse-ci.org/tasks.html)****
 * the [`get` step](https://concourse-ci.org/get-step.html) fetches a [resource](https://concourse-ci.org/resources.html)
 * the [`put` step](https://concourse-ci.org/put-step.html) updates a [resource](https://concourse-ci.org/resources.html)
 * the [`set_pipeline` step](https://concourse-ci.org/set-pipeline-step.html) configures a [pipeline](https://concourse-ci.org/pipelines.html)
@@ -37,13 +120,15 @@ Each [step](https://concourse-ci.org/steps.html) in a [job plan](https://concour
 
 Therefore, it's possible to indicate the type of container each step needs to be run in.
 
+
+
 ### Simple Pipeline Example
 
 ```yaml
 jobs:
-- name: escape
+- name: simple
   plan:
-  - task: escape-task
+  - task: simple-task
     privileged: true
     config:
       # Tells Concourse which type of worker this task should run on
@@ -57,16 +142,20 @@ jobs:
         args:
         - -cx
         - |
-          ls -l .
-          echo "hello from another step!" > the-artifact/message
+          sleep 1000
+          echo "$SUPER_SECRET"
+      params:
+        SUPER_SECRET: ((super.secret))
 ```
 
 ```bash
-fly -t tutorial set-pipeline -p hello-world -c hello-world.yml
+fly -t tutorial set-pipeline -p pipe-name -c hello-world.yml
 # pipelines are paused when first created
-fly -t tutorial unpause-pipeline -p hello-world
+fly -t tutorial unpause-pipeline -p pipe-name
 # trigger the job and watch it run to completion
-fly -t tutorial trigger-job --job hello-world/hello-world-job --watch
+fly -t tutorial trigger-job --job pipe-name/simple --watch
+# From another console
+fly -t tutorial intercept --job pipe-name/simple
 ```
 
 ### Bash script with output/input pipeline
@@ -143,31 +232,6 @@ Moreover, Concourse supports different credential managers:
 Note that if you have some kind of **write access to Concourse** you can create jobs to **exfiltrate those secrets** as Concourse needs to be able to access them.
 {% endhint %}
 
-## Architecture
-
-![](<../.gitbook/assets/image (651).png>)
-
-### ATC: web UI & build scheduler
-
-The ATC is the heart of Concourse. It runs the **web UI and API** and is responsible for all pipeline **scheduling**. It **connects to PostgreSQL**, which it uses to store pipeline data (including build logs).
-
-The [checker](https://concourse-ci.org/checker.html)'s responsibility is to continously checks for new versions of resources. The [scheduler](https://concourse-ci.org/scheduler.html) is responsible for scheduling builds for a job and the [build tracker](https://concourse-ci.org/build-tracker.html) is responsible for running any scheduled builds. The [garbage collector](https://concourse-ci.org/garbage-collector.html) is the cleanup mechanism for removing any unused or outdated objects, such as containers and volumes.
-
-### TSA: worker registration & forwarding
-
-The TSA is a **custom-built SSH server** that is used solely for securely **registering** [**workers**](https://concourse-ci.org/internals.html#architecture-worker) with the [ATC](https://concourse-ci.org/internals.html#component-atc).
-
-The TSA by **default listens on port `2222`**, and is usually colocated with the [ATC](https://concourse-ci.org/internals.html#component-atc) and sitting behind a load balancer.
-
-The **TSA implements CLI over the SSH connection,** supporting [**these commands**](https://concourse-ci.org/internals.html#component-tsa).
-
-### Workers
-
-In order to execute tasks concourse must have some workers. These workers **register themselves** via the [TSA](https://concourse-ci.org/internals.html#component-tsa) and run the services [**Garden**](https://github.com/cloudfoundry-incubator/garden) and [**Baggageclaim**](https://github.com/concourse/baggageclaim).
-
-* **Garden**: This is the **Container Manage AP**I, usually run in **port 7777** via **HTTP**.
-* **Baggageclaim**: This is the **Volume Management API**, usually run in **port 7788** via **HTTP**.
-
 ## Concourse Enumeration
 
 In order to enumerate a concourse environment you first need to **gather valid credentials** or to find an **authenticated token** probably in a `.flyrc` config file.
@@ -175,7 +239,7 @@ In order to enumerate a concourse environment you first need to **gather valid c
 ### Login and Current User enum
 
 * To login you need to know the **endpoint**, the **team name** (default is `main`) and a **team the user belongs to**:
-  * `fly --target example login --team-name my-team --concourse-url https://ci.example.com [`--insecure`] [--client-cert=./path --client-key=./path]`
+  * `fly --target example login --team-name my-team --concourse-url https://ci.example.com [--insecure] [--client-cert=./path --client-key=./path]`
 * Get configured **targets**:
   * `fly targets`
 * Get if the configured **target connection** is still **valid**:
@@ -217,12 +281,17 @@ rm /tmp/secrets.txt
 
 ### Containers & Workers
 
-* List **containers**:
-  * `fly -t <target> containers`
 * List **workers**:
   * `fly -t <target> workers`
+* List **containers**:
+  * `fly -t <target> containers`
 
 ## Concourse Attacks
+
+### Credentials Brute-Force
+
+* admin:admin
+* test:test
 
 ### Session inside running or recently run container
 
@@ -231,6 +300,51 @@ If you have enough privileges (**member role or more**) you will be able to **li
 ```bash
 fly -t tutorial intercept --job pipeline-name/job-name
 ```
+
+With these permissions you might be able to:
+
+* **Steal the secrets** inside the **container**
+* Try to **escape** to the node
+* Enumerate/Abuse **cloud metadata** endpoint (from the pod and from the node, if possible)
+
+### Pipeline Creation/Modification
+
+If you have enough privileges (**member role or more**) you will be able to **create/modify new pipelines.** Check this example:
+
+```yaml
+jobs:
+- name: simple
+  plan:
+  - task: simple-task
+    privileged: true
+    config:
+      # Tells Concourse which type of worker this task should run on
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: busybox # images are pulled from docker hub by default
+      run:
+        path: sh
+        args:
+        - -cx
+        - |
+          sleep 1000
+          echo "$SUPER_SECRET"
+      params:
+        SUPER_SECRET: ((super.secret))
+```
+
+With the **modification/creation** of a new pipeline you will be able to:
+
+* **Steal** the **secrets** (via echoing them out or getting inside the container and running `env`)
+* **Escape** to the **node** (by giving you enough privileges - `privileged: true`)
+* Enumerate/Abuse **cloud metadata** endpoint (from the pod and from the node)
+* **Delete** created pipeline
+
+{% hint style="warning" %}
+As far as I noticed&#x20;
+{% endhint %}
 
 ## References
 
