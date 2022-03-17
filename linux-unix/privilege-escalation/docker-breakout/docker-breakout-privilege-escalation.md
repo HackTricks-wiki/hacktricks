@@ -388,6 +388,10 @@ cat /proc/635813/fd/4
 
 You can also **kill processes and cause a DoS**.
 
+{% hint style="warning" %}
+If you somehow has privileged **access over a process outside of the container**, you could run something like `nsenter --target <pid> --all` or `nsenter --target <pid> --mount --net --pid --cgroup` to **run a shell with the same ns restrictions** (hopefully none) **as that process.**
+{% endhint %}
+
 ### hostNetwork
 
 ```
