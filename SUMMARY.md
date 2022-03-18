@@ -531,6 +531,7 @@
     * [Monitoring with Falco](pentesting/pentesting-kubernetes/kubernetes-hardening/monitoring-with-falco.md)
     * [Kubernetes SecurityContext(s)](pentesting/pentesting-kubernetes/kubernetes-hardening/kubernetes-securitycontext-s.md)
     * [Kubernetes NetworkPolicies](pentesting/pentesting-kubernetes/kubernetes-hardening/kubernetes-networkpolicies.md)
+  * [Kubernetes Network Attacks](cloud-security/pentesting-kubernetes/kubernetes-network-attacks.md)
 * [Concourse](cloud-security/concourse/README.md)
   * [Concourse Architecture](cloud-security/concourse/concourse-architecture.md)
   * [Concourse Lab Creation](cloud-security/concourse/concourse-lab-creation.md)

@@ -86,7 +86,7 @@ You can **select the whole signal** where information is located, select **Ampli
 
 For example, if you select Frequency instead of Amplitude in this AM signal you find just 1 frequency (no way information modulated in frequency is just using 1 freq).
 
-![](<../../.gitbook/assets/image (637).png>)
+![](<../../.gitbook/assets/image (637) (1).png>)
 
 If you find a lot of frequencies potentially this won't be a FM, probably the signal frequency was just modified because of the channel.
 

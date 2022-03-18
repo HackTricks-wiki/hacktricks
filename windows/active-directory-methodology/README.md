@@ -47,8 +47,8 @@ You can take a lot to [https://wadcoms.github.io/](https://wadcoms.github.io) to
 
 If you just have access to an AD environment but you don't have any credentials/sessions you could:
 
-* **Pentest the network:** 
-  * Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them (for example, [printers could be very interesting targets](ad-information-in-printers.md). 
+* **Pentest the network:**
+  * Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them (for example, [printers could be very interesting targets](ad-information-in-printers.md).
   * Enumerating DNS could give information about key servers in the domain as web, printers, shares, vpn, media, etc.
     * `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
   * Take a look to the General [**Pentesting Methodology**](../../pentesting-methodology.md) to find more information about how to do this.
@@ -56,7 +56,7 @@ If you just have access to an AD environment but you don't have any credentials/
   * `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
   * `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
   * `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-  * [**A more detailed guide on how to enumerate a SMB server can be found here.**](broken-reference)
+  * [**A more detailed guide on how to enumerate a SMB server can be found here.**](broken-reference/)
 * **Enumerate Ldap**
   * `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
   * [**A more detailed guide on how to enumerate LDAP can be found here.**](../../pentesting/pentesting-ldap.md)
@@ -106,7 +106,7 @@ Regarding [**ASREPRoast**](asreproast.md)you can now find every possible vulnera
 
 * You could use some[Windows binaries from the CMD to perform a basic recon](../basic-cmd-for-pentesters.md#domain-info), but using [powershell for recon](../basic-powershell-for-pentesters/) will probably be stealthier, and you could even [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information.
 * Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
-* Look in the LDAP database, with **ldapsearch** or **AdExplorer.exe** to look for credentials in fields *userPassword* & *unixUserPassword*, or even for *Description*.
+* Look in the LDAP database, with **ldapsearch** or **AdExplorer.exe** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_.
 * If you are using **Linux**, you could also enumerate the domain using [the-useless-one/pywerview](https://github.com/the-useless-one/pywerview).
 * You could also try automated tools as:
   * [tomcarver16/ADSearch](https://github.com/tomcarver16/ADSearch)
@@ -118,7 +118,7 @@ Regarding [**ASREPRoast**](asreproast.md)you can now find every possible vulnera
 
 The goal of Kerberoasting is to harvest **TGS tickets for services that run on behalf of domain user accounts**. Part of these TGS tickets are **encrypted wit keys derived from user passwords**. As a consequence, their credentials could be **cracked offline**.
 
-**Find more information about this attack [**in the Kerberoast page**](kerberoast.md).**
+**Find more information about this attack** [**in the Kerberoast page**](kerberoast.md)**.**
 
 ### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
 
@@ -186,12 +186,11 @@ The compromised user could have some **interesting privileges over some domain o
 If you can find any **Spool service listening** inside the domain, you may be able to **abuse** is to **obtain new credentials** and **escalate privileges**.\
 [**More information about how to find a abuse Spooler services here.**](printers-spooler-service-abuse.md)
 
-
 ## Post-exploitation with high privilege account
 
 ### Dumping Domain Credentials
 
-Once you get **Domain Admin** or even better **Enterprise Admin** privileges, you can **dump** the **domain database**: *ntds.dit*.
+Once you get **Domain Admin** or even better **Enterprise Admin** privileges, you can **dump** the **domain database**: _ntds.dit_.
 
 [**More information about DCSync attack can be found here**](dcsync.md).
 
@@ -413,6 +412,6 @@ If you don't execute this from a Domain Controller, ATA is going to catch you, s
 * [Python script to enumerate active directory](https://github.com/ropnop/windapsearch)
 * [Python script to enumerate active directory](https://github.com/CroweCybersecurity/ad-ldap-enum)
 
-![](<../../.gitbook/assets/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67 (6) (4) (1) (1) (2).png>)
+![](<../../.gitbook/assets/68747470733a2f2f7777772e6275796d6561636f666665652e636f6d2f6173736574732f696d672f637573746f6d5f696d616765732f6f72616e67655f696d672e706e67 (6) (4) (1) (1) (2) (14).png>)
 
 ​[**Buy me a coffee here**](https://www.buymeacoffee.com/carlospolop)
