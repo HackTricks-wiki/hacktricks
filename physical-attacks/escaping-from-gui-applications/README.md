@@ -144,6 +144,8 @@ Backup iKat versions:
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\
 
+Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`  
+Source: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 

@@ -47,7 +47,7 @@ From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Sig
 
 In order to mount a MBR in Linux you first need to get the start offset (you can use `fdisk` and the the `p` command)
 
-![](<../../../.gitbook/assets/image (413) (3) (3) (3) (2) (3).png>)
+![](<../../../.gitbook/assets/image (413) (3) (3) (3) (2) (2) (2).png>)
 
 An then use the following code
 
@@ -212,7 +212,7 @@ Also, the OS usually saves a lot of information about file system changes and ba
 
 Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
 
-There are several tools that you can use for file Carving indicating them the file-types you want search for&#x20;
+There are several tools that you can use for file Carving indicating them the file-types you want search for
 
 {% content-ref url="file-data-carving-recovery-tools.md" %}
 [file-data-carving-recovery-tools.md](file-data-carving-recovery-tools.md)
@@ -229,7 +229,7 @@ For example, instead of looking for a complete file containing logged URLs, this
 
 ### Secure Deletion
 
-Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**. \
+Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**.\
 You may notice that even performing that action there might be **other parts where the existence of the file is still logged**, and that's true and part of the forensics professional job is to find them.
 
 ## References

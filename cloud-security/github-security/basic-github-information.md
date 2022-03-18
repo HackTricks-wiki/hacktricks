@@ -63,7 +63,7 @@ You can also **create your own roles** in _https://github.com/organizations/\<or
 
 You can **list the teams created in an organization** in _https://github.com/orgs/\<org\_name>/teams_. Note that to see the teams which are children of other teams you need to access each parent team.
 
-![](<../../.gitbook/assets/image (630).png>)
+![](<../../.gitbook/assets/image (630) (1).png>)
 
 ### Users
 
