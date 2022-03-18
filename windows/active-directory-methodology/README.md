@@ -47,13 +47,17 @@ You can take a lot to [https://wadcoms.github.io/](https://wadcoms.github.io) to
 
 If you just have access to an AD environment but you don't have any credentials/sessions you could:
 
-* **Pentest the network:** Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them (for example, [printers could be very interesting targets](ad-information-in-printers.md)**. Take a look to the General** [**Pentesting Methodology**](../../pentesting-methodology.md) to find more information about how to do this.
+* **Pentest the network:** 
+  * Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them (for example, [printers could be very interesting targets](ad-information-in-printers.md). 
+  * Enumerating DNS could give information about key servers in the domain as web, printers, shares, vpn, media, etc.
+    * `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
+  * Take a look to the General [**Pentesting Methodology**](../../pentesting-methodology.md) to find more information about how to do this.
 * **Check for null and Guest access on smb services** (this won't work on modern Windows versions):
   * `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
   * `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
   * `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-  * [**A more detailed guide on how to enumerate a SMB server can be found here.**](broken-reference/)
-* **Enumerate Ldap**:
+  * [**A more detailed guide on how to enumerate a SMB server can be found here.**](broken-reference)
+* **Enumerate Ldap**
   * `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
   * [**A more detailed guide on how to enumerate LDAP can be found here.**](../../pentesting/pentesting-ldap.md)
 * **Poison the network**
@@ -94,25 +98,27 @@ For this phase you need to have **compromised the credentials or a session of a 
 
 #### Extracting all domain users
 
-It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser`or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
+It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser` or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
 
 Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
 
 Regarding [**ASREPRoast**](asreproast.md)you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords.
 
-* You could use some[Windows binaries from the CMD to perform a basic recon](../basic-cmd-for-pentesters.md#domain-info), but using [powershell for recon](../basic-powershell-for-pentesters/) will probably be stealthier, and you could even [**use powerview**](../basic-powershell-for-pentesters/powerview.md) **to extract more detailed information**. Always **learn what a CMD or powershell/powerview command does** before executing it, this way you will know **how stealth are you being**.
-* Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a **try**. Find where users can RDP, find path to other groups, etc.
-* Look in the LDAP database, with **ldapsearch** or **AdExplorer.exe** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_.
+* You could use some[Windows binaries from the CMD to perform a basic recon](../basic-cmd-for-pentesters.md#domain-info), but using [powershell for recon](../basic-powershell-for-pentesters/) will probably be stealthier, and you could even [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information.
+* Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
+* Look in the LDAP database, with **ldapsearch** or **AdExplorer.exe** to look for credentials in fields *userPassword* & *unixUserPassword*, or even for *Description*.
 * If you are using **Linux**, you could also enumerate the domain using [the-useless-one/pywerview](https://github.com/the-useless-one/pywerview).
 * You could also try automated tools as:
   * [tomcarver16/ADSearch](https://github.com/tomcarver16/ADSearch)
   * [61106960/adPEAS](https://github.com/61106960/adPEAS)
 
-**Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.**
+> Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.
 
-### **Kerberoast**
+### Kerberoast
 
-The goal of Kerberoasting is to harvest **TGS tickets for services that run on behalf of domain user accounts**, not computer accounts. Thus, part of these TGS tickets are **encrypted wit keys derived from user passwords**. As a consequence, their credentials could be **cracked offline**. You can know that a **user account** is being used as a **service** because the property **"ServicePrincipalName"** is **not null**. **Find more information about this attack** [**in the Kerberoast page**](kerberoast.md)**.**
+The goal of Kerberoasting is to harvest **TGS tickets for services that run on behalf of domain user accounts**. Part of these TGS tickets are **encrypted wit keys derived from user passwords**. As a consequence, their credentials could be **cracked offline**.
+
+**Find more information about this attack [**in the Kerberoast page**](kerberoast.md).**
 
 ### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
 
@@ -124,53 +130,53 @@ If you have compromised credentials or a session as a regular domain user and yo
 
 There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/) and a [**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to use [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
-## Privesc on Active Directory (Some "privileged" Creds/Session)
+## Privilege escalation on Active Directory WITH privileged credentials/session
 
 **For the following techniques a regular domain user is not enough, you need some special privileges/credentials to perform these attacks.**
 
 ### Hash extraction
 
-Hopefully you have managed to **compromise some local admin** account using [ASREPROast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md), [EvilSSDP](../../pentesting/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [Enumerating](./#enumerating-active-directory)... or [escalating privileges locally](../windows-local-privilege-escalation/).\
+Hopefully you have managed to **compromise some local admin** account using [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) including relaying, [EvilSSDP](../../pentesting/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/).\
 Then, its time to dump all the hashes in memory and locally.\
 [**Read this page about different ways to obtain the hashes.**](../stealing-credentials/)
 
-### **Pass the Hash**
+### Pass the Hash
 
 **Once you have the hash of a user**, you can use it to **impersonate** it.\
 You need to use some **tool** that will **perform** the **NTLM authentication using** that **hash**, **or** you could create a new **sessionlogon** and **inject** that **hash** inside the **LSASS**, so when any **NTLM authentication is performed**, that **hash will be used.** The last option is what mimikatz does.\
 [**More information about this attack and about how does NTLM works here**](../ntlm/#pass-the-hash)**.**
 
-### **Over Pass the Hash/Pass the Key**
+### Over Pass the Hash/Pass the Key
 
 This attack aims to **use the user NTLM hash to request Kerberos tickets**, as an alternative to the common Pass The Hash over NTLM protocol. Therefore, this could be especially **useful in networks where NTLM protocol is disabled** and only **Kerberos is allowed** as authentication protocol.\
 [**More information about Over Pass the Hash/Pass the Key here.**](over-pass-the-hash-pass-the-key.md)
 
-### **Pass the Ticket**
+### Pass the Ticket
 
 This attack is similar to Pass the Key, but instead of using hashes to request a ticket, the **ticket itself is stolen** and used to authenticate as its owner.\
 [**More information about Pass the Ticket here**](pass-the-ticket.md)**.**
 
-### **MSSQL Trusted Links**
+### MSSQL Trusted Links
 
 If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA).\
 Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. These trusts can be chained and at some point the user might be able to find a misconfigured database where he can execute commands.\
 **The links between databases work even across forest trusts.**\
 [**More information about this technique here.**](mssql-trusted-links.md)
 
-### **Unconstrained Delegation**
+### Unconstrained Delegation
 
-**If you find any Computer object with the attribute** [ADS\_UF\_TRUSTED\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.\
+If you find any Computer object with the attribute [ADS\_UF\_TRUSTED\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.\
 So, if a **Domain Admin logins onto the computer**, you will be able to dump his TGT and impersonate him using [Pass the Ticket](pass-the-ticket.md).\
 Thanks to constrained delegation you could even **automatically compromise a Print Server** (hopefully it will be a DC).\
 [**More information about this technique here.**](unconstrained-delegation.md)
 
-### **Constrained Delegation**
+### Constrained Delegation
 
 If a user or computer is allowed for "Constrained Delegation" it will be able to **impersonate any user to access some services in a computer**.\
 Then, if you **compromise the hash** of this user/computer you will be able to **impersonate any user** (even domain admins) to access some services.\
 [**More information about this attacks and some constrains here.**](constrained-delegation.md)
 
-### **ACLs Abuse**
+### ACLs Abuse
 
 The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.\
 [**More information about interesting privileges here.**](acl-persistence-abuse.md)
@@ -180,50 +186,50 @@ The compromised user could have some **interesting privileges over some domain o
 If you can find any **Spool service listening** inside the domain, you may be able to **abuse** is to **obtain new credentials** and **escalate privileges**.\
 [**More information about how to find a abuse Spooler services here.**](printers-spooler-service-abuse.md)
 
-## **Dumping Domain Credentials**
 
-Once you get **Domain Admin** privileges, you can **dump** all the **domain database**.
+## Post-exploitation with high privilege account
 
-```bash
-Invoke-Mimikatz -Command '"lsadump::lsa /patch"'
-```
+### Dumping Domain Credentials
 
-**More information about** [**DCSync attack can be found here**](dcsync.md)**.**\
-**More information about**[ **how to steal the NTDS.dit (Domain database) can be found here**](../stealing-credentials/)**.**
+Once you get **Domain Admin** or even better **Enterprise Admin** privileges, you can **dump** the **domain database**: *ntds.dit*.
 
-## **Persistence**
+[**More information about DCSync attack can be found here**](dcsync.md).
+
+[**More information about how to steal the NTDS.dit can be found here**](../stealing-credentials/)
+
+### Persistence
 
 **Some of the techniques discussed before can be used for persistence. For example you could make a user vulnerable to** [**ASREPRoast** ](asreproast.md)**or to** [**Kerberoast**](kerberoast.md)**.**
 
-### **Golden Ticket**
+### Golden Ticket
 
 A valid **TGT as any user** can be created **using the NTLM hash of the krbtgt AD account**. The advantage of forging a TGT instead of TGS is being **able to access any service** (or machine) in the domain ad the impersonated user.
 
 [**More information about Golden Ticket here.**](golden-ticket.md)
 
-### **Silver Ticket**
+### Silver Ticket
 
 The Silver ticket attack is based on **crafting a valid TGS for a service once the NTLM hash of service is owned** (like the **PC account hash**). Thus, it is possible to **gain access to that service** by forging a custom TGS **as any user** (like privileged access to a computer).\
 [**More information about Silver Ticket here.**](silver-ticket.md)
 
-### **AdminSDHolder Group**
+### AdminSDHolder Group
 
 The Access Control List (ACL) of the **AdminSDHolder** object is used as a template to **copy** **permissions** to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins.\
 By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker modifies the ACL of the group **AdminSDHolder** for example, giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group (in an hour).\
 And if someone tries to delete this user from the Domain Admins (for example) in an hour or less, the user will be back in the group.\
 [**More information about AdminSDHolder Group here**](privileged-accounts-and-token-privileges.md)**.**
 
-### **DSRM Credentials**
+### DSRM Credentials
 
 There is a **local administrator** account inside each **DC**. Having admin privileges in this machine, you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password** so you can remotely access to this local Administrator user.\
-[**More information about DSRM Credentials here.**](dsrm-credentials.md)\*\*\*\*
+[**More information about DSRM Credentials here.**](dsrm-credentials.md)
 
-### **ACL Persistence**
+### ACL Persistence
 
 You could **give** some **special permissions** to a **user** over some specific domain objects that will let the user **escalate privileges in the future**.\
 [**More information about interesting privileges here.**](acl-persistence-abuse.md)
 
-### **Security Descriptors**
+### Security Descriptors
 
 The **security descriptors** are used to **store** the **permissions** an **object** have **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.\
 [**More information about Security Descriptors here**](security-descriptors.md)**.**
@@ -233,19 +239,19 @@ The **security descriptors** are used to **store** the **permissions** an **obje
 **Modify LSASS** in memory to create a **master password** that will work for any account in the domain.\
 [**More information about Skeleton Key here.**](skeleton-key.md)
 
-### **Custom SSP**
+### Custom SSP
 
 [Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs.md#security-support-provider-interface-sspi)\
 You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.\
 [**More information about Custom SSP here**](custom-ssp.md)**.**
 
-### **DCShadow**
+### DCShadow
 
 It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
 Note that if you use wrong data, pretty ugly logs will appear.\
 [**More information about DCShadow here.**](dcshadow.md)\*\*\*\*
 
-## **Forest Privilege Escalation -** Domain Trusts
+## Forest Privilege Escalation - Domain Trusts
 
 Microsoft considers that the **domain isn't a Security Boundary**, the **Forest is the security Boundary**. This means that **if you compromise a domain inside a Forest you are going to be able to compromise the entire Forest**.
 
