@@ -14,7 +14,7 @@ In settings (the second tab button) you can select the **SDR device** or **selec
 
 In the GUI behaviour it's recommended to enable a few things if your PC support it:
 
-![](<../../.gitbook/assets/image (465).png>)
+![](<../../.gitbook/assets/image (465) (2).png>)
 
 {% hint style="info" %}
 If you realise that your PC is not capturing things try to disable OpenGL and lowering the sample rate.
