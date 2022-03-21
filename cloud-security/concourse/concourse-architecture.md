@@ -2,7 +2,7 @@
 
 ## Architecture
 
-![](<../../.gitbook/assets/image (651).png>)
+![](<../../.gitbook/assets/image (651) (1).png>)
 
 ### ATC: web UI & build scheduler
 
