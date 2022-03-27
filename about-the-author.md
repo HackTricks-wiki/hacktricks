@@ -22,8 +22,6 @@ I also wants to say **thanks to all the people that share cyber-security related
 
 Thank you for be **reading this**!
 
-Do you use **Hacktricks every day**? Did you find the book **very** **useful**? Would you like to **receive extra help** with cybersecurity questions? Would you like to **find more and higher quality content on Hacktricks**? [**Support Hacktricks through github sponsors**](https://github.com/sponsors/carlospolop) **so we can dedicate more time to it and also get access to the Hacktricks private group where you will get the help you need and much more!**
-
 Do you want to have access the **latest version of Hacktricks and PEASS**, obtain a **PDF copy of Hacktricks**, and more? Discover the **brand new** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop?frequency=one-time) **for individuals and companies.**
 
 LinPEAS, WinPEAS and MacPEAS aren’t enough for you? **Welcome The PEASS Family**, a limited collection of exclusive **NFTs** of our favourite PEASS in disguise, designed by my team. **Go get your favourite and make it yours!** And if you are a PEASS & Hacktricks enthusiast, you can get your hands now on our [**custom swag**](https://peass.creator-spring.com) **and show how much you like our projects!**
