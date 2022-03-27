@@ -5,7 +5,7 @@
 
 Do you want to have access the **latest version of Hacktricks and PEASS**, obtain a **PDF copy of Hacktricks**, and more? Discover the **brand new** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop?frequency=one-time) **for individuals and companies.**
 
-Discover **The PEASS Family**, our collection of exclusive **NFTs**
+Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)****
 
 Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)****
 
