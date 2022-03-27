@@ -1,12 +1,18 @@
 # Linux Privilege Escalation
 
-{% hint style="danger" %}
-Do you use **Hacktricks every day**? Did you find the book **very** **useful**? Would you like to **receive extra help** with cybersecurity questions? Would you like to **find more and higher quality content on Hacktricks**?\
-[**Support Hacktricks through github sponsors**](https://github.com/sponsors/carlospolop) **so we can dedicate more time to it and also get access to the Hacktricks private group where you will get the help you need and much more!**
-{% endhint %}
+{% hint style="warning" %}
+**Support HackTricks and get benefits!**
 
-If you want to know about my **latest modifications**/**additions** or you have **any suggestion for HackTricks** or **PEASS**, **join the** [**💬**](https://emojipedia.org/speech-balloon/)[**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass), or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**\
-If you want to **share some tricks with the community** you can also submit **pull requests** to [**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) that will be reflected in this book and don't forget to **give ⭐** on **github** to **motivate** **me** to continue developing this book.
+Do you want to have access the **latest version of Hacktricks and PEASS**, obtain a **PDF copy of Hacktricks**, and more? Discover the **brand new** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop?frequency=one-time) **for individuals and companies.**
+
+Discover **The PEASS Family**, our collection of exclusive **NFTs**
+
+Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)****
+
+**Join the** [**💬**](https://emojipedia.org/speech-balloon/)  ****  [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) **** or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+
+**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+{% endhint %}
 
 ## System Information
 
@@ -235,7 +241,7 @@ Normally you will need **root privileges** to read the memory of processes that 
 However, remember that **as a regular user you can read the memory of the processes you own**.
 
 {% hint style="warning" %}
-Note that nowadays most machines **don't allow ptrace by default** which means that you  cannot dump other processes that belongs to your unprivileged user.
+Note that nowadays most machines **don't allow ptrace by default** which means that you cannot dump other processes that belongs to your unprivileged user.
 
 The file _**/proc/sys/kernel/yama/ptrace\_scope**_ controls the accessibility of ptrace:
 
@@ -273,7 +279,7 @@ done
 ```
 {% endcode %}
 
-#### /proc/$pid/maps &  /proc/$pid/mem
+#### /proc/$pid/maps & /proc/$pid/mem
 
 For a given process ID, **maps shows how memory is mapped within that processes'** virtual address space; it also shows the **permissions of each mapped region**. The **mem** pseudo file **exposes the processes memory itself**. From the **maps** file we know which **memory regions are readable** and their offsets. We use this information to **seek into the mem file and dump all readable regions** to a file.
 
@@ -334,7 +340,7 @@ Press Ctrl-C to end monitoring without terminating the process.
 
 To dump a process memory you could use:
 
-* [**https://github.com/Sysinternals/ProcDump-for-Linux**](https://github.com/Sysinternals/ProcDump-for-Linux)****
+* [**https://github.com/Sysinternals/ProcDump-for-Linux**](https://github.com/Sysinternals/ProcDump-for-Linux)\*\*\*\*
 * [**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) (root) - _You can manually remove root requirements and dump process owned by you_
 * Script A.5 from [**https://www.delaat.net/rp/2016-2017/p97/report.pdf**](https://www.delaat.net/rp/2016-2017/p97/report.pdf) (root is required)
 
@@ -1234,7 +1240,7 @@ Specifies files that contains the public keys that can be used for user authenti
 AuthorizedKeysFile    .ssh/authorized_keys access
 ```
 
-That configuration will indicate that if you try to login with the **private** key **\*\*of the user "**testusername\*\*" ssh is going to compare the public key of your key with the ones located in `/home/testusername/.ssh/authorized_keys` and `/home/testusername/access`
+That configuration will indicate that if you try to login with the **private** key \*\*\*\*of the user "\*\*testusername\*\*" ssh is going to compare the public key of your key with the ones located in `/home/testusername/.ssh/authorized_keys` and `/home/testusername/access`
 
 #### ForwardAgent/AllowAgentForwarding
 
@@ -1252,7 +1258,7 @@ Notice that if `Host` is `*` every time the user jumps to a different machine th
 The file `/etc/ssh_config` can **override** this **options** and allow or denied this configuration.\
 The file `/etc/sshd_config` can **allow** or **denied** ssh-agent forwarding with the keyword `AllowAgentForwarding` (default is allow).
 
-If you Forward Agent configured in an environment **\*\*\[**check here how to exploit it to escalate privileges\*\*]\(ssh-forward-agent-exploitation.md).
+If you Forward Agent configured in an environment \*\*\*\*\[\*\*check here how to exploit it to escalate privileges\*\*]\(ssh-forward-agent-exploitation.md).
 
 ## Interesting Files
 
