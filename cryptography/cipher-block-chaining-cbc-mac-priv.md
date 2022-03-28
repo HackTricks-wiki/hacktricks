@@ -32,15 +32,15 @@ Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
 * `Administ`
 * `rator\00\00\00`
 
-You can create a username called **Administ** (m1) and retrieve the key (s1).\
+You can create a username called **Administ** (m1) and retrieve the signature (s1).\
 Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, knowing s1 and s32 you can put them together an generate the encryption of the full name **Administrator**.
+now, you can use s32 as the singature of the full name **Administrator**.
 
 #### Summary
 
 1. Get the signature of username **Administ** (m1) which is s1
 2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
-3. Set the cookie to s1 followed by s32 and it will be a valid cookie for the user **Administrator**.
+3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
 
 ## Attack Controlling IV
 
