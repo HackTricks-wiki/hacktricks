@@ -10,9 +10,9 @@
   * [Clone a Website](phishing-methodology/clone-a-website.md)
   * [Detecting Phising](phishing-methodology/detecting-phising.md)
   * [Phishing Documents](phishing-methodology/phishing-documents.md)
+* [Brute Force - CheatSheet](brute-force.md)
 * [Exfiltration](exfiltration.md)
 * [Tunneling and Port Forwarding](tunneling-and-port-forwarding.md)
-* [Brute Force - CheatSheet](brute-force.md)
 * [Search Exploits](search-exploits.md)
 
 ## Shells
