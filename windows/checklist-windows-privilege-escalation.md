@@ -18,7 +18,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 ### [System Info](windows-local-privilege-escalation/#system-info)
 
-* [ ] Obtain [**System informatio**](windows-local-privilege-escalation/#system-info)
+* [ ] Obtain [**System information**](windows-local-privilege-escalation/#system-info)
 * [ ] Search for **kernel** [**exploits using scripts**](windows-local-privilege-escalation/#version-exploits)
 * [ ] Use **Google to search** for kernel **exploits**
 * [ ] Use **searchsploit to search** for kernel **exploits**
@@ -39,7 +39,10 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] [**Cached Credentials**](windows-local-privilege-escalation/#cached-credentials)?
 * [ ] Check if any [**AV**](windows-local-privilege-escalation/#av)
 * [ ] [**AppLocker Policy**](windows-local-privilege-escalation/#applocker-policy)?
-* [ ] [**UA**](windows-local-privilege-escalation/#uac)[**User Privileges**](windows-local-privilege-escalation/#users-and-groups)
+* [ ] [**UAC**](windows-local-privilege-escalation/#uac)?
+
+### [**User Privileges**](windows-local-privilege-escalation/#users-and-groups)
+
 * [ ] Check [**current** user **privileges**](windows-local-privilege-escalation/#users-and-groups)
 * [ ] Are you [**member of any privileged group**](windows-local-privilege-escalation/#privileged-groups)?
 * [ ] Check if you have [any of these tokens enabled](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?

@@ -1,5 +1,5 @@
 ---
-description: 'https://github.com/EmpireProject/Empire'
+description: https://github.com/EmpireProject/Empire
 ---
 
 # Empire

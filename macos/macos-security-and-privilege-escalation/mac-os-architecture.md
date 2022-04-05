@@ -117,11 +117,11 @@ struct mach_header {
 
 Filetypes:
 
-* MH\_EXECUTE (0x2): Standard Mach-O executable            &#x20;
+* MH\_EXECUTE (0x2): Standard Mach-O executable
 * MH\_DYLIB (0x6): A Mach-O dynamic linked library (i.e. .dylib)
 * MH\_BUNDLE (0x8): A Mach-O bundle (i.e. .bundle)
 
-#### ****
+#### \*\*\*\*
 
 #### **Load commands**
 
@@ -137,7 +137,7 @@ struct load_command {
 };
 ```
 
-A **common** type of load command is **LC\_SEGMENT/LC\_SEGMENT\_64**, which **describes** a **segment:** \
+A **common** type of load command is **LC\_SEGMENT/LC\_SEGMENT\_64**, which **describes** a **segment:**\
 _A segment defines a **range of bytes** in a Mach-O file and the **addresses** and **memory**  **protection**  **attributes** at which those bytes are **mapped into** virtual memory when the dynamic linker loads the application._
 
 ![](<../../.gitbook/assets/image (557).png>)
@@ -151,7 +151,7 @@ Common segments:
 * **`__DATA`**: Contains data that is **writable.**
   * `__data`: Global variables (that have been initialized)
   * `__bss`: Static variables (that have not been initialized)
-  * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Information used by the Objective-C runtime&#x20;
+  * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Information used by the Objective-C runtime
 * **`__LINKEDIT`**: Contains information for the linker (dyld) such as, "symbol, string, and relocation table entries."
 * **`__OBJC`**: Contains information used by the Objective-C runtime. Though this information might also be found in the \_\_DATA segment, within various in \_\_objc\_\* sections.
 * **`LC_MAIN`**: Contains the entrypoint in the **entryoff attribute.** At load time, **dyld** simply **adds** this value to the (in-memory) **base of the binary**, then **jumps** to this instruction to kickoff execution of the binary’s code.
@@ -183,11 +183,11 @@ Some potential malware related libraries are:
 * **CoreWLAN**: Wifi scans.
 
 {% hint style="info" %}
-A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC\_MAIN**. \
+A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC\_MAIN**.\
 The offsets of any constructors are held in the **\_\_mod\_init\_func** section of the **\_\_DATA\_CONST** segment.
 {% endhint %}
 
-#### ****
+#### \*\*\*\*
 
 #### **Data**
 
@@ -219,15 +219,14 @@ ls -lR /Applications/Safari.app/Contents
     Contains **code-signing information** about the application (i.e., hashes, etc.).
 *   `Contents/MacOS`
 
-    Contains the **application’s binary** (which is executed when the user double-clicks the application icon in the UI).&#x20;
+    Contains the **application’s binary** (which is executed when the user double-clicks the application icon in the UI).
 *   `Contents/Resources`
 
-    Contains **UI elements of the application**, such as images, documents, and nib/xib files (that describe various user interfaces).&#x20;
+    Contains **UI elements of the application**, such as images, documents, and nib/xib files (that describe various user interfaces).
 * `Contents/Info.plist`\
-  ****The application’s main “**configuration file.**” Apple notes that “the system relies on the presence of this file to identify relevant information about \[the] application and any related files”.
+  \*\*\*\*The application’s main “**configuration file.**” Apple notes that “the system relies on the presence of this file to identify relevant information about \[the] application and any related files”.
   * **Plist** **files** contains configuration information. You can find find information about the meaning of they plist keys in [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
-  *   Pairs that may be of interest when analyzing an application include:\
-
+  *   Pairs that may be of interest when analyzing an application include:\\
 
       * **CFBundleExecutable**
 
@@ -266,10 +265,9 @@ There are some projects that allow to generate a binary executable by MacOS cont
 * **PyInstaller:** Python
   * Ways to detect this is the use of the embedded string **“Py\_SetPythonHome”** or a a **call** into a function named **`pyi_main`.**
 * **Electron:** JavaScript, HTML, and CSS.
-  * These binaries will use **Electron Framework.framework**. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in `.asar` files. These binaries will use Electron Framework.framework. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in **`.asar` files**. It's possible **unpack** such archives via the **asar** node module, or the **npx** **utility:** `npx asar extract StrongBox.app/Contents/Resources/app.asar appUnpacked`\
-
+  * These binaries will use **Electron Framework.framework**. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in `.asar` files. These binaries will use Electron Framework.framework. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in **`.asar` files**. It's possible **unpack** such archives via the **asar** node module, or the **npx** **utility:** `npx asar extract StrongBox.app/Contents/Resources/app.asar appUnpacked`\\
 
 ## References
 
-* ****[**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt\_other?\_encoding=UTF8\&me=\&qid=)****
-* ****[**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)****
+* [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt\_other?\_encoding=UTF8\&me=\&qid=)
+* [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

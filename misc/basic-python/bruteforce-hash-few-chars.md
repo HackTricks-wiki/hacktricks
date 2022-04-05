@@ -1,4 +1,4 @@
-# Bruteforce hash \(few chars\)
+# Bruteforce hash (few chars)
 
 ```python
 import hashlib
@@ -50,4 +50,3 @@ def main():
 
 main()
 ```
-

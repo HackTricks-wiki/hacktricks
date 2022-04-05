@@ -1,6 +1,6 @@
 # GCP - Serverless Code Exec Services Enumeration
 
-## Cloud Functions <a href="reviewing-cloud-functions" id="reviewing-cloud-functions"></a>
+## Cloud Functions <a href="#reviewing-cloud-functions" id="reviewing-cloud-functions"></a>
 
 Google [Cloud Functions](https://cloud.google.com/functions/) allow you to host code that is executed when an event is triggered, without the requirement to manage a host operating system. These functions can also store environment variables to be used by the code.
 
@@ -67,7 +67,7 @@ done
 
 ```
 
-## App Engine Configurations <a href="reviewing-app-engine-configurations" id="reviewing-app-engine-configurations"></a>
+## App Engine Configurations <a href="#reviewing-app-engine-configurations" id="reviewing-app-engine-configurations"></a>
 
 Google [App Engine](https://cloud.google.com/appengine/) is another ["serverless"](https://about.gitlab.com/topics/serverless/) offering for hosting applications, with a focus on scalability. As with Cloud Functions, **there is a chance that the application will rely on secrets that are accessed at run-time via environment variables**. These variables are stored in an `app.yaml` file which can be accessed as follows:
 
@@ -79,7 +79,7 @@ gcloud app versions list
 gcloud app describe [APP]
 ```
 
-## Cloud Run Configurations <a href="reviewing-cloud-run-configurations" id="reviewing-cloud-run-configurations"></a>
+## Cloud Run Configurations <a href="#reviewing-cloud-run-configurations" id="reviewing-cloud-run-configurations"></a>
 
 Google [Cloud Run](https://cloud.google.com/run) is another serverless offer where you can search for env variables also. Cloud Run creates a small web server, running on port 8080, that sits around waiting for an HTTP GET request. When the request is received, a job is executed and the job log is output via an HTTP response.
 

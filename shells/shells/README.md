@@ -1,4 +1,4 @@
-# Shells \(Linux, Windows, MSFVenom\)
+# Shells (Linux, Windows, MSFVenom)
 
 ## [**Shells - Linux**](linux.md)
 
@@ -10,8 +10,8 @@
 
 ## **Auto-generated shells**
 
-* [**https://reverse-shell.sh/**](https://reverse-shell.sh/)
-* [**https://www.revshells.com/**](https://www.revshells.com/)
+* [**https://reverse-shell.sh/**](https://reverse-shell.sh)
+* [**https://www.revshells.com/**](https://www.revshells.com)
 * [**https://github.com/ShutdownRepo/shellerator**](https://github.com/ShutdownRepo/shellerator)
 * [**https://github.com/0x00-0x00/ShellPop**](https://github.com/0x00-0x00/ShellPop)
 * [**https://github.com/cybervaca/ShellReverse**](https://github.com/cybervaca/ShellReverse)
@@ -20,4 +20,3 @@
 * [**https://weibell.github.io/reverse-shell-generator/**](https://weibell.github.io/reverse-shell-generator/)
 * [**https://github.com/t0thkr1s/revshellgen**](https://github.com/t0thkr1s/revshellgen)
 * [**https://github.com/mthbernardes/rsg**](https://github.com/mthbernardes/rsg)
-

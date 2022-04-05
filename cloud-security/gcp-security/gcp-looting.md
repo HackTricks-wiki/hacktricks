@@ -27,7 +27,7 @@ gcloud logging read [FOLDER]
 gcloud logging write [FOLDER] [MESSAGE]
 ```
 
-## AI platform configurations <a href="reviewing-ai-platform-configurations" id="reviewing-ai-platform-configurations"></a>
+## AI platform configurations <a href="#reviewing-ai-platform-configurations" id="reviewing-ai-platform-configurations"></a>
 
 Google [AI Platform](https://cloud.google.com/ai-platform/) is another "serverless" offering for machine learning projects.
 
@@ -38,7 +38,7 @@ $ gcloud ai-platform models list --format=json
 $ gcloud ai-platform jobs list --format=json
 ```
 
-## Cloud pub/sub <a href="reviewing-cloud-pubsub" id="reviewing-cloud-pubsub"></a>
+## Cloud pub/sub <a href="#reviewing-cloud-pubsub" id="reviewing-cloud-pubsub"></a>
 
 Google [Cloud Pub/Sub](https://cloud.google.com/pubsub/) is a service that allows independent applications to **send messages** back and forth. Basically, there are **topics** where applications may **subscribe** to send and receive **messages** (which are composed by the message content and some metadata).
 
@@ -55,7 +55,7 @@ gcloud pubsub subscriptions pull [SUBSCRIPTION NAME]
 
 However, you may have better results [asking for a larger set of data](https://cloud.google.com/pubsub/docs/replay-overview), including older messages. This has some prerequisites and could impact applications, so make sure you really know what you're doing.
 
-## Cloud Git repositories <a href="reviewing-cloud-git-repositories" id="reviewing-cloud-git-repositories"></a>
+## Cloud Git repositories <a href="#reviewing-cloud-git-repositories" id="reviewing-cloud-git-repositories"></a>
 
 Google's [Cloud Source Repositories](https://cloud.google.com/source-repositories/) are Git designed to be private storage for source code. You might **find useful secrets here**, or use the **source to discover vulnerabilities** in other applications.
 

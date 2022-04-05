@@ -4,9 +4,9 @@
 
 ## Start
 
-[You need to compile it](https://github.com/GhostPack/Seatbelt) or [use precompiled binaries \(by me\)](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)
+[You need to compile it](https://github.com/GhostPack/Seatbelt) or [use precompiled binaries (by me)](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)
 
-```text
+```
 SeatbeltNet3.5x64.exe all
 SeatbeltNet3.5x64.exe all full #Without filtering
 ```
@@ -19,7 +19,7 @@ This tool is more gathering-info oriented than privesc, but it has some pretty n
 
 **SeatBelt.exe system** collects the following system data:
 
-```text
+```
 BasicOSInfo           -   Basic OS info (i.e. architecture, OS version, etc.)
 RebootSchedule        -   Reboot schedule (last 15 days) based on event IDs 12 and 13
 TokenGroupPrivs       -   Current process/token privileges (e.g. SeDebugPrivilege/etc.)
@@ -55,7 +55,7 @@ SysmonConfig          -   Sysmon configuration from the registry
 
 **SeatBelt.exe user** collects the following user data:
 
-```text
+```
 SavedRDPConnections   -   Saved RDP connections
 TriageIE              -   Internet Explorer bookmarks and history (last 7 days)
 DumpVault             -   Dump saved credentials in Windows Vault (i.e. logins from Internet Explorer and Edge), from SharpWeb
@@ -72,7 +72,7 @@ RDCManFiles           -   List Windows Remote Desktop Connection Manager setting
 
 Non-default collection options:
 
-```text
+```
 CurrentDomainGroups   -   The current user's local and domain groups
 Patches               -   Installed patches via WMI (takes a bit on some systems)
 LogonSessions         -   User logon session data
@@ -86,4 +86,3 @@ RecycleBin            -   Items in the Recycle Bin deleted in the last 30 days -
 4648Events            -   4648 explicit logon events from the security event log
 KerberosTickets       -   List Kerberos tickets. If elevated, grouped by all logon sessions.
 ```
-

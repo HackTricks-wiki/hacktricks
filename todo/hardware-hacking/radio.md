@@ -82,7 +82,7 @@ And this is how part of the symbol looks like with the waveform:
 
 You can **select the whole signal** where information is located, select **Amplitude** mode and **Selection** and click on **Histogram.** You can observer that 2 clear levels are only found
 
-![](<../../.gitbook/assets/image (647) (1).png>)
+![](<../../.gitbook/assets/image (647) (1) (1).png>)
 
 For example, if you select Frequency instead of Amplitude in this AM signal you find just 1 frequency (no way information modulated in frequency is just using 1 freq).
 

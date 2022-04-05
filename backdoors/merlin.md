@@ -72,7 +72,7 @@ GOOS=windows GOARCH=amd64 go build -ldflags "-X main.url=https://10.2.0.5:443" -
 **LaZagneForensic** --> Get browser passwords (works but dont prints the output directory)\
 **dumpCredStore** --> Win32 Credential Manager API (https://github.com/zetlen/clortho/blob/master/CredMan.ps1) https://www.digitalcitizen.life/credential-manager-where-windows-stores-passwords-other-login-details\
 **Get-InjectedThread** --> Detect classic injection in running processes (Classic Injection (OpenProcess, VirtualAllocEx, WriteProcessMemory, CreateRemoteThread)) (doesnt works)\
-**Get-OSTokenInformation** --> Get Token Info of the running processes and threads (User, groups, privileges, owner… https://docs.microsoft.com/es-es/windows/desktop/api/winnt/ne-winnt-\_token_information_class)\
+**Get-OSTokenInformation** --> Get Token Info of the running processes and threads (User, groups, privileges, owner… https://docs.microsoft.com/es-es/windows/desktop/api/winnt/ne-winnt-\_token\_information\_class)\
 **Invoke-DCOM** --> Execute a command (inother computer) via DCOM (http://www.enigma0x3.net.) (https://enigma0x3.net/2017/09/11/lateral-movement-using-excel-application-and-dcom/)\
 **Invoke-DCOMPowerPointPivot** --> Execute a command in othe PC abusing PowerPoint COM objects (ADDin)\
 **Invoke-ExcelMacroPivot** --> Execute a command in othe PC abusing DCOM in Excel\

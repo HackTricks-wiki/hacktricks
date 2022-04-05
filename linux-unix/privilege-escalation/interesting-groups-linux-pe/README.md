@@ -98,7 +98,7 @@ So, read the file and try to **crack some hashes**.
 
 ## Disk Group
 
-&#x20;This privilege is almost **equivalent to root access** as you can access all the data inside of the machine.
+This privilege is almost **equivalent to root access** as you can access all the data inside of the machine.
 
 Files:`/dev/sd[a-z][1-9]`
 
@@ -139,7 +139,7 @@ cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
 
-To **open** the **raw image** you can use **GIMP**, select the **`screen.raw` ** file and select as file type **Raw image data**:
+To **open** the **raw image** you can use **GIMP**, select the \*\*`screen.raw` \*\* file and select as file type **Raw image data**:
 
 ![](<../../../.gitbook/assets/image (287).png>)
 

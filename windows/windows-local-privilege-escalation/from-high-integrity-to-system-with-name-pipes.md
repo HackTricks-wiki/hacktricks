@@ -5,7 +5,7 @@
 1. Create a new Pipe
 2. Create and start a service that will connect to the created pipe and write something. The service code will execute this encoded PS code: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
 3. The service receive the data from the client in the pipe, call ImpersonateNamedPipeClient and waits for the service to finish
-4.  Finally, uses the token obtained from the service to spawn a new _cmd.exe_
+4. &#x20;Finally, uses the token obtained from the service to spawn a new _cmd.exe_
 
 {% hint style="warning" %}
 If you don't have enough privileges the exploit may get stucked and never return.
@@ -117,4 +117,3 @@ int main() {
 	return 0;
 }
 ```
-

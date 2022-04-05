@@ -50,7 +50,7 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-As **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**is a legitimate Microsoft tool**, it's not detected by Defender. \
+As **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**is a legitimate Microsoft tool**, it's not detected by Defender.\
 You can use this tool to **dump the lsass process**, **download the dump** and **extract** the **credentials locally** from the dump.
 
 {% code title="Dump lsass" %}
@@ -112,7 +112,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
 
-### Dump the NTDS.dit password history from target DC&#x20;
+### Dump the NTDS.dit password history from target DC
 
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
@@ -192,7 +192,7 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 **The Ntds.dit file is a database that stores Active Directory data**, including information about user objects, groups, and group membership. It includes the password hashes for all users in the domain.
 
 The important NTDS.dit file will be **located in**: _%SystemRoom%/NTDS/ntds.dit_\
-__This file is a database _Extensible Storage Engine_ (ESE) and is "officially" composed by 3 tables:
+\_\_This file is a database _Extensible Storage Engine_ (ESE) and is "officially" composed by 3 tables:
 
 * **Data Table**: Contains the information about the objects (users, groups...)
 * **Link Table**: Information about the relations (member of...)
@@ -200,7 +200,7 @@ __This file is a database _Extensible Storage Engine_ (ESE) and is "officially" 
 
 More information about this: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows uses _Ntdsa.dll_ to interact with that file and its used by _lsass.exe_. Then, **part** of the **NTDS.dit** file could be located **inside the **_**lsass**_** memory** (you can find the lastet accessed data probably because of the performance impruve by using a **cache**).
+Windows uses _Ntdsa.dll_ to interact with that file and its used by _lsass.exe_. Then, **part** of the **NTDS.dit** file could be located **inside the \_lsass**\_\*\* memory\*\* (you can find the lastet accessed data probably because of the performance impruve by using a **cache**).
 
 #### Decrypting the hashes inside NTDS.dit
 
@@ -238,7 +238,7 @@ secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 
 For **big NTDS.dit files** it's recommend to extract it using [gosecretsdump](https://github.com/c-sto/gosecretsdump).
 
-Finally, you can also use the **metasploit module**: _post/windows/gather/credentials/domain\_hashdump_ or **mimikatz** `lsadump::lsa /inject`&#x20;
+Finally, you can also use the **metasploit module**: _post/windows/gather/credentials/domain\_hashdump_ or **mimikatz** `lsadump::lsa /inject`
 
 ## Lazagne
 
@@ -279,4 +279,4 @@ Download it from:[ http://www.tarasco.org/security/pwdump\_7](http://www.tarasco
 
 ## Defenses
 
-****[**Learn about some credentials protections here.**](credentials-protections.md)****
+[**Learn about some credentials protections here.**](credentials-protections.md)

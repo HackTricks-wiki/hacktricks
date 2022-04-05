@@ -4,7 +4,7 @@ description: >-
   I have learnt in CTFs, real life apps, and reading researches and news.
 ---
 
-# HackTricks
+# HackTricks-Exclusive
 
 ![](<.gitbook/assets/portada alcoholica.png>)
 

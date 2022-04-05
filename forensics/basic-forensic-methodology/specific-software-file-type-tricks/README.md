@@ -2,23 +2,39 @@
 
 Here you can find interesting tricks for specific file-types and/or software:
 
-{% page-ref page=".pyc.md" %}
+{% content-ref url=".pyc.md" %}
+[.pyc.md](.pyc.md)
+{% endcontent-ref %}
 
-{% page-ref page="browser-artifacts.md" %}
+{% content-ref url="browser-artifacts.md" %}
+[browser-artifacts.md](browser-artifacts.md)
+{% endcontent-ref %}
 
-{% page-ref page="desofuscation-vbs-cscript.exe.md" %}
+{% content-ref url="desofuscation-vbs-cscript.exe.md" %}
+[desofuscation-vbs-cscript.exe.md](desofuscation-vbs-cscript.exe.md)
+{% endcontent-ref %}
 
-{% page-ref page="local-cloud-storage.md" %}
+{% content-ref url="local-cloud-storage.md" %}
+[local-cloud-storage.md](local-cloud-storage.md)
+{% endcontent-ref %}
 
-{% page-ref page="office-file-analysis.md" %}
+{% content-ref url="office-file-analysis.md" %}
+[office-file-analysis.md](office-file-analysis.md)
+{% endcontent-ref %}
 
-{% page-ref page="pdf-file-analysis.md" %}
+{% content-ref url="pdf-file-analysis.md" %}
+[pdf-file-analysis.md](pdf-file-analysis.md)
+{% endcontent-ref %}
 
-{% page-ref page="png-tricks.md" %}
+{% content-ref url="png-tricks.md" %}
+[png-tricks.md](png-tricks.md)
+{% endcontent-ref %}
 
-{% page-ref page="video-and-audio-file-analysis.md" %}
+{% content-ref url="video-and-audio-file-analysis.md" %}
+[video-and-audio-file-analysis.md](video-and-audio-file-analysis.md)
+{% endcontent-ref %}
 
-{% page-ref page="zips-tricks.md" %}
-
-
+{% content-ref url="zips-tricks.md" %}
+[zips-tricks.md](zips-tricks.md)
+{% endcontent-ref %}
 

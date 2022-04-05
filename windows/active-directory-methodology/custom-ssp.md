@@ -8,7 +8,7 @@ You can create you **own SSP** to **capture** in **clear text** the **credential
 #### Mimilib
 
 You can use the `mimilib.dll` binary provided by Mimikatz. **This will log inside a file all the credentials in clear text.**\
-****Drop the dll in `C:\Windows\System32\`\
+\*\*\*\*Drop the dll in `C:\Windows\System32\`\
 Get a list existing LSA Security Packages:
 
 {% code title="attacker@target" %}

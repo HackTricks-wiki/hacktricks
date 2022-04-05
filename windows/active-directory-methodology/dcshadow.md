@@ -30,7 +30,7 @@ You can push the changes from a DA or from a user with this minimal permissions:
   * _DS-Install-Replica_ (Add/Remove Replica in Domain)
   * _DS-Replication-Manage-Topology_ (Manage Replication Topology)
   * _DS-Replication-Synchronize_ (Replication Synchornization)
-* The **Sites object** (and its children) in the **Configuration container**:&#x20;
+* The **Sites object** (and its children) in the **Configuration container**:
   * _CreateChild and DeleteChild_
 * The object of the **computer which is registered as a DC**:
   * _WriteProperty_ (Not Write)
@@ -38,7 +38,7 @@ You can push the changes from a DA or from a user with this minimal permissions:
   * _WriteProperty_ (Not Write)
 
 You can use [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) to give these privileges to an unprivileged user (notice that this will leave some logs). This is much more restrictive than having DA privileges.\
-For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose`  This means that the username _**student1**_ when logged on in the machine _**mcorp-student1**_ has DCShadow permissions over the object _**root1user**_.
+For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` This means that the username _**student1**_ when logged on in the machine _**mcorp-student1**_ has DCShadow permissions over the object _**root1user**_.
 
 ### Using DCShadow to create backdoors
 
@@ -79,6 +79,4 @@ To get the current ACE of an object: `(New-Object System.DirectoryServices.Direc
 
 Notice that in this case you need to make **several changes,** not just one. So, in the **mimikatz1 session** (RPC server) use the parameter **`/stack` with each change** you want to make. This way, you will only need to **`/push`** one time to perform all the stucked changes in the rouge server.
 
-
-
-****[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)****
+[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)

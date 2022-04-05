@@ -104,7 +104,7 @@ block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x4016
 
 ## Dynamic Analysis
 
-### Simulation Manager, States 
+### Simulation Manager, States&#x20;
 
 ```python
 #Live States
@@ -205,6 +205,4 @@ True
 Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a symbol as the first argument, to hook the address where the symbol lives
 
 ## Examples
-
-
 

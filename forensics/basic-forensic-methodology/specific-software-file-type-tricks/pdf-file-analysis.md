@@ -20,5 +20,3 @@ When exploring PDF content for hidden data, some of the hiding places to check i
 
 There are also several Python packages for working with the PDF file format, like [PeepDF](https://github.com/jesparza/peepdf), that enable you to write your own parsing scripts.
 
-
-

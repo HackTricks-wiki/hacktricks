@@ -19,10 +19,10 @@ An empty UDP packet is sent to a specific port. If the UDP port is open, no repl
 
 
 UDP port scanning is often unreliable, as firewalls and routers may drop ICMP\
- packets. This can lead to false positives in your scan, and you will regularly see\
- UDP port scans showing all UDP ports open on a scanned machine.\
- o Most port scanners do not scan all available ports, and usually have a preset list\
- of “interesting ports” that are scanned.
+&#x20;packets. This can lead to false positives in your scan, and you will regularly see\
+&#x20;UDP port scans showing all UDP ports open on a scanned machine.\
+&#x20;o Most port scanners do not scan all available ports, and usually have a preset list\
+&#x20;of “interesting ports” that are scanned.
 
 ## CTF - Tricks
 

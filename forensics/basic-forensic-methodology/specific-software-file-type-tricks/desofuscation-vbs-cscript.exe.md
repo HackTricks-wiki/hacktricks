@@ -1,4 +1,4 @@
-# Desofuscation vbs \(cscript.exe\)
+# Desofuscation vbs (cscript.exe)
 
 Some things that could be useful to debug/desofuscate a malicious vbs file:
 
@@ -10,13 +10,13 @@ Wscript.Echo "Like this?"
 
 ### Commnets
 
-```text
+```
 ' this is a comment
 ```
 
 ### Test
 
-```text
+```
 cscript.exe file.vbs
 ```
 
@@ -46,4 +46,3 @@ Function writeBinary(strBinary, strPath)
 
 End Function
 ```
-

@@ -20,7 +20,7 @@ The **visualisation application uses neo4j** to show how all the information is 
 
 ## Installation
 
-1. Bloodhound 
+1. Bloodhound
 
 To install the visualisation application you will need to install **neo4j** and the **bloodhound application**.\
 The easiest way to do this is just doing:
@@ -28,24 +28,26 @@ The easiest way to do this is just doing:
 ```
 apt-get install bloodhound
 ```
+
 You can **download the community version of neo4j** from [here](https://neo4j.com/download-center/#community).
 
-2. Ingestors
+1. Ingestors
 
 You can download the Ingestors from:
-- https://github.com/BloodHoundAD/SharpHound/releases
-- https://github.com/BloodHoundAD/BloodHound/releases
-- https://github.com/fox-it/BloodHound.py
 
-3. Learn the path from the graph
+* https://github.com/BloodHoundAD/SharpHound/releases
+* https://github.com/BloodHoundAD/BloodHound/releases
+* https://github.com/fox-it/BloodHound.py
 
-Bloodhound come with various queries to highlight sensitive compromission path. 
-It it possible to add custom queries to enhance the search and correlation between objects and more!
+1. Learn the path from the graph
+
+Bloodhound come with various queries to highlight sensitive compromission path. It it possible to add custom queries to enhance the search and correlation between objects and more!
 
 This repo has a nice collections of queries: https://github.com/CompassSecurity/BloodHoundQueries
 
-<u>Installation process</u>:
-```sh
+Installation process:
+
+```
 $ curl -o "~/.config/bloodhound/customqueries.json" "https://raw.githubusercontent.com/CompassSecurity/BloodHoundQueries/master/customqueries.json"
 ```
 
@@ -95,7 +97,7 @@ If you wish to execute SharpHound using different credentials you can create a C
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
 
-****[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)****
+[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
 
 ### **Python**
 

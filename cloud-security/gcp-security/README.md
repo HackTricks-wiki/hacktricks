@@ -375,7 +375,7 @@ Impersonating a service account can be very useful to **obtain new and better pr
 There are three ways in which you can [impersonate another service account](https://cloud.google.com/iam/docs/understanding-service-accounts#impersonating\_a\_service\_account):
 
 * Authentication **using RSA private keys** (covered [above](./#bypassing-access-scopes))
-* Authorization **using Cloud IAM policies** (covered [here](broken-reference/))
+* Authorization **using Cloud IAM policies** (covered [here](https://github.com/carlospolop/hacktricks/blob/master/cloud-security/gcp-security/broken-reference/README.md))
 * **Deploying jobs on GCP services** (more applicable to the compromise of a user account)
 
 ### Granting access to management console <a href="#granting-access-to-management-console" id="granting-access-to-management-console"></a>

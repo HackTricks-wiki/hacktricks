@@ -2,7 +2,7 @@
 
 ## Add user
 
-```text
+```
 #i686-w64-mingw32-gcc -o scsiaccess.exe useradd.c
 #include <stdlib.h> /* system, NULL, EXIT_FAILURE */  
 int main ()  
@@ -13,4 +13,3 @@ int main ()
     return 0;  
 }
 ```
-

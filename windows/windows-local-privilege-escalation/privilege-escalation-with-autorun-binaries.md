@@ -61,15 +61,15 @@ Note: The **Wow6432Node** registry entry indicates that you are running a 64-bit
 
 Run and RunOnce registry keys cause programs to run each time that a user logs on. The data value for a key is a command line no longer than 260 characters.
 
-**Service runs** \(can control automatic startup of services during boot\):
+**Service runs** (can control automatic startup of services during boot):
 
-* `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce` 
-* `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce` 
-* `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServices` 
+* `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`&#x20;
+* `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`&#x20;
+* `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServices`&#x20;
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServices`
-* `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServicesOnce` 
-* `HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServicesOnce` 
-* `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServices` 
+* `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServicesOnce`&#x20;
+* `HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServicesOnce`&#x20;
+* `HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServices`&#x20;
 * `HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunServices`
 
 **RunOnceEx:**
@@ -153,7 +153,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 Any shortcut created to the location pointed by subkey Startup will launch the service during logon/reboot. Start up location is specified both at Local Machine and Current User.
 
 {% hint style="info" %}
-If you can overwrite any \[User\] Shell Folder under **HKLM**, you will e able to point it to a folder controlled by you and place a backdoor that will be executed anytime a user logs in the system escalating privileges.
+If you can overwrite any \[User] Shell Folder under **HKLM**, you will e able to point it to a folder controlled by you and place a backdoor that will be executed anytime a user logs in the system escalating privileges.
 {% endhint %}
 
 ```bash
@@ -172,7 +172,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Usually, **Userinit** key points to userinit.exe but if this key can be altered, then that exe will also launch by Winlogon.  
+Usually, **Userinit** key points to userinit.exe but if this key can be altered, then that exe will also launch by Winlogon.\
 **Shell** key should point to explorer.exe.
 
 ```bash
@@ -188,7 +188,7 @@ If you can overwrite the registry value or the binary you will be able to escala
 
 ### Policy Settings
 
-* `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer` 
+* `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`&#x20;
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
 Check **Run** key.
@@ -204,14 +204,14 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 Path: **`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`**
 
-Under the registry key `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot` is the value **AlternateShell**, which by default is set to `cmd.exe` \(the command prompt\). When you press F8 during startup and select "Safe Mode with Command Prompt," the system uses this alternate shell.  
+Under the registry key `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot` is the value **AlternateShell**, which by default is set to `cmd.exe` (the command prompt). When you press F8 during startup and select "Safe Mode with Command Prompt," the system uses this alternate shell.\
 You can, however, create a boot option so that you don't have to press F8, then select "Safe Mode with Command Prompt."
 
-1. Edit the boot.ini \(c:\boot.ini\) file attributes to make the file nonread-only, nonsystem, and nonhidden \(attrib c:\boot.ini -r -s -h\).
+1. Edit the boot.ini (c:\boot.ini) file attributes to make the file nonread-only, nonsystem, and nonhidden (attrib c:\boot.ini -r -s -h).
 2. Open boot.ini.
 3. Add a line similar to the following: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. Save the file.
-5. Reapply the correct permissions \(attrib c:\boot.ini +r +s +h\).
+5. Reapply the correct permissions (attrib c:\boot.ini +r +s +h).
 
 Info from [here](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell).
 
@@ -220,11 +220,11 @@ Info from [here](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-o
 {% endhint %}
 
 {% hint style="info" %}
-**Exploit 2 \(PATH write permissions\)**: If you have write permission on any folder of the system **PATH** before _C:\Windows\system32_ \(or if you can change it\) you can create a cmd.exe file and if someone initiates the machine in Safe Mode your backdoor will be executed.
+**Exploit 2 (PATH write permissions)**: If you have write permission on any folder of the system **PATH** before _C:\Windows\system32_ (or if you can change it) you can create a cmd.exe file and if someone initiates the machine in Safe Mode your backdoor will be executed.
 {% endhint %}
 
 {% hint style="info" %}
-**Exploit 3 \(PATH write permissions and boot.ini write permissions\)**: If you can write boot.ini, you can automate the startup in safe mode for the next reboot.
+**Exploit 3 (PATH write permissions and boot.ini write permissions)**: If you can write boot.ini, you can automate the startup in safe mode for the next reboot.
 {% endhint %}
 
 ```bash
@@ -245,7 +245,7 @@ Inside those keys you will find more keys and each for those will home some inte
 
 * **IsInstalled:**
   * 0: The component’s command will not run.
-  * 1: The component’s command will be run once per user. This is the default \(if the IsInstalled value does not exist\).
+  * 1: The component’s command will be run once per user. This is the default (if the IsInstalled value does not exist).
 * **StubPath**
   * Format: Any valid command line, e.g. “notepad”
   * This is the command that is executed if Active Setup determines this component needs to run during logon.
@@ -266,7 +266,7 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 * `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-A **Browser Helper Object** \(**BHO**\) is a DLL module designed as a plugin for Microsoft's Internet Explorer web browser to provide added functionality. These modules are executed for each new instance of Internet Explorer and for each new instance of Windows Explorer. However, a BHO can be prevented to be executed by each instance of Explorer setting the key **NoExplorer** to 1.
+A **Browser Helper Object** (**BHO**) is a DLL module designed as a plugin for Microsoft's Internet Explorer web browser to provide added functionality. These modules are executed for each new instance of Internet Explorer and for each new instance of Windows Explorer. However, a BHO can be prevented to be executed by each instance of Explorer setting the key **NoExplorer** to 1.
 
 BHOs are still supported as of Windows 10, through Internet Explorer 11, while BHOs are not supported in the default web browser Microsoft Edge.
 
@@ -310,7 +310,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\she
 
 ### Image File Execution Options
 
-```text
+```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
 ```
@@ -319,17 +319,16 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 
 Note that all the sites where you can find autoruns are **already searched by**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). However, for a **more comprehensive list of auto-executed** file you could use [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)from systinternals:
 
-```text
+```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 
 ## More
 
-Find more Autoruns like registries in [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+Find more Autoruns like registries in [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
 ## References
 
-* [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/\#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
+* [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
-* [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
-
+* [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)

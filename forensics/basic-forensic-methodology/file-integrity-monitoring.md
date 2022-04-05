@@ -5,7 +5,7 @@
 A baseline consist on take a snapshot of certain part of a system in oder to c**ompare it with a future status to highlight changes**.
 
 For example, you can calculate and store the hash of each file of the filesystem to .be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all. 
+This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all.&#x20;
 
 ### File Integrity Monitoring
 

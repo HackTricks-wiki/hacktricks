@@ -127,15 +127,15 @@ myset2 = set(\[1, 2, 3, 4])\
 myset.union(myset2) #Values it myset OR myset2\
 myset.intersection(myset2) #Values in myset AND myset2\
 myset.difference(myset2) #Values in myset but not in myset2\
-myset.symmetric_difference(myset2) #Values that are not in myset AND myset2 (not in both)\
+myset.symmetric\_difference(myset2) #Values that are not in myset AND myset2 (not in both)\
 myset.pop() #Get the first element of the set and remove it\
-myset.intersection_update(myset2) #myset = Elements in both myset and myset2\
-myset.difference_update(myset2) #myset = Elements in myset but not in myset2\
-myset.symmetric_difference_update(myset2) #myset = Elements that are not in both
+myset.intersection\_update(myset2) #myset = Elements in both myset and myset2\
+myset.difference\_update(myset2) #myset = Elements in myset but not in myset2\
+myset.symmetric\_difference\_update(myset2) #myset = Elements that are not in both
 
 ### Classes
 
-The method in \__It\_\_ will be the one used by sort in order to compare if an object of this class is bigger than other
+The method in \_\_It\_\_ will be the one used by sort in order to compare if an object of this class is bigger than other
 
 ```python
 class Person(name):
@@ -279,9 +279,9 @@ print(list(permutations('123',2))) = \[('1', '2'), ('1', '3'), ('2', '1'), ('2',
 from itertools import **combinations** --> Generates all possible combinations without repeating characters (if "ab" existing, doesn't generate "ba")\
 print(list(**combinations**('123',2))) --> \[('1', '2'), ('1', '3'), ('2', '3')]
 
-**combinations_with_replacement**\
-from itertools import **combinations_with_replacement** --> Generates all possible combinations from the char onwards(for example, the 3rd is mixed from the 3rd onwards but not with the 2nd o first)\
-print(list(**combinations_with_replacement**('1133',2))) = \[('1', '1'), ('1', '1'), ('1', '3'), ('1', '3'), ('1', '1'), ('1', '3'), ('1', '3'), ('3', '3'), ('3', '3'), ('3', '3')]
+**combinations\_with\_replacement**\
+from itertools import **combinations\_with\_replacement** --> Generates all possible combinations from the char onwards(for example, the 3rd is mixed from the 3rd onwards but not with the 2nd o first)\
+print(list(**combinations\_with\_replacement**('1133',2))) = \[('1', '1'), ('1', '1'), ('1', '3'), ('1', '3'), ('1', '1'), ('1', '3'), ('1', '3'), ('3', '3'), ('3', '3'), ('3', '3')]
 
 ### Decorators
 

@@ -1,6 +1,6 @@
 # Esoteric languages
 
-[Esolangs Wiki](https://esolangs.org/wiki/Main_Page)
+[Esolangs Wiki](https://esolangs.org/wiki/Main\_Page)
 
 ## Malbolge
 

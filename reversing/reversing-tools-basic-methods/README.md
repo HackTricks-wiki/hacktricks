@@ -129,7 +129,7 @@ Then, looking to this ca see when the execution was stopped in the dll you want 
 
 ## GUI Apps / Videogames
 
-****[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
+\*\*\*\*[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
 
 {% content-ref url="cheat-engine.md" %}
 [cheat-engine.md](cheat-engine.md)
@@ -155,7 +155,7 @@ You can find a slightly modified version of Blobrunner in the following link. In
 
 ### Debugging a shellcode with jmp2it
 
-****[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
+\*\*\*\*[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
 
 ![](<../../.gitbook/assets/image (397).png>)
 
@@ -163,7 +163,7 @@ You can download a compiled version of [jmp2it inside the releases page](https:/
 
 ### Debugging shellcode using Cutter
 
-****[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
+\*\*\*\*[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
 
 Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
 
@@ -219,7 +219,7 @@ apt-get install libz3-dev
 
 And [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)&#x20;
+If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
@@ -234,7 +234,7 @@ Having the **name** of the **functions** being called, search for them on the **
 
 For Delphi compiled binaries you can use [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-I you have to reverse a Delphi binary I would suggest you to use the IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)****
+I you have to reverse a Delphi binary I would suggest you to use the IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)\*\*\*\*
 
 Just press **ATL+f7** (import python plugin in IDA) and select the python plugin.
 
@@ -262,12 +262,12 @@ In this page you can find how to get the python code from an ELF/EXE python comp
 
 If you get the **binary** of a GBA game you can use different tools to **emulate** and **debug** it:
 
-* ****[**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - Contains a debugger with interface
-* ****[**mgba** ](https://mgba.io)- Contains a CLI debugger
-* ****[**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
+* \*\*\*\*[**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - Contains a debugger with interface
+* \*\*\*\*[**mgba** ](https://mgba.io)- Contains a CLI debugger
+* \*\*\*\*[**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
 * [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_** ** you can see how to press the Game Boy Advance **buttons**
+In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_\*\* \*\* you can see how to press the Game Boy Advance **buttons**
 
 ![](<../../.gitbook/assets/image (578).png>)
 
@@ -315,7 +315,7 @@ void FUN_080015a8(void)
   uVar4 = DAT_030004d8;
 ```
 
-&#x20;It's found this code:
+It's found this code:
 
 ```c
   do {
@@ -364,12 +364,12 @@ In the previous code you can see that we are comparing **uVar1** (the place wher
 * First, it's compared with the **value 4** (**SELECT** button): In the challenge this button clears the screen
 * Then, it's comparing it with the **value 8** (**START** button): In the challenge this checks is the code is valid to get the flag.
   * In this case the var **`DAT_030000d8`** is compared with 0xf3 and if the value is the same some code is executed.
-* In any other cases, some cont (`DAT_030000d4`) is checked. It's a cont because it's adding 1 right after entering in the code. \
-  **I**f less than 8 something that involves **adding** values to **`DAT_030000d8` ** is done (basically it's adding the values of the keys pressed in this variable as long as the cont is less than 8).
+* In any other cases, some cont (`DAT_030000d4`) is checked. It's a cont because it's adding 1 right after entering in the code.\
+  **I**f less than 8 something that involves **adding** values to \*\*`DAT_030000d8` \*\* is done (basically it's adding the values of the keys pressed in this variable as long as the cont is less than 8).
 
 So, in this challenge, knowing the values of the buttons, you needed to **press a combination with a length smaller than 8 that the resulting addition is 0xf3.**
 
-**Reference for this tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)****
+**Reference for this tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)\*\*\*\*
 
 ## Game Boy
 

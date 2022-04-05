@@ -63,7 +63,7 @@ However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). 
 
 Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domain (note that a suspicious domain can be a false positive).
 
-**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) that does just like that.
+**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing\_catcher**](https://github.com/x0rz/phishing\_catcher) that does just like that.
 
 ### **New domains**
 

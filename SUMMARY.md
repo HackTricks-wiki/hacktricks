@@ -1,6 +1,6 @@
 # Table of contents
 
-* [HackTricks](README.md)
+* [HackTricks-Exclusive](README.md)
 * [About the author](about-the-author.md)
 * [Getting Started in Hacking](getting-started-in-hacking.md)
 * [Pentesting Methodology](pentesting-methodology.md)
@@ -384,6 +384,8 @@
 * [Cross-site WebSocket hijacking (CSWSH)](pentesting-web/cross-site-websocket-hijacking-cswsh.md)
 * [CSRF (Cross Site Request Forgery)](pentesting-web/csrf-cross-site-request-forgery.md)
 * [Dangling Markup - HTML scriptless injection](pentesting-web/dangling-markup-html-scriptless-injection.md)
+  * [HTML Injection / Char-by-char Exfiltration](pentesting-web/dangling-markup-html-scriptless-injection/html-injection-char-by-char-exfiltration/README.md)
+    * [CSS Injection Code](pentesting-web/dangling-markup-html-scriptless-injection/html-injection-char-by-char-exfiltration/css-injection-code.md)
 * [Deserialization](pentesting-web/deserialization/README.md)
   * [NodeJS - \_\_proto\_\_ & prototype Pollution](pentesting-web/deserialization/nodejs-proto-prototype-pollution/README.md)
     * [Client Side Prototype Pollution](pentesting-web/deserialization/nodejs-proto-prototype-pollution/client-side-prototype-pollution.md)
@@ -536,6 +538,10 @@
   * [Concourse Architecture](cloud-security/concourse/concourse-architecture.md)
   * [Concourse Lab Creation](cloud-security/concourse/concourse-lab-creation.md)
   * [Concourse Enumeration & Attacks](cloud-security/concourse/concourse-enumeration-and-attacks.md)
+* [Apache Airflow](cloud-security/apache-airflow/README.md)
+  * [Airflow Configuration](cloud-security/apache-airflow/airflow-configuration.md)
+  * [Airflow RBAC](cloud-security/apache-airflow/airflow-rbac.md)
+* [CircleCI](cloud-security/circleci.md)
 * [Cloud Security Review](cloud-security/cloud-security-review.md)
 * [AWS Security](cloud-security/aws-security.md)
 

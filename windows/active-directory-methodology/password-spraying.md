@@ -77,8 +77,8 @@ spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod
 
 There are multiples tools for password spraying outlook.
 
-* With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
-* with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+* With [MSF Owa\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_login/)
+* with [MSF Owa\_ews\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_ews\_login/)
 * With [Ruler](https://github.com/sensepost/ruler) (reliable!)
 * With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 * With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)

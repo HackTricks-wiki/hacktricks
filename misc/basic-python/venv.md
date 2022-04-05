@@ -18,4 +18,3 @@ is fixed running
 pip3 install wheel
 inside the virtual environment
 ```
-

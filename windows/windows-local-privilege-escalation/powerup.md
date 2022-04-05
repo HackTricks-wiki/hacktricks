@@ -2,7 +2,7 @@
 
 ## Invoke
 
-```text
+```
 powershell -ep bypass
 . .\powerup.ps
 Invoke-AllChecks
@@ -26,4 +26,3 @@ _03/2019_
 * [x] Encrypted application pool and virtual directory passwords
 * [x] Plaintext passwords in McAfee SiteList.xml
 * [x] Cached Group Policy Preferences .xml files
-

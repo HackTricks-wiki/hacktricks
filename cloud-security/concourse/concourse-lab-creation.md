@@ -27,7 +27,7 @@ helm install concourse-release concourse/concourse
 # After the installation you will find the indications to connect to it in the console
 
 # If you need to delete it
-helm delete my-release
+helm delete concourse-release
 ```
 
 After generating the concourse env, you could generate a secret and give a access to the SA running in concourse web to access K8s secrets:

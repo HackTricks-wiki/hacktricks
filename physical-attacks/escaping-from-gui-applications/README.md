@@ -20,13 +20,13 @@ You should check if you can:
 
 ### Command Execution
 
-Maybe **using a **_**Open with**_** option** you can open/execute some kind of shell.
+Maybe **using a \_Open with**\_\*\* option\*\* you can open/execute some kind of shell.
 
 #### Windows
 
 For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands (and perform unexpected actions) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
-#### \*NIX __&#x20;
+#### \*NIX \_\_
 
 _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
@@ -37,7 +37,7 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 * **Environment variables**: There are a lot of environment variables that are pointing to some path
 * **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
 * **Symbolic links**
-* **Shortcuts**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager),  Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
+* **Shortcuts**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager), Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
   * Hidden Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
 * **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
 * **UNC paths**: Paths to connect to shared folders. You should try to connect to the C$ of the local machine ("\\\127.0.0.1\c$\Windows\System32")
@@ -75,27 +75,27 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 
 ### ShortCuts
 
-* Sticky Keys – Press SHIFT 5 times&#x20;
-* Mouse Keys – SHIFT+ALT+NUMLOCK&#x20;
-* High Contrast – SHIFT+ALT+PRINTSCN&#x20;
-* Toggle Keys – Hold NUMLOCK for 5 seconds&#x20;
-* Filter Keys – Hold right SHIFT for 12 seconds&#x20;
-* WINDOWS+F1 – Windows Search&#x20;
-* WINDOWS+D – Show Desktop&#x20;
-* WINDOWS+E – Launch Windows Explorer&#x20;
-* WINDOWS+R – Run&#x20;
-* WINDOWS+U – Ease of Access Centre&#x20;
-* WINDOWS+F – Search&#x20;
-* SHIFT+F10 – Context Menu&#x20;
-* CTRL+SHIFT+ESC – Task Manager&#x20;
-* CTRL+ALT+DEL – Splash screen on newer Windows versions&#x20;
-* F1 – Help F3 – Search&#x20;
-* F6 – Address Bar&#x20;
-* F11 – Toggle full screen within Internet Explorer&#x20;
-* CTRL+H – Internet Explorer History&#x20;
-* CTRL+T – Internet Explorer – New Tab&#x20;
-* CTRL+N – Internet Explorer – New Page&#x20;
-* CTRL+O – Open File&#x20;
+* Sticky Keys – Press SHIFT 5 times
+* Mouse Keys – SHIFT+ALT+NUMLOCK
+* High Contrast – SHIFT+ALT+PRINTSCN
+* Toggle Keys – Hold NUMLOCK for 5 seconds
+* Filter Keys – Hold right SHIFT for 12 seconds
+* WINDOWS+F1 – Windows Search
+* WINDOWS+D – Show Desktop
+* WINDOWS+E – Launch Windows Explorer
+* WINDOWS+R – Run
+* WINDOWS+U – Ease of Access Centre
+* WINDOWS+F – Search
+* SHIFT+F10 – Context Menu
+* CTRL+SHIFT+ESC – Task Manager
+* CTRL+ALT+DEL – Splash screen on newer Windows versions
+* F1 – Help F3 – Search
+* F6 – Address Bar
+* F11 – Toggle full screen within Internet Explorer
+* CTRL+H – Internet Explorer History
+* CTRL+T – Internet Explorer – New Tab
+* CTRL+N – Internet Explorer – New Page
+* CTRL+O – Open File
 * CTRL+S – Save CTRL+N – New RDP / Citrix
 
 ### Swipes
@@ -103,7 +103,7 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 * Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
 * Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
 * Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
-* Swipe up from the bottom to show  the taskbar in a full screen app.
+* Swipe up from the bottom to show the taskbar in a full screen app.
 
 ### Internet Explorer Tricks
 
@@ -142,10 +142,10 @@ Type this URLs to obtain an Explorer view:
 Backup iKat versions:
 
 [http://swin.es/k/](http://swin.es/k/)\
-[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\
+[http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\\
 
-Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`  
-Source: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`\
+Source: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 
@@ -187,11 +187,11 @@ To change to next/last App
 
 To power off
 
-#### Press the  On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**
+#### Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**
 
 To force a hard power off
 
-#### Press the  On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**
+#### Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**
 
 To take a screenshot that will pop up in the lower left of the display. Press both buttons at the same time very briefly as if you hold them a few seconds a hard power off will be performed.
 

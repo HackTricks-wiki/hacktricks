@@ -45,7 +45,7 @@ cat /proc/`python -c "import os; print(os.getppid())"`/environ
 
 * _**/etc/bash.bashrc**_: This file is read whenever an interactive shell is started (normal terminal) and all the commands specified in here are executed.
 * _**/etc/profile and /etc/profile.d/\***_**:** This file is read every time a user logs in. Thus all the commands executed in here will execute only once at the time of user logging in.
-  *   **Example: **
+  *   \*\*Example: \*\*
 
       `/etc/profile.d/somescript.sh`
 
@@ -69,7 +69,7 @@ From: [https://geek-university.com/linux/common-environment-variables/](https://
 * **DISPLAY** – the display used by **X**. This variable is usually set to **:0.0**, which means the first display on the current computer.
 * **EDITOR** – the user’s preferred text editor.
 * **HISTFILESIZE** – the maximum number of lines contained in the history file.
-* **HISTSIZE - **Number of lines added to the history file when the user finish his session
+* \*\*HISTSIZE - \*\*Number of lines added to the history file when the user finish his session
 * **HOME** – your home directory.
 * **HOSTNAME** – the hostname of the computer.
 * **LANG** – your current language.
@@ -77,7 +77,7 @@ From: [https://geek-university.com/linux/common-environment-variables/](https://
 * **MANPATH** – the list of directories to search for manual pages.
 * **OSTYPE** – the type of operating system.
 * **PS1** – the default prompt in bash.
-* **PATH - **stores the path of all the directories which holds binary files you want to execute just by specifying the name of the file and not by relative or absolute path.
+* \*\*PATH - \*\*stores the path of all the directories which holds binary files you want to execute just by specifying the name of the file and not by relative or absolute path.
 * **PWD** – the current working directory.
 * **SHELL** – the path to the current command shell (for example, **/bin/bash**).
 * **TERM** – the current terminal type (for example, **xterm**).
@@ -122,7 +122,7 @@ export https_proxy="http://10.10.10.10:8080"
 
 Change how your prompt looks.
 
-**I have created **[**this one**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808) (based on another, read the code).
+\*\*I have created \*\*[**this one**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808) (based on another, read the code).
 
 Root:
 
