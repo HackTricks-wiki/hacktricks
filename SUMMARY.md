@@ -542,6 +542,7 @@
 * [CircleCI](cloud-security/circleci.md)
 * [Apache Airflow](cloud-security/apache-airflow/README.md)
   * [Airflow Configuration](cloud-security/apache-airflow/airflow-configuration.md)
+  * [Airflow RBAC](cloud-security/apache-airflow/airflow-rbac.md)
 * [Cloud Security Review](cloud-security/cloud-security-review.md)
 * [AWS Security](cloud-security/aws-security.md)
 
