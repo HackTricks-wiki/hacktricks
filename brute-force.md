@@ -578,6 +578,8 @@ zip -r file.xls .
 ```bash
 # From https://github.com/Ridter/p12tool
 ./p12tool crack -c staff.pfx -f /usr/share/wordlists/rockyou.txt
+# From https://github.com/crackpkcs12/crackpkcs12
+crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
 
 ## Tools
