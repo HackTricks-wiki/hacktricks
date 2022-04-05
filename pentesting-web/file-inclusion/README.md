@@ -3,7 +3,8 @@
 {% hint style="warning" %}
 **Support HackTricks and get benefits!**
 
-Do you want to have access the **latest version of Hacktricks and PEASS**, obtain a **PDF copy of Hacktricks**, and more? Discover the **brand new** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop?frequency=one-time) **for individuals and companies.**
+Do you work in a **cybersecurity company**? Do you want to see your **company announced in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**?
+Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
 Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
