@@ -13,6 +13,7 @@
 * [Brute Force - CheatSheet](brute-force.md)
 * [Exfiltration](exfiltration.md)
 * [Tunneling and Port Forwarding](tunneling-and-port-forwarding.md)
+* [CSS Injection Code](css-injection-code.md)
 * [Search Exploits](search-exploits.md)
 
 ## Shells
@@ -383,7 +384,9 @@
 * [CRLF (%0D%0A) Injection](pentesting-web/crlf-0d-0a.md)
 * [Cross-site WebSocket hijacking (CSWSH)](pentesting-web/cross-site-websocket-hijacking-cswsh.md)
 * [CSRF (Cross Site Request Forgery)](pentesting-web/csrf-cross-site-request-forgery.md)
-* [Dangling Markup - HTML scriptless injection](pentesting-web/dangling-markup-html-scriptless-injection.md)
+* [Dangling Markup - HTML scriptless injection](pentesting-web/dangling-markup-html-scriptless-injection/README.md)
+  * [HTML Injection / Char-by-char Exfiltration](pentesting-web/dangling-markup-html-scriptless-injection/html-injection-char-by-char-exfiltration/README.md)
+    * [CSS Injection Code](pentesting-web/dangling-markup-html-scriptless-injection/html-injection-char-by-char-exfiltration/css-injection-code.md)
 * [Deserialization](pentesting-web/deserialization/README.md)
   * [NodeJS - \_\_proto\_\_ & prototype Pollution](pentesting-web/deserialization/nodejs-proto-prototype-pollution/README.md)
     * [Client Side Prototype Pollution](pentesting-web/deserialization/nodejs-proto-prototype-pollution/client-side-prototype-pollution.md)

