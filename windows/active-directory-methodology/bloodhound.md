@@ -95,7 +95,7 @@ If you wish to execute SharpHound using different credentials you can create a C
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
 
-****[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)****
+[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
 
 ### **Python**
 

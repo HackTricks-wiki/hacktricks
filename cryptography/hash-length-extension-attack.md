@@ -7,7 +7,7 @@ Imagine a server which is **signing** some **data** by **appending** a **secret*
 * **The length of the secret** (this can be also bruteforced from a given length range)
 * **The clear text data**
 * **The algorithm (and it's vulnerable to this attack)**
-* **The padding is known**&#x20;
+* **The padding is known**
   * Usually a default one is used, so if the other 3 requirements are met, this also is
   * The padding vary depending on the length of the secret+data, that's why the length of the secret is needed
 

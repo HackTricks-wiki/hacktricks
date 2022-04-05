@@ -36,7 +36,7 @@ In the page [route\_parser.go](https://github.com/twistlock/authz/blob/master/co
 
 ### Simple Plugin Tutorial
 
-You can find an **easy to understand plugin** with detailed information about installation and debugging here: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)****
+You can find an **easy to understand plugin** with detailed information about installation and debugging here: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
 
 Read the `README` and the `plugin.go` code to understand how is it working.
 

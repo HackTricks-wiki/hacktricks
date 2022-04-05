@@ -1,6 +1,6 @@
 # AppendData/AddSubdirectory permission over service registry
 
-**Information copied from** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)****
+**Information copied from** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
 
 According to the output of the script, the current user has some write permissions on two registry keys:
 

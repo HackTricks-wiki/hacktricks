@@ -42,7 +42,7 @@ aa-mergeprof  #used to merge the policies
 ## Creating a profile
 
 * In order to indicate the affected executable, **absolute paths and wildcards** are allowed (for file globbing) for specifying files.
-* To indicate the access the binary will have over **files** the following **access controls** can be used:&#x20;
+* To indicate the access the binary will have over **files** the following **access controls** can be used:
   * **r** (read)
   * **w** (write)
   * **m** (memory map as executable)

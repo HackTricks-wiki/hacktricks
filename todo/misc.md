@@ -13,7 +13,7 @@ $6$- sha512
 If you do not know what is behind a service, try to make and HTTP GET request.
 
 **UDP Scans**\
-****nc -nv -u -z -w 1 \<IP> 160-16
+nc -nv -u -z -w 1 \<IP> 160-16
 
 An empty UDP packet is sent to a specific port. If the UDP port is open, no reply is sent back from the target machine. If the UDP port is closed, an ICMP port unreachable packet should be sent back from the target machine.\
 

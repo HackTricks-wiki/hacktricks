@@ -2,7 +2,7 @@
 
 ## SigDigger
 
-****[**SigDigger** ](https://github.com/BatchDrake/SigDigger)is a free digital signal analyzer for GNU/Linux and macOS, designed to extract information of unknown radio signals. It supports a variety of SDR devices through SoapySDR, and allows adjustable demodulation of FSK, PSK and ASK signals, decode analog video, analyze bursty signals and listen to analog voice channels (all in real time).
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)is a free digital signal analyzer for GNU/Linux and macOS, designed to extract information of unknown radio signals. It supports a variety of SDR devices through SoapySDR, and allows adjustable demodulation of FSK, PSK and ASK signals, decode analog video, analyze bursty signals and listen to analog voice channels (all in real time).
 
 ### Basic Config
 
@@ -157,7 +157,7 @@ In the previous image you can observe pretty good that **2 frequencies are used*
 
 This is because I capture the signal in booth frequencies, therefore one is approximately the other in negative:
 
-&#x20;
+
 
 ![](<../../.gitbook/assets/image (656).png>)
 

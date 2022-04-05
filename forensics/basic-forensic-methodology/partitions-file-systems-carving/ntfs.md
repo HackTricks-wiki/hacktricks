@@ -122,7 +122,7 @@ Some interesting attributes:
   * Access date
   * MFT update date
   * DOS File permissions
-* [$FILE\_NAME](https://flatcap.org/linux-ntfs/ntfs/attributes/file\_name.html) (among others):&#x20;
+* [$FILE\_NAME](https://flatcap.org/linux-ntfs/ntfs/attributes/file\_name.html) (among others):
   * File name
   * Creation date
   * Modification date

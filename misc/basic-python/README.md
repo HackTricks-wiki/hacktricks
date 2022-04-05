@@ -10,7 +10,7 @@ The difference between a Tuple and a List is that the position of a value in a t
 
 ### Main operations
 
-To raise a number you should do: 3\*\*2 (it isn't 3^2)\
+To raise a number you should do: 3**2 (it isn't 3^2)\
 If you do 2/3 it returns 1 because you are dividing two ints. If you want decimals you should divide floats (2.0/3.0).\
 i >= j\
 i <= j\
@@ -179,7 +179,7 @@ for f, b in zip(foo, bar):
 
 **Lambda** is used to define a function\
 (lambda x,y: x+y)(5,3) = 8 --> Use lambda as simple **function**\
-**sorted**(range(-5,6), key=lambda x: x\*\* 2) = \[0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5] --> Use lambda to sort a list\
+**sorted**(range(-5,6), key=lambda x: x** 2) = \[0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5] --> Use lambda to sort a list\
 m = **filter**(lambda x: x % 3 == 0, \[1, 2, 3, 4, 5, 6, 7, 8, 9]) = \[3, 6, 9] --> Use lambda to filter\
 **reduce** (lambda x,y: x\*y, \[1,2,3,4]) = 24
 

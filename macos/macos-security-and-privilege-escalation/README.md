@@ -5,11 +5,11 @@
 
 Do you want to have access the **latest version of Hacktricks and PEASS**, obtain a **PDF copy of Hacktricks**, and more? Discover the **brand new** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop?frequency=one-time) **for individuals and companies.**
 
-Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)****
+Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)****
+Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/)  ****  [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) **** or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+**Join the** [**💬**](https://emojipedia.org/speech-balloon/)    [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass)  or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 {% endhint %}
@@ -211,11 +211,11 @@ When the user first installs or runs your software, the presence of a ticket (ei
 ### File Quarantine
 
 Gatekeeper builds upon **File Quarantine.**\
-****Upon download of an application, a particular **extended file attribute** ("quarantine flag") can be **added** to the **downloaded** **file**. This attribute **is added by the application that downloads the file**, such as a **web** **browser** or email client, but is not usually added by others like common BitTorrent client software.\
+Upon download of an application, a particular **extended file attribute** ("quarantine flag") can be **added** to the **downloaded** **file**. This attribute **is added by the application that downloads the file**, such as a **web** **browser** or email client, but is not usually added by others like common BitTorrent client software.\
 When a user executes a "quarantined" file, **Gatekeeper** is the one that **performs the mentioned actions** to allow the execution of the file.
 
 {% hint style="info" %}
-&#x20;**Checking** the **validity** of code signatures is a **resource-intensive** process that includes generating cryptographic **hashes** of the code and all its bundled resources. Furthermore, checking certificate validity involves doing an **online check** to Apple's servers to see if it has been revoked after it was issued. For these reasons, a full code signature and notarization check is **impractical to run every time an app is launched**.
+**Checking** the **validity** of code signatures is a **resource-intensive** process that includes generating cryptographic **hashes** of the code and all its bundled resources. Furthermore, checking certificate validity involves doing an **online check** to Apple's servers to see if it has been revoked after it was issued. For these reasons, a full code signature and notarization check is **impractical to run every time an app is launched**.
 
 Therefore, these checks are **only run when executing apps with the quarantined attribute.**
 
@@ -348,7 +348,7 @@ Bypasses examples:
 ### SIP - System Integrity Protection
 
 This protection was enabled to **help keep root level malware from taking over certain parts** of the operating system. Although this means **applying limitations to the root user** many find it to be worthwhile trade off.\
-The most notable of these limitations are that **users can no longer create, modify, or delete files inside** of the following four directories in general:&#x20;
+The most notable of these limitations are that **users can no longer create, modify, or delete files inside** of the following four directories in general:
 
 * /System
 * /bin
@@ -391,7 +391,7 @@ System Integrity Protection status: enabled.
 ```
 
 If you want to **disable** **it**, you need to put the computer in recovery mode (start it pressing command+R) and execute: `csrutil disable` \
-You can also maintain it **enable but without debugging protections** doing:&#x20;
+You can also maintain it **enable but without debugging protections** doing:
 
 ```bash
 csrutil enable --without debug
@@ -418,7 +418,7 @@ spctl --assess --verbose /Applications/Safari.app
 
 ## Installed Software & Services
 
-Check for **suspicious** applications installed and **privileges** over the.installed resources:&#x20;
+Check for **suspicious** applications installed and **privileges** over the.installed resources:
 
 ```bash
 system_profiler SPApplicationsDataType #Installed Apps
@@ -839,7 +839,7 @@ The following oneliner can be use to dump **all the information about the users*
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
 
-****[**Scripts like this one**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) or [**this one**](https://github.com/octomagon/davegrohl.git) can be used to transform the hash to **hashcat** **format**.
+[**Scripts like this one**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) or [**this one**](https://github.com/octomagon/davegrohl.git) can be used to transform the hash to **hashcat** **format**.
 
 ### Keychain Dump
 
@@ -876,7 +876,7 @@ Base on this comment [https://github.com/juuso/keychaindump/issues/10#issuecomme
 
 ### chainbreaker
 
-****[**Chainbreaker**](https://github.com/n0fate/chainbreaker) can be used to extract the following types of information from an OSX keychain in a forensically sound manner:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) can be used to extract the following types of information from an OSX keychain in a forensically sound manner:
 
 * Hashed Keychain password, suitable for cracking with [hashcat](https://hashcat.net/hashcat/) or [John the Ripper](https://www.openwall.com/john/)
 * Internet Passwords
@@ -977,11 +977,11 @@ This is like the [**LD\_PRELOAD on Linux**](../../linux-unix/privilege-escalatio
 This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
 
 {% hint style="info" %}
-Since 2012 when [OSX.FlashBack.B](https://www.f-secure.com/v-descs/trojan-downloader\_osx\_flashback\_b.shtml) \[22] abused this technique, **Apple has drastically reduced the “power”** of the DYLD\_INSERT\_LIBRARIES.&#x20;
+Since 2012 when [OSX.FlashBack.B](https://www.f-secure.com/v-descs/trojan-downloader\_osx\_flashback\_b.shtml) \[22] abused this technique, **Apple has drastically reduced the “power”** of the DYLD\_INSERT\_LIBRARIES.
 
-For example the dynamic loader (dyld) ignores the DYLD\_INSERT\_LIBRARIES environment variable in a wide range of cases, such as setuid and platform binaries. And, starting with macOS Catalina, only 3rd-party applications that are not compiled with the hardened runtime (which “protects the runtime integrity of software” \[22]), or have an exception such as the com.apple.security.cs.allow-dyld-environment-variables entitlement) are susceptible to dylib insertions.&#x20;
+For example the dynamic loader (dyld) ignores the DYLD\_INSERT\_LIBRARIES environment variable in a wide range of cases, such as setuid and platform binaries. And, starting with macOS Catalina, only 3rd-party applications that are not compiled with the hardened runtime (which “protects the runtime integrity of software” \[22]), or have an exception such as the com.apple.security.cs.allow-dyld-environment-variables entitlement) are susceptible to dylib insertions.
 
-For more details on the security features afforded by the hardened runtime, see Apple’s documentation: “[Hardened Runtime](https://developer.apple.com/documentation/security/hardened\_runtime)”&#x20;
+For more details on the security features afforded by the hardened runtime, see Apple’s documentation: “[Hardened Runtime](https://developer.apple.com/documentation/security/hardened\_runtime)”
 {% endhint %}
 
 ## Interesting Information in Databases
@@ -1224,7 +1224,7 @@ sudo killall -HUP mDNSResponder
 
 ## References
 
-* ****[**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)****
-* ****[**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)****
-* ****[**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)****
-* ****[**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)****
+* [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+* [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
+* [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
+* [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)

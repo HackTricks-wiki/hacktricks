@@ -126,8 +126,8 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ### Other tricks
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
-[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells\*\*]\(https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
-[https://gtfobins.github.io](https://gtfobins.github.io/\*\*]\(https/gtfobins.github.io)\
+[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**]\(https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
+[https://gtfobins.github.io](https://gtfobins.github.io/**]\(https/gtfobins.github.io)\
 **It could also be interesting the page:**
 
 {% content-ref url="../useful-linux-commands/bypass-bash-restrictions.md" %}

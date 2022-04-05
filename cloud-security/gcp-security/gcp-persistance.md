@@ -6,9 +6,9 @@ These are useful techniques once, somehow, you have compromised some GCP credent
 
 ### Persistent Backdoor
 
-[**Google Cloud Shell**](https://cloud.google.com/shell/) **** provides you with command-line access to your cloud resources directly from your browser without any associated cost.
+[**Google Cloud Shell**](https://cloud.google.com/shell/)  provides you with command-line access to your cloud resources directly from your browser without any associated cost.
 
-You can access Google's Cloud Shell from the **web console** or running **`gcloud cloud-shell ssh`**.&#x20;
+You can access Google's Cloud Shell from the **web console** or running **`gcloud cloud-shell ssh`**.
 
 This console has some interesting capabilities for attackers:
 

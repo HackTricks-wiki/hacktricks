@@ -28,7 +28,7 @@ If you have enabled this token you can use **KERB\_S4U\_LOGON** to get an **impe
 
 This privilege causes the system to **grant all read access** control to any file (only read).\
 Use it to **read the password hashes of local Administrator** accounts from the registry and then use "**psexec**" or "**wmicexec**" with the hash (PTH).\
-&#x20;This attack won't work if the Local Administrator is disabled, or if it is configured that a Local Admin isn't admin if he is connected remotely.\
+This attack won't work if the Local Administrator is disabled, or if it is configured that a Local Admin isn't admin if he is connected remotely.\
 You can **abuse this privilege** with: [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1) or with [https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug](https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug) or following IppSec in [https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab\_channel=IppSec](https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab\_channel=IppSec)
 
 ### SeRestorePrivilege (3.1.5)
@@ -39,16 +39,16 @@ You can **modify services**, DLL Hijacking, set **debugger** (Image File Executi
 ### SeCreateTokenPrivilege (3.1.6)
 
 This token **can be used** as EoP method **only** if the user **can impersonate** tokens (even without SeImpersonatePrivilege).\
-&#x20;In a possible scenario, a user can impersonate the token if it is for the same user and the integrity level is less or equal to the current process integrity level.\
-&#x20;In this case, the user could **create an impersonation token** and add to it a privileged group SID.
+In a possible scenario, a user can impersonate the token if it is for the same user and the integrity level is less or equal to the current process integrity level.\
+In this case, the user could **create an impersonation token** and add to it a privileged group SID.
 
 ### SeLoadDriverPrivilege (3.1.7)
 
 **Load and unload device drivers.**\
-****You need to create an entry in the registry with values for ImagePath and Type.\
+You need to create an entry in the registry with values for ImagePath and Type.\
 As you don't have access to write to HKLM, you have to **use HKCU**. But HKCU doesn't mean anything for the kernel, the way to guide the kernel here and use the expected path for a driver config is to use the path: "\Registry\User\S-1-5-21-582075628-3447520101-2530640108-1003\System\CurrentControlSet\Services\DriverName" (the ID is the **RID** of the current user).\
-&#x20;So, you have to **create all that path inside HKCU and set the ImagePath** (path to the binary that is going to be executed) **and Type** (SERVICE\_KERNEL\_DRIVER 0x00000001).\
-[**Learn how to exploit it here.**](../active-directory-methodology/privileged-accounts-and-token-privileges.md#seloaddriverprivilege)****
+So, you have to **create all that path inside HKCU and set the ImagePath** (path to the binary that is going to be executed) **and Type** (SERVICE\_KERNEL\_DRIVER 0x00000001).\
+[**Learn how to exploit it here.**](../active-directory-methodology/privileged-accounts-and-token-privileges.md#seloaddriverprivilege)
 
 ### SeTakeOwnershipPrivilege (3.1.8)
 

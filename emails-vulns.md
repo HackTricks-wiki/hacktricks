@@ -8,7 +8,7 @@ The symbols: **+, -** and **{}** in rare occasions can be used for tagging and i
 
 * E.g. john.doe+intigriti@example.com → john.doe@example.com
 
-**Comments between parentheses ()** at the beginning or the end will also be ignored&#x20;
+**Comments between parentheses ()** at the beginning or the end will also be ignored
 
 * E.g. john.doe(intigriti)@example.com → john.doe@example.com
 
@@ -46,7 +46,7 @@ You can send an email using _**From: company.com**_** ** and _**Replay-To: attac
 
 ## **References**
 
-* ****[**https://drive.google.com/file/d/1iKL6wbp3yYwOmxEtAg1jEmuOf8RM8ty9/view**](https://drive.google.com/file/d/1iKL6wbp3yYwOmxEtAg1jEmuOf8RM8ty9/view)****
+* [**https://drive.google.com/file/d/1iKL6wbp3yYwOmxEtAg1jEmuOf8RM8ty9/view**](https://drive.google.com/file/d/1iKL6wbp3yYwOmxEtAg1jEmuOf8RM8ty9/view)
 
 ## Hard Bounce Rate
 

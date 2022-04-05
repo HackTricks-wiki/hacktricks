@@ -40,7 +40,7 @@ void say_hi()
 
 1. **Create** those files in your machine in the same folder
 2. **Compile** the **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. **Copy **_**** libcustom.so_ to _/usr/lib_: `sudo cp libcustom.so /usr/lib` (root privs)
+3. **Copy **_ libcustom.so_ to _/usr/lib_: `sudo cp libcustom.so /usr/lib` (root privs)
 4. **Compile** the **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
 ### Check the environment
@@ -111,7 +111,7 @@ ubuntu
 Note that in this example we haven't escalated privileges, but modifying the commands executed and **waiting for root or other privileged user to execute the vulnerable binary** we will be able to escalate privileges.
 {% endhint %}
 
-### &#x20;Other misconfigurations - Same vuln
+### Other misconfigurations - Same vuln
 
 In the previous example we faked a misconfiguration where an administrator **set a non-privileged folder inside a configuration file inside `/etc/ld.so.conf.d/`**.\
 But there are other misconfigurations that can cause the same vulnerability, if you have **write permissions** in some **config file** inside `/etc/ld.so.conf.d`s, in the folder `/etc/ld.so.conf.d` or in the file `/etc/ld.so.conf` you can configure the same vulnerability and exploit it.

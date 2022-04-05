@@ -61,7 +61,7 @@
 * [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : Lateral movements
 * [https://freddiebarrsmith.com/trix/trix.html](https://freddiebarrsmith.com/trix/trix.html) : LOL bins
 * [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Persistence
-* [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Windows Process Injection techniques&#x20;
+* [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Windows Process Injection techniques
 * [https://github.com/BankSecurity/Red\_Team](https://github.com/BankSecurity/Red\_Team) : Red Team scripts
 * [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : find security-related misconfigurations in Active Directory Group Policy.
 * [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Securestring obfuscation

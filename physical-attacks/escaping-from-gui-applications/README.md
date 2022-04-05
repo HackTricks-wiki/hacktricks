@@ -26,7 +26,7 @@ Maybe **using a **_**Open with**_** option** you can open/execute some kind of s
 
 For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands (and perform unexpected actions) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
-#### \*NIX __&#x20;
+#### \*NIX __
 
 _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
@@ -75,27 +75,27 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 
 ### ShortCuts
 
-* Sticky Keys – Press SHIFT 5 times&#x20;
-* Mouse Keys – SHIFT+ALT+NUMLOCK&#x20;
-* High Contrast – SHIFT+ALT+PRINTSCN&#x20;
-* Toggle Keys – Hold NUMLOCK for 5 seconds&#x20;
-* Filter Keys – Hold right SHIFT for 12 seconds&#x20;
-* WINDOWS+F1 – Windows Search&#x20;
-* WINDOWS+D – Show Desktop&#x20;
-* WINDOWS+E – Launch Windows Explorer&#x20;
-* WINDOWS+R – Run&#x20;
-* WINDOWS+U – Ease of Access Centre&#x20;
-* WINDOWS+F – Search&#x20;
-* SHIFT+F10 – Context Menu&#x20;
-* CTRL+SHIFT+ESC – Task Manager&#x20;
-* CTRL+ALT+DEL – Splash screen on newer Windows versions&#x20;
-* F1 – Help F3 – Search&#x20;
-* F6 – Address Bar&#x20;
-* F11 – Toggle full screen within Internet Explorer&#x20;
-* CTRL+H – Internet Explorer History&#x20;
-* CTRL+T – Internet Explorer – New Tab&#x20;
-* CTRL+N – Internet Explorer – New Page&#x20;
-* CTRL+O – Open File&#x20;
+* Sticky Keys – Press SHIFT 5 times
+* Mouse Keys – SHIFT+ALT+NUMLOCK
+* High Contrast – SHIFT+ALT+PRINTSCN
+* Toggle Keys – Hold NUMLOCK for 5 seconds
+* Filter Keys – Hold right SHIFT for 12 seconds
+* WINDOWS+F1 – Windows Search
+* WINDOWS+D – Show Desktop
+* WINDOWS+E – Launch Windows Explorer
+* WINDOWS+R – Run
+* WINDOWS+U – Ease of Access Centre
+* WINDOWS+F – Search
+* SHIFT+F10 – Context Menu
+* CTRL+SHIFT+ESC – Task Manager
+* CTRL+ALT+DEL – Splash screen on newer Windows versions
+* F1 – Help F3 – Search
+* F6 – Address Bar
+* F11 – Toggle full screen within Internet Explorer
+* CTRL+H – Internet Explorer History
+* CTRL+T – Internet Explorer – New Tab
+* CTRL+N – Internet Explorer – New Page
+* CTRL+O – Open File
 * CTRL+S – Save CTRL+N – New RDP / Citrix
 
 ### Swipes

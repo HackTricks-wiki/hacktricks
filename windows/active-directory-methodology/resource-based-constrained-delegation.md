@@ -22,8 +22,8 @@ However, if the **TGS** used in **S4U2Proxy** is **NOT Forwardable** trying to a
 Suppose that the attacker has already **write equivalent privileges over the victim computer**.
 
 1. The attacker **compromises** an account that has a **SPN** or **creates one** (“Service A”). Note that **any** _Admin User_ without any other special privilege can **create** up until 10 **Computer objects (**_**MachineAccountQuota**_**)** and set them a **SPN**. So the attacker can just create a Computer object and set a SPN.
-2. The attacker configures **resource-based constrained delegation from Service A to the victim host**.&#x20;
-3. The attacker uses Rubeus to perform a **full S4U attack** (S4U2Self and S4U2Proxy) from Service A to Service B for a user **with privileged access to Service B**.&#x20;
+2. The attacker configures **resource-based constrained delegation from Service A to the victim host**.
+3. The attacker uses Rubeus to perform a **full S4U attack** (S4U2Self and S4U2Proxy) from Service A to Service B for a user **with privileged access to Service B**.
    1. S4U2Self (from the SPN compromised/created account): Ask for a **TGS of Administrator to me** (Not Forwardable).
    2. S4U2Proxy: Use the **not Forwardable TGS** of the step before to ask for a **TGS** from **Administrator** to the **victim host**.
    3. Even if you are using a not Forwardable TGS, as you are exploiting Resource-based constrained delegation, it will work.

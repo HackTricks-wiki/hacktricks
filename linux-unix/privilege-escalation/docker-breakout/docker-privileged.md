@@ -154,7 +154,7 @@ Also, note that when Docker (or other CRIs) are used in a **Kubernetes** cluster
 
 ### AppArmor
 
-**AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**. When you run with the `--privileged` flag, this protection is disabled.&#x20;
+**AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**. When you run with the `--privileged` flag, this protection is disabled.
 
 {% content-ref url="apparmor.md" %}
 [apparmor.md](apparmor.md)

@@ -34,7 +34,7 @@ Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
 
 You can create a username called **Administ** (m1) and retrieve the signature (s1).\
 Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, you can use s32 as the singature of the full name **Administrator**.
+now, you can use s32 as the signature of the full name **Administrator**.
 
 #### Summary
 

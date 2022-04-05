@@ -40,7 +40,7 @@ Silver ticket events ID \(more stealth than golden ticket\):
 * 4634: Account Logoff
 * 4672: Admin Logon
 
-\*\*\*\*[**More information about Silver Tickets in ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)\*\*\*\*
+[**More information about Silver Tickets in ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 
 ## Available Services
 

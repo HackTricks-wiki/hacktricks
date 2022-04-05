@@ -81,7 +81,7 @@ To inspect these files you can use [**LinkParser**](http://4discovery.com/our-to
 
 In this tools you will find 2 set of timestamps: **FileModifiedDate**, **FileAccessDate** and **FileCreationDate**, and **LinkModifiedDate**, **LinkAccessDate** and **LinkCreationDate**. The first set of timestamp references the **timestamps of the link file itself**. The second set references the **timestamps of the linked file**.
 
-You can get the same information running the Windows cli tool: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)\*\*\*\*
+You can get the same information running the Windows cli tool: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
 
 ```
 LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
@@ -353,7 +353,7 @@ The cache stores various file metadata depending on the operating system, such a
 
 This information can be found in the registry in:
 
-* `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache`&#x20;
+* `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache`
   * XP (96 entries)
 * `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache`
   * Server 2003 (512 entries)
@@ -478,7 +478,7 @@ This event is recorded by the EventID 4616 inside the Security Event log.
 The following System EventIDs are useful:
 
 * 20001 / 20003 / 10000: First time it was used
-* 10100: Driver update&#x20;
+* 10100: Driver update
 
 The EventID 112 from DeviceSetupManager contains the timestamp of each USB device inserted.
 

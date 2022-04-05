@@ -1,6 +1,6 @@
 # Cheat Engine
 
-****[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
 When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
 
 ## What are you searching?
@@ -79,7 +79,7 @@ Note that there are a **lot of possible changes** and you can do these **steps a
 
 ### Random Memory Address - Finding the code
 
-Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.&#x20;
+Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.
 
 Using some of the mentioned tricks, find the address where your current game is storing the important value. Then (stopping the game if you whish) do a **right click** on the found **address** and select "**Find out what accesses this address**" or "**Find out what writes to this address**":
 

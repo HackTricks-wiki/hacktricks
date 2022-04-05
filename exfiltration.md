@@ -151,7 +151,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
 
-Or create a \*\*smb \*\*share **using samba**:
+Or create a **smb **share **using samba**:
 
 ```bash
 apt-get install samba

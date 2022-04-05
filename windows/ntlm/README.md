@@ -110,7 +110,7 @@ This will launch a process that will belongs to the users that have launch mimik
 ### Pass-the-Hash from linux
 
 You can obtain code execution in Windows machines using Pass-the-Hash from Linux. \
-[**Access here to learn how to do it.**](broken-reference)****
+[**Access here to learn how to do it.**](broken-reference)
 
 ### Impacket Windows compiled tools
 
@@ -171,10 +171,10 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ### Manual Windows remote execution with username and password
 
-* ****[**PsExec**](psexec-and-winexec.md)****
-* [**SmbExec**](smbexec.md)****
-* ****[**WmicExec**](wmicexec.md)****
-* ****[**AtExec**](atexec.md)****
+* [**PsExec**](psexec-and-winexec.md)
+* [**SmbExec**](smbexec.md)
+* [**WmicExec**](wmicexec.md)
+* [**AtExec**](atexec.md)
 
 ## Extracting credentials from a Windows Host
 
@@ -190,4 +190,4 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Parse NTLM challenges from a network capture
 
-**You can use** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)****
+**You can use** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)

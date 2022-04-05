@@ -1,6 +1,6 @@
 # Kerberos Authentication
 
-**This information was extracted from the post:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)****
+**This information was extracted from the post:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
 ## Kerberos (I): How does Kerberos work? – Theory
 

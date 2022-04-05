@@ -2,7 +2,7 @@
 
 ### Host header
 
-Several times the back-end trust the H**ost header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).&#x20;
+Several times the back-end trust the H**ost header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 ### Session booleans
 

@@ -368,7 +368,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-&#x20;**Windows** systems maintain a set of **keys** in the registry database (**UserAssist keys**) to keep track of programs that executed. The number of executions and last execution date and time are available in these **keys**.
+**Windows** systems maintain a set of **keys** in the registry database (**UserAssist keys**) to keep track of programs that executed. The number of executions and last execution date and time are available in these **keys**.
 
 {% tabs %}
 {% tab title="vol3" %}

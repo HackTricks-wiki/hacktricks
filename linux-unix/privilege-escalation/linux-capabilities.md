@@ -764,7 +764,7 @@ And in order to read a file you could do:
 print(open("/etc/shadow", "r").read())
 ```
 
-#### Example with \_\*\*\_Environment (Docker breakout)
+#### Example with \_**\_Environment (Docker breakout)
 
 You can check the enabled capabilities inside the docker container using:
 
@@ -1301,7 +1301,7 @@ It looks like we can only add to the inheritable set capabilities from the bound
 
 ### CAP\_SYS\_RAWIO
 
-\*\*\*\*[**CAP\_SYS\_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) provides a number of sensitive operations including access to `/dev/mem`, `/dev/kmem` or `/proc/kcore`, modify `mmap_min_addr`, access `ioperm(2)` and `iopl(2)` system calls, and various disk commands. The `FIBMAP ioctl(2)` is also enabled via this capability, which has caused issues in the [past](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html). As per the man page, this also allows the holder to descriptively `perform a range of device-specific operations on other devices`.
+[**CAP\_SYS\_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) provides a number of sensitive operations including access to `/dev/mem`, `/dev/kmem` or `/proc/kcore`, modify `mmap_min_addr`, access `ioperm(2)` and `iopl(2)` system calls, and various disk commands. The `FIBMAP ioctl(2)` is also enabled via this capability, which has caused issues in the [past](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html). As per the man page, this also allows the holder to descriptively `perform a range of device-specific operations on other devices`.
 
 This can be useful for **privilege escalation** and **Docker breakout.**
 

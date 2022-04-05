@@ -14,7 +14,7 @@
 
 ## Consensus Mechanisms
 
-For a blockchain transaction to be recognized, it must be **appended** to the **blockchain**. Validators (miners) carry out this appending; in most protocols, they **receive a reward** for doing so. For the blockchain to remain secure, it must have a mechanism to **prevent a malicious user or group from taking over a majority of validation**.&#x20;
+For a blockchain transaction to be recognized, it must be **appended** to the **blockchain**. Validators (miners) carry out this appending; in most protocols, they **receive a reward** for doing so. For the blockchain to remain secure, it must have a mechanism to **prevent a malicious user or group from taking over a majority of validation**.
 
 Proof of work, another commonly used consensus mechanism, uses a validation of computational prowess to verify transactions, requiring a potential attacker to acquire a large fraction of the computational power of the validator network.
 
@@ -108,7 +108,7 @@ Some people gives data about theirs bitcoin addresses in different webs on Inter
 
 ### Transaction Graphs
 
-By representing the transactions in graphs, i**t's possible to know with certain probability to where the money of an account were**. Therefore, it's possible to know something about **users** that are **related** in the blockchain.&#x20;
+By representing the transactions in graphs, i**t's possible to know with certain probability to where the money of an account were**. Therefore, it's possible to know something about **users** that are **related** in the blockchain.
 
 ### **Unnecessary input heuristic**
 
@@ -179,12 +179,12 @@ This offers a new level of privacy, however, **some** **transactions** where som
 
 Examples of (likely) CoinJoin transactions IDs on bitcoin's blockchain are `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-[**https://coinjoin.io/en**](https://coinjoin.io/en)****\
+[**https://coinjoin.io/en**](https://coinjoin.io/en)\
 **Similar to coinjoin but better and for ethereum you have** [**Tornado Cash**](https://tornado.cash) **(the money is given from miners, so it jus appear in your waller).**
 
 ### PayJoin
 
-The type of CoinJoin discussed in the previous section can be easily identified as such by checking for the multiple outputs with the same value.&#x20;
+The type of CoinJoin discussed in the previous section can be easily identified as such by checking for the multiple outputs with the same value.
 
 PayJoin (also called pay-to-end-point or P2EP) is a special type of CoinJoin between two parties where one party pays the other. The transaction then **doesn't have the distinctive multiple outputs** with the same value, and so is not obviously visible as an equal-output CoinJoin. Consider this transaction:
 
@@ -203,7 +203,7 @@ If PayJoin transactions became even moderately used then it would make the **com
 
 Bitcoin wallets must somehow obtain information about their balance and history. As of late-2018 the most practical and private existing solutions are to use a **full node wallet** (which is maximally private) and **client-side block filtering** (which is very good).
 
-* **Full node:** Full nodes download the entire blockchain which contains every on-chain [transaction](https://en.bitcoin.it/wiki/Transaction) that has ever happened in bitcoin. So an adversary watching the user's internet connection will not be able to learn which transactions or addresses the user is interested in.&#x20;
+* **Full node:** Full nodes download the entire blockchain which contains every on-chain [transaction](https://en.bitcoin.it/wiki/Transaction) that has ever happened in bitcoin. So an adversary watching the user's internet connection will not be able to learn which transactions or addresses the user is interested in.
 * **Client-side block filtering:** Client-side block filtering works by having **filters** created that contains all the **addresses** for every transaction in a block. The filters can test whether an **element is in the set**; false positives are possible but not false negatives. A lightweight wallet would **download** all the filters for every **block** in the **blockchain** and check for matches with its **own** **addresses**. Blocks which contain matches would be downloaded in full from the peer-to-peer network, and those blocks would be used to obtain the wallet's history and current balance.
 
 ### Tor
@@ -248,7 +248,7 @@ When Jordan sends the money, 1.00231 ETH will be deducted from Jordan's account.
 
 Additionally, Jordan can also set a max fee (`maxFeePerGas`) for the transaction. The difference between the max fee and the actual fee is refunded to Jordan, i.e. `refund = max fee - (base fee + priority fee)`. Jordan can set a maximum amount to pay for the transaction to execute and not worry about overpaying "beyond" the base fee when the transaction is executed.
 
-As the base fee is calculated by the network based on demand for block space, this last param: maxFeePerGas helps to control the maximum fee that is going to be payed.&#x20;
+As the base fee is calculated by the network based on demand for block space, this last param: maxFeePerGas helps to control the maximum fee that is going to be payed.
 
 ### Transactions
 

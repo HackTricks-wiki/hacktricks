@@ -12,7 +12,7 @@ Zero Configuration Networking, such as Bonjour provides:
 The device will get an **IP address in the range 169.254/16** and will check if any other device is using that IP address. If not, it will keep the IP address. Macs keeps an entry in their routing table for this subnet: `netstat -rn | grep 169`
 
 For DNS the **Multicast DNS (mDNS) protocol is used**. [**mDNS** **services** listen in port **5353/UDP**](../../pentesting/5353-udp-multicast-dns-mdns.md), use **regular DNS queries** and use the **multicast address 224.0.0.251** instead of sending the request just to an IP address. Any machine listening these request will respond, usually to a multicast address, so all the devices can update their tables.\
-Each device will **select its own name** when accessing the network, the device will choose a name **ended in .local** (might be based on the hostname or a completely random one).&#x20;
+Each device will **select its own name** when accessing the network, the device will choose a name **ended in .local** (might be based on the hostname or a completely random one).
 
 For **discovering services DNS Service Discovery (DNS-SD)** is used.
 
@@ -77,5 +77,5 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 
 ## References
 
-* [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt\_other?\_encoding=UTF8\&me=\&qid=)****
-* ****[**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)****
+* [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt\_other?\_encoding=UTF8\&me=\&qid=)
+* [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

@@ -59,6 +59,6 @@ ln -s /file/you/want/to/read root.txt
 
 Then, when **7z** is execute, it will treat `root.txt` as a file containing the list of files it should compress (thats what the existence of `@root.txt` indicates) and when it 7z read `root.txt` it will read `/file/you/want/to/read` and **as the content of this file isn't a list of files, it will throw and error** showing the content.
 
-_More info in Write-ups of the box CTF from HackTheBox._&#x20;
+_More info in Write-ups of the box CTF from HackTheBox._
 
 __

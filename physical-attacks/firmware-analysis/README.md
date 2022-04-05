@@ -158,9 +158,9 @@ Some **interesting things to look** for inside the firmware:
 
 Tools that search for this kind of information (even if you always should take a manual look and get comfortable with the filesystem structure, the tools can help you finding **hidden things**):
 
-* ****[**LinPEAS**](https://github.com/carlospolop/PEASS-ng)**:** Awesome bash script that in this case is useful for searching **sensitive information** inside the filesystem. Just **chroot inside the firmware filesystem and run it**.
-* ****[**Firmwalker**](https://github.com/craigz28/firmwalker)**:** Bash script to search for potential sensitive information
-* ****[**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT\_core):&#x20;
+* [**LinPEAS**](https://github.com/carlospolop/PEASS-ng)**:** Awesome bash script that in this case is useful for searching **sensitive information** inside the filesystem. Just **chroot inside the firmware filesystem and run it**.
+* [**Firmwalker**](https://github.com/craigz28/firmwalker)**:** Bash script to search for potential sensitive information
+* [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT\_core):
   * Identification of software components such as operating system, CPU architecture, and third-party components along with their associated version information
   * Extraction of firmware filesystem (s ) from images
   * Detection of certificates and private keys
@@ -172,9 +172,9 @@ Tools that search for this kind of information (even if you always should take a
   * Detection of binary mitigations such as NX, DEP, ASLR, stack canaries, RELRO, and FORTIFY\_SOURCE
   * REST API
   * and more...
-* ****[**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer): FwAnalyzer is a tool to analyze (ext2/3/4), FAT/VFat, SquashFS, UBIFS filesystem images, cpio archives, and directory content using a set of configurable rules.
-* ****[**ByteSweep**](https://gitlab.com/bytesweep/bytesweep): A Free Software IoT Firmware Security Analysis Tool
-* ****[**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go): This is a complete rewrite of the original ByteSweep project in Go.
+* [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer): FwAnalyzer is a tool to analyze (ext2/3/4), FAT/VFat, SquashFS, UBIFS filesystem images, cpio archives, and directory content using a set of configurable rules.
+* [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep): A Free Software IoT Firmware Security Analysis Tool
+* [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go): This is a complete rewrite of the original ByteSweep project in Go.
 
 {% hint style="warning" %}
 Inside the filesystem you can also find **source code** of programs (that you should always **check**), but also **compiled binaries**. These programs might be somehow exposed and you should **decompile** and **check** them for potential vulnerabilities.
@@ -234,11 +234,11 @@ There are several tools, based in **qemu** in general, that will allow you to em
 
 * [**https://github.com/firmadyne/firmadyne**](https://github.com/firmadyne/firmadyne)**:**
   * You need to install several things, configure postgres, then run the extractor.py script to extract the firmware, use the getArch.sh script to get the architecture. Then, use tar2db.py and makeImage.sh scripts to store information from the extracted image in the database and generate a QEMU image that we can emulate. The, use inferNetwork.sh script to get the network interfaces, and finally use the run.sh script, which is automatically created in the ./scratch/1/folder.
-* [**https://github.com/attify/firmware-analysis-toolkit**](https://github.com/attify/firmware-analysis-toolkit)**:**&#x20;
-  * This tool depends on firmadyne and automates the process of emulating the firmware using firmadynee. you need to configure `fat.config` before using it: `sudo python3 ./fat.py IoTGoat-rpi-2.img --qemu 2.5.0`&#x20;
-* ****[**https://github.com/therealsaumil/emux**](https://github.com/therealsaumil/emux)****
-* ****[**https://github.com/getCUJO/MIPS-X**](https://github.com/getCUJO/MIPS-X)****
-* ****[**https://github.com/qilingframework/qiling#qltool**](https://github.com/qilingframework/qiling#qltool)
+* [**https://github.com/attify/firmware-analysis-toolkit**](https://github.com/attify/firmware-analysis-toolkit)**:**
+  * This tool depends on firmadyne and automates the process of emulating the firmware using firmadynee. you need to configure `fat.config` before using it: `sudo python3 ./fat.py IoTGoat-rpi-2.img --qemu 2.5.0`
+* [**https://github.com/therealsaumil/emux**](https://github.com/therealsaumil/emux)
+* [**https://github.com/getCUJO/MIPS-X**](https://github.com/getCUJO/MIPS-X)
+* [**https://github.com/qilingframework/qiling#qltool**](https://github.com/qilingframework/qiling#qltool)
 
 ## **Dynamic analysis**
 
@@ -301,8 +301,8 @@ Utilize the following references for further guidance:
 
 ## Prepared OSs to analyze Firmware
 
-* ****[**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS is a distro intended to help you perform security assessment and penetration testing of Internet of Things (IoT) devices. It saves you a lot of time by providing a pre-configured environment with all the necessary tools loaded.
-* ****[**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system based on Ubuntu 18.04 preloaded with firmware security testing tools.
+* [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS is a distro intended to help you perform security assessment and penetration testing of Internet of Things (IoT) devices. It saves you a lot of time by providing a pre-configured environment with all the necessary tools loaded.
+* [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system based on Ubuntu 18.04 preloaded with firmware security testing tools.
 
 ## Vulnerable firmware to practice
 

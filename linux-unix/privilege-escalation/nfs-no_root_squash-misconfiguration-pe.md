@@ -52,7 +52,7 @@ Another required requirement for the exploit to work is that **the export inside
 \--_I'm not sure that if `/etc/export` is indicating an IP address this trick will work_--
 {% endhint %}
 
-**Trick copied from** [**https://www.errno.fr/nfs\_privesc.html**](https://www.errno.fr/nfs\_privesc.html)****
+**Trick copied from** [**https://www.errno.fr/nfs\_privesc.html**](https://www.errno.fr/nfs\_privesc.html)
 
 Now, let’s assume that the share server still runs `no_root_squash` but there is something preventing us from mounting the share on our pentest machine. This would happen if the `/etc/exports` has an explicit list of IP addresses allowed to mount the share.
 

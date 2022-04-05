@@ -42,7 +42,7 @@ This could be a **real person** within your organization who requires access to 
 * **Secret access key ID**: 40 random upper and lowercase characters: S836fh/J73yHSb64Ag3Rkdi/jaD6sPl6/antFtU (It's not possible to retrieve lost secret access key IDs).
 
 Whenever you need to **change the Access Key** this is the process you should follow:\
-****_Create a new access key -> Apply the new key to system/application -> mark original one as inactive -> Test and verify new access key is working -> Delete old access key_
+_Create a new access key -> Apply the new key to system/application -> mark original one as inactive -> Test and verify new access key is working -> Delete old access key_
 
 **MFA** is **supported** when using the AWS **CLI**.
 
@@ -56,7 +56,7 @@ Roles are used to grant identities a set of permissions. **Roles don't have any 
 
 An IAM role consists of **two types of policies**: A **trust policy**, which cannot be empty, defining who can assume the role, and a **permissions policy**, which cannot be empty, defining what they can access.
 
-#### AWS Security Token Service (STS)&#x20;
+#### AWS Security Token Service (STS)
 
 This is a web service that enables you to **request temporary, limited-privilege credentials** for AWS Identity and Access Management (IAM) users or for users that you authenticate (federated users).
 
@@ -64,7 +64,7 @@ This is a web service that enables you to **request temporary, limited-privilege
 
 #### Policy Permissions
 
-Are used to assign permissions. There are 2 types:&#x20;
+Are used to assign permissions. There are 2 types:
 
 * AWS managed policies (preconfigured by AWS)
 * Customer Managed Policies: Configured by you. You can create policies based on AWS managed policies (modifying one of them and creating your own), using the policy generator (a GUI view that helps you granting and denying permissions) or writing  your own..
@@ -143,7 +143,7 @@ The app uses the AssumeRoleWithWebIdentity to create temporary credentials. Howe
 
 ## KMS - Key Management Service
 
-&#x20;AWS Key Management Service (AWS KMS) is a managed service that makes it easy for you to **create and control **_**customer master keys**_** (CMKs)**, the encryption keys used to encrypt your data. AWS KMS CMKs are **protected by hardware security modules** (HSMs)
+AWS Key Management Service (AWS KMS) is a managed service that makes it easy for you to **create and control **_**customer master keys**_** (CMKs)**, the encryption keys used to encrypt your data. AWS KMS CMKs are **protected by hardware security modules** (HSMs)
 
 KMS uses **symmetric cryptography**. This is used to **encrypt information as rest** (for example, inside a S3). If you need to **encrypt information in transit** you need to use something like **TLS**.\
 KMS is a **region specific service**.
@@ -241,7 +241,7 @@ It's possible to **enable S3 access login** (which by default is disabled) to so
 
 **Server-side encryption with S3 managed keys, SSE-S3:** This option requires minimal configuration and all management of encryption keys used are managed by AWS. All you need to do is to **upload your data and S3 will handle all other aspects**. Each bucket in a S3 account is assigned a bucket key.
 
-* Encryption:&#x20;
+* Encryption:
   * Object Data + created plaintext DEK --> Encrypted data (stored inside S3)
   * Created plaintext DEK + S3 Master Key --> Encrypted DEK (stored inside S3) and plain text is deleted from memory
 * Decryption:
@@ -250,7 +250,7 @@ It's possible to **enable S3 access login** (which by default is disabled) to so
 
 Please, note that in this case **the key is managed by AWS** (rotation only every 3 years). If you use your own key you willbe able to rotate, disable and apply access control.
 
-**Server-side encryption with KMS managed keys, SSE-KMS:** This method allows S3 to use the key management service to generate your data encryption keys. KMS gives you a far greater flexibility of how your keys are managed. For example, you are able to disable, rotate, and apply access controls to the CMK, and order to against their usage using AWS Cloud Trail.&#x20;
+**Server-side encryption with KMS managed keys, SSE-KMS:** This method allows S3 to use the key management service to generate your data encryption keys. KMS gives you a far greater flexibility of how your keys are managed. For example, you are able to disable, rotate, and apply access controls to the CMK, and order to against their usage using AWS Cloud Trail.
 
 * Encryption:
   * S3 request data keys from KMS CMK
@@ -261,7 +261,7 @@ Please, note that in this case **the key is managed by AWS** (rotation only ever
   * KMS decrypt the data key with the CMK and send it back to S3
   * S3 decrypts the object data
 
-**Server-side encryption with customer provided keys, SSE-C:** This option gives you the opportunity to provide your own master key that you may already be using outside of AWS. Your customer-provided key would then be sent with your data to S3, where S3 would then perform the encryption for you.&#x20;
+**Server-side encryption with customer provided keys, SSE-C:** This option gives you the opportunity to provide your own master key that you may already be using outside of AWS. Your customer-provided key would then be sent with your data to S3, where S3 would then perform the encryption for you.
 
 * Encryption:
   * The user sends the object data + Customer key to S3
@@ -273,7 +273,7 @@ Please, note that in this case **the key is managed by AWS** (rotation only ever
   * The key is validated against the HMAC value stored
   * The customer provided key is then used to decrypt the data
 
-**Client-side encryption with KMS, CSE-KMS:** Similarly to SSE-KMS, this also uses the key management service to generate your data encryption keys. However, this time KMS is called upon via the client not S3. The encryption then takes place client-side and the encrypted data is then sent to S3 to be stored.&#x20;
+**Client-side encryption with KMS, CSE-KMS:** Similarly to SSE-KMS, this also uses the key management service to generate your data encryption keys. However, this time KMS is called upon via the client not S3. The encryption then takes place client-side and the encrypted data is then sent to S3 to be stored.
 
 * Encryption:
   * Client request for a data key to KMS
@@ -285,9 +285,9 @@ Please, note that in this case **the key is managed by AWS** (rotation only ever
   * The client asks KMS to decrypt the encrypted key using the CMK and KMS sends back the plaintext DEK
   * The client can now decrypt the encrypted data
 
-**Client-side encryption with customer provided keys, CSE-C:** Using this mechanism, you are able to utilize your own provided keys and use an AWS-SDK client to encrypt your data before sending it to S3 for storage.&#x20;
+**Client-side encryption with customer provided keys, CSE-C:** Using this mechanism, you are able to utilize your own provided keys and use an AWS-SDK client to encrypt your data before sending it to S3 for storage.
 
-* Encryption:&#x20;
+* Encryption:
   * The client generates a DEK and encrypts the plaintext data
   * Then, using it's own custom CMK it encrypts the DEK
   * submit the encrypted data + encrypted DEK to S3 where it's stored
@@ -303,16 +303,16 @@ The unusual feature of CloudHSM is that it is a physical device, and thus it is 
 
 Typically, a device is available within 15 minutes assuming there is capacity, but if the AZ is out of capacity it can take two weeks or more to acquire additional capacity.
 
-Both KMS and CloudHSM are available to you at AWS and both are integrated with your apps at AWS. Since this is a physical device dedicated to you, **the keys are stored on the device**. Keys need to either be **replicated to another device**, backed up to offline storage, or exported to a standby appliance. **This device is not backed** by S3 or any other service at AWS like KMS.&#x20;
+Both KMS and CloudHSM are available to you at AWS and both are integrated with your apps at AWS. Since this is a physical device dedicated to you, **the keys are stored on the device**. Keys need to either be **replicated to another device**, backed up to offline storage, or exported to a standby appliance. **This device is not backed** by S3 or any other service at AWS like KMS.
 
 In **CloudHSM**, you have to **scale the service yourself**. You have to provision enough CloudHSM devices to handle whatever your encryption needs are based on the encryption algorithms you have chosen to implement for your solution.\
-Key Management Service scaling is performed by AWS and automatically scales on demand, so as your use grows, so might the number of CloudHSM appliances that are required. Keep this in mind as you scale your solution and if your solution has auto-scaling, make sure your maximum scale is accounted for with enough CloudHSM appliances to service the solution.&#x20;
+Key Management Service scaling is performed by AWS and automatically scales on demand, so as your use grows, so might the number of CloudHSM appliances that are required. Keep this in mind as you scale your solution and if your solution has auto-scaling, make sure your maximum scale is accounted for with enough CloudHSM appliances to service the solution.
 
 Just like scaling, **performance is up to you with CloudHSM**. Performance varies based on which encryption algorithm is used and on how often you need to access or retrieve the keys to encrypt the data. Key management service performance is handled by Amazon and automatically scales as demand requires it. CloudHSM's performance is achieved by adding more appliances and if you need more performance you either add devices or alter the encryption method to the algorithm that is faster.
 
 If your solution is **multi-region**, you should add several **CloudHSM appliances in the second region and work out the cross-region connectivity with a private VPN connection** or some method to ensure the traffic is always protected between the appliance at every layer of the connection. If you have a multi-region solution you need to think about how to **replicate keys and set up additional CloudHSM devices in the regions where you operate**. You can very quickly get into a scenario where you have six or eight devices spread across multiple regions, enabling full redundancy of your encryption keys.
 
-**CloudHSM** is an enterprise class service for secured key storage and can be used as a **root of trust for an enterprise**. It can store private keys in PKI and certificate authority keys in X509 implementations. In addition to symmetric keys used in symmetric algorithms such as AES, **KMS stores and physically protects symmetric keys only (cannot act as a certificate authority)**, so if you need to store PKI and CA keys a CloudHSM or two or three could be your solution.&#x20;
+**CloudHSM** is an enterprise class service for secured key storage and can be used as a **root of trust for an enterprise**. It can store private keys in PKI and certificate authority keys in X509 implementations. In addition to symmetric keys used in symmetric algorithms such as AES, **KMS stores and physically protects symmetric keys only (cannot act as a certificate authority)**, so if you need to store PKI and CA keys a CloudHSM or two or three could be your solution.
 
 **CloudHSM is considerably more expensive than Key Management Service**. CloudHSM is a hardware appliance so you have fix costs to provision the CloudHSM device, then an hourly cost to run the appliance. The cost is multiplied by as many CloudHSM appliances that are required to achieve your specific requirements.\
 Additionally, cross consideration must be made in the purchase of third party software such as SafeNet ProtectV software suites and integration time and effort. Key Management Service is a usage based and depends on the number of keys you have and the input and output operations. As key management provides seamless integration with many AWS services, integration costs should be significantly lower. Costs should be considered secondary factor in encryption solutions. Encryption is typically used for security and compliance.
@@ -512,7 +512,7 @@ You can make any of those run on the EC2 machines you decide.
 * Rules packages to be used
 * Duration of the assessment run 15min/1hour/8hours
 * SNS topics, select when notify: Starts, finished, change state, reports a finding
-* Attributes to b assigned to findings&#x20;
+* Attributes to b assigned to findings
 
 **Rule package**: Contains a number of individual rules that are check against an EC2 when an assessment is run. Each one also have a severity (high, medium, low, informational). The possibilities are:
 
@@ -532,7 +532,7 @@ Note that nowadays AWS already allow you to **autocreate** all the necesary **co
 
 **Telemetry**: data that is collected from an instance, detailing its configuration, behavior and processes during an assessment run. Once collected, the data is then sent back to Amazon Inspector in near-real-time over TLS where it is then stored and encrypted on S3 via an ephemeral KMS key. Amazon Inspector then accesses the S3 Bucket, decrypts the data in memory, and analyzes it against any rules packages used for that assessment to generate the findings.
 
-**Assessment Report**: Provide details on what was assessed and the results of the assessment.&#x20;
+**Assessment Report**: Provide details on what was assessed and the results of the assessment.
 
 * The **findings report** contain the summary of the assessment, info about the EC2 and rules and the findings that occurred.
 * The **full report** is the finding report + a list of rules that were passed.
@@ -589,7 +589,7 @@ The main function of the service is to provide an automatic method of **detectin
 The service is backed by **machine learning**, allowing your data to be actively reviewed as different actions are taken within your AWS account. Machine learning can spot access patterns and **user behavior** by analyzing **cloud trail event** data to **alert against any unusual or irregular activity**. Any findings made by Amazon Macie are presented within a dashboard which can trigger alerts, allowing you to quickly resolve any potential threat of exposure or compromise of your data.
 
 Amazon Macie will automatically and continuously **monitor and detect new data that is stored in Amazon S3**. Using the abilities of machine learning and artificial intelligence, this service has the ability to familiarize over time, access patterns to data. \
-Amazon Macie also uses natural language processing methods to **classify and interpret different data types and content**. NLP uses principles from computer science and computational linguistics to look at the interactions between computers and the human language. In particular, how to program computers to understand and decipher language data. The **service can automatically assign business values to data that is assessed in the form of a risk score**. This enables Amazon Macie to order findings on a priority basis, enabling you to focus on the most critical alerts first. In addition to this, Amazon Macie also has the added benefit of being able to **monitor and discover security changes governing your data**. As well as identify specific security-centric data such as access keys held within an S3 bucket.&#x20;
+Amazon Macie also uses natural language processing methods to **classify and interpret different data types and content**. NLP uses principles from computer science and computational linguistics to look at the interactions between computers and the human language. In particular, how to program computers to understand and decipher language data. The **service can automatically assign business values to data that is assessed in the form of a risk score**. This enables Amazon Macie to order findings on a priority basis, enabling you to focus on the most critical alerts first. In addition to this, Amazon Macie also has the added benefit of being able to **monitor and discover security changes governing your data**. As well as identify specific security-centric data such as access keys held within an S3 bucket.
 
 This protective and proactive security monitoring enables Amazon Macie to identify critical, sensitive, and security focused data such as API keys, secret keys, in addition to PII (personally identifiable information) and PHI data.
 
@@ -615,7 +615,7 @@ Pre-defined alerts categories:
 * Service disruption
 * Suspicious access
 
-The **alert summary** provides detailed information to allow you to respond appropriately. It has a description that provides a deeper level of understanding of why it was generated. It also has a breakdown of the results. &#x20;
+The **alert summary** provides detailed information to allow you to respond appropriately. It has a description that provides a deeper level of understanding of why it was generated. It also has a breakdown of the results. 
 
 The user has the possibility to create new custom alerts.
 
@@ -752,10 +752,10 @@ One key point of EMR is that **by default, the instances within a cluster do not
 
 From an encryption in transit perspective, you could enable **open source transport layer security** encryption features and select a certificate provider type which can be either PEM where you will need to manually create PEM certificates, bundle them up with a zip file and then reference the zip file in S3 or custom where you would add a custom certificate provider as a Java class that provides encryption artefacts.
 
-Once the TLS certificate provider has been configured in the security configuration file, the following encryption applications specific encryption features can be enabled which will vary depending on your EMR version.&#x20;
+Once the TLS certificate provider has been configured in the security configuration file, the following encryption applications specific encryption features can be enabled which will vary depending on your EMR version.
 
 * Hadoop might reduce encrypted shuffle which uses TLS. Both secure Hadoop RPC which uses Simple Authentication Security Layer, and data encryption of HDFS Block Transfer which uses AES-256, are both activated when at rest encryption is enabled in the security configuration.
-* Presto: When using EMR version 5.6.0 and later, any internal communication between Presto nodes will use SSL and TLS.&#x20;
+* Presto: When using EMR version 5.6.0 and later, any internal communication between Presto nodes will use SSL and TLS.
 * Tez Shuffle Handler uses TLS.
 * Spark: The Akka protocol uses TLS. Block Transfer Service uses Simple Authentication Security Layer and 3DES. External shuffle service uses the Simple Authentication Security Layer.
 
@@ -779,7 +779,7 @@ Once the database is associated with an option group, you must ensure that the O
 
 Amazon Firehose is used to deliver **real-time streaming data to different services** and destinations within AWS, many of which can be used for big data such as S3 Redshift and Amazon Elasticsearch.
 
-The service is fully managed by AWS, taking a lot of the administration of maintenance out of your hands. Firehose is used to receive data from your data producers where it then automatically delivers the data to your chosen destination.&#x20;
+The service is fully managed by AWS, taking a lot of the administration of maintenance out of your hands. Firehose is used to receive data from your data producers where it then automatically delivers the data to your chosen destination.
 
 Amazon Streams essentially collects and processes huge amounts of data in real time and makes it available for consumption.
 
@@ -844,7 +844,7 @@ You can have **100 conditions of each type**, such as Geo Match or size constrai
 ### Rules
 
 Using these conditions you can create rules: For example, block request if 2 conditions are met.\
-When creating your rule you will be asked to select a **Rule Type**: **Regular Rule** or **Rate-Based Rule**.&#x20;
+When creating your rule you will be asked to select a **Rule Type**: **Regular Rule** or **Rate-Based Rule**.
 
 The only **difference** between a rate-based rule and a regular rule is that **rate-based** rules **count** the **number** of **requests** that are being received from a particular IP address over a time period of **five minutes**.
 
@@ -858,7 +858,7 @@ An action is applied to each rule, these actions can either be **Allow**, **Bloc
 * When a request is **blocked**, the request is **terminated** there and no further processing of that request is taken.
 * A **Count** action will **count the number of requests that meet the conditions** within that rule. This is a really good option to select when testing the rules to ensure that the rule is picking up the requests as expected before setting it to either Allow or Block.
 
-If an **incoming request does not meet any rule** within the Web ACL then the request takes the action associated to a **default action** specified which can either be **Allow** or **Block**. An important point to make about these rules is that they are **executed in the order that they are listed within a Web ACL**. So be careful to architect this order correctly for your rule base, **typically** these are **ordered** as shown:&#x20;
+If an **incoming request does not meet any rule** within the Web ACL then the request takes the action associated to a **default action** specified which can either be **Allow** or **Block**. An important point to make about these rules is that they are **executed in the order that they are listed within a Web ACL**. So be careful to architect this order correctly for your rule base, **typically** these are **ordered** as shown:
 
 1. WhiteListed Ips as Allow.
 2. BlackListed IPs Block
@@ -884,7 +884,7 @@ A **rule group** (a set of WAF rules together) can be added to an AWS Firewall M
 
 AWS Shield has been designed to help **protect your infrastructure against distributed denial of service attacks**, commonly known as DDoS.
 
-**AWS Shield Standard** is **free** to everyone, and it offers DDoS **protection** against some of the more common layer three, the **network layer**, and layer four, **transport layer**, DDoS attacks. This protection is integrated with both CloudFront and Route 53.&#x20;
+**AWS Shield Standard** is **free** to everyone, and it offers DDoS **protection** against some of the more common layer three, the **network layer**, and layer four, **transport layer**, DDoS attacks. This protection is integrated with both CloudFront and Route 53.
 
 **AWS Shield advanced** offers a **greater level of protection** for DDoS attacks across a wider scope of AWS services for an additional cost. This advanced level offers protection against your web applications running on EC2, CloudFront, ELB and also Route 53. In addition to these additional resource types being protected, there are enhanced levels of DDoS protection offered compared to that of Standard. And you will also have **access to a 24-by-seven specialized DDoS response team at AWS, known as DRT**.
 
@@ -922,10 +922,10 @@ In addition, take the following into consideration when you use Site-to-Site VPN
 
 #### Concepts
 
-* &#x20;**Client VPN endpoint:** The resource that you create and configure to enable and manage client VPN sessions. It is the resource where all client VPN sessions are terminated.
-* &#x20;**Target network:** A target network is the network that you associate with a Client VPN endpoint. **A subnet from a VPC is a target network**. Associating a subnet with a Client VPN endpoint enables you to establish VPN sessions. You can associate multiple subnets with a Client VPN endpoint for high availability. All subnets must be from the same VPC. Each subnet must belong to a different Availability Zone.
+* **Client VPN endpoint:** The resource that you create and configure to enable and manage client VPN sessions. It is the resource where all client VPN sessions are terminated.
+* **Target network:** A target network is the network that you associate with a Client VPN endpoint. **A subnet from a VPC is a target network**. Associating a subnet with a Client VPN endpoint enables you to establish VPN sessions. You can associate multiple subnets with a Client VPN endpoint for high availability. All subnets must be from the same VPC. Each subnet must belong to a different Availability Zone.
 * **Route**: Each Client VPN endpoint has a route table that describes the available destination network routes. Each route in the route table specifies the path for traffic to specific resources or networks.
-* &#x20;**Authorization rules:** An authorization rule **restricts the users who can access a network**. For a specified network, you configure the Active Directory or identity provider (IdP) group that is allowed access. Only users belonging to this group can access the specified network. **By default, there are no authorization rules** and you must configure authorization rules to enable users to access resources and networks.
+* **Authorization rules:** An authorization rule **restricts the users who can access a network**. For a specified network, you configure the Active Directory or identity provider (IdP) group that is allowed access. Only users belonging to this group can access the specified network. **By default, there are no authorization rules** and you must configure authorization rules to enable users to access resources and networks.
 * **Client:** The end user connecting to the Client VPN endpoint to establish a VPN session. End users need to download an OpenVPN client and use the Client VPN configuration file that you created to establish a VPN session.
 * **Client CIDR range:** An IP address range from which to assign client IP addresses. Each connection to the Client VPN endpoint is assigned a unique IP address from the client CIDR range. You choose the client CIDR range, for example, `10.2.0.0/16`.
 * **Client VPN ports:** AWS Client VPN supports ports 443 and 1194 for both TCP and UDP. The default is port 443.
@@ -957,7 +957,7 @@ Amazon Cognito provides **authentication, authorization, and user management** f
 
 The two main components of Amazon Cognito are user pools and identity pools. **User pools** are user directories that provide **sign-up and sign-in options for your app users**. **Identity pools** enable you to grant your users **access to other AWS services**. You can use identity pools and user pools separately or together.
 
-### &#x20;**User pools**
+### **User pools**
 
 A user pool is a user directory in Amazon Cognito. With a user pool, your users can **sign in to your web or mobile app** through Amazon Cognito, **or federate** through a **third-party** identity provider (IdP). Whether your users sign in directly or through a third party, all members of the user pool have a directory profile that you can access through an SDK.
 

@@ -77,7 +77,7 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 
 ## Compiling our own reverse shell
 
-&#x20;https://medium.com/@Bank\_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
+https://medium.com/@Bank\_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
 #### First C# Revershell
 

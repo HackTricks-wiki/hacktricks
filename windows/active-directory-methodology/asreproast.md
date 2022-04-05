@@ -47,4 +47,4 @@ Force **preauth** not required for a user where you have **GenericAll** permissi
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
 
-****[**More information about AS-RRP Roasting in ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)****
+[**More information about AS-RRP Roasting in ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)

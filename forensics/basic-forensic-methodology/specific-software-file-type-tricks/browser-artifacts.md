@@ -31,7 +31,7 @@ Each profile has a "**Path**" variable with the name of the folder where it's da
 Inside the folder **of each profile** (_\~/.mozilla/firefox/\<ProfileName>/_) path you should be able to find the following interesting files:
 
 * _**places.sqlite**_ : History (moz_\__places), bookmarks (moz\_bookmarks), and downloads (moz_\__annos). In windows the tool [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html) can be used to read the history inside _**places.sqlite**_.
-  * Query to dump history: `select datetime(lastvisitdate/1000000,'unixepoch') as visit_date, url, title, visit_count, visit_type FROM moz_places,moz_historyvisits WHERE moz_places.id = moz_historyvisits.place_id;`&#x20;
+  * Query to dump history: `select datetime(lastvisitdate/1000000,'unixepoch') as visit_date, url, title, visit_count, visit_type FROM moz_places,moz_historyvisits WHERE moz_places.id = moz_historyvisits.place_id;`
     * Note that the link type is a number that indicates:
       * 1: User followed a link
       * 2: User wrote the URL
@@ -51,7 +51,7 @@ Inside the folder **of each profile** (_\~/.mozilla/firefox/\<ProfileName>/_) pa
 * _**cookies.sqlite**_ : Contains **cookies.** [**MZCookiesView**](https://www.nirsoft.net/utils/mzcv.html) can be used in Windows to inspect this file.
 *   _**cache2/entries**_ or _**startupCache**_ : Cache data (\~350MB). Tricks like **data carving** can also be used to obtain the files saved in the cache. [MozillaCacheView](https://www.nirsoft.net/utils/mozilla\_cache\_viewer.html) can be used to see the **files saved in the cache**.
 
-    &#x20;Information that can be obtained:
+    Information that can be obtained:
 
     * URL, fetch Count, Filename, Content type, FIle size, Last modified time, Last fetched time, Server Last Modified, Server Response
 * _**favicons.sqlite**_ : Favicons
@@ -96,7 +96,7 @@ Most of the information will be saved inside the _**Default/**_ or _**ChromeDefa
   * Reloaded
 * _**Cookies**_ : Cookies. [ChromeCookiesView](https://www.nirsoft.net/utils/chrome\_cookies\_view.html) can be used to inspect the cookies.
 * _**Cache**_ : Cache. In Windows you can use the tool [ChromeCacheView](https://www.nirsoft.net/utils/chrome\_cache\_view.html) to inspect the ca
-* _**Bookmarks**_ : Bookmarks&#x20;
+* _**Bookmarks**_ : Bookmarks
 * _**Web Data**_ : Form History
 * _**Favicons**_ : Favicons
 * _**Login Data**_ : Login information (usernames, passwords...)
@@ -147,7 +147,7 @@ The metadata information about the cache stores:
 
 #### Files
 
-The cache information can be found in _**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5**_ and _**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5\low**_&#x20;
+The cache information can be found in _**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5**_ and _**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5\low**_
 
 The information inside these folders is a **snapshot of what the user was seeing**. The caches has a size of **250 MB** and the timestamps indicate when the page was visited (first time, creation date of the NTFS, last time, modification time of the NTFS).
 
@@ -169,7 +169,7 @@ The metadata information about the cookies stores:
 
 #### Files
 
-The cookies data can be found in _**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies**_ and _**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies\low**_&#x20;
+The cookies data can be found in _**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies**_ and _**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies\low**_
 
 Session cookies will reside in memory and persistent cookie in the disk.
 

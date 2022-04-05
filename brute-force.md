@@ -5,11 +5,11 @@
 
 Do you want to have access the **latest version of Hacktricks and PEASS**, obtain a **PDF copy of Hacktricks**, and more? Discover the **brand new** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop?frequency=one-time) **for individuals and companies.**
 
-Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)****
+Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)****
+Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/)  ****  [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) **** or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+**Join the** [**💬**](https://emojipedia.org/speech-balloon/)    [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass)  or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 {% endhint %}
@@ -28,7 +28,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
 * [**https://www.cirt.net/passwords**](https://www.cirt.net/passwords)
 * [**http://www.passwordsdatabase.com/**](http://www.passwordsdatabase.com)
-* [**https://many-passwords.github.io/**](https://many-passwords.github.io)\*\*\*\*
+* [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 
 ## **Create your own Dictionaries**
 
@@ -568,7 +568,8 @@ If you have xlsx file with a column protected by password you can unprotect it:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
-# Find something like: <sheetProtection algorithmName="SHA-512"hashValue="hFq32ZstMEekuneGzHEfxeBZh3hnmO9nvv8qVHV8Ux+t+39/22E3pfr8aSuXISfrRV9UVfNEzidgv+Uvf8C5Tg" saltValue="U9oZfaVCkz5jWdhs9AA8nA" spinCount="100000" sheet="1" objects="1" scenarios="1"/>
+# Find something like: <sheetProtection algorithmName="SHA-512"
+hashValue="hFq32ZstMEekuneGzHEfxeBZh3hnmO9nvv8qVHV8Ux+t+39/22E3pfr8aSuXISfrRV9UVfNEzidgv+Uvf8C5Tg" saltValue="U9oZfaVCkz5jWdhs9AA8nA" spinCount="100000" sheet="1" objects="1" scenarios="1"/>
 # Remove that line and rezip the file
 zip -r file.xls .
 ```

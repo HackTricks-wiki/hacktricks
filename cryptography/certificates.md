@@ -43,7 +43,7 @@ The most common format for public key certificates is defined by [X.509](https:/
     * In a Web certificate this will appear as a _X509v3 extension_ and will have the value `TLS Web Server Authentication`
   * **Subject Alternative Name:** Allows users to specify additional host **names** for a single SSL **certificate**. The use of the SAN extension is standard practice for SSL certificates, and it's on its way to replacing the use of the common **name**.
   * **Basic Constraint:** This extension describes whether the certificate is a CA certificate or an end entity certificate. A CA certificate is something that signs certificates of others and a end entity certificate is the certificate used in a web page for example (the last par of the chain).
-  * &#x20;**Subject Key Identifier** (SKI): This extension declares a unique **identifier** for the public **key** in the certificate. It is required on all CA certificates. CAs propagate their own SKI to the Issuer **Key Identifier** (AKI) extension on issued certificates. It's the hash of the subject public key.
+  * **Subject Key Identifier** (SKI): This extension declares a unique **identifier** for the public **key** in the certificate. It is required on all CA certificates. CAs propagate their own SKI to the Issuer **Key Identifier** (AKI) extension on issued certificates. It's the hash of the subject public key.
   * **Authority Key Identifier**: It contains a key identifier which is derived from the public key in the issuer certificate. It's the hash of the issuer public key.
   * **Authority Information Access** (AIA): This extension contains at most two types of information :
     * Information about **how to get the issuer of this certificate** (CA issuer access method)

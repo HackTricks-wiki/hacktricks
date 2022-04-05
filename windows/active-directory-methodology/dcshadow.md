@@ -30,7 +30,7 @@ You can push the changes from a DA or from a user with this minimal permissions:
   * _DS-Install-Replica_ (Add/Remove Replica in Domain)
   * _DS-Replication-Manage-Topology_ (Manage Replication Topology)
   * _DS-Replication-Synchronize_ (Replication Synchornization)
-* The **Sites object** (and its children) in the **Configuration container**:&#x20;
+* The **Sites object** (and its children) in the **Configuration container**:
   * _CreateChild and DeleteChild_
 * The object of the **computer which is registered as a DC**:
   * _WriteProperty_ (Not Write)
@@ -81,4 +81,4 @@ Notice that in this case you need to make **several changes,** not just one. So,
 
 
 
-****[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)****
+[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)

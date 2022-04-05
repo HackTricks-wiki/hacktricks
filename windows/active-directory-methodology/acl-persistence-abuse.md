@@ -6,7 +6,7 @@
 
 This lab is to abuse weak permissions of Active Directory Discretionary Access Control Lists (DACLs) and Acccess Control Entries (ACEs) that make up DACLs.
 
-Active Directory objects such as users and groups are securable objects and DACL/ACEs define who can read/modify those objects (i.e change account name, reset password, etc).&#x20;
+Active Directory objects such as users and groups are securable objects and DACL/ACEs define who can read/modify those objects (i.e change account name, reset password, etc).
 
 An example of ACEs for the "Domain Admins" securable object can be seen here:
 
@@ -261,7 +261,7 @@ Set-Acl -Path $path -AclObject $acl
 ## **Replication on the domain (DCSync)**
 
 The **DCSync** permission implies having these permissions over the domain itself: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** and **Replicating Directory Changes In Filtered Set**.\
-[**Learn more about the DCSync attack here.**](dcsync.md)****
+[**Learn more about the DCSync attack here.**](dcsync.md)
 
 ## GPO Delegation <a href="#gpo-delegation" id="gpo-delegation"></a>
 
@@ -279,7 +279,7 @@ The below indicates that the user `offense\spotless` has **WriteProperty**, **Wr
 
 ![](../../.gitbook/assets/a14.png)
 
-****[**More about general AD ACL/ACE abuse here.**](acl-persistence-abuse.md)****
+[**More about general AD ACL/ACE abuse here.**](acl-persistence-abuse.md)
 
 ### Abusing the GPO Permissions <a href="#abusing-the-gpo-permissions" id="abusing-the-gpo-permissions"></a>
 

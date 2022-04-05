@@ -96,10 +96,10 @@ The following Mimikatz command creates a Silver Ticket for the CIFS service on t
 mimikatz “kerberos::golden /admin:LukeSkywalker /id:1106 /domain:lab.adsecurity.org /sid:S-1-5-21-1473643419-774954089-2222329127 /target:adsmswin2k8r2.lab.adsecurity.org /rc4:d7e2b80507ea074ad59f152a1ba20458 /service:cifs /ptt” exit
 ```
 
-#### ****[**Trust Ticket**](https://adsecurity.org/?p=1588)****
+#### [**Trust Ticket**](https://adsecurity.org/?p=1588)
 
 Once the Active Directory Trust password hash is determined, a trust ticket can be generated. The trust tickets are created using the shared password between 2 Domains that trust each other.\
-****[More background on Trust Tickets.](https://adsecurity.org/?p=1588)
+[More background on Trust Tickets.](https://adsecurity.org/?p=1588)
 
 **Dumping trust passwords (trust keys)**
 
@@ -125,7 +125,7 @@ Trust Ticket Specific Required Parameters:
 #### **More KERBEROS**
 
 **KERBEROS::List** – List all user tickets (TGT and TGS) in user memory. No special privileges required since it only displays the current user’s tickets.\
-****Similar to functionality of “klist”.
+Similar to functionality of “klist”.
 
 **KERBEROS::PTC** – pass the cache (NT6)\
 \*Nix systems like Mac OS, Linux,BSD, Unix, etc cache Kerberos credentials. This cached data can be copied off and passed using Mimikatz. Also useful for injecting Kerberos tickets in ccache files.

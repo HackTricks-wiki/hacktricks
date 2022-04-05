@@ -58,7 +58,7 @@ So, if you can **modify custom instance metadata** with your service account, yo
 
 ### **Add SSH key to existing privileged user**
 
-Let's start by adding our own key to an existing account, as that will probably make the least noise.&#x20;
+Let's start by adding our own key to an existing account, as that will probably make the least noise.
 
 **Check the instance for existing SSH keys**. Pick one of these users as they are likely to have sudo rights.
 
@@ -161,7 +161,7 @@ If you're really bold, you can also just type `gcloud compute ssh [INSTANCE]` to
 
 ## **Using OS Login**
 
-****[**OS Login**](https://cloud.google.com/compute/docs/oslogin/) **** is an alternative to managing SSH keys. It links a **Google user or service account to a Linux identity**, relying on IAM permissions to grant or deny access to Compute Instances.
+[**OS Login**](https://cloud.google.com/compute/docs/oslogin/)  is an alternative to managing SSH keys. It links a **Google user or service account to a Linux identity**, relying on IAM permissions to grant or deny access to Compute Instances.
 
 OS Login is [enabled](https://cloud.google.com/compute/docs/instances/managing-instance-access#enable\_oslogin) at the project or instance level using the metadata key of `enable-oslogin = TRUE`.
 

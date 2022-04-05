@@ -5,11 +5,11 @@
 
 Do you want to have access the **latest version of Hacktricks and PEASS**, obtain a **PDF copy of Hacktricks**, and more? Discover the **brand new** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop?frequency=one-time) **for individuals and companies.**
 
-Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)****
+Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)****
+Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/)  ****  [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) **** or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+**Join the** [**💬**](https://emojipedia.org/speech-balloon/)    [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass)  or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 {% endhint %}
@@ -254,7 +254,7 @@ You can create you **own SSP** to **capture** in **clear text** the **credential
 
 It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
 Note that if you use wrong data, pretty ugly logs will appear.\
-[**More information about DCShadow here.**](dcshadow.md)\*\*\*\*
+[**More information about DCShadow here.**](dcshadow.md)
 
 ## Forest Privilege Escalation - Domain Trusts
 

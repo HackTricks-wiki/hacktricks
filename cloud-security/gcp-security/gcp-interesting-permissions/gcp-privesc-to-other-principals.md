@@ -37,7 +37,7 @@ Note that **iam.serviceAccountKeys.update won't work to modify the key** of a SA
 
 ### iam.serviceAccounts.implicitDelegation
 
-If you have the _**iam.serviceAccounts.implicitDelegation**_\*\* permission on a Service Account\*\* that has the _**iam.serviceAccounts.getAccessToken**_\*\* permission on a third Service Account\*\*, then you can use implicitDelegation to **create a token for that third Service Account**. Here is a diagram to help explain.
+If you have the _**iam.serviceAccounts.implicitDelegation**_** permission on a Service Account** that has the _**iam.serviceAccounts.getAccessToken**_** permission on a third Service Account**, then you can use implicitDelegation to **create a token for that third Service Account**. Here is a diagram to help explain.
 
 ![](https://rhinosecuritylabs.com/wp-content/uploads/2020/04/image2-500x493.png)
 
@@ -217,7 +217,7 @@ Apparently this permission might be useful to gather auth credentials (basic aut
 
 **Kubernetes** by default **prevents** principals from being able to **create** or **update** **RoleBindings** and **ClusterRoleBindings** to give **more permissions** that the ones the principal has. However, a **GCP** principal with that permissions will be **able to create/update RolesBindings/ClusterRolesBindings with more permissions** that ones he has, effectively bypassing the Kubernetes protection against this behaviour.
 
-**container.roleBindings.create** and/or **container.roleBindings.update** OR **container.clusterRoleBindings.create** and/or **container.clusterRoleBindings.update** respectively **** are also **necessary** to perform those privilege escalation actions.
+**container.roleBindings.create** and/or **container.roleBindings.update** OR **container.clusterRoleBindings.create** and/or **container.clusterRoleBindings.update** respectively  are also **necessary** to perform those privilege escalation actions.
 
 ### container.cronJobs.create, container.cronJobs.update container.daemonSets.create, container.daemonSets.update container.deployments.create, container.deployments.update container.jobs.create, container.jobs.update container.pods.create, container.pods.update container.replicaSets.create, container.replicaSets.update container.replicationControllers.create, container.replicationControllers.update container.scheduledJobs.create, container.scheduledJobs.update container.statefulSets.create, container.statefulSets.update
 
@@ -255,7 +255,7 @@ For more information [**follow this link**](../../pentesting-kubernetes/abusing-
 
 ### storage.hmacKeys.create
 
-There is a feature of Cloud Storage, “interoperability”, that provides a way for Cloud Storage to interact with storage offerings from other cloud providers, like AWS S3. As part of that, there are HMAC keys that can be created for both Service Accounts and regular users. We can **escalate Cloud Storage permissions by creating an HMAC key for a higher-privileged Service Account**.&#x20;
+There is a feature of Cloud Storage, “interoperability”, that provides a way for Cloud Storage to interact with storage offerings from other cloud providers, like AWS S3. As part of that, there are HMAC keys that can be created for both Service Accounts and regular users. We can **escalate Cloud Storage permissions by creating an HMAC key for a higher-privileged Service Account**.
 
 HMAC keys belonging to your user cannot be accessed through the API and must be accessed through the web console, but what’s nice is that both the access key and secret key are available at any point. This means we could take an existing pair and store them for backup access to the account. HMAC keys belonging to Service Accounts **can** be accessed through the API, but after creation, you are not able to see the access key and secret again.
 

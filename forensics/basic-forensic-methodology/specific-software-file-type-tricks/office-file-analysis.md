@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Microsoft has created **dozens of office document file formats**, many of which are popular for the distribution of phishing attacks and malware because of their ability to **include macros** (VBA scripts).&#x20;
+Microsoft has created **dozens of office document file formats**, many of which are popular for the distribution of phishing attacks and malware because of their ability to **include macros** (VBA scripts).
 
 Broadly speaking, there are two generations of Office file format: the **OLE formats** (file extensions like RTF, DOC, XLS, PPT), and the "**Office Open XML**" formats (file extensions that include DOCX, XLSX, PPTX). **Both** formats are structured, compound file binary formats that **enable Linked or Embedded content** (Objects). OOXML files are actually zip file containers, meaning that one of the easiest ways to check for hidden data is to simply `unzip` the document:
 

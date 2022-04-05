@@ -32,4 +32,4 @@ Golden ticket events ID:
 * 4672: Admin Logon
 * `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-****[**More information about Golden Ticket in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)****
+[**More information about Golden Ticket in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)

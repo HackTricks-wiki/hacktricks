@@ -2,7 +2,7 @@
 
 ## Basic Information
 
-****[**CircleCI**](https://circleci.com/docs/2.0/about-circleci/) is a Continuos Integration platform where you ca **define templates** indicating what you want it to do with some code and when to do it. This way you can **automate testing** or **deployments** directly **from your repo master branch** for example.
+[**CircleCI**](https://circleci.com/docs/2.0/about-circleci/) is a Continuos Integration platform where you ca **define templates** indicating what you want it to do with some code and when to do it. This way you can **automate testing** or **deployments** directly **from your repo master branch** for example.
 
 ## Permissions
 
@@ -17,7 +17,7 @@ According to [**the docs**](https://circleci.com/docs/2.0/env-vars/#) there are 
 
 ### Built-in env variables
 
-Every container run by CircleCI will always have [**specific env vars defined in the documentation**](https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables) **** like **** `CIRCLE_PR_USERNAME`, `CIRCLE_PROJECT_REPONAME` or `CIRCLE_USERNAME`.
+Every container run by CircleCI will always have [**specific env vars defined in the documentation**](https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables)  like  `CIRCLE_PR_USERNAME`, `CIRCLE_PROJECT_REPONAME` or `CIRCLE_USERNAME`.
 
 ### Clear text
 

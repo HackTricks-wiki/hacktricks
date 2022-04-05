@@ -33,8 +33,8 @@ An autonomous system number \(**ASN**\) is a **unique number** assigned to an **
 An **AS** consists of **blocks** of **IP addresses** which have a distinctly defined policy for accessing external networks and are administered by a single organisation but may be made up of several operators.
 
 It's interesting to find if the **company have assigned any ASN** to find its **IP ranges.** It will be interested to perform a **vulnerability test** against all the **hosts** inside the **scope** and **look for domains** inside these IPs.  
-**\*\*You can search by** company name**, by** IP **or by** domain **in** [**https://bgp.he.net/**](https://bgp.he.net/)**.  
-Depending on the region of the company this links could be useful to gather more data:** [**AFRINIC**](https://www.afrinic.net/) **\(Africa\),** [**Arin**](https://www.arin.net/about/welcome/region/)**\(North America\),** [**APNIC**](https://www.apnic.net/) **\(Asia\),** [**LACNIC**](https://www.lacnic.net/) **\(Latin America\),** [**RIPE NCC**](https://www.ripe.net/) **\(Europe\). Anyway, probably all the** useful information **\(IP ranges and Whois\)** appears already in the first link\*\*.
+You can search by** company name**, by** IP **or by** domain **in** [**https://bgp.he.net/**](https://bgp.he.net/)**.  
+Depending on the region of the company this links could be useful to gather more data:** [**AFRINIC**](https://www.afrinic.net/) **\(Africa\),** [**Arin**](https://www.arin.net/about/welcome/region/)**\(North America\),** [**APNIC**](https://www.apnic.net/) **\(Asia\),** [**LACNIC**](https://www.lacnic.net/) **\(Latin America\),** [**RIPE NCC**](https://www.ripe.net/) **\(Europe\). Anyway, probably all the** useful information **\(IP ranges and Whois\)** appears already in the first link**.
 
 ```bash
 #You can try "automate" this with amass, but it's not very recommended
@@ -48,8 +48,8 @@ You can fins the IP and ASN of a domain using [http://ipv4info.com/](http://ipv4
 ### Looking for vulnerabilities
 
 At this point we known **all the assets inside the scope**, so if you are allowed you could launch some **vulnerability scanner** \(Nessus, OpenVAS\) over all the hosts.  
-Also, you could launch some [**port scans**](pentesting/pentesting-network/#discovering-hosts-from-the-outside) **\*\*or use services like** shodan **to find** open ports **and depending on what you find you should** take a look in this book to how to pentest several possible service running**.  
-Also, It could be worth it to mention that you can also prepare some** default username **and** passwords **lists and try to** bruteforce\*\* services with [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
+Also, you could launch some [**port scans**](pentesting/pentesting-network/#discovering-hosts-from-the-outside) or use services like** shodan **to find** open ports **and depending on what you find you should** take a look in this book to how to pentest several possible service running**.  
+Also, It could be worth it to mention that you can also prepare some** default username **and** passwords **lists and try to** bruteforce** services with [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
 
 ## Domains
 
@@ -81,8 +81,8 @@ You can use online tools like:
 * [https://viewdns.info/reversewhois/](https://viewdns.info/reversewhois/) - **Free**
 * [https://domaineye.com/reverse-whois](https://domaineye.com/reverse-whois)  - **Free**
 * [https://www.reversewhois.io/](https://www.reversewhois.io/)  - **Free**
-* \*\*\*\*[https://www.whoxy.com/](https://www.whoxy.com/) - **Free** web, not free API.
-* \*\*\*\*[http://reversewhois.domaintools.com/](http://reversewhois.domaintools.com/) - Not free
+* [https://www.whoxy.com/](https://www.whoxy.com/) - **Free** web, not free API.
+* [http://reversewhois.domaintools.com/](http://reversewhois.domaintools.com/) - Not free
 * [https://drs.whoisxmlapi.com/reverse-whois-search](https://drs.whoisxmlapi.com/reverse-whois-search) - Not Free \(only **100 free** searches\)
 * [https://www.domainiq.com/](https://www.domainiq.com/) - Not Free
 
@@ -98,10 +98,10 @@ For example, if you see the same **Google Analytics ID** or the same **Adsense I
 
 There are some pages that let you search by these trackers and more:
 
-* [**BuiltWith**](https://builtwith.com/)\*\*\*\*
-* \*\*\*\*[**Sitesleuth**](https://www.sitesleuth.io/)\*\*\*\*
-* \*\*\*\*[**Publicwww**](https://publicwww.com/)\*\*\*\*
-* \*\*\*\*[**SpyOnWeb**](http://spyonweb.com/)\*\*\*\*
+* [**BuiltWith**](https://builtwith.com/)
+* [**Sitesleuth**](https://www.sitesleuth.io/)
+* [**Publicwww**](https://publicwww.com/)
+* [**SpyOnWeb**](http://spyonweb.com/)
 
 ### **Favicon**
 
@@ -300,7 +300,7 @@ cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 a
 
 Now that you have discovered **all the web servers** running in the scope \(in **IPs** of the company and all the **domains** and **subdomains**\) you probably **don't know where to start**. So, let's make it simple and start just taking screenshots of all of them. Just **taking a look** to the **main page** of all of them you could find **weird** endpoints more **prone** to be **vulnerable**.
 
-To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), **\*\*\[**Aquatone**\]\(**[https://github.com/michenriksen/aquatone](https://github.com/michenriksen/aquatone)**\)**, **\[**shutter**\]\(**[https://shutter-project.org/downloads/](https://shutter-project.org/downloads/)**\) \*\***or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
+To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), \[**Aquatone**\]\(**[https://github.com/michenriksen/aquatone](https://github.com/michenriksen/aquatone)**\)**, **\[**shutter**\]\(**[https://shutter-project.org/downloads/](https://shutter-project.org/downloads/)**\) or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
 ## Recapitulation 1
 
@@ -350,7 +350,7 @@ Now that we have built the list of assets of our scope it's time to search for s
 
 You can also search for leaked secrets in all open repository platforms using: [https://searchcode.com/?q=auth\_key](https://searchcode.com/?q=auth_key)
 
-## [**Pentesting Web Methodology**](pentesting/pentesting-web/)\*\*\*\*
+## [**Pentesting Web Methodology**](pentesting/pentesting-web/)
 
 Anyway, the **majority of the vulnerabilities** found by bug hunters resides inside **web applications**, so at this point I would like to talk about a **web application testing methodology**, and you can [**find this information here**](pentesting/pentesting-web/).
 

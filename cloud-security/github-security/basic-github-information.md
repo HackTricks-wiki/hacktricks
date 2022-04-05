@@ -25,7 +25,7 @@ In an organisation users can have different roles:
 * **Organization members**: The **default**, non-administrative role for **people in an organization** is the organization member. By default, organization members **have a number of permissions**.
 * **Billing managers**: Billing managers are users who can **manage the billing settings for your organization**, such as payment information.
 * **Security Managers**: It's a role that organization owners can assign to any team in an organization. When applied, it gives every member of the team permissions to **manage security alerts and settings across your organization, as well as read permissions for all repositories** in the organization.
-  * If your organization has a security team, you can use the security manager role to give members of the team the least access they need to the organization.&#x20;
+  * If your organization has a security team, you can use the security manager role to give members of the team the least access they need to the organization.
 * **Github App managers**: To allow additional users to **manage GitHub Apps owned by an organization**, an owner can grant them GitHub App manager permissions.
 * **Outside collaborators**: An outside collaborator is a person who has **access to one or more organization repositories but is not explicitly a member** of the organization.
 

@@ -6,7 +6,7 @@ Also if you are **already root and the Splunk service is not listening only on l
 
 In the first  image below you can see how a Splunkd web page looks like.
 
-**The following information was copied from** [**https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/**](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)****
+**The following information was copied from** [**https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/**](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)
 
 ## Abusing Splunk Forwarders For Shells and Persistence
 
@@ -145,4 +145,4 @@ Related blog posts:
 * https://medium.com/@airman604/splunk-universal-forwarder-hijacking-5899c3e0e6b2
 * https://www.hurricanelabs.com/splunk-tutorials/using-splunk-as-an-offensive-security-tool
 
-_\*\* Note: \*\*_ This issue is a serious issue with Splunk systems and it has been exploited by other testers for years. While Remote Code Execution is an intended feature of Splunk Universal Forwarder, the implimentaion of this is dangerous. I attempted to submit this bug via Splunk’s bug bounty program in the very unlikely chance they are not aware of the design implications, but was notified that any bug submissions implement the Bug Crowd/Splunk disclosure policy which states no details of the vulnerability may be discussed publically _ever_ without Splunk’s permission. I requested a 90 day disclosure timeline and was denied. As such, I did not responsibly disclose this since I am reasonably sure Splunk is aware of the issue and has chosen to ignore it, I feel this could severely impact companies, and it is the responsibility of the infosec community to educate businesses.
+_** Note: **_ This issue is a serious issue with Splunk systems and it has been exploited by other testers for years. While Remote Code Execution is an intended feature of Splunk Universal Forwarder, the implimentaion of this is dangerous. I attempted to submit this bug via Splunk’s bug bounty program in the very unlikely chance they are not aware of the design implications, but was notified that any bug submissions implement the Bug Crowd/Splunk disclosure policy which states no details of the vulnerability may be discussed publically _ever_ without Splunk’s permission. I requested a 90 day disclosure timeline and was denied. As such, I did not responsibly disclose this since I am reasonably sure Splunk is aware of the issue and has chosen to ignore it, I feel this could severely impact companies, and it is the responsibility of the infosec community to educate businesses.

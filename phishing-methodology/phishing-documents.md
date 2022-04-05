@@ -48,5 +48,5 @@ The more common they are, the more probable the AV will detect it.
 
 ### MacOS
 
-* ****[**macphish**](https://github.com/cldrn/macphish)****
-* ****[**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)****
+* [**macphish**](https://github.com/cldrn/macphish)
+* [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)

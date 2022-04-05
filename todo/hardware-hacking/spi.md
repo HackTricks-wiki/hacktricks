@@ -12,7 +12,7 @@ Note that even if the PINOUT of the Pirate Bus indicates pins for **MOSI** and *
 
 ![](<../../.gitbook/assets/image (648).png>)
 
-In Windows or Linux you can use the program [**`flashrom`**](https://www.flashrom.org/Flashrom) **** to dump the content of the flash memory running something like:
+In Windows or Linux you can use the program [**`flashrom`**](https://www.flashrom.org/Flashrom)  to dump the content of the flash memory running something like:
 
 ```bash
 # In this command we are indicating:

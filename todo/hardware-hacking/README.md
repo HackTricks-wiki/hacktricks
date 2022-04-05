@@ -29,7 +29,7 @@ Boundary scans include tests of the four-wire **Test Access Port (TAP)**, a gene
 * Test data output (**TDO**) TDO is the pin that sends **data out of the chip**.
 * Test reset (**TRST**) input The optional TRST resets the finite state machine **to a known good state**. Alternatively, if the TMS is held at 1 for five consecutive clock cycles, it invokes a reset, the same way the TRST pin would, which is why TRST is optional.
 
-Sometimes you will be able to find those pins marked in the PCB. In other occasions you might need to **find them**.&#x20;
+Sometimes you will be able to find those pins marked in the PCB. In other occasions you might need to **find them**.
 
 ### Identifying JTAG pins
 
@@ -37,7 +37,7 @@ The fastest but most expensive way to detect JTAG ports is by using the **JTAGul
 
 It has **24 channels** you can connect to the boards pins. Then it performs a **BF attack** of all the possible combinations sending **IDCODE** and **BYPASS** boundary scan commands. If it receives a response, it displays the channel corresponding to each JTAG signal
 
-A cheaper but much slower way of identifying JTAG pinouts is by using the [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) **** loaded on an Arduino-compatible microcontroller.
+A cheaper but much slower way of identifying JTAG pinouts is by using the [**JTAGenum**](https://github.com/cyphunk/JTAGenum/)  loaded on an Arduino-compatible microcontroller.
 
 Using **JTAGenum**, you’d first **define the pins of the probing** device that you’ll use for the enumeration.You’d have to reference the device’s pinout diagram, and then connect these pins with the test points on your target device.
 

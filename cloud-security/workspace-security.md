@@ -104,7 +104,7 @@ This also means that the **App Script will be trusted by the Workspace environme
 
 {% hint style="danger" %}
 This also means that if an **App Script already existed** and people has **granted access**, anyone with **Editor** permission to the doc can **modify it and abuse that access.**\
-****To abuse this you also need people to trigger the App Script. And one neat trick if to **publish the script as a web app**. When the **people** that already granted **access** to the App Script access the web page, they will **trigger the App Script** (this also works using `<img>` tags.
+To abuse this you also need people to trigger the App Script. And one neat trick if to **publish the script as a web app**. When the **people** that already granted **access** to the App Script access the web page, they will **trigger the App Script** (this also works using `<img>` tags.
 {% endhint %}
 
 ## Post-Exploitation
@@ -123,15 +123,15 @@ You potentially need access to the console to join groups that allow to be joine
 
 ### Access Groups Mail info
 
-If you managed to **compromise a google user session**, from [**https://groups.google.com/all-groups**](https://groups.google.com/all-groups) **** you can see the history of mails sent to the mail groups the user is member of, and you might find **credentials** or other **sensitive data**.
+If you managed to **compromise a google user session**, from [**https://groups.google.com/all-groups**](https://groups.google.com/all-groups)  you can see the history of mails sent to the mail groups the user is member of, and you might find **credentials** or other **sensitive data**.
 
 ### Takeout - Download Everything Google Knows about an account
 
-If you have a **session inside victims google account** you can download everything Google saves about that account from [**https://takeout.google.com**](https://takeout.google.com/u/1/?pageId=none)****
+If you have a **session inside victims google account** you can download everything Google saves about that account from [**https://takeout.google.com**](https://takeout.google.com/u/1/?pageId=none)
 
 ### Vault - Download all the Workspace data of users
 
-If an organization has **Google Vault enabled**, you might be able to access [**https://vault.google.com**](https://vault.google.com/u/1/) **** and **download** all the **information**.
+If an organization has **Google Vault enabled**, you might be able to access [**https://vault.google.com**](https://vault.google.com/u/1/)  and **download** all the **information**.
 
 ### Contacts download
 
@@ -156,7 +156,7 @@ For sake of simplicity, most of the people will generate and share a link instea
 Some proposed ways to find all the documents:
 
 * Search in internal chat, forums...
-* **Spider** known **documents** searching for **references** to other documents. You can do this within an App Script with[ **PaperChaser**](https://github.com/mandatoryprogrammer/PaperChaser)****
+* **Spider** known **documents** searching for **references** to other documents. You can do this within an App Script with[ **PaperChaser**](https://github.com/mandatoryprogrammer/PaperChaser)
 
 ### **Keep Notes**
 
@@ -198,7 +198,7 @@ The docs mention that to use `ScriptApp.newTrigger("funcion")` you need the **sc
 
 In [**https://admin.google.com**/](https://admin.google.com), if you have enough permissions you might be able to modify settings in the Workspace of the whole organization.
 
-You can also search emails through all the users invoices in [**https://admin.google.com/ac/emaillogsearch**](https://admin.google.com/ac/emaillogsearch)****
+You can also search emails through all the users invoices in [**https://admin.google.com/ac/emaillogsearch**](https://admin.google.com/ac/emaillogsearch)
 
 ## Account Compromised Recovery
 

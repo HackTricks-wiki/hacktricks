@@ -85,7 +85,7 @@ Searches for AES keys by searching for their key schedules. Able to find 128. 19
 
 Download [here](https://sourceforge.net/projects/findaes/).
 
-## Complementary tools&#x20;
+## Complementary tools
 
 You can use [**viu** ](https://github.com/atanunq/viu)to see images form the terminal.\
 You can use the linux command line tool **pdftotext** to transform a pdf into text and read it.

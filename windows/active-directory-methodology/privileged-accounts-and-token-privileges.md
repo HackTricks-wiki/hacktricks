@@ -28,7 +28,7 @@ Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityRefer
 
 If you don't want to wait an hour you can use a PS script to make the restore happen instantly: [https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1)
 
-****[**More information in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)****
+[**More information in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)
 
 ## Account Operators <a href="#account-operators" id="account-operators"></a>
 
@@ -112,7 +112,7 @@ sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
 ```
 
-****[**Learn more about this privilege escalation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/from-dnsadmins-to-system-to-domain-compromise)
+[**Learn more about this privilege escalation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/from-dnsadmins-to-system-to-domain-compromise)
 
 ## **AD Recycle Bin**
 
@@ -126,16 +126,16 @@ Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 
 ## Group Managed Service Accounts (gMSA)
 
-&#x20;In most of the infrastructures, service accounts are typical user accounts with “**Password never expire**” option. Maintaining these accounts could be a real mess and that's why Microsoft introduced  **Managed Service Accounts:**
+In most of the infrastructures, service accounts are typical user accounts with “**Password never expire**” option. Maintaining these accounts could be a real mess and that's why Microsoft introduced  **Managed Service Accounts:**
 
-* No more password management. It uses a complex, random, 240-character password and changes that automatically when it reaches the domain or computer password expire date.&#x20;
+* No more password management. It uses a complex, random, 240-character password and changes that automatically when it reaches the domain or computer password expire date.
   * It is uses Microsoft Key Distribution Service (KDC) to create and manage the passwords for the gMSA.
 * It cannot be lock out or use for interactive login
 * Supports to share across multiple hosts
 * Can use to run schedule tasks (Managed service accounts do not support to run schedule tasks)
 * Simplified SPN Management – System will automatically change the SPN value if **sAMaccount** details of the computer change or DNS name property change.
 
-&#x20;gMSA accounts have their passwords stored in a LDAP property called _**msDS-ManagedPassword**_ which **automatically** get **resets** by the DC’s every 30 days, are **retrievable** by **authorized administrators** and by the **servers** who they are installed on. _**msDS-ManagedPassword**_ is an encrypted data blob called [MSDS-MANAGEDPASSWORD\_BLOB](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) and it’s only retrievable when the connection is secured, **LDAPS** or when the authentication type is ‘Sealing & Secure’ for an example.
+gMSA accounts have their passwords stored in a LDAP property called _**msDS-ManagedPassword**_ which **automatically** get **resets** by the DC’s every 30 days, are **retrievable** by **authorized administrators** and by the **servers** who they are installed on. _**msDS-ManagedPassword**_ is an encrypted data blob called [MSDS-MANAGEDPASSWORD\_BLOB](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) and it’s only retrievable when the connection is secured, **LDAPS** or when the authentication type is ‘Sealing & Secure’ for an example.
 
 ![Image from https://cube0x0.github.io/Relaying-for-gMSA/](../../.gitbook/assets/asd1.png)
 
@@ -237,7 +237,7 @@ PCWSTR pPathSourceReg = L"\\Registry\\User\\<User-SID>\\System\\CurrentControlSe
 The first one declares a string variable indicating where the vulnerable **Capcom.sys** driver is located on the victim system and the second one is a string variable indicating a service name that will be used (could be any service).\
 Note, that the **driver must be signed by Windows** so you cannot load arbitrary drivers. But, **Capcom.sys** **can be abused to execute arbitrary code and is signed by Windows**, so the goal is to load this driver and exploit it.
 
-&#x20;Load the driver:
+Load the driver:
 
 ```c
 #include "stdafx.h"

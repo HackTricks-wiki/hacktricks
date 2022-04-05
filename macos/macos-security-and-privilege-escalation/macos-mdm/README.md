@@ -106,7 +106,7 @@ It follows a few steps to get the Activation Record performed by **`MCTeslaConfi
 5. Make the request
    1. POST to [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) sending the data `{ "action": "RequestProfileConfiguration", "sn": "" }`
    2. The JSON payload is encrypted using Absinthe (**`NACSign`**)
-   3. All requests over HTTPs, built-in root certificates are used&#x20;
+   3. All requests over HTTPs, built-in root certificates are used
 
 ![](<../../../.gitbook/assets/image (566) (1).png>)
 

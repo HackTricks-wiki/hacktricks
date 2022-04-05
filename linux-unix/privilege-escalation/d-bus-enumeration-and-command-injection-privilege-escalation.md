@@ -336,7 +336,7 @@ dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oou
 
 _Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) references the service object and the last part (`.Block`) references the method name._
 
-### C code&#x20;
+### C code
 
 {% code title="d-bus_server.c" %}
 ```c

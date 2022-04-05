@@ -37,7 +37,7 @@ fail_here
 </Wix>
 ```
 
-&#x20;We will use `candle.exe` from wixtools to create a wixobject from `msi.xml`
+We will use `candle.exe` from wixtools to create a wixobject from `msi.xml`
 
 ```markup
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
