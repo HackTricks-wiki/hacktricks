@@ -127,7 +127,7 @@ Pressing sample this appears:
 
 Now, to make SigDigger understand **where is the range** of the level carrying information you need to click on the **lower level** and maintain clicked until the biggest level:
 
-![](<../../.gitbook/assets/image (662).png>)
+![](<../../.gitbook/assets/image (662) (1).png>)
 
 If there would have been for example **4 different levels of amplitude**, you should have need to configure the **Bits per symbol to 2** and select from the smallest to the biggest.
 
@@ -149,7 +149,7 @@ Also, use **codifications** such as **Manchester**, and **up+down** can be **1 o
 
 Signal example sending information modulated in FM:
 
-![](<../../.gitbook/assets/image (661).png>)
+![](<../../.gitbook/assets/image (661) (1).png>)
 
 In the previous image you can observe pretty good that **2 frequencies are used** but if you **observe** the **waveform** you might n**ot be able to identify correctly the 2 different frequencies**:
 

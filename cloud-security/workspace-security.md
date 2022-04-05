@@ -86,7 +86,7 @@ If someone creates a **copy** of that **document** that **contained the App Scri
 
 This method will be able to bypass also the Workspace admin restriction:
 
-![](<../.gitbook/assets/image (662) (1).png>)
+![](<../.gitbook/assets/image (662) (1) (1).png>)
 
 But can be prevented with:
 

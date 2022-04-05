@@ -384,7 +384,7 @@
 * [CRLF (%0D%0A) Injection](pentesting-web/crlf-0d-0a.md)
 * [Cross-site WebSocket hijacking (CSWSH)](pentesting-web/cross-site-websocket-hijacking-cswsh.md)
 * [CSRF (Cross Site Request Forgery)](pentesting-web/csrf-cross-site-request-forgery.md)
-* [Dangling Markup - HTML scriptless injection](pentesting-web/dangling-markup-html-scriptless-injection/README.md)
+* [Dangling Markup - HTML scriptless injection](pentesting-web/dangling-markup-html-scriptless-injection.md)
   * [HTML Injection / Char-by-char Exfiltration](pentesting-web/dangling-markup-html-scriptless-injection/html-injection-char-by-char-exfiltration/README.md)
     * [CSS Injection Code](pentesting-web/dangling-markup-html-scriptless-injection/html-injection-char-by-char-exfiltration/css-injection-code.md)
 * [Deserialization](pentesting-web/deserialization/README.md)
@@ -539,6 +539,9 @@
   * [Concourse Architecture](cloud-security/concourse/concourse-architecture.md)
   * [Concourse Lab Creation](cloud-security/concourse/concourse-lab-creation.md)
   * [Concourse Enumeration & Attacks](cloud-security/concourse/concourse-enumeration-and-attacks.md)
+* [CircleCI](cloud-security/circleci.md)
+* [Apache Airflow](cloud-security/apache-airflow/README.md)
+  * [Airflow Configuration](cloud-security/apache-airflow/airflow-configuration.md)
 * [Cloud Security Review](cloud-security/cloud-security-review.md)
 * [AWS Security](cloud-security/aws-security.md)
 
