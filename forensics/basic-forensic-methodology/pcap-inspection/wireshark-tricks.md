@@ -71,7 +71,7 @@ Other interesting filters:
 ### Search
 
 If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_\
-__You can add new layers to the main information bar _(No., Time, Source...)_ pressing _right bottom_ and _Edit Column_
+\_\_You can add new layers to the main information bar _(No., Time, Source...)_ pressing _right bottom_ and _Edit Column_
 
 Practice: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)
 
@@ -83,7 +83,7 @@ You can add a column that show the Host HTTP header:
 
 And a column that add the Server name from an initiating HTTPS connection (**ssl.handshake.type == 1**):
 
-![](<../../../.gitbook/assets/image (408) (1).png>)
+![](<../../../.gitbook/assets/image (408).png>)
 
 ## Identifying local hostnames
 
@@ -96,10 +96,6 @@ In current Wireshark instead of `bootp` you need to search for `DHCP`
 ### From NBNS
 
 ![](<../../../.gitbook/assets/image (405).png>)
-
-
-
-
 
 ## Decrypting TLS
 
@@ -154,4 +150,3 @@ f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
-

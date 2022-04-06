@@ -36,7 +36,7 @@ Having these files you can sue the tool [**Rifiuti**](https://github.com/abelche
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
 
-![](<../../../.gitbook/assets/image (495) (1) (1).png>)
+![](<../../../.gitbook/assets/image (495) (1) (1) (1).png>)
 
 ### Volume Shadow Copies
 
@@ -134,7 +134,7 @@ The files in the folder WPDNSE are a copy of the original ones, then won't survi
 
 Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about when the USB connection was produced (search for `Section start`).
 
-![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (2) (1) (1) (2).png>)
+![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1).png>)
 
 ### USB Detective
 
@@ -232,12 +232,12 @@ The Windows Registry Contains a lot of **information** about the **system and th
 
 The files containing the registry are located in:
 
-* %windir%\System32\Config\*_SAM\*_:  `HKEY_LOCAL_MACHINE`
-* %windir%\System32\Config\*_SECURITY\*_:  `HKEY_LOCAL_MACHINE`
-* %windir%\System32\Config\*_SYSTEM\*_:  `HKEY_LOCAL_MACHINE`
-* %windir%\System32\Config\*_SOFTWARE\*_:  `HKEY_LOCAL_MACHINE`
-* %windir%\System32\Config\*_DEFAULT\*_:  `HKEY_LOCAL_MACHINE`
-* %UserProfile%{User}\*_NTUSER.DAT\*_:  `HKEY_CURRENT_USER`
+* %windir%\System32\Config\*_SAM\*_: `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\*_SECURITY\*_: `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\*_SYSTEM\*_: `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\*_SOFTWARE\*_: `HKEY_LOCAL_MACHINE`
+* %windir%\System32\Config\*_DEFAULT\*_: `HKEY_LOCAL_MACHINE`
+* %UserProfile%{User}\*_NTUSER.DAT\*_: `HKEY_CURRENT_USER`
 
 From Windows Vista and Windows 2008 Server upwards there are some backups of the `HKEY_LOCAL_MACHINE` registry files in **`%Windir%\System32\Config\RegBack\`**.\
 Also from these versions, the registry file **`%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`** is created saving information about program executions.

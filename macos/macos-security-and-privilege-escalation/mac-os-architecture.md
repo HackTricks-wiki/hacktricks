@@ -117,11 +117,11 @@ struct mach_header {
 
 Filetypes:
 
-* MH\_EXECUTE (0x2): Standard Mach-O executable            
+* MH\_EXECUTE (0x2): Standard Mach-O executable
 * MH\_DYLIB (0x6): A Mach-O dynamic linked library (i.e. .dylib)
 * MH\_BUNDLE (0x8): A Mach-O bundle (i.e. .bundle)
 
-#### 
+####
 
 #### **Load commands**
 
@@ -137,7 +137,7 @@ struct load_command {
 };
 ```
 
-A **common** type of load command is **LC\_SEGMENT/LC\_SEGMENT\_64**, which **describes** a **segment:** \
+A **common** type of load command is **LC\_SEGMENT/LC\_SEGMENT\_64**, which **describes** a **segment:**\
 _A segment defines a **range of bytes** in a Mach-O file and the **addresses** and **memory**  **protection**  **attributes** at which those bytes are **mapped into** virtual memory when the dynamic linker loads the application._
 
 ![](<../../.gitbook/assets/image (557).png>)
@@ -183,17 +183,17 @@ Some potential malware related libraries are:
 * **CoreWLAN**: Wifi scans.
 
 {% hint style="info" %}
-A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC\_MAIN**. \
+A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC\_MAIN**.\
 The offsets of any constructors are held in the **\_\_mod\_init\_func** section of the **\_\_DATA\_CONST** segment.
 {% endhint %}
 
-#### 
+####
 
 #### **Data**
 
 The heart of the file is the final region, the data, which consists of a number of segments as laid out in the load-commands region. **Each segment can contain a number of data sections**. Each of these sections **contains code or data** of one particular type.
 
-![](<../../.gitbook/assets/image (555).png>)
+![](<../../.gitbook/assets/image (507) (3).png>)
 
 #### Get the info
 
@@ -226,8 +226,7 @@ ls -lR /Applications/Safari.app/Contents
 * `Contents/Info.plist`\
   The application’s main “**configuration file.**” Apple notes that “the system relies on the presence of this file to identify relevant information about \[the] application and any related files”.
   * **Plist** **files** contains configuration information. You can find find information about the meaning of they plist keys in [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
-  *   Pairs that may be of interest when analyzing an application include:\
-
+  *   Pairs that may be of interest when analyzing an application include:\\
 
       * **CFBundleExecutable**
 
@@ -266,8 +265,7 @@ There are some projects that allow to generate a binary executable by MacOS cont
 * **PyInstaller:** Python
   * Ways to detect this is the use of the embedded string **“Py\_SetPythonHome”** or a a **call** into a function named **`pyi_main`.**
 * **Electron:** JavaScript, HTML, and CSS.
-  * These binaries will use **Electron Framework.framework**. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in `.asar` files. These binaries will use Electron Framework.framework. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in **`.asar` files**. It's possible **unpack** such archives via the **asar** node module, or the **npx** **utility:** `npx asar extract StrongBox.app/Contents/Resources/app.asar appUnpacked`\
-
+  * These binaries will use **Electron Framework.framework**. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in `.asar` files. These binaries will use Electron Framework.framework. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in **`.asar` files**. It's possible **unpack** such archives via the **asar** node module, or the **npx** **utility:** `npx asar extract StrongBox.app/Contents/Resources/app.asar appUnpacked`\\
 
 ## References
 

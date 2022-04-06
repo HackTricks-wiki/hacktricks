@@ -8,7 +8,7 @@
 
 There are other account memberships and access token privileges that can also be useful during security assessments when chaining multiple attack vectors.
 
-## AdminSDHolder  group
+## AdminSDHolder group
 
 The Access Control List (ACL) of the **AdminSDHolder** object is used as a template to **copy** **permissions** to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins.\
 By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker modifies the ACL of the group **AdminSDHolder** for example giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group (in an hour).\
@@ -37,7 +37,7 @@ If you don't want to wait an hour you can use a PS script to make the restore ha
 
 Note the spotless' user membership:
 
-![](<../../.gitbook/assets/1 (2) (1) (1).png>)
+![](<../../.gitbook/assets/1 (2) (1).png>)
 
 However, we can still add new users:
 
@@ -126,7 +126,7 @@ Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 
 ## Group Managed Service Accounts (gMSA)
 
-In most of the infrastructures, service accounts are typical user accounts with “**Password never expire**” option. Maintaining these accounts could be a real mess and that's why Microsoft introduced  **Managed Service Accounts:**
+In most of the infrastructures, service accounts are typical user accounts with “**Password never expire**” option. Maintaining these accounts could be a real mess and that's why Microsoft introduced **Managed Service Accounts:**
 
 * No more password management. It uses a complex, random, 240-character password and changes that automatically when it reaches the domain or computer password expire date.
   * It is uses Microsoft Key Distribution Service (KDC) to create and manage the passwords for the gMSA.
@@ -211,7 +211,7 @@ We compile the above, execute and the privilege `SeLoadDriverPrivilege` is now e
 
 To further prove the `SeLoadDriverPrivilege` is dangerous, let's **exploit it to elevate privileges**.
 
-You can load a new driver using  **NTLoadDriver:**
+You can load a new driver using **NTLoadDriver:**
 
 ```cpp
 NTSTATUS NTLoadDriver(
@@ -373,4 +373,3 @@ Then, you will need to download a **Capcom.sys** exploit and use it to escalate 
 {% embed url="https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e" %}
 
 {% embed url="https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html" %}
-

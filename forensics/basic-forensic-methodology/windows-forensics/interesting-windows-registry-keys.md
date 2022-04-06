@@ -35,7 +35,7 @@
 * **`System\ControlSet001\Services\lanmanserver\Shares\`**: Share folders and their configurations. If **Client Side Caching** (CSCFLAGS) is enabled, then, a copy of the shared files will be saved in the clients and server in `C:\Windows\CSC`
   * CSCFlag=0 -> By default the user needs to indicate the files that he wants to cache
   * CSCFlag=16 -> Automatic caching documents. “All files and programs that users open from the shared folder are automatically available offline” with the “optimize for performance" unticked.
-  * CSCFlag=32 -> Like the previous options by “optimize for performance”  is ticked
+  * CSCFlag=32 -> Like the previous options by “optimize for performance” is ticked
   * CSCFlag=48 -> Cache is disabled.
   * CSCFlag=2048: This setting is only on Win 7 & 8 and is the default setting until you disable “Simple file sharing” or use the “advanced” sharing option. It also appears to be the default setting for the “Homegroup”
   * CSCFlag=768 -> This setting was only seen on shared Print devices.
@@ -110,7 +110,7 @@ Desktop Access:
 * `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU`
 * `NTUSER.DAT\Software\Microsoft\Windows\Shell\Bags`
 
-To analyze the Shellbags you can use [**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md) and you will be able to find the** MAC time of the folder **and also the** creation date and modified date of the shellbag **which are related with the** first time the folder was accessed and the last time**.
+To analyze the Shellbags you can use [**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md) and you will be able to find the\*\* MAC time of the folder **and also the** creation date and modified date of the shellbag **which are related with the** first time the folder was accessed and the last time\*\*.
 
 Note 2 things from the following image:
 
@@ -133,7 +133,7 @@ Within this registry it's possible to find:
 
 ![](<../../../.gitbook/assets/image (477).png>)
 
-![](<../../../.gitbook/assets/image (479) (1) (1).png>)
+![](<../../../.gitbook/assets/image (479) (1).png>)
 
 Moreover, checking the registry `HKLM\SYSTEM\ControlSet001\Enum\USB` and comparing the values of the sub-keys it's possible to find the VID value
 
@@ -153,7 +153,7 @@ Having the **{GUID}** of the device it's now possible to **check all the NTUDER.
 
 Checking the registry `System\MoutedDevices` it's possible to find out **which device was the last one mounted**. In the following image check how the last device mounted in `E:` is the Thoshiba one (using the tool Registry Explorer).
 
-![](<../../../.gitbook/assets/image (483) (1).png>)
+![](<../../../.gitbook/assets/image (483) (1) (1).png>)
 
 ### Volume Serial Number
 

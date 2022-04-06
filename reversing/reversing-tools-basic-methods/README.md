@@ -55,7 +55,7 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 
 And click on **compile**:
 
-![](<../../.gitbook/assets/image (314) (1) (1).png>)
+![](<../../.gitbook/assets/image (314) (1).png>)
 
 Then save the new file on _**File >> Save module...**_:
 
@@ -267,7 +267,7 @@ If you get the **binary** of a GBA game you can use different tools to **emulate
 * [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
 * [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_** ** you can see how to press the Game Boy Advance **buttons**
+In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_\*\* \*\* you can see how to press the Game Boy Advance **buttons**
 
 ![](<../../.gitbook/assets/image (578).png>)
 
@@ -364,8 +364,8 @@ In the previous code you can see that we are comparing **uVar1** (the place wher
 * First, it's compared with the **value 4** (**SELECT** button): In the challenge this button clears the screen
 * Then, it's comparing it with the **value 8** (**START** button): In the challenge this checks is the code is valid to get the flag.
   * In this case the var **`DAT_030000d8`** is compared with 0xf3 and if the value is the same some code is executed.
-* In any other cases, some cont (`DAT_030000d4`) is checked. It's a cont because it's adding 1 right after entering in the code. \
-  **I**f less than 8 something that involves **adding** values to **`DAT_030000d8` ** is done (basically it's adding the values of the keys pressed in this variable as long as the cont is less than 8).
+* In any other cases, some cont (`DAT_030000d4`) is checked. It's a cont because it's adding 1 right after entering in the code.\
+  **I**f less than 8 something that involves **adding** values to \*\*`DAT_030000d8` \*\* is done (basically it's adding the values of the keys pressed in this variable as long as the cont is less than 8).
 
 So, in this challenge, knowing the values of the buttons, you needed to **press a combination with a length smaller than 8 that the resulting addition is 0xf3.**
 
