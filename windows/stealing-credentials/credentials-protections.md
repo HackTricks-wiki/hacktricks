@@ -8,7 +8,7 @@
 sekurlsa::wdigest
 ```
 
-This behaviour can be **deactivated/activated setting to 1** the value of _**UseLogonCredential**_ and _**Negotiate**_  in _**HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_.\
+This behaviour can be **deactivated/activated setting to 1** the value of _**UseLogonCredential**_ and _**Negotiate**_ in _**HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_.\
 If these registry keys **don't exist** or the value is **"0"**, then WDigest will be **deactivated**.
 
 ```
@@ -57,7 +57,7 @@ Using _Restricted Admin mode for RDP_, when you connect to a remote computer usi
 
 Note that as your credentials are not being saved on the RDP session if **try to access network resources** your credentials won't be used. **The machine identity will be used instead**.
 
-![](../../.gitbook/assets/RAM.png)
+![](../../.gitbook/assets/ram.png)
 
 From [here](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 

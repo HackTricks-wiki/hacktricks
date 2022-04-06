@@ -42,7 +42,7 @@ _**Sig**_ = _**Fsig**_(_**Fhash**_(_**m**_),_**dA**_)
 
 Where:
 
-* _d_A is the signing **private key**
+* \_d\_A is the signing **private key**
 * _m_ is the **transaction**
 * Fhash is the hashing function
 * Fsig is the signing algorithm
@@ -84,7 +84,7 @@ There are **2 main types** of transactions:
 This protocol helps to **perform several transactions to a channe**l and **just** **sent** the **final** **state** to the blockchain to save it.\
 This **improves** bitcoin blockchain **speed** (it just on allow 7 payments per second) and it allows to create **transactions more difficult to trace** as the channel is created via nodes of the bitcoin blockchain:
 
-![](<../.gitbook/assets/image (611).png>)
+![](<../../.gitbook/assets/image (611).png>)
 
 Normal use of the Lightning Network consists of **opening a payment channel** by committing a funding transaction to the relevant base blockchain (layer 1), followed by making **any number** of Lightning Network **transactions** that update the tentative distribution of the channel's funds **without broadcasting those to the blockchain**, optionally followed by closing the payment channel by **broadcasting** the **final** **version** of the settlement transaction to distribute the channel's funds.
 
@@ -175,7 +175,7 @@ Some other services can be also used as mixers, like Bitcoin casinos where you c
 ### CoinJoin
 
 **CoinJoin** will **mix several transactions of different users into just one** in order to make more **difficult** for an observer to find out **which input is related to which output**.\
-This offers a new level of privacy, however, **some** **transactions** where some input and output amounts are  correlated or are very different from the rest of the inputs and outputs **can still be correlated** by the external observer.
+This offers a new level of privacy, however, **some** **transactions** where some input and output amounts are correlated or are very different from the rest of the inputs and outputs **can still be correlated** by the external observer.
 
 Examples of (likely) CoinJoin transactions IDs on bitcoin's blockchain are `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
@@ -278,4 +278,3 @@ Note that there isn't any field for the origin address, this is because this can
 * [https://ethereum.org/en/developers/docs/transactions/](https://ethereum.org/en/developers/docs/transactions/)
 * [https://ethereum.org/en/developers/docs/gas/](https://ethereum.org/en/developers/docs/gas/)
 * [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced\_address\_reuse)
-

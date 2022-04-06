@@ -17,7 +17,7 @@ According to [**the docs**](https://circleci.com/docs/2.0/env-vars/#) there are 
 
 ### Built-in env variables
 
-Every container run by CircleCI will always have [**specific env vars defined in the documentation**](https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables)  like  `CIRCLE_PR_USERNAME`, `CIRCLE_PROJECT_REPONAME` or `CIRCLE_USERNAME`.
+Every container run by CircleCI will always have [**specific env vars defined in the documentation**](https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables) like `CIRCLE_PR_USERNAME`, `CIRCLE_PROJECT_REPONAME` or `CIRCLE_USERNAME`.
 
 ### Clear text
 
@@ -255,4 +255,5 @@ jobs:
   * _https://app.circleci.com/settings/project/github/\<org>/\<repo>/ssh_
 * It's possible to **create a cron job in hidden branch** in an unexpected project that is **leaking** all the **context env** vars everyday.
   * Or even create in a branch / modify a known job that will **leak** all context and **projects secrets** everyday.
-* It you are a github owner you can **allow unverified orbs** and configure one in a job as **backdoor**
+* If you are a github owner you can **allow unverified orbs** and configure one in a job as **backdoor**
+* You can find a **command injection vulnerability** in some task and **inject commands** via a **secret** modifying its value

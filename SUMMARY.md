@@ -543,6 +543,7 @@
 * [Apache Airflow](cloud-security/apache-airflow/README.md)
   * [Airflow Configuration](cloud-security/apache-airflow/airflow-configuration.md)
   * [Airflow RBAC](cloud-security/apache-airflow/airflow-rbac.md)
+* [Atlantis](cloud-security/atlantis.md)
 * [Cloud Security Review](cloud-security/cloud-security-review.md)
 * [AWS Security](cloud-security/aws-security.md)
 
@@ -558,7 +559,8 @@
 
 ## Blockchain
 
-* [Blockchain & Crypto Currencies](blockchain/blockchain-and-crypto-currencies.md)
+* [Blockchain & Crypto Currencies](blockchain/blockchain-and-crypto-currencies/README.md)
+  * [Page 1](blockchain/blockchain-and-crypto-currencies/page-1.md)
 
 ## Courses and Certifications Reviews
 

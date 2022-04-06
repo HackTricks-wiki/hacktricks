@@ -134,7 +134,7 @@ Some interesting attributes:
 * [$Data](https://flatcap.org/linux-ntfs/ntfs/attributes/data.html) (among others):
   * Contains the file's data or the indication of the sectors where the data resides. In the following example the attribute data is not resident so the attribute gives information about the sectors where the data resides.
 
-![](<../../../.gitbook/assets/image (507) (1) (1).png>)
+![](<../../../.gitbook/assets/image (507) (1).png>)
 
 ![](<../../../.gitbook/assets/image (509).png>)
 
