@@ -25,7 +25,7 @@ ls /dev
 cachefiles       mapper           port             shm              tty24            tty44            tty7
 console          mem              psaux            stderr           tty25            tty45            tty8
 core             mqueue           ptmx             stdin            tty26            tty46            tty9
-cpu              nbd0             pts              stdout           tty27            tty47            ttyS0cker run --rm --privileged -it alpine sh
+cpu              nbd0             pts              stdout           tty27            tty47            ttyS0
 [...]
 ```
 {% endtab %}
