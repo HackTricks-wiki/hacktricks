@@ -347,6 +347,7 @@
 * [8009 - Pentesting Apache JServ Protocol (AJP)](pentesting/8009-pentesting-apache-jserv-protocol-ajp.md)
 * [8086 - Pentesting InfluxDB](pentesting/8086-pentesting-influxdb.md)
 * [8089 - Pentesting Splunkd](pentesting/8089-splunkd.md)
+* [8333,18333,38333,18444 - Pentesting Bitcoin](pentesting/8333-18333-38333-18444-pentesting-bitcoin.md)
 * [9000 - Pentesting FastCGI](pentesting/9000-pentesting-fastcgi.md)
 * [9001 - Pentesting HSQLDB](pentesting/9001-pentesting-hsqldb.md)
 * [9042/9160 - Pentesting Cassandra](pentesting/cassandra.md)
