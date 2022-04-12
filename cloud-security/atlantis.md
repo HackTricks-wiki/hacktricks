@@ -276,6 +276,7 @@ If you managed to get access to the server or at least you got a LFI there are s
 * `/atlantis-data/repos/<org_name>`_`/`_`<repo_name>/<pr_num>/<workspace>/<path_to_dir>/.terraform/terraform.tfstate` Terraform stated file
   * Example: /atlantis-data/repos/ghOrg_/_myRepo/20/default/env/prod/.terraform/terraform.tfstate
 * `/proc/1/environ` Env variables
+* `/proc/[2-20]/cmdline` Cmd line of `atlantis server` (may contain sensitive data)
 
 ## Mitigations
 
