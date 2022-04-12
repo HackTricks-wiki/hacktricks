@@ -6,6 +6,13 @@ Atlantis basically helps you to to run terraform from Pull Requests from your gi
 
 ![](<../.gitbook/assets/image (307) (3).png>)
 
+## Local Lab
+
+1. Go to the **atlantis releases page** in [https://github.com/runatlantis/atlantis/releases](https://github.com/runatlantis/atlantis/releases) and **download** the one that suits you.
+2. Create a **personal token** (with repo access) of your **github** user
+3. Execute `./atlantis testdrive` and it will create a **demo repo** you can use to **talk to atlantis**
+   1. You can access the web page in 127.0.0.1:4141
+
 ## Atlantis Access
 
 ### Git Server Credentials
@@ -47,6 +54,12 @@ It's up to you how you [provide credentials](https://www.runatlantis.io/docs/pro
 {% hint style="warning" %}
 The **container** where **Atlantis** is **running** will highly probably **contain privileged credentials** to the providers (AWS, GCP, Github...) that Atlantis is managing via Terraform.
 {% endhint %}
+
+### Web Page
+
+By default Atlantis will run a **web page in the port 4141 in localhost**. This page just allows you to enable/disable atlantis apply and check the plan status of the repos and unlock them (it doesn't allow to modify things, so it isn't that useful).
+
+You probably won't find it exposed to the internet, but it looks like by default **no credentials are needed** to access it (and if they are `atlantis`:`atlantis` are the **default** ones).
 
 ## Server Configuration
 
@@ -195,6 +208,20 @@ resource "null_resource" "rev_shell" {
 }
 ```
 
+### Terraform Param Injection
+
+When running `atlantis plan` or `atlantis apply` terraform is being run under-needs, you can pass commands to terraform from atlantis commenting something like:
+
+```bash
+atlantis plan -- <terraform commands>
+atlantis plan -- -h #Get terraform plan help
+
+atlantis apply -- <terraform commands>
+atlantis apply -- -h #Get terraform apply help
+```
+
+Something you can pass are env variables which might be helpful to bypass some protections. Check terraform env vars in [https://www.terraform.io/cli/config/environment-variables](https://www.terraform.io/cli/config/environment-variables)
+
 ### Custom Workflow
 
 Running **malicious custom build commands** specified in an `atlantis.yaml` file. Atlantis uses the `atlantis.yaml` file from the pull request branch, **not** of `master`.\
@@ -239,6 +266,16 @@ Bitbucket Cloud does **not support webhook secrets**. This could allow attackers
 * This means that an **attacker** could make **fake requests to Atlantis** that look like they're coming from Bitbucket.
 * If you are specifying `--repo-allowlist` then they could only fake requests pertaining to those repos so the most damage they could do would be to plan/apply on your own repos.
 * To prevent this, allowlist [Bitbucket's IP addresses](https://confluence.atlassian.com/bitbucket/what-are-the-bitbucket-cloud-ip-addresses-i-should-use-to-configure-my-corporate-firewall-343343385.html) (see Outbound IPv4 addresses).
+
+## Post-Exploitation
+
+If you managed to get access to the server or at least you got a LFI there are some interesting things you should try to read:
+
+* `/home/atlantis/.git-credentials` Contains vcs access credentials
+* `/atlantis-data/atlantis.db` Contains vcs access credentials with more info
+* `/atlantis-data/repos/<org_name>`_`/`_`<repo_name>/<pr_num>/<workspace>/<path_to_dir>/.terraform/terraform.tfstate` Terraform stated file
+  * Example: /atlantis-data/repos/ghOrg_/_myRepo/20/default/env/prod/.terraform/terraform.tfstate
+* `/proc/1/environ` Env variables
 
 ## Mitigations
 
