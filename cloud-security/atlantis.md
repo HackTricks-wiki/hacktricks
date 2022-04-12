@@ -259,6 +259,10 @@ This is the **setting** in Github branch protections:
 
 ![](<../.gitbook/assets/image (307).png>)
 
+### Webhook Secret
+
+If you manage to **steal the webhook secret** used or if there **isn't any webhook secret** being used, you could **call the Atlantis webhook** and **invoke atlatis commands** directly.
+
 ### Bitbucket
 
 Bitbucket Cloud does **not support webhook secrets**. This could allow attackers to **spoof requests from Bitbucket**. Ensure you are allowing only Bitbucket IPs.
