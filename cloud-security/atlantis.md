@@ -166,6 +166,17 @@ atlantis apply [options] -- [terraform apply flags]
 
 ## Attacks
 
+{% hint style="warning" %}
+If during the exploitation you find this **error**: `Error: Error acquiring the state lock`
+
+You can fix it by running:
+
+```
+atlantis unlock #You might need to run this in a different PR
+atlantis plan -- -lock=false
+```
+{% endhint %}
+
 ### Atlantis plan RCE - Config modification in new PR
 
 If you have write access over a repository you will be able to create a new branch on it and generate a PR. If you can **execute `atlantis plan` ** (or maybe it's automatically executed) **you will be able to RCE inside the Atlantis server**.
