@@ -13,7 +13,6 @@
 * [Brute Force - CheatSheet](brute-force.md)
 * [Exfiltration](exfiltration.md)
 * [Tunneling and Port Forwarding](tunneling-and-port-forwarding.md)
-* [CSS Injection Code](css-injection-code.md)
 * [Search Exploits](search-exploits.md)
 
 ## Shells
@@ -376,7 +375,8 @@
 * [Clickjacking](pentesting-web/clickjacking.md)
 * [Client Side Template Injection (CSTI)](pentesting-web/client-side-template-injection-csti.md)
 * [Command Injection](pentesting-web/command-injection.md)
-* [Content Security Policy (CSP) Bypass](pentesting-web/content-security-policy-csp-bypass.md)
+* [Content Security Policy (CSP) Bypass](pentesting-web/content-security-policy-csp-bypass/README.md)
+  * [CSP bypass: self + 'unsafe-inline' with Iframes](pentesting-web/content-security-policy-csp-bypass/csp-bypass-self-+-unsafe-inline-with-iframes.md)
 * [Cookies Hacking](pentesting-web/hacking-with-cookies/README.md)
   * [Cookie Tossing](pentesting-web/hacking-with-cookies/cookie-tossing.md)
   * [Cookie Jar Overflow](pentesting-web/hacking-with-cookies/cookie-jar-overflow.md)
