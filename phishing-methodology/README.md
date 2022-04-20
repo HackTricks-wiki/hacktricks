@@ -3,14 +3,13 @@
 {% hint style="warning" %}
 **Support HackTricks and get benefits!**
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**?
-Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
 Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
 Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/)    [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass)  or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+**Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 {% endhint %}
@@ -340,7 +339,7 @@ The page www.mail-tester.com can indicate you if you your domain is being blocke
 * Decide from which account are you going to send the phishing emails. Suggestions: _noreply, support, servicedesk, salesforce..._
 * You can leave blank the username and password, but make sure to check the Ignore Certificate Errors
 
-![](<../.gitbook/assets/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (2) (1) (1) (4).png>)
+![](<../.gitbook/assets/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (2) (7).png>)
 
 {% hint style="info" %}
 It's recommended to use the "**Send Test Email**" functionality to test that everything is working.\
