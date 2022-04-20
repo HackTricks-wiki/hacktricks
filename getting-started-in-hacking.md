@@ -35,3 +35,6 @@ This site has a lot of binaries for forensic learning.
 ### [https://www.hackthissite.org/missions/basic/](https://www.hackthissite.org/missions/basic/)
 
 ### [https://attackdefense.com/](https://attackdefense.com)
+
+### [https://portswigger.net/web-security/dashboard](https://portswigger.net/web-security/dashboard)
+This website has a lot of web exploitation labs
