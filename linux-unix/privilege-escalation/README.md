@@ -1463,7 +1463,7 @@ There is a vulnerability on `logrotate`that allows a user with **write permissio
 So, if you have **write perms** over a **log file** **or** any of its **parent folder**, you can **privesc** (on most linux distributions, logrotate is executed automatically once a day as **user root**). Also, check if apart of _/var/log_ there are more files being **rotated**.
 
 {% hint style="info" %}
-This vulnerability affects `logrotate` version `3.15.1` and below
+This vulnerability affects `logrotate` version `3.18.0` and below
 {% endhint %}
 
 More detailed information about the vulnerability can be found in this page: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).
