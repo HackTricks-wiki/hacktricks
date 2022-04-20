@@ -7,8 +7,7 @@
 ### Basic Config
 
 After installing there are a few things that you could consider configuring.\
-In settings (the second tab button) you can select the **SDR device** or **select a file** to read and which frequency to syntonise and the Sample rate (recommended to up to 2.56Msps if your PC support it)\
-
+In settings (the second tab button) you can select the **SDR device** or **select a file** to read and which frequency to syntonise and the Sample rate (recommended to up to 2.56Msps if your PC support it)\\
 
 ![](<../../.gitbook/assets/image (655).png>)
 
@@ -43,7 +42,7 @@ With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with t
 
 ![](<../../.gitbook/assets/image (660).png>)
 
-![](<../../.gitbook/assets/image (652).png>)
+![](<../../.gitbook/assets/image (652) (1).png>)
 
 * **After recovering the bits you might need to process them someway**. For example, in Manchester codification a up+down will be a 1 or 0 and a down+up will be the other one. So pairs of 1s and 0s (ups and downs) will be a real 1 or a real 0.
 * Even if a signal is using Manchester codification (it's impossible to find more than two 0s or 1s in a row), you might **find several 1s or 0s together in the preamble**!
@@ -82,7 +81,7 @@ And this is how part of the symbol looks like with the waveform:
 
 You can **select the whole signal** where information is located, select **Amplitude** mode and **Selection** and click on **Histogram.** You can observer that 2 clear levels are only found
 
-![](<../../.gitbook/assets/image (647) (1).png>)
+![](<../../.gitbook/assets/image (647) (1) (1).png>)
 
 For example, if you select Frequency instead of Amplitude in this AM signal you find just 1 frequency (no way information modulated in frequency is just using 1 freq).
 
@@ -156,8 +155,6 @@ In the previous image you can observe pretty good that **2 frequencies are used*
 ![](<../../.gitbook/assets/image (653).png>)
 
 This is because I capture the signal in booth frequencies, therefore one is approximately the other in negative:
-
-
 
 ![](<../../.gitbook/assets/image (656).png>)
 
