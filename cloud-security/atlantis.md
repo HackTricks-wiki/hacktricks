@@ -199,6 +199,8 @@ module "not_rev_shell" {
 
 You can find the rev shell code in [https://github.com/carlospolop/terraform\_external\_module\_rev\_shell/tree/main/modules](https://github.com/carlospolop/terraform\_external\_module\_rev\_shell/tree/main/modules)
 
+For an even **more stealth attack** you can use the **ref** feature to hide the **terraform rev shell code in a branch** inside of the repo, something like: `git@github.com:carlospolop/terraform_external_module_rev_shell//modules?ref=b401d2b`
+
 ### Atlantis apply RCE - Config modification in new PR
 
 If you have write access over a repository you will be able to create a new branch on it and generate a PR. If you can **execute `atlantis apply` you will be able to RCE inside the Atlantis server**.
