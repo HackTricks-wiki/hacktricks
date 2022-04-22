@@ -10,9 +10,9 @@
 
 Note that even if the PINOUT of the Pirate Bus indicates pins for **MOSI** and **MISO** to connect to SPI however some SPIs may indicate pins as DI and DO. **MOSI -> DI, MISO -> DO**
 
-![](<../../.gitbook/assets/image (648).png>)
+![](<../../.gitbook/assets/image (648) (1).png>)
 
-In Windows or Linux you can use the program [**`flashrom`**](https://www.flashrom.org/Flashrom)  to dump the content of the flash memory running something like:
+In Windows or Linux you can use the program [**`flashrom`**](https://www.flashrom.org/Flashrom) to dump the content of the flash memory running something like:
 
 ```bash
 # In this command we are indicating:

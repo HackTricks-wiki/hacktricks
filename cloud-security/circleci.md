@@ -68,7 +68,7 @@ jobs:
 These are **secrets** that are only going to be **accessible** by the **project** (by **any branch**).\
 You can see them **declared in** _https://app.circleci.com/settings/project/github/\<org\_name>/\<repo\_name>/environment-variables_
 
-![](<../.gitbook/assets/image (662).png>)
+![](<../.gitbook/assets/image (662) (1).png>)
 
 {% hint style="danger" %}
 The "**Import Variables**" functionality allows to **import variables from other projects** to this one.

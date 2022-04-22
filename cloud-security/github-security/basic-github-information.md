@@ -96,7 +96,7 @@ You can generate personal access token to **give an application access to your a
 Oauth applications may ask you for permissions **to access part of your github information or to impersonate you** to perform some actions. A common example of this functionality is the **login with github button** you might find in some platforms.
 
 * You can **create** your own **Oauth applications** in [https://github.com/settings/developers](https://github.com/settings/developers)
-* You can see all the **Oauth applications that has access to your account**  in [https://github.com/settings/applications](https://github.com/settings/applications)
+* You can see all the **Oauth applications that has access to your account** in [https://github.com/settings/applications](https://github.com/settings/applications)
 * You can see the **scopes that Oauth Apps can ask for** in [https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps](https://docs.github.com/en/developers/apps/building-oauth-apps/scopes-for-oauth-apps)
 * You can see third party access of applications in an **organization** in _https://github.com/organizations/\<org\_name>/settings/oauth\_application\_policy_
 
@@ -104,7 +104,7 @@ Some **security recommendations**:
 
 * An **OAuth App** should always **act as the authenticated GitHub user across all of GitHub** (for example, when providing user notifications) and with access only to the specified scopes..
 * An OAuth App can be used as an identity provider by enabling a "Login with GitHub" for the authenticated user.
-* **Don't** build an **OAuth App** if you want your application to act on a **single repository**. With the `repo` OAuth scope, OAuth Apps can **act on **_**all**_** of the authenticated user's repositorie**s.
+* **Don't** build an **OAuth App** if you want your application to act on a **single repository**. With the `repo` OAuth scope, OAuth Apps can **act on \_all**\_\*\* of the authenticated user's repositorie\*\*s.
 * **Don't** build an OAuth App to act as an application for your **team or company**. OAuth Apps authenticate as a **single user**, so if one person creates an OAuth App for a company to use, and then they leave the company, no one else will have access to it.
 * **More** in [here](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps#about-oauth-apps).
 
@@ -115,7 +115,7 @@ Github applications can ask for permissions to **access your github information 
 * To install a GitHub App, you must be an **organisation owner or have admin permissions** in a repository.
 * The GitHub App should **connect to a personal account or an organisation**.
 * You can create your own Github application in [https://github.com/settings/apps](https://github.com/settings/apps)
-* You can see all the **Github applications that has access to your account**  in [https://github.com/settings/apps/authorizations](https://github.com/settings/apps/authorizations)
+* You can see all the **Github applications that has access to your account** in [https://github.com/settings/apps/authorizations](https://github.com/settings/apps/authorizations)
 * These are the **API Endpoints for Github Applications** [https://docs.github.com/en/rest/overview/endpoints-available-for-github-app](https://docs.github.com/en/rest/overview/endpoints-available-for-github-apps). Depending on the permissions of the App it will be able to access some of them
 * You can see installed apps in an **organization** in _https://github.com/organizations/\<org\_name>/settings/installations_
 
@@ -129,6 +129,10 @@ Some security recommendations:
 * Don't build a GitHub App if you _only_ want to act as a GitHub user and do everything that user can do.
 * If you are using your app with GitHub Actions and want to modify workflow files, you must authenticate on behalf of the user with an OAuth token that includes the `workflow` scope. The user must have admin or write permission to the repository that contains the workflow file. For more information, see "[Understanding scopes for OAuth apps](https://docs.github.com/en/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/#available-scopes)."
 * **More** in [here](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps#about-github-apps).
+
+### Deploy keys
+
+Deploy keys might have read-only or write access to the repo, so they might be interesting to compromise specific repos.
 
 ### Github Actions
 
@@ -144,7 +148,7 @@ In _https://github.com/organizations/\<org\_name>/settings/actions_ it's possibl
 
 It's possible to disallow the use of github actions completely, **allow all github actions**, or just allow certain actions.
 
-It's also possible to configure **who needs approval to run a Github Action** and the **permissions of the  **_**GITHUB\_TOKEN**_** of a Github Action when it's run**.
+It's also possible to configure **who needs approval to run a Github Action** and the **permissions of the \_GITHUB\_TOKEN**\_\*\* of a Github Action when it's run\*\*.
 
 ### Git Secrets
 
@@ -255,4 +259,3 @@ As you can see, even if you managed to obtain some credentials of a user, **repo
 * [https://docs.github.com/en/get-started/learning-about-github/access-permissions-on-github](https://docs.github.com/en/get-started/learning-about-github/access-permissions-on-github)
 * [https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-user-account/managing-user-account-settings/permission-levels-for-user-owned-project-boards](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-user-account/managing-user-account-settings/permission-levels-for-user-owned-project-boards)
 * [https://docs.github.com/en/actions/security-guides/encrypted-secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
-

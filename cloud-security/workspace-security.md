@@ -86,7 +86,7 @@ If someone creates a **copy** of that **document** that **contained the App Scri
 
 This method will be able to bypass also the Workspace admin restriction:
 
-![](<../.gitbook/assets/image (662) (1) (1).png>)
+![](<../.gitbook/assets/image (662) (1) (1) (1).png>)
 
 But can be prevented with:
 
@@ -123,7 +123,7 @@ You potentially need access to the console to join groups that allow to be joine
 
 ### Access Groups Mail info
 
-If you managed to **compromise a google user session**, from [**https://groups.google.com/all-groups**](https://groups.google.com/all-groups)  you can see the history of mails sent to the mail groups the user is member of, and you might find **credentials** or other **sensitive data**.
+If you managed to **compromise a google user session**, from [**https://groups.google.com/all-groups**](https://groups.google.com/all-groups) you can see the history of mails sent to the mail groups the user is member of, and you might find **credentials** or other **sensitive data**.
 
 ### Takeout - Download Everything Google Knows about an account
 
@@ -131,7 +131,7 @@ If you have a **session inside victims google account** you can download everyth
 
 ### Vault - Download all the Workspace data of users
 
-If an organization has **Google Vault enabled**, you might be able to access [**https://vault.google.com**](https://vault.google.com/u/1/)  and **download** all the **information**.
+If an organization has **Google Vault enabled**, you might be able to access [**https://vault.google.com**](https://vault.google.com/u/1/) and **download** all the **information**.
 
 ### Contacts download
 

@@ -9,7 +9,7 @@
 After installing there are a few things that you could consider configuring.\
 In settings (the second tab button) you can select the **SDR device** or **select a file** to read and which frequency to syntonise and the Sample rate (recommended to up to 2.56Msps if your PC support it)\\
 
-![](<../../.gitbook/assets/image (655).png>)
+![](<../../.gitbook/assets/image (655) (1).png>)
 
 In the GUI behaviour it's recommended to enable a few things if your PC support it:
 
@@ -126,7 +126,7 @@ Pressing sample this appears:
 
 Now, to make SigDigger understand **where is the range** of the level carrying information you need to click on the **lower level** and maintain clicked until the biggest level:
 
-![](<../../.gitbook/assets/image (662) (1).png>)
+![](<../../.gitbook/assets/image (662) (1) (1).png>)
 
 If there would have been for example **4 different levels of amplitude**, you should have need to configure the **Bits per symbol to 2** and select from the smallest to the biggest.
 
@@ -160,7 +160,7 @@ This is because I capture the signal in booth frequencies, therefore one is appr
 
 If the synchronized frequency is **closer to one frequency than to the other** you can easily see the 2 different frequencies:
 
-![](<../../.gitbook/assets/image (648) (1).png>)
+![](<../../.gitbook/assets/image (648) (1) (1).png>)
 
 ![](<../../.gitbook/assets/image (634).png>)
 

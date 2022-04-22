@@ -1,6 +1,11 @@
 # Jenkins
 
-## Enumeration
+## Basic Information
+
+Jenkins offers a simple way to set up a **continuous integration** or **continuous delivery** (CI/CD) environment for almost **any** combination of **languages** and source code repositories using pipelines, as well as automating other routine development tasks. While Jenkins doesn’t eliminate the **need to create scripts for individual steps**, it does give you a faster and more robust way to integrate your entire chain of build, test, and deployment tools than you can easily build yourself.\
+Definition from [here](https://www.infoworld.com/article/3239666/what-is-jenkins-the-ci-server-explained.html).
+
+## Unauthenticated Enumeration
 
 In order to search for interesting Jenkins pages without authentication like (_/people_ or _/asynchPeople_, this lists the current users) you can use:
 
@@ -14,11 +19,11 @@ Check if you can execute commands without needing authentication:
 msf> use auxiliary/scanner/http/jenkins_command
 ```
 
-Without credentials you can look inside _**/asynchPeople/**_ path or  _**/securityRealm/user/admin/search/index?q=**_ for **usernames**.
+Without credentials you can look inside _**/asynchPeople/**_ path or _**/securityRealm/user/admin/search/index?q=**_ for **usernames**.
 
 You may be able to get the Jenkins version from the path _**/oops**_ or _**/error**_
 
-![](<../../.gitbook/assets/image (415).png>)
+![](<../.gitbook/assets/image (415).png>)
 
 ## Login
 
@@ -67,17 +72,15 @@ This method is very noisy because you have to create a hole new project (obvious
 2. Inside **Build** section set **Execute shell** and paste a powershell Empire launcher or a meterpreter powershell (can be obtained using _unicorn_). Start the payload with _PowerShell.exe_ instead using _powershell._
 3. Click **Build now**
 
-
-
 Go to the projects and check **if you can configure any** of them (look for the "Configure button"):
 
-![](<../../.gitbook/assets/image (158).png>)
+![](<../.gitbook/assets/image (158).png>)
 
-Or **try to access to the path **_**/configure**_ in each project (example: /_me/my-views/view/all/job/Project0/configure_).
+Or **try to access to the path \_/configure**\_ in each project (example: /_me/my-views/view/all/job/Project0/configure_).
 
 If you are allowed to configure the project you can **make it execute commands when a build is successful**:
 
-![](<../../.gitbook/assets/image (159).png>)
+![](<../.gitbook/assets/image (159).png>)
 
 Click on **Save** and **build** the project and your **command will be executed**.\
 If you are not executing a reverse shell but a simple command you can **see the output of the command inside the output of the build**.
@@ -96,7 +99,7 @@ println "Found text ${process.text}"
 
 You could execute a command using: `cmd.exe /c dir`
 
-In **linux** you can do:  **`"ls /".execute().text`**
+In **linux** you can do: **`"ls /".execute().text`**
 
 If you need to use _quotes_ and _single quotes_ inside the text. You can use _"""PAYLOAD"""_ (triple double quotes) to execute the payload.
 

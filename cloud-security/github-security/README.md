@@ -64,7 +64,7 @@ Check the section below about [**branch protections bypasses**](./#branch-protec
 
 Github allows **users** to set **SSH keys** that will be used as **authentication method to deploy code** on their behalf (no 2FA is applied).
 
-With this key you can perform **changes in repositories where the user has some privileges**, however you can not sue it to access github api to enumerate the environment. However, you can get **enumerate local settings** to get information about the repos and user you have access to:
+With this key you can perform **changes in repositories where the user has some privileges**, however you can not user it to access github api to enumerate the environment. However, you can **enumerate local settings** to get information about the repos and user you have access to:
 
 ```bash
 # Go to the the repository folder
@@ -111,6 +111,14 @@ For an introduction about [**Github Applications check the basic information**](
 An attacker might create a **malicious Github Application** to access privileged data/actions of the users that accepts them probably as part of a phishing campaign.
 
 Moreover, as explained in the basic information, **organizations can give/deny access to third party applications** to information/repos/actions related with the organisation.
+
+### Enumerate Webhooks
+
+**Webhooks** are able to **send specific gitea information to some places**. You might be able to **exploit that communication**.\
+However, usually a **secret** you can **not retrieve** is set in the **webhook** that will **prevent** external users that know the URL of the webhook but not the secret to **exploit that webhook**.\
+But in some occasions, people instead of setting the **secret** in its place, they **set it in the URL** as a parameter, so **checking the URLs** could allow you to **find secrets** and other places you could exploit further.
+
+Webhooks can be set at **repo and at org level**.
 
 ### With Malicious Github Action
 
