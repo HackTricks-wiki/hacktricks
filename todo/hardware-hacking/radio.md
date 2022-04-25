@@ -113,7 +113,7 @@ You can also indicate the number of symbols you are going to select and SigDigge
 
 Having found this is an **AM modulated** signal and the **symbol rate** (and knowing that in this case something up means 1 and something down means 0), it's very easy to **obtain the bits** encoded in the signal. So, select the signal with info and configure the sampling and decision and press sample (check that **Amplitude** is selected, the discovered **Symbol rate** is configured and the **Gadner clock recovery** is selected):
 
-![](<../../.gitbook/assets/image (642).png>)
+![](<../../.gitbook/assets/image (642) (1).png>)
 
 * **Sync to selection intervals** means that if you previously selected intervals to find the symbol rate, that symbol rate will be used.
 * **Manual** means that the indicated symbol rate is going to be used
@@ -132,7 +132,7 @@ If there would have been for example **4 different levels of amplitude**, you sh
 
 Finally **increasing** the **Zoom** and **changing the Row size** you can see the bits (and you can select all and copy to get all the bits):
 
-![](<../../.gitbook/assets/image (649).png>)
+![](<../../.gitbook/assets/image (649) (1).png>)
 
 If the signal has more than 1 bit per symbol (for example 2), SigDigger has **no way to know which symbol is** 00, 01, 10, 11, so it will use different **grey scales** the represent each (and if you copy the bits it will use **numbers from 0 to 3**, you will need to treat them).
 
@@ -160,7 +160,7 @@ This is because I capture the signal in booth frequencies, therefore one is appr
 
 If the synchronized frequency is **closer to one frequency than to the other** you can easily see the 2 different frequencies:
 
-![](<../../.gitbook/assets/image (648) (1) (1).png>)
+![](<../../.gitbook/assets/image (648) (1) (1) (1).png>)
 
 ![](<../../.gitbook/assets/image (634).png>)
 

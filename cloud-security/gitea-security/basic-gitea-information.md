@@ -32,7 +32,7 @@ When creating a new team, several important settings are selected:
   * **Administrator** access
   * **Specific** access:
 
-![](<../../.gitbook/assets/image (648).png>)
+![](<../../.gitbook/assets/image (648) (1).png>)
 
 ### Teams & Users
 
