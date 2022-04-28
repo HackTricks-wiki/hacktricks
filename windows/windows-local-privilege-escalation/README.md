@@ -224,7 +224,7 @@ Even if the attack is For more information about the flow of the attack check [h
 
 ### AlwaysInstallElevated
 
-**If** these 2 registers are **enabled** (value is **0x1**), then users of any privilege can **install** (execute) \*\* `*.msi`\*\* files as NT AUTHORITY\\**SYSTEM**.
+**If** these 2 registers are **enabled** (value is **0x1**), then users of any privilege can **install** (execute) `*.msi` files as NT AUTHORITY\\**SYSTEM**.
 
 ```bash
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
@@ -266,7 +266,7 @@ Read this tutorial to learn how to create a MSI wrapper using this tools. Note t
 
 #### MSI Installation
 
-To execute the **installation** of the \*\*malicious `.msi` \*\* file in **background:**
+To execute the **installation** of the malicious `.msi` file in **background:**
 
 ```
 msiexec /quiet /qn /i C:\Users\Steve.INFERNO\Downloads\alwe.msi
@@ -1134,7 +1134,7 @@ Search for a file called **SiteList.xml**
 
 Before KB2928120 (see MS14-025), some Group Policy Preferences could be configured with a custom account. This feature was mainly used to deploy a custom local administrator account on a group of machines. There were two problems with this approach though. First, since the Group Policy Objects are stored as XML files in SYSVOL, any domain user can read them. The second problem is that the password set in these GPPs is AES256-encrypted with a default key, which is publicly documented. This means that any authenticated user could potentially access very sensitive data and elevate their privileges on their machine or even the domain. This function will check whether any locally cached GPP file contains a non-empty "cpassword" field. If so, it will decrypt it and return a custom PS object containing some information about the GPP along with the location of the file.
 
-Search in \*\* **\_**C:\ProgramData\Microsoft\Group Policy\history\*\* \_ or in _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (previous to W Vista)_ for these files:
+Search in `C:\ProgramData\Microsoft\Group Policy\history` or in _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (previous to W Vista)_ for these files:
 
 * Groups.xml
 * Services.xml
@@ -1419,7 +1419,7 @@ Using this technique is usually **selected any process running as SYSTEM with al
 
 #### **Named Pipes**
 
-This technique is used by meterpreter to escalate in `getsystem`. The technique consists on **creating a pipe and then create/abuse a service to write on that pipe**. Then, the **server** that created the pipe using the \*\*`SeImpersonate` \*\* privilege will be able to **impersonate the token** of the pipe client (the service) obtaining SYSTEM privileges.\
+This technique is used by meterpreter to escalate in `getsystem`. The technique consists on **creating a pipe and then create/abuse a service to write on that pipe**. Then, the **server** that created the pipe using the **`SeImpersonate`** privilege will be able to **impersonate the token** of the pipe client (the service) obtaining SYSTEM privileges.\
 If you want to [**learn more about name pipes you should read this**](./#named-pipe-client-impersonation).\
 If you want to read an example of [**how to go from high integrity to System using name pipes you should read this**](from-high-integrity-to-system-with-name-pipes.md).
 
