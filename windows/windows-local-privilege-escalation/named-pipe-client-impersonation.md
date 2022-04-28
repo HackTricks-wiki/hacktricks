@@ -1,4 +1,4 @@
-
+# Named Pipe Client Impersonation
 
 <details>
 
@@ -16,12 +16,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
-# Named Pipe Client Impersonation
+## Named Pipe Client Impersonation
 
 **This information was copied from** [**https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation**](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)
 
-## Overview
+### Overview
 
 A `pipe` is a block of shared memory that processes can use for communication and data exchange.
 
@@ -34,7 +33,7 @@ This lab is concerned with a simple PoC code that allows:
 * creating a single-threaded dumb named pipe server that will accept one client connection
 * named pipe server to write a simple message to the named pipe so that the pipe client can read it
 
-## Code
+### Code
 
 Below is the PoC for both the server and the client:
 
@@ -104,23 +103,23 @@ int main()
 {% endtab %}
 {% endtabs %}
 
-## Execution
+### Execution
 
 Below shows the named pipe server and named pipe client working as expected:
 
-![](<../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22 (2).png>)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22.png>)
 
 Worth nothing that the named pipes communication by default uses SMB protocol:
 
-![](../../.gitbook/assets/screenshot-from-2019-04-04-23-51-48.png)
+![](<../../.gitbook/assets/Screenshot from 2019-04-04 23-51-48.png>)
 
 Checking how the process maintains a handle to our named pipe `mantvydas-first-pipe`:
 
-![](<../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22 (1).png>)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (1).png>)
 
 Similary, we can see the client having an open handle to the named pipe:
 
-![](../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22.png)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (2).png>)
 
 We can even see our pipe with powershell:
 
@@ -128,9 +127,9 @@ We can even see our pipe with powershell:
 ((Get-ChildItem \\.\pipe\).name)[-1..-5]
 ```
 
-![](<../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22 (3).png>)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (3).png>)
 
-## Token Impersonation
+### Token Impersonation
 
 {% hint style="info" %}
 Note that in order to impersonate the token of the client process you need to have (the server process creating the pipe) the **`SeImpersonate`** token privilege
@@ -181,7 +180,6 @@ int main() {
 
 Running the server and connecting to it with the client that is running under administrator@offense.local security context, we can see that the main thread of the named server pipe assumed the token of the named pipe client - offense\administrator, although the PipeServer.exe itself is running under ws01\mantvydas security context. Sounds like a good way to escalate privileges?
 
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -197,5 +195,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

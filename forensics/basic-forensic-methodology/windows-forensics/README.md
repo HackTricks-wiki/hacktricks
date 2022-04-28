@@ -1,4 +1,4 @@
-
+# Windows Artifacts
 
 <details>
 
@@ -16,30 +16,29 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+## Windows Artifacts
 
-# Windows Artifacts
+### Generic Windows Artifacts
 
-## Generic Windows Artifacts
-
-### Windows 10 Notifications
+#### Windows 10 Notifications
 
 In the path `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` you can find the database `appdb.dat` (before Windows anniversary) or `wpndatabase.db` (after Windows Anniversary).
 
 Inside this SQLite database you can find the `Notification` table with all the notifications (in xml format) that may contain interesting data.
 
-### Timeline
+#### Timeline
 
 Timeline is a Windows characteristic that provides **chronological history** of web pages visited, edited documents, executed applications...\
 The database resides in the path `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`\
 This database can be open with a SQLite tool or with the tool [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **which generates 2 files that can be opened with the tool** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
-### ADS/Alternate Data Streams
+#### ADS/Alternate Data Streams
 
 Files downloaded may contain the **ADS Zone.Identifier** indicating **how** was **downloaded** (from the intranet, Internet...) and some software (like browser) usually put even **more** **information** like the **URL** from where the file was downloaded.
 
-## **File Backups**
+### **File Backups**
 
-### Recycle Bin
+#### Recycle Bin
 
 In Vista/Win7/Win8/Win10 the **Reciclye Bin** can be found in the folder **`$Recycle.bin`** in the root of the drive (`C:\$Reciycle.bin`).\
 When a file is deleted in this folder are created 2 files:
@@ -55,9 +54,9 @@ Having these files you can sue the tool [**Rifiuti**](https://github.com/abelche
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
 
-![](<../../../.gitbook/assets/image (495) (1) (1) (1).png>)
+![](<../../../.gitbook/assets/image (495) (1) (1).png>)
 
-### Volume Shadow Copies
+#### Volume Shadow Copies
 
 Shadow Copy is a technology included in Microsoft Windows that can create **backup copies** or snapshots of computer files or volumes, even when they are in use.\
 These backups are usually located in the `\System Volume Information` from the roof of the file system and the name is composed by **UIDs** as in the following image:
@@ -74,15 +73,15 @@ The registry entry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRe
 
 The registry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` also contains configuration information about the `Volume Shadow Copies`.
 
-### Office AutoSaved Files
+#### Office AutoSaved Files
 
 You can find the office autosaved files in : `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
 
-## Shell Items
+### Shell Items
 
 A shell item is an item that contains information about how to access another file.
 
-### Recent Documents (LNK)
+#### Recent Documents (LNK)
 
 Windows **automatically** **creates** these **shortcuts** when the user **open, uses or creates a file** in:
 
@@ -108,7 +107,7 @@ LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 
 In this case the information is going to be saved inside a CSV file.
 
-### Jumplists
+#### Jumplists
 
 These are the recent files that are indicated per application. It's the list of **recent files used by an application** that you can access on each application.
 
@@ -127,11 +126,11 @@ You can inspect the jumplists using [**JumplistExplorer**](https://ericzimmerman
 
 (_Note that the timestamps provided by JumplistExplorer are related to the jumplist file itself_)
 
-### Shellbags
+#### Shellbags
 
 [**Follow this link to learn what are the shellbags.**](interesting-windows-registry-keys.md#shellbags)
 
-## Use of Windows USBs
+### Use of Windows USBs
 
 It's possible to identify that a USB device was used thanks to the creation of:
 
@@ -145,23 +144,23 @@ Note that some LNK file instead of pointing to the original path, points to the 
 
 The files in the folder WPDNSE are a copy of the original ones, then won't survive a restart of the PC and the GUID is taken from a shellbag.
 
-### Registry Information
+#### Registry Information
 
 [Check this page to learn](interesting-windows-registry-keys.md#usb-information) which registry keys contains interesting information about USB connected devices.
 
-### setupapi
+#### setupapi
 
 Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about when the USB connection was produced (search for `Section start`).
 
-![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (3).png>)
+![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (4).png>)
 
-### USB Detective
+#### USB Detective
 
 [**USBDetective**](https://usbdetective.com) can be used to obtain information about the USB devices that have been connected to an image.
 
 ![](<../../../.gitbook/assets/image (483).png>)
 
-### Plug and Play Cleanup
+#### Plug and Play Cleanup
 
 The 'Plug and Play Cleanup' scheduled task is responsible for **clearing** legacy versions of drivers. It would appear (based upon reports online) that it also picks up **drivers which have not been used in 30 days**, despite its description stating that "the most current version of each driver package will be kept". As such, **removable devices which have not been connected for 30 days may have their drivers removed**.\
 The scheduled task itself is located at ‘C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup’, and its content is displayed below:
@@ -171,7 +170,7 @@ The scheduled task itself is located at ‘C:\Windows\System32\Tasks\Microsoft\W
 The task references 'pnpclean.dll' which is responsible for performing the cleanup activity additionally we see that the ‘UseUnifiedSchedulingEngine’ field is set to ‘TRUE’ which specifies that the generic task scheduling engine is used to manage the task. The ‘Period’ and ‘Deadline’ values of 'P1M' and 'P2M' within ‘MaintenanceSettings’ instruct Task Scheduler to execute the task once every month during regular Automatic maintenance and if it fails for 2 consecutive months, to start attempting the task during.\
 **This section was copied from** [**here**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)**.**
 
-## Emails
+### Emails
 
 The emails contains **2 interesting parts: The headers and the content** of the email. In the **headers** you can find information like:
 
@@ -182,7 +181,7 @@ Also, inside the `References` and `In-Reply-To` headers you can find the ID of t
 
 ![](<../../../.gitbook/assets/image (484).png>)
 
-### Windows Mail App
+#### Windows Mail App
 
 This application saves the emails in HTML or text. You can find the emails inside subfolders inside `\Users\<username>\AppData\Local\Comms\Unistore\data\3\`. The emails are saved with `.dat` extension.
 
@@ -190,7 +189,7 @@ The **metadata** of the emails and the **contacts** can be found inside the **ED
 
 **Change the extension** of the file from `.vol` to `.edb` and you can use the tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html) to open it. Inside the `Message` table you can see the emails.
 
-### Microsoft Outlook
+#### Microsoft Outlook
 
 When Exchange servers or Outlook clients are used there are going to be some MAPI headers:
 
@@ -210,31 +209,31 @@ You can open the PST file using the tool [**Kernel PST Viewer**](https://www.nuc
 
 ![](<../../../.gitbook/assets/image (485).png>)
 
-### Outlook OST
+#### Outlook OST
 
 When Microsoft Outlook is configured **using** **IMAP** or using an **Exchange** server, it generates a **OST** file that stores almost the same info as the PST file. It keeps the file synchronized with the server for the l**ast 12 months**, with a **max file-size of 50GB** and in the **same folder as the PST** file is saved.
 
 You can inspect this file using [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html).
 
-### Recovering Attachments
+#### Recovering Attachments
 
 You may be able to find them in the folder:
 
 * `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook` -> IE10
 * `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook` -> IE11+
 
-### Thunderbird MBOX
+#### Thunderbird MBOX
 
 **Thunderbird** stores the information in **MBOX** **files** in the folder `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles`
 
-## Thumbnails
+### Thumbnails
 
 When a user access a folder and organised it using thumbnails, then a `thumbs.db` file is created. This db **stores the thumbnails of the images** of the folder even if they are deleted.\
 in winXP and WIn8-8.1 this file is created automatically. In Win7/Win10, it's created automatically if it's accessed via an UNC path (\IP\folder...).
 
 It is possible to read this file with the tool [**Thumbsviewer**](https://thumbsviewer.github.io).
 
-### Thumbcache
+#### Thumbcache
 
 Beginning with Windows Vista, **thumbnail previews are stored in a centralized location on the system**. This provides the system with access to images independent of their location, and addresses issues with the locality of Thumbs.db files. The cache is stored at **`%userprofile%\AppData\Local\Microsoft\Windows\Explorer`** as a number of files with the label **thumbcache\_xxx.db** (numbered by size); as well as an index used to find thumbnails in each sized database.
 
@@ -245,7 +244,7 @@ Beginning with Windows Vista, **thumbnail previews are stored in a centralized l
 
 You can read this file using [**ThumbCache Viewer**](https://thumbcacheviewer.github.io).
 
-## Windows Registry
+### Windows Registry
 
 The Windows Registry Contains a lot of **information** about the **system and the actions of the users**.
 
@@ -261,7 +260,7 @@ The files containing the registry are located in:
 From Windows Vista and Windows 2008 Server upwards there are some backups of the `HKEY_LOCAL_MACHINE` registry files in **`%Windir%\System32\Config\RegBack\`**.\
 Also from these versions, the registry file **`%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT`** is created saving information about program executions.
 
-### Tools
+#### Tools
 
 Some tools are useful to analyzed the registry files:
 
@@ -270,28 +269,28 @@ Some tools are useful to analyzed the registry files:
 * [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Again, it has a GUI that allows to navigate through the loaded registry and also contains plugins that highlight interesting information inside the loaded registry.
 * [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Another GUI application capable of extracting the important information from the registry loaded.
 
-### Recovering Deleted Element
+#### Recovering Deleted Element
 
 When a key is deleted it's marked as such but until the space it's occupying is needed it won't be removed. Therefore, using tools like **Registry Explorer** it's possible to recover these deleted keys.
 
-### Last Write Time
+#### Last Write Time
 
 Each Key-Value contains a **timestamp** indicating the last time it was modified.
 
-### SAM
+#### SAM
 
 The file/hive **SAM** contains the **users, groups and users passwords** hashes of the system.\
 In `SAM\Domains\Account\Users` you can obtain the username, the RID, last logon, last failed logon, login counter, password policy and when the account was created. In order to get the **hashes** you also **need** the file/hive **SYSTEM**.
 
-### Interesting entries in the Windows Registry
+#### Interesting entries in the Windows Registry
 
 {% content-ref url="interesting-windows-registry-keys.md" %}
 [interesting-windows-registry-keys.md](interesting-windows-registry-keys.md)
 {% endcontent-ref %}
 
-## Programs Executed
+### Programs Executed
 
-### Basic Windows Processes
+#### Basic Windows Processes
 
 in the following page you can learn about the basic Windows processes to detect suspicious behaviours:
 
@@ -299,15 +298,15 @@ in the following page you can learn about the basic Windows processes to detect 
 [windows-processes.md](windows-processes.md)
 {% endcontent-ref %}
 
-### Windows RecentAPPs
+#### Windows RecentAPPs
 
 Inside the registry `NTUSER.DAT` in the path `Software\Microsoft\Current Version\Search\RecentApps` you can subkeys with information about the **application executed**, **last time** it was executed, and **number of times** it was launched.
 
-### BAM
+#### BAM
 
 You can open the `SYSTEM` file with a registry editor and inside the path `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` you can find the information about the **applications executed by each user** (note the `{SID}` in the path) and at **what time** they were executed (the time is inside the Data value of the registry).
 
-### Windows Prefetch
+#### Windows Prefetch
 
 Prefetching is a technique that allows a computer to silently **fetch the necessary resources needed to display content** that a user **might access in the near future** so resources can be accessed in less time.
 
@@ -327,7 +326,7 @@ To inspect these files you can use the tool [**PEcmd.exe**](https://github.com/E
 
 ![](<../../../.gitbook/assets/image (487).png>)
 
-### Superprefetch
+#### Superprefetch
 
 **Superprefetch** has the same goal as prefetch, **load programs faster** by predicting what is going to be loaded next. However, it doesn't substitute the prefetch service.\
 This service will generate database files in `C:\Windows\Prefetch\Ag*.db`.
@@ -336,7 +335,7 @@ In these databases you can find the **name** of the **program**, **number** of *
 
 You can access this information using the tool [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/).
 
-### SRUM
+#### SRUM
 
 **System Resource Usage Monitor** (SRUM) **monitors** the **resources** **consumed** **by a process**. It appeared in W8 and it stores the data en an ESE database located in `C:\Windows\System32\sru\SRUDB.dat`.
 
@@ -358,7 +357,7 @@ You can obtain the date from this file using the tool [**srum\_dump**](https://g
 .\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -t SRUM_TEMPLATE.xlsx -o C:\Users\student\Desktop\srum
 ```
 
-### AppCompatCache (ShimCache)
+#### AppCompatCache (ShimCache)
 
 **Shimcache**, also known as **AppCompatCache**, is a component of the **Application Compatibility Database**, which was created by **Microsoft** and used by the operating system to identify application compatibility issues.
 
@@ -382,7 +381,7 @@ You can use the tool [**AppCompatCacheParser**](https://github.com/EricZimmerman
 
 ![](<../../../.gitbook/assets/image (488).png>)
 
-### Amcache
+#### Amcache
 
 The **Amcache.hve** file is a registry file that stores the information of executed applications. It's located in `C:\Windows\AppCompat\Programas\Amcache.hve`
 
@@ -396,21 +395,21 @@ AmcacheParser.exe -f C:\Users\student\Desktop\Amcache.hve --csv C:\Users\student
 
 The most interesting CVS file generated if the `Amcache_Unassociated file entries`.
 
-### RecentFileCache
+#### RecentFileCache
 
 This artifact can only be found in W7 in `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` and it contains information about the recent execution of some binaries.
 
 You can use the tool [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) to parse the file.
 
-### Scheduled tasks
+#### Scheduled tasks
 
 You can extract them from `C:\Windows\Tasks` or `C:\Windows\System32\Tasks` and read them as XML.
 
-### Services
+#### Services
 
 You can find them in the registry under `SYSTEM\ControlSet001\Services`. You can see what is going to be executed and when.
 
-### **Windows Store**
+#### **Windows Store**
 
 The installed applications can be found in `\ProgramData\Microsoft\Windows\AppRepository\`\
 This repository has a **log** with **each application installed** in the system inside the database **`StateRepository-Machine.srd`**.
@@ -420,7 +419,7 @@ Inside the Application table of this database it's possible to find the columns:
 It's also possible to **find installed application** inside the registry path: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
 And **uninstalled** **applications** in: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
 
-## Windows Events
+### Windows Events
 
 Information that appears inside Windows events:
 
@@ -438,7 +437,7 @@ The location of the event files can be found in the SYSTEM registry in **`HKLM\S
 
 They can be visualized from the Windows Event Viewer (**`eventvwr.msc`**) or with other tools like [**Event Log Explorer**](https://eventlogxp.com) **or** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)**.**
 
-### Security
+#### Security
 
 These event register the accesses and give information about the security configuration.\
 they can be found in `C:\Windows\System32\winevt\Security.evtx`.
@@ -477,22 +476,22 @@ The Status and sub status information of the event s can indicate more details a
 
 ![](<../../../.gitbook/assets/image (455).png>)
 
-### Recovering Windows Events
+#### Recovering Windows Events
 
 It's highly recommended to turn off the suspicious PC by **unplugging it** to maximize the probabilities of recovering the Windows Events. In case they were deleted, a tool that can be useful to try to recover them is [**Bulk\_extractor**](../partitions-file-systems-carving/file-data-carving-recovery-tools.md#bulk-extractor) indicating the **evtx** extension.
 
-## Identifying Common Attacks with Windows Events
+### Identifying Common Attacks with Windows Events
 
-### Brute-Force Attack
+#### Brute-Force Attack
 
 A brute-force attack can be easily identifiable because **several EventIDs 4625 will appear**. **If** the attack was **successful**, after the EventIDs 4625, **an EventID 4624 will appear**.
 
-### Time Change
+#### Time Change
 
 This is awful for the forensics team as all the timestamps will be modified.\
 This event is recorded by the EventID 4616 inside the Security Event log.
 
-### USB devices
+#### USB devices
 
 The following System EventIDs are useful:
 
@@ -501,14 +500,13 @@ The following System EventIDs are useful:
 
 The EventID 112 from DeviceSetupManager contains the timestamp of each USB device inserted.
 
-### Turn Off / Turn On
+#### Turn Off / Turn On
 
 The ID 6005 of the "Event Log" service indicates the PC was turned On. The ID 6006 indicates it was turned Off.
 
-### Logs Deletion
+#### Logs Deletion
 
 The Security EventID 1102 indicates the logs were deleted.
-
 
 <details>
 
@@ -525,5 +523,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

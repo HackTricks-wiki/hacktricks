@@ -1,4 +1,4 @@
-
+# Abusing Active Directory ACLs/ACEs
 
 <details>
 
@@ -16,12 +16,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
-# Abusing Active Directory ACLs/ACEs
+## Abusing Active Directory ACLs/ACEs
 
 **This information was copied from** [**https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **because it's just perfect**
 
-## Context
+### Context
 
 This lab is to abuse weak permissions of Active Directory Discretionary Access Control Lists (DACLs) and Acccess Control Entries (ACEs) that make up DACLs.
 
@@ -29,7 +28,7 @@ Active Directory objects such as users and groups are securable objects and DACL
 
 An example of ACEs for the "Domain Admins" securable object can be seen here:
 
-![](<../../.gitbook/assets/1 (1).png>)
+![](../../.gitbook/assets/1.png)
 
 Some of the Active Directory object permissions and types that we as attackers are interested in:
 
@@ -43,7 +42,7 @@ Some of the Active Directory object permissions and types that we as attackers a
 
 In this lab, we are going to explore and try to exploit most of the above ACEs.
 
-## GenericAll on User
+### GenericAll on User
 
 Using powerview, let's check if our attacking user `spotless` has `GenericAll rights` on the AD object for the user `delegate`:
 
@@ -59,7 +58,7 @@ We can reset user's `delegate` password without knowing the current password:
 
 ![](../../.gitbook/assets/3.png)
 
-## GenericAll on Group
+### GenericAll on Group
 
 Let's see if `Domain admins` group has any weak permissions. First of, let's get its `distinguishedName`:
 
@@ -95,11 +94,11 @@ Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
 ```
 
-## GenericAll / GenericWrite / Write on Computer
+### GenericAll / GenericWrite / Write on Computer
 
 If you have these privileges on a Computer object, you can pull [Kerberos **Resource-based Constrained Delegation**: Computer Object Take Over](resource-based-constrained-delegation.md) off.
 
-## WriteProperty on Group
+### WriteProperty on Group
 
 If our controlled user has `WriteProperty` right on `All` objects for `Domain Admin` group:
 
@@ -113,7 +112,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 
 ![](../../.gitbook/assets/8.png)
 
-## Self (Self-Membership) on Group
+### Self (Self-Membership) on Group
 
 Another privilege that enables the attacker adding themselves to a group:
 
@@ -125,7 +124,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 
 ![](../../.gitbook/assets/10.png)
 
-## WriteProperty (Self-Membership)
+### WriteProperty (Self-Membership)
 
 One more privilege that enables the attacker adding themselves to a group:
 
@@ -141,7 +140,7 @@ net group "domain admins" spotless /add /domain
 
 ![](../../.gitbook/assets/12.png)
 
-## **ForceChangePassword**
+### **ForceChangePassword**
 
 If we have `ExtendedRight` on `User-Force-Change-Password` object type, we can reset the user's password without knowing their current password:
 
@@ -189,7 +188,7 @@ More info:
 * [https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/6b0dff90-5ac0-429a-93aa-150334adabf6?redirectedfrom=MSDN](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/6b0dff90-5ac0-429a-93aa-150334adabf6?redirectedfrom=MSDN)
 * [https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/e28bf420-8989-44fb-8b08-f5a7c2f2e33c](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/e28bf420-8989-44fb-8b08-f5a7c2f2e33c)
 
-## WriteOwner on Group
+### WriteOwner on Group
 
 Note how before the attack the owner of `Domain Admins` is `Domain Admins`:
 
@@ -213,7 +212,7 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 
 ![](../../.gitbook/assets/19.png)
 
-## GenericWrite on User
+### GenericWrite on User
 
 ```csharp
 Get-ObjectAcl -ResolveGUIDs -SamAccountName delegate | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
@@ -231,7 +230,7 @@ Below shows the user's ~~`delegate`~~ logon script field got updated in the AD:
 
 ![](../../.gitbook/assets/21.png)
 
-## WriteDACL + WriteOwner
+### WriteDACL + WriteOwner
 
 If you are the owner of a group, like I'm the owner of a `Test` AD group:
 
@@ -277,12 +276,12 @@ Set-Acl -Path $path -AclObject $acl
 
 ![](../../.gitbook/assets/26.png)
 
-## **Replication on the domain (DCSync)**
+### **Replication on the domain (DCSync)**
 
 The **DCSync** permission implies having these permissions over the domain itself: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** and **Replicating Directory Changes In Filtered Set**.\
 [**Learn more about the DCSync attack here.**](dcsync.md)
 
-## GPO Delegation <a href="#gpo-delegation" id="gpo-delegation"></a>
+### GPO Delegation <a href="#gpo-delegation" id="gpo-delegation"></a>
 
 Sometimes, certain users/groups may be delegated access to manage Group Policy Objects as is the case with `offense\spotless` user:
 
@@ -300,7 +299,7 @@ The below indicates that the user `offense\spotless` has **WriteProperty**, **Wr
 
 [**More about general AD ACL/ACE abuse here.**](acl-persistence-abuse.md)
 
-### Abusing the GPO Permissions <a href="#abusing-the-gpo-permissions" id="abusing-the-gpo-permissions"></a>
+#### Abusing the GPO Permissions <a href="#abusing-the-gpo-permissions" id="abusing-the-gpo-permissions"></a>
 
 We know the above ObjectDN from the above screenshot is referring to the `New Group Policy Object` GPO since the ObjectDN points to `CN=Policies` and also the `CN={DDC640FF-634A-4442-BC2E-C05EED132F0C}` which is the same in the GPO settings as highlighted below:
 
@@ -314,7 +313,7 @@ Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityRefere
 
 ![](../../.gitbook/assets/a16.png)
 
-#### Computers with a Given Policy Applied <a href="#computers-with-a-given-policy-applied" id="computers-with-a-given-policy-applied"></a>
+**Computers with a Given Policy Applied**
 
 We can now resolve the computer names the GPO `Misconfigured Policy` is applied to:
 
@@ -324,7 +323,7 @@ Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -A
 
 ![](../../.gitbook/assets/a17.png)
 
-#### Policies Applied to a Given Computer <a href="#policies-applied-to-a-given-computer" id="policies-applied-to-a-given-computer"></a>
+**Policies Applied to a Given Computer**
 
 ```
 Get-DomainGPO -ComputerIdentity ws01 -Properties Name, DisplayName
@@ -332,7 +331,7 @@ Get-DomainGPO -ComputerIdentity ws01 -Properties Name, DisplayName
 
 ![](https://blobs.gitbook.com/assets%2F-LFEMnER3fywgFHoroYn%2F-LWNAqc8wDhu0OYElzrN%2F-LWNBOmSsNrObOboiT2E%2FScreenshot%20from%202019-01-16%2019-44-19.png?alt=media\&token=34332022-c1fc-4f97-a7e9-e0e4d98fa8a5)
 
-#### OUs with a Given Policy Applied <a href="#ous-with-a-given-policy-applied" id="ous-with-a-given-policy-applied"></a>
+**OUs with a Given Policy Applied**
 
 ```
 Get-DomainOU -GPLink "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" -Properties DistinguishedName
@@ -340,7 +339,7 @@ Get-DomainOU -GPLink "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" -Properties Distin
 
 ![](https://blobs.gitbook.com/assets%2F-LFEMnER3fywgFHoroYn%2F-LWNAqc8wDhu0OYElzrN%2F-LWNBtLT332kTVDzd5qV%2FScreenshot%20from%202019-01-16%2019-46-33.png?alt=media\&token=ec90fdc0-e0dc-4db0-8279-cde4720df598)
 
-#### Abusing Weak GPO Permissions <a href="#abusing-weak-gpo-permissions" id="abusing-weak-gpo-permissions"></a>
+**Abusing Weak GPO Permissions**
 
 One of the ways to abuse this misconfiguration and get code execution is to create an immediate scheduled task through the GPO like so:
 
@@ -354,13 +353,13 @@ The above will add our user spotless to the local `administrators` group of the 
 
 ![](../../.gitbook/assets/a20.png)
 
-### Force Policy Update <a href="#force-policy-update" id="force-policy-update"></a>
+#### Force Policy Update <a href="#force-policy-update" id="force-policy-update"></a>
 
 ScheduledTask and its code will execute after the policy updates are pushed through (roughly each 90 minutes), but we can force it with `gpupdate /force` and see that our user `spotless` now belongs to local administrators group:
 
 ![](../../.gitbook/assets/a21.png)
 
-### Under the hood <a href="#under-the-hood" id="under-the-hood"></a>
+#### Under the hood <a href="#under-the-hood" id="under-the-hood"></a>
 
 If we observe the Scheduled Tasks of the `Misconfigured Policy` GPO, we can see our `evilTask` sitting there:
 
@@ -429,7 +428,7 @@ Below is the XML file that got created by `New-GPOImmediateTask` that represents
 ```
 {% endcode %}
 
-### Users and Groups <a href="#users-and-groups" id="users-and-groups"></a>
+#### Users and Groups <a href="#users-and-groups" id="users-and-groups"></a>
 
 The same privilege escalation could be achieved by abusing the GPO Users and Groups feature. Note in the below file, line 6 where the user `spotless` is added to the local `administrators` group - we could change the user to something else, add another one or even add the user to another group/multiple groups since we can amend the policy configuration file in the shown location due to the GPO delegation assigned to our user `spotless`:
 
@@ -450,7 +449,7 @@ The same privilege escalation could be achieved by abusing the GPO Users and Gro
 
 Additionally, we could think about leveraging logon/logoff scripts, using registry for autoruns, installing .msi, edit services and similar code execution avenues.
 
-## References
+### References
 
 {% embed url="https://wald0.com/?p=112" %}
 
@@ -461,7 +460,6 @@ Additionally, we could think about leveraging logon/logoff scripts, using regist
 {% embed url="https://adsecurity.org/?p=3658" %}
 
 {% embed url="https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_" %}
-
 
 <details>
 
@@ -478,5 +476,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

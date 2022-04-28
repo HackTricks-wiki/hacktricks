@@ -1,4 +1,4 @@
-
+# Privileged Accounts and Token Privileges
 
 <details>
 
@@ -16,10 +16,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+## Privileged Accounts and Token Privileges
 
-# Privileged Accounts and Token Privileges
-
-## Known groups with administration privileges
+### Known groups with administration privileges
 
 * **Administrators**
 * **Domain Admins**
@@ -27,7 +26,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 There are other account memberships and access token privileges that can also be useful during security assessments when chaining multiple attack vectors.
 
-## AdminSDHolder group
+### AdminSDHolder group
 
 The Access Control List (ACL) of the **AdminSDHolder** object is used as a template to **copy** **permissions** to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins.\
 By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker modifies the ACL of the group **AdminSDHolder** for example giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group (in an hour).\
@@ -49,14 +48,14 @@ If you don't want to wait an hour you can use a PS script to make the restore ha
 
 [**More information in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)
 
-## Account Operators <a href="#account-operators" id="account-operators"></a>
+### Account Operators <a href="#account-operators" id="account-operators"></a>
 
 * Allows creating non administrator accounts and groups on the domain
 * Allows logging in to the DC locally
 
 Note the spotless' user membership:
 
-![](<../../.gitbook/assets/1 (2) (1).png>)
+![](<../../.gitbook/assets/1 (2) (1) (1).png>)
 
 However, we can still add new users:
 
@@ -66,7 +65,7 @@ As well as login to DC01 locally:
 
 ![](../../.gitbook/assets/a3.png)
 
-## Server Operators <a href="#server-operators" id="server-operators"></a>
+### Server Operators <a href="#server-operators" id="server-operators"></a>
 
 This membership allows users to configure Domain Controllers with the following privileges:
 
@@ -90,20 +89,20 @@ The story changes:
 
 ![](../../.gitbook/assets/a6.png)
 
-## Backup Operators <a href="#backup-operators" id="backup-operators"></a>
+### Backup Operators <a href="#backup-operators" id="backup-operators"></a>
 
 As with `Server Operators` membership, we can access the `DC01` file system if we belong to `Backup Operators`:
 
 ![](../../.gitbook/assets/a7.png)
 
-## DnsAdmins
+### DnsAdmins
 
-### Resume
+#### Resume
 
 A user who is member of the **DNSAdmins** group or have **write privileges to a DNS** server object can load an **arbitrary DLL** with **SYSTEM** privileges on the **DNS server**.\
 This is really interesting as the **Domain Controllers** are used very frequently as DNS servers.
 
-### Execute
+#### Execute
 
 Then, if you have a user inside the DNSAdmins group, you can make the DNS server load an arbitrary DLL with SYSTEM privileges. You can make the DNS server load a local or remote (shared by SMB) DLL file executing:
 
@@ -133,7 +132,7 @@ sc.exe \\dc01 start dns
 
 [**Learn more about this privilege escalation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/from-dnsadmins-to-system-to-domain-compromise)
 
-## **AD Recycle Bin**
+### **AD Recycle Bin**
 
 This group gives you permission to read deleted AD object. Something juicy information can be found in there:
 
@@ -143,7 +142,7 @@ This group gives you permission to read deleted AD object. Something juicy infor
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
 
-## Group Managed Service Accounts (gMSA)
+### Group Managed Service Accounts (gMSA)
 
 In most of the infrastructures, service accounts are typical user accounts with “**Password never expire**” option. Maintaining these accounts could be a real mess and that's why Microsoft introduced **Managed Service Accounts:**
 
@@ -162,7 +161,7 @@ So, if gMSA is being used, find if it has **special privileges** and also check 
 
 Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.
 
-## SeLoadDriverPrivilege <a href="#seloaddriverprivilege" id="seloaddriverprivilege"></a>
+### SeLoadDriverPrivilege <a href="#seloaddriverprivilege" id="seloaddriverprivilege"></a>
 
 A very dangerous privilege to assign to any user - it allows the user to load kernel drivers and execute code with kernel privilges aka `NT\System`. See how `offense\spotless` user has this privilege:
 
@@ -226,7 +225,7 @@ We compile the above, execute and the privilege `SeLoadDriverPrivilege` is now e
 
 ![](../../.gitbook/assets/a10.png)
 
-### Capcom.sys Driver Exploit <a href="#capcom-sys-driver-exploit" id="capcom-sys-driver-exploit"></a>
+#### Capcom.sys Driver Exploit <a href="#capcom-sys-driver-exploit" id="capcom-sys-driver-exploit"></a>
 
 To further prove the `SeLoadDriverPrivilege` is dangerous, let's **exploit it to elevate privileges**.
 
@@ -355,7 +354,7 @@ You can download exploits from [https://github.com/tandasat/ExploitCapcom](https
 
 ![](../../.gitbook/assets/a12.png)
 
-### Auto
+#### Auto
 
 You can use [https://github.com/TarlogicSecurity/EoPLoadDriver/](https://github.com/TarlogicSecurity/EoPLoadDriver/) to **automatically enable** the **privilege**, **create** the **registry key** under HKEY\_CURRENT\_USER and **execute NTLoadDriver** indicating the registry key that you want to create and the path to the driver:
 
@@ -363,7 +362,7 @@ You can use [https://github.com/TarlogicSecurity/EoPLoadDriver/](https://github.
 
 Then, you will need to download a **Capcom.sys** exploit and use it to escalate privileges.
 
-## References <a href="#references" id="references"></a>
+### References <a href="#references" id="references"></a>
 
 {% embed url="https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges" %}
 
@@ -393,7 +392,6 @@ Then, you will need to download a **Capcom.sys** exploit and use it to escalate 
 
 {% embed url="https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html" %}
 
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -409,5 +407,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

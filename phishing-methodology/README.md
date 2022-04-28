@@ -1,4 +1,4 @@
-
+# Phishing Methodology
 
 <details>
 
@@ -16,10 +16,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+## Phishing Methodology
 
-# Phishing Methodology
-
-## Methodology
+### Methodology
 
 1. Recon the victim
    1. Select the **victim domain**.
@@ -34,9 +33,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
    2. Prepare the **web page** to steal the credentials
 4. Launch the campaign!
 
-## Generate similar domain names or buy a trusted domain
+### Generate similar domain names or buy a trusted domain
 
-### Domain Name Variation Techniques
+#### Domain Name Variation Techniques
 
 * **Keyword**: The domain name **contains** an important **keyword** of the original domain (e.g., zelster.com-management.com).
 * **hypened subdomain**: Change the **dot for a hyphen** of a subdomain (e.g., www-zelster.com).
@@ -51,18 +50,18 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Insertion**: It **inserts a letter** into the domain name (e.g., zerltser.com).
 * **Missing dot**: Append the TLD to the domain name. (e.g., zelstercom.com)
 
-#### Automatic Tools
+**Automatic Tools**
 
 * [**dnstwist**](https://github.com/elceef/dnstwist)
 * [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-#### **Websites**
+**Websites**
 
 * [https://dnstwist.it/](https://dnstwist.it)
 * [https://dnstwister.report/](https://dnstwister.report)
 * [https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/](https://www.internetmarketingninjas.com/tools/free-tools/domain-typo-generator/)
 
-### Bitflipping
+#### Bitflipping
 
 In the world of computing, everything is stored in bits (zeros and ones) in memory behind the scenes.\
 This applies to domains too. For example, _windows.com_ becomes _01110111..._ in the volatile memory of your computing device.\
@@ -74,7 +73,7 @@ For example a 1 bit modification in the domain microsoft.com can transform it in
 
 For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
-### Buy a trusted domain
+#### Buy a trusted domain
 
 You can search in [https://www.expireddomains.net/](https://www.expireddomains.net) for a expired domain that you could use.\
 In order to make sure that the expired domain that you are going to buy **has already a good SEO** you could search how is it categorized in:
@@ -82,7 +81,7 @@ In order to make sure that the expired domain that you are going to buy **has al
 * [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 * [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
 
-## Discovering Emails
+### Discovering Emails
 
 * [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester) (100% free)
 * [https://phonebook.cz/](https://phonebook.cz) (100% free)
@@ -93,9 +92,9 @@ In order to make sure that the expired domain that you are going to buy **has al
 In order to **discover more** valid email addresses or **verify the ones** you have already discovered you can check if you can brute-force them smtp servers of the victim. [Learn how to verify/discover email address here](broken-reference/).\
 Moreover, don't forget that if the users use **any web portal to access their mails**, you can check if it's vulnerable to **username brute force**, and exploit the vulnerability if possible.
 
-## Configuring GoPhish
+### Configuring GoPhish
 
-### Installation
+#### Installation
 
 You can download it from [https://github.com/gophish/gophish/releases/tag/v0.11.0](https://github.com/gophish/gophish/releases/tag/v0.11.0)
 
@@ -106,9 +105,9 @@ You will be given a password for the admin user in port 3333 in the output. Ther
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
 
-### Configuration
+#### Configuration
 
-#### TLS certificate configuration
+**TLS certificate configuration**
 
 Before this step you should have **already bought the domain** you are going to use and it must be **pointing** to the **IP of the VPS** where you are configuring **gophish**.
 
@@ -128,7 +127,7 @@ cp "/etc/letsencrypt/live/$DOMAIN/privkey.pem" /opt/gophish/ssl_keys/key.pem
 cp "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" /opt/gophish/ssl_keys/key.crt​
 ```
 
-#### Mail configuration
+**Mail configuration**
 
 Start installing: `apt-get install postfix`
 
@@ -154,7 +153,7 @@ apt install mailutils
 echo "This is the body of the email" | mail -s "This is the subject line" test@email.com
 ```
 
-#### Gophish configuration
+**Gophish configuration**
 
 Stop the execution of gophish and lets configure it.\
 Modify `/opt/gophish/config.json` to the following (note the use of https):
@@ -184,7 +183,7 @@ Modify `/opt/gophish/config.json` to the following (note the use of https):
 }
 ```
 
-#### Configure gophish service
+**Configure gophish service**
 
 In order to create the gophish service so it can be started automatically and managed a service you can create the file `/etc/init.d/gophish` with the following content:
 
@@ -248,18 +247,18 @@ ss -l | grep "3333\|443"
 service gophish stop
 ```
 
-## Configuring mail server and domain
+### Configuring mail server and domain
 
-### Wait
+#### Wait
 
 The older a domain is the less probable it's going to be caught as spam. Then you should wait as much time as possible (at least 1week) before the phishing assessment.\
 Note that even if you have to wait a week you can finish configuring everything now.
 
-### Configure Reverse DNS (rDNS) record
+#### Configure Reverse DNS (rDNS) record
 
 Set a rDNS (PTR) record that resolves the IP address of the VPS to the domain name.
 
-### Sender Policy Framework (SPF) Record
+#### Sender Policy Framework (SPF) Record
 
 You must **configure a SPF record for the new domain**. If you don't know what is a SPF record [**read this page**](../pentesting/pentesting-smtp/#spf).
 
@@ -273,7 +272,7 @@ This is the content that must be set inside a TXT record inside the domain:
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
 
-### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
+#### Domain-based Message Authentication, Reporting & Conformance (DMARC) Record
 
 You must **configure a DMARC record for the new domain**. If you don't know what is a DMARC record [**read this page**](../pentesting/pentesting-smtp/#dmarc).
 
@@ -283,7 +282,7 @@ You have to create a new DNS TXT record pointing the hostname `_dmarc.<domain>` 
 v=DMARC1; p=none
 ```
 
-### DomainKeys Identified Mail (DKIM)
+#### DomainKeys Identified Mail (DKIM)
 
 You must **configure a DKIM for the new domain**. If you don't know what is a DMARC record [**read this page**](../pentesting/pentesting-smtp/#dkim).
 
@@ -297,7 +296,7 @@ v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqP
 ```
 {% endhint %}
 
-### Test your email configuration score
+#### Test your email configuration score
 
 You can do that using [https://www.mail-tester.com/](https://www.mail-tester.com)\
 Just access the page and send an email to the address they give you:
@@ -328,30 +327,30 @@ Authentication-Results: mx.google.com;
        dkim=pass header.i=@example.com;
 ```
 
-### ​Removing from Spamhouse Blacklist
+#### ​Removing from Spamhouse Blacklist
 
 The page www.mail-tester.com can indicate you if you your domain is being blocked by spamhouse. You can request your domain/IP to be removed at: ​[https://www.spamhaus.org/lookup/](https://www.spamhaus.org/lookup/)
 
-### Removing from Microsoft Blacklist
+#### Removing from Microsoft Blacklist
 
 ​​You can request your domain/IP to be removed at [https://sender.office.com/](https://sender.office.com).
 
-## Create & Launch GoPhish Campaign
+### Create & Launch GoPhish Campaign
 
-### Sending Profile
+#### Sending Profile
 
 * Set some **name to identify** the sender profile
 * Decide from which account are you going to send the phishing emails. Suggestions: _noreply, support, servicedesk, salesforce..._
 * You can leave blank the username and password, but make sure to check the Ignore Certificate Errors
 
-![](<../.gitbook/assets/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (7).png>)
+![](<../.gitbook/assets/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (11).png>)
 
 {% hint style="info" %}
 It's recommended to use the "**Send Test Email**" functionality to test that everything is working.\
 I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
 {% endhint %}
 
-### Email Template
+#### Email Template
 
 * Set some **name to identify** the template
 * Then write a **subject** (nothing estrange, just something you could expect to read in a regular email)
@@ -385,13 +384,13 @@ Note that **in order to increase the credibility of the email**, it's recommende
 * Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.
 * Try to contact **some valid discovered** email and wait for the response
 
-![](<../.gitbook/assets/image (67) (1).png>)
+![](<../.gitbook/assets/image (393).png>)
 
 {% hint style="info" %}
 The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../windows/ntlm/places-to-steal-ntlm-creds.md).
 {% endhint %}
 
-### Landing Page
+#### Landing Page
 
 * Write a **name**
 * **Write the HTML code** of the web page. Note that you can **import** web pages.
@@ -409,14 +408,14 @@ Note that if you need to **use some static resources** for the HTML (maybe some 
 For the redirection you could **redirect the users to the legit main web page** of the victim, or redirect them to _/static/migration.html_ for example, put some **spinning wheel (**[**https://loading.io/**](https://loading.io)**) for 5 seconds and then indicate that the process was successful**.
 {% endhint %}
 
-### Users & Groups
+#### Users & Groups
 
 * Set a name
 * **Import the data** (note that in order to use the template for the example you need the firstname, last name and email address of each user)
 
 ![](<../.gitbook/assets/image (395).png>)
 
-### Campaign
+#### Campaign
 
 Finally, create a campaign selecting a name, the email template, the landing page, the URL, the sending profile and the group. Note that the URL will be the link sent to the victims
 
@@ -430,7 +429,7 @@ I would recommend to **send the test emails to 10min mails addresses** in order 
 
 Once everything is ready, just launch the campaign!
 
-## Website Cloning
+### Website Cloning
 
 If for any reason you want to clone the website check the following page:
 
@@ -438,7 +437,7 @@ If for any reason you want to clone the website check the following page:
 [clone-a-website.md](clone-a-website.md)
 {% endcontent-ref %}
 
-## Phishing2.0
+### Phishing2.0
 
 The previous attack is pretty clever as you are faking a real website and gathering the information set by the user. Unfortunately, if the user didn't put the correct password or if the application you faked is configured with 2FA, **this information won't allow you to impersonate the tricked user**.
 
@@ -449,7 +448,7 @@ This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2) 
 3. If the account is configured with **2FA**, the MitM page will ask for it and once the **user introduces** it the tool will send it to the real web page.
 4. Once the user is authenticated you (as attacker) will have **captured the credentials, the 2FA, the cookie and any information** of every interaction your while the tool is performing a MitM.
 
-## Detecting the detection
+### Detecting the detection
 
 Obviously one of the best ways to know if you have been busted is to **search your domain inside blacklists**. If it appears listed, somehow your domain was detected as suspicions.\
 One easy way to check if you domain appears in any blacklist is to use [https://malwareworld.com/](https://malwareworld.com)
@@ -462,15 +461,14 @@ However, there are other ways to know if the victim is **actively looking for su
 
 You can **buy a domain with a very similar name** to the victims domain **and/or generate a certificate** for a **subdomain** of a domain controlled by you **containing** the **keyword** of the victim's domain. If the **victim** perform any kind of **DNS or HTTP interaction** with them, you will know that **he is actively looking** for suspicious domains and you will need to be very stealth.
 
-### Evaluate the phishing
+#### Evaluate the phishing
 
 Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your email is going to end in the spam folder or if it's going to be blocked or successful.
 
-## References
+### References
 
 * [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
 * [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)
-
 
 <details>
 
@@ -487,5 +485,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-
