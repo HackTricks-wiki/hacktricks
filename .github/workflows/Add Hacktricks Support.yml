@@ -19,7 +19,7 @@ jobs:
       
       - name: Run script file
         shell: bash
-        run: >
+        run: |
           support_hacktricks_text='
 
           <details>
