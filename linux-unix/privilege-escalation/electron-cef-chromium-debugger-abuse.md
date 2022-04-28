@@ -1,4 +1,4 @@
-
+# Node inspector/CEF debug abuse
 
 <details>
 
@@ -16,10 +16,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+## Node inspector/CEF debug abuse
 
-# Node inspector/CEF debug abuse
-
-## Basic Information
+### Basic Information
 
 When started with the `--inspect` switch, a Node.js process listens for a debugging client. By **default**, it will listen at host and port **`127.0.0.1:9229`**. Each process is also assigned a **unique** **UUID**.
 
@@ -57,7 +56,7 @@ When you start a debugged browser something like this will appear:
 DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4c6-fcf5c35b4369
 ```
 
-### Browsers, WebSockets and same-origin policy <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
+#### Browsers, WebSockets and same-origin policy <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
 
 Websites open in a web-browser can make WebSocket and HTTP requests under the browser security model. An **initial HTTP connection** is necessary to **obtain a unique debugger session id**. The **same-origin-policy** **prevents** websites from being able to make **this HTTP connection**. For additional security against [**DNS rebinding attacks**](https://en.wikipedia.org/wiki/DNS\_rebinding)**,** Node.js verifies that the **'Host' headers** for the connection either specify an **IP address** or **`localhost`** or **`localhost6`** precisely.
 
@@ -65,7 +64,7 @@ Websites open in a web-browser can make WebSocket and HTTP requests under the br
 This **security measures prevents exploiting the inspector** to run code by **just sending a HTTP request** (which could be done exploiting a SSRF vuln).
 {% endhint %}
 
-### Starting inspector in running processes
+#### Starting inspector in running processes
 
 You can send the **signal SIGUSR1** to a running nodejs process to make it **start the inspector** in the default port. However, note that you need to have enough privileges, so this might grant you **privileged access to information inside the process** but no a direct privilege escalation.
 
@@ -78,7 +77,7 @@ kill -s SIGUSR1 <nodejs-ps>
 This is useful in containers because **shutting down the process and starting a new one** with `--inspect` is **not an option** because the **container** will be **killed** with the process.
 {% endhint %}
 
-### Connect to inspector/debugger
+#### Connect to inspector/debugger
 
 If you have access to a **Chromium base browser** you can connect accessing `chrome://inspect` or `edge://inspect` in Edge. Click the Configure button and ensure your **target host and port** are listed (Find an example in the following image of how to get RCE using one of the next sections examples).
 
@@ -108,10 +107,10 @@ The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefd
 Note that **NodeJS RCE exploits won't work** if connected to a browser via [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) \*\*\*\* (you need to check the API to find interesting things to do with it).
 {% endhint %}
 
-## RCE in NodeJS Debugger/Inspector
+### RCE in NodeJS Debugger/Inspector
 
 {% hint style="info" %}
-If you came here looking how to get [**RCE from a XSS in Electron please check this page.**](../../pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/)\*\*\*\*
+If you came here looking how to get [**RCE from a XSS in Electron please check this page.**](../../pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/)
 {% endhint %}
 
 Some common ways to obtain **RCE** when you can **connect** to a Node **inspector** is using something like (looks that this **won't work in a connection to Chrome DevTools protocol**):
@@ -123,16 +122,17 @@ require('child_process').spawnSync('calc.exe')
 Browser.open(JSON.stringify({url: "c:\\windows\\system32\\calc.exe"}))
 ```
 
-## Chrome DevTools Protocol Payloads
+### Chrome DevTools Protocol Payloads
 
 You can check the API here: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
 In this section I will just list interesting things I find people have used to exploit this protocol.
 
-### Overwrite Files
+#### Overwrite Files
 
 Change the folder where **downloaded files are going to be saved** and download a file to **overwrite** frequently used **source code** of the application with your **malicious code**.
 
 ```javascript
+ws = new WebSocket(url); //URL of the chrome devtools service
 ws.send(JSON.stringify({
     id: 42069,
     method: 'Browser.setDownloadBehavior',
@@ -143,11 +143,11 @@ ws.send(JSON.stringify({
 }));
 ```
 
-### Webdriver RCE and exfiltration
+#### Webdriver RCE and exfiltration
 
 According to this post: [https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148) it's possible to obtain RCE and exfiltrate internal pages from theriver.
 
-### Post-Exploitation
+#### Post-Exploitation
 
 In a real environment and **after compromising** a user PC that uses Chrome/Chromium based browser you could launch a Chrome process with the **debugging activated and port-forward the debugging port** so you can access it. This way you will be able to **inspect everything the victim does with Chrome and steal sensitive information**.
 
@@ -157,7 +157,7 @@ The stealth way is to **terminate every Chrome process** and then call something
 Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 ```
 
-## References
+### References
 
 * [https://www.youtube.com/watch?v=iwR746pfTEc\&t=6345s](https://www.youtube.com/watch?v=iwR746pfTEc\&t=6345s)
 * [https://github.com/taviso/cefdebug](https://github.com/taviso/cefdebug)
@@ -169,7 +169,6 @@ Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 * [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)
 * [https://larry.science/post/corctf-2021/#saasme-2-solves](https://larry.science/post/corctf-2021/#saasme-2-solves)
 * [https://embracethered.com/blog/posts/2020/chrome-spy-remote-control/](https://embracethered.com/blog/posts/2020/chrome-spy-remote-control/)
-
 
 <details>
 
@@ -186,5 +185,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-
