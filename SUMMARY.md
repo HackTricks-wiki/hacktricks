@@ -282,6 +282,7 @@
   * [XSS to RCE Electron Desktop Apps](pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/README.md)
     * [Electron contextIsolation RCE via preload code](pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/electron-contextisolation-rce-via-preload-code.md)
     * [Electron contextIsolation RCE via Electron internal code](pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/electron-contextisolation-rce-via-electron-internal-code.md)
+    * [Electron contextIsolation RCE via IPC](pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/electron-contextisolation-rce-via-ipc.md)
 * [88tcp/udp - Pentesting Kerberos](pentesting/pentesting-kerberos-88/README.md)
   * [Harvesting tickets from Windows](pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
   * [Harvesting tickets from Linux](pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
