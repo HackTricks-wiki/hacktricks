@@ -63,7 +63,7 @@ This is useful in containers because **shutting down the process and starting a 
 
 If you have access to a **Chromium base browser** you can connect accessing `chrome://inspect` or `edge://inspect` in Edge. Click the Configure button and ensure your **target host and port** are listed (Find an example in the following image of how to get RCE using one of the next sections examples).
 
-![](<../../.gitbook/assets/image (620).png>)
+![](<../../.gitbook/assets/image (620) (1).png>)
 
 Using the **command line** you can connect to a debugger/inspector with:
 
@@ -86,13 +86,13 @@ The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefd
 ```
 
 {% hint style="info" %}
-Note that **NodeJS RCE exploits won't work** if connected to a browser via [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) **** (you need to check the API to find interesting things to do with it).
+Note that **NodeJS RCE exploits won't work** if connected to a browser via [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) \*\*\*\* (you need to check the API to find interesting things to do with it).
 {% endhint %}
 
 ## RCE in NodeJS Debugger/Inspector
 
 {% hint style="info" %}
-If you came here looking how to get [**RCE from a XSS in Electron please check this page.**](../../pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/)****
+If you came here looking how to get [**RCE from a XSS in Electron please check this page.**](../../pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/)\*\*\*\*
 {% endhint %}
 
 Some common ways to obtain **RCE** when you can **connect** to a Node **inspector** is using something like (looks that this **won't work in a connection to Chrome DevTools protocol**):
