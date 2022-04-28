@@ -17,7 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 {% hint style="danger" %}
-****
+****<img src="../.gitbook/assets/image (651).png" alt="" data-size="original">****
 
 **Bug bounty tip**: sign up for **Intigriti**, a premium **bug bounty platform created by hackers, for hac**kers! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to $100,000!
 
