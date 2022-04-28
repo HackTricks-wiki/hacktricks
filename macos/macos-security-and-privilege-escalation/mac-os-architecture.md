@@ -1,4 +1,4 @@
-
+# Mac OS Architecture
 
 <details>
 
@@ -16,24 +16,23 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+## Mac OS Architecture
 
-# Mac OS Architecture
+### Kernel
 
-## Kernel
-
-### XNU
+#### XNU
 
 The heart of Mac OS X is the **XNU kernel**. XNU is basically composed of a **Mach core** (covered in the next section) with supplementary features provided by Berkeley Software Distribution (**BSD**). Additionally, **XNU** is responsible for providing an **environment for kernel drivers called the I/O Kit**. **XNU is a Darwin package**, so all of the source **code** is **freely available**.
 
 From a security researcher’s perspective, **Mac OS X feels just like a FreeBSD box with a pretty windowing system** and a large number of custom applications. For the most part, applications written for BSD will compile and run without modification on Mac OS X. All the tools you are accustomed to using in BSD are available in Mac OS X. Nevertheless, the fact that the **XNU kernel contains all the Mach code** means that some day, when you have to dig deeper, you’ll find many differences that may cause you problems and some you may be able to leverage for your own purposes.
 
-### Mach
+#### Mach
 
 Mach was originated as a UNIX-compatible **operating system** back in 1984. One of its primary design **goals** was to be a **microkernel**; that is, to **minimize** the amount of code running in the **kernel** and allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level** Mach tasks.
 
 **In XNU, Mach is responsible for many of the low-level operations** you expect from a kernel, such as processor scheduling and multitasking and virtual- memory management.
 
-### BSD
+#### BSD
 
 The **kernel** also involves a large chunk of **code derived from the FreeBSD** code base. This code runs as part of the kernel along with Mach and uses the same address space. The F**reeBSD code within XNU may differ significantly from the original FreeBSD code**, as changes had to be made for it to coexist with Mach. FreeBSD provides many of the remaining operations the kernel needs, including:
 
@@ -46,7 +45,7 @@ The **kernel** also involves a large chunk of **code derived from the FreeBSD** 
 
 To get an idea of just how complicated the interaction between these two sets of code can be, consider the idea of the fundamental executing unit. **In BSD the fundamental unit is the process. In Mach it is a Mach thread**. The disparity is settled by each BSD-style process being associated with a Mach task consisting of exactly one Mach thread. When the BSD fork() system call is made, the BSD code in the kernel uses Mach calls to create a task and thread structure. Also, it is important to note that both the Mach and BSD layers have different security models. The **Mach security** model is **based** **on** **port** **rights**, and the **BSD** model is based on **process** **ownership**. Disparities between these two models have resulted in a **number of local privilege-escalation vulnerabilities**. Additionally, besides typical system cells, there are Mach traps that allow user-space programs to communicate with the kernel.
 
-### I/O Kit - Drivers
+#### I/O Kit - Drivers
 
 I/O Kit is the open-source, object-oriented, **device-driver framework** in the XNU kernel and is responsible for the addition and management of **dynamically loaded device drivers**. These drivers allow for modular code to be added to the kernel dynamically for use with different hardware, for example. They are located in:
 
@@ -89,13 +88,13 @@ kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
 ```
 
-## Applications
+### Applications
 
 A kernel without applications isn’t very useful. **Darwin** is the non-Aqua, **open-source core of Mac OS X**. Basically it is all the parts of Mac OS X for which the **source code is available**. The code is made available in the form of a **package that is easy to install**. There are hundreds of **available Darwin packages**, such as X11, GCC, and other GNU tools. Darwin provides many of the applications you may already use in BSD or Linux for Mac OS X. Apple has spent significant time **integrating these packages into their operating system** so that everything behaves nicely and has a consistent look and feel when possible.
 
 On the **other** hand, many familiar pieces of Mac OS X are **not open source**. The main missing piece to someone running just the Darwin code will be **Aqua**, the **Mac OS X windowing and graphical-interface environment**. Additionally, most of the common **high-level applications**, such as Safari, Mail, QuickTime, iChat, etc., are not open source (although some of their components are open source). Interestingly, these closed-source applications often **rely on open- source software**, for example, Safari relies on the WebKit project for HTML and JavaScript rendering. **For perhaps this reason, you also typically have many more symbols in these applications when debugging than you would in a Windows environment.**
 
-### **Universal binaries**
+#### **Universal binaries**
 
 Mac OS binaries usually are compiled as universal binaries. A **universal binary** can **support multiple architectures in the same file**.
 
@@ -114,11 +113,11 @@ gcc -arch ppc -arch i386 -o test-universal test.c
 
 As you may be thinking usually a universal binary compiled for 2 architectures **doubles the size** of one compiled for just 1 arch.
 
-### Mach-o Format
+#### Mach-o Format
 
 ![](<../../.gitbook/assets/image (559).png>)
 
-#### **Header**
+**Header**
 
 The header contains basic information about the file, such as magic bytes to identify it as a Mach-O file and information about the target architecture. You can find it in: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 
@@ -140,9 +139,9 @@ Filetypes:
 * MH\_DYLIB (0x6): A Mach-O dynamic linked library (i.e. .dylib)
 * MH\_BUNDLE (0x8): A Mach-O bundle (i.e. .bundle)
 
-####
 
-#### **Load commands**
+
+**Load commands**
 
 This specifies the **layout of the file in memory**. It contains the **location of the symbol table**, the main thread context at the beginning of execution, and which **shared libraries** are required.\
 The commands basically instruct the dynamic loader **(dyld) how to load the binary in memory.**
@@ -206,15 +205,15 @@ A Mach-O binary can contain one or **more** **constructors**, that will be **exe
 The offsets of any constructors are held in the **\_\_mod\_init\_func** section of the **\_\_DATA\_CONST** segment.
 {% endhint %}
 
-####
 
-#### **Data**
+
+**Data**
 
 The heart of the file is the final region, the data, which consists of a number of segments as laid out in the load-commands region. **Each segment can contain a number of data sections**. Each of these sections **contains code or data** of one particular type.
 
 ![](<../../.gitbook/assets/image (507) (3).png>)
 
-#### Get the info
+**Get the info**
 
 ```bash
 otool -f /bin/ls #Get universal headers info
@@ -225,7 +224,7 @@ otool -L /bin/ls #Get libraries used by the binary
 
 Or you can use the GUI tool [**machoview**](https://sourceforge.net/projects/machoview/).
 
-### Bundles
+#### Bundles
 
 Basically, a bundle is a **directory structure** within the file system. Interestingly, by default this directory **looks like a single object in Finder**. The types of resources contained within a bundle may consist of applications, libraries, images, documentation, header files, etc. All these files are inside `<application>.app/Contents/`
 
@@ -259,7 +258,7 @@ ls -lR /Applications/Safari.app/Contents
 
       Contains the **oldest** **version** of **macOS** that the application is compatible with.
 
-### Objective-C
+#### Objective-C
 
 Programs written in Objective-C **retain** their class declarations **when** **compiled** into (Mach-O) binaries. Such class declarations **include** the name and type of:
 
@@ -275,7 +274,7 @@ class-dump Kindle.app
 
 Note that this names can be obfuscated to make the reversing of the binary more difficult.
 
-### Native Packages
+#### Native Packages
 
 There are some projects that allow to generate a binary executable by MacOS containing script code which will be executed. Some examples are:
 
@@ -286,11 +285,10 @@ There are some projects that allow to generate a binary executable by MacOS cont
 * **Electron:** JavaScript, HTML, and CSS.
   * These binaries will use **Electron Framework.framework**. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in `.asar` files. These binaries will use Electron Framework.framework. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in **`.asar` files**. It's possible **unpack** such archives via the **asar** node module, or the **npx** **utility:** `npx asar extract StrongBox.app/Contents/Resources/app.asar appUnpacked`\\
 
-## References
+### References
 
 * [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt\_other?\_encoding=UTF8\&me=\&qid=)
 * [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
-
 
 <details>
 
@@ -307,5 +305,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-
