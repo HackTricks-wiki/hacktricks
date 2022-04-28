@@ -101,7 +101,7 @@ In this example you can see how there is a **big circle** but also **a lot of po
 
 Select the smallest symbol you can find (so you are sure it's just 1) and check the "Selection freq". I this case it would be 1.013kHz (so 1kHz).
 
-![](<../../.gitbook/assets/image (638).png>)
+![](<../../.gitbook/assets/image (638) (1).png>)
 
 #### With a group of symbols
 
