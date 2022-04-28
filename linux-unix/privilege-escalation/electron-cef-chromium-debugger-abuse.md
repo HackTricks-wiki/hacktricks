@@ -89,7 +89,7 @@ The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefd
 Note that **NodeJS RCE exploits won't work** if connected to a browser via [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) **** (you need to check the API to find interesting things to do with it).
 {% endhint %}
 
-## RCE
+## RCE in NodeJS Debugger/Inspector
 
 {% hint style="info" %}
 If you came here looking how to get [**RCE from a XSS in Electron please check this page.**](../../pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/)****
@@ -123,6 +123,10 @@ ws.send(JSON.stringify({
     }
 }));
 ```
+
+### Webdriver RCE and exfiltration
+
+According to this post: [https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148) it's possible to obtain RCE and exfiltrate internal pages from theriver.
 
 ### Post-Exploitation
 
