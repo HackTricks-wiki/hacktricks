@@ -124,6 +124,16 @@ ws.send(JSON.stringify({
 }));
 ```
 
+### Post-Exploitation
+
+In a real environment and **after compromising** a user PC that uses Chrome/Chromium based browser you could launch a Chrome process with the **debugging activated and port-forward the debugging port** so you can access it. This way you will be able to **inspect everything the victim does with Chrome and steal sensitive information**.
+
+The stealth way is to **terminate every Chrome process** and then call something like
+
+```bash
+Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
+```
+
 ## References
 
 * [https://www.youtube.com/watch?v=iwR746pfTEc\&t=6345s](https://www.youtube.com/watch?v=iwR746pfTEc\&t=6345s)
@@ -135,3 +145,4 @@ ws.send(JSON.stringify({
 * [https://nodejs.org/en/docs/guides/debugging-getting-started/](https://nodejs.org/en/docs/guides/debugging-getting-started/)
 * [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)
 * [https://larry.science/post/corctf-2021/#saasme-2-solves](https://larry.science/post/corctf-2021/#saasme-2-solves)
+* [https://embracethered.com/blog/posts/2020/chrome-spy-remote-control/](https://embracethered.com/blog/posts/2020/chrome-spy-remote-control/)
