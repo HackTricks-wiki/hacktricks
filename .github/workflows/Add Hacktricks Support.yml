@@ -19,7 +19,7 @@ jobs:
       
       - name: Run script file
         shell: bash
-        run: |
+        run: >
            support_hacktricks_text='
 
 <details>
@@ -50,6 +50,7 @@ for f in `find ./ -name "*.md" 2>/dev/null`; do
         mv temp "$f"
     fi
 done
+
 
       - name: Create local changes
         run: |
