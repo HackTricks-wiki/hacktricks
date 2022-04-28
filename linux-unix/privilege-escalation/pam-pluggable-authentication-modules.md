@@ -1,3 +1,22 @@
+
+
+<details>
+
+<summary><strong>Support HackTricks and get benefits!</strong></summary>
+
+Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+
+Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+
+Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+
+**Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+
+**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+
+</details>
+
+
 # PAM - Pluggable Authentication Modules
 
 PAM is a collection of modules that essentially form a barrier between a service on your system, and the user of the service. The modules can have widely varying purposes, from disallowing a login to users from a particular UNIX group \(or netgroup, or subnet…\), to implementing resource limits so that your ‘research’ group can’t hog system resources.
@@ -54,4 +73,23 @@ As the modules are invoked in order, here is what will happen:
 2. The ‘**pam\_env**’ module will s**et environment variables** based on what the administrator has set up in /etc/security/pam\_env.conf. On a default setup of Redhat 9, Fedora Core 1, and Mandrake 9.2, the configuration file for this module doesn’t actually set any variables. A good use for this might be automatically setting a DISPLAY environment variable for a user logging in via SSH so they don’t have to set it themselves if they want to shoot an ‘xterm’ back to their remote desktop \(though this can be taken care of by OpenSSH automagically\).
 3. The ‘**pam\_ldap**’ module will **prompt** the user for a **password**, and then check the ldap directory indicated in **`/etc/ldap.conf`** to authenticate the user. If this fails, the operation can still succeed if ‘pam\_unix’ succeeds in authenticating the user. If pam\_ldap succeeds, ‘pam\_unix’ will not be invoked.
 4. The ‘**pam\_unix**’ module, in this case, will **not prompt the user for a password**. The ‘try\_first\_pass’ argument will tell the module to **use the password given to it by the preceding module** \(in this case, pam\_ldap\). It will try to authenticate the user using the standard getpw\* system calls. If pam\_unix fails, and pam\_ldap has failed, the operation will fail. If pam\_ldap fails, but pam\_unix succeeds, the operation will succeed \(this is extremely helpful in cases where root is not in the ldap directory, but is still in the local /etc/passwd file!\).
+
+
+
+<details>
+
+<summary><strong>Support HackTricks and get benefits!</strong></summary>
+
+Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+
+Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+
+Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+
+**Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+
+**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+
+</details>
+
 
