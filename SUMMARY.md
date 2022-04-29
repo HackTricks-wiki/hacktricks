@@ -468,7 +468,7 @@
   * [Debugging Client Side JS](pentesting-web/xss-cross-site-scripting/debugging-client-side-js.md)
   * [Server Side XSS (Dynamic PDF)](pentesting-web/xss-cross-site-scripting/server-side-xss-dynamic-pdf.md)
   * [XSS Tools](pentesting-web/xss-cross-site-scripting/xss-tools.md)
-  * [Iframes in XSS and CSP](pentesting-web/xss-cross-site-scripting/iframes-in-xss-and-csp.md)
+  * [Iframes in XSS, CSP and SOP](pentesting-web/xss-cross-site-scripting/iframes-in-xss-and-csp.md)
   * [Other JS Tricks](pentesting-web/xss-cross-site-scripting/other-js-tricks.md)
   * [Steal Info JS](pentesting-web/xss-cross-site-scripting/steal-info-js.md)
 * [XSSI (Cross-Site Script Inclusion)](pentesting-web/xssi-cross-site-script-inclusion.md)
