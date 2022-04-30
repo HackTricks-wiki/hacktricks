@@ -58,9 +58,19 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 **STM Cyber** also support cybersecurity open source projects like HackTricks :)
 
+#### [Intrigiti](https://www.intigriti.com)
+
+![](<.gitbook/assets/image (638).png>)
+
+**Intrigiti** is the **Europe's #1** ethical hacking and **bug bounty platform**
+
+**Bug bounty tip**:**sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+
+{% embed url="https://go.intigriti.com/hacktricks" %}
+
 #### [**INE**](https://ine.com)
 
-![](<.gitbook/assets/INE\_Logo (3).jpg>)
+![](.gitbook/assets/ine\_logo-3-.jpg)
 
 [**INE**](https://ine.com) is a great platform to start learning or **improve** your **IT knowledge** through their huge range of **courses**. I personally like and have completed many from the [**cybersecurity section**](https://ine.com/pages/cybersecurity). **INE** also provides with the official courses to prepare the **certifications** from [**eLearnSecurity**](https://elearnsecurity.com)**.**
 

