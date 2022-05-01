@@ -1,5 +1,7 @@
 # Interesting Windows Registry Keys
 
+## Interesting Windows Registry Keys
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -16,38 +18,37 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+## **Windows system info**
 
-# **Windows system info**
-
-## Version
+### Version
 
 * **`Software\Microsoft\Windows NT\CurrentVersion`**: Windows version, Service Pack, Installation time and the registered owner
 
-## Hostname
+### Hostname
 
 * **`System\ControlSet001\Control\ComputerName\ComputerName`**: Hostname
 
-## Timezone
+### Timezone
 
 * **`System\ControlSet001\Control\TimeZoneInformation`**: TimeZone
 
-## Last Access Time
+### Last Access Time
 
 * **`System\ControlSet001\Control\Filesystem`**: Last time access (by default it's disabled with `NtfsDisableLastAccessUpdate=1`, if `0`, then, it's enabled).
   * To enable it: `fsutil behavior set disablelastaccess 0`
 
-## Shutdown Time
+### Shutdown Time
 
 * `System\ControlSet001\Control\Windows`: Shutdown time
 * `System\ControlSet001\Control\Watchdog\Display`: Shutdown count (only XP)
 
-## Network Information
+### Network Information
 
 * **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**: Network interfaces
 * **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Unmanaged` & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed` & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Nla\Cache`**: First and last time a network connection was performed and connections through VPN
 * **`Software\Microsoft\WZCSVC\Parameters\Interfaces{GUID}` (for XP) & `Software\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles`**: Network type (0x47-wireless, 0x06-cable, 0x17-3G) an category (0-Public, 1-Private/Home, 2-Domain/Work) and last connections
 
-## Shared Folders
+### Shared Folders
 
 * **`System\ControlSet001\Services\lanmanserver\Shares\`**: Share folders and their configurations. If **Client Side Caching** (CSCFLAGS) is enabled, then, a copy of the shared files will be saved in the clients and server in `C:\Windows\CSC`
   * CSCFlag=0 -> By default the user needs to indicate the files that he wants to cache
@@ -57,7 +58,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
   * CSCFlag=2048: This setting is only on Win 7 & 8 and is the default setting until you disable “Simple file sharing” or use the “advanced” sharing option. It also appears to be the default setting for the “Homegroup”
   * CSCFlag=768 -> This setting was only seen on shared Print devices.
 
-## AutoStart programs
+### AutoStart programs
 
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -65,15 +66,15 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * `Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run`
 * `Software\Microsoft\Windows\CurrentVersion\Run`
 
-## Explorer Searches
+### Explorer Searches
 
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordwheelQuery`: What the user searched for using explorer/helper. The item with `MRU=0` is the last one.
 
-## Typed Paths
+### Typed Paths
 
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: Paths types in the explorer (only W10)
 
-## Recent Docs
+### Recent Docs
 
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: Recent documents opened by the user
 * `NTUSER.DAT\Software\Microsoft\Office{Version}{Excel|Word}\FileMRU`:Recent office docs. Versions:
@@ -85,7 +86,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
   * 15.0 office 2013
   * 16.0 Office 2016
 
-## MRUs
+### MRUs
 
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedMRU`
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LasVisitedPidlMRU`
@@ -97,12 +98,12 @@ Indicates the path from where the executable was executed
 
 Indicates files opened inside an opened Window
 
-## Last Run Commands
+### Last Run Commands
 
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\Policies\RunMR`
 
-## User AssistKey
+### User AssistKey
 
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`
 
@@ -113,7 +114,7 @@ The GUID is the id of the application. Data saved:
 * GUI application name (this contains the abs path and more information)
 * Focus time and Focus name
 
-# Shellbags
+## Shellbags
 
 When you open a directory Windows saves data about how to visualize the directory in the registry. These entries are known as Shellbags.
 
@@ -136,9 +137,9 @@ Note 2 things from the following image:
 
 ![](<../../../.gitbook/assets/image (475).png>)
 
-# USB information
+## USB information
 
-## Device Info
+### Device Info
 
 The registry `HKLM\SYSTEM\ControlSet001\Enum\USBSTOR` monitors each USB device that has been connected to the PC.\
 Within this registry it's possible to find:
@@ -150,7 +151,7 @@ Within this registry it's possible to find:
 
 ![](<../../../.gitbook/assets/image (477).png>)
 
-![](<../../../.gitbook/assets/image (479) (1).png>)
+![](<../../../.gitbook/assets/image (479) (1) (1).png>)
 
 Moreover, checking the registry `HKLM\SYSTEM\ControlSet001\Enum\USB` and comparing the values of the sub-keys it's possible to find the VID value
 
@@ -160,19 +161,19 @@ With the previous information the registry `SOFTWARE\Microsoft\Windows Portable 
 
 ![](<../../../.gitbook/assets/image (480).png>)
 
-## User that used the device
+### User that used the device
 
 Having the **{GUID}** of the device it's now possible to **check all the NTUDER.DAT hives of all the users** searching for the GUID until you find it in one of them (`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\Mountpoints2`)
 
 ![](<../../../.gitbook/assets/image (481).png>)
 
-## Last mounted
+### Last mounted
 
 Checking the registry `System\MoutedDevices` it's possible to find out **which device was the last one mounted**. In the following image check how the last device mounted in `E:` is the Thoshiba one (using the tool Registry Explorer).
 
-![](<../../../.gitbook/assets/image (483) (1) (1).png>)
+![](<../../../.gitbook/assets/image (483) (1).png>)
 
-## Volume Serial Number
+### Volume Serial Number
 
 In `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt` you can find the volume serial number. **Knowing the volume name and the volume serial number you can correlate the information** from LNK files that uses that information.
 
@@ -182,7 +183,7 @@ Note that when a USB device is formatted:
 * A new volume serial number is created
 * The physical serial number is kept
 
-## Timestamps
+### Timestamps
 
 In `System\ControlSet001\Enum\USBSTOR{VEN_PROD_VERSION}{USB serial}\Properties{83da6326-97a6-4088-9453-a1923f573b29}\` you can find the first and last time the device was connected:
 

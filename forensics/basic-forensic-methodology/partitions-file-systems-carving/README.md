@@ -1,5 +1,7 @@
 # Partitions/File Systems/Carving
 
+## Partitions/File Systems/Carving
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -16,13 +18,12 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
-# Partitions
+## Partitions
 
 A hard drive or a **SSD disk can contain different partitions** with the goal of separating data physically.\
 The **minimum** unit of a disk is the **sector** (normally composed by 512B). So, each partition size needs to be multiple of that size.
 
-## MBR (master Boot Record)
+### MBR (master Boot Record)
 
 It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate the PC what and from where a partition should be mounted.\
 It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**.. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
@@ -64,7 +65,7 @@ From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Sig
 
 In order to mount a MBR in Linux you first need to get the start offset (you can use `fdisk` and the the `p` command)
 
-![](<../../../.gitbook/assets/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (3).png>)
+![](<../../../.gitbook/assets/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 An then use the following code
 
@@ -79,7 +80,7 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 
 **Logical block addressing** (**LBA**) is a common scheme used for **specifying the location of blocks** of data stored on computer storage devices, generally secondary storage systems such as hard disk drives. LBA is a particularly simple linear addressing scheme; **blocks are located by an integer index**, with the first block being LBA 0, the second LBA 1, and so on.
 
-## GPT (GUID Partition Table)
+### GPT (GUID Partition Table)
 
 It’s called GUID Partition Table because every partition on your drive has a **globally unique identifier**.
 
@@ -141,7 +142,7 @@ The partition table header defines the usable blocks on the disk. It also define
 
 More partition types in [https://en.wikipedia.org/wiki/GUID\_Partition\_Table](https://en.wikipedia.org/wiki/GUID\_Partition\_Table)
 
-## Inspecting
+### Inspecting
 
 After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image a **MBR** was detected on the **sector 0** and interpreted:
 
@@ -149,9 +150,9 @@ After mounting the forensics image with [**ArsenalImageMounter**](https://arsena
 
 If it was a **GPT table instead of a MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
 
-# File-Systems
+## File-Systems
 
-## Windows file-systems list
+### Windows file-systems list
 
 * **FAT12/16**: MSDOS, WIN95/98/NT/200
 * **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
@@ -159,7 +160,7 @@ If it was a **GPT table instead of a MBR** it should appear the signature _EFI P
 * **NTFS**: XP/2003/2008/2012/VISTA/7/8/10
 * **ReFS**: 2012/2016
 
-## FAT
+### FAT
 
 The **FAT (File Allocation Table)** file system is named for its method of organization, the file allocation table, which resides at the beginning of the volume. To protect the volume, **two copies** of the table are kept, in case one becomes damaged. In addition, the file allocation tables and the root folder must be stored in a **fixed location** so that the files needed to start the system can be correctly located.
 
@@ -183,13 +184,13 @@ The **root directory** occupies a **specific position** for both FAT12 and FAT16
 
 When a file is "deleted" using a FAT file system, the directory entry remains almost **unchanged** except for the **first character of the file name** (modified to 0xE5), preserving most of the "deleted" file's name, along with its time stamp, file length and — most importantly — its physical location on the disk. The list of disk clusters occupied by the file will, however, be erased from the File Allocation Table, marking those sectors available for use by other files created or modified thereafter. In case of FAT32, it is additionally erased field responsible for upper 16 bits of file start cluster value.
 
-## **NTFS**
+### **NTFS**
 
 {% content-ref url="ntfs.md" %}
 [ntfs.md](ntfs.md)
 {% endcontent-ref %}
 
-## EXT
+### EXT
 
 **Ext2** is the most common file-system for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
 
@@ -197,7 +198,7 @@ When a file is "deleted" using a FAT file system, the directory entry remains al
 [ext.md](ext.md)
 {% endcontent-ref %}
 
-# **Metadata**
+## **Metadata**
 
 Some files contains metadata. This is information about the content of the file which sometimes might be interesting for the analyst as depending on the file-type it might have information like:
 
@@ -211,9 +212,9 @@ Some files contains metadata. This is information about the content of the file 
 
 You can use tools like [**exiftool**](https://exiftool.org) and [**Metadiver**](https://www.easymetadata.com/metadiver-2/) to get the metadata of a file.
 
-# **Deleted Files Recovery**
+## **Deleted Files Recovery**
 
-## Logged Deleted Files
+### Logged Deleted Files
 
 As it was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file-system just mark it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files (like the MFT) and find the deleted files.
 
@@ -223,7 +224,7 @@ Also, the OS usually saves a lot of information about file system changes and ba
 [file-data-carving-recovery-tools.md](file-data-carving-recovery-tools.md)
 {% endcontent-ref %}
 
-## **File Carving**
+### **File Carving**
 
 **File carving** is a technique that tries to **find files in a bulk of data**. There are 3 main ways tools like this works: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
 
@@ -235,7 +236,7 @@ There are several tools that you can use for file Carving indicating them the fi
 [file-data-carving-recovery-tools.md](file-data-carving-recovery-tools.md)
 {% endcontent-ref %}
 
-## Data Stream **C**arving
+### Data Stream **C**arving
 
 Data Stream Carving is similar to File Carving but i**nstead of looking for complete files, it looks for interesting fragments** of information.\
 For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
@@ -244,12 +245,12 @@ For example, instead of looking for a complete file containing logged URLs, this
 [file-data-carving-recovery-tools.md](file-data-carving-recovery-tools.md)
 {% endcontent-ref %}
 
-## Secure Deletion
+### Secure Deletion
 
 Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**.\
 You may notice that even performing that action there might be **other parts where the existence of the file is still logged**, and that's true and part of the forensics professional job is to find them.
 
-# References
+## References
 
 * [https://en.wikipedia.org/wiki/GUID\_Partition\_Table](https://en.wikipedia.org/wiki/GUID\_Partition\_Table)
 * [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)

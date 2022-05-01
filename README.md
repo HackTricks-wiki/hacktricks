@@ -22,14 +22,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
 ![](.gitbook/assets/p.png)
 
 **Welcome to the page where you will find each hacking trick/technique/whatever I have learnt in CTFs, real life apps, and reading researches and news.**
 
 Here you can find a little **introduction:**
 
-## [**Pentesting Methodology**](pentesting-methodology.md)
+## [**Pentesting Methodology**](generic-methodologies-and-resources/pentesting-methodology.md)
 
 Here you will find the **typical flow** that **you should follow when pentesting** one or more **machines**.
 
@@ -59,7 +58,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [Intrigiti](https://www.intigriti.com)
 
-![](<.gitbook/assets/image (638).png>)
+![](<.gitbook/assets/image (620) (2) (1) (1) (2).png>)
 
 **Intrigiti** is the **Europe's #1** ethical hacking and **bug bounty platform**
 
@@ -69,7 +68,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [**INE**](https://ine.com)
 
-![](.gitbook/assets/ine\_logo-3-.jpg)
+![](<.gitbook/assets/INE\_Logo (3).jpg>)
 
 [**INE**](https://ine.com) is a great platform to start learning or **improve** your **IT knowledge** through their huge range of **courses**. I personally like and have completed many from the [**cybersecurity section**](https://ine.com/pages/cybersecurity). **INE** also provides with the official courses to prepare the **certifications** from [**eLearnSecurity**](https://elearnsecurity.com)**.**
 

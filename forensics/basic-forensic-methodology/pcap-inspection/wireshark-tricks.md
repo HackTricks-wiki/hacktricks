@@ -1,5 +1,7 @@
 # Wireshark tricks
 
+## Wireshark tricks
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -16,10 +18,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+## Improve your Wireshark skills
 
-# Improve your Wireshark skills
-
-## Tutorials
+### Tutorials
 
 The following tutorials are amazing to learn some cool basic tricks:
 
@@ -28,7 +29,7 @@ The following tutorials are amazing to learn some cool basic tricks:
 * [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 * [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-## Analysed Information
+### Analysed Information
 
 **Expert Information**
 
@@ -73,7 +74,7 @@ Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication
 
 ![](<../../../.gitbook/assets/image (574).png>)
 
-## Filters
+### Filters
 
 Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
 Other interesting filters:
@@ -85,14 +86,14 @@ Other interesting filters:
 * `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
   * HTTP and initial HTTPS traffic + TCP SYN + DNS requests
 
-## Search
+### Search
 
 If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_\
 \_\_You can add new layers to the main information bar _(No., Time, Source...)_ pressing _right bottom_ and _Edit Column_
 
 Practice: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)
 
-# Identifying Domains
+## Identifying Domains
 
 You can add a column that show the Host HTTP header:
 
@@ -100,23 +101,23 @@ You can add a column that show the Host HTTP header:
 
 And a column that add the Server name from an initiating HTTPS connection (**ssl.handshake.type == 1**):
 
-![](<../../../.gitbook/assets/image (408).png>)
+![](<../../../.gitbook/assets/image (408) (1).png>)
 
-# Identifying local hostnames
+## Identifying local hostnames
 
-## From DHCP
+### From DHCP
 
 In current Wireshark instead of `bootp` you need to search for `DHCP`
 
 ![](<../../../.gitbook/assets/image (404).png>)
 
-## From NBNS
+### From NBNS
 
 ![](<../../../.gitbook/assets/image (405).png>)
 
-# Decrypting TLS
+## Decrypting TLS
 
-## Decrypting https traffic with server private key
+### Decrypting https traffic with server private key
 
 _edit>preference>protocol>ssl>_
 
@@ -124,7 +125,7 @@ _edit>preference>protocol>ssl>_
 
 Press _Edit_ and add all the data of the server and the private key (_IP, Port, Protocol, Key file and password_)
 
-## Decrypting https traffic with symmetric session keys
+### Decrypting https traffic with symmetric session keys
 
 It turns out that Firefox and Chrome both support logging the symmetric session key used to encrypt TLS traffic to a file. You can then point Wireshark at said file and presto! decrypted TLS traffic. More in: [https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)\
 To detect this search inside the environment for to variable `SSLKEYLOGFILE`
@@ -137,7 +138,7 @@ To import this in wireshark go to _edit>preference>protocol>ssl>_ and import it 
 
 ![](<../../../.gitbook/assets/image (100).png>)
 
-# ADB communication
+## ADB communication
 
 Extract an APK from an ADB communication where the APK was sent:
 

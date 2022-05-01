@@ -1,5 +1,7 @@
 # Pickle Rick
 
+## Pickle Rick
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -16,16 +18,15 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
 ![](../../.gitbook/assets/picklerick.gif)
 
 This machine was categorised as easy and it was pretty easy.
 
-# Enumeration
+## Enumeration
 
 I started **enumerating the machine using my tool** [**Legion**](https://github.com/carlospolop/legion):
 
-![](<../../.gitbook/assets/image (79) (2).png>)
+![](<../../.gitbook/assets/image (79) (1).png>)
 
 In as you can see 2 ports are open: 80 (**HTTP**) and 22 (**SSH**)
 
@@ -49,7 +50,7 @@ Checking the source code of the root page, a username is discovered: `R1ckRul3s`
 
 Therefore, you can login on the login page using the credentials `R1ckRul3s:Wubbalubbadubdub`
 
-# User
+## User
 
 Using those credentials you will access a portal where you can execute commands:
 
@@ -71,7 +72,7 @@ The **second ingredient** can be found in `/home/rick`
 
 ![](<../../.gitbook/assets/image (240).png>)
 
-# Root
+## Root
 
 The user **www-data can execute anything as sudo**:
 
