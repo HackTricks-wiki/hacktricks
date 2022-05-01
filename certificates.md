@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Certificates
-
-## What is a Certificate
+# What is a Certificate
 
 In cryptography, a **public key certificate,** also known as a **digital certificate** or **identity certificate,** is an electronic document used to prove the ownership of a public key. The certificate includes information about the key, information about the identity of its owner \(called the subject\), and the digital signature of an entity that has verified the certificate's contents \(called the issuer\). If the signature is valid, and the software examining the certificate trusts the issuer, then it can use that key to communicate securely with the certificate's subject.
 
@@ -27,7 +25,7 @@ In a typical [public-key infrastructure](https://en.wikipedia.org/wiki/Public-ke
 
 The most common format for public key certificates is defined by [X.509](https://en.wikipedia.org/wiki/X.509). Because X.509 is very general, the format is further constrained by profiles defined for certain use cases, such as [Public Key Infrastructure \(X.509\)](https://en.wikipedia.org/wiki/PKIX) as defined in RFC 5280.
 
-## x509 Common Fields
+# x509 Common Fields
 
 * **Version Number:** Version of x509 format.
 * **Serial Number**: Used to uniquely identify the certificate within a CA's systems. In particular this is used to track revocation information.
@@ -69,7 +67,7 @@ The most common format for public key certificates is defined by [X.509](https:/
     * Address of the **OCSP responder from where revocation of this certificate** can be checked \(OCSP access method\).
   * **CRL Distribution Points**: This extension identifies the location of the CRL from which the revocation of this certificate can be checked. The application that processes the certificate can get the location of the CRL from this extension, download the CRL and then check the revocation of this certificate.
 
-### Difference between OSCP and CRL Distribution Points
+## Difference between OSCP and CRL Distribution Points
 
 **OCSP** \(RFC 2560\) is a standard protocol that consists of an **OCSP client and an OCSP responder**. This protocol **determines revocation status of a given digital public-key certificate** **without** having to **download** the **entire CRL**.  
 **CRL** is the **traditional method** of checking certificate validity. A **CRL provides a list of certificate serial numbers** that have been revoked or are no longer valid. CRLs let the verifier check the revocation status of the presented certificate while verifying it. CRLs are limited to 512 entries.  

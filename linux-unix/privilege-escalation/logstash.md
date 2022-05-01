@@ -17,13 +17,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Logstash
-
-## Basic Information
+# Basic Information
 
 Logstash  is used for collecting, transforming and outputting logs. This is realized by using **pipelines**, which contain input, filter and output modules. The service gets interesting when having compromised a machine which is running Logstash as a service.
 
-### Pipelines
+## Pipelines
 
 The pipeline configuration file **/etc/logstash/pipelines.yml** specifies the locations of active pipelines:
 
@@ -41,7 +39,7 @@ The pipeline configuration file **/etc/logstash/pipelines.yml** specifies the lo
 
 In here you can find the paths to the **.conf** files, which contain the configured pipelines. If the **Elasticsearch output module** is used, **pipelines** are likely to **contain** valid **credentials** for an Elasticsearch instance. Those credentials have often more privileges, since Logstash has to write data to Elasticsearch. If wildcards are used, Logstash tries to run all pipelines located in that folder matching the wildcard.
 
-### Privesc with writable pipelines
+## Privesc with writable pipelines
 
 Before trying to elevate your own privileges you should check which user is running the logstash service, since this will be the user, you will be owning afterwards. Per default the logstash service runs with the privileges of the **logstash** user.
 
@@ -79,7 +77,7 @@ If **/etc/logstash/logstash.yml** contains the entry **config.reload.automatic: 
 
 If no wildcard is used, you can apply those changes to an existing pipeline configuration. **Make sure you do not break things!**
 
-## References
+# References
 
 * [https://insinuator.net/2021/01/pentesting-the-elk-stack/](https://insinuator.net/2021/01/pentesting-the-elk-stack/)
 

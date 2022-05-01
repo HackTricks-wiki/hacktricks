@@ -17,13 +17,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# lxd/lxc Group - Privilege escalation
-
 If you belong to _**lxd**_ **or** _**lxc**_ **group**, you can become root
 
-## Exploiting without internet
+# Exploiting without internet
 
-### Method 1
+## Method 1
 
 You can install in your machine this distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(follow the instructions of the github):
 
@@ -76,7 +74,7 @@ lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
 
-### Method 2
+## Method 2
 
 Build an Alpine image and start it using the flag `security.privileged=true`, forcing the container to interact as root with the host filesystem.
 
@@ -106,7 +104,7 @@ lxc exec mycontainer /bin/sh
 
 Alternatively [https://github.com/initstring/lxd\_root](https://github.com/initstring/lxd\_root)
 
-## With internet
+# With internet
 
 You can follow [these instructions](https://reboare.github.io/lxd/lxd-escape.html).
 
@@ -118,7 +116,7 @@ lxc exec test bash
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
 
-## Other Refs
+# Other Refs
 
 {% embed url="https://reboare.github.io/lxd/lxd-escape.html" %}
 

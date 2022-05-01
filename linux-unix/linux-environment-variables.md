@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Linux Environment Variables
-
-## Global variables
+# Global variables
 
 The global variables **will be** inherited by **child processes**.
 
@@ -38,7 +36,7 @@ You can **remove** a variable doing:
 unset MYGLOBAL
 ```
 
-## Local variables
+# Local variables
 
 The **local variables** can only be **accessed** by the **current shell/script**.
 
@@ -48,7 +46,7 @@ echo $LOCAL
 unset LOCAL
 ```
 
-## List current variables
+# List current variables
 
 ```bash
 set
@@ -58,9 +56,9 @@ cat /proc/$$/environ
 cat /proc/`python -c "import os; print(os.getppid())"`/environ
 ```
 
-## Persistent Environment variables
+# Persistent Environment variables
 
-#### **Files that affect behavior of every user:**
+### **Files that affect behavior of every user:**
 
 * _**/etc/bash.bashrc**_: This file is read whenever an interactive shell is started (normal terminal) and all the commands specified in here are executed.
 * _**/etc/profile and /etc/profile.d/\***_**:** This file is read every time a user logs in. Thus all the commands executed in here will execute only once at the time of user logging in.
@@ -74,14 +72,14 @@ cat /proc/`python -c "import os; print(os.getppid())"`/environ
       export $TEST
       ```
 
-#### **Files that affect behavior for only a specific user:**
+### **Files that affect behavior for only a specific user:**
 
 * _**\~/.bashrc**_: This file behaves the same way _/etc/bash.bashrc_ file works but it is executed only for a specific user. If you want to create an environment for yourself go ahead and modify or create this file in your home directory.
 * _**\~/.profile, \~/.bash\_profile, \~/.bash\_login**_**:** These files are same as _/etc/profile_. The difference comes in the way it is executed. This file is executed only when a user in whose home directory this file exists, logs in.
 
 **Extracted from:** [**here**](https://codeburst.io/linux-environment-variables-53cea0245dc9) **and** [**here**](https://www.gnu.org/software/bash/manual/html\_node/Bash-Startup-Files.html)
 
-## Common variables
+# Common variables
 
 From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
 
@@ -103,9 +101,9 @@ From: [https://geek-university.com/linux/common-environment-variables/](https://
 * **TZ** – your time zone.
 * **USER** – your current username.
 
-## Interesting variables for hacking
+# Interesting variables for hacking
 
-### **HISTFILESIZE**
+## **HISTFILESIZE**
 
 Change the **value of this variable to 0**, so when you **end your session** the **history file** (\~/.bash\_history) **will be deleted**.
 
@@ -113,7 +111,7 @@ Change the **value of this variable to 0**, so when you **end your session** the
 export HISTFILESIZE=0
 ```
 
-### **HISTSIZE**
+## **HISTSIZE**
 
 Change the **value of this variable to 0**, so when you **end your session** any command will be added to the **history file** (\~/.bash\_history).
 
@@ -121,7 +119,7 @@ Change the **value of this variable to 0**, so when you **end your session** any
 export HISTSIZE=0
 ```
 
-### http\_proxy
+## http\_proxy
 
 The processes will use the **proxy** declared here to connect to internet through **http**.
 
@@ -129,7 +127,7 @@ The processes will use the **proxy** declared here to connect to internet throug
 export http_proxy="http://10.10.10.10:8080"
 ```
 
-### https\_proxy
+## https\_proxy
 
 The processes will use the **proxy** declared here to connect to internet through **https**.
 
@@ -137,7 +135,7 @@ The processes will use the **proxy** declared here to connect to internet throug
 export https_proxy="http://10.10.10.10:8080"
 ```
 
-### PS1
+## PS1
 
 Change how your prompt looks.
 

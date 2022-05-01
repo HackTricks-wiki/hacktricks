@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Docker Basics & Breakout
-
-## **Basic Docker Engine Security**
+# **Basic Docker Engine Security**
 
 Docker engine does the heavy lifting of running and managing Containers. Docker engine uses Linux kernel features like **Namespaces** and **Cgroups** to provide basic **isolation** across Containers. Advanced isolation can be achieved using Linux kernel features like **Capabilities**, **Seccomp**, **SELinux/AppArmor**. Docker exposes these Linux kernel capabilities either at Docker daemon level or at each Container level.
 
@@ -28,7 +26,7 @@ Finally, an **auth plugin** can be used to **limit the actions** users can perfo
 
 ![](<../../../.gitbook/assets/image (625) (1) (1).png>)
 
-### **Docker engine secure access**
+## **Docker engine secure access**
 
 Docker client can access Docker engine **locally using Unix socket or remotely using http** mechanism. To use it remotely, it is needed to use https and **TLS** so that confidentiality, integrity and authentication can be ensured.
 
@@ -43,7 +41,7 @@ Sudo service docker restart -> Restart Docker daemon
 
 Exposing Docker daemon using http is not a good practice and it is needed to secure the connection using https. There are two options: first option is for **client to verify server identity** and in second option **both client and server verify each other’s identity**. Certificates establish the identity of a server. For an example of both options [**check this page**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/).
 
-### **Container image security**
+## **Container image security**
 
 Container images are stored either in private repository or public repository. Following are the options that Docker provides for storing Container images:
 
@@ -51,13 +49,13 @@ Container images are stored either in private repository or public repository. F
 * [Docker registry](https://github.com/%20docker/distribution) – This is an open source project that users can use to host their own registry.
 * [Docker trusted registry](https://www.docker.com/docker-trusted-registry) – This is Docker’s commercial implementation of Docker registry and it provides role based user authentication along with LDAP directory service integration.
 
-### Image Scanning
+## Image Scanning
 
 Containers can have **security vulnerabilities** either because of the base image or because of the software installed on top of the base image. Docker is working on a project called **Nautilus** that does security scan of Containers and lists the vulnerabilities. Nautilus works by comparing the each Container image layer with vulnerability repository to identify security holes.
 
 For more [**information read this**](https://docs.docker.com/engine/scan/).
 
-#### How to scan images <a href="#how-to-scan-images" id="how-to-scan-images"></a>
+### How to scan images <a href="#how-to-scan-images" id="how-to-scan-images"></a>
 
 The `docker scan` command allows you to scan existing Docker images using the image name or ID. For example, run the following command to scan the hello-world image:
 
@@ -77,7 +75,7 @@ Licenses:          enabled
 Note that we do not currently have vulnerability data for your image.
 ```
 
-### Docker Image Signing
+## Docker Image Signing
 
 Docker Container images can be stored either in public or private registry. It is needed to **sign** **Container** images to be able to confirm images haven't being tampered. Content **publisher** takes care of **signing** Container image and pushing it into the registry.\
 Following are some details on Docker content trust:
@@ -117,9 +115,9 @@ tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 
 When I changed Docker host, I had to move the root keys and repository keys to operate from the new host.
 
-## Containers Security Improvements
+# Containers Security Improvements
 
-### Namespaces
+## Namespaces
 
 **Namespaces** are a feature of the Linux kernel that **partitions kernel resources** such that one set of **processes** **sees** one set of **resources** while **another** set of **processes** sees a **different** set of resources. The feature works by having the same namespace for a set of resources and processes, but those namespaces refer to distinct resources. Resources may exist in multiple spaces.
 
@@ -137,7 +135,7 @@ For **more information about the namespaces** check the following page:
 [namespaces.md](namespaces.md)
 {% endcontent-ref %}
 
-### cgroups
+## cgroups
 
 Linux kernel feature **cgroups** provides capability to **restrict resources like cpu, memory, io, network bandwidth among** a set of processes. Docker allows to create Containers using cgroup feature which allows for resource control for the specific Container.\
 Following is a Container created with user space memory limited to 500m, kernel memory limited to 50m, cpu share to 512, blkioweight to 400. CPU share is a ratio that controls Container’s CPU usage. It has a default value of 1024 and range between 0 and 1024. If three Containers have the same CPU share of 1024, each Container can take upto 33% of CPU in case of CPU resource contention. blkio-weight is a ratio that controls Container’s IO. It has a default value of 500 and range between 10 and 1000.
@@ -154,7 +152,7 @@ ps -ef | grep 1234 #Get info about the sleep process
 ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the hosts and some may be shred with it)
 ```
 
-### Capabilities
+## Capabilities
 
 Capabilities allow **finer control for the capabilities that can be allowed** for root user. Docker uses the Linux kernel capability feature to **limit the operations that can be done inside a Container** irrespective of the type of user.
 
@@ -162,7 +160,7 @@ Capabilities allow **finer control for the capabilities that can be allowed** fo
 [linux-capabilities.md](../linux-capabilities.md)
 {% endcontent-ref %}
 
-### Seccomp in Docker
+## Seccomp in Docker
 
 This is a security feature that allows Docker to **limit the syscalls** that can be used inside the container:
 
@@ -170,7 +168,7 @@ This is a security feature that allows Docker to **limit the syscalls** that can
 [seccomp.md](seccomp.md)
 {% endcontent-ref %}
 
-### AppArmor in Docker
+## AppArmor in Docker
 
 **AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**.:
 
@@ -178,7 +176,7 @@ This is a security feature that allows Docker to **limit the syscalls** that can
 [apparmor.md](apparmor.md)
 {% endcontent-ref %}
 
-### SELinux in Docker
+## SELinux in Docker
 
 [SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) is a **labeling** **system**. Every **process** and every **file** system object has a **label**. SELinux policies define rules about what a **process label is allowed to do with all of the other labels** on the system.
 
@@ -188,7 +186,7 @@ Container engines launch **container processes with a single confined SELinux la
 [selinux.md](../selinux.md)
 {% endcontent-ref %}
 
-### AuthZ & AuthN
+## AuthZ & AuthN
 
 An authorization plugin **approves** or **denies** **requests** to the Docker **daemon** based on both the current **authentication** context and the **command** **context**. The **authentication** **context** contains all **user details** and the **authentication** **method**. The **command context** contains all the **relevant** **request** data.
 
@@ -196,9 +194,9 @@ An authorization plugin **approves** or **denies** **requests** to the Docker **
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
 {% endcontent-ref %}
 
-## Interesting Docker Flags
+# Interesting Docker Flags
 
-### --privileged flag
+## --privileged flag
 
 In the following page you can learn **what does the `--privileged` flag imply**:
 
@@ -206,9 +204,9 @@ In the following page you can learn **what does the `--privileged` flag imply**:
 [docker-privileged.md](docker-privileged.md)
 {% endcontent-ref %}
 
-### --security-opt
+## --security-opt
 
-#### no-new-privileges
+### no-new-privileges
 
 If you are running a container where an attacker manages to get access as a low privilege user. If you have a **miss-configured suid binary**, the attacker may abuse it and **escalate privileges inside** the container. Which, may allow him to escape from it.
 
@@ -218,7 +216,7 @@ Running the container with the **`no-new-privileges`** option enabled will **pre
 docker run -it --security-opt=no-new-privileges:true nonewpriv
 ```
 
-#### Other
+### Other
 
 ```bash
 #You can manually add/drop capabilities with
@@ -237,9 +235,9 @@ docker run -it --security-opt=no-new-privileges:true nonewpriv
 
 For more **`--security-opt`** options check: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
 
-## Other Security Considerations
+# Other Security Considerations
 
-### Managing Secrets
+## Managing Secrets
 
 First of all, **do not put them inside your image!**
 
@@ -292,19 +290,19 @@ Then start Compose as usual with `docker-compose up --build my_service`.
 
 If you’re using [Kubernetes](https://kubernetes.io/docs/concepts/configuration/secret/), it has support for secrets. [Helm-Secrets](https://github.com/futuresimple/helm-secrets) can help make secrets management in K8s easier. Additionally, K8s has Role Based Access Controls (RBAC) — as does Docker Enterprise. RBAC makes access Secrets management more manageable and more secure for teams.
 
-### gVisor
+## gVisor
 
 **gVisor** is an application kernel, written in Go, that implements a substantial portion of the Linux system surface. It includes an [Open Container Initiative (OCI)](https://www.opencontainers.org) runtime called `runsc` that provides an **isolation boundary between the application and the host kernel**. The `runsc` runtime integrates with Docker and Kubernetes, making it simple to run sandboxed containers.
 
 {% embed url="https://github.com/google/gvisor" %}
 
-### Kata Containers
+## Kata Containers
 
 **Kata Containers** is an open source community working to build a secure container runtime with lightweight virtual machines that feel and perform like containers, but provide **stronger workload isolation using hardware virtualization** technology as a second layer of defense.
 
 {% embed url="https://katacontainers.io/" %}
 
-### Summary Tips
+## Summary Tips
 
 * **Do not use the `--privileged` flag or mount a** [**Docker socket inside the container**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** The docker socket allows for spawning containers, so it is an easy way to take full control of the host, for example, by running another container with the `--privileged` flag.
 * Do **not run as root inside the container. Use a** [**different user**](https://docs.docker.com/develop/develop-images/dockerfile\_best-practices/#user) **and** [**user namespaces**](https://docs.docker.com/engine/security/userns-remap/)**.** The root in the container is the same as on host unless remapped with user namespaces. It is only lightly restricted by, primarily, Linux namespaces, capabilities, and cgroups.
@@ -321,7 +319,7 @@ If you’re using [Kubernetes](https://kubernetes.io/docs/concepts/configuration
 * **Don’t put ssh** inside container, “docker exec” can be used to ssh to Container.
 * Have **smaller** container **images**
 
-## Docker Breakout / Privilege Escalation
+# Docker Breakout / Privilege Escalation
 
 If you are **inside a docker container** or you have access to a user in the **docker group**, you could try to **escape and escalate privileges**:
 
@@ -329,7 +327,7 @@ If you are **inside a docker container** or you have access to a user in the **d
 [docker-breakout-privilege-escalation.md](docker-breakout-privilege-escalation.md)
 {% endcontent-ref %}
 
-## Docker Authentication Plugin Bypass
+# Docker Authentication Plugin Bypass
 
 If you have access to the docker socket or have access to a user in the **docker group but your actions are being limited by a docker auth plugin**, check if you can **bypass it:**
 
@@ -337,12 +335,12 @@ If you have access to the docker socket or have access to a user in the **docker
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
 {% endcontent-ref %}
 
-## Hardening Docker
+# Hardening Docker
 
 * The tool [**docker-bench-security**](https://github.com/docker/docker-bench-security) is a script that checks for dozens of common best-practices around deploying Docker containers in production. The tests are all automated, and are based on the [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
   You need to run the tool from the host running docker or from a container with enough privileges. Find out **how to run it in the README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
-## References
+# References
 
 * [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 * [https://twitter.com/\_fel1x/status/1151487051986087936](https://twitter.com/\_fel1x/status/1151487051986087936)

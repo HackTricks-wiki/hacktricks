@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# DNSCat pcap analysis
-
 If you have pcap with data being **exfiltrated by DNSCat** (without using encryption), you can find the exfiltrated content.
 
 You only need to know that the **first 9 bytes** are not real data but are related to the **C\&C communication**:

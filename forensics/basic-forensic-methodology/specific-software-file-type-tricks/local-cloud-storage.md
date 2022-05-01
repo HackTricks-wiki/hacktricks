@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Local Cloud Storage
-
-## OneDrive
+# OneDrive
 
 In Windows you can find the OneDrive folder in `\Users\<username>\AppData\Local\Microsoft\OneDrive`\
 And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` which contains some interesting data regarding the synchronized files:
@@ -35,7 +33,7 @@ And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` 
 
 Once you have found the CID it's recommended to **search files containing this ID**. You may be able to find files with the name: _**\<CID>.ini**_ and _**\<CID>.dat**_ that may contain interesting information like the names of files syncronized with OneDrive.
 
-## Google Drive
+# Google Drive
 
 In Widows you can find the main Google Drive folder in `\Users\<username>\AppData\Local\Google\Drive\user_default`\
 This folder contains a file called Sync\_log.log with information like the email address of the account, filenames, timestamps, MD5 hashes of the files...\
@@ -46,7 +44,7 @@ In this table you can find: the **name** of the **synchronized** **files**, modi
 
 The table data of the database **`Sync_config.db`** contains the email address of the account, path of the shared folders and Google Drive version.
 
-## Dropbox
+# Dropbox
 
 Dropbox uses **SQLite databases** to mange the files. In this \
 You can find the databases in the folders:

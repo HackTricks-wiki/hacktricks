@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# EXT
-
-## Ext - Extended Filesystem
+# Ext - Extended Filesystem
 
 **Ext2** is the most common filesystem for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
 
@@ -36,7 +34,7 @@ Every block group contains the following pieces of information:
 
 ![](<../../../.gitbook/assets/image (406).png>)
 
-### Ext Optional Features
+## Ext Optional Features
 
 **Features affect where** the data is located, **how** the data is stored in inodes and some of them might supply **additional metadata** for analysis, therefore features are important in Ext.
 
@@ -54,7 +52,7 @@ Suspected attacker might have non-standard extensions
 
 **Any utility** that reads the **superblock** will be able to indicate the **features** of a **Ext filesystem**, but you could also use `file -sL /dev/sd*`
 
-### Superblock
+## Superblock
 
 The superblock is the first 1024 bytes from the start, it's repeated in the first block of each group and contains:
 
@@ -80,7 +78,7 @@ fsstat -o <offsetstart> /pat/to/filesystem-file.ext
 You can also use the free gui application: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
 Or you can also use **python** to obtain the superblock information: [https://pypi.org/project/superblock/](https://pypi.org/project/superblock/)
 
-### inodes
+## inodes
 
 The **inodes** contain the list of **blocks** that **contains** the actual **data** of a **file**.\
 If the file is big, and inode **may contain pointers** to **other inodes** that points to the blocks/more inodes containing the file data.
@@ -233,7 +231,7 @@ getfattr file.txt #Get extended attribute names of a file
 getdattr -n 'user.secret' file.txt #Get extended attribute called "user.secret"
 ```
 
-### Filesystem View
+## Filesystem View
 
 In order to see the contents of the file system you can **use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
 Or you can mount it in your linux using `mount` command.

@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# challenge-0521.intigriti.io
-
-### Brief Description <a href="brief-description" id="brief-description"></a>
+## Brief Description <a href="brief-description" id="brief-description"></a>
 
 The challenge provides a vulnerable to XSS form in the page [https://challenge-0521.intigriti.io/captcha.php](https://challenge-0521.intigriti.io/captcha.php).\
 This form is loaded in [https://challenge-0521.intigriti.io/](https://challenge-0521.intigriti.io) via an iframe.
@@ -28,7 +26,7 @@ It was found that the form will **insert the user input inside the JavaScript `e
 However, before inserting the user input inside the`eval` function, it’s checked with the regexp `/[a-df-z<>()!\\='"]/gi` so if any of those character is found, the user input won’t be executed inside `eval`.\
 Anyway, it was found a way to bypass the regexp protection and execute `alert(document.domain)` abusing the dangerous `eval` function.
 
-### Accessing the HTML <a href="accessing-the-html" id="accessing-the-html"></a>
+## Accessing the HTML <a href="accessing-the-html" id="accessing-the-html"></a>
 
 It was found that the letter `e` is permitted as user input. It was also found that there is an HTLM element using the `id="e"`. Therefore, this HtML element is accesible from Javascript just using the variable `e`:\
 ![](https://i.imgur.com/Slq2Xal.png)
@@ -53,7 +51,7 @@ Then, from the `e` HTML element it’s possible to access the `document` object 
 e["parentNode"]["parentNode"]["parentNode"]["parentNode"]["parentNode"]
 ```
 
-### Calling a function without parenthesis with JS code as string <a href="calling-a-function-without-parenthesis-with-js-code-as-string" id="calling-a-function-without-parenthesis-with-js-code-as-string"></a>
+## Calling a function without parenthesis with JS code as string <a href="calling-a-function-without-parenthesis-with-js-code-as-string" id="calling-a-function-without-parenthesis-with-js-code-as-string"></a>
 
 From the object `document` it’s possible to call the `write` function to **write arbitrary HTML text that the browser will execute**.\
 However, as the `()` characters are **forbidden**, it’s not possible to call the function using them. Anyway, it’s possible to call a function using **backtips** (\`\`).\
@@ -71,7 +69,7 @@ e["parentNode"]["parentNode"]["parentNode"]["parentNode"]["parentNode"]["write"]
 
 You can test this code in a javascript console inside the page [https://challenge-0521.intigriti.io/captcha.php](https://challenge-0521.intigriti.io/captcha.php)
 
-### Final forbidden characters bypass <a href="final-forbidden-characters-bypass" id="final-forbidden-characters-bypass"></a>
+## Final forbidden characters bypass <a href="final-forbidden-characters-bypass" id="final-forbidden-characters-bypass"></a>
 
 However, there is still one problem left. Most of the characters of the exploit are **forbidden** as they appear in the regexp `/[a-df-z<>()!\\='"]/gi`. But note how all the **forbidden characters are strings** inside the exploit and the **not string characters in the exploit (e\[]\`${}) are allowed**.\
 This means that if it’s possible to **generate the forbidden charaters as strings from the allowed characters**, it’s possible to generate the exploit.\
@@ -85,7 +83,7 @@ Using these tricks and some more complex ones it was possible to **generate all 
 e["parentNode"]["parentNode"]["parentNode"]["parentNode"]["parentNode"]["write"]`${"<script>alert(document.location)</script>"}`
 ```
 
-### Exploit Code <a href="exploit-code" id="exploit-code"></a>
+## Exploit Code <a href="exploit-code" id="exploit-code"></a>
 
 This is the python exploit used to generate the final exploit. If you execute it, it will print the exploit:
 
@@ -158,7 +156,7 @@ txt = f'{document}[{write}]'+'`${['+payload+']}`'
 print(txt) #Write the exploit to stdout
 ```
 
-### Exploitation <a href="exploitation" id="exploitation"></a>
+## Exploitation <a href="exploitation" id="exploitation"></a>
 
 In order to generate the exploit just execute the previous python code. If you prefer, you can also copy/paste it from here:
 

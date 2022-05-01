@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# AWS Security
+# Types of services
 
-## Types of services
-
-### Container services
+## Container services
 
 Services that fall under container services have the following characteristics:
 
@@ -32,7 +30,7 @@ Services that fall under container services have the following characteristics:
 * Also, platform-level identity and access management where it exists.
 * **Examples** of AWS container services include Relational Database Service, Elastic Mapreduce, and Elastic Beanstalk.
 
-### Abstract Services
+## Abstract Services
 
 * These services are **removed, abstracted, from the platform or management layer which cloud applications are built on**.
 * The services are accessed via endpoints using AWS application programming interfaces, APIs.
@@ -41,7 +39,7 @@ Services that fall under container services have the following characteristics:
 * **Data is isolated via security mechanisms**.
 * Abstract services have a strong integration with IAM, and **examples** of abstract services include S3, DynamoDB, Amazon Glacier, and SQS.
 
-## IAM - Identity and Access Management
+# IAM - Identity and Access Management
 
 IAM is the service that will allow you to manage **Authentication**, **Authorization** and **Access Control** inside your AWS account.
 
@@ -51,11 +49,11 @@ IAM is the service that will allow you to manage **Authentication**, **Authoriza
 
 IAM can be defined by its ability to manage, control and govern authentication, authorization and access control mechanisms of identities to your resources within your AWS account.
 
-### Users
+## Users
 
 This could be a **real person** within your organization who requires access to operate and maintain your AWS environment. Or it could be an account to be used by an **application** that may require permissions to **access** your **AWS** resources **programmatically**. Note that **usernames must be unique**.
 
-#### CLI
+### CLI
 
 * **Access Key ID**: 20 random uppercase alphanumeric characters like AKHDNAPO86BSHKDIRYT
 * **Secret access key ID**: 40 random upper and lowercase characters: S836fh/J73yHSb64Ag3Rkdi/jaD6sPl6/antFtU (It's not possible to retrieve lost secret access key IDs).
@@ -65,23 +63,23 @@ _Create a new access key -> Apply the new key to system/application -> mark orig
 
 **MFA** is **supported** when using the AWS **CLI**.
 
-### Groups
+## Groups
 
 These are objects that **contain multiple users**. Permissions can be assigned to a user or inherit form a group. **Giving permission to groups and not to users the secure way to grant permissions**.
 
-### Roles
+## Roles
 
 Roles are used to grant identities a set of permissions. **Roles don't have any access keys or credentials associated with them**. Roles are usually used with resources (like EC2 machines) but they can also be useful to grant **temporary privileges to a user**. Note that when for example an EC2 has an IAM role assigned, instead of saving some keys inside the machine, dynamic temporary access keys will be supplied by the IAM role to handle authentication and determine if access is authorized.
 
 An IAM role consists of **two types of policies**: A **trust policy**, which cannot be empty, defining who can assume the role, and a **permissions policy**, which cannot be empty, defining what they can access.
 
-#### AWS Security Token Service (STS)
+### AWS Security Token Service (STS)
 
 This is a web service that enables you to **request temporary, limited-privilege credentials** for AWS Identity and Access Management (IAM) users or for users that you authenticate (federated users).
 
-### Policies
+## Policies
 
-#### Policy Permissions
+### Policy Permissions
 
 Are used to assign permissions. There are 2 types:
 
@@ -114,32 +112,32 @@ If **single "Deny" exist, it will override the "Allow"**, except for requests th
 }
 ```
 
-#### Inline Policies
+### Inline Policies
 
 This kind of policies are **directly assigned** to a user, group or role. Then, they not appear in the Policies list as any other one can use them.\
 Inline policies are useful if you want to **maintain a strict one-to-one relationship between a policy and the identity** that it's applied to. For example, you want to be sure that the permissions in a policy are not inadvertently assigned to an identity other than the one they're intended for. When you use an inline policy, the permissions in the policy cannot be inadvertently attached to the wrong identity. In addition, when you use the AWS Management Console to delete that identity, the policies embedded in the identity are deleted as well. That's because they are part of the principal entity.
 
-#### S3 Bucket Policies
+### S3 Bucket Policies
 
 Can only be applied to S3 Buckets. They contains an attribute called 'principal' that can be: IAM users, Federated users, another AWS account, an AWS service. P**rincipals define who/what should be allowed or denied access to various S3 resources.**
 
-### Multi-Factor Authentication
+## Multi-Factor Authentication
 
 It's used to **create an additional factor for authentication** in addition to your existing methods, such as password, therefore, creating a multi-factor level of authentication.\
 You can use a **free virtual application or a physical device**. You can use apps like google authentication for free to activate a MFA in AWS.
 
-### Identity Federation
+## Identity Federation
 
 Identity federation **allows users from identity providers which are external** to AWS to access AWS resources securely without having to supply AWS user credentials from a valid IAM user account. \
 An example of an identity provider can be your own corporate Microsoft Active Directory(via SAML) or OpenID services (like Google). Federated access will then allow the users within it to access AWS.\
 AWS Identity Federation connects via IAM roles.
 
-#### Cross Account Trusts and Roles
+### Cross Account Trusts and Roles
 
 **A user** (trusting) can create a Cross Account Role with some policies and then, **allow another user** (trusted) to **access his account** but only h**aving the access indicated in the new role policies**. To create this, just create a new Role and select Cross Account Role. Roles for Cross-Account Access offers two options. Providing access between AWS accounts that you own, and providing access between an account that you own and a third party AWS account.\
 It's recommended to **specify the user who is trusted and not put some generic thing** because if not, other authenticated users like federated users will be able to also abuse this trust.
 
-#### AWS Simple AD
+### AWS Simple AD
 
 Not supported:
 
@@ -151,16 +149,16 @@ Not supported:
 * Schema Extensions
 * No Direct access to OS or Instances
 
-#### Web Federation or OpenID Authentication
+### Web Federation or OpenID Authentication
 
 The app uses the AssumeRoleWithWebIdentity to create temporary credentials. However this doesn't grant access to the AWS console, just access to resources within AWS.
 
-### Other IAM options
+## Other IAM options
 
 * You can **set a password policy setting** options like minimum length and password requirements.
 * You can **download "Credential Report"** with information about current credentials (like user creation time, is password enabled...). You can generate a credential report as often as once every **four hours**.
 
-## KMS - Key Management Service
+# KMS - Key Management Service
 
 AWS Key Management Service (AWS KMS) is a managed service that makes it easy for you to **create and control **_**customer master keys**_** (CMKs)**, the encryption keys used to encrypt your data. AWS KMS CMKs are **protected by hardware security modules** (HSMs)
 
@@ -180,7 +178,7 @@ There are 2 types of master keys:
 
 **Envelope Encryption** in the context of Key Management Service (KMS): Two-tier hierarchy system to **encrypt data with data key and then encrypt data key with master key**.
 
-### Key Policies
+## Key Policies
 
 These defines **who can use and access a key in KMS**. By default root user has full access over KMS, if you delete this one, you need to contact AWS for support.
 
@@ -204,7 +202,7 @@ Access:
 * Via IAM policy
 * Via grants
 
-### Key Administrators
+## Key Administrators
 
 Key administrator by default:
 
@@ -212,7 +210,7 @@ Key administrator by default:
 * Only IAM users and roles can be added to Key Administrators list (not groups)
 * If external CMK is used, Key Administrators have the permission to import key material
 
-### Rotation of CMKs
+## Rotation of CMKs
 
 * The longer the same key is left in place, the more data is encrypted with that key, and if that key is breached, then the wider the blast area of data is at risk. In addition to this, the longer the key is active, the probability of it being breached increases.
 * **KMS rotate customer keys every 365 days** (or you can perform the process manually whenever you want) and **keys managed by AWS every 3 years** and this time it cannot be changed.
@@ -220,7 +218,7 @@ Key administrator by default:
 * In a break, rotating the key won't remove the threat as it will be possible to decrypt all the data encrypted with the compromised key. However, the **new data will be encrypted with the new key**.
 * If **CMK** is in state of **disabled** or **pending** **deletion**, KMS will **not perform a key rotation** until the CMK is re-enabled or deletion is cancelled.
 
-#### Manual rotation
+### Manual rotation
 
 * A **new CMK needs to be created**, then, a new CMK-ID is created, so you will need to **update** any **application** to **reference** the new CMK-ID.
 * To do this process easier you can **use aliases to refer to a key-id** and then just update the key the alias is referring to.
@@ -228,7 +226,7 @@ Key administrator by default:
 
 You can import keys from your on-premises key infrastructure .
 
-### Other information
+## Other information
 
 KMS is priced per number of encryption/decryption requests received from all services per month.
 
@@ -242,7 +240,7 @@ With KMS policy you can do the following:
 
 You cannot synchronize or move/copy keys across regions; you can only define rules to allow access across region.
 
-## S3
+# S3
 
 Amazon S3 is a service that allows you **store important amounts of data**.
 
@@ -250,11 +248,11 @@ Amazon S3 provides multiple options to achieve the **protection** of data at RES
 
 With resource-based permissions, you can define permissions for sub-directories of your bucket separately.
 
-### S3 Access logs
+## S3 Access logs
 
 It's possible to **enable S3 access login** (which by default is disabled) to some bucket and save the logs in a different bucket to know who is accessing the bucket. The source bucket and the target bucket (the one is saving the logs needs to be in the same region.
 
-### S3 Encryption Mechanisms
+## S3 Encryption Mechanisms
 
 **DEK means Data Encryption Key** and is the key that is always generated and used to encrypt data.
 
@@ -314,7 +312,7 @@ Please, note that in this case **the key is managed by AWS** (rotation only ever
   * S3 sends the encrypted data and DEK
   * As the client already has the CMK used to encrypt the DEK, it decrypts the DEK and then uses the plaintext DEK to decrypt the data
 
-## HSM - Hardware Security Module
+# HSM - Hardware Security Module
 
 Cloud HSM is a FIPS 140 level two validated **hardware device** for secure cryptographic key storage (note that CloudHSM is a hardware appliance, it is not a virtualized service). It is a SafeNetLuna 7000 appliance with 5.3.13 preloaded. There are two firmware versions and which one you pick is really based on your exact needs. One is for FIPS 140-2 compliance and there was a newer version that can be used.
 
@@ -338,7 +336,7 @@ Additionally, cross consideration must be made in the purchase of third party so
 
 **With CloudHSM only you have access to the keys** and without going into too much detail, with CloudHSM you manage your own keys. **With KMS, you and Amazon co-manage your keys**. AWS does have many policy safeguards against abuse and **still cannot access your keys in either solution**. The main distinction is compliance as it pertains to key ownership and management, and with CloudHSM, this is a hardware appliance that you manage and maintain with exclusive access to you and only you.
 
-### CloudHSM Suggestions
+## CloudHSM Suggestions
 
 1. Always deploy CloudHSM in an **HA setup** with at least two appliances in **separate availability zones**, and if possible, deploy a third either on premise or in another region at AWS.
 2. Be careful when **initializing** a **CloudHSM**. This action **will destroy the keys**, so either have another copy of the keys or be absolutely sure you do not and never, ever will need these keys to decrypt any data.
@@ -354,7 +352,7 @@ The most common reason to use CloudHSM is compliance standards that you must mee
 
 The **public key is installed on the HSM appliance during provisioning** so you can access the CloudHSM instance via SSH.
 
-## Amazon Athena
+# Amazon Athena
 
 Amazon Athena is an interactive query service that makes it easy to **analyze data** directly in Amazon Simple Storage Service (Amazon **S3**) **using** standard **SQL**.
 
@@ -366,7 +364,7 @@ Amazon Athena supports the **hability to query S3 data that is already encrypted
 
 SSE-C and CSE-E are not supported. In addition to this, it's important to understand that Amazon Athena will only run queries against **encrypted objects that are in the same region as the query itself**. If you need to query S3 data that's been encrypted using KMS, then specific permissions are required by the Athena user to enable them to perform the query.
 
-## AWS CloudTrail
+# AWS CloudTrail
 
 This service **tracks and monitors AWS API calls made within the environment**. Each call to an API (event) is logged. Each logged event contains:
 
@@ -387,11 +385,11 @@ When creating a Trail the event selectors will allow you to indicate the trail t
 
 Logs are saved in an S3 bucket. By default Server Side Encryption is used (SSE-S3) so AWS will decrypt the content for the people that has access to it, but for additional security you can use SSE with KMS and your own keys.
 
-### Log File Naing Convention
+## Log File Naing Convention
 
 ![](<../.gitbook/assets/image (429).png>)
 
-### S3 folder structure
+## S3 folder structure
 
 ![](<../.gitbook/assets/image (428).png>)
 
@@ -401,7 +399,7 @@ Note that the folders "_AWSLogs_" and "_CloudTrail_" are fixed folder names,
 
 ![](<../.gitbook/assets/image (437).png>)
 
-### Aggregate Logs from Multiple Accounts
+## Aggregate Logs from Multiple Accounts
 
 * Create a Trial in the AWS account where you want the log files to be delivered to
 * Apply permissions to the destination S3 bucket allowing cross-account access for CloudTrail and allow each AWS account that needs access
@@ -409,7 +407,7 @@ Note that the folders "_AWSLogs_" and "_CloudTrail_" are fixed folder names,
 
 However, even if you can save al the logs in the same S3 bucket, you cannot aggregate CloudTrail logs from multiple accounts into a CloudWatch Logs belonging to a single AWS account
 
-### Log Files Checking
+## Log Files Checking
 
 You can check that the logs haven't been altered by running
 
@@ -417,7 +415,7 @@ You can check that the logs haven't been altered by running
 aws cloudtrail validate-logs --trail-arn <trailARN> --start-time <start-time> [--end-time <end-time>] [--s3-bucket <bucket-name>] [--s3-prefix <prefix>] [--verbose]
 ```
 
-### Logs to CloudWatch
+## Logs to CloudWatch
 
 **CloudTrail can automatically send logs to CloudWatch so you can set alerts that warns you when suspicious activities are performed.**\
 Note that in order to allow CloudTrail to send the logs to CloudWatch a **role** needs to be created that allows that action. If possible, it's recommended to use AWS default role to perform these actions. This role will allow CloudTrail to:
@@ -425,17 +423,17 @@ Note that in order to allow CloudTrail to send the logs to CloudWatch a **role**
 * CreateLogStream: This allows to create a CloudWatch Logs log streams
 * PutLogEvents: Deliver CloudTrail logs to CloudWatch Logs log stream
 
-### Event History
+## Event History
 
 CloudTrail Event History allows you to inspect in a table the logs that have been recorded:
 
 ![](<../.gitbook/assets/image (431).png>)
 
-### Insights
+## Insights
 
 **CloudTrail Insights** automatically **analyzes** write management events from CloudTrail trails and **alerts** you to **unusual activity**. For example, if there is an increase in `TerminateInstance` events that differs from established baselines, you’ll see it as an Insight event. These events make **finding and responding to unusual API activity easier** than ever.
 
-## CloudWatch
+# CloudWatch
 
 Amazon CloudWatch allows to **collect all of your logs in a single repository** where you can create **metrics** and **alarms** based on the logs.\
 CloudWatch Log Event have a **size limitation of 256KB of each log line**.
@@ -450,7 +448,7 @@ Events that are monitored:
 * API calls that resulted in failed authorization
 * Filters to search in cloudwatch: [https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html)
 
-### Agent Installation
+## Agent Installation
 
 You can install agents insie your machines/containers to automatically send the logs back to CloudWatch.
 
@@ -460,17 +458,17 @@ You can install agents insie your machines/containers to automatically send the 
 
 A log group has many streams. A stream has many events. And inside of each stream, the events are guaranteed to be in order.
 
-## Cost Explorer and Anomaly detection
+# Cost Explorer and Anomaly detection
 
 This allows you to check how are you expending money in AWS services and help you **detecting anomalies**.\
 Moreover, you can configure an anomaly detection so AWS will warn you when some anomaly in costs is found.
 
-### Budgets
+## Budgets
 
 Budgets help to manage costs and usage. You can get **alerted when a threshold is reached**.\
 Also, they can be used for non cost related monitoring like the usage of a service (how many GB are used in a particular S3 bucket?).
 
-## AWS Config
+# AWS Config
 
 AWS Config **capture resource changes**, so any change to a resource supported by Config can be recorded, which will **record what changed along with other useful metadata, all held within a file known as a configuration item**, a CI.\
 This service is **region specific**.
@@ -491,7 +489,7 @@ A configuration item or **CI** as it's known, is a key component of AWS Config. 
 
 **S3 is used to store** the Configuration History files and any Configuration snapshots of your data within a single bucket, which is defined within the Configuration recorder. If you have multiple AWS accounts you may want to aggregate your configuration history files into the same S3 bucket for your primary account. However, you'll need to grant write access for this service principle, config.amazonaws.com, and your secondary accounts with write access to the S3 bucket in your primary account.
 
-### Config Rules
+## Config Rules
 
 Config rules are a great way to help you **enforce specific compliance checks** **and controls across your resources**, and allows you to adopt an ideal deployment specification for each of your resource types. Each rule **is essentially a lambda function** that when called upon evaluates the resource and carries out some simple logic to determine the compliance result with the rule. **Each time a change is made** to one of your supported resources, **AWS Config will check the compliance against any config rules that you have in place**.\
 AWS have a number of **predefined rules** that fall under the security umbrella that are ready to use. For example, Rds-storage-encrypted. This checks whether storage encryption is activated by your RDS database instances. Encrypted-volumes. This checks to see if any EBS volumes that have an attached state are encrypted.
@@ -502,13 +500,13 @@ AWS have a number of **predefined rules** that fall under the security umbrella 
 Limit of 50 config rules per region before you need to contact AWS for an increase.\
 Non compliant results are NOT deleted.
 
-## SNS Topic
+# SNS Topic
 
 SNS topic is used as a **configuration stream for notifications** from different AWS services like Config or CloudWatch alarms.\
 You can have various endpoints associated to the SNS stream.\
 You can use SNS topic to send notifications to you via email or to SQS to treate programatically the notification.
 
-## Inspector
+# Inspector
 
 The Amazon Inspector service is **agent based**, meaning it requires software agents to be **installed on any EC2 instances** you want to assess. This makes it an easy service to be configured and added at any point to existing resources already running within your AWS infrastructure. This helps Amazon Inspector to become a seamless integration with any of your existing security processes and procedures as another level of security.
 
@@ -521,7 +519,7 @@ These are the tests that AWS Inspector allow you to perform:
 
 You can make any of those run on the EC2 machines you decide.
 
-### Element of AWS Inspector
+## Element of AWS Inspector
 
 **Role**: Create or select a role to allow Amazon Inspector to have read only access to the EC2 instances (DescribeInstances)\
 **Assessment Targets**: Group of EC2 instances that you want to run an assessment against\
@@ -547,7 +545,7 @@ Amazon Inspector has a pre-defined set of rules, grouped into packages. Each Ass
 Note that nowadays AWS already allow you to **autocreate** all the necesary **configurations** and even automatically **install the agents inside the EC2 instances.**
 {% endhint %}
 
-### **Reporting**
+## **Reporting**
 
 **Telemetry**: data that is collected from an instance, detailing its configuration, behavior and processes during an assessment run. Once collected, the data is then sent back to Amazon Inspector in near-real-time over TLS where it is then stored and encrypted on S3 via an ephemeral KMS key. Amazon Inspector then accesses the S3 Bucket, decrypts the data in memory, and analyzes it against any rules packages used for that assessment to generate the findings.
 
@@ -556,7 +554,7 @@ Note that nowadays AWS already allow you to **autocreate** all the necesary **co
 * The **findings report** contain the summary of the assessment, info about the EC2 and rules and the findings that occurred.
 * The **full report** is the finding report + a list of rules that were passed.
 
-## Trusted Advisor
+# Trusted Advisor
 
 The main function of Trusted Advisor is to **recommend improvements across your AWS account** to help optimize and hone your environment based on **AWS best practices**. These recommendations cover four distinct categories. It's a is a cross-region service.
 
@@ -569,7 +567,7 @@ The full power and potential of AWS Trusted Advisor is only really **available i
 Trusted advisor can send notifications and you can exclude items from it.\
 Trusted advisor data is **automatically refreshed every 24 hours**, **but** you can perform a **manual one 5 mins after the previous one.**
 
-## Amazon GuardDuty
+# Amazon GuardDuty
 
 Amazon GuardDuty is a regional-based intelligent **threat detection service**, the first of its kind offered by AWS, which allows users to **monitor** their **AWS account** for **unusual and unexpected behavior by analyzing VPC Flow Logs, AWS CloudTrail management event logs, Cloudtrail S3 data event logs, and DNS logs**. It uses **threat intelligence feeds**, such as lists of malicious IP addresses and domains, and **machine learning** to identify **unexpected and potentially unauthorized and malicious activity** within your AWS environment. This can include issues like escalations of privileges, uses of exposed credentials, or communication with malicious IP addresses, or domains.\
 For example, GuardDuty can detect compromised EC2 instances serving malware or mining bitcoin. It also monitors AWS account access behavior for signs of compromise, such as unauthorized infrastructure deployments, like instances deployed in a Region that has never been used, or unusual API calls, like a password policy change to reduce password strength.\
@@ -601,7 +599,7 @@ You pay for the processing of your log files, per 1 million events per months fr
 When a user disable GuardDuty, it will stop monitoring your AWS environment and it won't generate any new findings at all, and the existing findings will be lost.\
 If you just stop it, the existing findings will remain.
 
-## Amazon Macie
+# Amazon Macie
 
 The main function of the service is to provide an automatic method of **detecting, identifying, and also classifying data** that you are storing within your AWS account.
 
@@ -680,13 +678,13 @@ The research function allows to create you own queries again all Amazon Macie da
 
 It possible to invite other accounts to Amazon Macie so several accounts share Amazon Macie.
 
-## Route 53
+# Route 53
 
 You can very easily create **health checks for web pages** via Route53. For example you can create HTTP checks on port 80 to a page to check that the web server is working.
 
 Route 53 service is mainly used for checking the health of the instances. To check the health of the instances we can ping a certain DNS point and we should get response from the instance if the instances are healthy.
 
-## CloufFront
+# CloufFront
 
 Amazon CloudFront is AWS's **content delivery network that speeds up distribution** of your static and dynamic content through its worldwide network of edge locations. When you use a request content that you're hosting through Amazon CloudFront, the request is routed to the closest edge location which provides it the lowest latency to deliver the best performance. When **CloudFront access logs** are enabled you can record the request from each user requesting access to your website and distribution. As with S3 access logs, these logs are also **stored on Amazon S3 for durable and persistent storage**. There are no charges for enabling logging itself, however, as the logs are stored in S3 you will be stored for the storage used by S3.
 
@@ -694,9 +692,9 @@ The log files capture data over a period of time and depending on the amount of 
 
 **By default cookie logging is disabled** but you can enable it.
 
-## VPC
+# VPC
 
-### VPC Flow Logs
+## VPC Flow Logs
 
 Within your VPC, you could potentially have hundreds or even thousands of resources all communicating between different subnets both public and private and also between different VPCs through VPC peering connections. **VPC Flow Logs allows you to capture IP traffic information that flows between your network interfaces of your resources within your VPC**.
 
@@ -718,7 +716,7 @@ For every network interface that publishes data to the CloudWatch log group, it 
 
 ![](<../.gitbook/assets/image (433).png>)
 
-### Subnets
+## Subnets
 
 Subnets helps to enforce a greater level of security. **Logical grouping of similar resources** also helps you to maintain an **ease of management** across your infrastructure.\
 Valid CIDR are from a /16 netmask to a /28 netmask.\
@@ -738,7 +736,7 @@ By default, all subnets have the automatic assigned of public IP addresses turne
 
 If you are **connection a subnet with a different subnet you cannot access the subnets connected** with the other subnet, you need to create connection with them directly. **This also applies to internet gateways**. You cannot go through a subnet connection to access internet, you need to assign the internet gateway to your subnet.
 
-### VPC Peering
+## VPC Peering
 
 VPC peering allows you to **connect two or more VPCs together**, using IPV4 or IPV6, as if they were a part of the same network.
 
@@ -746,7 +744,7 @@ Once the peer connectivity is established, **resources in one VPC can access res
 If you have **overlapping or duplicate CIDR** ranges for your VPC, then **you'll not be able to peer the VPCs** together.\
 Each AWS VPC will **only communicate with its peer**. As an example, if you have a peering connection between VPC 1 and VPC 2, and another connection between VPC 2 and VPC 3 as shown, then VPC 1 and 2 could communicate with each other directly, as can VPC 2 and VPC 3, however, VPC 1 and VPC 3 could not. **You can't route through one VPC to get to another.**
 
-## AWS Secrets Manager
+# AWS Secrets Manager
 
 AWS Secrets Manager is a great service to enhance your security posture by allowing you to **remove any hard-coded secrets within your application and replacing them with a simple API call** to the aid of your secrets manager which then services the request with the relevant secret. As a result, AWS Secrets Manager acts as a **single source of truth for all your secrets across all of your applications**.
 
@@ -758,7 +756,7 @@ To allow a user form a different account to access your secret you need to autho
 
 **AWS Secrets Manager integrates with AWS KMS to encrypt your secrets within AWS Secrets Manager.**
 
-## EMR
+# EMR
 
 EMR is a managed service by AWS and is comprised of a **cluster of EC2 instances that's highly scalable** to process and run big data frameworks such Apache Hadoop and Spark.
 
@@ -778,7 +776,7 @@ Once the TLS certificate provider has been configured in the security configurat
 * Tez Shuffle Handler uses TLS.
 * Spark: The Akka protocol uses TLS. Block Transfer Service uses Simple Authentication Security Layer and 3DES. External shuffle service uses the Simple Authentication Security Layer.
 
-## RDS - Relational Database Service
+# RDS - Relational Database Service
 
 RDS allows you to set up a **relational database** using a number of **different engines** such as MySQL, Oracle, SQL Server, etc. During the creation of your RDS database instance, you have the opportunity to **Enable Encryption at the Configure Advanced Settings** screen under Database Options and Enable Encryption.
 
@@ -794,7 +792,7 @@ If you want to use the TDE method, then you must first ensure that the database 
 
 Once the database is associated with an option group, you must ensure that the Oracle Transparent Data Encryption option is added to that group. Once this TDE option has been added to the option group, it cannot be removed. TDE can use two different encryption modes, firstly, TDE tablespace encryption which encrypts entire tables and, secondly, TDE column encryption which just encrypts individual elements of the database.
 
-## Amazon Kinesis Firehouse
+# Amazon Kinesis Firehouse
 
 Amazon Firehose is used to deliver **real-time streaming data to different services** and destinations within AWS, many of which can be used for big data such as S3 Redshift and Amazon Elasticsearch.
 
@@ -812,7 +810,7 @@ As a part of this process, it's important to ensure that both producer and consu
 
 Kinesis SSE encryption will typically call upon KMS to **generate a new data key every five minutes**. So, if you had your stream running for a month or more, thousands of data keys would be generated within this time frame.
 
-## Amazon Redshift
+# Amazon Redshift
 
 Redshift is a fully managed service that can scale up to over a petabyte in size, which is used as a **data warehouse for big data solutions**. Using Redshift clusters, you are able to run analytics against your datasets using fast, SQL-based query tools and business intelligence applications to gather greater understanding of vision for your business.
 
@@ -820,7 +818,7 @@ Redshift is a fully managed service that can scale up to over a petabyte in size
 
 Encryption for your cluster can only happen during its creation, and once encrypted, the data, metadata, and any snapshots are also encrypted. The tiering level of encryption keys are as follows, **tier one is the master key, tier two is the cluster encryption key, the CEK, tier three, the database encryption key, the DEK, and finally tier four, the data encryption keys themselves**.
 
-### KMS
+## KMS
 
 During the creation of your cluster, you can either select the **default KMS key** for Redshift or select your **own CMK**, which gives you more flexibility over the control of the key, specifically from an auditable perspective.
 
@@ -836,7 +834,7 @@ This encrypted DEK is then sent over a secure channel and stored in Redshift sep
 
 You can use AWS Trusted Advisor to monitor the configuration of your Amazon S3 buckets and ensure that bucket logging is enabled, which can be useful for performing security audits and tracking usage patterns in S3.
 
-### CloudHSM
+## CloudHSM
 
 When working with CloudHSM to perform your encryption, firstly you must set up a trusted connection between your HSM client and Redshift while using client and server certificates.
 
@@ -848,19 +846,19 @@ If your internal security policies or governance controls dictate that you must 
 
 During the rotation, Redshift will rotate the CEK for your cluster and for any backups of that cluster. It will rotate a DEK for the cluster but it's not possible to rotate a DEK for the snapshots stored in S3 that have been encrypted using the DEK. It will put the cluster into a state of 'rotating keys' until the process is completed when the status will return to 'available'.
 
-## WAF
+# WAF
 
 AWS WAF is a web application firewall that helps **protect your web applications** or APIs against common web exploits that may affect availability, compromise security, or consume excessive resources. AWS WAF gives you control over **how traffic reaches your applications** by enabling you to create security rules that block common attack patterns, such as SQL injection or cross-site scripting, and rules that filter out specific traffic patterns you define.
 
 So there are a number of essential components relating to WAF, these being: Conditions, Rules and Web access control lists, also known as Web ACLs
 
-### Conditions
+## Conditions
 
 Conditions allow you to specify **what elements of the incoming HTTP or HTTPS request you want WAF to be monitoring** (XSS, GEO - filtering by location-, IP address, Size constraints, SQL Injection attacks, strings and regex matching). Note that if you are restricting a country from cloudfront, this request won't arrive to the waf.
 
 You can have **100 conditions of each type**, such as Geo Match or size constraints, however **Regex** is the **exception** to this rule where **only 10 Regex** conditions are allowed but this limit is possible to increase. You are able to have **100 rules and 50 Web ACLs per AWS account**. You are limited to **5 rate-based-rules** per account. Finally you can have **10,000 requests per second** when **using WAF** within your application load balancer.
 
-### Rules
+## Rules
 
 Using these conditions you can create rules: For example, block request if 2 conditions are met.\
 When creating your rule you will be asked to select a **Rule Type**: **Regular Rule** or **Rate-Based Rule**.
@@ -869,7 +867,7 @@ The only **difference** between a rate-based rule and a regular rule is that **r
 
 When you select a rate-based rule option, you are asked to **enter the maximum number of requests from a single IP within a five minute time frame**. When the count limit is **reached**, **all other requests from that same IP address is then blocked**. If the request rate falls back below the rate limit specified the traffic is then allowed to pass through and is no longer blocked. When setting your rate limit it **must be set to a value above 2000**. Any request under this limit is considered a Regular Rule.
 
-### Actions
+## Actions
 
 An action is applied to each rule, these actions can either be **Allow**, **Block** or **Count**.
 
@@ -883,11 +881,11 @@ If an **incoming request does not meet any rule** within the Web ACL then the re
 2. BlackListed IPs Block
 3. Any Bad Signatures also as Block.
 
-### CloudWatch
+## CloudWatch
 
 WAF CloudWatch metrics are reported **in one minute intervals by default** and are kept for a two week period. The metrics monitored are AllowedRequests, BlockedRequests, CountedRequests, and PassedRequests.
 
-## AWS Firewall Manager
+# AWS Firewall Manager
 
 AWS Firewall Manager simplifies your administration and maintenance tasks across multiple accounts and resources for **AWS WAF, AWS Shield Advanced, Amazon VPC security groups, and AWS Network Firewall**. With Firewall Manager, you set up your AWS WAF firewall rules, Shield Advanced protections, Amazon VPC security groups, and Network Firewall firewalls just once. The service **automatically applies the rules and protections across your accounts and resources**, even as you add new resources.
 
@@ -899,7 +897,7 @@ A **rule group** (a set of WAF rules together) can be added to an AWS Firewall M
 
 **Firewall Manager policies only allow "Block" or "Count"** options for a rule group (no "Allow" option).
 
-## AWS Shield
+# AWS Shield
 
 AWS Shield has been designed to help **protect your infrastructure against distributed denial of service attacks**, commonly known as DDoS.
 
@@ -909,13 +907,13 @@ AWS Shield has been designed to help **protect your infrastructure against distr
 
 Whereas the Standard version of Shield offered protection against layer three and layer four, **Advanced also offers protection against layer seven, application, attacks.**
 
-## VPN
+# VPN
 
-### Site-to-Site VPN
+## Site-to-Site VPN
 
 **Connect your on premisses network with your VPC.**
 
-#### Concepts
+### Concepts
 
 * **VPN connection**: A secure connection between your on-premises equipment and your VPCs.
 *   **VPN tunnel**: An encrypted link where data can pass from the customer network to or from AWS.
@@ -926,7 +924,7 @@ Whereas the Standard version of Shield offered protection against layer three an
 * **Virtual private gateway**: The VPN concentrator on the Amazon side of the Site-to-Site VPN connection. You use a virtual private gateway or a transit gateway as the gateway for the Amazon side of the Site-to-Site VPN connection.
 * **Transit gateway**: A transit hub that can be used to interconnect your VPCs and on-premises networks. You use a transit gateway or virtual private gateway as the gateway for the Amazon side of the Site-to-Site VPN connection.
 
-#### Limitations
+### Limitations
 
 * IPv6 traffic is not supported for VPN connections on a virtual private gateway.
 * An AWS VPN connection does not support Path MTU Discovery.
@@ -935,11 +933,11 @@ In addition, take the following into consideration when you use Site-to-Site VPN
 
 * When connecting your VPCs to a common on-premises network, we recommend that you use non-overlapping CIDR blocks for your networks.
 
-### Components of Client VPN <a href="#what-is-components" id="what-is-components"></a>
+## Components of Client VPN <a href="#what-is-components" id="what-is-components"></a>
 
 **Connect from your machine to your VPC**
 
-#### Concepts
+### Concepts
 
 * **Client VPN endpoint:** The resource that you create and configure to enable and manage client VPN sessions. It is the resource where all client VPN sessions are terminated.
 * **Target network:** A target network is the network that you associate with a Client VPN endpoint. **A subnet from a VPC is a target network**. Associating a subnet with a Client VPN endpoint enables you to establish VPN sessions. You can associate multiple subnets with a Client VPN endpoint for high availability. All subnets must be from the same VPC. Each subnet must belong to a different Availability Zone.
@@ -952,7 +950,7 @@ In addition, take the following into consideration when you use Site-to-Site VPN
 * **Connection logging:** You can enable connection logging for your Client VPN endpoint to log connection events. You can use this information to run forensics, analyze how your Client VPN endpoint is being used, or debug connection issues.
 * **Self-service portal:** You can enable a self-service portal for your Client VPN endpoint. Clients can log into the web-based portal using their credentials and download the latest version of the Client VPN endpoint configuration file, or the latest version of the AWS provided client.
 
-#### Limitations
+### Limitations
 
 * **Client CIDR ranges cannot overlap with the local CIDR** of the VPC in which the associated subnet is located, or any routes manually added to the Client VPN endpoint's route table.
 * Client CIDR ranges must have a block size of at **least /22** and must **not be greater than /12.**
@@ -970,13 +968,13 @@ In addition, take the following into consideration when you use Site-to-Site VPN
     ```
 * The self-service portal is **not available for clients that authenticate using mutual authentication**.
 
-## Amazon Cognito
+# Amazon Cognito
 
 Amazon Cognito provides **authentication, authorization, and user management** for your web and mobile apps. Your users can sign in directly with a **user name and password**, or through a **third party** such as Facebook, Amazon, Google or Apple.
 
 The two main components of Amazon Cognito are user pools and identity pools. **User pools** are user directories that provide **sign-up and sign-in options for your app users**. **Identity pools** enable you to grant your users **access to other AWS services**. You can use identity pools and user pools separately or together.
 
-### **User pools**
+## **User pools**
 
 A user pool is a user directory in Amazon Cognito. With a user pool, your users can **sign in to your web or mobile app** through Amazon Cognito, **or federate** through a **third-party** identity provider (IdP). Whether your users sign in directly or through a third party, all members of the user pool have a directory profile that you can access through an SDK.
 
@@ -989,7 +987,7 @@ User pools provide:
 * Security features such as multi-factor authentication (MFA), checks for compromised credentials, account takeover protection, and phone and email verification.
 * Customized workflows and user migration through AWS Lambda triggers.
 
-### **Identity pools**
+## **Identity pools**
 
 With an identity pool, your users can **obtain temporary AWS credentials to access AWS services**, such as Amazon S3 and DynamoDB. Identity pools support anonymous guest users, as well as the following identity providers that you can use to authenticate users for identity pools:
 

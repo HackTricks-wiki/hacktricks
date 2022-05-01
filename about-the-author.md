@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# About the author
-
-### Hello!!
+## Hello!!
 
 This is **Carlos Polop**.
 
@@ -27,7 +25,7 @@ First of all, I want to indicate that **I don't own this entire book**, a lot of
 
 I also wants to say **thanks to all the people that share cyber-security related information for free** on the Internet. Thanks to them I learn new hacking techniques that then I add to Hacktricks.
 
-### BIO
+## BIO
 
 * I've worked in different companies as sysadmin, developer and **pentester**
 * I'm a **Telecommunications Engineer** with a **Masters** in **Cybersecurity**
@@ -37,7 +35,7 @@ I also wants to say **thanks to all the people that share cyber-security related
 * I'm also the developer of [**PEASS-ng**](https://github.com/carlospolop/PEASS-ng)
 * And I really enjoy researching, playing CTFs, pentesting and everything related to **hacking**
 
-### Support HackTricks
+## Support HackTricks
 
 Thank you for be **reading this**!
 

@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Basic Forensic Methodology
-
 {% hint style="danger" %}
 Do you use **Hacktricks every day**? Did you find the book **very** **useful**? Would you like to **receive extra help** with cybersecurity questions? Would you like to **find more and higher quality content on Hacktricks**?\
 [**Support Hacktricks through github sponsors**](https://github.com/sponsors/carlospolop) **so we can dedicate more time to it and also get access to the Hacktricks private group where you will get the help you need and much more!**
@@ -34,13 +32,13 @@ We are going to talk about partitions, file-systems, carving, memory, logs, back
 
 So if you are doing a professional forensic analysis to some data or just playing a CTF you can find here useful interesting tricks.
 
-## Creating and Mounting an Image
+# Creating and Mounting an Image
 
 {% content-ref url="image-adquisition-and-mount.md" %}
 [image-adquisition-and-mount.md](image-adquisition-and-mount.md)
 {% endcontent-ref %}
 
-## Malware Analysis
+# Malware Analysis
 
 This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
 
@@ -48,7 +46,7 @@ This **isn't necessary the first step to perform once you have the image**. But 
 [malware-analysis.md](malware-analysis.md)
 {% endcontent-ref %}
 
-## Inspecting an Image
+# Inspecting an Image
 
 if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
 
@@ -70,7 +68,7 @@ Depending on the used OSs and even platform different interesting artifacts shou
 [docker-forensics.md](docker-forensics.md)
 {% endcontent-ref %}
 
-## Deep inspection of specific file-types and Software
+# Deep inspection of specific file-types and Software
 
 If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
 Read the following page to learn some interesting tricks:
@@ -85,19 +83,19 @@ I want to do a special mention to the page:
 [browser-artifacts.md](specific-software-file-type-tricks/browser-artifacts.md)
 {% endcontent-ref %}
 
-## Memory Dump Inspection
+# Memory Dump Inspection
 
 {% content-ref url="memory-dump-analysis/" %}
 [memory-dump-analysis](memory-dump-analysis/)
 {% endcontent-ref %}
 
-## Pcap Inspection
+# Pcap Inspection
 
 {% content-ref url="pcap-inspection/" %}
 [pcap-inspection](pcap-inspection/)
 {% endcontent-ref %}
 
-## **Anti-Forensic Techniques**
+# **Anti-Forensic Techniques**
 
 Keep in mind the possible use of anti-forensic techniques:
 
@@ -105,7 +103,7 @@ Keep in mind the possible use of anti-forensic techniques:
 [anti-forensic-techniques.md](anti-forensic-techniques.md)
 {% endcontent-ref %}
 
-## Threat Hunting
+# Threat Hunting
 
 {% content-ref url="file-integrity-monitoring.md" %}
 [file-integrity-monitoring.md](file-integrity-monitoring.md)

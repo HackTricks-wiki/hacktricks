@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# hc0n Christmas CTF - 2019
-
 ![](../../.gitbook/assets/41d0cdc8d99a8a3de2758ccbdf637a21.jpeg)
 
-## Enumeration
+# Enumeration
 
 I started **enumerating the machine using my tool** [**Legion**](https://github.com/carlospolop/legion):
 

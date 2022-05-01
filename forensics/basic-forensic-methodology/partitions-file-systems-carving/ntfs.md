@@ -16,9 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## NTFS
 
-### **NTFS**
+# **NTFS**
 
 **NTFS** (**New Technology File System**) is a proprietary journaling file system developed by Microsoft.
 
@@ -35,17 +34,17 @@ The cluster is the minimum size unit of NTFS and the size of the cluster depends
 | 16,385MB-32,768MB (32GB) | 64                  | 32KB         |
 | Greater than 32,768MB    | 128                 | 64KB         |
 
-#### **Slack-Space**
+## **Slack-Space**
 
 As the **minimum** size unit of NTFS is a **cluster**. Each file will be occupying a number of complete clusters. Then, it's highly probable that **each file occupies more space than necessary**. These **unused** **spaces** **booked** by a file which is called **slacking** **space**. And people could take advantage of this technique to **hide** **information**.
 
 ![](<../../../.gitbook/assets/image (498).png>)
 
-#### **NTFS boot sector**
+## **NTFS boot sector**
 
 When you format an NTFS volume, the format program allocates the first 16 sectors for the $Boot metadata file. First sector, in fact, is a boot sector with a "bootstrap" code and the following 15 sectors are the boot sector's IPL (initial program loader). To increase file system reliability the very last sector an NTFS partition contains a spare copy of the boot sector.
 
-#### **Master File Table o $MFT**
+## **Master File Table o $MFT**
 
 The NTFS file system contains a file called the _master file table_, or MFT. There is at least **one entry in the MFT for every file on an NTFS file system** volume, including the MFT itself. All information about a file, including its **size, time and date stamps, permissions, and data content**, is stored either in MFT entries, or in space outside the MFT that is described by MFT entries.
 
@@ -78,7 +77,7 @@ NTFS reserves the first 16 records of the table for special information:
 | Object Id file        | $ObjId    | 25         | Contains file object IDs.                                                                                                                                                                                                     |
 | Reparse point file    | $Reparse  | 26         | This file contains information about files and folders on the volume include reparse point data.                                                                                                                              |
 
-#### Each entry of the MFT looks like the following:
+## Each entry of the MFT looks like the following:
 
 ![](<../../../.gitbook/assets/image (499).png>)
 
@@ -98,7 +97,7 @@ It's also possible to recover deleted files using FTKImager:
 
 ![](<../../../.gitbook/assets/image (502).png>)
 
-#### MFT Attributes
+## MFT Attributes
 
 Each MFT entry has several attributes as the following image indicates:
 
@@ -156,7 +155,7 @@ Some interesting attributes:
 
 ![](<../../../.gitbook/assets/image (509).png>)
 
-#### NTFS timestamps
+## NTFS timestamps
 
 ![](<../../../.gitbook/assets/image (512).png>)
 
@@ -165,7 +164,7 @@ This program will extract all the MFT data and present it in CSV format. It can 
 
 ![](<../../../.gitbook/assets/image (513).png>)
 
-#### $LOGFILE
+## $LOGFILE
 
 The file **`$LOGFILE`** contains **logs** about the **actions** that have been **performed** **to** **files**. It also **saves** the **action** it would need to perform in case of a **redo** and the action needed to **go back** to the **previous** **state**.\
 These logs are useful for the MFT to rebuild the file system in case some kind of error happened.
@@ -181,7 +180,7 @@ Filtering by filenames you can see **all the actions performed against a file**:
 
 ![](<../../../.gitbook/assets/image (514).png>)
 
-#### $USNJnrl
+## $USNJnrl
 
 The file `$EXTEND/$USNJnrl/$J` is and alternate data stream of the file `$EXTEND$USNJnrl` . This artifact contains a **registry of changes produced inside the NTFS volume with more detail than `$LOGFILE`**.
 
@@ -191,7 +190,7 @@ Filtering by the filename it's possible to see **all the actions performed again
 
 ![](<../../../.gitbook/assets/image (516).png>)
 
-#### $I30
+## $I30
 
 Every **directory** in the file system contains an **`$I30`** **attribute** that must be maintained whenever there are changes to the directory's contents. When files or folders are removed from the directory, the **`$I30`** index records are re-arranged accordingly. However, **re-arranging of the index records may leave remnants of the deleted file/folder entry within the slack space**. This can be useful in forensics analysis for identifying files that may have existed on the drive.
 
@@ -201,13 +200,13 @@ You can get the `$I30` file of a directory from the **FTK Imager** and inspect i
 
 With this data you can find **information about the file changes performed inside the folder** but note that the deletion time of a file isn't saved inside this logs. However, you can see that **last modified date** of the **`$I30` file**, and if the **last action performed** over the directory is the **deletion** of a file, the times may be the same.
 
-#### $Bitmap
+## $Bitmap
 
 The **`$BitMap`** is a special file within the NTFS file system. This file keeps **track of all of the used and unused clusters** on an NTFS volume. When a file takes up space on the NTFS volume the location is uses is marked out in the `$BitMap`.
 
 ![](<../../../.gitbook/assets/image (523).png>)
 
-#### ADS (Alternate Data Stream)
+## ADS (Alternate Data Stream)
 
 Alternate data streams allow files to contain more than one stream of data. Every file has at least one data stream. In Windows, this default data stream is called `:$DATA`.\
 In this [page you can see different ways to create/access/discover alternate data streams](../../../windows/basic-cmd-for-pentesters.md#alternate-data-streams-cheatsheet-ads-alternate-data-stream) from the console. In the past this cause a vulnerability in IIS as people was able to access the source code of a page by accessing the `:$DATA` stream like `http://www.alternate-data-streams.com/default.asp::$DATA`.

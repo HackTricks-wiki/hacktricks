@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Escaping from a Docker container
-
-## `--privileged` flag
+# `--privileged` flag
 
 {% code title="Initial PoC" %}
 ```bash
@@ -80,7 +78,7 @@ Further, Docker [starts containers with the `docker-default` AppArmor](https://d
 
 A container would be vulnerable to this technique if run with the flags: `--security-opt apparmor=unconfined --cap-add=SYS_ADMIN`
 
-### Breaking down the proof of concept
+## Breaking down the proof of concept
 
 Now that we understand the requirements to use this technique and have refined the proof of concept exploit, let’s walk through it line-by-line to demonstrate how it works.
 
@@ -149,11 +147,11 @@ root        10  0.0  0.0      0     0 ?        I    13:57   0:00 [rcu_sched]
 root        11  0.0  0.0      0     0 ?        S    13:57   0:00 [migration/0]
 ```
 
-## `--privileged` flag v2
+# `--privileged` flag v2
 
 The previous PoCs work fine when the container is configured with a storage-driver which exposes the full host path of the mount point, for example `overlayfs`, however I recently came across a couple of configurations which did not obviously disclose the host file system mount point.
 
-### Kata Containers
+## Kata Containers
 
 ```text
 root@container:~$ head -1 /etc/mtab
@@ -164,7 +162,7 @@ kataShared on / type 9p (rw,dirsync,nodev,relatime,mmap,access=client,trans=virt
 
 \* More on Kata Containers in a future blog post.
 
-### Device Mapper
+## Device Mapper
 
 ```text
 root@container:~$ head -1 /etc/mtab
@@ -173,13 +171,13 @@ root@container:~$ head -1 /etc/mtab
 
 I saw a container with this root mount in a live environment, I believe the container was running with a specific `devicemapper` storage-driver configuration, but at this point I have been unable to replicate this behaviour in a test environment.
 
-### An Alternative PoC
+## An Alternative PoC
 
 Obviously in these cases there is not enough information to identify the path of container files on the host file system, so Felix’s PoC cannot be used as is. However, we can still execute this attack with a little ingenuity.
 
 The one key piece of information required is the full path, relative to the container host, of a file to execute within the container. Without being able to discern this from mount points within the container we have to look elsewhere.
 
-#### Proc to the Rescue <a id="proc-to-the-rescue"></a>
+### Proc to the Rescue <a id="proc-to-the-rescue"></a>
 
 The Linux `/proc` pseudo-filesystem exposes kernel process data structures for all processes running on a system, including those running in different namespaces, for example within a container. This can be shown by running a command in a container and accessing the `/proc` directory of the process on the host:Container
 
@@ -229,7 +227,7 @@ findme
 
 This changes the requirement for the attack from knowing the full path, relative to the container host, of a file within the container, to knowing the pid of _any_ process running in the container.
 
-#### Pid Bashing <a id="pid-bashing"></a>
+### Pid Bashing <a id="pid-bashing"></a>
 
 This is actually the easy part, process ids in Linux are numerical and assigned sequentially. The `init` process is assigned process id `1` and all subsequent processes are assigned incremental ids. To identify the host process id of a process within a container, a brute force incremental search can be used:Container
 
@@ -249,7 +247,7 @@ root@host:~$ cat /proc/${COUNTER}/root/findme
 findme
 ```
 
-#### Putting it All Together <a id="putting-it-all-together"></a>
+### Putting it All Together <a id="putting-it-all-together"></a>
 
 To complete this attack the brute force technique can be used to guess the pid for the path `/proc/<pid>/root/payload.sh`, with each iteration writing the guessed pid path to the cgroups `release_agent` file, triggering the `release_agent`, and seeing if an output file is created.
 
@@ -347,7 +345,7 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
 
-## Use containers securely
+# Use containers securely
 
 Docker restricts and limits containers by default. Loosening these restrictions may create security issues, even without the full power of the `--privileged` flag. It is important to acknowledge the impact of each additional permission, and limit permissions overall to the minimum necessary.
 
@@ -362,7 +360,7 @@ To help keep containers secure:
 * Use [official docker images](https://docs.docker.com/docker-hub/official_images/) or build your own based on them. Don’t inherit or use [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) images.
 * Regularly rebuild your images to apply security patches. This goes without saying.
 
-## References
+# References
 
 * [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 * [https://twitter.com/\_fel1x/status/1151487051986087936](https://twitter.com/_fel1x/status/1151487051986087936)

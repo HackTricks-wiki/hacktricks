@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Github Leaked Secrets
-
 Now that we have built the list of assets of our scope it's time to search for some OSINT low-hanging fruits.
 
-### Api keys leaks in github
+## Api keys leaks in github
 
 * [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
 * [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
@@ -33,7 +31,7 @@ Now that we have built the list of assets of our scope it's time to search for s
 * [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 * [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
-### **Dorks**
+## **Dorks**
 
 ```bash
 ".mlab.com password"

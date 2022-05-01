@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# USB Keyboard pcap analysis
-
 If you have a pcap of a USB connection with a lot of Interruptions probably it is a USB Keyboard connection.
 
 A wireshark filter like this could be useful: `usb.transfer_type == 0x01 and frame.len == 35 and !(usb.capdata == 00:00:00:00:00:00:00:00)`

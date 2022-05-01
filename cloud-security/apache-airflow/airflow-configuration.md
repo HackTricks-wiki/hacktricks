@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Airflow Configuration
-
-## Configuration File
+# Configuration File
 
 **Apache Airflow** generates a **config file** in all the airflow machines called **`airflow.cfg`** in the home of the airflow user. This config file contains configuration information and **might contain interesting and sensitive information.**
 
@@ -32,7 +30,7 @@ If you have **access to some machine inside the airflow env**, check the **envir
 
 Some interesting values to check when reading the config file:
 
-### \[api]
+## \[api]
 
 * **`access_control_allow_headers`**: This indicates the **allowed** **headers** for **CORS**
 * **`access_control_allow_methods`**: This indicates the **allowed methods** for **CORS**
@@ -47,12 +45,12 @@ Some interesting values to check when reading the config file:
   * You can also **create you own authentication** method with python.
 * **`google_key_path`:** Path to the **GCP service account key**
 
-### **\[atlas]**
+## **\[atlas]**
 
 * **`password`**: Atlas password
 * **`username`**: Atlas username
 
-### \[celery]
+## \[celery]
 
 * **`flower_basic_auth`** : Credentials (_user1:password1,user2:password2_)
 * **`result_backend`**: Postgres url which may contain **credentials**.
@@ -60,39 +58,39 @@ Some interesting values to check when reading the config file:
 * **`ssl_cert`**: Path to the cert
 * **`ssl_key`**: Path to the key
 
-### \[core]
+## \[core]
 
 * **`dag_discovery_safe_mode`**: Enabled by default. When discovering DAGs, ignore any files that don’t contain the strings `DAG` and `airflow`.
 * **`fernet_key`**: Key to store encrypted variables (symmetric)
 * **`hide_sensitive_var_conn_fields`**: Enabled by default, hide sensitive info of connections.
 * **`security`**: What security module to use (for example kerberos)
 
-### \[dask]
+## \[dask]
 
 * **`tls_ca`**: Path to ca
 * **`tls_cert`**: Part to the cert
 * **`tls_key`**: Part to the tls key
 
-### \[kerberos]
+## \[kerberos]
 
 * **`ccache`**: Path to ccache file
 * **`forwardable`**: Enabled by default
 
-### \[logging]
+## \[logging]
 
 * **`google_key_path`**: Path to GCP JSON creds.
 
-### \[secrets]
+## \[secrets]
 
 * **`backend`**: Full class name of secrets backend to enable
 * **`backend_kwargs`**: The backend\_kwargs param is loaded into a dictionary and passed to **init** of secrets backend class.
 
-### \[smtp]
+## \[smtp]
 
 * **`smtp_password`**: SMTP password
 * **`smtp_user`**: SMTP user
 
-### \[webserver]
+## \[webserver]
 
 * **`cookie_samesite`**: By default it's **Lax**, so it's already the weakest possible value
 * **`cookie_secure`**: Set **secure flag** on the the session cookie
@@ -103,7 +101,7 @@ Some interesting values to check when reading the config file:
 * **`web_server_ssl_key`**: **Path** to the **SSL** **Key**
 * **`x_frame_enabled`**: Default is **True**, so by default clickjacking isn't possible
 
-### Web Authentication
+## Web Authentication
 
 By default **web authentication** is specified in the file **`webserver_config.py`** and is configured as
 

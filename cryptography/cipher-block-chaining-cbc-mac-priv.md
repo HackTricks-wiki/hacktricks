@@ -17,13 +17,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Cipher Block Chaining CBC-MAC
-
-## CBC
+# CBC
 
 If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
 
-## CBC-MAC
+# CBC-MAC
 
 In cryptography, a **cipher block chaining message authentication code** (**CBC-MAC**) is a technique for constructing a message authentication code from a block cipher. The message is encrypted with some block cipher algorithm in CBC mode to create a **chain of blocks such that each block depends on the proper encryption of the previous block**. This interdependence ensures that a **change** to **any** of the plaintext **bits** will cause the **final encrypted block** to **change** in a way that cannot be predicted or counteracted without knowing the key to the block cipher.
 
@@ -31,7 +29,7 @@ To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero init
 
 ![CBC-MAC structure (en).svg](https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC\_structure\_\(en\).svg/570px-CBC-MAC\_structure\_\(en\).svg.png)
 
-## Vulnerability
+# Vulnerability
 
 With CBC-MAC usually the **IV used is 0**.\
 This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
@@ -55,19 +53,19 @@ You can create a username called **Administ** (m1) and retrieve the signature (s
 Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
 now, you can use s32 as the signature of the full name **Administrator**.
 
-#### Summary
+### Summary
 
 1. Get the signature of username **Administ** (m1) which is s1
 2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
 3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
 
-## Attack Controlling IV
+# Attack Controlling IV
 
 If you can control the used IV the attack could be very easy.\
 If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\
 Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0] XOR "A" == IV'\[0] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
 
-## References
+# References
 
 More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
 

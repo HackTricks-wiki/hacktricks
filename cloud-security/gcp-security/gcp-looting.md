@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# GCP - Other Services Enumeration
-
-## Stackdriver logging
+# Stackdriver logging
 
 [Stackdriver](https://cloud.google.com/stackdriver/) is Google's general-purpose infrastructure logging suite which might be capturing sensitive information like syslog-like capabilities that report individual commands run inside Compute Instances, HTTP requests sent to load balancers or App Engine applications, network packet metadata for VPC communications, and more.
 
@@ -46,7 +44,7 @@ gcloud logging read [FOLDER]
 gcloud logging write [FOLDER] [MESSAGE]
 ```
 
-## AI platform configurations <a href="reviewing-ai-platform-configurations" id="reviewing-ai-platform-configurations"></a>
+# AI platform configurations <a href="reviewing-ai-platform-configurations" id="reviewing-ai-platform-configurations"></a>
 
 Google [AI Platform](https://cloud.google.com/ai-platform/) is another "serverless" offering for machine learning projects.
 
@@ -57,7 +55,7 @@ $ gcloud ai-platform models list --format=json
 $ gcloud ai-platform jobs list --format=json
 ```
 
-## Cloud pub/sub <a href="reviewing-cloud-pubsub" id="reviewing-cloud-pubsub"></a>
+# Cloud pub/sub <a href="reviewing-cloud-pubsub" id="reviewing-cloud-pubsub"></a>
 
 Google [Cloud Pub/Sub](https://cloud.google.com/pubsub/) is a service that allows independent applications to **send messages** back and forth. Basically, there are **topics** where applications may **subscribe** to send and receive **messages** (which are composed by the message content and some metadata).
 
@@ -74,7 +72,7 @@ gcloud pubsub subscriptions pull [SUBSCRIPTION NAME]
 
 However, you may have better results [asking for a larger set of data](https://cloud.google.com/pubsub/docs/replay-overview), including older messages. This has some prerequisites and could impact applications, so make sure you really know what you're doing.
 
-## Cloud Git repositories <a href="reviewing-cloud-git-repositories" id="reviewing-cloud-git-repositories"></a>
+# Cloud Git repositories <a href="reviewing-cloud-git-repositories" id="reviewing-cloud-git-repositories"></a>
 
 Google's [Cloud Source Repositories](https://cloud.google.com/source-repositories/) are Git designed to be private storage for source code. You might **find useful secrets here**, or use the **source to discover vulnerabilities** in other applications.
 
@@ -88,7 +86,7 @@ gcloud source repos list
 gcloud source repos clone [REPO NAME]
 ```
 
-## Cloud Filestore Instances
+# Cloud Filestore Instances
 
 Google [Cloud Filestore](https://cloud.google.com/filestore/) is NAS for Compute Instances and Kubernetes Engine instances. You can think of this like any other **shared document repository -** a potential source of sensitive info.
 
@@ -98,7 +96,7 @@ If you find a filestore available in the project, you can **mount it** from with
 gcloud filestore instances list --format=json
 ```
 
-## Containers
+# Containers
 
 ```bash
 gcloud container images list
@@ -110,7 +108,7 @@ gcloud container clusters get-credentials [NAME]
 docker run --rm -ti gcr.io/<project-name>/secret:v1 sh
 ```
 
-## Kubernetes
+# Kubernetes
 
 First, you can check to see if any Kubernetes clusters exist in your project.
 
@@ -136,7 +134,7 @@ You can read more about `gcloud` for containers [here](https://cloud.google.com/
 
 This is a simple script to enumerate kubernetes in GCP: [https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_k8s\_enum](https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_k8s\_enum)
 
-## References
+# References
 
 * [https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/#reviewing-stackdriver-logging](https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/#reviewing-stackdriver-logging)
 

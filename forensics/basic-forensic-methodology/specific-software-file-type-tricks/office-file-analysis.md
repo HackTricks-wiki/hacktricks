@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Office file analysis
-
-## Introduction
+# Introduction
 
 Microsoft has created **dozens of office document file formats**, many of which are popular for the distribution of phishing attacks and malware because of their ability to **include macros** (VBA scripts).
 
@@ -76,18 +74,18 @@ Sometimes the challenge is not to find hidden static data, but to **analyze a VB
 $ soffice path/to/test.docx macro://./standard.module1.mymacro
 ```
 
-## [oletools](https://github.com/decalage2/oletools)
+# [oletools](https://github.com/decalage2/oletools)
 
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
 
-## Automatic Execution
+# Automatic Execution
 
 Macro functions like `AutoOpen`, `AutoExec` or `Document_Open` will be **automatically** **executed**.
 
-## References
+# References
 
 * [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 

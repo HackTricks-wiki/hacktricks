@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Wifi Pcap Analysis
-
-## Check BSSIDs
+# Check BSSIDs
 
 When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with _Wireless --> WLAN Traffic_:
 
@@ -27,7 +25,7 @@ When you receive a capture whose principal traffic is Wifi using WireShark you c
 
 ![](<../../../.gitbook/assets/image (425).png>)
 
-### Brute Force
+## Brute Force
 
 One of the columns of that screen indicates if **any authentication was found inside the pcap**. If that is the case you can try to Brute force it using `aircrack-ng`:
 
@@ -35,11 +33,11 @@ One of the columns of that screen indicates if **any authentication was found in
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
 
-## Data in Beacons / Side Channel
+# Data in Beacons / Side Channel
 
 If you suspect that **data is being leaked inside beacons of a Wifi network** you can check the beacons of the network using a filter like the following one: `wlan contains <NAMEofNETWORK>`, or `wlan.ssid == "NAMEofNETWORK"` search inside the filtered packets for suspicious strings.
 
-## Find unknown MAC addresses in a Wiffi network
+# Find unknown MAC addresses in a Wiffi network
 
 The following link will be useful to find the **machines sending data inside a Wifi Network**:
 
@@ -49,7 +47,7 @@ If you already know **MAC addresses you can remove them from the output** adding
 
 Once you have detected **unknown MAC** addresses communicating inside the network you can use **filters** like the following one: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` to filter its traffic. Note that ftp/http/ssh/telnet filters are useful if you have decrypted the traffic.
 
-## Decrypt Traffic
+# Decrypt Traffic
 
 Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 

@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Basic Gitea Information
-
-## Basic Structure
+# Basic Structure
 
 The basic gitea environment structure is to group repos by **organization(s),** each of them may contain **several repositories** and **several teams.** However, note that just like in github users can have repos outside of the organization.
 
@@ -29,9 +27,9 @@ A user may also be **part of different teams** with different permissions over d
 
 And finally **repositories may have special protection mechanisms**.
 
-## Permissions
+# Permissions
 
-### Organizations
+## Organizations
 
 When an **organization is created** a team called **Owners** is **created** and the user is put inside of it. This team will give **admin access** over the **organization**, those **permissions** and the **name** of the team **cannot be modified**.
 
@@ -53,7 +51,7 @@ When creating a new team, several important settings are selected:
 
 ![](<../../.gitbook/assets/image (648) (1).png>)
 
-### Teams & Users
+## Teams & Users
 
 In a repo, the **org admin** and the **repo admins** (if allowed by the org) can **manage the roles** given to collaborators (other users) and teams. There are **3** possible **roles**:
 
@@ -61,35 +59,35 @@ In a repo, the **org admin** and the **repo admins** (if allowed by the org) can
 * Write
 * Read
 
-## Gitea Authentication
+# Gitea Authentication
 
-### Web Access
+## Web Access
 
 Using **username + password** and potentially (and recommended) a 2FA.
 
-### **SSH Keys**
+## **SSH Keys**
 
 You can configure your account with one or several public keys allowing the related **private key to perform actions on your behalf.** [http://localhost:3000/user/settings/keys](http://localhost:3000/user/settings/keys)
 
-#### **GPG Keys**
+### **GPG Keys**
 
 You **cannot impersonate the user with these keys** but if you don't use it it might be possible that you **get discover for sending commits without a signature**.
 
-### **Personal Access Tokens**
+## **Personal Access Tokens**
 
 You can generate personal access token to **give an application access to your account**. A personal access token gives full access over your account: [http://localhost:3000/user/settings/applications](http://localhost:3000/user/settings/applications)
 
-### Oauth Applications
+## Oauth Applications
 
 Just like personal access tokens **Oauth applications** will have **complete access** over your account and the places your account has access because, as indicated in the [docs](https://docs.gitea.io/en-us/oauth2-provider/#scopes), scopes aren't supported yet:
 
 ![](<../../.gitbook/assets/image (662).png>)
 
-### Deploy keys
+## Deploy keys
 
 Deploy keys might have read-only or write access to the repo, so they might be interesting to compromise specific repos.
 
-## Branch Protections
+# Branch Protections
 
 Branch protections are designed to **not give complete control of a repository** to the users. The goal is to **put several protection methods before being able to write code inside some branch**.
 

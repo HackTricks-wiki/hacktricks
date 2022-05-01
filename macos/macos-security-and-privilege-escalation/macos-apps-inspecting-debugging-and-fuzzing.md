@@ -17,23 +17,21 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# MacOS Apps - Inspecting, debugging and Fuzzing
+# Static Analysis
 
-## Static Analysis
-
-### otool
+## otool
 
 ```bash
 otool -L /bin/ls #List dynamically linked libraries
 otool -tv /bin/ps #Decompile application
 ```
 
-### SuspiciousPackage
+## SuspiciousPackage
 
 [**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) is a tool useful to inspect **.pkg** files (installers) and see what is inside before installing it.\
 These installers have `preinstall` and `postinstall` bash scripts that malware authors usually abuse to **persist** **the** **malware**.
 
-### hdiutil
+## hdiutil
 
 This tool allows to **mount** Apple disk images (**.dmg**) files to inspect them before running anything:
 
@@ -43,7 +41,7 @@ hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 
 It will be mounted in `/Volumes`
 
-### Objective-C
+## Objective-C
 
 When a function is called in a binary that uses objective-C, the compiled code instead of calling that function, it will call **`objc_msgSend`**. Which will be calling the final function:
 
@@ -65,13 +63,13 @@ The params this function expects are:
 | **6th argument**  | **r9**                                                          | **4th argument to the method**                         |
 | **7th+ argument** | <p><strong>rsp+</strong><br><strong>(on the stack)</strong></p> | **5th+ argument to the method**                        |
 
-### Packed binaries
+## Packed binaries
 
 * Check for high entropy
 * Check the strings (is there is almost no understandable string, packed)
 * The UPX packer for MacOS generates a section called "\_\_XHDR"
 
-## Dynamic Analysis
+# Dynamic Analysis
 
 {% hint style="warning" %}
 Note that in order to debug binaries, **SIP needs to be disabled** (`csrutil disable` or `csrutil enable --without debug`) or to copy the binaries to a temporary folder and **remove the signature** with `codesign --remove-signature <binary-path>` or allow the debugging of the binary (you can use [this script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
@@ -81,14 +79,14 @@ Note that in order to debug binaries, **SIP needs to be disabled** (`csrutil dis
 Note that in order to **instrument system binarie**s, (such as `cloudconfigurationd`) on macOS, **SIP must be disabled** (just removing the signature won't work).
 {% endhint %}
 
-### dtruss
+## dtruss
 
 ```bash
 dtruss -c ls #Get syscalls of ls
 dtruss -c -p 1000 #get syscalls of PID 1000
 ```
 
-### ktrace
+## ktrace
 
 You can use this one even with **SIP activated**
 
@@ -96,7 +94,7 @@ You can use this one even with **SIP activated**
 ktrace trace -s -S -t c -c ls | grep "ls("
 ```
 
-### dtrace
+## dtrace
 
 It allows users access to applications at an extremely **low level** and provides a way for users to **trace** **programs** and even change their execution flow. Dtrace uses **probes** which are **placed throughout the kernel** and are at locations such as the beginning and end of system calls.
 
@@ -116,7 +114,7 @@ The probe name consists of four parts: the provider, module, function, and name 
 
 A more detailed explanation and more examples can be found in [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)
 
-#### Examples
+### Examples
 
 * In line
 
@@ -165,15 +163,15 @@ syscall:::return
 sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 ```
 
-### ProcessMonitor
+## ProcessMonitor
 
 [**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) is a very useful tool to check the process related actions a process is performing (for example, monitor which new processes a process is creating).
 
-### FileMonitor
+## FileMonitor
 
 [**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) allows to monitor file events (such as creation, modifications, and deletions) providing detailed information about such events.
 
-### fs\_usage
+## fs\_usage
 
 Allows to follow actions performed by processes:
 
@@ -182,12 +180,12 @@ fs_usage -w -f filesys ls #This tracks filesystem actions of proccess names cont
 fs_usage -w -f network curl #This tracks network actions
 ```
 
-### TaskExplorer
+## TaskExplorer
 
 [**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) is useful to see the **libraries** used by a binary, the **files** it's using and the **network** connections.\
 It also checks the binary processes against **virustotal** and show information about the binary.
 
-### lldb
+## lldb
 
 **lldb** is the de **facto tool** for **macOS** binary **debugging**.
 
@@ -226,9 +224,9 @@ When calling the **`objc_sendMsg`** function, the **rsi** register holds the **n
 `(lldb) reg read $rsi: rsi = 0x00000001000f1576  "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 {% endhint %}
 
-### Anti-Dynamic Analysis
+## Anti-Dynamic Analysis
 
-#### VM detection
+### VM detection
 
 * The command **`sysctl hw.model`** returns "Mac" when the **host is a MacOS** but something different when it's a VM.
 * Playing with the values of **`hw.logicalcpu`** and **`hw.physicalcpu`** some malwares try to detect if it's a VM.
@@ -240,9 +238,9 @@ When calling the **`objc_sendMsg`** function, the **rsi** register holds the **n
   * As noted in this writeup, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
     “_The message Process # exited with **status = 45 (0x0000002d)** is usually a tell-tale sign that the debug target is using **PT\_DENY\_ATTACH**_”
 
-## Fuzzing
+# Fuzzing
 
-### [ReportCrash](https://ss64.com/osx/reportcrash.html#:\~:text=ReportCrash%20analyzes%20crashing%20processes%20and%20saves%20a%20crash%20report%20to%20disk.\&text=ReportCrash%20also%20records%20the%20identity,when%20a%20crash%20is%20detected.)
+## [ReportCrash](https://ss64.com/osx/reportcrash.html#:\~:text=ReportCrash%20analyzes%20crashing%20processes%20and%20saves%20a%20crash%20report%20to%20disk.\&text=ReportCrash%20also%20records%20the%20identity,when%20a%20crash%20is%20detected.)
 
 ReportCrash **analyzes crashing processes and saves a crash report to disk**. A crash report contains information that can **help a developer diagnose** the cause of a crash.\
 For applications and other processes **running in the per-user launchd context**, ReportCrash runs as a LaunchAgent and saves crash reports in the user's `~/Library/Logs/DiagnosticReports/`\
@@ -260,7 +258,7 @@ launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 ```
 
-### Sleep
+## Sleep
 
 While fuzzing in a MacOS it's important to not allow the Mac to sleep:
 
@@ -268,7 +266,7 @@ While fuzzing in a MacOS it's important to not allow the Mac to sleep:
 * pmset, System Preferences
 * [KeepingYouAwake](https://github.com/newmarcel/KeepingYouAwake)
 
-#### SSH Disconnect
+### SSH Disconnect
 
 If you are fuzzing via a SSH connection it's important to make sure the session isn't going to day. So change the sshd\_config file with:
 
@@ -281,11 +279,11 @@ sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
 
-### Internal Handlers
+## Internal Handlers
 
 [**Checkout this section**](./#file-extensions-apps) to find out how you can find which app is responsible of **handling the specified scheme or protocol**.
 
-### Enumerating Network Processes
+## Enumerating Network Processes
 
 This interesting to find processes that are managing network data:
 
@@ -298,13 +296,13 @@ cat procs.txt
 
 Or use `netstat` or `lsof`
 
-### More Fuzzing MacOS Info
+## More Fuzzing MacOS Info
 
 * [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
 * [https://github.com/bnagy/francis/tree/master/exploitaben](https://github.com/bnagy/francis/tree/master/exploitaben)
 * [https://github.com/ant4g0nist/crashwrangler](https://github.com/ant4g0nist/crashwrangler)
 
-## References
+# References
 
 * [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 * [**https://www.youtube.com/watch?v=T5xfL9tEg44**](https://www.youtube.com/watch?v=T5xfL9tEg44)

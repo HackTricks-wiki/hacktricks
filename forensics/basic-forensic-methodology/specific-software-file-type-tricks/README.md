@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Specific Software/File-Type Tricks
-
 Here you can find interesting tricks for specific file-types and/or software:
 
 {% page-ref page=".pyc.md" %}

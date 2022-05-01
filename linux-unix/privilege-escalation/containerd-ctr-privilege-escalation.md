@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Containerd (ctr) Privilege Escalation
-
-## Basic information
+# Basic information
 
 Go to the following link to learn **what is containerd** and `ctr`:
 
@@ -27,7 +25,7 @@ Go to the following link to learn **what is containerd** and `ctr`:
 [2375-pentesting-docker.md](../../pentesting/2375-pentesting-docker.md)
 {% endcontent-ref %}
 
-## PE 1
+# PE 1
 
 if you find that a host contains the `ctr` command:
 
@@ -51,7 +49,7 @@ And then **run one of those images mounting the host root folder to it**:
 ctr run --mount type=bind,src=/,dst=/,options=rbind -t registry:5000/ubuntu:latest ubuntu bash
 ```
 
-## PE 2
+# PE 2
 
 Run a container privileged and escape from it.\
 You can run a privileged container as:

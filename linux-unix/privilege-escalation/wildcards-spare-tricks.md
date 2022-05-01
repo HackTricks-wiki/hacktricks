@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Wildcards Spare tricks
-
-### chown, chmod
+## chown, chmod
 
 You can **indicate which file owner and permissions you want to copy for the rest of the files**
 
@@ -30,7 +28,7 @@ touch "--reference=/my/own/path/filename"
 You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(combined attack)_\
 __More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
-### Tar
+## Tar
 
 **Execute arbitrary commands:**
 
@@ -42,7 +40,7 @@ touch "--checkpoint-action=exec=sh shell.sh"
 You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(tar attack)_\
 __More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
-### Rsync
+## Rsync
 
 **Execute arbitrary commands:**
 
@@ -60,7 +58,7 @@ touch "-e sh shell.sh"
 You can exploit this using [https://github.com/localh0t/wildpwn/blob/master/wildpwn.py](https://github.com/localh0t/wildpwn/blob/master/wildpwn.py) _(_rsync _attack)_\
 __More info in [https://www.exploit-db.com/papers/33930](https://www.exploit-db.com/papers/33930)
 
-### 7z
+## 7z
 
 In **7z** even using `--` before `*` (note that `--` means that the following input cannot treated as parameters, so just file paths in this case) you can cause an arbitrary error to read a file, so if a command like the following one is being executed by root:
 

@@ -17,19 +17,17 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Github Security
-
-## What is Github
+# What is Github
 
 (From [here](https://kinsta.com/knowledgebase/what-is-github/)) At a high level, **GitHub is a website and cloud-based service that helps developers store and manage their code, as well as track and control changes to their code**.
 
-### Basic Information
+## Basic Information
 
 {% content-ref url="basic-github-information.md" %}
 [basic-github-information.md](basic-github-information.md)
 {% endcontent-ref %}
 
-## External Recon
+# External Recon
 
 Github repositories can be configured as public, private and internal.
 
@@ -39,7 +37,7 @@ Github repositories can be configured as public, private and internal.
 
 In case you know the **user, repo or organisation you want to target** you can use **github dorks** to find sensitive information or search for **sensitive information leaks** **on each repo**.
 
-### Github Dorks
+## Github Dorks
 
 Github allows to **search for something specifying as scope a user, a repo or an organisation**. Therefore, with a list of strings that are going to appear close to sensitive information you can easily **search for potential sensitive information in your target**.
 
@@ -49,7 +47,7 @@ Tools (each tool contains its list of dorks):
 * [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks) ([Dorks list](https://github.com/techgaun/github-dorks/blob/master/github-dorks.txt))
 * [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber) ([Dorks list](https://github.com/hisxo/gitGraber/tree/master/wordlists))
 
-### Github Leaks
+## Github Leaks
 
 Please, note that the github dorks are also meant to search for leaks using github search options. This section is dedicated to those tools that will **download each repo and search for sensitive information in them** (even checking certain depth of commits).
 
@@ -63,11 +61,11 @@ Tools (each tool contains its list of regexes):
 * [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 * [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
 
-## Internal Recon & Attacks
+# Internal Recon & Attacks
 
 For this scenario we are going to suppose that you have obtained some access to a github account.
 
-### With User Credentials
+## With User Credentials
 
 If you somehow already have credentials for a user inside an organization you can **just login** and check which **enterprise and organization roles you have**, if you are a raw member, check which **permissions raw members have**, in which **groups** you are, which **permissions you have** over which **repos,** and **how are the repos protected.**
 
@@ -79,7 +77,7 @@ Note that if you **manage to steal the `user_session` cookie** (currently config
 
 Check the section below about [**branch protections bypasses**](./#branch-protection-bypass) in case it's useful.
 
-### With User SSH Key
+## With User SSH Key
 
 Github allows **users** to set **SSH keys** that will be used as **authentication method to deploy code** on their behalf (no 2FA is applied).
 
@@ -95,7 +93,7 @@ If the user has configured its username as his github username you can access th
 
 **SSH keys** can also be set in repositories as **deploy keys**. Anyone with access to this key will be able to **launch projects from a repository**. Usually in a server with different deploy keys the local file **`~/.ssh/config`** will give you info about key is related.
 
-#### GPG Keys
+### GPG Keys
 
 As explained [**here**](basic-github-information.md#ssh-keys) sometimes it's needed to sign the commits or you might get discovered.
 
@@ -105,7 +103,7 @@ Check locally if the current user has any key with:
 gpg --list-secret-keys --keyid-format=long
 ```
 
-### With User Token
+## With User Token
 
 For an introduction about [**User Tokens check the basic information**](basic-github-information.md#personal-access-tokens).
 
@@ -113,7 +111,7 @@ A user token can be used **instead of a password** for Git over HTTPS, or can be
 
 A User token looks like this: `ghp_EfHnQFcFHX6fGIu5mpduvRiYR584kK0dX123`
 
-### With Oauth Application
+## With Oauth Application
 
 For an introduction about [**Github Oauth Applications check the basic information**](basic-github-information.md#oauth-applications).
 
@@ -123,7 +121,7 @@ These are the [scopes an Oauth application can request](https://docs.github.com/
 
 Moreover, as explained in the basic information, **organizations can give/deny access to third party applications** to information/repos/actions related with the organisation.
 
-### With Github Application
+## With Github Application
 
 For an introduction about [**Github Applications check the basic information**](basic-github-information.md#github-applications).
 
@@ -131,7 +129,7 @@ An attacker might create a **malicious Github Application** to access privileged
 
 Moreover, as explained in the basic information, **organizations can give/deny access to third party applications** to information/repos/actions related with the organisation.
 
-### Enumerate Webhooks
+## Enumerate Webhooks
 
 **Webhooks** are able to **send specific gitea information to some places**. You might be able to **exploit that communication**.\
 However, usually a **secret** you can **not retrieve** is set in the **webhook** that will **prevent** external users that know the URL of the webhook but not the secret to **exploit that webhook**.\
@@ -139,17 +137,17 @@ But in some occasions, people instead of setting the **secret** in its place, th
 
 Webhooks can be set at **repo and at org level**.
 
-### With Malicious Github Action
+## With Malicious Github Action
 
 For an introduction about [**Github Actions check the basic information**](basic-github-information.md#git-actions).
 
 In case you can **execute arbitrary github actions** in a **repository**, you can **steal the secrets from that repo**.
 
-#### Github Action Execution from Repo Creation
+### Github Action Execution from Repo Creation
 
 In case members of an organization can **create new repos** and you can execute github actions, you can **create a new repo and steal the secrets set at organization level**.
 
-#### Github Action from a New Branch
+### Github Action from a New Branch
 
 If you can **create a new branch in a repository that already contains a Github Action** configured, you can **modify** it, **upload** the content, and then **execute that action from the new branch**. This way you can **exfiltrate repository and organization level secrets** (but you need to know how they are called).
 
@@ -168,7 +166,7 @@ on:
 # Use '**' instead of a branh name to trigger the action in all the cranches
 ```
 
-#### Github Action Injection/Backdoor
+### Github Action Injection/Backdoor
 
 In case you somehow managed to **infiltrate inside a Github Action**, if you can escalate privileges you can **steal secrets from the processes where secrets have been set in**. In some cases you don't even need to escalate privileges.
 
@@ -177,7 +175,7 @@ cat /proc/<proc_number>/environ
 cat /proc/*/environ | grep -i secret #Suposing the env variable name contains "secret"
 ```
 
-#### GITHUB\_TOKEN
+### GITHUB\_TOKEN
 
 This "**secret**" (coming from `${{ secrets.GITHUB_TOKEN }}` and `${{ github.token }}`) is given by default read and **write permissions** **to the repo**. This token is the same one a **Github Application will use**, so it can access the same endpoints: [https://docs.github.com/en/rest/overview/endpoints-available-for-github-apps](https://docs.github.com/en/rest/overview/endpoints-available-for-github-apps)
 
@@ -217,7 +215,7 @@ curl -X POST \
 Note that in several occasions you will be able to find **github user tokens inside Github Actions envs or in the secrets**. These tokens may give you more privileges over the repository and organization.
 {% endhint %}
 
-#### List secrets in Github Action output
+### List secrets in Github Action output
 
 ```yaml
 name: list_env
@@ -241,7 +239,7 @@ jobs:
           secret_postgress_pass: ${{secrets.POSTGRESS_PASSWORDyaml}}
 ```
 
-#### Get reverse shell with secrets
+### Get reverse shell with secrets
 
 ```yaml
 name: revshell
@@ -264,7 +262,7 @@ jobs:
           secret_postgress_pass: ${{secrets.POSTGRESS_PASSWORDyaml}}
 ```
 
-### Branch Protection Bypass
+## Branch Protection Bypass
 
 * **Require a number of approvals**: If you compromised several accounts you might just accept your PRs from other accounts. If you just have the account from where you created the PR you cannot accept your own PR. However, if you have access to a **Github Action** environment inside the repo, using the **GITHUB\_TOKEN** you might be able to **approve your PR** and get 1 approval this way.
   * _Note for this and for the Code Owners restriction that usually a user won't be able to approve his own PRs, but if you are, you can abuse it to accept your PRs._
@@ -278,7 +276,7 @@ jobs:
 * **Bypassing push protections**: If a repo **only allows certain users** to send push (merge code) in branches (the branch protection might be protecting all the branches specifying the wildcard `*`).
   * If you have **write access over the repo but you are not allowed to push code** because of the branch protection, you can still **create a new branch** and within it create a **github action that is triggered when code is pushed**. As the **branch protection won't protect the branch until it's created**, this first code push to the branch will **execute the github action**.
 
-### Bypass Environments Protections
+## Bypass Environments Protections
 
 For an introduction about [**Github Environment check the basic information**](basic-github-information.md#git-environments).
 
@@ -294,7 +292,7 @@ Note, that you might find the edge case where **all the branches are protected**
 
 Note that **after the creation** of the branch the **branch protection will apply to the new branch** and you won't be able to modify it, but for that time you will have already dumped the secrets.
 
-## Persistence
+# Persistence
 
 * Generate **user token**
 * Steal **github tokens** from **secrets**

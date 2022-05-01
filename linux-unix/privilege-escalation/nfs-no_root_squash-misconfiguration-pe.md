@@ -17,17 +17,15 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# NFS no\_root\_squash/no\_all\_squash misconfiguration PE
-
 Read the _ **/etc/exports** _ file, if you find some directory that is configured as **no\_root\_squash**, then you can **access** it from **as a client** and **write inside** that directory **as** if you were the local **root** of the machine.
 
 **no\_root\_squash**: This option basically gives authority to the root user on the client to access files on the NFS server as root. And this can lead to serious security implications.
 
 **no\_all\_squash:** This is similar to **no\_root\_squash** option but applies to **non-root users**. Imagine, you have a shell as nobody user; checked /etc/exports file; no\_all\_squash option is present; check /etc/passwd file; emulate a non-root user; create a suid file as that user (by mounting using nfs). Execute the suid as nobody user and become different user.
 
-## Privilege Escalation
+# Privilege Escalation
 
-### Remote Exploit
+## Remote Exploit
 
 If you have found this vulnerability, you can exploit it:
 
@@ -62,7 +60,7 @@ cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
 
-### Local Exploit
+## Local Exploit
 
 {% hint style="info" %}
 Note that if you can create a **tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports**.\
@@ -89,7 +87,7 @@ This exploit relies on a problem in the NFSv3 specification that mandates that i
 
 Here’s a [library that lets you do just that](https://github.com/sahlberg/libnfs).
 
-#### Compiling the example <a href="#compiling-the-example" id="compiling-the-example"></a>
+### Compiling the example <a href="#compiling-the-example" id="compiling-the-example"></a>
 
 Depending on your kernel, you might need to adapt the example. In my case I had to comment out the fallocate syscalls.
 
@@ -100,7 +98,7 @@ make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
 
-#### Exploiting using the library <a href="#exploiting-using-the-library" id="exploiting-using-the-library"></a>
+### Exploiting using the library <a href="#exploiting-using-the-library" id="exploiting-using-the-library"></a>
 
 Let’s use the simplest of exploits:
 
@@ -128,7 +126,7 @@ All that’s left is to launch it:
 
 There we are, local root privilege escalation!
 
-### Bonus NFShell <a href="#bonus-nfshell" id="bonus-nfshell"></a>
+## Bonus NFShell <a href="#bonus-nfshell" id="bonus-nfshell"></a>
 
 Once local root on the machine, I wanted to loot the NFS share for possible secrets that would let me pivot. But there were many users of the share all with their own uids that I couldn’t read despite being root because of the uid mismatch. I didn’t want to leave obvious traces such as a chown -R, so I rolled a little snippet to set my uid prior to running the desired shell command:
 

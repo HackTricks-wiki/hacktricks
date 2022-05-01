@@ -16,24 +16,23 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Atlantis
 
-### Basic Information
+# Basic Information
 
 Atlantis basically helps you to to run terraform from Pull Requests from your git server.
 
 ![](<../.gitbook/assets/image (307) (3).png>)
 
-### Local Lab
+# Local Lab
 
 1. Go to the **atlantis releases page** in [https://github.com/runatlantis/atlantis/releases](https://github.com/runatlantis/atlantis/releases) and **download** the one that suits you.
 2. Create a **personal token** (with repo access) of your **github** user
 3. Execute `./atlantis testdrive` and it will create a **demo repo** you can use to **talk to atlantis**
    1. You can access the web page in 127.0.0.1:4141
 
-### Atlantis Access
+# Atlantis Access
 
-#### Git Server Credentials
+## Git Server Credentials
 
 **Atlantis** support several git hosts such as **Github**, **Gitlab**, **Bitbucket** and **Azure DevOps**.\
 However, in order to access the repos in those platforms and perform actions, it needs to have some **privileged access granted to them** (at least write permissions).\
@@ -43,7 +42,7 @@ However, in order to access the repos in those platforms and perform actions, it
 In any case, from an attackers perspective, the **Atlantis account** is going to be one very **interesting** **to compromise**.
 {% endhint %}
 
-#### Webhooks
+## Webhooks
 
 Atlantis uses optionally [**Webhook secrets**](https://www.runatlantis.io/docs/webhook-secrets.html#generating-a-webhook-secret) to validate that the **webhooks** it receives from your Git host are **legitimate**.
 
@@ -55,7 +54,7 @@ Note that unless you use a private github or bitbucket server, you will need to 
 Atlantis is going to be **exposing webhooks** so the git server can send it information. From an attackers perspective it would be interesting to know **if you can send it messages**.
 {% endhint %}
 
-#### Provider Credentials <a href="#provider-credentials" id="provider-credentials"></a>
+## Provider Credentials <a href="#provider-credentials" id="provider-credentials"></a>
 
 Atlantis runs Terraform by simply **executing `terraform plan` and `apply`** commands on the server **Atlantis is hosted on**. Just like when you run Terraform locally, Atlantis needs credentials for your specific provider.
 
@@ -73,13 +72,13 @@ It's up to you how you [provide credentials](https://www.runatlantis.io/docs/pro
 The **container** where **Atlantis** is **running** will highly probably **contain privileged credentials** to the providers (AWS, GCP, Github...) that Atlantis is managing via Terraform.
 {% endhint %}
 
-#### Web Page
+## Web Page
 
 By default Atlantis will run a **web page in the port 4141 in localhost**. This page just allows you to enable/disable atlantis apply and check the plan status of the repos and unlock them (it doesn't allow to modify things, so it isn't that useful).
 
 You probably won't find it exposed to the internet, but it looks like by default **no credentials are needed** to access it (and if they are `atlantis`:`atlantis` are the **default** ones).
 
-### Server Configuration
+# Server Configuration
 
 Configuration to `atlantis server` can be specified via command line flags, environment variables, a config file or a mix of the three.
 
@@ -96,7 +95,7 @@ Values are **chosen in this order**:
 Note that in the configuration you might find interesting values such as **tokens and passwords**.
 {% endhint %}
 
-#### Repos Configuration
+## Repos Configuration
 
 Some configurations affects **how the repos are managed**. However, it's possible that **each repo require different settings**, so there are ways to specify each repo. This is the priority order:
 
@@ -155,7 +154,7 @@ Atlantis supports running **server-side** [**conftest**](https://www.conftest.de
 
 You can check how to configure it in [**the docs**](https://www.runatlantis.io/docs/policy-checking.html#how-it-works).
 
-### Atlantis Commands
+# Atlantis Commands
 
 \*\*\*\*[**In the docs**](https://www.runatlantis.io/docs/using-atlantis.html#using-atlantis) you can find the options you can use to run Atlantis:
 
@@ -165,24 +164,24 @@ atlantis help
 
 # Run terraform plan
 atlantis plan [options] -- [terraform plan flags]
-##Options:
-## -d directory
-## -p project
-## --verbose
-## You can also add extra terraform options
+#Options:
+# -d directory
+# -p project
+# --verbose
+# You can also add extra terraform options
 
 # Run terraform apply
 atlantis apply [options] -- [terraform apply flags]
-##Options:
-## -d directory
-## -p project
-## -w workspace
-## --auto-merge-disabled
-## --verbose
-## You can also add extra terraform options 
+#Options:
+# -d directory
+# -p project
+# -w workspace
+# --auto-merge-disabled
+# --verbose
+# You can also add extra terraform options 
 ```
 
-### Attacks
+# Attacks
 
 {% hint style="warning" %}
 If during the exploitation you find this **error**: `Error: Error acquiring the state lock`
@@ -195,7 +194,7 @@ atlantis plan -- -lock=false
 ```
 {% endhint %}
 
-#### Atlantis plan RCE - Config modification in new PR
+## Atlantis plan RCE - Config modification in new PR
 
 If you have write access over a repository you will be able to create a new branch on it and generate a PR. If you can \*\*execute `atlantis plan` \*\* (or maybe it's automatically executed) **you will be able to RCE inside the Atlantis server**.
 
@@ -224,7 +223,7 @@ You can find the rev shell code in [https://github.com/carlospolop/terraform\_ex
 * In the external resource, use the **ref** feature to hide the **terraform rev shell code in a branch** inside of the repo, something like: `git@github.com:carlospolop/terraform_external_module_rev_shell//modules?ref=b401d2b`
 * **Instead** of creating a **PR to master** to trigger Atlantis, **create 2 branches** (test1 and test2) and create a **PR from one to the other**. When you have completed the attack, just **remove the PR and the branches**.
 
-#### Atlantis apply RCE - Config modification in new PR
+## Atlantis apply RCE - Config modification in new PR
 
 If you have write access over a repository you will be able to create a new branch on it and generate a PR. If you can **execute `atlantis apply` you will be able to RCE inside the Atlantis server**.
 
@@ -256,7 +255,7 @@ resource "null_resource" "rev_shell" {
 
 Follow the **suggestions from the previous technique** the perform this attack in a **stealthier way**.
 
-#### Terraform Param Injection
+## Terraform Param Injection
 
 When running `atlantis plan` or `atlantis apply` terraform is being run under-needs, you can pass commands to terraform from atlantis commenting something like:
 
@@ -270,7 +269,7 @@ atlantis apply -- -h #Get terraform apply help
 
 Something you can pass are env variables which might be helpful to bypass some protections. Check terraform env vars in [https://www.terraform.io/cli/config/environment-variables](https://www.terraform.io/cli/config/environment-variables)
 
-#### Custom Workflow
+## Custom Workflow
 
 Running **malicious custom build commands** specified in an `atlantis.yaml` file. Atlantis uses the `atlantis.yaml` file from the pull request branch, **not** of `master`.\
 This possibility was mentioned in a previous section:
@@ -297,7 +296,7 @@ workflows:
 ```
 {% endhint %}
 
-#### PR Hijacking
+## PR Hijacking
 
 If someone sends **`atlantis plan/apply` comments on your valid pull requests,** it will cause terraform to run when you don't want it to.
 
@@ -307,11 +306,11 @@ This is the **setting** in Github branch protections:
 
 ![](<../.gitbook/assets/image (375) (1).png>)
 
-#### Webhook Secret
+## Webhook Secret
 
 If you manage to **steal the webhook secret** used or if there **isn't any webhook secret** being used, you could **call the Atlantis webhook** and **invoke atlatis commands** directly.
 
-#### Bitbucket
+## Bitbucket
 
 Bitbucket Cloud does **not support webhook secrets**. This could allow attackers to **spoof requests from Bitbucket**. Ensure you are allowing only Bitbucket IPs.
 
@@ -319,7 +318,7 @@ Bitbucket Cloud does **not support webhook secrets**. This could allow attackers
 * If you are specifying `--repo-allowlist` then they could only fake requests pertaining to those repos so the most damage they could do would be to plan/apply on your own repos.
 * To prevent this, allowlist [Bitbucket's IP addresses](https://confluence.atlassian.com/bitbucket/what-are-the-bitbucket-cloud-ip-addresses-i-should-use-to-configure-my-corporate-firewall-343343385.html) (see Outbound IPv4 addresses).
 
-### Post-Exploitation
+# Post-Exploitation
 
 If you managed to get access to the server or at least you got a LFI there are some interesting things you should try to read:
 
@@ -330,17 +329,17 @@ If you managed to get access to the server or at least you got a LFI there are s
 * `/proc/1/environ` Env variables
 * `/proc/[2-20]/cmdline` Cmd line of `atlantis server` (may contain sensitive data)
 
-### Mitigations
+# Mitigations
 
-#### Don't Use On Public Repos <a href="#don-t-use-on-public-repos" id="don-t-use-on-public-repos"></a>
+## Don't Use On Public Repos <a href="#don-t-use-on-public-repos" id="don-t-use-on-public-repos"></a>
 
 Because anyone can comment on public pull requests, even with all the security mitigations available, it's still dangerous to run Atlantis on public repos without proper configuration of the security settings.
 
-#### Don't Use `--allow-fork-prs` <a href="#don-t-use-allow-fork-prs" id="don-t-use-allow-fork-prs"></a>
+## Don't Use `--allow-fork-prs` <a href="#don-t-use-allow-fork-prs" id="don-t-use-allow-fork-prs"></a>
 
 If you're running on a public repo (which isn't recommended, see above) you shouldn't set `--allow-fork-prs` (defaults to false) because anyone can open up a pull request from their fork to your repo.
 
-#### `--repo-allowlist` <a href="#repo-allowlist" id="repo-allowlist"></a>
+## `--repo-allowlist` <a href="#repo-allowlist" id="repo-allowlist"></a>
 
 Atlantis requires you to specify a allowlist of repositories it will accept webhooks from via the `--repo-allowlist` flag. For example:
 
@@ -351,7 +350,7 @@ Atlantis requires you to specify a allowlist of repositories it will accept webh
 
 This flag ensures your Atlantis install isn't being used with repositories you don't control. See `atlantis server --help` for more details.
 
-#### Protect Terraform Planning <a href="#protect-terraform-planning" id="protect-terraform-planning"></a>
+## Protect Terraform Planning <a href="#protect-terraform-planning" id="protect-terraform-planning"></a>
 
 If attackers submitting pull requests with malicious Terraform code is in your threat model then you must be aware that `terraform apply` approvals are not enough. It is possible to run malicious code in a `terraform plan` using the [`external` data source](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/data\_source) or by specifying a malicious provider. This code could then exfiltrate your credentials.
 
@@ -361,7 +360,7 @@ To prevent this, you could:
 2. Implement the provider registry protocol internally and deny public egress, that way you control who has write access to the registry.
 3. Modify your [server-side repo configuration](https://www.runatlantis.io/docs/server-side-repo-config.html)'s `plan` step to validate against the use of disallowed providers or data sources or PRs from not allowed users. You could also add in extra validation at this point, e.g. requiring a "thumbs-up" on the PR before allowing the `plan` to continue. Conftest could be of use here.
 
-#### Webhook Secrets <a href="#webhook-secrets" id="webhook-secrets"></a>
+## Webhook Secrets <a href="#webhook-secrets" id="webhook-secrets"></a>
 
 Atlantis should be run with Webhook secrets set via the `$ATLANTIS_GH_WEBHOOK_SECRET`/`$ATLANTIS_GITLAB_WEBHOOK_SECRET` environment variables. Even with the `--repo-allowlist` flag set, without a webhook secret, attackers could make requests to Atlantis posing as a repository that is allowlisted. Webhook secrets ensure that the webhook requests are actually coming from your VCS provider (GitHub or GitLab).
 
@@ -371,17 +370,17 @@ If you are using Azure DevOps, instead of webhook secrets add a basic username a
 
 Azure DevOps supports sending a basic authentication header in all webhook events. This requires using an HTTPS URL for your webhook location.
 
-#### SSL/HTTPS <a href="#ssl-https" id="ssl-https"></a>
+## SSL/HTTPS <a href="#ssl-https" id="ssl-https"></a>
 
 If you're using webhook secrets but your traffic is over HTTP then the webhook secrets could be stolen. Enable SSL/HTTPS using the `--ssl-cert-file` and `--ssl-key-file` flags.
 
-#### Enable Authentication on Atlantis Web Server <a href="#enable-authentication-on-atlantis-web-server" id="enable-authentication-on-atlantis-web-server"></a>
+## Enable Authentication on Atlantis Web Server <a href="#enable-authentication-on-atlantis-web-server" id="enable-authentication-on-atlantis-web-server"></a>
 
 It is very recommended to enable authentication in the web service. Enable BasicAuth using the `--web-basic-auth=true` and setup a username and a password using `--web-username=yourUsername` and `--web-password=yourPassword` flags.
 
 You can also pass these as environment variables `ATLANTIS_WEB_BASIC_AUTH=true` `ATLANTIS_WEB_USERNAME=yourUsername` and `ATLANTIS_WEB_PASSWORD=yourPassword`.
 
-### References
+# References
 
 * [**https://www.runatlantis.io/docs**](https://www.runatlantis.io/docs)\*\*\*\*
 

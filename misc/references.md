@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Other Big References
-
 {% embed url="https://highon.coffee/blog/penetration-testing-tools-cheat-sheet/#python-tty-shell-trick" %}
 
 {% embed url="https://hausec.com/pentesting-cheatsheet/#_Toc475368982" %}

@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# USB Keystrokes
-
 If you have a pcap containing the communication via USB of a keyboard like the following one:
 
 ![](<../../../.gitbook/assets/image (613).png>)

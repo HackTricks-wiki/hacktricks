@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# PAM - Pluggable Authentication Modules
-
 PAM is a collection of modules that essentially form a barrier between a service on your system, and the user of the service. The modules can have widely varying purposes, from disallowing a login to users from a particular UNIX group \(or netgroup, or subnet…\), to implementing resource limits so that your ‘research’ group can’t hog system resources.
 
-## Config Files
+# Config Files
 
 Solaris and other commercial UNIX systems have a slightly different configuration model, centered around a single file, **`/etc/pam.conf`**. On most Linux systems, these configuration files live in **`/etc/pam.d`**, and are named after the service – for example, the ‘login’ configuration file is called **`/etc/pam.d/login`**. Let’s have a quick look at a version of that file:
 
@@ -38,7 +36,7 @@ password required /lib/security/pam_pwdb.so use_first_pass
 session required /lib/security/pam_unix_session.so
 ```
 
-### **PAM Management Realms**
+## **PAM Management Realms**
 
 The leftmost column can contains four unique words, which represent four realms of PAM management: **auth**, **account**, **password** and **session**. While there are many modules which support more than one of these realms \(indeed, pam\_unix supports all of them\), others, like pam\_cracklib for instance, are only suited for one \(the ‘password’ facility in pam\_cracklib’s case\).
 
@@ -47,7 +45,7 @@ The leftmost column can contains four unique words, which represent four realms 
 * **password**: The modules in this area are responsible for any functionality needed in the course of **updating passwords** for a given service. Most of the time, this section is pretty ‘ho-hum’, simply calling a module that **will prompt for a current password**, and, assuming that’s successful, prompt you for a new one. Other modules could be added to perform **password complexity** or dictionary checking as well, such as that performed by the pam\_cracklib and pam\_pwcheck modules. 
 * **session**: Modules in this area perform any number of things that happen either **during the setup or cleanup of a service** for a given user. This may include any number of things; launching a system-wide initialization script, performing special logging, **mounting the user’s home directory**, or setting resource limits.
 
-### **PAM Module Controls**
+## **PAM Module Controls**
 
 The **middle column** holds a keyword that essentially determines w**hat PAM should do if the module either succeeds or fails**. These keywords are called ‘**controls**’ in PAM-speak. In 90% of the cases, you can use one of the common keywords \(**requisite**, **required**, **sufficient** or **optional**\). However, this is only the tip of the iceberg in terms of unleashing the flexibility and power of PAM. 
 
@@ -56,7 +54,7 @@ The **middle column** holds a keyword that essentially determines w**hat PAM sho
 * **sufficient**: If a **sufficient** module **succeeds**, it is enough to satisfy the requirements of sufficient modules in that realm for use of the service, and **modules below it that are also listed as ‘sufficient’ are not invoked**. **If it fails, the operation fails unless a module invoked after it succeeds**.
 * **optional**: An ''optional’ module, according to the pam\(8\) manpage, **will only cause an operation to fail if it’s the only module in the stack for that facility**.
 
-### Example
+## Example
 
 In our example file, we have four modules stacked for the auth realm:
 

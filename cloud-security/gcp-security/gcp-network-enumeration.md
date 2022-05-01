@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# GCP - Network Enumeration
+# Network Enumeration
 
-## Network Enumeration
-
-### Compute
+## Compute
 
 ```bash
 # List networks

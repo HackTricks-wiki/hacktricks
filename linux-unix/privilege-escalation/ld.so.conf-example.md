@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# ld.so exploit example
-
-## Prepare the environment
+# Prepare the environment
 
 In the following section you can find the code of the files we are going to use to prepare the environment
 
@@ -62,7 +60,7 @@ void say_hi()
 3. **Copy **_ libcustom.so_ to _/usr/lib_: `sudo cp libcustom.so /usr/lib` (root privs)
 4. **Compile** the **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
-### Check the environment
+## Check the environment
 
 Check that _libcustom.so_ is being **loaded** from _/usr/lib_ and that you can **execute** the binary.
 
@@ -78,7 +76,7 @@ Welcome to my amazing application!
 Hi
 ```
 
-## Exploit
+# Exploit
 
 In this scenario we are going to suppose that **someone has created a vulnerable entry** inside a file in _/etc/ld.so.conf/_:
 
@@ -130,12 +128,12 @@ ubuntu
 Note that in this example we haven't escalated privileges, but modifying the commands executed and **waiting for root or other privileged user to execute the vulnerable binary** we will be able to escalate privileges.
 {% endhint %}
 
-### Other misconfigurations - Same vuln
+## Other misconfigurations - Same vuln
 
 In the previous example we faked a misconfiguration where an administrator **set a non-privileged folder inside a configuration file inside `/etc/ld.so.conf.d/`**.\
 But there are other misconfigurations that can cause the same vulnerability, if you have **write permissions** in some **config file** inside `/etc/ld.so.conf.d`s, in the folder `/etc/ld.so.conf.d` or in the file `/etc/ld.so.conf` you can configure the same vulnerability and exploit it.
 
-## Exploit 2
+# Exploit 2
 
 **Suppose you have sudo privileges over `ldconfig`**.\
 You can indicate `ldconfig` **where to load the conf files from**, so we can take advantage of it to make `ldconfig` load arbitrary folders.\
@@ -166,7 +164,7 @@ ldd sharedvuln
 I **didn't find** a reliable way to exploit this vuln if `ldconfig` is configured with the **suid bit**. The following error appear: `/sbin/ldconfig.real: Can't create temporary cache file /etc/ld.so.cache~: Permission denied`
 {% endhint %}
 
-## References
+# References
 
 * [https://www.boiteaklou.fr/Abusing-Shared-Libraries.html](https://www.boiteaklou.fr/Abusing-Shared-Libraries.html)
 * [https://blog.pentesteracademy.com/abusing-missing-library-for-privilege-escalation-3-minute-read-296dcf81bec2](https://blog.pentesteracademy.com/abusing-missing-library-for-privilege-escalation-3-minute-read-296dcf81bec2)

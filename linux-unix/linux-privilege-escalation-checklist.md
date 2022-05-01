@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Checklist - Linux Privilege Escalation
-
 {% hint style="warning" %}
 **Support HackTricks and get benefits!**
 
@@ -34,9 +32,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 {% endhint %}
 
-### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+## **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-### [System Information](privilege-escalation/#system-information)
+## [System Information](privilege-escalation/#system-information)
 
 * [ ] Get **OS information**
 * [ ] Check the [**PATH**](privilege-escalation/#path), any **writable folder**?
@@ -47,18 +45,18 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] More system enum ([date, system stats, cpu info, printers](privilege-escalation/#more-system-enumeration))
 * [ ] [Enumerate more defenses](privilege-escalation/#enumerate-possible-defenses)
 
-### [Drives](privilege-escalation/#drives)
+## [Drives](privilege-escalation/#drives)
 
 * [ ] **List mounted** drives
 * [ ] **Any unmounted drive?**
 * [ ] **Any creds in fstab?**
 
-### [**Installed Software**](privilege-escalation/#installed-software)
+## [**Installed Software**](privilege-escalation/#installed-software)
 
 * [ ] **Check for**[ **useful software**](privilege-escalation/#useful-software) **installed**
 * [ ] **Check for** [**vulnerable software**](privilege-escalation/#vulnerable-software-installed) **installed**
 
-### [Processes](privilege-escalation/#processes)
+## [Processes](privilege-escalation/#processes)
 
 * [ ] Is any **unknown software running**?
 * [ ] Is any software with **more privileges that it should have running**?
@@ -67,40 +65,40 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] **Monitor processes** and check if any interesting process is running frequently
 * [ ] Can you **read** some interesting **process memory** (where passwords could be saved)?
 
-### [Scheduled/Cron jobs?](privilege-escalation/#scheduled-jobs)
+## [Scheduled/Cron jobs?](privilege-escalation/#scheduled-jobs)
 
 * [ ] Is the [**PATH** ](privilege-escalation/#cron-path)being modified by some cron and you can **write** in it?
 * [ ] Any [**wildcard** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)in a cron job?
 * [ ] Some [**modifiable script** ](privilege-escalation/#cron-script-overwriting-and-symlink)is being **executed** or is inside **modifiable folder**?
 * [ ] Have you detected that some **script** could be being [**executed** very **frequently**](privilege-escalation/#frequent-cron-jobs)? (every 1, 2 or 5 minutes)
 
-### [Services](privilege-escalation/#services)
+## [Services](privilege-escalation/#services)
 
 * [ ] Any **writable .service** file?
 * [ ] Any **writable binary** executed by a **service**?
 * [ ] Any **writable folder in systemd PATH**?
 
-### [Timers](privilege-escalation/#timers)
+## [Timers](privilege-escalation/#timers)
 
 * [ ] Any **writable timer**?
 
-### [Sockets](privilege-escalation/#sockets)
+## [Sockets](privilege-escalation/#sockets)
 
 * [ ] Any **writable .socket** file?
 * [ ] Can you **communicate with any socket**?
 * [ ] **HTTP sockets** with interesting info?
 
-### [D-Bus](privilege-escalation/#d-bus)
+## [D-Bus](privilege-escalation/#d-bus)
 
 * [ ] Can you **communicate with any D-Bus**?
 
-### [Network](privilege-escalation/#network)
+## [Network](privilege-escalation/#network)
 
 * [ ] Enumerate the network to know where you are
 * [ ] **Open ports you couldn't access before** getting a shell inside the machine?
 * [ ] Can you **sniff traffic** using `tcpdump`?
 
-### [Users](privilege-escalation/#users)
+## [Users](privilege-escalation/#users)
 
 * [ ] Generic users/groups **enumeration**
 * [ ] Do you have a **very big UID**? Is the **machine** **vulnerable**?
@@ -109,11 +107,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] Password Policy?
 * [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without password.
 
-### [Writable PATH](privilege-escalation/#writable-path-abuses)
+## [Writable PATH](privilege-escalation/#writable-path-abuses)
 
 * [ ] If you have **write privileges over some folder in PATH** you may be able to escalate privileges
 
-### [SUDO and SUID commands](privilege-escalation/#sudo-and-suid)
+## [SUDO and SUID commands](privilege-escalation/#sudo-and-suid)
 
 * [ ] Can you execute **any comand with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
 * [ ] Is any **exploitable suid binary**? ([**GTFOBins**](https://gtfobins.github.io))
@@ -127,25 +125,25 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] Can you [**modify /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
 * [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) command
 
-### [Capabilities](privilege-escalation/#capabilities)
+## [Capabilities](privilege-escalation/#capabilities)
 
 * [ ] Has any binary any **unexpected capability**?
 
-### [ACLs](privilege-escalation/#acls)
+## [ACLs](privilege-escalation/#acls)
 
 * [ ] Has any file any **unexpected ACL**?
 
-### [Open Shell sessions](privilege-escalation/#open-shell-sessions)
+## [Open Shell sessions](privilege-escalation/#open-shell-sessions)
 
 * [ ] **screen**
 * [ ] **tmux**
 
-### [SSH](privilege-escalation/#ssh)
+## [SSH](privilege-escalation/#ssh)
 
 * [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
 * [ ] [**SSH Interesting configuration values**](privilege-escalation/#ssh-interesting-configuration-values)
 
-### [Interesting Files](privilege-escalation/#interesting-files)
+## [Interesting Files](privilege-escalation/#interesting-files)
 
 * [ ] **Profile files** - Read sensitive data? Write to privesc?
 * [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
@@ -160,14 +158,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
 * [ ] **Generic search**
 
-### [**Writable Files**](privilege-escalation/#writable-files)
+## [**Writable Files**](privilege-escalation/#writable-files)
 
 * [ ] **Modify python library** to execute arbitrary commands?
 * [ ] Can you **modify log files**? **Logtotten** exploit
 * [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
 * [ ] Can you [**write in ini, int.d, systemd or rc.d files**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
 
-### [**Other tricks**](privilege-escalation/#other-tricks)
+## [**Other tricks**](privilege-escalation/#other-tricks)
 
 * [ ] Can you [**abuse NFS to escalate privileges**](privilege-escalation/#nfs-privilege-escalation)?
 * [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?

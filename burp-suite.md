@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Burp Suite
-
-## Basic Payloads
+# Basic Payloads
 
 * **Simple List:** Just a list containing an entry in each line
 * **Runtime File:** A list read in runtime (not loaded in memory). For supporting big lists.

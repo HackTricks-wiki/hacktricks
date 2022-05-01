@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Useful Linux Commands
-
-## Common Bash
+# Common Bash
 
 ```bash
 #Exfiltration using Base64
@@ -83,7 +81,7 @@ python3 -m http.server
 ruby -rwebrick -e "WEBrick::HTTPServer.new(:Port => 80, :DocumentRoot => Dir.pwd).start"
 php -S $ip:80
 
-##Curl
+#Curl
 #json data
 curl --header "Content-Type: application/json" --request POST --data '{"password":"password", "username":"admin"}' http://host:3000/endpoint
 #Auth via JWT
@@ -99,10 +97,10 @@ dd if=file.bin bs=28 skip=1 of=blob
 sudo apt-get install libguestfs-tools
 guestmount --add NAME.vhd --inspector --ro /mnt/vhd #For read-only, create first /mnt/vhd
 
-## ssh-keyscan, help to find if 2 ssh ports are from the same host comparing keys
+# ssh-keyscan, help to find if 2 ssh ports are from the same host comparing keys
 ssh-keyscan 10.10.10.101
 
-## Openssl
+# Openssl
 openssl s_client -connect 10.10.10.127:443 #Get the certificate from a server
 openssl x509 -in ca.cert.pem -text #Read certificate
 openssl genrsa -out newuser.key 2048 #Create new RSA2048 key
@@ -110,7 +108,7 @@ openssl req -new -key newuser.key -out newuser.csr #Generate certificate from a 
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Create certificate
 openssl x509 -req -in newuser.csr -CA intermediate.cert.pem -CAkey intermediate.key.pem -CAcreateserial -out newuser.pem -days 1024 -sha256 #Create a signed certificate
 openssl pkcs12 -export -out newuser.pfx -inkey newuser.key -in newuser.pem #Create from the signed certificate the pkcs12 certificate format (firefox)
-## If you only needs to create a client certificate from a Ca certificate and the CA key, you can do it using:
+# If you only needs to create a client certificate from a Ca certificate and the CA key, you can do it using:
 openssl pkcs12 -export -in ca.cert.pem -inkey ca.key.pem -out client.p12
 # Decrypt ssh key
 openssl rsa -in key.ssh.enc -out key.ssh
@@ -120,7 +118,7 @@ openssl enc -aes256 -k <KEY> -d -in backup.tgz.enc -out b.tgz
 #Count number of instructions executed by a program, need a host based linux (not working in VM)
 perf stat -x, -e instructions:u "ls"
 
-##Find trick for HTB, find files from 2018-12-12 to 2018-12-14
+#Find trick for HTB, find files from 2018-12-12 to 2018-12-14
 find / -newermt 2018-12-12 ! -newermt 2018-12-14 -type f -readable -not -path "/proc/*" -not -path "/sys/*" -ls 2>/dev/null
 
 #Reconfigure timezone
@@ -137,7 +135,7 @@ sudo chattr +i file.txt
 sudo chattr -i file.txt #Remove the bit so you can delete it
 ```
 
-## Bash for Windows
+# Bash for Windows
 
 ```bash
 #Base64 for Windows
@@ -159,7 +157,7 @@ python pyinstaller.py --onefile exploit.py
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
 
-## Greps
+# Greps
 
 ```bash
 #Extract emails from file
@@ -174,7 +172,7 @@ grep -i "pwd\|passw" file.txt
 #Extract users
 grep -i "user\|invalid\|authentication\|login" file.txt
 
-## Extract hashes
+# Extract hashes
 #Extract md5 hashes ({32}), sha1 ({40}), sha256({64}), sha512({128})
 egrep -oE '(^|[^a-fA-F0-9])[a-fA-F0-9]{32}([^a-fA-F0-9]|$)' *.txt | egrep -o '[a-fA-F0-9]{32}' > md5-hashes.txt
 #Extract valid MySQL-Old hashes
@@ -210,7 +208,7 @@ grep -E '(((https|ftp|gopher)|mailto)[.:][^ >"	]*|www.[-a-z0-9.]+)[^ .,;	>">):]'
 #Extract Floating point numbers
 grep -E -o "^[-+]?[0-9]*.?[0-9]+([eE][-+]?[0-9]+)?$" *.txt > floats.txt
 
-## Extract credit card data
+# Extract credit card data
 #Visa
 grep -E -o "4[0-9]{3}[ -]?[0-9]{4}[ -]?[0-9]{4}[ -]?[0-9]{4}" *.txt > visa.txt
 #MasterCard
@@ -226,7 +224,7 @@ grep -E -o "\b(?:2131|1800|35d{3})d{11}\b" *.txt > jcb.txt
 #AMEX
 grep -E -o "3[47][0-9]{2}[ -]?[0-9]{6}[ -]?[0-9]{5}" *.txt > amex.txt
 
-## Extract IDs
+# Extract IDs
 #Extract Social Security Number (SSN)
 grep -E -o "[0-9]{3}[ -]?[0-9]{2}[ -]?[0-9]{4}" *.txt > ssn.txt
 #Extract Indiana Driver License Number
@@ -241,7 +239,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
 
-## Nmap search help
+# Nmap search help
 
 ```bash
 #Nmap scripts ((default or version) and smb))
@@ -250,14 +248,14 @@ locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | gre
 nmap --script-help "(default or version) and smb)"
 ```
 
-## Bash
+# Bash
 
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
 ```
 
-## Iptables
+# Iptables
 
 ```bash
 #Delete curent rules and chains

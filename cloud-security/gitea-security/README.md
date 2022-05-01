@@ -17,21 +17,19 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Gitea Security
-
-## What is Gitea
+# What is Gitea
 
 **Gitea** is a **self-hosted community managed lightweight code hosting** solution written in Go.
 
 ![](<../../.gitbook/assets/image (655).png>)
 
-### Basic Information
+## Basic Information
 
 {% content-ref url="basic-gitea-information.md" %}
 [basic-gitea-information.md](basic-gitea-information.md)
 {% endcontent-ref %}
 
-## Lab
+# Lab
 
 To run a Gitea instance locally you can just run a docker container:
 
@@ -48,7 +46,7 @@ helm repo add gitea-charts https://dl.gitea.io/charts/
 helm install gitea gitea-charts/gitea
 ```
 
-## Unauthenticated Enumeration
+# Unauthenticated Enumeration
 
 * Public repos: [http://localhost:3000/explore/repos](http://localhost:3000/explore/repos)
 * Registered users: [http://localhost:3000/explore/users](http://localhost:3000/explore/users)
@@ -56,11 +54,11 @@ helm install gitea gitea-charts/gitea
 
 Note that by **default Gitea allows new users to register**. This won't give specially interesting access to the new users over other organizations/users repos, but a **logged in user** might be able to **visualize more repos or organizations**.
 
-## Internal Exploitation
+# Internal Exploitation
 
 For this scenario we are going to suppose that you have obtained some access to a github account.
 
-### With User Credentials/Web Cookie
+## With User Credentials/Web Cookie
 
 If you somehow already have credentials for a user inside an organization (or you stole a session cookie) you can **just login** and check which which **permissions you have** over which **repos,** in **which teams** you are, **list other users**, and **how are the repos protected.**
 
@@ -70,7 +68,7 @@ Note that **2FA may be used** so you will only be able to access this informatio
 Note that if you **manage to steal the `i_like_gitea` cookie** (currently configured with SameSite: Lax) you can **completely impersonate the user** without needing credentials or 2FA.
 {% endhint %}
 
-### With User SSH Key
+## With User SSH Key
 
 Gitea allows **users** to set **SSH keys** that will be used as **authentication method to deploy code** on their behalf (no 2FA is applied).
 
@@ -86,7 +84,7 @@ If the user has configured its username as his gitea username you can access the
 
 **SSH keys** can also be set in repositories as **deploy keys**. Anyone with access to this key will be able to **launch projects from a repository**. Usually in a server with different deploy keys the local file **`~/.ssh/config`** will give you info about key is related.
 
-#### GPG Keys
+### GPG Keys
 
 As explained [**here**](../github-security/basic-github-information.md#ssh-keys) sometimes it's needed to sign the commits or you might get discovered.
 
@@ -96,13 +94,13 @@ Check locally if the current user has any key with:
 gpg --list-secret-keys --keyid-format=long
 ```
 
-### With User Token
+## With User Token
 
 For an introduction about [**User Tokens check the basic information**](basic-gitea-information.md#personal-access-tokens).
 
 A user token can be used **instead of a password** to **authenticate** against Gitea server [**via API**](https://try.gitea.io/api/swagger#/). it will has **complete access** over the user.
 
-### With Oauth Application
+## With Oauth Application
 
 For an introduction about [**Gitea Oauth Applications check the basic information**](basic-gitea-information.md#oauth-applications).
 
@@ -110,7 +108,7 @@ An attacker might create a **malicious Oauth Application** to access privileged 
 
 As explained in the basic information, the application will have **full access over the user account**.
 
-### Branch Protection Bypass
+## Branch Protection Bypass
 
 In Github we have **github actions** which by default get a **token with write access** over the repo that can be used to **bypass branch protections**. In this case that **doesn't exist**, so the bypasses are more limited. But lets take a look to what can be done:
 
@@ -123,7 +121,7 @@ In Github we have **github actions** which by default get a **token with write a
 
 Note that **if you are an org/repo admin** you can bypass the protections.
 
-### Enumerate Webhooks
+## Enumerate Webhooks
 
 **Webhooks** are able to **send specific gitea information to some places**. You might be able to **exploit that communication**.\
 However, usually a **secret** you can **not retrieve** is set in the **webhook** that will **prevent** external users that know the URL of the webhook but not the secret to **exploit that webhook**.\
@@ -131,9 +129,9 @@ But in some occasions, people instead of setting the **secret** in its place, th
 
 Webhooks can be set at **repo and at org level**.
 
-## Post Exploitation
+# Post Exploitation
 
-### Inside the server
+## Inside the server
 
 If somehow you managed to get inside the server where gitea is running you should search for the gitea configuration file. By default it's located in `/data/gitea/conf/app.ini`
 

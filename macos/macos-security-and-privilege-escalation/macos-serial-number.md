@@ -17,13 +17,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# MacOS Serial Number
-
 Apple devices manufactured after 2010 generally have **12-character alphanumeric** serial numbers, with the **first three digits representing the manufacturing location**, the following **two** indicating the **year** and **week** of manufacture, the next **three** digits providing a **unique** **identifier**, and the **last** **four** digits representing the **model number**.
 
 Serial number example: **C02L13ECF8J2**
 
-### **3 - Manufacturing locations**
+## **3 - Manufacturing locations**
 
 | Code | Factory |
 | :--- | :--- |
@@ -48,7 +46,7 @@ Serial number example: **C02L13ECF8J2**
 | C7 | Pentragon, Changhai, China |
 | RM | Refurbished/remanufactured |
 
-### 1 - Year of manufacturing
+## 1 - Year of manufacturing
 
 | Code | Release |
 | :--- | :--- |
@@ -73,19 +71,19 @@ Serial number example: **C02L13ECF8J2**
 | Y | 2019 \(1st half\) |
 | Z | 2019 \(2nd half\) |
 
-### 1 - Week of manufacturing
+## 1 - Week of manufacturing
 
 The fifth character represent the week in which the device was manufactured. There are 28 possible characters in this spot: **the digits 1-9 are used to represent the first through ninth weeks**, and the **characters C through Y**, **excluding** the vowels A, E, I, O, and U, and the letter S, represent the **tenth through twenty-seventh weeks**. For devices manufactured in the **second half of the year, add 26** to the number represented by the fifth character of the serial number. For example, a product with a serial number whose fourth and fifth digits are “JH” was manufactured in the 40th week of 2012.
 
-### 3 - Uniq Code
+## 3 - Uniq Code
 
 The next three digits are an identifier code which **serves to differentiate each Apple device of the same model** which is manufactured in the same location and during the same week of the same year, ensuring that each device has a different serial number. 
 
-### 4 - Serial number
+## 4 - Serial number
 
 The last four digits of the serial number represent the **product’s model**.
 
-### Reference
+## Reference
 
 {% embed url="https://beetstech.com/blog/decode-meaning-behind-apple-serial-number" %}
 

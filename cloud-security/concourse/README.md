@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Concourse
-
 **Concourse allows you to build pipelines to automatically run tests, actions and build images whenever you need it (time based, when something happens...)**
 
-## Concourse Architecture
+# Concourse Architecture
 
 Learn how the concourse environment is structured in:
 
@@ -29,7 +27,7 @@ Learn how the concourse environment is structured in:
 [concourse-architecture.md](concourse-architecture.md)
 {% endcontent-ref %}
 
-## Run Concourse Locally
+# Run Concourse Locally
 
 Learn how you can run a concourse environment locally to do your own tests in:
 
@@ -37,7 +35,7 @@ Learn how you can run a concourse environment locally to do your own tests in:
 [concourse-lab-creation.md](concourse-lab-creation.md)
 {% endcontent-ref %}
 
-## Enumerate & Attack Concourse
+# Enumerate & Attack Concourse
 
 Learn how you can enumerate the concourse environment and abuse it in:
 
@@ -45,7 +43,7 @@ Learn how you can enumerate the concourse environment and abuse it in:
 [concourse-enumeration-and-attacks.md](concourse-enumeration-and-attacks.md)
 {% endcontent-ref %}
 
-## References
+# References
 
 * [https://concourse-ci.org/internals.html#architecture-worker](https://concourse-ci.org/internals.html#architecture-worker)
 

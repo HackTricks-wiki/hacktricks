@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# MacOS Red Teaming
-
-## Common management methods
+# Common management methods
 
 * JAMF Pro: `jamf checkJSSConnection`
 * Kandji
@@ -38,7 +36,7 @@ And also about **MacOS** "special" **network** **protocols**:
 [macos-protocols.md](macos-protocols.md)
 {% endcontent-ref %}
 
-## Active Directory
+# Active Directory
 
 In some occasions you will find that the **MacOS computer is connected to an AD**. In this scenario you should try to **enumerate** the active directory as you are use to it. Find some **help** in the following pages:
 
@@ -66,13 +64,13 @@ Also there are some tools prepared for MacOS to automatically enumerate the AD a
 * [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost is an Objective-C project designed to interact with the Heimdal krb5 APIs on macOS. The goal of the project is to enable better security testing around Kerberos on macOS devices using native APIs without requiring any other framework or packages on the target.
 * [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) tool to do Active Directory enumeration.
 
-### Domain Information
+## Domain Information
 
 ```
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
 
-### Users
+## Users
 
 The three types of MacOS users are:
 
@@ -113,15 +111,15 @@ dsconfigad -show
 
 More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
-## External Services
+# External Services
 
 MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** (like github, aws...) via OneLogin:
 
 ![](<../../.gitbook/assets/image (563).png>)
 
-###
+##
 
-## References
+# References
 
 * [https://www.youtube.com/watch?v=IiMladUbL6E](https://www.youtube.com/watch?v=IiMladUbL6E)
 * [https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)

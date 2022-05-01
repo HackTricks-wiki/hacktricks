@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# venv
-
 ```bash
 sudo apt-get install python3-venv
 #Now, go to the folder you want to create the virtual environment

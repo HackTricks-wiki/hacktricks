@@ -17,28 +17,26 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# CircleCI
-
-## Basic Information
+# Basic Information
 
 [**CircleCI**](https://circleci.com/docs/2.0/about-circleci/) is a Continuos Integration platform where you ca **define templates** indicating what you want it to do with some code and when to do it. This way you can **automate testing** or **deployments** directly **from your repo master branch** for example.
 
-## Permissions
+# Permissions
 
 **CircleCI** **inherits the permissions** from github and bitbucket related to the **account** that logs in.\
 In my testing I checked that as long as you have **write permissions over the repo in github**, you are going to be able to **manage its project settings in CircleCI** (set new ssh keys, get project api keys, create new branches with new CircleCI configs...).
 
 However, you need to be a a **repo admin** in order to **convert the repo into a CircleCI project**.
 
-## Env Variables & Secrets
+# Env Variables & Secrets
 
 According to [**the docs**](https://circleci.com/docs/2.0/env-vars/#) there are different ways to **load values in environment variables** inside a workflow.
 
-### Built-in env variables
+## Built-in env variables
 
 Every container run by CircleCI will always have [**specific env vars defined in the documentation**](https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables) like `CIRCLE_PR_USERNAME`, `CIRCLE_PROJECT_REPONAME` or `CIRCLE_USERNAME`.
 
-### Clear text
+## Clear text
 
 You can declare them in clear text inside a **command**:
 
@@ -82,7 +80,7 @@ jobs:
                     SECRET: A secret
 ```
 
-### Project Secrets
+## Project Secrets
 
 These are **secrets** that are only going to be **accessible** by the **project** (by **any branch**).\
 You can see them **declared in** _https://app.circleci.com/settings/project/github/\<org\_name>/\<repo\_name>/environment-variables_
@@ -93,7 +91,7 @@ You can see them **declared in** _https://app.circleci.com/settings/project/gith
 The "**Import Variables**" functionality allows to **import variables from other projects** to this one.
 {% endhint %}
 
-### Context Secrets
+## Context Secrets
 
 These are secrets that are **org wide**. By **default any repo** is going to be able to **access any secret** stored here:
 
@@ -104,17 +102,17 @@ However, note that a different group (instead of All members) can be **selected 
 This is currently one of the best ways to **increase the security of the secrets**, to not allow everybody to access them but just some people.
 {% endhint %}
 
-## Attacks
+# Attacks
 
-### Search Clear Text Secrets
+## Search Clear Text Secrets
 
 If you have **access to the VCS** (like github) check the file `.circleci/config.yml` of **each repo on each branch** and **search** for potential **clear text secrets** stored in there.
 
-### Secret Env Vars & Context enumeration
+## Secret Env Vars & Context enumeration
 
 Checking the code you can find **all the secrets names** that are being **used** in each `.circleci/config.yml` file. You can also get the **context names** from those files or check them in the web console: _https://app.circleci.com/settings/organization/github/\<org\_name>/contexts_.
 
-### Exfiltrate Project secrets
+## Exfiltrate Project secrets
 
 {% hint style="warning" %}
 In order to **exfiltrate ALL** the project and context **SECRETS** you **just** need to have **WRITE** access to **just 1 repo** in the whole github org (_and your account must have access to the contexts but by default everyone can access every context_).
@@ -174,7 +172,7 @@ workflows:
       - exfil-env
 ```
 
-### Exfiltrate Context Secrets
+## Exfiltrate Context Secrets
 
 You need to **specify the context name** (this will also exfiltrate the project secrets):
 
@@ -235,7 +233,7 @@ workflows:
 Just creating a new `.circleci/config.yml` in a repo **isn't enough to trigger a circleci build**. You need to **enable it as a project in the circleci console**.
 {% endhint %}
 
-### Escape to Cloud
+## Escape to Cloud
 
 **CircleCI** gives you the option to run **your builds in their machines or in your own**.\
 By default their machines are located in GCP, and you initially won't be able to fid anything relevant. However, if a victim is running the tasks in **their own machines (potentially, in a cloud env)**, you might find a **cloud metadata endpoint with interesting information on it**.
@@ -264,7 +262,7 @@ jobs:
           version: 19.03.13
 ```
 
-### Persistence
+## Persistence
 
 * It's possible to **create** **user tokens in CircleCI** to access the API endpoints with the users access.
   * _https://app.circleci.com/settings/user/tokens_

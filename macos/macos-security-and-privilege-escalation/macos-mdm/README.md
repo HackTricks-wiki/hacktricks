@@ -16,11 +16,10 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## MacOS MDM
 
-### Basics
+# Basics
 
-#### What is MDM (Mobile Device Management)?
+## What is MDM (Mobile Device Management)?
 
 [Mobile Device Management](https://en.wikipedia.org/wiki/Mobile\_device\_management) (MDM) is a technology commonly used to **administer end-user computing devices** such as mobile phones, laptops, desktops and tablets. In the case of Apple platforms like iOS, macOS and tvOS, it refers to a specific set of features, APIs and techniques used by administrators to manage these devices. Management of devices via MDM requires a compatible commercial or open-source MDM server that implements support for the [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf).
 
@@ -28,7 +27,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * Requires an **MDM server** which implements support for the MDM protocol
 * MDM server can **send MDM commands**, such as remote wipe or “install this config”
 
-#### Basics What is DEP (Device Enrolment Program)?
+## Basics What is DEP (Device Enrolment Program)?
 
 The [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP\_Guide.pdf) (DEP) is a service offered by Apple that **simplifies** Mobile Device Management (MDM) **enrollment** by offering **zero-touch configuration** of iOS, macOS, and tvOS devices. Unlike more traditional deployment methods, which require the end-user or administrator to take action to configure a device, or manually enroll with an MDM server, DEP aims to bootstrap this process, **allowing the user to unbox a new Apple device and have it configured for use in the organization almost immediately**.
 
@@ -42,21 +41,21 @@ Administrators can leverage DEP to automatically enroll devices in their organiz
 Unfortunately, if an organization has not taken additional steps to **protect their MDM enrollment**, a simplified end-user enrollment process through DEP can also mean a simplified process for **attackers to enroll a device of their choosing in the organization’s MDM** server, assuming the "identity" of a corporate device.
 {% endhint %}
 
-#### Basics What is SCEP (Simple Certificate Enrolment Protocol)?
+## Basics What is SCEP (Simple Certificate Enrolment Protocol)?
 
 * A relatively old protocol, created before TLS and HTTPS were widespread.
 * Gives clients a standardized way of sending a **Certificate Signing Request** (CSR) for the purpose of being granted a certificate. The client will ask the server to give him a signed certificate.
 
-#### What are Configuration Profiles (aka mobileconfigs)?
+## What are Configuration Profiles (aka mobileconfigs)?
 
 * Apple’s official way of **setting/enforcing system configuration.**
 * File format that can contain multiple payloads.
 * Based on property lists (the XML kind).
 * “can be signed and encrypted to validate their origin, ensure their integrity, and protect their contents.” Basics — Page 70, iOS Security Guide, January 2018.
 
-### Protocols
+# Protocols
 
-#### MDM
+## MDM
 
 * Combination of APNs (**Apple server**s) + RESTful API (**MDM** **vendor** servers)
 * **Communication** occurs between a **device** and a server associated with a **device** **management** **product**
@@ -64,7 +63,7 @@ Unfortunately, if an organization has not taken additional steps to **protect th
 * All over **HTTPS**. MDM servers can be (and are usually) pinned.
 * Apple grants the MDM vendor an **APNs certificate** for authentication
 
-#### DEP
+## DEP
 
 * **3 APIs**: 1 for resellers, 1 for MDM vendors, 1 for device identity (undocumented):
   * The so-called [DEP "cloud service" API](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). This is used by MDM servers to associate DEP profiles with specific devices.
@@ -83,7 +82,7 @@ Unfortunately, if an organization has not taken additional steps to **protect th
   * Additional trusted certificates for server URL (optional pinning)
   * Extra settings (e.g. which screens to skip in Setup Assistant)
 
-### Steps for enrolment and management
+# Steps for enrolment and management
 
 1. Device record creation (Reseller, Apple): The record for the new device is created
 2. Device record assignment (Customer): The device is assigned to a MDM server
@@ -97,7 +96,7 @@ Unfortunately, if an organization has not taken additional steps to **protect th
 
 The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` exports functions that can be considered **high-level "steps"** of the enrolment process.
 
-#### Step 4: DEP check-in - Getting the Activation Record
+## Step 4: DEP check-in - Getting the Activation Record
 
 This part of the process occurs when a **user boots a Mac for the first time** (or after a complete wipe)
 
@@ -133,7 +132,7 @@ The response is a JSON dictionary with some important data like:
 * **url**: URL of the MDM vendor host for the activation profile
 * **anchor-certs**: Array of DER certificates used as trusted anchors
 
-#### **Step 5: Profile Retrieval**
+## **Step 5: Profile Retrieval**
 
 ![](<../../../.gitbook/assets/image (567).png>)
 
@@ -148,7 +147,7 @@ The response is a JSON dictionary with some important data like:
 
 ![](<../../../.gitbook/assets/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### Step 6: Profile Installation
+## Step 6: Profile Installation
 
 * Once retrieved, **profile is stored on the system**
 * This step begins automatically (if in **setup assistant**)
@@ -183,7 +182,7 @@ Typically, **activation profile** provided by an MDM vendor will **include the f
   * Property: IdentityCertificateUUID
   * Delivered via SCEP payload
 
-#### **Step 7: Listening for MDM commands**
+## **Step 7: Listening for MDM commands**
 
 * After MDM check-in is complete, vendor can **issue push notifications using APNs**
 * Upon receipt, handled by **`mdmclient`**
@@ -192,9 +191,9 @@ Typically, **activation profile** provided by an MDM vendor will **include the f
   * **`ServerURLPinningCertificateUUIDs`** for pinning request
   * **`IdentityCertificateUUID`** for TLS client certificate
 
-### Attacks
+# Attacks
 
-#### Enrolling Devices in Other Organisations
+## Enrolling Devices in Other Organisations
 
 As previously commented, in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
 Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected:
@@ -203,7 +202,7 @@ Therefore, this could be a dangerous entrypoint for attackers if the enrolment p
 [enrolling-devices-in-other-organisations.md](enrolling-devices-in-other-organisations.md)
 {% endcontent-ref %}
 
-### **References**
+# **References**
 
 * [https://www.youtube.com/watch?v=ku8jZe-MHUU](https://www.youtube.com/watch?v=ku8jZe-MHUU)
 * [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)

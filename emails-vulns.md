@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Emails Vulnerabilities
+# Payloads
 
-## Payloads
-
-### Ignored parts of an email
+## Ignored parts of an email
 
 The symbols: **+, -** and **{}** in rare occasions can be used for tagging and ignored by most e-mail servers
 
@@ -31,43 +29,43 @@ The symbols: **+, -** and **{}** in rare occasions can be used for tagging and i
 
 * E.g. john.doe(intigriti)@example.com → john.doe@example.com
 
-### Whitelist bypass
+## Whitelist bypass
 
 * inti(;inti@inti.io;)@whitelisted.com
 * inti@inti.io(@whitelisted.com)
 * inti+(@whitelisted.com;)@inti.io
 
-### IPs
+## IPs
 
 You can also use IPs as domain named between square brackets:
 
 * john.doe@\[127.0.0.1]
 * john.doe@\[IPv6:2001:db8::1]
 
-### Other vulns
+## Other vulns
 
 ![](<.gitbook/assets/image (296).png>)
 
-## Third party SSO
+# Third party SSO
 
-### XSS
+## XSS
 
 Some services like **github** or **salesforce allows** you to create an **email address with XSS payloads on it**. If you can **use this providers to login on other services** and this services **aren't sanitising** correctly the email, you could cause **XSS**.
 
-### Account-Takeover
+## Account-Takeover
 
 If a **SSO service** allows you to **create an account without verifying the given email address** (like **salesforce**) and then you can use that account to **login in a different service** that **trusts** salesforce, you could access any account.\
 _Note that salesforce indicates if the given email was or not verified but so the application should take into account this info._
 
-## Reply-To
+# Reply-To
 
 You can send an email using _**From: company.com**_** ** and _**Replay-To: attacker.com**_ and if any **automatic reply** is sent due to the email was sent **from** an **internal address** the **attacker** may be able to **receive** that **response**.
 
-## **References**
+# **References**
 
 * [**https://drive.google.com/file/d/1iKL6wbp3yYwOmxEtAg1jEmuOf8RM8ty9/view**](https://drive.google.com/file/d/1iKL6wbp3yYwOmxEtAg1jEmuOf8RM8ty9/view)
 
-## Hard Bounce Rate
+# Hard Bounce Rate
 
 Some applications like AWS have a **Hard Bounce Rate** (in AWS is 10%), that whenever is overloaded the email service is blocked.
 

@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# GCP - Abuse GCP Permissions
-
-## Introduction to GCP Privilege Escalation <a href="#introduction-to-gcp-privilege-escalation" id="introduction-to-gcp-privilege-escalation"></a>
+# Introduction to GCP Privilege Escalation <a href="#introduction-to-gcp-privilege-escalation" id="introduction-to-gcp-privilege-escalation"></a>
 
 GCP, as any other cloud, have some **principals**: users, groups and service accounts, and some **resources** like compute engine, cloud functions…\
 Then, via roles, **permissions are granted to those principals over the resources**. This is the way to specify the permissions a principal has over a resource in GCP.\
@@ -41,7 +39,7 @@ It's important to note also that in **GCP Service Accounts are both principals a
 The permissions between parenthesis indicate the permissions needed to exploit the vulnerability with `gcloud`. Those might not be needed if exploiting it through the API.
 {% endhint %}
 
-## Privilege Escalation to Principals
+# Privilege Escalation to Principals
 
 Check all the **known permissions** that will allow you to **escalate privileges over other principals** in:
 
@@ -49,7 +47,7 @@ Check all the **known permissions** that will allow you to **escalate privileges
 [gcp-privesc-to-other-principals.md](gcp-privesc-to-other-principals.md)
 {% endcontent-ref %}
 
-## Privilege Escalation to Resources
+# Privilege Escalation to Resources
 
 Check all the **known permissions** that will allow you to **escalate privileges over other resources** in:
 
@@ -57,7 +55,7 @@ Check all the **known permissions** that will allow you to **escalate privileges
 [gcp-privesc-to-resources.md](gcp-privesc-to-resources.md)
 {% endcontent-ref %}
 
-##
+#
 
 
 <details>

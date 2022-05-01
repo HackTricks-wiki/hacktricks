@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Docker Breakout
-
-## What is a container
+# What is a container
 
 In summary, it's an **isolated** **process** via **cgroups** (what the process can use, like CPU and RAM) and **namespaces** (what the process can see, like directories or other processes):
 
@@ -29,7 +27,7 @@ ps -ef | grep 1234 #Get info about the sleep process
 ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the hosts and some may be shred with it)
 ```
 
-## Mounted docker socket
+# Mounted docker socket
 
 If somehow you find that the **docker socket is mounted** inside the docker container, you will be able to escape from it.\
 This usually happen in docker containers that for some reason need to connect to docker daemon to perform actions.
@@ -53,7 +51,7 @@ docker run -it -v /:/host/ ubuntu:18.04 chroot /host/ bash
 In case the **docker socket is in an unexpected place** you can still communicate with it using the **`docker`** command with the parameter **`-H unix:///path/to/docker.sock`**
 {% endhint %}
 
-## Container Capabilities
+# Container Capabilities
 
 You should check the capabilities of the container, if it has any of the following ones, you might be able to scape from it: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE`**
 
@@ -69,11 +67,11 @@ In the following page you can **learn more about linux capabilities** and how to
 [linux-capabilities.md](linux-capabilities.md)
 {% endcontent-ref %}
 
-## `--privileged` flag
+# `--privileged` flag
 
 The --privileged flag allows the container to have access to the host devices.
 
-### I own Root
+## I own Root
 
 Well configured docker containers won't allow command like **fdisk -l**. However on missconfigured docker command where the flag --privileged is specified, it is possible to get the privileges to see the host drive.
 
@@ -147,7 +145,7 @@ Further, Docker [starts containers with the `docker-default` AppArmor](https://d
 
 A container would be vulnerable to this technique if run with the flags: `--security-opt apparmor=unconfined --cap-add=SYS_ADMIN`
 
-### Breaking down the proof of concept
+## Breaking down the proof of concept
 
 Now that we understand the requirements to use this technique and have refined the proof of concept exploit, let’s walk through it line-by-line to demonstrate how it works.
 
@@ -216,11 +214,11 @@ root        10  0.0  0.0      0     0 ?        I    13:57   0:00 [rcu_sched]
 root        11  0.0  0.0      0     0 ?        S    13:57   0:00 [migration/0]
 ```
 
-## `--privileged` flag v2
+# `--privileged` flag v2
 
 The previous PoCs work fine when the container is configured with a storage-driver which exposes the full host path of the mount point, for example `overlayfs`, however I recently came across a couple of configurations which did not obviously disclose the host file system mount point.
 
-### Kata Containers
+## Kata Containers
 
 ```
 root@container:~$ head -1 /etc/mtab
@@ -231,7 +229,7 @@ kataShared on / type 9p (rw,dirsync,nodev,relatime,mmap,access=client,trans=virt
 
 \* More on Kata Containers in a future blog post.
 
-### Device Mapper
+## Device Mapper
 
 ```
 root@container:~$ head -1 /etc/mtab
@@ -240,13 +238,13 @@ root@container:~$ head -1 /etc/mtab
 
 I saw a container with this root mount in a live environment, I believe the container was running with a specific `devicemapper` storage-driver configuration, but at this point I have been unable to replicate this behaviour in a test environment.
 
-### An Alternative PoC
+## An Alternative PoC
 
 Obviously in these cases there is not enough information to identify the path of container files on the host file system, so Felix’s PoC cannot be used as is. However, we can still execute this attack with a little ingenuity.
 
 The one key piece of information required is the full path, relative to the container host, of a file to execute within the container. Without being able to discern this from mount points within the container we have to look elsewhere.
 
-#### Proc to the Rescue <a href="proc-to-the-rescue" id="proc-to-the-rescue"></a>
+### Proc to the Rescue <a href="proc-to-the-rescue" id="proc-to-the-rescue"></a>
 
 The Linux `/proc` pseudo-filesystem exposes kernel process data structures for all processes running on a system, including those running in different namespaces, for example within a container. This can be shown by running a command in a container and accessing the `/proc` directory of the process on the host:Container
 
@@ -296,7 +294,7 @@ findme
 
 This changes the requirement for the attack from knowing the full path, relative to the container host, of a file within the container, to knowing the pid of _any_ process running in the container.
 
-#### Pid Bashing <a href="pid-bashing" id="pid-bashing"></a>
+### Pid Bashing <a href="pid-bashing" id="pid-bashing"></a>
 
 This is actually the easy part, process ids in Linux are numerical and assigned sequentially. The `init` process is assigned process id `1` and all subsequent processes are assigned incremental ids. To identify the host process id of a process within a container, a brute force incremental search can be used:Container
 
@@ -316,7 +314,7 @@ root@host:~$ cat /proc/${COUNTER}/root/findme
 findme
 ```
 
-#### Putting it All Together <a href="putting-it-all-together" id="putting-it-all-together"></a>
+### Putting it All Together <a href="putting-it-all-together" id="putting-it-all-together"></a>
 
 To complete this attack the brute force technique can be used to guess the pid for the path `/proc/<pid>/root/payload.sh`, with each iteration writing the guessed pid path to the cgroups `release_agent` file, triggering the `release_agent`, and seeing if an output file is created.
 
@@ -414,7 +412,7 @@ root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
 
-## Runc exploit (CVE-2019-5736)
+# Runc exploit (CVE-2019-5736)
 
 In case you can execute `docker exec` as root (probably with sudo), you try to escalate privileges escaping from a container abusing CVE-2019-5736 (exploit [here](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). This technique will basically **overwrite** the _**/bin/sh**_ binary of the **host** **from a container**, so anyone executing docker exec may trigger the payload.
 
@@ -427,11 +425,11 @@ This will trigger the payload which is present in the main.go file.
 
 For more information: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
 
-## Docker Auth Plugin Bypass
+# Docker Auth Plugin Bypass
 
 In some occasions, the sysadmin may install some plugins to docker to avoid low privilege users to interact with docker without being able to escalate privileges.
 
-### disallowed `run --privileged`
+## disallowed `run --privileged`
 
 In this case the sysadmin **disallowed users to mount volumes and run containers with the `--privileged` flag** or give any extra capability to the container:
 
@@ -451,7 +449,7 @@ docker exec -it --privileged bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6f
 
 Now, the user can escape from the container using any of the previously discussed techniques and escalate privileges inside the host.
 
-### Mount Writable Folder
+## Mount Writable Folder
 
 In this case the sysadmin **disallowed users to run containers with the `--privileged` flag** or give any extra capability to the container, and he only allowed to mount the `/tmp` folder:
 
@@ -472,7 +470,7 @@ Note that maybe you cannot mount the folder `/tmp` but you can mount a **differe
 Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
 {% endhint %}
 
-### Unchecked JSON Structure
+## Unchecked JSON Structure
 
 It's possible that when the sysadmin configured the docker firewall he **forgot about some important parameter** of the API ([https://docs.docker.com/engine/api/v1.40/#operation/ContainerList](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList)) like "**Binds**".\
 In the following example it's possible to abuse this misconfiguration to create and run a container that mounts the root (/) folder of the host:
@@ -487,7 +485,7 @@ docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 #You can access the host filesystem
 ```
 
-### Unchecked JSON Attribute
+## Unchecked JSON Attribute
 
 It's possible that when the sysadmin configured the docker firewall he **forgot about some important attribute of a parametter** of the API ([https://docs.docker.com/engine/api/v1.40/#operation/ContainerList](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList)) like "**Capabilities**" inside "**HostConfig**". In the following example it's possible to abuse this misconfiguration to create and run a container with the **SYS_MODULE** capability:
 
@@ -501,27 +499,27 @@ capsh --print
 #You can abuse the SYS_MODULE capability
 ```
 
-## Writable hostPath Mount
+# Writable hostPath Mount
 
 (Info from [**here**](https://medium.com/swlh/kubernetes-attack-path-part-2-post-initial-access-1e27aabda36d)) Within the container, an attacker may attempt to gain further access to the underlying host OS via a writable hostPath volume created by the cluster. Below is some common things you can check within the container to see if you leverage this attacker vector:
 
 ```bash
-#### Check if You Can Write to a File-system
+### Check if You Can Write to a File-system
 $ echo 1 > /proc/sysrq-trigger
 
-#### Check root UUID
+### Check root UUID
 $ cat /proc/cmdlineBOOT_IMAGE=/boot/vmlinuz-4.4.0-197-generic root=UUID=b2e62f4f-d338-470e-9ae7-4fc0e014858c ro console=tty1 console=ttyS0 earlyprintk=ttyS0 rootdelay=300- Check Underlying Host Filesystem
 $ findfs UUID=<UUID Value>/dev/sda1- Attempt to Mount the Host's Filesystem
 $ mkdir /mnt-test
 $ mount /dev/sda1 /mnt-testmount: /mnt: permission denied. ---> Failed! but if not, you may have access to the underlying host OS file-system now.
 
-#### debugfs (Interactive File System Debugger)
+### debugfs (Interactive File System Debugger)
 $ debugfs /dev/sda1
 ```
 
-## Containers Security Improvements
+# Containers Security Improvements
 
-### Seccomp in Docker
+## Seccomp in Docker
 
 This is not a technique to breakout from a Docker container but a security feature that Docker uses and you should know about as it might prevent you from breaking out from docker:
 
@@ -529,7 +527,7 @@ This is not a technique to breakout from a Docker container but a security featu
 [seccomp.md](seccomp.md)
 {% endcontent-ref %}
 
-### AppArmor in Docker
+## AppArmor in Docker
 
 This is not a technique to breakout from a Docker container but a security feature that Docker uses and you should know about as it might prevent you from breaking out from docker:
 
@@ -537,7 +535,7 @@ This is not a technique to breakout from a Docker container but a security featu
 [apparmor.md](apparmor.md)
 {% endcontent-ref %}
 
-### AuthZ & AuthN
+## AuthZ & AuthN
 
 An authorization plugin **approves** or **denies** **requests** to the Docker **daemon** based on both the current **authentication** context and the **command** **context**. The **authentication** **context** contains all **user details** and the **authentication** **method**. The **command context** contains all the **relevant** **request** data.
 
@@ -545,19 +543,19 @@ An authorization plugin **approves** or **denies** **requests** to the Docker **
 [Broken link](broken-reference)
 {% endcontent-ref %}
 
-### gVisor
+## gVisor
 
 **gVisor** is an application kernel, written in Go, that implements a substantial portion of the Linux system surface. It includes an [Open Container Initiative (OCI)](https://www.opencontainers.org) runtime called `runsc` that provides an **isolation boundary between the application and the host kernel**. The `runsc` runtime integrates with Docker and Kubernetes, making it simple to run sandboxed containers.
 
 {% embed url="https://github.com/google/gvisor" %}
 
-## Kata Containers
+# Kata Containers
 
 **Kata Containers** is an open source community working to build a secure container runtime with lightweight virtual machines that feel and perform like containers, but provide** stronger workload isolation using hardware virtualization** technology as a second layer of defense.
 
 {% embed url="https://katacontainers.io/" %}
 
-### Use containers securely
+## Use containers securely
 
 Docker restricts and limits containers by default. Loosening these restrictions may create security issues, even without the full power of the `--privileged` flag. It is important to acknowledge the impact of each additional permission, and limit permissions overall to the minimum necessary.
 
@@ -572,7 +570,7 @@ To help keep containers secure:
 * Use [official docker images](https://docs.docker.com/docker-hub/official_images/) or build your own based on them. Don’t inherit or use [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) images.
 * Regularly rebuild your images to apply security patches. This goes without saying.
 
-## References
+# References
 
 * [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 * [https://twitter.com/\_fel1x/status/1151487051986087936](https://twitter.com/\_fel1x/status/1151487051986087936)

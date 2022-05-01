@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# GCP - KMS & Secrets Management Enumeration
-
-## Crypto Keys
+# Crypto Keys
 
 [Cloud Key Management Service](https://cloud.google.com/kms/docs/) is a repository for storing cryptographic keys, such as those used to **encrypt and decrypt sensitive files**. Individual keys are stored in key rings, and granular permissions can be applied at either level.
 
@@ -40,7 +38,7 @@ gcloud kms decrypt --ciphertext-file=[INFILE] \
     --location global
 ```
 
-## Secrets Management
+# Secrets Management
 
 Google [Secrets Management](https://cloud.google.com/solutions/secrets-management/) is a vault-like solution for storing passwords, API keys, certificates, and other sensitive data. As of this writing, it is currently in beta.
 
@@ -54,7 +52,7 @@ gcloud beta secrets versions access 1 --secret="[SECRET NAME]"
 
 Note that changing a secret entry will create a new version, so it's worth changing the `1` in the command above to a `2` and so on.
 
-## References
+# References
 
 * [https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/#reviewing-stackdriver-logging](https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/#reviewing-stackdriver-logging)
 

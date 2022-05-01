@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# GCP - Compute Enumeration
-
-## Compute instances
+# Compute instances
 
 It would be interesting if you can **get the zones** the project is using and the **list of all the running instances** and details about each of them.
 
@@ -33,7 +31,7 @@ The details may include:
 
 ```bash
 # Get list of zones
-## It's interesting to know which zones are being used
+# It's interesting to know which zones are being used
 gcloud compute regions list | grep -E "NAME|[^0]/"
 
 # List compute instances & get info
@@ -53,7 +51,7 @@ For more information about how to **SSH** or **modify the metadata** of an insta
 [gcp-local-privilege-escalation-ssh-pivoting.md](gcp-local-privilege-escalation-ssh-pivoting.md)
 {% endcontent-ref %}
 
-### Custom Metadata
+## Custom Metadata
 
 Administrators can add [custom metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata#custom) at the instance and project level. This is simply a way to pass **arbitrary key/value pairs into an instance**, and is commonly used for environment variables and startup/shutdown scripts. This can be obtained using the `describe` method from a command in the previous section, but it could also be retrieved from the inside of the instance accessing the metadata endpoint.
 
@@ -67,7 +65,7 @@ curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/?re
     -H "Metadata-Flavor: Google"
 ```
 
-### Serial Console Logs
+## Serial Console Logs
 
 Compute instances may be **writing output from the OS and BIOS to serial ports**. Serial console logs may expose **sensitive information** from the system logs which low privileged user may not usually see, but with the appropriate IAM permissions you may be able to read them.
 
@@ -91,7 +89,7 @@ You can then [export](https://cloud.google.com/sdk/gcloud/reference/compute/imag
 $ gcloud compute images list --no-standard-images
 ```
 
-### Local Privilege Escalation and Pivoting
+## Local Privilege Escalation and Pivoting
 
 If you compromises a compute instance you should also check the actions mentioned in this page:
 
@@ -99,9 +97,9 @@ If you compromises a compute instance you should also check the actions mentione
 [gcp-local-privilege-escalation-ssh-pivoting.md](gcp-local-privilege-escalation-ssh-pivoting.md)
 {% endcontent-ref %}
 
-## Images
+# Images
 
-### Custom Images
+## Custom Images
 
 **Custom compute images may contain sensitive details** or other vulnerable configurations that you can exploit. You can query the list of non-standard images in a project with the following command:
 
@@ -127,7 +125,7 @@ gcloud compute images list --project windows-cloud --no-standard-images #non-Shi
 gcloud compute images list --project gce-uefi-images --no-standard-images #available Shielded VM images, including Windows images
 ```
 
-### Custom Instance Templates
+## Custom Instance Templates
 
 An [instance template](https://cloud.google.com/compute/docs/instance-templates/) defines instance properties to help deploy consistent configurations. These may contain the same types of sensitive data as a running instance's custom metadata. You can use the following commands to investigate:
 
@@ -139,7 +137,7 @@ $ gcloud compute instance-templates list
 $ gcloud compute instance-templates describe [TEMPLATE NAME]
 ```
 
-## More Enumeration
+# More Enumeration
 
 | Description            | Command                                                                                                   |
 | ---------------------- | --------------------------------------------------------------------------------------------------------- |

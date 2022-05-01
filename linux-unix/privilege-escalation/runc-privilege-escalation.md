@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# RunC Privilege Escalation
-
-## Basic information
+# Basic information
 
 If you want to learn more about **runc** check the following page:
 
@@ -27,7 +25,7 @@ If you want to learn more about **runc** check the following page:
 [2375-pentesting-docker.md](../../pentesting/2375-pentesting-docker.md)
 {% endcontent-ref %}
 
-## PE
+# PE
 
 If you find that `runc` is installed in the host you may be able to **run a container mounting the root / folder of the host**.
 

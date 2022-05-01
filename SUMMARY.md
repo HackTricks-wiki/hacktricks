@@ -15,7 +15,7 @@
 * [Tunneling and Port Forwarding](tunneling-and-port-forwarding.md)
 * [Search Exploits](search-exploits.md)
 
-## Shells
+# Shells
 
 * [Shells (Linux, Windows, MSFVenom)](shells/shells/README.md)
   * [MSFVenom - CheatSheet](shells/shells/msfvenom.md)
@@ -23,7 +23,7 @@
   * [Shells - Linux](shells/shells/linux.md)
   * [Full TTYs](shells/shells/full-ttys.md)
 
-## Linux/Unix
+# Linux/Unix
 
 * [Checklist - Linux Privilege Escalation](linux-unix/linux-privilege-escalation-checklist.md)
 * [Linux Privilege Escalation](linux-unix/privilege-escalation/README.md)
@@ -62,7 +62,7 @@
   * [Bypass Bash Restrictions](linux-unix/useful-linux-commands/bypass-bash-restrictions.md)
 * [Linux Environment Variables](linux-unix/linux-environment-variables.md)
 
-## MacOS
+# MacOS
 
 * [MacOS Security & Privilege Escalation](macos/macos-security-and-privilege-escalation/README.md)
   * [Mac OS Architecture](macos/macos-security-and-privilege-escalation/mac-os-architecture.md)
@@ -73,7 +73,7 @@
   * [MacOS Serial Number](macos/macos-security-and-privilege-escalation/macos-serial-number.md)
   * [MacOS Apps - Inspecting, debugging and Fuzzing](macos/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing.md)
 
-## Windows
+# Windows
 
 * [Checklist - Local Windows Privilege Escalation](windows/checklist-windows-privilege-escalation.md)
 * [Windows Local Privilege Escalation](windows/windows-local-privilege-escalation/README.md)
@@ -138,7 +138,7 @@
   * [PowerView](windows/basic-powershell-for-pentesters/powerview.md)
 * [AV Bypass](windows/av-bypass.md)
 
-## Mobile Apps Pentesting
+# Mobile Apps Pentesting
 
 * [Android APK Checklist](mobile-apps-pentesting/android-checklist.md)
 * [Android Applications Pentesting](mobile-apps-pentesting/android-app-pentesting/README.md)
@@ -185,7 +185,7 @@
   * [iOS UIPasteboard](mobile-apps-pentesting/ios-pentesting/ios-uipasteboard.md)
   * [iOS WebViews](mobile-apps-pentesting/ios-pentesting/ios-webviews.md)
 
-## Pentesting
+# Pentesting
 
 * [Pentesting Network](pentesting/pentesting-network/README.md)
   * [Spoofing LLMNR, NBT-NS, mDNS/DNS and WPAD and Relay Attacks](pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
@@ -365,7 +365,7 @@
 * [50030,50060,50070,50075,50090 - Pentesting Hadoop](pentesting/50030-50060-50070-50075-50090-pentesting-hadoop.md)
 * [Pentesting Remote GdbServer](pentesting/pentesting-remote-gdbserver.md)
 
-## Pentesting Web
+# Pentesting Web
 
 * [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology.md)
 * [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet/README.md)
@@ -474,7 +474,7 @@
 * [XSSI (Cross-Site Script Inclusion)](pentesting-web/xssi-cross-site-script-inclusion.md)
 * [XS-Search](pentesting-web/xs-search.md)
 
-## Forensics
+# Forensics
 
 * [Basic Forensic Methodology](forensics/basic-forensic-methodology/README.md)
   * [Baseline Monitoring](forensics/basic-forensic-methodology/file-integrity-monitoring.md)
@@ -508,7 +508,7 @@
     * [Windows Processes](forensics/basic-forensic-methodology/windows-forensics/windows-processes.md)
     * [Interesting Windows Registry Keys](forensics/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys.md)
 
-## Cloud Security
+# Cloud Security
 
 * [GCP Security](cloud-security/gcp-security/README.md)
   * [GCP - Other Services Enumeration](cloud-security/gcp-security/gcp-looting.md)
@@ -559,7 +559,7 @@
 * [Cloud Security Review](cloud-security/cloud-security-review.md)
 * [AWS Security](cloud-security/aws-security.md)
 
-## A.I. Exploiting
+# A.I. Exploiting
 
 * [BRA.I.NSMASHER Presentation](a.i.-exploiting/bra.i.nsmasher-presentation/README.md)
   * [Basic Bruteforcer](a.i.-exploiting/bra.i.nsmasher-presentation/basic-bruteforcer.md)
@@ -569,16 +569,16 @@
   * [ML Basics](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/README.md)
     * [Feature Engineering](a.i.-exploiting/bra.i.nsmasher-presentation/ml-basics/feature-engineering.md)
 
-## Blockchain
+# Blockchain
 
 * [Blockchain & Crypto Currencies](blockchain/blockchain-and-crypto-currencies/README.md)
   * [Page 1](blockchain/blockchain-and-crypto-currencies/page-1.md)
 
-## Courses and Certifications Reviews
+# Courses and Certifications Reviews
 
 * [INE Courses and eLearnSecurity Certifications Reviews](courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md)
 
-## Physical attacks
+# Physical attacks
 
 * [Physical Attacks](physical-attacks/physical-attacks.md)
 * [Escaping from KIOSKs](physical-attacks/escaping-from-gui-applications/README.md)
@@ -587,7 +587,7 @@
   * [Bootloader testing](physical-attacks/firmware-analysis/bootloader-testing.md)
   * [Firmware Integrity](physical-attacks/firmware-analysis/firmware-integrity.md)
 
-## Reversing
+# Reversing
 
 * [Reversing Tools & Basic Methods](reversing/reversing-tools-basic-methods/README.md)
   * [Angr](reversing/reversing-tools-basic-methods/angr/README.md)
@@ -600,7 +600,7 @@
   * [Unpacking binaries](reversing/cryptographic-algorithms/unpacking-binaries.md)
 * [Word Macros](reversing/word-macros.md)
 
-## Exploiting
+# Exploiting
 
 * [Linux Exploiting (Basic) (SPA)](exploiting/linux-exploiting-basic-esp/README.md)
   * [Format Strings Template](exploiting/linux-exploiting-basic-esp/format-strings-template.md)
@@ -614,7 +614,7 @@
   * [PwnTools](exploiting/tools/pwntools.md)
 * [Windows Exploiting (Basic Guide - OSCP lvl)](exploiting/windows-exploiting-basic-guide-oscp-lvl.md)
 
-## Cryptography
+# Cryptography
 
 * [Certificates](cryptography/certificates.md)
 * [Cipher Block Chaining CBC-MAC](cryptography/cipher-block-chaining-cbc-mac-priv.md)
@@ -624,19 +624,19 @@
 * [Padding Oracle](cryptography/padding-oracle-priv.md)
 * [RC4 - Encrypt\&Decrypt](cryptography/rc4-encrypt-and-decrypt.md)
 
-## BACKDOORS
+# BACKDOORS
 
 * [Merlin](backdoors/merlin.md)
 * [Empire](backdoors/empire.md)
 * [Salseo](backdoors/salseo.md)
 * [ICMPsh](backdoors/icmpsh.md)
 
-## Stego
+# Stego
 
 * [Stego Tricks](stego/stego-tricks.md)
 * [Esoteric languages](stego/esoteric-languages.md)
 
-## MISC
+# MISC
 
 * [Basic Python](misc/basic-python/README.md)
   * [venv](misc/basic-python/venv.md)
@@ -647,7 +647,7 @@
   * [Bruteforce hash (few chars)](misc/basic-python/bruteforce-hash-few-chars.md)
 * [Other Big References](misc/references.md)
 
-## TODO
+# TODO
 
 * [More Tools](todo/more-tools.md)
 * [MISC](todo/misc.md)

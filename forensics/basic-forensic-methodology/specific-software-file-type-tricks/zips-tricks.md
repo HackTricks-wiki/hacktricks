@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# ZIPs tricks
-
 There are a handful of command-line tools for zip files that will be useful to know about.
 
 * `unzip` will often output helpful information on why a zip will not decompress.

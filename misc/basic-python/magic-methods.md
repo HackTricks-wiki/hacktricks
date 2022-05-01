@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Magic Methods
-
-## Class Methods
+# Class Methods
 
 You can access the **methods** of a **class** using **\_\_dict\_\_.**
 
@@ -29,15 +27,15 @@ You can access the functions
 
 ![](<../../.gitbook/assets/image (45).png>)
 
-## Object class
+# Object class
 
-### **Attributes**
+## **Attributes**
 
 You can access the **attributes of an object** using **\_\_dict\_\_**. Example:
 
 ![](<../../.gitbook/assets/image (41).png>)
 
-### Class
+## Class
 
 You can access the **class** of an object using **\_\_class\_\_**
 
@@ -47,7 +45,7 @@ You can access the **methods** of the **class** of an **object chainning** magic
 
 ![](<../../.gitbook/assets/image (44).png>)
 
-## Server Side Template Injection
+# Server Side Template Injection
 
 Interesting functions to exploit this vulnerability
 
@@ -69,7 +67,7 @@ __class__.__init__.__globals__[<name>].__dict__
 __class__.__init__.__globals__[<name>].__dict__.config
 ```
 
-## More Information
+# More Information
 
 * [https://rushter.com/blog/python-class-internals/](https://rushter.com/blog/python-class-internals/)
 * [https://docs.python.org/3/reference/datamodel.html](https://docs.python.org/3/reference/datamodel.html)

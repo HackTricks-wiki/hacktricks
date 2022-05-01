@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Abusing Docker Socket for Privilege Escalation
-
 There are some occasions were you just have **access to the docker socket** and you want to use it to **escalate privileges**. Some actions might be very suspicious and you may want to avoid them, so here you can find different flags that can be useful to escalate privileges:
 
-### Via mount
+## Via mount
 
 You can **mount** different parts of the **filesystem** in a container running as root and **access** them.\
 You could also **abuse a mount to escalate privileges** inside the container.
@@ -49,12 +47,12 @@ Note that maybe you cannot mount the folder `/tmp` but you can mount a **differe
 Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
 {% endhint %}
 
-### Escaping from the container
+## Escaping from the container
 
 * **`--privileged`** -> With this flag you [remove all the isolation from the container](docker-privileged.md#what-affects). Check techniques to [escape from privileged containers as root](docker-breakout-privilege-escalation.md#automatic-enumeration-and-escape).
 * **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> To [escalate abusing capabilities](../linux-capabilities.md), **grant that capability to the container** and disable other protection methods that may prevent the exploit to work.
 
-### Curl
+## Curl
 
 In this page we have discussed ways to escalate privileges using docker flags, you can find **ways to abuse these methods using curl** command in the page:
 

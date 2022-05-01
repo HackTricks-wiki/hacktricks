@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# GCP - Serverless Code Exec Services Enumeration
-
-## Cloud Functions <a href="reviewing-cloud-functions" id="reviewing-cloud-functions"></a>
+# Cloud Functions <a href="reviewing-cloud-functions" id="reviewing-cloud-functions"></a>
 
 Google [Cloud Functions](https://cloud.google.com/functions/) allow you to host code that is executed when an event is triggered, without the requirement to manage a host operating system. These functions can also store environment variables to be used by the code.
 
@@ -35,18 +33,18 @@ gcloud functions describe [FUNCTION NAME]
 gcloud functions logs read [FUNCTION NAME] --limit [NUMBER]
 ```
 
-### Enumerate Open Cloud Functions
+## Enumerate Open Cloud Functions
 
 With the following code [taken from here](https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_misc/-/blob/master/find\_open\_functions.sh) you can find Cloud Functions that permit unauthenticated invocations.
 
 ```bash
 #!/bin/bash
 
-#############################
+############################
 # Run this tool to find Cloud Functions that permit unauthenticated invocations
 # anywhere in your GCP organization.
 # Enjoy!
-#############################
+############################
 
 for proj in $(gcloud projects list --format="get(projectId)"); do
     echo "[*] scraping project $proj"
@@ -86,7 +84,7 @@ done
 
 ```
 
-## App Engine Configurations <a href="reviewing-app-engine-configurations" id="reviewing-app-engine-configurations"></a>
+# App Engine Configurations <a href="reviewing-app-engine-configurations" id="reviewing-app-engine-configurations"></a>
 
 Google [App Engine](https://cloud.google.com/appengine/) is another ["serverless"](https://about.gitlab.com/topics/serverless/) offering for hosting applications, with a focus on scalability. As with Cloud Functions, **there is a chance that the application will rely on secrets that are accessed at run-time via environment variables**. These variables are stored in an `app.yaml` file which can be accessed as follows:
 
@@ -98,7 +96,7 @@ gcloud app versions list
 gcloud app describe [APP]
 ```
 
-## Cloud Run Configurations <a href="reviewing-cloud-run-configurations" id="reviewing-cloud-run-configurations"></a>
+# Cloud Run Configurations <a href="reviewing-cloud-run-configurations" id="reviewing-cloud-run-configurations"></a>
 
 Google [Cloud Run](https://cloud.google.com/run) is another serverless offer where you can search for env variables also. Cloud Run creates a small web server, running on port 8080, that sits around waiting for an HTTP GET request. When the request is received, a job is executed and the job log is output via an HTTP response.
 
@@ -122,18 +120,18 @@ curl -H \
     [URL]
 ```
 
-### Enumerate Open CloudRun
+## Enumerate Open CloudRun
 
 With the following code [taken from here](https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_misc/-/blob/master/find\_open\_cloudrun.sh) you can find Cloud Run services that permit unauthenticated invocations.
 
 ```bash
 #!/bin/bash
 
-#############################
+############################
 # Run this tool to find Cloud Run services that permit unauthenticated
 # invocations anywhere in your GCP organization.
 # Enjoy!
-#############################
+############################
 
 for proj in $(gcloud projects list --format="get(projectId)"); do
     echo "[*] scraping project $proj"
@@ -169,7 +167,7 @@ done
 
 ```
 
-## References
+# References
 
 * [https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/#reviewing-stackdriver-logging](https://about.gitlab.com/blog/2020/02/12/plundering-gcp-escalating-privileges-in-google-cloud-platform/#reviewing-stackdriver-logging)
 

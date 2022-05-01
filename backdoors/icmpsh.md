@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# ICMPsh
-
 Download the backdoor from: [https://github.com/inquisb/icmpsh](https://github.com/inquisb/icmpsh)
 
-## Client side
+# Client side
 
 Execute the script: **run.sh**
 
@@ -39,7 +37,7 @@ echo Please insert the IP where you want to listen
 read IP
 ```
 
-## **Victim Side**
+# **Victim Side**
 
 Upload **icmpsh.exe** to the victim and execute:
 

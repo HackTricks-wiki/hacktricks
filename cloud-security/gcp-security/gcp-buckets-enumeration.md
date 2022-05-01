@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# GCP - Buckets Enumeration
-
 Default configurations permit read access to storage. This means that you may **enumerate ALL storage buckets in the project**, including **listing** and **accessing** the contents inside.
 
 This can be a MAJOR vector for privilege escalation, as those buckets can contain secrets.
@@ -48,19 +46,19 @@ If you get a permission denied error listing buckets you may still have access t
 for i in $(cat wordlist.txt); do gsutil ls -r gs://"$i"; done
 ```
 
-### Search Open Buckets
+## Search Open Buckets
 
 With the following script [gathered from here](https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_misc/-/blob/master/find\_open\_buckets.sh) you can find all the open buckets:
 
 ```bash
 #!/bin/bash
 
-#############################
+############################
 # Run this tool to find buckets that are open to the public anywhere
 # in your GCP organization.
 #
 # Enjoy!
-#############################
+############################
 
 for proj in $(gcloud projects list --format="get(projectId)"); do
     echo "[*] scraping project $proj"

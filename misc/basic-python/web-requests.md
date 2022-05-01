@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Web Requests
-
 ```python
 import requests
 
@@ -54,7 +52,7 @@ pr = requests.post(url, data={"submit": "submit"}, files=filedict)
 print(f"\rflag: {flag}{char}", end="")
 ```
 
-## Python cmd to exploit a RCE
+# Python cmd to exploit a RCE
 
 ```python
 import requests

@@ -17,13 +17,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# GCP - Local Privilege Escalation / SSH Pivoting
-
 in this scenario we are going to suppose that you **have compromised a non privilege account** inside a VM in a Compute Engine project.
 
 Amazingly, GPC permissions of the compute engine you have compromised may help you to **escalate privileges locally inside a machine**. Even if that won't always be very helpful in a cloud environment, it's good to know it's possible.
 
-## Read the scripts <a href="#follow-the-scripts" id="follow-the-scripts"></a>
+# Read the scripts <a href="#follow-the-scripts" id="follow-the-scripts"></a>
 
 **Compute Instances** are probably there to **execute some scripts** to perform actions with their service accounts.
 
@@ -35,7 +33,7 @@ Running `gsutil ls` from the command line returns nothing, as the service accoun
 
 You may be able to find this bucket name inside a script (in bash, Python, Ruby...).
 
-## Custom Metadata
+# Custom Metadata
 
 Administrators can add [custom metadata](https://cloud.google.com/compute/docs/storing-retrieving-metadata#custom) at the instance and project level. This is simply a way to pass **arbitrary key/value pairs into an instance**, and is commonly used for environment variables and startup/shutdown scripts.
 
@@ -49,7 +47,7 @@ curl "http://metadata.google.internal/computeMetadata/v1/instance/attributes/?re
     -H "Metadata-Flavor: Google"
 ```
 
-## Modifying the metadata <a href="#modifying-the-metadata" id="modifying-the-metadata"></a>
+# Modifying the metadata <a href="#modifying-the-metadata" id="modifying-the-metadata"></a>
 
 If you can **modify the instance's metadata**, there are numerous ways to escalate privileges locally. There are a few scenarios that can lead to a service account with this permission:
 
@@ -67,7 +65,7 @@ Although Google [recommends](https://cloud.google.com/compute/docs/access/servic
 * `https://www.googleapis.com/auth/compute`
 * `https://www.googleapis.com/auth/cloud-platfo`rm
 
-### **Add SSH keys to custom metadata**
+## **Add SSH keys to custom metadata**
 
 **Linux** **systems** on GCP will typically be running [Python Linux Guest Environment for Google Compute Engine](https://github.com/GoogleCloudPlatform/compute-image-packages/tree/master/packages/python-google-compute-engine#accounts) scripts. One of these is the [accounts daemon](https://github.com/GoogleCloudPlatform/compute-image-packages/tree/master/packages/python-google-compute-engine#accounts), which **periodically** **queries** the instance metadata endpoint for **changes to the authorized SSH public keys**.
 
@@ -75,7 +73,7 @@ Although Google [recommends](https://cloud.google.com/compute/docs/access/servic
 
 So, if you can **modify custom instance metadata** with your service account, you can **escalate** to root on the local system by **gaining SSH rights** to a privileged account. If you can modify **custom project metadata**, you can **escalate** to root on **any system in the current GCP project** that is running the accounts daemon.
 
-### **Add SSH key to existing privileged user**
+## **Add SSH key to existing privileged user**
 
 Let's start by adding our own key to an existing account, as that will probably make the least noise.
 
@@ -132,7 +130,7 @@ alice@instance:~$ sudo id
 uid=0(root) gid=0(root) groups=0(root)
 ```
 
-### **Create a new privileged user and add a SSH key**
+## **Create a new privileged user and add a SSH key**
 
 No existing keys found when following the steps above? No one else interesting in `/etc/passwd` to target?
 
@@ -156,7 +154,7 @@ gcloud compute instances add-metadata [INSTANCE_NAME] --metadata-from-file ssh-k
 ssh -i ./key "$NEWUSER"@localhost
 ```
 
-### **Grant sudo to existing session**
+## **Grant sudo to existing session**
 
 This one is so easy, quick, and dirty that it feels wrong…
 
@@ -166,7 +164,7 @@ gcloud compute ssh [INSTANCE NAME]
 
 This will **generate a new SSH key, add it to your existing user, and add your existing username to the `google-sudoers` group**, and start a new SSH session. While it is quick and easy, it may end up making more changes to the target system than the previous methods.
 
-### SSH keys at project level <a href="#sshing-around" id="sshing-around"></a>
+## SSH keys at project level <a href="#sshing-around" id="sshing-around"></a>
 
 Following the details mentioned in the previous section you can try to compromise more VMs.
 
@@ -178,7 +176,7 @@ gcloud compute project-info add-metadata --metadata-from-file ssh-keys=meta.txt
 
 If you're really bold, you can also just type `gcloud compute ssh [INSTANCE]` to use your current username on other boxes.
 
-## **Using OS Login**
+# **Using OS Login**
 
 [**OS Login**](https://cloud.google.com/compute/docs/oslogin/)  is an alternative to managing SSH keys. It links a **Google user or service account to a Linux identity**, relying on IAM permissions to grant or deny access to Compute Instances.
 
@@ -197,7 +195,7 @@ If your service account has these permissions. **You can simply run the `gcloud 
 
 Similar to using SSH keys from metadata, you can use this strategy to **escalate privileges locally and/or to access other Compute Instances** on the network.
 
-## Search for Keys in the filesystem
+# Search for Keys in the filesystem
 
 It's quite possible that **other users on the same box have been running `gcloud`** commands using an account more powerful than your own. You'll **need local root** to do this.
 
@@ -216,7 +214,7 @@ You can manually inspect the files inside, but these are generally the ones with
 
 Now, you have the option of looking for clear text credentials in these files or simply copying the entire `gcloud` folder to a machine you control and running `gcloud auth list` to see what accounts are now available to you.
 
-### More API Keys regexes
+## More API Keys regexes
 
 ```bash
 TARGET_DIR="/path/to/whatever"

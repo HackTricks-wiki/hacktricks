@@ -22,7 +22,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## HackTricks
 
 ![](.gitbook/assets/p.png)
 
@@ -30,13 +29,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 Here you can find a little **introduction:**
 
-### [**Pentesting Methodology**](pentesting-methodology.md)
+## [**Pentesting Methodology**](pentesting-methodology.md)
 
 Here you will find the **typical flow** that **you should follow when pentesting** one or more **machines**.
 
 **Click in the title to start!**
 
-### Support HackTricks
+## Support HackTricks
 
 Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
@@ -46,9 +45,9 @@ And if you are a PEASS & HackTricks enthusiast, you can get your hands now on ou
 You can also, **join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) **to learn about latest news in cybersecurity and meet other cybersecurity enthusiasts**, or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**\
 If you want to **share some tricks with the community** you can also submit **pull requests** to [**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) that will be reflected in this book and don't forget to **give ⭐** on **github** to **motivate** **me** to continue developing this book.
 
-### Corporate Sponsors
+## Corporate Sponsors
 
-#### [STM Cyber](https://www.stmcyber.com)
+### [STM Cyber](https://www.stmcyber.com)
 
 ![](<.gitbook/assets/image (642) (1) (1) (1).png>)
 
@@ -58,7 +57,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 **STM Cyber** also support cybersecurity open source projects like HackTricks :)
 
-#### [Intrigiti](https://www.intigriti.com)
+### [Intrigiti](https://www.intigriti.com)
 
 ![](<.gitbook/assets/image (638).png>)
 
@@ -68,7 +67,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
-#### [**INE**](https://ine.com)
+### [**INE**](https://ine.com)
 
 ![](.gitbook/assets/ine\_logo-3-.jpg)
 
@@ -84,7 +83,7 @@ You can find **my reviews of the certifications eMAPT and eWPTXv2** (and their *
 [ine-courses-and-elearnsecurity-certifications-reviews.md](courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md)
 {% endcontent-ref %}
 
-### License
+## License
 
 **Copyright © Carlos Polop 2021. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **by Carlos Polop is licensed under the**[ **Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
 **If you want to use it with commercial purposes, contact me.**

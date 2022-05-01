@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Basic Github Information
-
-## Basic Structure
+# Basic Structure
 
 The basic github environment structure of a big **company** is to own an **enterprise** which owns **several organizations** and each of them may contain **several repositories** and **several teams.**. Smaller companies may just **own one organization and no enterprises**.
 
@@ -29,14 +27,14 @@ Moreover, a user may be **part of different teams** with different enterprise, o
 
 And finally **repositories may have special protection mechanisms**.
 
-## Privileges
+# Privileges
 
-### Enterprise Roles
+## Enterprise Roles
 
 * **Enterprise owner**: People with this role can **manage administrators, manage organizations within the enterprise, manage enterprise settings, enforce policy across organizations**. However, they **cannot access organization settings or content** unless they are made an organization owner or given direct access to an organization-owned repository
 * **Enterprise members**: Members of organizations owned by your enterprise are also **automatically members of the enterprise**.
 
-### Organization Roles
+## Organization Roles
 
 In an organisation users can have different roles:
 
@@ -50,7 +48,7 @@ In an organisation users can have different roles:
 
 You can **compare the permissions** of these roles in this table: [https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/roles-in-an-organization#permissions-for-organization-roles](https://docs.github.com/en/organizations/managing-peoples-access-to-your-organization-with-roles/roles-in-an-organization#permissions-for-organization-roles)
 
-### Members Privileges
+## Members Privileges
 
 In _https://github.com/organizations/\<org\_name>/settings/member\_privileges_ you can see the **permissions users will have just for being part of the organisation**.
 
@@ -64,7 +62,7 @@ The settings here configured will indicate the following permissions of members 
 * The permissions admins has over the repositories
 * If members can create new teams
 
-### Repository Roles
+## Repository Roles
 
 By default repository roles are created:
 
@@ -78,39 +76,39 @@ You can **compare the permissions** of each role in this table [https://docs.git
 
 You can also **create your own roles** in _https://github.com/organizations/\<org\_name>/settings/roles_
 
-### Teams
+## Teams
 
 You can **list the teams created in an organization** in _https://github.com/orgs/\<org\_name>/teams_. Note that to see the teams which are children of other teams you need to access each parent team.
 
 ![](<../../.gitbook/assets/image (630) (1).png>)
 
-### Users
+## Users
 
 The users of an organization can be **listed** in _https://github.com/orgs/\<org\_name>/people._
 
 In the information of each user you can see the **teams the user is member of**, and the **repos the user has access to**.
 
-## Github Authentication
+# Github Authentication
 
 Github offers different ways to authenticate to your account and perform actions on your behalf.
 
-### Web Access
+## Web Access
 
 Accessing **github.com** you can login using your **username and password** (and a **2FA potentially**).
 
-### **SSH Keys**
+## **SSH Keys**
 
 You can configure your account with one or several public keys allowing the related **private key to perform actions on your behalf.** [https://github.com/settings/keys](https://github.com/settings/keys)
 
-#### **GPG Keys**
+### **GPG Keys**
 
 You **cannot impersonate the user with these keys** but if you don't use it it might be possible that you **get discover for sending commits without a signature**. Learn more about [vigilant mode here](https://docs.github.com/en/authentication/managing-commit-signature-verification/displaying-verification-statuses-for-all-of-your-commits#about-vigilant-mode).
 
-### **Personal Access Tokens**
+## **Personal Access Tokens**
 
 You can generate personal access token to **give an application access to your account**. When creating a personal access token the **user** needs to **specify** the **permissions** to **token** will have. [https://github.com/settings/tokens](https://github.com/settings/tokens)
 
-### Oauth Applications
+## Oauth Applications
 
 Oauth applications may ask you for permissions **to access part of your github information or to impersonate you** to perform some actions. A common example of this functionality is the **login with github button** you might find in some platforms.
 
@@ -127,7 +125,7 @@ Some **security recommendations**:
 * **Don't** build an OAuth App to act as an application for your **team or company**. OAuth Apps authenticate as a **single user**, so if one person creates an OAuth App for a company to use, and then they leave the company, no one else will have access to it.
 * **More** in [here](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps#about-oauth-apps).
 
-### Github Applications
+## Github Applications
 
 Github applications can ask for permissions to **access your github information or impersonate you** to perform specific actions over specific resources. In Github Apps you need to specify the repositories the app will have access to.
 
@@ -149,19 +147,19 @@ Some security recommendations:
 * If you are using your app with GitHub Actions and want to modify workflow files, you must authenticate on behalf of the user with an OAuth token that includes the `workflow` scope. The user must have admin or write permission to the repository that contains the workflow file. For more information, see "[Understanding scopes for OAuth apps](https://docs.github.com/en/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/#available-scopes)."
 * **More** in [here](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps#about-github-apps).
 
-### Deploy keys
+## Deploy keys
 
 Deploy keys might have read-only or write access to the repo, so they might be interesting to compromise specific repos.
 
-### Github Actions
+## Github Actions
 
 This **isn't a way to authenticate in github**, but a **malicious** Github Action could get **unauthorised access to github** and **depending** on the **privileges** given to the Action several **different attacks** could be done. See below for more information.
 
-## Git Actions
+# Git Actions
 
 Git actions allows to automate the **execution of code when an event happen**. Usually the code executed is **somehow related to the code of the repository** (maybe build a docker container or check that the PR doesn't contain secrets).
 
-### Configuration
+## Configuration
 
 In _https://github.com/organizations/\<org\_name>/settings/actions_ it's possible to check the **configuration of the github actions** for the organization.
 
@@ -169,7 +167,7 @@ It's possible to disallow the use of github actions completely, **allow all gith
 
 It's also possible to configure **who needs approval to run a Github Action** and the **permissions of the \_GITHUB\_TOKEN**\_\*\* of a Github Action when it's run\*\*.
 
-### Git Secrets
+## Git Secrets
 
 Github Action usually need some kind of secrets to interact with github or third party applications. To **avoid putting them in clear-text** in the repo, github allow to put them as **Secrets**.
 
@@ -184,7 +182,7 @@ steps:
       super_secret: ${{ secrets.SuperSecret }}
 ```
 
-#### Example using Bash <a href="#example-using-bash" id="example-using-bash"></a>
+### Example using Bash <a href="#example-using-bash" id="example-using-bash"></a>
 
 ```yaml
 steps:
@@ -203,7 +201,7 @@ Once configured in the repo or the organizations **users of github won't be able
 
 Therefore, the **only way to steal github secrets is to be able to access the machine that is executing the Github Action** (in that scenario you will be able to access only the secrets declared for the Action).
 
-### Git Environments
+## Git Environments
 
 Github allows to create **environments** where you can save **secrets**. Then, you can give the github action access to the secrets inside the environment with something like:
 
@@ -216,7 +214,7 @@ jobs:
 
 You can configure an environment to be **accessed** by **all branches** (default), **only protected** branches or **specify** which branches can access it.
 
-### Git Action Box
+## Git Action Box
 
 A Github Action can be **executed inside the github environment** or can be executed in a **third party infrastructure** configured by the user.
 
@@ -230,7 +228,7 @@ It's **not possible to run a Github Action of an organization inside a self host
 
 If the custom **Github Runner is configured in a machine inside AWS or GCP** for example, the Action **could have access to the metadata endpoint** and **steal the token of the service account** the machine is running with.
 
-### Git Action Compromise
+## Git Action Compromise
 
 If all actions (or a malicious action) are allowed a user could use a **Github action** that is **malicious** and will **compromise** the **container** where it's being executed.
 
@@ -242,7 +240,7 @@ A **malicious Github Action** run could be **abused** by the attacker to:
 * **Abuse the token** used by the **workflow** to **steal the code of the repo** where the Action is executed or **even modify it**.
 {% endhint %}
 
-## Branch Protections
+# Branch Protections
 
 Branch protections are designed to **not give complete control of a repository** to the users. The goal is to **put several protection methods before being able to write code inside some branch**.
 
@@ -271,7 +269,7 @@ Different protections can be applied to a branch (like to master):
 As you can see, even if you managed to obtain some credentials of a user, **repos might be protected avoiding you to pushing code to master** for example to compromise the CI/CD pipeline.
 {% endhint %}
 
-## References
+# References
 
 * [https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-roles-for-an-organization)
 * [https://docs.github.com/en/enterprise-server@3.3/admin/user-management/managing-users-in-your-enterprise/roles-in-an-enterprise](https://docs.github.com/en/enterprise-server@3.3/admin/user-management/managing-users-in-your-enterprise/roles-in-an-enterprise)[https://docs.github.com/en/enterprise-server](https://docs.github.com/en/enterprise-server@3.3/admin/user-management/managing-users-in-your-enterprise/roles-in-an-enterprise)

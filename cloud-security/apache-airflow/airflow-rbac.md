@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Airflow RBAC
-
-## RBAC
+# RBAC
 
 Airflow ships with a **set of roles by default**: **Admin**, **User**, **Op**, **Viewer**, and **Public**. **Only `Admin`** users could **configure/alter the permissions for other roles**. But it is not recommended that `Admin` users alter these default roles in any way by removing or adding permissions to these roles.
 
@@ -33,7 +31,7 @@ Note that **admin** users can **create more roles** with more **granular permiss
 
 Also note that the only default role with **permission to list users and roles is Admin, not even Op** is going to be able to do that.
 
-### Default Permissions
+## Default Permissions
 
 These are the default permissions per default role:
 

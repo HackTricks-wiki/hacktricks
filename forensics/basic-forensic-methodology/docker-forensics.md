@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Docker Forensics
-
-## Container modification
+# Container modification
 
 There are suspicions that some docker container was compromised:
 
@@ -66,7 +64,7 @@ If you find that **some suspicious file was added** you can access the container
 docker exec -it wordpress bash
 ```
 
-## Images modifications
+# Images modifications
 
 When you are given an exported docker image (probably in `.tar` format) you can use [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) to **extract a summary of the modifications**:
 
@@ -83,7 +81,7 @@ Then, you can **decompress** the image and **access the blobs** to search for su
 tar -xf image.tar
 ```
 
-### Basic Analysis
+## Basic Analysis
 
 You can get **basic information** from the image running:
 
@@ -104,7 +102,7 @@ alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock --rm alpi
 dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
 
-### Dive
+## Dive
 
 In order to find added/modified files in docker images you can also use the [**dive**](https://github.com/wagoodman/dive) (download it from [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) utility:
 
@@ -127,7 +125,7 @@ tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
 
-## Credentials from memory
+# Credentials from memory
 
 Note that when you run a docker container inside a host **you can see the processes running on the container from the host** just running `ps -ef`
 
