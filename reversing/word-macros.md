@@ -1,4 +1,4 @@
-# Python
+# Word Macros
 
 <details>
 
@@ -16,27 +16,18 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Server using python
+### Junk Code
 
-test a possible **code execution**, using the function _str()_:
+It's very common to find **junk code that is never used** to make the reversing of the macro more difficult.\
+For example, in the following image you can see that and If that is never going to be true is used to execute some junk and useless code.
 
-```python
-"+str(True)+" #If the string True is printed, then it is vulnerable
-```
+![](<../.gitbook/assets/image (373).png>)
 
-### Tricks
+### Macro Forms
 
-{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
-{% endcontent-ref %}
+Using the **GetObject** function it's possible to obtain data from forms of the macro. This can be used to difficult the analysis. The following is a photo of a macro form used to **hide data inside text boxes** (a text box can be hiding other text boxes):
 
-{% content-ref url="../../pentesting-web/ssti-server-side-template-injection/" %}
-[ssti-server-side-template-injection](../../pentesting-web/ssti-server-side-template-injection/)
-{% endcontent-ref %}
-
-{% content-ref url="../../pentesting-web/deserialization/" %}
-[deserialization](../../pentesting-web/deserialization/)
-{% endcontent-ref %}
+![](<../.gitbook/assets/image (374).png>)
 
 <details>
 

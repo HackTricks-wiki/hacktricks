@@ -1,4 +1,4 @@
-# Python
+# Low-Power Wide Area Network
 
 <details>
 
@@ -16,27 +16,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Server using python
+## Introduction
 
-test a possible **code execution**, using the function _str()_:
+**Low-Power Wide Area Network** (LPWAN) is a group of wireless, low-power, wide area network technologies designed for **long-range communications** at a low bit rate.\
+They can reach more than **six miles** and their **batteries** can last up to **20 years**.
 
-```python
-"+str(True)+" #If the string True is printed, then it is vulnerable
-```
+Long Range (**LoRa**) it’s popular in multiple countries and has an open source specification called **LoRaWAN**.
 
-### Tricks
-
-{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
-{% endcontent-ref %}
-
-{% content-ref url="../../pentesting-web/ssti-server-side-template-injection/" %}
-[ssti-server-side-template-injection](../../pentesting-web/ssti-server-side-template-injection/)
-{% endcontent-ref %}
-
-{% content-ref url="../../pentesting-web/deserialization/" %}
-[deserialization](../../pentesting-web/deserialization/)
-{% endcontent-ref %}
+### LPWAN, LoRa, and LoRaWAN
 
 <details>
 

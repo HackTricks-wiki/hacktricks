@@ -1,4 +1,4 @@
-# Python
+# venv
 
 <details>
 
@@ -16,27 +16,24 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Server using python
-
-test a possible **code execution**, using the function _str()_:
-
-```python
-"+str(True)+" #If the string True is printed, then it is vulnerable
+```bash
+sudo apt-get install python3-venv
+#Now, go to the folder you want to create the virtual environment
+python3 -m venv <Dirname>
+python3 -m venv pvenv #In this case the folder "pvenv" is going to be crated
+source <Dirname>/bin/activate
+source pvenv/bin/activate #Activate the environment
+#You can now install whatever python library you need
+deactivate #To deactivate the virtual environment
 ```
 
-### Tricks
-
-{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
-{% endcontent-ref %}
-
-{% content-ref url="../../pentesting-web/ssti-server-side-template-injection/" %}
-[ssti-server-side-template-injection](../../pentesting-web/ssti-server-side-template-injection/)
-{% endcontent-ref %}
-
-{% content-ref url="../../pentesting-web/deserialization/" %}
-[deserialization](../../pentesting-web/deserialization/)
-{% endcontent-ref %}
+```bash
+The error
+error: invalid command 'bdist_wheel'
+is fixed running
+pip3 install wheel
+inside the virtual environment
+```
 
 <details>
 

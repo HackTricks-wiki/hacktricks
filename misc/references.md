@@ -1,4 +1,4 @@
-# Python
+# Other Big References
 
 <details>
 
@@ -16,27 +16,23 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Server using python
+{% embed url="https://highon.coffee/blog/penetration-testing-tools-cheat-sheet/#python-tty-shell-trick" %}
 
-test a possible **code execution**, using the function _str()_:
+{% embed url="https://hausec.com/pentesting-cheatsheet/#_Toc475368982" %}
 
-```python
-"+str(True)+" #If the string True is printed, then it is vulnerable
-```
+{% embed url="https://anhtai.me/pentesting-cheatsheet/" %}
 
-### Tricks
+{% embed url="https://bitvijays.github.io/LFF-IPS-P2-VulnerabilityAnalysis.html" %}
 
-{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
-{% endcontent-ref %}
+{% embed url="https://ired.team/offensive-security-experiments/offensive-security-cheetsheets" %}
 
-{% content-ref url="../../pentesting-web/ssti-server-side-template-injection/" %}
-[ssti-server-side-template-injection](../../pentesting-web/ssti-server-side-template-injection/)
-{% endcontent-ref %}
+{% embed url="http://www.lifeoverpentest.com/2018/02/enumeration-cheat-sheet-for-windows.html" %}
 
-{% content-ref url="../../pentesting-web/deserialization/" %}
-[deserialization](../../pentesting-web/deserialization/)
-{% endcontent-ref %}
+{% embed url="https://chryzsh.gitbooks.io/pentestbook/basics_of_windows.html" %}
+
+{% embed url="https://github.com/wwong99/pentest-notes/blob/master/oscp_resources/OSCP-Survival-Guide.md" %}
+
+{% embed url="https://anhtai.me/oscp-fun-guide/" %}
 
 <details>
 

