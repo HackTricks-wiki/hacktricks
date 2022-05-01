@@ -17,10 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
----
-description: 'https://github.com/inquisb/icmpsh'
----
-
 # ICMPsh
 
 Download the backdoor from: [https://github.com/inquisb/icmpsh](https://github.com/inquisb/icmpsh)

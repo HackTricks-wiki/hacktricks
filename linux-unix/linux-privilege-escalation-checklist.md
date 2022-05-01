@@ -17,10 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
----
-description: Checklist for privilege escalation in Linux
----
-
 # Checklist - Linux Privilege Escalation
 
 {% hint style="warning" %}

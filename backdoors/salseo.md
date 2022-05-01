@@ -17,10 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
----
-description: https://github.com/Hackplayers/Salsa-tools
----
-
 # Salseo
 
 ## Compiling the binaries

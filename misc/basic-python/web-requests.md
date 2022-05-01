@@ -17,10 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
----
-description: 'Get request, Post request (regular, json, file)'
----
-
 # Web Requests
 
 ```python
