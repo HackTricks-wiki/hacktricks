@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Skeleton Key
-
-## **Skeleton Key**
+# **Skeleton Key**
 
 **From:** [**https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/**](https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/)
 
@@ -27,11 +25,11 @@ There are several methods for compromising Active Directory accounts that attack
 
 Not surprisingly, this is one of the many attacks that is packaged and very easy to perform using [Mimikatz](https://github.com/gentilkiwi/mimikatz). Let’s take a look at how it works.
 
-#### Requirements for the Skeleton Key Attack
+### Requirements for the Skeleton Key Attack
 
 In order to perpetrate this attack, **the attacker must have Domain Admin rights**. This attack must be **performed on each and every domain controller for complete compromise, but even targeting a single domain controller can be effective**. **Rebooting** a domain controller **will remove this malware** and it will have to be redeployed by the attacker.
 
-#### Performing the Skeleton Key Attack
+### Performing the Skeleton Key Attack
 
 Performing the attack is very straightforward to do. It only requires the following **command to be run on each domain controller**: `misc::skeleton`. After that, you can authenticate as any user with the default password of Mimikatz.
 
@@ -49,7 +47,7 @@ If lsass was **already patched** with skeleton, then this **error** will appear:
 
 ![](<../../.gitbook/assets/image (160).png>)
 
-### Mitigations
+## Mitigations
 
 Skeleton Key
 

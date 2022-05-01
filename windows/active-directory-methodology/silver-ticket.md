@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Silver Ticket
-
-## Silver ticket
+# Silver ticket
 
 The Silver ticket attack is based on **crafting a valid TGS for a service once the NTLM hash of service is owned** \(like the **PC account hash**\). Thus, it is possible to **gain access to that service** by forging a custom TGS **as any user**.
 
@@ -51,7 +49,7 @@ mimikatz.exe "kerberos::ptt ticket.kirbi"
 
 The **CIFS** service is the one that allows you to **access the file system of the victim**. You can find other services here: [**https://adsecurity.org/?page\_id=183**](https://adsecurity.org/?page_id=183)**.** For example, you can use the **HOST service** to create a _**schtask**_ in a computer. Then you can check if this has worked trying to list the tasks of the victim: `schtasks /S <hostname>` or you can use the **HOST and** **RPCSS service** to execute **WMI** queries in a computer, test it doing: `Get-WmiObject -Class win32_operatingsystem -ComputerName <hostname>`
 
-### Mitigation
+## Mitigation
 
 Silver ticket events ID \(more stealth than golden ticket\):
 
@@ -61,7 +59,7 @@ Silver ticket events ID \(more stealth than golden ticket\):
 
 [**More information about Silver Tickets in ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 
-## Available Services
+# Available Services
 
 <table>
   <thead>
@@ -127,11 +125,11 @@ Using **Rubeus** you may **ask for all** these tickets using the parameter:
 
 * `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-## Abusing Service tickets
+# Abusing Service tickets
 
 In the following examples lets imagine that the ticket is retrieved impersonating the administrator account.
 
-### CIFS
+## CIFS
 
 With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** \(if they are exposed\) and copy files to a part of the remote filesystem just doing something like:
 
@@ -145,7 +143,7 @@ You will also be able to obtain a shell inside the host or execute arbitrary com
 
 {% page-ref page="../ntlm/psexec-and-winexec.md" %}
 
-### HOST
+## HOST
 
 With this permission you can generate scheduled tasks in remote computers and execute arbitrary commands:
 
@@ -161,7 +159,7 @@ schtasks /query /S some.vuln.pc
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 
-### HOST + RPCSS
+## HOST + RPCSS
 
 With these tickets you can **execute WMI in the victim system**:
 
@@ -179,7 +177,7 @@ Find **more information about wmiexec** in the following page:
 
 {% page-ref page="../ntlm/wmicexec.md" %}
 
-### HOST + WSMAN \(WINRM\)
+## HOST + WSMAN \(WINRM\)
 
 With winrm access over a computer you can **access it** and even get a PowerShell:
 
@@ -195,7 +193,7 @@ Check the following page to learn **more ways to connect with a remote host usin
 Note that **winrm must be active and listening** on the remote computer to access it.
 {% endhint %}
 
-### LDAP
+## LDAP
 
 With this privilege you can dump the DC database using **DCSync**:
 

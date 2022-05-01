@@ -16,9 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Credentials Protections
 
-### WDigest
+# WDigest
 
 [WDigest](https://technet.microsoft.com/pt-pt/library/cc778868\(v=ws.10\).aspx?f=255\&MSPPError=-2147217396) protocol was introduced in Windows XP and was designed to be used with HTTP Protocol for authentication. Microsoft has this protocol **enabled by default in multiple versions of Windows** (Windows XP — Windows 8.0 and Windows Server 2003 — Windows Server 2012) which means that **plain-text passwords are stored in the LSASS** (Local Security Authority Subsystem Service). **Mimikatz** can interact with the LSASS allowing an attacker to **retrieve these credentials** through the following command:
 
@@ -33,7 +32,7 @@ If these registry keys **don't exist** or the value is **"0"**, then WDigest wil
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
 
-### LSA Protection
+# LSA Protection
 
 Microsoft in **Windows 8.1 and later** has provided additional protection for the LSA to **prevent** untrusted processes from being able to **read its memory** or to inject code. This will prevent regular `mimikatz.exe sekurlsa:logonpasswords` for working properly.\
 To **activate this protection** you need to set the value _**RunAsPPL**_ in _**HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ to 1.
@@ -42,13 +41,13 @@ To **activate this protection** you need to set the value _**RunAsPPL**_ in _**H
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
 
-#### Bypass
+## Bypass
 
 It is possible to bypass this protection using Mimikatz driver mimidrv.sys:
 
 ![](../../.gitbook/assets/mimidrv.png)
 
-### Credential Guard
+# Credential Guard
 
 **Credential Guard** is a new feature in Windows 10 (Enterprise and Education edition) that helps to protect your credentials on a machine from threats such as pass the hash. This works through a technology called Virtual Secure Mode (VSM) which utilizes virtualization extensions of the CPU (but is not an actual virtual machine) to provide **protection to areas of memory** (you may hear this referred to as Virtualization Based Security or VBS). VSM creates a separate "bubble" for key **processes** that are **isolated** from the regular **operating system** processes, even the kernel and **only specific trusted processes may communicate to the processes** (known as **trustlets**) in VSM. This means a process in the main OS cannot read the memory from VSM, even kernel processes. The **Local Security Authority (LSA) is one of the trustlets** in VSM in addition to the standard **LSASS** process that still runs in the main OS to ensure support with existing processes but is really just acting as a proxy or stub to communicate with the version in VSM ensuring actual credentials run on the version in VSM and are therefore protected from attack. Credential Guard must be turned on and deployed in your organization as it is **not enabled by default.**\
 From [https://www.itprotoday.com/windows-10/what-credential-guard](https://www.itprotoday.com/windows-10/what-credential-guard)\
@@ -65,7 +64,7 @@ More information and a PS1 script to enable Credential Guard [can be found here]
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
 
-### RDP RestrictedAdmin Mode
+# RDP RestrictedAdmin Mode
 
 With Windows 8.1 and Windows Server 2012 R2, new security features were introduced. One of those security features is the _Restricted Admin mode for RDP_. This new security feature is introduced to mitigate the risk of [pass the hash](https://blog.ahasayen.com/pass-the-hash/) attacks.
 
@@ -79,7 +78,7 @@ Note that as your credentials are not being saved on the RDP session if **try to
 
 From [here](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
-### Cached Credentials
+# Cached Credentials
 
 **Domain credentials** are used by operating system components and are **authenticated** by the **Local** **Security Authority** (LSA). Typically, domain credentials are established for a user when a registered security package authenticates the user's logon data. This registered security package may be the **Kerberos** protocol or **NTLM**.
 
@@ -99,7 +98,7 @@ HKEY_LOCAL_MACHINE\SECURITY\Cache
 **Extracting from Mimikatz**: `lsadump::cache`\
 From [here](http://juggernaut.wikidot.com/cached-credentials).
 
-### Protected Users
+# Protected Users
 
 When the signed in user is a member of the Protected Users group the following protections are applied:
 

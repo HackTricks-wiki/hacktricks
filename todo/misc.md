@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# MISC
-
 In a ping response TTL:\
 127 = Windows\
 254 = Cisco\
@@ -43,7 +41,7 @@ UDP port scanning is often unreliable, as firewalls and routers may drop ICMP\
  o Most port scanners do not scan all available ports, and usually have a preset list\
  of “interesting ports” that are scanned.
 
-## CTF - Tricks
+# CTF - Tricks
 
 In **Windows** use **Winzip** to search for files.\
 **Alternate data Streams**: _dir /r | find ":$DATA"_\
@@ -54,7 +52,7 @@ binwalk --dd=".*" <file> #Extract everything
 binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and continue extracing (depth of 10000)
 ```
 
-### Crypto
+## Crypto
 
 **featherduster**\
 
@@ -75,7 +73,7 @@ rsatool
 
 Snow --> Hide messages using spaces and tabs
 
-## Characters
+# Characters
 
 %E2%80%AE => RTL Character (writes payloads backwards)
 

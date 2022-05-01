@@ -17,13 +17,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# SPI
+# Basic Information
 
-## Basic Information
+# Dump Flash
 
-## Dump Flash
-
-### Bus Pirate + flashrom
+## Bus Pirate + flashrom
 
 ![](<../../.gitbook/assets/image (201).png>)
 
@@ -35,10 +33,10 @@ In Windows or Linux you can use the program [**`flashrom`**](https://www.flashro
 
 ```bash
 # In this command we are indicating:
-## -VV Verbose
-## -c <chip> The chip (if you know it better, if not, don'tindicate it and the program might be able to find it)
-## -p <programmer> In this case how to contact th chip via the Bus Pirate
-## -r <file> Image to save in the filesystem
+# -VV Verbose
+# -c <chip> The chip (if you know it better, if not, don'tindicate it and the program might be able to find it)
+# -p <programmer> In this case how to contact th chip via the Bus Pirate
+# -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
 

@@ -19,8 +19,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 # Security Descriptors
 
-## Security Descriptors
-
 Security Descriptor Definition Language (SDDL) defines the format which is used to describe a security descriptor. SDDL uses ACE strings for DACL and SACL:: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
 The **security descriptors** are used to **store** the **permissions** an **object** has **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.

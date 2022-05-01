@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Escaping from KIOSKs
-
-## Check for possible actions inside the GUI application
+# Check for possible actions inside the GUI application
 
 **Common Dialogs** are those options of **saving a file**, **opening a file**, selecting a font, a color... Most of them will **offer a full Explorer functionality**. This means that you will be able to access Explorer functionalities if you can access these options:
 
@@ -37,21 +35,21 @@ You should check if you can:
 * Get access to restricted areas
 * Execute other apps
 
-### Command Execution
+## Command Execution
 
 Maybe **using a **_**Open with**_** option** you can open/execute some kind of shell.
 
-#### Windows
+### Windows
 
 For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands (and perform unexpected actions) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
-#### \*NIX __
+### \*NIX __
 
 _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
-## Windows
+# Windows
 
-### Bypassing path restrictions
+## Bypassing path restrictions
 
 * **Environment variables**: There are a lot of environment variables that are pointing to some path
 * **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
@@ -74,13 +72,13 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-### Download Your Binaries
+## Download Your Binaries
 
 Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
 Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
 Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-### Accessing filesystem from the browser
+## Accessing filesystem from the browser
 
 | PATH                | PATH              | PATH               | PATH                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
@@ -92,7 +90,7 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 | %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
 | %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
 
-### ShortCuts
+## ShortCuts
 
 * Sticky Keys – Press SHIFT 5 times
 * Mouse Keys – SHIFT+ALT+NUMLOCK
@@ -117,20 +115,20 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 * CTRL+O – Open File
 * CTRL+S – Save CTRL+N – New RDP / Citrix
 
-### Swipes
+## Swipes
 
 * Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
 * Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
 * Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
 * Swipe up from the bottom to show  the taskbar in a full screen app.
 
-### Internet Explorer Tricks
+## Internet Explorer Tricks
 
-#### 'Image Toolbar'
+### 'Image Toolbar'
 
 It's a toolbar that appears on the top-left of image when it's clicked. You will be able to Save, Print, Mailto, Open "My Pictures" in Explorer. The Kiosk needs to be using Internet Explorer.
 
-#### Shell Protocol
+### Shell Protocol
 
 Type this URLs to obtain an Explorer view:
 
@@ -156,7 +154,7 @@ Type this URLs to obtain an Explorer view:
 * `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
 * `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-## Browsers tricks
+# Browsers tricks
 
 Backup iKat versions:
 
@@ -166,55 +164,55 @@ Backup iKat versions:
 Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`  
 Source: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
-## iPad
+# iPad
 
-### Gestures and bottoms
+## Gestures and bottoms
 
-#### Swipe up with four (or five) fingers / Double-tap Home button
+### Swipe up with four (or five) fingers / Double-tap Home button
 
 To view the multitask view and change App
 
-#### Swipe one way or another with four or five fingers
+### Swipe one way or another with four or five fingers
 
 In order to change to the next/last App
 
-#### Pinch the screen with five fingers / Touch Home button / Swipe up with 1 finger from the bottom of the screen in a quick motion to the up
+### Pinch the screen with five fingers / Touch Home button / Swipe up with 1 finger from the bottom of the screen in a quick motion to the up
 
 To access Home
 
-#### Swipe one finger from the bottom of the screen just 1-2 inches (slow)
+### Swipe one finger from the bottom of the screen just 1-2 inches (slow)
 
 The dock will appear
 
-#### Swipe down from the top of the display with 1 finger
+### Swipe down from the top of the display with 1 finger
 
 To view your notifications
 
-#### Swipe down with 1 finger the top-right corner of the screen
+### Swipe down with 1 finger the top-right corner of the screen
 
 To see iPad Pro's control centre
 
-#### Swipe 1 finger from the left of the screen 1-2 inches
+### Swipe 1 finger from the left of the screen 1-2 inches
 
 To see Today view
 
-#### Swipe fast 1 finger from the centre of the screen to the right or left
+### Swipe fast 1 finger from the centre of the screen to the right or left
 
 To change to next/last App
 
-#### Press and hold the On/**Off**/Sleep button at the upper-right corner of the **iPad +** Move the Slide to **power off** slider all the way to the right,
+### Press and hold the On/**Off**/Sleep button at the upper-right corner of the **iPad +** Move the Slide to **power off** slider all the way to the right,
 
 To power off
 
-#### Press the  On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**
+### Press the  On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**
 
 To force a hard power off
 
-#### Press the  On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**
+### Press the  On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**
 
 To take a screenshot that will pop up in the lower left of the display. Press both buttons at the same time very briefly as if you hold them a few seconds a hard power off will be performed.
 
-### Shortcuts
+## Shortcuts
 
 You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that could help escaping from the application will be shown here.
 
@@ -231,7 +229,7 @@ You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that 
 | ↑   | Up Arrow     |
 | ↓   | Down Arrow   |
 
-#### System shortcuts
+### System shortcuts
 
 These shortcuts are for the visual settings and sound settings, depending on the use of the iPad.
 
@@ -247,7 +245,7 @@ These shortcuts are for the visual settings and sound settings, depending on the
 | F12      | Increase volume                                                                |
 | ⌘ Space  | Display a list of available languages; to choose one, tap the space bar again. |
 
-#### iPad navigation
+### iPad navigation
 
 | Shortcut                                           | Action                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
@@ -275,7 +273,7 @@ These shortcuts are for the visual settings and sound settings, depending on the
 | ⌘⇥ (Command-Tab)                                   | Switch back to the original app                         |
 | ←+→, then Option + ← or Option+→                   | Navigate through Dock                                   |
 
-#### Safari shortcuts
+### Safari shortcuts
 
 | Shortcut                | Action                                           |
 | ----------------------- | ------------------------------------------------ |
@@ -292,7 +290,7 @@ These shortcuts are for the visual settings and sound settings, depending on the
 | ⌘]                      | Goes forward one page in your browsing history   |
 | ⌘⇧R                     | Activate Reader Mode                             |
 
-#### Mail shortcuts
+### Mail shortcuts
 
 | Shortcut                   | Action                       |
 | -------------------------- | ---------------------------- |
@@ -303,7 +301,7 @@ These shortcuts are for the visual settings and sound settings, depending on the
 | ⌘.                         | Stop loading the current tab |
 | ⌘⌥F (Command-Option/Alt-F) | Search in your mailbox       |
 
-### References
+## References
 
 * [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 * [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)

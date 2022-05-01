@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Golden Ticket
-
-## Golden ticket
+# Golden ticket
 
 A valid **TGT as any user** can be created **using the NTLM hash of the krbtgt AD account**. The advantage of forging a TGT instead of TGS is being **able to access any service** (or machine) in the domain and the impersonated user.
 
@@ -43,7 +41,7 @@ klist #List tickets in memory
 
 **Once** you have the **golden Ticket injected**, you can access the shared files **(C$)**, and execute services and WMI, so you could use **psexec** or **wmiexec** to obtain a shell (looks like yo can not get a shell via winrm).
 
-### Mitigation
+## Mitigation
 
 Golden ticket events ID:
 

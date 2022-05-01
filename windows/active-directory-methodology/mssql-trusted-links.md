@@ -19,14 +19,12 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 # MSSQL Trusted Links
 
-## MSSQL Trusted Links
-
 If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA). \
 Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. This trusts can be chained and at some point the user might be able to find some misconfigured database where he can execute commands.
 
 **The links between databases work even across forest trusts.**
 
-### **Powershell**
+## **Powershell**
 
 ```bash
 Import-Module .\PowerupSQL.psd1
@@ -43,7 +41,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 
-## FROM INSIDE OF THE DOMAIN
+# FROM INSIDE OF THE DOMAIN
 #Get info about valid MSQL instances running in domain
 #This looks for SPNs that starts with MSSQL (not always is a MSSQL running instance)
 Get-SQLInstanceDomain | Get-SQLServerinfo -Verbose 
@@ -79,7 +77,7 @@ Invoke-SQLAudit -Verbose -Instance "dcorp-mssql.dollarcorp.moneycorp.local"
 Invoke-SQLEscalatePriv –Verbose –Instance "SQLServer1\Instance1"
 ```
 
-### Metasploit
+## Metasploit
 
 You can easily check for trusted links using metasploit.
 
@@ -91,7 +89,7 @@ msf> use exploit/windows/mssql/mssql_linkcrawler
 
 Notice that metasploit will try to abuse only the `openquery()` function in MSSQL (so, if you can't execute command with `openquery()` you will need to try the `EXECUTE` method **manually** to execute commands, see more below.)
 
-### Manual - Openquery()
+## Manual - Openquery()
 
 From Linux you could obtain a MSSQL console shell with **sqsh** and **mssqlclient.py** and run queries like:
 
@@ -119,7 +117,7 @@ You can continue these trusted links chain forever manually.
 
 Some times you won't be able to perform actions like `exec xp_cmdshell` from `openquery()` in those cases it might be worth it to test the following method:
 
-### Manual - EXECUTE
+## Manual - EXECUTE
 
 You can also abuse trusted links using EXECUTE:
 

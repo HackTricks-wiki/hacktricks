@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# AtExec / SchtasksExec
-
-## How Does it works
+# How Does it works
 
 At allows to schedule tasks in hosts where you know username/\(password/Hash\). So, you can use it to execute commands in other hosts and get the output.
 

@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Pass the Ticket
-
-## Pass The Ticket \(PTT\)
+# Pass The Ticket \(PTT\)
 
 This kind of attack is similar to Pass the Key, but instead of using hashes to request a ticket, the ticket itself is stolen and used to authenticate as its owner.
 
@@ -28,7 +26,7 @@ This kind of attack is similar to Pass the Key, but instead of using hashes to r
 * [Harvesting tickets from Windows](../../pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
 * [Harvesting tickets from Linux](../../pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **Swaping Linux and Windows tickets between platforms**
+## **Swaping Linux and Windows tickets between platforms**
 
 The [ticket\_converter](https://github.com/Zer1t0/ticket_converter) script. The only needed parameters are the current ticket and the output file, it automatically detects the input ticket file format and converts it. For example:
 
@@ -41,7 +39,7 @@ Converting kirbi => ccache
 
 [Kekeo](https://github.com/gentilkiwi/kekeo), to convert them in Windows. This tool was not checked due to requiring a license in their ASN1 library, but I think it is worth mentioning.
 
-### Pass The Ticket Attack
+## Pass The Ticket Attack
 
 {% code title="Linux" %}
 ```bash

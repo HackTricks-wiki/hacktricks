@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Stealing Sensitive Information Disclosure from a Web
-
 If at some point you find a **web page that presents you sensitive information based on your session**: Maybe it's reflecting cookies, or printing or CC details or any other sensitive information, you may try to steal it.\
 Here I present you the main ways to can try to achieve it:
 

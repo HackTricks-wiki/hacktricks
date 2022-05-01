@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Create MSI with WIX
-
 **Tutorial copied from** [**https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root**](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)\
 In order to create the msi we will use [wixtools](http://wixtoolset.org) , you can use other msi builders but they didn’t work for me.\
 Check [this page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) for some wix msi usage examples.\

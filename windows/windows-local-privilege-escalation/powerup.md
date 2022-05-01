@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# PowerUp
-
-## Invoke
+# Invoke
 
 ```text
 powershell -ep bypass
@@ -27,7 +25,7 @@ powershell -ep bypass
 Invoke-AllChecks
 ```
 
-## Checks
+# Checks
 
 _03/2019_
 

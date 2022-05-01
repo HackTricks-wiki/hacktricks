@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# UART
-
-## Basic Information
+# Basic Information
 
 UART is a serial protocol, which means it transfers data between components one bit at a time. In contrast, parallel communication protocols transmit data simultaneously through multiple channels. Common serial protocols include RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, and USB.
 
@@ -35,7 +33,7 @@ Hardware tools to communicate with UART:
 * Adapters with the CP2102 or PL2303 chips
 * Multipurpose tool such as: Bus Pirate, the Adafruit FT232H, the Shikra, or the Attify Badge
 
-### Identifying UART Ports
+## Identifying UART Ports
 
 UART has 4 ports: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), and **GND**(Ground). You might be able to find 4 ports with the **`TX`** and **`RX`** letters **written** in the PCB. But if there is no indication, you might need to try to find them yourself using a **multimeter** or a **logic analyzer**.
 
@@ -50,7 +48,7 @@ You can confuse the TX and RX ports and nothing would happen, but if you confuse
 
 With a logic analyzer:
 
-### Identifying the UART Baud Rate
+## Identifying the UART Baud Rate
 
 The easiest way to identify the correct baud rate is to look at the **TX pin’s output and try to read the data**. If the data you receive isn’t readable, switch to the next possible baud rate until the data becomes readable. You can use a USB-to-serial adapter or a multipurpose device like Bus Pirate to do this, paired with a helper script, such as [baudrate.py](https://github.com/devttys0/baudrate/). The most common baud rates are 9600, 38400, 19200, 57600, and 115200.
 
@@ -58,7 +56,7 @@ The easiest way to identify the correct baud rate is to look at the **TX pin’s
 It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
 {% endhint %}
 
-## Bus Pirate
+# Bus Pirate
 
 In this scenario we are going to sniff the UART communication of the Arduino that is sending all the prints of the program to the Serial Monitor.
 
@@ -93,7 +91,7 @@ Set serial port speed: (bps)
 10. BRG raw value
 
 # Select the speed the communication is occurring on (you BF all this until you find readable things)
-## Or you could later use the macro (4) to try to find the speed
+# Or you could later use the macro (4) to try to find the speed
 (1)>5
 Data bits and parity:
  1. 8, NONE *default

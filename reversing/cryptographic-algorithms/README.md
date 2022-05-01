@@ -16,13 +16,12 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Cryptographic/Compression Algorithms
 
-### Identifying Algorithms
+# Identifying Algorithms
 
 If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
 
-#### API functions
+## API functions
 
 **CryptDeriveKey**
 
@@ -49,7 +48,7 @@ Initiates the hashing of a stream of data. If this function is used, you can fin
 \
 Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-#### Code constants
+## Code constants
 
 Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
 
@@ -62,7 +61,7 @@ If you search for the first constant in Google this is what you get:
 Therefore, you can assume that the decompiled function is a **sha256 calculator.**\
 You can search any of the other constants and you will obtain (probably) the same result.
 
-#### data info
+## data info
 
 If the code doesn't have any significant constant it may be **loading information from the .data section**.\
 You can access that data, **group the first dword** and search for it in google as we have done in the section before:
@@ -71,9 +70,9 @@ You can access that data, **group the first dword** and search for it in google 
 
 In this case, if you look for **0xA56363C6** you can find that it's related to the **tables of the AES algorithm**.
 
-### RC4 **(Symmetric Crypt)**
+# RC4 **(Symmetric Crypt)**
 
-#### Characteristics
+## Characteristics
 
 It's composed of 3 main parts:
 
@@ -85,38 +84,38 @@ It's composed of 3 main parts:
 **In order to identify a RC4 in a disassembly/decompiled code you can check for 2 loops of size 0x100 (with the use of a key) and then a XOR of the input data with the 256 values created before in the 2 loops probably using a %256 (mod 256)**
 {% endhint %}
 
-#### **Initialization stage/Substitution Box:** (Note the number 256 used as counter and how a 0 is written in each place of the 256 chars)
+## **Initialization stage/Substitution Box:** (Note the number 256 used as counter and how a 0 is written in each place of the 256 chars)
 
 ![](<../../.gitbook/assets/image (377).png>)
 
-#### **Scrambling Stage:**
+## **Scrambling Stage:**
 
 ![](<../../.gitbook/assets/image (378).png>)
 
-#### **XOR Stage:**
+## **XOR Stage:**
 
 ![](<../../.gitbook/assets/image (379).png>)
 
-### **AES (Symmetric Crypt)**
+# **AES (Symmetric Crypt)**
 
-#### **Characteristics**
+## **Characteristics**
 
 * Use of **substitution boxes and lookup tables**
   * It's possible to **distinguish AES thanks to the use of specific lookup table values** (constants). _Note that the **constant** can be **stored** in the binary **or created**  **dynamically**._
 * The **encryption key** must be **divisible** by **16** (usually 32B) and usually an **IV** of 16B is used.
 
-#### SBox constants
+## SBox constants
 
 ![](<../../.gitbook/assets/image (380).png>)
 
-### Serpent **(Symmetric Crypt)**
+# Serpent **(Symmetric Crypt)**
 
-#### Characteristics
+## Characteristics
 
 * It's rare to find some malware using it but there are examples (Ursnif)
 * Simple to determine if an algorithm is Serpent or not based on it's length (extremely long function)
 
-#### Identifying
+## Identifying
 
 In the following image notice how the constant **0x9E3779B9** is used (note that this constant is also used by other crypto algorithms like **TEA** -Tiny Encryption Algorithm).\
 Also note the **size of the loop** (**132**) and the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
@@ -129,29 +128,29 @@ As it was mentioned before, this code can be visualized inside any decompiler as
 
 Therefore, it's possible to identify this algorithm checking the **magic number** and the **initial XORs**, seeing a **very long function** and **comparing** some **instructions** of the long function **with an implementation** (like the shift left by 7 and the rotate left by 22).
 
-### RSA **(Asymmetric Crypt)**
+# RSA **(Asymmetric Crypt)**
 
-#### Characteristics
+## Characteristics
 
 * More complex than symmetric algorithms
 * There are no constants! (custom implementation are difficult to determine)
 * KANAL (a crypto analyzer) fails to show hints on RSA ad it relies on constants.
 
-#### Identifying by comparisons
+## Identifying by comparisons
 
 ![](<../../.gitbook/assets/image (383).png>)
 
 * In line 11 (left) there is a `+7) >> 3` which is the same as in line 35 (right): `+7) / 8`
 * Line 12 (left) is checking if `modulus_len < 0x040` and in line 36 (right) it's checking if `inputLen+11 > modulusLen`
 
-### MD5 & SHA (hash)
+# MD5 & SHA (hash)
 
-#### Characteristics
+## Characteristics
 
 * 3 functions: Init, Update, Final
 * Similar initialize functions
 
-#### Identify
+## Identify
 
 **Init**
 
@@ -165,12 +164,12 @@ Note the use of more constants
 
 ![](<../../.gitbook/assets/image (253) (1) (1).png>)
 
-### CRC (hash)
+# CRC (hash)
 
 * Smaller and more efficient as it's function is to find accidental changes in data
 * Uses lookup tables (so you can identify constants)
 
-#### Identify
+## Identify
 
 Check **lookup table constants**:
 
@@ -180,14 +179,14 @@ A CRC hash algorithm looks like:
 
 ![](<../../.gitbook/assets/image (386).png>)
 
-### APLib (Compression)
+# APLib (Compression)
 
-#### Characteristics
+## Characteristics
 
 * Not recognizable constants
 * You can try to write the algorithm in python and search for similar things online
 
-#### Identify
+## Identify
 
 The graph is quiet large:
 

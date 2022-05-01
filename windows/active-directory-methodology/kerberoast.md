@@ -19,8 +19,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 # Kerberoast
 
-## Kerberoast
-
 The goal of **Kerberoasting** is to harvest **TGS tickets for services that run on behalf of user accounts** in the AD, not computer accounts. Thus, **part** of these TGS **tickets are** **encrypted** with **keys** derived from user passwords. As a consequence, their credentials could be **cracked offline**.\
 You can know that a **user account** is being used as a **service** because the property **"ServicePrincipalName"** is **not null**.
 
@@ -59,7 +57,7 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 ```
 {% endcode %}
 
-### Cracking
+## Cracking
 
 ```
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
@@ -67,7 +65,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
 
-### Persistence
+## Persistence
 
 If you have **enough permissions** over a user you can **make it kerberoastable**:
 
@@ -79,7 +77,7 @@ You can find useful **tools** for **kerberoast** attacks here: [https://github.c
 
 If you find this **error** from Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** it because of your local time, you need to synchronise the host with the DC: `ntpdate <IP of DC>`
 
-### Mitigation
+## Mitigation
 
 Kerberoast is very stealthy if exploitable
 

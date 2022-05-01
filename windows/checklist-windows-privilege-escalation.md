@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Checklist - Local Windows Privilege Escalation
-
 {% hint style="warning" %}
 **Support HackTricks and get benefits!**
 
@@ -34,9 +32,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 {% endhint %}
 
-### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+## **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
-### [System Info](windows-local-privilege-escalation/#system-info)
+## [System Info](windows-local-privilege-escalation/#system-info)
 
 * [ ] Obtain [**System informatio**](windows-local-privilege-escalation/#system-info)
 * [ ] Search for **kernel** [**exploits using scripts**](windows-local-privilege-escalation/#version-exploits)
@@ -49,7 +47,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] [**WSUS exploit**](windows-local-privilege-escalation/#wsus)?
 * [ ] [**AlwaysInstallElevated**](windows-local-privilege-escalation/#alwaysinstallelevated)?
 
-### [Logging/AV enumeration](windows-local-privilege-escalation/#enumeration)
+## [Logging/AV enumeration](windows-local-privilege-escalation/#enumeration)
 
 * [ ] Check [**Audit** ](windows-local-privilege-escalation/#audit-settings)and [**WEF** ](windows-local-privilege-escalation/#wef)settings
 * [ ] Check [**LAPS**](windows-local-privilege-escalation/#laps)
@@ -68,42 +66,42 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] Check [**Password Policy**](windows-local-privilege-escalation/#password-policy)
 * [ ] What is[ **inside the Clipboard**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
 
-### [Network](windows-local-privilege-escalation/#network)
+## [Network](windows-local-privilege-escalation/#network)
 
 * [ ] Check **current** [**network** **information**](windows-local-privilege-escalation/#network)
 * [ ] Check **hidden local services** restricted to the outside
 
-### [Running Processes](windows-local-privilege-escalation/#running-processes)
+## [Running Processes](windows-local-privilege-escalation/#running-processes)
 
 * [ ] Processes binaries [**file and folders permissions**](windows-local-privilege-escalation/#file-and-folder-permissions)
 * [ ] [**Memory Password mining**](windows-local-privilege-escalation/#memory-password-mining)
 * [ ] [**Insecure GUI apps**](windows-local-privilege-escalation/#insecure-gui-apps)
 
-### [Services](windows-local-privilege-escalation/#services)
+## [Services](windows-local-privilege-escalation/#services)
 
 * [ ] [Can you **modify any service**?](windows-local-privilege-escalation/#permissions)
 * [ ] [Can you **modify** the **binary** that is **executed** by any **service**?](windows-local-privilege-escalation/#modify-service-binary-path)
 * [ ] [Can you **modify** the **registry** of any **service**?](windows-local-privilege-escalation/#services-registry-permissions)
 * [ ] [Can you take advantage of any **unquoted service** binary **path**?](windows-local-privilege-escalation/#unquoted-service-paths)
 
-### [**Applications**](windows-local-privilege-escalation/#applications)
+## [**Applications**](windows-local-privilege-escalation/#applications)
 
 * [ ] **Write** [**permissions on installed applications**](windows-local-privilege-escalation/#write-permissions)
 * [ ] [**Startup Applications**](windows-local-privilege-escalation/#run-at-startup)
 * [ ] **Vulnerable** [**Drivers**](windows-local-privilege-escalation/#drivers)
 
-### [DLL Hijacking](windows-local-privilege-escalation/#path-dll-hijacking)
+## [DLL Hijacking](windows-local-privilege-escalation/#path-dll-hijacking)
 
 * [ ] Can you **write in any folder inside PATH**?
 * [ ] Is there any known service binary that **tries to load any non-existant DLL**?
 * [ ] Can you **write** in any **binaries folder**?
 
-### [Network](windows-local-privilege-escalation/#network)
+## [Network](windows-local-privilege-escalation/#network)
 
 * [ ] Enumerate the network(shares, interfaces, routes, neighbours...)
 * [ ] Take a special look to network services listing on local (127.0.0.1)
 
-### [Windows Credentials](windows-local-privilege-escalation/#windows-credentials)
+## [Windows Credentials](windows-local-privilege-escalation/#windows-credentials)
 
 * [ ] [**Winlogon** ](windows-local-privilege-escalation/#winlogon-credentials)credentials
 * [ ] [**Windows Vault**](windows-local-privilege-escalation/#windows-vault) credentials that you could use?
@@ -115,7 +113,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] [**AppCmd.exe** exists](windows-local-privilege-escalation/#appcmd-exe)? Credentials?
 * [ ] [**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? DLL Side Loading?
 
-### [Files and Registry (Credentials)](windows-local-privilege-escalation/#files-and-registry-credentials)
+## [Files and Registry (Credentials)](windows-local-privilege-escalation/#files-and-registry-credentials)
 
 * [ ] **Putty:** [**Creds**](windows-local-privilege-escalation/#putty-creds) **and** [**SSH host keys**](windows-local-privilege-escalation/#putty-ssh-host-keys)
 * [ ] [**SSH keys in registry**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
@@ -133,11 +131,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] [**Generic password search**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry) in files and registry
 * [ ] [**Tools**](windows-local-privilege-escalation/#tools-that-search-for-passwords) to automatically search for passwords
 
-### [Leaked Handlers](windows-local-privilege-escalation/#leaked-handlers)
+## [Leaked Handlers](windows-local-privilege-escalation/#leaked-handlers)
 
 * [ ] Have you access to any handler of a process run by administrator?
 
-### [Pipe Client Impersonation](windows-local-privilege-escalation/#named-pipe-client-impersonation)
+## [Pipe Client Impersonation](windows-local-privilege-escalation/#named-pipe-client-impersonation)
 
 * [ ] Check if you can abuse it
 

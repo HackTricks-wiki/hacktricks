@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Esoteric languages
-
 [Esolangs Wiki](https://esolangs.org/wiki/Main_Page)
 
-## Malbolge
+# Malbolge
 
 ```
 ('&%:9]!~}|z2Vxwv-,POqponl$Hjig%eB@@>}=<M:9wv6WsU2T|nm-,jcL(I&%$#"
@@ -30,13 +28,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 [http://malbolge.doleczek.pl/](http://malbolge.doleczek.pl)
 
-## npiet
+# npiet
 
 ![](<../.gitbook/assets/image (146).png>)
 
 [https://www.bertnase.de/npiet/npiet-execute.php](https://www.bertnase.de/npiet/npiet-execute.php)
 
-## Rockstar
+# Rockstar
 
 ```
 Midnight takes your heart and your soul

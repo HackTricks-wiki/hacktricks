@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# RottenPotato
-
 The info in this page info was extracted [from this post](https://www.absolomb.com/2018-05-04-HackTheBox-Tally/)
 
 Service accounts usually have special privileges \(SeImpersonatePrivileges\) and this could be used to escalate privileges.

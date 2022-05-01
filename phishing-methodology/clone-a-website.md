@@ -17,28 +17,26 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Clone a Website
-
 For a phishing assessment sometimes it might be useful to completely **clone a website**.
 
 Note that you can add also some payloads to the cloned website like a BeEF hook to "control" the tab of the user. 
 
 There are different tools you can use for this purpose:
 
-### wget
+## wget
 
 ```text
 wget -mk -nH
 ```
 
-### goclone
+## goclone
 
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
 
-### Social Engineering Toolit
+## Social Engineering Toolit
 
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit

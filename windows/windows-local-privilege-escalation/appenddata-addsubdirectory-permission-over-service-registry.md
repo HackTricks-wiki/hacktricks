@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# AppendData/AddSubdirectory permission over service registry
-
 **Information copied from** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
 
 According to the output of the script, the current user has some write permissions on two registry keys:
@@ -60,7 +58,7 @@ What does this mean exactly? It means that we cannot just modify the `ImagePath`
 
 Does it mean that it was indeed a false positive? Surely not. Let the fun begin!
 
-### RTFM <a href="#rtfm" id="rtfm"></a>
+## RTFM <a href="#rtfm" id="rtfm"></a>
 
 At this point, we know that we can create arbirary subkeys under `HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper` but we cannot modify existing subkeys and values. These already existing subkeys are `Parameters` and `Security`, which are quite common for Windows services.
 
@@ -106,7 +104,7 @@ DWORD APIENTRY ClosePerfData();
 
 I think that’s enough with the theory, it’s time to start writing some code!
 
-### Writing a Proof-of-Concept <a href="#writing-a-proof-of-concept" id="writing-a-proof-of-concept"></a>
+## Writing a Proof-of-Concept <a href="#writing-a-proof-of-concept" id="writing-a-proof-of-concept"></a>
 
 Thanks to all the bits and pieces I was able to collect throughout the documentation, writing a simple Proof-of-Concept DLL should be pretty straightforward. But still, we need a plan!
 
@@ -249,7 +247,7 @@ If you want to see the full code, I uploaded it [here](https://gist.github.com/i
 
 Finally, we can select _**Release/x64**_ and “_**Build the solution**_”. This will produce our DLL file: `.\DllRpcEndpointMapperPoc\x64\Release\DllRpcEndpointMapperPoc.dll`.
 
-### Testing the PoC <a href="#testing-the-poc" id="testing-the-poc"></a>
+## Testing the PoC <a href="#testing-the-poc" id="testing-the-poc"></a>
 
 Before going any further, I always make sure that my payload is working properly by testing it separately. The little time spent here can save a lot of time afterwards by preventing you from going down a rabbit hole during a hypothetical debug phase. To do so, we can simply use `rundll32.exe` and pass the name of the DLL and the name of an exported function as the parameters.
 
@@ -350,7 +348,7 @@ Get-WmiObject Win32_PerfRawData
 Get-WmiObject Win32_PerfFormattedData
 ```
 
-### Conclusion <a href="#conclusion" id="conclusion"></a>
+## Conclusion <a href="#conclusion" id="conclusion"></a>
 
 I don’t know how this vulnerability has gone unnoticed for so long. One explanation is that other tools probably looked for full write access in the registry, whereas `AppendData/AddSubdirectory` was actually enough in this case. Regarding the “misconfiguration” itself, I would assume that the registry key was set this way for a specific purpose, although I can’t think of a concrete scenario in which users would have any kind of permissions to modify a service’s configuration.
 

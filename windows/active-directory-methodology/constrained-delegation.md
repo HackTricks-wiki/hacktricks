@@ -19,8 +19,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 # Constrained Delegation
 
-## Constrained Delegation
-
 Using this a Domain admin can allow 3rd parties to impersonate a user or computer against a service of a machine.
 
 * **Service for User to self (**_**S4U2self**_**):** If a **service account** has a _userAccountControl_ value containing [TRUSTED\_TO\_AUTH\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx) (T2A4D), then it can obtains a TGS for itself (the service) on behalf of any other user.
@@ -65,7 +63,7 @@ Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.
 ```
 {% endcode %}
 
-### Mitigation
+## Mitigation
 
 * Disable kerberos delegation where possible
 * Limit DA/Admin logins to specific services

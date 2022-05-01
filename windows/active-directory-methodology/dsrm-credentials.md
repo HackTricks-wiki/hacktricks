@@ -19,8 +19,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 # DSRM Credentials
 
-## DSRM Credentials
-
 There is a **local administrator** account inside each **DC**. Having admin privileges in this machine you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password** so you can remotely access to this local Administrator user.\
 First we need to **dump** the **hash** of the **local Administrator** user inside the DC:
 
@@ -46,7 +44,7 @@ ls \\dc-host-name\C$
 
 More info about this in: [https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) and [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785)
 
-### Mitigation
+## Mitigation
 
 * Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
 

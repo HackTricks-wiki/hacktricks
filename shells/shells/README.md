@@ -17,17 +17,15 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Shells \(Linux, Windows, MSFVenom\)
+# [**Shells - Linux**](linux.md)
 
-## [**Shells - Linux**](linux.md)
+# [**Shells - Windows**](windows.md)
 
-## [**Shells - Windows**](windows.md)
+# [**MSFVenom - CheatSheet**](msfvenom.md)
 
-## [**MSFVenom - CheatSheet**](msfvenom.md)
+# [**Full TTYs**](full-ttys.md)
 
-## [**Full TTYs**](full-ttys.md)
-
-## **Auto-generated shells**
+# **Auto-generated shells**
 
 * [**https://reverse-shell.sh/**](https://reverse-shell.sh/)
 * [**https://www.revshells.com/**](https://www.revshells.com/)

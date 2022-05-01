@@ -19,8 +19,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 # Integrity Levels
 
-## Integrity Levels
-
 From Windows Vista, all **protected objects are labeled with an integrity level**. Most user and system files and registry keys on the system have a default label of “medium” integrity. The primary exception is a set of specific folders and files writeable by Internet Explorer 7 at Low integrity. **Most processes** run by **standard users** are labeled with **medium integrity** (even the ones started by a user inside the administrators group), and most **services** are labeled with **System integrity**. The root directory is protected by a high-integrity label.\
 Note that **a process with a lower integrity level can’t write to an object with a higher integrity level.**\
 There are several levels of integrity:
@@ -40,7 +38,7 @@ You can also get your **current integrity level** using `whoami /groups`
 
 ![](<../../.gitbook/assets/image (319).png>)
 
-### Integrity Levels in File-system
+## Integrity Levels in File-system
 
 A object inside the file-system may need an **minimum integrity level requirement** and if a process doesn't have this integrity process it won't be able to interact with it.\
 For example, lets **create a regular from a regular user console file and check the permissions**:
@@ -88,7 +86,7 @@ Access is denied.
 **Therefore, when a file has a minimum integrity level, in order to modify it you need to be running at least in that integrity level.**
 {% endhint %}
 
-### Integrity Levels in Binaries
+## Integrity Levels in Binaries
 
 I made a copy of `cmd.exe` in `C:\Windows\System32\cmd-low.exe` and set it an **integrity level of low from an administrator console:**
 
@@ -108,7 +106,7 @@ Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instea
 
 For curious people, if you assign high integrity level to a binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) it won't run with high integrity level automatically (if you invoke it from a medium integrity level --by default-- it will run under a medium integrity level).
 
-### Integrity Levels in Processes
+## Integrity Levels in Processes
 
 Not all files and folders have a minimum integrity level, **but all processes are running under an integrity level**. And similar to what happened with the file-system, **if a process wants to write inside another process it must have at least the same integrity level**. This means that a process with low integrity level can’t open a handle with full access to a process with medium integrity level.
 

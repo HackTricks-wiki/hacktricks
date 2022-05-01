@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Unpacking binaries
-
-## Identifying packed binaries
+# Identifying packed binaries
 
 * **lack of strings**: It's common to find that packed binaries doesn't have almost any string
 * A lot of **unused strings**: Also, when a malware is using some kind of commercial packer it's common to find a lot of strings without cross-references. Even if these strings exist that doesn't mean that the binary isn't packed.
@@ -28,7 +26,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
   * [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
   * [Language 2000](http://farrokhi.net/language/)
 
-## Basic Recommendations
+# Basic Recommendations
 
 * **Start** analysing the packed binary **from the bottom in IDA and move up**. Unpackers exit once the unpacked code exit so it's unlikely that the unpacker passes execution to the unpacked code at the start.
 * Search for **JMP's** or **CALLs** to **registers** or **regions** of **memory**. Also search for **functions pushing arguments and an address direction and then calling `retn`**, because the return of the function in that case may call the address just pushed to the stack before calling it.

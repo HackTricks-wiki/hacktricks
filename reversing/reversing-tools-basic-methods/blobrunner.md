@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Blobrunner
-
 The only modified line from the [original code](https://github.com/OALabs/BlobRunner) is the line 10.  
 In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
 

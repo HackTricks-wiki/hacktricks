@@ -17,13 +17,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# I2C
 
 
 
 
-
-## Bus Pirate
+# Bus Pirate
 
 To test a Bus Pirate is working, connect +5V with VPU and 3.3V with ADC and access the bus pirate (Using Tera Term for example) and use the command `~`:
 
@@ -149,7 +147,7 @@ Searching I2C address space. Found devices at:
 0xA0(0x50 W) 0xA1(0x50 R)
 
 # Note that each slave will have a write address and a read address
-## 0xA0 ad 0xA1 in the previous case
+# 0xA0 ad 0xA1 in the previous case
 
 # Write "BBB" in address 0x69
 I2C>[0xA0 0x00 0x69 0x42 0x42 0x42]
@@ -178,7 +176,7 @@ READ: 0x42  ACK 0x42  ACK 0x42  ACK 0x20  ACK 0x48  ACK 0x69  ACK 0x20  ACK 0x44
 NACK
 ```
 
-### Sniffer
+## Sniffer
 
 In this scenario we are going to sniff the I2C communication between the arduino and the previous EPROM, you just need to communicate both devices and then connect the bus pirate to the SCL, SDA and GND pins:
 

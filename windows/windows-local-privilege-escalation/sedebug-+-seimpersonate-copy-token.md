@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# SeDebug + SeImpersonate copy token
-
 The following code **exploits the privileges SeDebug and SeImpersonate** to copy the token from a **process running as SYSTEM** and with **all the token privileges**. \
 In this case, this code can be compiled and used as a **Windows service binary** to check that it's working.\
 However, the main part of the **code where the elevation occurs** is inside the **`Exploit`** **function**.\

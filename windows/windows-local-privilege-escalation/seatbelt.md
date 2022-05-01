@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Seatbelt
 
 
-
-## Start
+# Start
 
 [You need to compile it](https://github.com/GhostPack/Seatbelt) or [use precompiled binaries \(by me\)](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)
 
@@ -32,7 +30,7 @@ SeatbeltNet3.5x64.exe all full #Without filtering
 
 I really like the performed filtering.
 
-## Check
+# Check
 
 This tool is more gathering-info oriented than privesc, but it has some pretty nice checks and looks for some passwords.
 

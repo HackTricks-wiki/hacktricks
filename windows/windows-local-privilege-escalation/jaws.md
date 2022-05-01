@@ -17,18 +17,16 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# JAWS
 
 
-
-## Start
+# Start
 
 ```text
 iex(New-Object net.WebClient).downloadstring("https://raw.githubusercontent.com/411Hall/JAWS
 /master/jaws-enum.ps1")
 ```
 
-## Info recopilation
+# Info recopilation
 
 It does not only check for privilege escalation missconfiguration, but it also gathers information about the current situation.
 
@@ -42,7 +40,7 @@ It does not only check for privilege escalation missconfiguration, but it also g
 * [x] Drives
 * [x] Last modified files
 
-## Checks
+# Checks
 
 * [x] Files and folders with Full Control
 * [x] Unquoted Service Paths

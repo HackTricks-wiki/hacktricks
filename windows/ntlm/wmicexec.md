@@ -17,17 +17,15 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# WmicExec
-
-## How Does it works
+# How Does it works
 
 Wmi allows to open process in hosts where you know username/\(password/Hash\). Then, Wmiexec uses wmi to execute each command that is asked to execute \(this is why Wmicexec gives you semi-interactive shell\).
 
 **dcomexec.py:** This script gives a semi-interactive shell similar to wmiexec.py, but using different DCOM endpoints \(ShellBrowserWindow DCOM object\). Currently, it supports MMC20. Application, Shell Windows and Shell Browser Window objects. \(from [here](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)\)
 
-## WMI Basics
+# WMI Basics
 
-### Namespace
+## Namespace
 
 WMI is divided into a directory-style hierarchy, the \root container, with other directories under \root. These "directory paths" are called namespaces.  
 List namespaces:
@@ -50,7 +48,7 @@ gwmwi -List -Recurse #If no namespace is specified, by default is used: "root\ci
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 
-### **Classes**
+## **Classes**
 
 The WMI class name eg: win32\_process is a starting point for any WMI action. We always need to know a Class Name and the Namespace where it is located.  
 List classes starting with `win32`:
@@ -68,7 +66,7 @@ Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
 
-### Methods
+## Methods
 
 WMI classes have one or more functions that can be executed. These functions are called methods.
 
@@ -88,9 +86,9 @@ Get-WmiObject -Query 'Select * From Meta_Class WHERE __Class LIKE "win32%"' | Wh
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
 
-## WMI Enumeration
+# WMI Enumeration
 
-### Check WMI service
+## Check WMI service
 
 This how you can check if WMI service is running:
 
@@ -105,13 +103,13 @@ Running  Winmgmt            Windows Management Instrumentation
 net start | findstr "Instrumentation"
 ```
 
-### System Information
+## System Information
 
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 ```
 
-### Process Information
+## Process Information
 
 ```bash
 Get-WmiObject win32_process | Select Name, Processid
@@ -132,7 +130,7 @@ wmic sysaccount list /format:list
  Get-WmiObject Win32_Processor -ComputerName 10.0.0.182 -Credential $cred
 ```
 
-## **Manual Remote WMI Querying**
+# **Manual Remote WMI Querying**
 
 For example, here's a very stealthy way to discover local admins on a remote machine \(note that domain is the computer name\):
 

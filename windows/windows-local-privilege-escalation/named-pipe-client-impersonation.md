@@ -16,11 +16,10 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Named Pipe Client Impersonation
 
 **This information was copied from** [**https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation**](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)
 
-### Overview
+# Overview
 
 A `pipe` is a block of shared memory that processes can use for communication and data exchange.
 
@@ -33,7 +32,7 @@ This lab is concerned with a simple PoC code that allows:
 * creating a single-threaded dumb named pipe server that will accept one client connection
 * named pipe server to write a simple message to the named pipe so that the pipe client can read it
 
-### Code
+# Code
 
 Below is the PoC for both the server and the client:
 
@@ -103,7 +102,7 @@ int main()
 {% endtab %}
 {% endtabs %}
 
-### Execution
+# Execution
 
 Below shows the named pipe server and named pipe client working as expected:
 
@@ -129,7 +128,7 @@ We can even see our pipe with powershell:
 
 ![](<../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22 (3).png>)
 
-### Token Impersonation
+# Token Impersonation
 
 {% hint style="info" %}
 Note that in order to impersonate the token of the client process you need to have (the server process creating the pipe) the **`SeImpersonate`** token privilege

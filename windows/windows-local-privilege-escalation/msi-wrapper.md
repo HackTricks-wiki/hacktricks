@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# MSI Wrapper
-
 Download the free version app from [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), execute it and wrap the "malicious" binary on it.\
 Note that you can wrap a "**.bat**" if you **just** want to **execute** **command lines (instead of cmd.exe select the .bat file)**
 

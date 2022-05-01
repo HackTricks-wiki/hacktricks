@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Show file extensions
-
-### How to Show File Extensions in Windows XP
+## How to Show File Extensions in Windows XP
 
 1. Open Windows Explorer. You can do this by clicking "My Computer" from the Start Menu. Note that this is NOT the same thing as Internet Explorer.
 2. Click the "Tools" menu on the menu bar in Explorer (the menu bar is at the top of the Explorer window, underneath the window title). Click the "Folder Options" item in the popup menu that appears.
@@ -27,7 +25,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 4. Look for a setting "Hide file extensions for known file types" and uncheck the box beside it to disable it.
 5. Click the button "Apply to All Folders". Then click "Apply" and then "OK".
 
-### Displaying the File Extension in Windows Vista and Windows 7
+## Displaying the File Extension in Windows Vista and Windows 7
 
 1. Click the Start menu. This is the round icon that is on the bottom left corner of your screen.
 2. Type "folder options" (without the quotes). Click the line "Folder Options" that appears at the top of the Start menu.
@@ -35,7 +33,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 4. Click to uncheck the box for "Hide extensions for known file types".
 5. Click the "OK" button at the bottom of the dialog box.
 
-### How to Show File Extensions in Windows 8
+## How to Show File Extensions in Windows 8
 
 1. Invoke the start screen. One way to do this is to move your mouse to the bottom left corner of your screen. In Windows 8, there's no indication that this will cause the start screen to appear, but it will.
 2. Type "folder options" (without the quotes). I know that there is no blank field in the start screen to suggest that you can actually type anything. Like many things in Windows 8, arcane knowledge is needed to operate the system.
@@ -47,7 +45,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 6. Look for the line "Hide extensions of known file types" and click the box beside it to remove the tick.
 7. Click the "OK" button.
 
-### How to Show File Extensions in Windows 10
+## How to Show File Extensions in Windows 10
 
 1. Click the icon on the task bar at the bottom of the screen to invoke the Start menu. (The icon is the one that looks like a white version of the Windows logo.)
 2. Type "folder options" (without the quotation marks). There is no blank field on the screen to suggest that you can type anything, but you can. Just type it.

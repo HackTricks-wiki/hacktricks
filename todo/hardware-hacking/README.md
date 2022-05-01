@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Hardware Hacking
+#
 
-##
-
-## JTAG
+# JTAG
 
 JTAG allows to perform a boundary scan. The boundary scan analyzes certain circuitry, including embedded boundary-scan cells and registers for each pin.
 
@@ -38,7 +36,7 @@ It can also support other commands such as:
 
 You might come across these instructions when you use a tool like the JTAGulator.
 
-### The Test Access Port
+## The Test Access Port
 
 Boundary scans include tests of the four-wire **Test Access Port (TAP)**, a general-purpose port that provides **access to the JTAG test support** functions built into a component. TAP uses the following five signals:
 
@@ -50,7 +48,7 @@ Boundary scans include tests of the four-wire **Test Access Port (TAP)**, a gene
 
 Sometimes you will be able to find those pins marked in the PCB. In other occasions you might need to **find them**.
 
-### Identifying JTAG pins
+## Identifying JTAG pins
 
 The fastest but most expensive way to detect JTAG ports is by using the **JTAGulator**, a device created specifically for this purpose (although it can **also detect UART pinouts**).
 
@@ -62,7 +60,7 @@ Using **JTAGenum**, you’d first **define the pins of the probing** device that
 
 A **third way** to identify JTAG pins is by **inspecting the PCB** for one of the pinouts. In some cases, PCBs might conveniently provide the **Tag-Connect interface**, which is a clear indication that the board has a JTAG connector, too. You can see what that interface looks like at [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Additionally, inspecting the **datasheets of the chipsets on the PCB** might reveal pinout diagrams that point to JTAG interfaces.
 
-## SDW
+# SDW
 
 SWD is an ARM-specific protocol designed for debugging.
 

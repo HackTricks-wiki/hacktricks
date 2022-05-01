@@ -19,8 +19,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 # DCShadow
 
-## DCShadow
-
 It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
 Note that if you use wrong data, pretty ugly logs will appear.
 
@@ -59,7 +57,7 @@ You can push the changes from a DA or from a user with this minimal permissions:
 You can use [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) to give these privileges to an unprivileged user (notice that this will leave some logs). This is much more restrictive than having DA privileges.\
 For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose`  This means that the username _**student1**_ when logged on in the machine _**mcorp-student1**_ has DCShadow permissions over the object _**root1user**_.
 
-### Using DCShadow to create backdoors
+## Using DCShadow to create backdoors
 
 {% code title="Set Enterprise Admins in SIDHistory to a user" %}
 ```bash
@@ -82,7 +80,7 @@ lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attr
 ```
 {% endcode %}
 
-### Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
+## Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
 
 We need to append following ACEs with our user's SID at the end:
 

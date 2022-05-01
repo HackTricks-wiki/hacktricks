@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Privilege Escalation with Autoruns
-
-## WMIC
+# WMIC
 
 **Wmic** can be used to run programs on **startup**. See which binaries are programmed to run is startup with:
 
@@ -28,7 +26,7 @@ wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 
-## Scheduled Tasks
+# Scheduled Tasks
 
 **Tasks** can be schedules to run with **certain frequency**. See which binaries are scheduled to run with:
 
@@ -43,7 +41,7 @@ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,Tas
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
 
-## Folders
+# Folders
 
 All the binaries located in the **Startup folders are going to be executed on startup**. The common startup folders are the ones listed a continuation, but the startup folder is indicated in the registry. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 
@@ -56,13 +54,13 @@ Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
 
-## Registry
+# Registry
 
 {% hint style="info" %}
 Note: The **Wow6432Node** registry entry indicates that you are running a 64-bit Windows version. The operating system uses this key to display a separate view of HKEY\_LOCAL\_MACHINE\SOFTWARE for 32-bit applications that run on 64-bit Windows versions.
 {% endhint %}
 
-### Runs
+## Runs
 
 **Commonly known** AutoRun registry:
 
@@ -162,7 +160,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\RunOnceEx'
 Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\RunOnceEx'
 ```
 
-### Startup Path
+## Startup Path
 
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
@@ -187,7 +185,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
 
-### Winlogon Keys
+## Winlogon Keys
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
@@ -205,7 +203,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 If you can overwrite the registry value or the binary you will be able to escalate privileges.
 {% endhint %}
 
-### Policy Settings
+## Policy Settings
 
 * `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer` 
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
@@ -219,7 +217,7 @@ Get-ItemProperty -Path 'Registry::HKLM\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name "Run"
 ```
 
-### AlternateShell
+## AlternateShell
 
 Path: **`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`**
 
@@ -251,7 +249,7 @@ reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
 
-### Installed Component
+## Installed Component
 
 * `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 * `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
@@ -280,7 +278,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 ```
 
-### Browser Helper Objects
+## Browser Helper Objects
 
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 * `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
@@ -296,14 +294,14 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 
 Note that the registry will contain 1 new registry per each dll and it will be represented by the **CLSID**. You can find the CLSID info in `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
-### Internet Explorer Extensions
+## Internet Explorer Extensions
 
 * `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 * `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
 Note that the registry will contain 1 new registry per each dll and it will be represented by the **CLSID**. You can find the CLSID info in `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
-### Font Drivers
+## Font Drivers
 
 * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers`
 * `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers`
@@ -315,7 +313,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
 
-### Open Command
+## Open Command
 
 * `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 * `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -327,14 +325,14 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\comm
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
 
-### Image File Execution Options
+## Image File Execution Options
 
 ```text
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
 ```
 
-## SysInternals
+# SysInternals
 
 Note that all the sites where you can find autoruns are **already searched by**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). However, for a **more comprehensive list of auto-executed** file you could use [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)from systinternals:
 
@@ -342,11 +340,11 @@ Note that all the sites where you can find autoruns are **already searched by**[
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 
-## More
+# More
 
 Find more Autoruns like registries in [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
-## References
+# References
 
 * [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/\#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)

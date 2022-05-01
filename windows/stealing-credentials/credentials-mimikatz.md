@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Mimikatz
-
 The content of this page was copied [adsecurity.org](https://adsecurity.org/?page\_id=1821)
 
-## LM and Clear-Text in memory
+# LM and Clear-Text in memory
 
 Starting with Windows 8.1 and Windows Server 2012 R2, the LM hash and “clear-text” password are no longer in memory.
 
@@ -29,7 +27,7 @@ In order to prevent the “clear-text” password from being placed in LSASS, th
 
 _HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest “UseLogonCredential”(DWORD)_
 
-## **Mimikatz & LSA Protection:**
+# **Mimikatz & LSA Protection:**
 
 Windows Server 2012 R2 and Windows 8.1 includes a new feature called LSA Protection which involves enabling [LSASS as a protected process on Windows Server 2012 R2](https://technet.microsoft.com/en-us/library/dn408187.aspx) (Mimikatz can bypass with a driver, but that should make some noise in the event logs):
 
@@ -44,9 +42,9 @@ LSA Protection prevents non-protected processes from interacting with LSASS. Mim
 
 [![Mimikatz-Driver-Remove-LSASS-Protection](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-Driver-Remove-LSASS-Protection.jpg)](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-Driver-Remove-LSASS-Protection.jpg)
 
-## Main
+# Main
 
-### **EVENT**
+## **EVENT**
 
 **EVENT::Clear** – Clear an event log\
 [\
@@ -59,9 +57,9 @@ LSA Protection prevents non-protected processes from interacting with LSASS. Mim
 Note:\
 Run privilege::debug then event::drop to patch the event log.  Then run Event::Clear to clear the event log without any log cleared event (1102) being logged.
 
-### KERBEROS
+## KERBEROS
 
-#### Golden Ticket
+### Golden Ticket
 
 A Golden Ticket is a TGT using the KRBTGT NTLM password hash to encrypt and sign.
 
@@ -103,7 +101,7 @@ Golden Ticket Default Groups:
 
 [Golden tickets across domains](https://adsecurity.org/?p=1640)
 
-#### Silver Ticket
+### Silver Ticket
 
 A Silver Ticket is a TGS (similar to TGT in format) using the target service account’s (identified by SPN mapping) NTLM password hash to encrypt and sign.
 
@@ -115,7 +113,7 @@ The following Mimikatz command creates a Silver Ticket for the CIFS service on t
 mimikatz “kerberos::golden /admin:LukeSkywalker /id:1106 /domain:lab.adsecurity.org /sid:S-1-5-21-1473643419-774954089-2222329127 /target:adsmswin2k8r2.lab.adsecurity.org /rc4:d7e2b80507ea074ad59f152a1ba20458 /service:cifs /ptt” exit
 ```
 
-#### [**Trust Ticket**](https://adsecurity.org/?p=1588)
+### [**Trust Ticket**](https://adsecurity.org/?p=1588)
 
 Once the Active Directory Trust password hash is determined, a trust ticket can be generated. The trust tickets are created using the shared password between 2 Domains that trust each other.\
 [More background on Trust Tickets.](https://adsecurity.org/?p=1588)
@@ -141,7 +139,7 @@ Trust Ticket Specific Required Parameters:
 * **/**rc4 – the NTLM hash for the service kerberos service account (krbtgt).
 * **/**ticket – provide a path and name for saving the forged ticket file to for later use or use /ptt to immediately inject the golden ticket into memory for use.
 
-#### **More KERBEROS**
+### **More KERBEROS**
 
 **KERBEROS::List** – List all user tickets (TGT and TGS) in user memory. No special privileges required since it only displays the current user’s tickets.\
 Similar to functionality of “klist”.
@@ -171,7 +169,7 @@ Similar to functionality of “klist purge”. Run this command before passing t
 
 [![Mimikatz-Kerberos-TGT](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-Kerberos-TGT.png)](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-Kerberos-TGT.png)
 
-### LSADUMP
+## LSADUMP
 
 **LSADUMP**::**DCShadow** – Set the current machines as DC to have the habitability to create new objects inside the DC (persistent method).\
 This requires full AD admin rights or KRBTGT pw hash.\
@@ -233,7 +231,7 @@ NetSync provides a simple way to use a DC computer account password data to impe
 
 [**LSADUMP::Trust**](https://adsecurity.org/?p=1588) – Ask LSA Server to retrieve Trust Auth Information (normal or patch on the fly).
 
-### MISC
+## MISC
 
 [**MISC::Skeleton**](https://adsecurity.org/?p=1275) – Inject Skeleton Key into LSASS process on Domain Controller.
 
@@ -241,13 +239,13 @@ NetSync provides a simple way to use a DC computer account password data to impe
 "privilege::debug" "misc::skeleton"
 ```
 
-### PRIVILEGE
+## PRIVILEGE
 
 **PRIVILEGE::Backup** – get backup privilege/rights. Requires Debug rights.
 
 **PRIVILEGE::Debug** – get debug rights (this or Local System rights is required for many Mimikatz commands).
 
-### SEKURLSA
+## SEKURLSA
 
 **SEKURLSA::Credman** – List Credentials Manager
 
@@ -295,7 +293,7 @@ Command:  _mimikatz sekurlsa::tickets exit_
 * Dumps all authenticated Kerberos tickets on a system.
 * Requires administrator access (with debug) or Local SYSTEM rights
 
-### **SID**
+## **SID**
 
 The Mimikatz SID module replaces MISC::AddSID. Use SID::Patch to patch the ntds service.
 
@@ -307,7 +305,7 @@ The Mimikatz SID module replaces MISC::AddSID. Use SID::Patch to patch the ntds 
 
 [![Mimikatz-SID-Modify](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-SID-Modify.png)](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-SID-Modify.png)
 
-### **TOKEN**
+## **TOKEN**
 
 The Mimikatz Token module enables Mimikatz to interact with Windows authentication tokens, including grabbing and impersonating existing tokens.
 
@@ -322,7 +320,7 @@ Find a domain admin credential on the box and use that token: _token::elevate /d
 
 **TOKEN::List** – list all tokens of the system
 
-### **TS**
+## **TS**
 
 **TS::MultiRDP** – (experimental) Patch Terminal Server service to allow multiple users
 
@@ -332,7 +330,7 @@ Find a domain admin credential on the box and use that token: _token::elevate /d
 
 ![](https://adsecurity.org/wp-content/uploads/2017/11/Mimikatz-TS-Sessions.png)
 
-### Vault
+## Vault
 
 `mimikatz.exe "privilege::debug" "token::elevate" "vault::cred /patch" "exit"` - Get passwords of scheduled tasks
 

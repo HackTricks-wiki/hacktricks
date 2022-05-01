@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Firmware Analysis
-
-## Introduction
+# Introduction
 
 Firmware is a type of software that provides communication and control over a device’s hardware components. It’s the first piece of code that a device runs. Usually, it **boots the operating system** and provides very specific runtime services for programs by **communicating with various hardware components**. Most, if not all, electronic devices have firmware.
 
@@ -27,7 +25,7 @@ Devices store firmware in **nonvolatile memory**, such as ROM, EPROM, or flash m
 
 It’s important to **examine** the **firmware** and then attempt to **modify** it, because we can uncover many security issues during this process.
 
-## **Information gathering and reconnaissance**
+# **Information gathering and reconnaissance**
 
 During this stage, collect as much information about the target as possible to understand its overall composition underlying technology. Attempt to gather the following:
 
@@ -49,7 +47,7 @@ During this stage, collect as much information about the target as possible to u
 
 Where possible, acquire data using open source intelligence (OSINT) tools and techniques. If open source software is used, download the repository and perform both manual as well as automated static analysis against the code base. Sometimes, open source software projects already use free static analysis tools provided by vendors that provide scan results such as [Coverity Scan](https://scan.coverity.com) and [Semmle’s LGTM](https://lgtm.com/#explore).
 
-## Getting the Firmware
+# Getting the Firmware
 
 There are different ways with different difficulty levels to download the firmware
 
@@ -68,7 +66,7 @@ There are different ways with different difficulty levels to download the firmwa
 * Removing the **flash chip** (e.g. SPI) or MCU from the board for offline analysis and data extraction (LAST RESORT).
   * You will need a supported chip programmer for flash storage and/or the MCU.
 
-## Analyzing the firmware
+# Analyzing the firmware
 
 Now that you **have the firmware**, you need to extract information about it to know how to treat it. Different tools you can use for that:
 
@@ -91,12 +89,12 @@ Moreover, you can use these tools to extract **files embedded inside the firmwar
 
 Or [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) to inspect the file.
 
-### Getting the Filesystem
+## Getting the Filesystem
 
 With the previous commented tools like `binwalk -ev <bin>` you should have been able to **extract the filesystem**.\
 Binwalk usually extracts it inside a **folder named as the filesystem type**, which usually is one of the following: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Manual Filesystem Extraction
+### Manual Filesystem Extraction
 
 Sometimes, binwalk will **not have the magic byte of the filesystem in its signatures**. In these cases, use binwalk to **find the offset of the filesystem and carve the compressed filesystem** from the binary and **manually extract** the filesystem according to its type using the steps below.
 
@@ -148,7 +146,7 @@ Files will be in "`squashfs-root`" directory afterwards.
 
 `$ ubidump.py <bin>`
 
-### Analyzing the Filesystem
+## Analyzing the Filesystem
 
 Now that you have the filesystem is time to start looking for bad practices such as:
 
@@ -201,7 +199,7 @@ Inside the filesystem you can also find **source code** of programs (that you sh
 Tools like [**checksec.sh**](https://github.com/slimm609/checksec.sh) can be useful to find unprotected binaries. For Windows binaries you could use [**PESecurity**](https://github.com/NetSPI/PESecurity).
 {% endhint %}
 
-## Emulating Firmware
+# Emulating Firmware
 
 The idea to emulate the Firmware is to be able to perform a **dynamic analysis** of the device **running** or of a **single program**.
 
@@ -209,11 +207,11 @@ The idea to emulate the Firmware is to be able to perform a **dynamic analysis**
 At times, partial or full emulation **may not work due to a hardware or architecture dependencies**. If the architecture and endianness match a device owned such as a raspberry pie, the root filesystem or specific binary can be transferred to the device for further testing. This method also applies to pre built virtual machines using the same architecture and endianness as the target.
 {% endhint %}
 
-### Binary Emulation
+## Binary Emulation
 
 If you just want to emulate one program to search for vulnerabilities, you first need to identify its endianness and the CPU architecture for which it was compiled.
 
-#### MIPS example
+### MIPS example
 
 ```bash
 file ./squashfs-root/bin/busybox
@@ -233,7 +231,7 @@ qemu-mips -L ./squashfs-root/ ./squashfs-root/bin/ls
 100              100.7z           15A6D2.squashfs  squashfs-root    squashfs-root-0
 ```
 
-#### ARM Example
+### ARM Example
 
 ```bash
 file bin/busybox                
@@ -247,7 +245,7 @@ qemu-arm -L ./squashfs-root/ ./squashfs-root/bin/ls
 1C00000.squashfs  B80B6C            C41DD6.xz         squashfs-root     squashfs-root-0
 ```
 
-### Full System Emulation
+## Full System Emulation
 
 There are several tools, based in **qemu** in general, that will allow you to emulate the complete firmware:
 
@@ -259,7 +257,7 @@ There are several tools, based in **qemu** in general, that will allow you to em
 * [**https://github.com/getCUJO/MIPS-X**](https://github.com/getCUJO/MIPS-X)
 * [**https://github.com/qilingframework/qiling#qltool**](https://github.com/qilingframework/qiling#qltool)
 
-## **Dynamic analysis**
+# **Dynamic analysis**
 
 In this stage you should have either a device running the firmware to attack or the firmware being emulated to attack. In any case, it's highly recommended that you also have **a shell in the OS and filesystem that is running**.
 
@@ -285,7 +283,7 @@ You should test if the device is doing any kind of **firmware integrity tests**,
 
 Firmware update vulnerabilities usually occurs because, the **integrity** of the **firmware** might **not** be **validated**, use **unencrypted** **network** protocols, use of **hardcoded** **credentials**, an **insecure authentication** to the cloud component that hosts the firmware, and even excessive and insecure **logging** (sensitive data), allow **physical updates** without verifications.
 
-## **Runtime analysis**
+# **Runtime analysis**
 
 Runtime analysis involves attaching to a running process or binary while a device is running in its normal or emulated environment. Basic runtime analysis steps are provided below:
 
@@ -307,7 +305,7 @@ Tools that may be helpful are (non-exhaustive):
 * Binary Ninja
 * Hopper
 
-## **Binary Exploitation**
+# **Binary Exploitation**
 
 After identifying a vulnerability within a binary from previous steps, a proper proof-of-concept (PoC) is required to demonstrate the real-world impact and risk. Developing exploit code requires programming experience in lower level languages (e.g. ASM, C/C++, shellcode, etc.) as well as background within the particular target architecture (e.g. MIPS, ARM, x86 etc.). PoC code involves obtaining arbitrary execution on a device or application by controlling an instruction in memory.
 
@@ -318,12 +316,12 @@ Utilize the following references for further guidance:
 * [https://azeria-labs.com/writing-arm-shellcode/](https://azeria-labs.com/writing-arm-shellcode/)
 * [https://www.corelan.be/index.php/category/security/exploit-writing-tutorials/](https://www.corelan.be/index.php/category/security/exploit-writing-tutorials/)
 
-## Prepared OSs to analyze Firmware
+# Prepared OSs to analyze Firmware
 
 * [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS is a distro intended to help you perform security assessment and penetration testing of Internet of Things (IoT) devices. It saves you a lot of time by providing a pre-configured environment with all the necessary tools loaded.
 * [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system based on Ubuntu 18.04 preloaded with firmware security testing tools.
 
-## Vulnerable firmware to practice
+# Vulnerable firmware to practice
 
 To practice discovering vulnerabilities in firmware, use the following vulnerable firmware projects as a starting point.
 
@@ -340,12 +338,12 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 * Damn Vulnerable IoT Device (DVID)
   * [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## References
+# References
 
 * [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 * [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 
-## Trainning and Cert
+# Trainning and Cert
 
 * [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 

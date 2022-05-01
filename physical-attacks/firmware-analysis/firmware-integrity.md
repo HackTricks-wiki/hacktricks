@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Firmware Integrity
-
-#### This page was copied from [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+### This page was copied from [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 Attempt to **upload custom firmware and/or compiled binaries** for integrity or signature verification flaws. For example, compile a backdoor bind shell that starts upon boot using the following steps.
 

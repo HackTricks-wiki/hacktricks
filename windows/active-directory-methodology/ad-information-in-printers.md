@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# AD information in printers
-
 There are several blogs in the Internet which **highlight the dangers of leaving printers configured with LDAP with default/weak** logon credentials.\
 This is because an attacker could **trick the printer to authenticate against a rouge LDAP server** (typically a `nc -vv -l -p 444` is enough) and to capture the printer **credentials on clear-text**.
 
@@ -33,7 +31,7 @@ Some blogs about the topic:
 
 **The following information was copied from** [**https://grimhacker.com/2018/03/09/just-a-printer/**](https://grimhacker.com/2018/03/09/just-a-printer/)
 
-## LDAP settings
+# LDAP settings
 
 On Konica Minolta printers it is possible to configure an LDAP server to connect to, along with credentials. In earlier versions of the firmware on these devices I have heard it is possible to recover the credentials simply by reading the html source of the page. Now, however the credentials are not returned in the interface so we have to work a little harder.
 
@@ -43,9 +41,9 @@ The interface allows the LDAP server to be modified without re-entering the cred
 
 We can reconfigure the LDAP server address setting to a machine we control, and trigger a connection with the helpful “Test Connection” functionality.
 
-## Listening for the goods
+# Listening for the goods
 
-### netcat
+## netcat
 
 If you have better luck than me, you may be able to get away with a simple netcat listener:
 
@@ -55,13 +53,13 @@ sudo nc -k -v -l -p 386
 
 I am assured by [@\_castleinthesky](https://twitter.com/\_castleinthesky) that this works most of the time, however I have yet to be let off that easy.
 
-### Slapd
+## Slapd
 
 I have found that a full LDAP server is required as the printer first attempts a null bind and then queries the available information, only if these operations are successful does it proceed to bind with the credentials.
 
 I searched for a simple ldap server that met the requirements, however there seemed to be limited options. In the end I opted to setup an open ldap server and use the slapd debug server service to accept connections and print out the messages from the printer. (If you know of an easier alternative, I would be happy to hear about it)
 
-#### Installation
+### Installation
 
 (Note this section is a lightly adapted version of the guide here [https://www.server-world.info/en/note?os=Fedora\_26\&p=openldap](https://www.server-world.info/en/note?os=Fedora\_26\&p=openldap) )
 
@@ -298,7 +296,7 @@ modifying entry "cn=config"
 firewall-cmd --add-service={ldap,ldaps}
 ```
 
-### The payoff
+## The payoff
 
 Once you have installed and configured your LDAP service you can run it with the following command :
 
@@ -310,7 +308,7 @@ The screen shot below shows an example of the output when we run the connection 
 
 ![slapd terminal output containing the username "MyUser" and password "MyPassword"](https://i1.wp.com/grimhacker.com/wp-content/uploads/2018/03/slapd\_output.png?resize=474%2C163\&ssl=1)
 
-## How bad can it be?
+# How bad can it be?
 
 This very much depends on the credentials that have been configured.
 

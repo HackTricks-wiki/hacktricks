@@ -17,8 +17,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# From High Integrity to SYSTEM with Name Pipes
-
 **Code flow:**
 
 1. Create a new Pipe

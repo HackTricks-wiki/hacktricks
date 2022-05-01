@@ -17,11 +17,9 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Kerberos Authentication
-
 **This information was extracted from the post:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
-## Kerberos (I): How does Kerberos work? – Theory
+# Kerberos (I): How does Kerberos work? – Theory
 
 20 - MAR - 2019 - ELOY PÉREZ
 
@@ -33,13 +31,13 @@ In this first post only basic functionality will be discussed. In later posts it
 
 If you have any doubt about the topic which it is not well explained, do not be afraid on leave a comment or question about it. Now, onto the topic.
 
-### What is Kerberos?
+## What is Kerberos?
 
 Firstly, Kerberos is an authentication protocol, not authorization. In other words, it allows to identify each user, who provides a secret password, however, it does not validates to which resources or services can this user access.
 
 Kerberos is used in Active Directory. In this platform, Kerberos provides information about the privileges of each user, but it is responsability of each service to determine if the user has access to its resources.
 
-### Kerberos items
+## Kerberos items
 
 In this section several components of Kerberos environment will be studied.
 
@@ -100,7 +98,7 @@ Below is shown a summary of message sequency to perform authentication
 
 ![Kerberos messages summary](<../../.gitbook/assets/image (174).png>)
 
-### Authentication process
+## Authentication process
 
 In this section, the sequency of messages to perform authentication will be studied, starting from a user without tickets, up to being authenticated against the desired service.
 
@@ -189,7 +187,7 @@ _KRB\_AP\_REQ_ includes:
 
 After that, if user privileges are rigth, this can access to service. If is the case, which not usually happens, the AP will verify the PAC against the KDC. And also, if mutual authentication is needed it will respond to user with a _KRB\_AP\_REP_ message.
 
-### References
+## References
 
 * Kerberos v5 RFC: [https://tools.ietf.org/html/rfc4120](https://tools.ietf.org/html/rfc4120)
 * \[MS-KILE] – Kerberos extension: [https://msdn.microsoft.com/en-us/library/cc233855.aspx](https://msdn.microsoft.com/en-us/library/cc233855.aspx)

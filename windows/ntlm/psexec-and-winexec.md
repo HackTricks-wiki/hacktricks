@@ -17,16 +17,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# PsExec/Winexec/ScExec
-
-## How do they work
+# How do they work
 
 1. Copy a service binary to the ADMIN$ share over SMB
 2. Create a service on the remote machine pointing to the binary
 3. Remotely start the service
 4. When exited, stop the service and delete the binary
 
-## **Manually PsExec'ing**
+# **Manually PsExec'ing**
 
 First let's assume we have a payload executable we generated with msfvenom and obfuscated with Veil (so AV doesn't flag it). In this case, I created a meterpreter reverse_http payload and called it 'met8888.exe'
 

