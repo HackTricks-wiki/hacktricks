@@ -1,7 +1,5 @@
 # Windows Local Privilege Escalation
 
-## Windows Local Privilege Escalation
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -200,7 +198,7 @@ In orther to exploit this vulnerabilities you can use tools like: [Wsuxploit](ht
 
 Read the research here:
 
-{% file src="../../.gitbook/assets/CTX_WSUSpect_White_Paper.pdf" %}
+{% file src="../../.gitbook/assets/CTX_WSUSpect_White_Paper (1).pdf" %}
 
 **WSUS CVE-2020-1013**
 
