@@ -1,6 +1,8 @@
 
 name: Add Hacktricks Support
 on:
+  schedule:
+    - cron: '0 0 * * SUN'
   workflow_dispatch:
 
 jobs:
