@@ -1,4 +1,4 @@
-# Bruteforce hash (few chars)
+
 
 <details>
 
@@ -15,6 +15,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
 
 ```python
 import hashlib
@@ -67,6 +68,8 @@ def main():
 main()
 ```
 
+
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -82,3 +85,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

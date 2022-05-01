@@ -1,4 +1,4 @@
-# Interesting HTTP
+
 
 <details>
 
@@ -16,15 +16,16 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Referrer headers and policy
+
+# Referrer headers and policy
 
 Referrer is the header used by browsers to indicate which was the previous page visited.
 
-### Sensitive information leaked
+## Sensitive information leaked
 
 If at some point inside a web page any sensitive information is located on a GET request parameters, if the page contains links to external sources or an attacker is able to make/suggest (social engineering) the user visit a URL controlled by the attacker. It could be able to exfiltrate the sensitive information inside the latest GET request.
 
-### Mitigation
+## Mitigation
 
 You can make the browser follow a **Referrer-policy** that could **avoid** the sensitive information to be sent to other web applications:
 
@@ -39,7 +40,7 @@ Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
 
-### Counter-Mitigation
+## Counter-Mitigation
 
 You can override this rule using an HTML meta tag (the attacker needs to exploit and HTML injection):
 
@@ -48,9 +49,10 @@ You can override this rule using an HTML meta tag (the attacker needs to exploit
 <img src="https://attacker.com">
 ```
 
-### Defense
+## Defense
 
 Never put any sensitive data inside GET parameters or paths in the URL.
+
 
 <details>
 
@@ -67,3 +69,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

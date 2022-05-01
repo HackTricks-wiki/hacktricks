@@ -1,4 +1,4 @@
-# EXT
+
 
 <details>
 
@@ -16,7 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Ext - Extended Filesystem
+
+# Ext - Extended Filesystem
 
 **Ext2** is the most common filesystem for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
 
@@ -33,7 +34,7 @@ Every block group contains the following pieces of information:
 
 ![](<../../../.gitbook/assets/image (406).png>)
 
-### Ext Optional Features
+## Ext Optional Features
 
 **Features affect where** the data is located, **how** the data is stored in inodes and some of them might supply **additional metadata** for analysis, therefore features are important in Ext.
 
@@ -51,7 +52,7 @@ Suspected attacker might have non-standard extensions
 
 **Any utility** that reads the **superblock** will be able to indicate the **features** of a **Ext filesystem**, but you could also use `file -sL /dev/sd*`
 
-### Superblock
+## Superblock
 
 The superblock is the first 1024 bytes from the start, it's repeated in the first block of each group and contains:
 
@@ -77,7 +78,7 @@ fsstat -o <offsetstart> /pat/to/filesystem-file.ext
 You can also use the free gui application: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
 Or you can also use **python** to obtain the superblock information: [https://pypi.org/project/superblock/](https://pypi.org/project/superblock/)
 
-### inodes
+## inodes
 
 The **inodes** contain the list of **blocks** that **contains** the actual **data** of a **file**.\
 If the file is big, and inode **may contain pointers** to **other inodes** that points to the blocks/more inodes containing the file data.
@@ -168,24 +169,24 @@ icat -o <start offset> /path/to/image.ext 657103 #Cat the file
 
 File Mode
 
-| Number | Description                                                                                        |
-| ------ | -------------------------------------------------------------------------------------------------- |
-| **15** | **Reg/Slink-13/Socket-14**                                                                         |
-| **14** | **Directory/Block Bit 13**                                                                         |
-| **13** | **Char Device/Block Bit 14**                                                                       |
-| **12** | **FIFO**                                                                                           |
-| 11     | Set UID                                                                                            |
-| 10     | Set GID                                                                                            |
-| 9      | Sticky Bit (without it, anyone with Write & exec perms on a directory can delete and rename files) |
-| 8      | Owner Read                                                                                         |
-| 7      | Owner Write                                                                                        |
-| 6      | Owner Exec                                                                                         |
-| 5      | Group Read                                                                                         |
-| 4      | Group Write                                                                                        |
-| 3      | Group Exec                                                                                         |
-| 2      | Others Read                                                                                        |
-| 1      | Others Write                                                                                       |
-| 0      | Others Exec                                                                                        |
+| Number | Description                                                                                         |
+| ------ | --------------------------------------------------------------------------------------------------- |
+| **15** | **Reg/Slink-13/Socket-14**                                                                          |
+| **14** | **Directory/Block Bit 13**                                                                          |
+| **13** | **Char Device/Block Bit 14**                                                                        |
+| **12** | **FIFO**                                                                                            |
+| 11     | Set UID                                                                                             |
+| 10     | Set GID                                                                                             |
+| 9      | Sticky Bit (without it, anyone with Write & exec perms on a directory can delete and rename files)  |
+| 8      | Owner Read                                                                                          |
+| 7      | Owner Write                                                                                         |
+| 6      | Owner Exec                                                                                          |
+| 5      | Group Read                                                                                          |
+| 4      | Group Write                                                                                         |
+| 3      | Group Exec                                                                                          |
+| 2      | Others Read                                                                                         |
+| 1      | Others Write                                                                                        |
+| 0      | Others Exec                                                                                         |
 
 The bold bits (12, 13, 14, 15) indicate the type of file the file is (a directory, socket...) only one of the options in bold may exit.
 
@@ -230,12 +231,13 @@ getfattr file.txt #Get extended attribute names of a file
 getdattr -n 'user.secret' file.txt #Get extended attribute called "user.secret"
 ```
 
-### Filesystem View
+## Filesystem View
 
 In order to see the contents of the file system you can **use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
 Or you can mount it in your linux using `mount` command.
 
 [https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.](https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.)
+
 
 <details>
 
@@ -252,3 +254,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

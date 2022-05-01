@@ -1,4 +1,4 @@
-# Certificates
+
 
 <details>
 
@@ -16,7 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## What is a Certificate
+
+# What is a Certificate
 
 In cryptography, a **public key certificate,** also known as a **digital certificate** or **identity certificate,** is an electronic document used to prove the ownership of a public key. The certificate includes information about the key, information about the identity of its owner (called the subject), and the digital signature of an entity that has verified the certificate's contents (called the issuer). If the signature is valid, and the software examining the certificate trusts the issuer, then it can use that key to communicate securely with the certificate's subject.
 
@@ -24,7 +25,7 @@ In a typical [public-key infrastructure](https://en.wikipedia.org/wiki/Public-ke
 
 The most common format for public key certificates is defined by [X.509](https://en.wikipedia.org/wiki/X.509). Because X.509 is very general, the format is further constrained by profiles defined for certain use cases, such as [Public Key Infrastructure (X.509)](https://en.wikipedia.org/wiki/PKIX) as defined in RFC 5280.
 
-## x509 Common Fields
+# x509 Common Fields
 
 * **Version Number:** Version of x509 format.
 * **Serial Number**: Used to uniquely identify the certificate within a CA's systems. In particular this is used to track revocation information.
@@ -67,13 +68,13 @@ The most common format for public key certificates is defined by [X.509](https:/
   * **CRL Distribution Points**: This extension identifies the location of the CRL from which the revocation of this certificate can be checked. The application that processes the certificate can get the location of the CRL from this extension, download the CRL and then check the revocation of this certificate.
   * **CT Precertificate SCTs**: Logs of Certificate transparency regarding the certificate
 
-### Difference between OSCP and CRL Distribution Points
+## Difference between OSCP and CRL Distribution Points
 
 **OCSP** (RFC 2560) is a standard protocol that consists of an **OCSP client and an OCSP responder**. This protocol **determines revocation status of a given digital public-key certificate** **without** having to **download** the **entire CRL**.\
 **CRL** is the **traditional method** of checking certificate validity. A **CRL provides a list of certificate serial numbers** that have been revoked or are no longer valid. CRLs let the verifier check the revocation status of the presented certificate while verifying it. CRLs are limited to 512 entries.\
 From [here](https://www.arubanetworks.com/techdocs/ArubaOS%206\_3\_1\_Web\_Help/Content/ArubaFrameStyles/CertRevocation/About\_OCSP\_and\_CRL.htm#:\~:text=OCSP%20\(RFC%202560\)%20is%20a,to%20download%20the%20entire%20CRL.\&text=A%20CRL%20provides%20a%20list,or%20are%20no%20longer%20valid.).
 
-### What is Certificate Transparency
+## What is Certificate Transparency
 
 Certificate Transparency aims to remedy certificate-based threats by **making the issuance and existence of SSL certificates open to scrutiny by domain owners, CAs, and domain users**. Specifically, Certificate Transparency has three main goals:
 
@@ -81,27 +82,27 @@ Certificate Transparency aims to remedy certificate-based threats by **making th
 * Provide an **open auditing and monitoring system that lets any domain owner or CA determine whether certificates have been mistakenly or maliciously** issued.
 * **Protect users** (as much as possible) from being duped by certificates that were mistakenly or maliciously issued.
 
-#### **Certificate Logs**
+### **Certificate Logs**
 
 Certificate logs are simple network services that maintain **cryptographically assured, publicly auditable, append-only records of certificates**. **Anyone can submit certificates to a log**, although certificate authorities will likely be the foremost submitters. Likewise, anyone can query a log for a cryptographic proof, which can be used to verify that the log is behaving properly or verify that a particular certificate has been logged. The number of log servers doesn’t have to be large (say, much less than a thousand worldwide), and each could be operated independently by a CA, an ISP, or any other interested party.
 
-#### Query
+### Query
 
 You can query the logs of Certificate Transparency of any domain in [https://crt.sh/](https://crt.sh).
 
-## Formats
+# Formats
 
 There are different formats that can be used to store a certificate.
 
-#### **PEM Format**
+### **PEM Format**
 
 * It is the most common format used for certificates
 * Most servers (Ex: Apache) expects the certificates and private key to be in a separate files\
-  \- Usually they are Base64 encoded ASCII files\
-  \- Extensions used for PEM certificates are .cer, .crt, .pem, .key files\
-  \- Apache and similar server uses PEM format certificates
+  \-   Usually they are Base64 encoded ASCII files\
+  \-   Extensions used for PEM certificates are .cer, .crt, .pem, .key files\
+  \-   Apache and similar server uses PEM format certificates
 
-#### **DER Format**
+### **DER Format**
 
 * The DER format is the binary form of the certificate
 * All types of certificates & private keys can be encoded in DER format
@@ -109,19 +110,19 @@ There are different formats that can be used to store a certificate.
 * DER formatted certificates most often use the ‘.cer’ and '.der' extensions
 * DER is typically used in Java Platforms
 
-#### **P7B/PKCS#7 Format**
+### **P7B/PKCS#7 Format**
 
 * The PKCS#7 or P7B format is stored in Base64 ASCII format and has a file extension of .p7b or .p7c
 * A P7B file only contains certificates and chain certificates (Intermediate CAs), not the private key
 * The most common platforms that support P7B files are Microsoft Windows and Java Tomcat
 
-#### **PFX/P12/PKCS#12 Format**
+### **PFX/P12/PKCS#12 Format**
 
 * The PKCS#12 or PFX/P12 format is a binary format for storing the server certificate, intermediate certificates, and the private key in one encryptable file
 * These files usually have extensions such as .pfx and .p12
 * They are typically used on Windows machines to import and export certificates and private keys
 
-### Formats conversions
+## Formats conversions
 
 **Convert x509 to PEM**
 
@@ -129,7 +130,7 @@ There are different formats that can be used to store a certificate.
 openssl x509 -in certificatename.cer -outform PEM -out certificatename.pem
 ```
 
-#### **Convert PEM to DER**
+### **Convert PEM to DER**
 
 ```
 openssl x509 -outform der -in certificatename.pem -out certificatename.der
@@ -193,6 +194,7 @@ openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.cer
 openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certificatename.pfx -certfile  cacert.cer
 ```
 
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -208,3 +210,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

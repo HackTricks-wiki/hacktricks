@@ -1,4 +1,4 @@
-# Firmware Integrity
+
 
 <details>
 
@@ -16,7 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-#### This page was copied from [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+
+### This page was copied from [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 Attempt to **upload custom firmware and/or compiled binaries** for integrity or signature verification flaws. For example, compile a backdoor bind shell that starts upon boot using the following steps.
 
@@ -49,6 +50,7 @@ If a root shell has already been obtained from dynamic analysis, bootloader mani
 
 If possible, identify a vulnerability within startup scripts to obtain persistent access to a device across reboots. Such vulnerabilities arise when startup scripts reference, [symbolically link](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data), or depend on code located in untrusted mounted locations such as SD cards, and flash volumes used for storage data outside of root filesystems.
 
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -64,3 +66,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

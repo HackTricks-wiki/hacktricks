@@ -1,7 +1,5 @@
 # Reversing Tools & Basic Methods
 
-## Reversing Tools & Basic Methods
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -18,7 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Wasm decompiler / Wat compiler
+
+# Wasm decompiler / Wat compiler
 
 Online:
 
@@ -31,14 +30,14 @@ Software:
 * [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 * [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
-## .Net decompiler
+# .Net decompiler
 
 [https://github.com/icsharpcode/ILSpy](https://github.com/icsharpcode/ILSpy)\
 [ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): You can have it in any OS (you can install it directly from VSCode, no need to download the git. Click on **Extensions** and **search ILSpy**).\
 If you need to **decompile**, **modify** and **recompile** again you can use: [**https://github.com/0xd4d/dnSpy/releases**](https://github.com/0xd4d/dnSpy/releases) (**Right Click -> Modify Method** to change something inside a function).\
 You cloud also try [https://www.jetbrains.com/es-es/decompiler/](https://www.jetbrains.com/es-es/decompiler/)
 
-### DNSpy Logging
+## DNSpy Logging
 
 In order to make **DNSpy log some information in a file**, you could use this .Net lines:
 
@@ -48,7 +47,7 @@ path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
 
-### DNSpy Debugging
+## DNSpy Debugging
 
 In order to debug code using DNSpy you need to:
 
@@ -109,14 +108,14 @@ Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 
 ![](<../../.gitbook/assets/image (285).png>)
 
-## Java decompiler
+# Java decompiler
 
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## Debugging DLLs
+# Debugging DLLs
 
-### Using IDA
+## Using IDA
 
 * **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
 * Select **Windbg** debugger
@@ -132,7 +131,7 @@ Then, when you start debugging **the execution will be stopped when each DLL is 
 
 But, how can you get to the code of the DLL that was lodaded? Using this method, I don't know how.
 
-### Using x64dbg/x32dbg
+## Using x64dbg/x32dbg
 
 * **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
 * **Change the Command Line** ( _File --> Change Command Line_ ) and set the path of the dll and the function that you want to call, for example: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii\_2.dll",DLLMain
@@ -145,7 +144,7 @@ Notice that when the execution is stopped by any reason in win64dbg you can see 
 
 Then, looking to this ca see when the execution was stopped in the dll you want to debug.
 
-## GUI Apps / Videogames
+# GUI Apps / Videogames
 
 [**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
 
@@ -153,13 +152,13 @@ Then, looking to this ca see when the execution was stopped in the dll you want 
 [cheat-engine.md](cheat-engine.md)
 {% endcontent-ref %}
 
-## ARM & MIPS
+# ARM & MIPS
 
 {% embed url="https://github.com/nongiach/arm_now" %}
 
-## Shellcodes
+# Shellcodes
 
-### Debugging a shellcode with blobrunner
+## Debugging a shellcode with blobrunner
 
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) will **allocate** the **shellcode** inside a space of memory, will **indicate** you the **memory address** were the shellcode was allocated and will **stop** the execution.\
 Then, you need to **attach a debugger** (Ida or x64dbg) to the process and put a **breakpoint the indicated memory address** and **resume** the execution. This way you will be debugging the shellcode.
@@ -171,7 +170,7 @@ You can find a slightly modified version of Blobrunner in the following link. In
 [blobrunner.md](blobrunner.md)
 {% endcontent-ref %}
 
-### Debugging a shellcode with jmp2it
+## Debugging a shellcode with jmp2it
 
 [**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
 
@@ -179,7 +178,7 @@ You can find a slightly modified version of Blobrunner in the following link. In
 
 You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
 
-### Debugging shellcode using Cutter
+## Debugging shellcode using Cutter
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
 
@@ -197,7 +196,7 @@ You can see the stack for example inside a hex dump:
 
 ![](<../../.gitbook/assets/image (402).png>)
 
-### Deobfuscating shellcode and getting executed functions
+## Deobfuscating shellcode and getting executed functions
 
 You should try [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7\&pid=152).\
 It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.
@@ -217,11 +216,11 @@ scDbg also counts with a graphical launcher where you can select the options you
 
 The **Create Dump** option will dump the final shellcode if any change is done to the shellcode dynamically in memory (useful to download the decoded shellcode). The **start offset** can be useful to start the shellcode at a specific offset. The **Debug Shell** option is useful to debug the shellcode using the scDbg terminal (however I find any of the options explained before better for this matter as you will be able to use Ida or x64dbg).
 
-### Disassembling using CyberChef
+## Disassembling using CyberChef
 
 Upload you shellcode file as input and use the following receipt to decompile it: [https://gchq.github.io/CyberChef/#recipe=To\_Hex('Space',0)Disassemble\_x86('32','Full%20x86%20architecture',16,0,true,true)](https://gchq.github.io/CyberChef/#recipe=To\_Hex\('Space',0\)Disassemble\_x86\('32','Full%20x86%20architecture',16,0,true,true\))
 
-## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
+# [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
 This obfuscator **modify all the instructions for `mov`**(yeah, really cool). It also uses interruptions to change executions flows. For more information about how does it works:
 
@@ -239,7 +238,7 @@ And [install keystone](https://github.com/keystone-engine/keystone/blob/master/d
 
 If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
-## Rust
+# Rust
 
 To find the **entry point** search the functions by `::main` like in:
 
@@ -248,7 +247,7 @@ To find the **entry point** search the functions by `::main` like in:
 In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
 Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
 
-## **Delphi**
+# **Delphi**
 
 For Delphi compiled binaries you can use [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
@@ -260,7 +259,7 @@ This plugin will execute the binary and resolve function names dynamically at th
 
 It is also very interesting because if you press a button in the graphic application the debugger will stop in the function executed by that bottom.
 
-## Golang
+# Golang
 
 I you have to reverse a Golang binary I would suggest you to use the IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
@@ -268,7 +267,7 @@ Just press **ATL+f7** (import python plugin in IDA) and select the python plugin
 
 This will resolve the names of the functions.
 
-## Compiled Python
+# Compiled Python
 
 In this page you can find how to get the python code from an ELF/EXE python compiled binary:
 
@@ -276,7 +275,7 @@ In this page you can find how to get the python code from an ELF/EXE python comp
 [.pyc.md](../../forensics/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md)
 {% endcontent-ref %}
 
-## GBA - Game Body Advance
+# GBA - Game Body Advance
 
 If you get the **binary** of a GBA game you can use different tools to **emulate** and **debug** it:
 
@@ -389,11 +388,11 @@ So, in this challenge, knowing the values of the buttons, you needed to **press 
 
 **Reference for this tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
-## Game Boy
+# Game Boy
 
 {% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
 
-## Courses
+# Courses
 
 * [https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering)
 * [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)

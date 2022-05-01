@@ -1,4 +1,4 @@
-# Crypto CTFs Tricks
+
 
 <details>
 
@@ -16,7 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Online Hashes DBs
+
+# Online Hashes DBs
 
 * _**Google it**_
 * [http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240](http://hashtoolkit.com/reverse-hash?hash=4d186321c1a7f0f354b297e8914ab240)
@@ -30,33 +31,33 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [https://hashkiller.co.uk/Cracker/MD5](https://hashkiller.co.uk/Cracker/MD5)
 * [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html)
 
-## Magic Autosolvers
+# Magic Autosolvers
 
 * [**https://github.com/Ciphey/Ciphey**](https://github.com/Ciphey/Ciphey)
 * [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/) (Magic module)
 * [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 
-## Encoders
+# Encoders
 
 Most of encoded data can be decoded with these 2 ressources:
 
 * [https://www.dcode.fr/tools-list](https://www.dcode.fr/tools-list)
 * [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
 
-### Substitution Autosolvers
+## Substitution Autosolvers
 
 * [https://www.boxentriq.com/code-breaking/cryptogram](https://www.boxentriq.com/code-breaking/cryptogram)
 * [https://quipqiup.com/](https://quipqiup.com) - Very good !
 
-#### Caesar - ROTx Autosolvers
+### Caesar - ROTx Autosolvers
 
 * [https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript](https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript)
 
-#### Atbash Cipher
+### Atbash Cipher
 
 * [http://rumkin.com/tools/cipher/atbash.php](http://rumkin.com/tools/cipher/atbash.php)
 
-### Base Encodings Autosolver
+## Base Encodings Autosolver
 
 Check all these bases with: [https://github.com/dhondta/python-codext](https://github.com/dhondta/python-codext)
 
@@ -74,7 +75,7 @@ Check all these bases with: [https://github.com/dhondta/python-codext](https://g
   * `D1QPRRB3C5S62RVFDHGG====`
 * **Base32 Extended Hexadecimal** \[_0-9A-V_]
   * `D1NMOOB3C5P62ORFDHGG====`
-* **Base45** \[_0-9A-Z $%\*+-./:_]
+* **Base45** \[_0-9A-Z $%*+-./:_]
   * `59DPVDGPCVKEUPCPVD`
 * **Base58 (bitcoin)** \[_1-9A-HJ-NP-Za-km-z_]
   * `2yJiRg5BF9gmsU6AC`
@@ -86,19 +87,19 @@ Check all these bases with: [https://github.com/dhondta/python-codext](https://g
   * `g2AextRZpBKRBzQ9`
 * **Base64** \[_A-Za-z0-9+/=_]
   * `aG9sYWNhcmFjb2xh`
-* **Base67** \[_A-Za-z0-9-_.!\~\_]
+* **Base67** \[_A-Za-z0-9-_.!~_]
   * `NI9JKX0cSUdqhr!p`
-* **Base85 (Ascii85)** \[_!"#$%&'()\*+,-./0-9:;<=>?@A-Z\[\\]^\_\`a-u_]
+* **Base85 (Ascii85)** \[_!\"#$%&'()*+,-./0-9:;<=>?@A-Z[\\]^\_`a-u_]
   * `BQ%]q@psCd@rH0l`
-* **Base85 (Adobe)** \[_!"#$%&'()\*+,-./0-9:;<=>?@A-Z\[\\]^\_\`a-u_]
+* **Base85 (Adobe)** \[_!\"#$%&'()*+,-./0-9:;<=>?@A-Z[\\]^\_`a-u_]
   * `<~BQ%]q@psCd@rH0l~>`
-* **Base85 (IPv6 or RFC1924)** \[_0-9A-Za-z!#$%&()\*+-;<=>?@^_\`{|}\~\_]
-  * `Xm4y`V\_|Y(V{dF>\`
-* **Base85 (xbtoa)** \[_!"#$%&'()\*+,-./0-9:;<=>?@A-Z\[\\]^\_\`a-u_]
+* **Base85 (IPv6 or RFC1924)** \[_0-9A-Za-z!#$%&()*+-;<=>?@^_`{|}~_]
+  * `Xm4y`V_|Y(V{dF>`
+* **Base85 (xbtoa)** \[_!\"#$%&'()*+,-./0-9:;<=>?@A-Z[\\]^\_`a-u_]
   * `xbtoa Begin\nBQ%]q@psCd@rH0l\nxbtoa End N 12 c E 1a S 4e6 R 6991d`
-* **Base85 (XML)** \[_0-9A-Za-y!#$()\*+,-./:;=?@^\`{|}\~z\__]
+* **Base85 (XML)** \[_0-9A-Za-y!#$()*+,-./:;=?@^`{|}~z\__]
   * `Xm4y|V{~Y+V}dF?`
-* **Base91** \[_A-Za-z0-9!#$%&()\*+,./:;<=>?@\[]^\_\`{|}\~"_]
+* **Base91** \[_A-Za-z0-9!#$%&()*+,./:;<=>?@[]^\_`{|}~"_]
   * `frDg[*jNN!7&BQM`
 * **Base100** \[]
   * `👟👦👣👘👚👘👩👘👚👦👣👘`
@@ -127,25 +128,25 @@ Check all these bases with: [https://github.com/dhondta/python-codext](https://g
 * **Citrix CTX1** \[]
   * `MNGIKCAHMOGLKPAKMMGJKNAINPHKLOBLNNHILCBHNOHLLPBK`
 
-[http://k4.cba.pl/dw/crypo/tools/eng\_atom128c.html](http://k4.cba.pl/dw/crypo/tools/eng\_atom128c.html) - 404 Dead: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng\_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng\_hackerize.html)
+[http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html](http://k4.cba.pl/dw/crypo/tools/eng_atom128c.html) - 404 Dead: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
 
-### HackerizeXS \[_╫Λ↻├☰┏_]
+## HackerizeXS \[_╫Λ↻├☰┏_]
 
 ```
 ╫☐↑Λ↻Λ┏Λ↻☐↑Λ
 ```
 
-* [http://k4.cba.pl/dw/crypo/tools/eng\_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng\_hackerize.html) - 404 Dead: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng\_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng\_hackerize.html)
+* [http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html) - 404 Dead: [https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html](https://web.archive.org/web/20190228181208/http://k4.cba.pl/dw/crypo/tools/eng_hackerize.html)
 
-### Morse
+## Morse
 
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
 
-* [http://k4.cba.pl/dw/crypo/tools/eng\_morse-encode.html](http://k4.cba.pl/dw/crypo/tools/eng\_morse-encode.html) - 404 Dead: [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
+* [http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html](http://k4.cba.pl/dw/crypo/tools/eng_morse-encode.html) - 404 Dead: [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
 
-### UUencoder
+## UUencoder
 
 ```
 begin 644 webutils_pl
@@ -158,7 +159,7 @@ end
 
 * [http://www.webutils.pl/index.php?idx=uu](http://www.webutils.pl/index.php?idx=uu)
 
-### XXEncoder
+## XXEncoder
 
 ```
 begin 644 webutils_pl
@@ -169,7 +170,7 @@ end
 
 * [www.webutils.pl/index.php?idx=xx](https://github.com/carlospolop/hacktricks/tree/bf578e4c5a955b4f6cdbe67eb4a543e16a3f848d/crypto/www.webutils.pl/index.php?idx=xx)
 
-### YEncoder
+## YEncoder
 
 ```
 =ybegin line=128 size=28 name=webutils_pl
@@ -179,7 +180,7 @@ ryvkryvkryvkryvkryvkryvkryvk
 
 * [http://www.webutils.pl/index.php?idx=yenc](http://www.webutils.pl/index.php?idx=yenc)
 
-### BinHex
+## BinHex
 
 ```
 (This file must be converted with BinHex 4.0)
@@ -189,7 +190,7 @@ ryvkryvkryvkryvkryvkryvkryvk
 
 * [http://www.webutils.pl/index.php?idx=binhex](http://www.webutils.pl/index.php?idx=binhex)
 
-### ASCII85
+## ASCII85
 
 ```
 <~85DoF85DoF85DoF85DoF85DoF85DoF~>
@@ -197,7 +198,7 @@ ryvkryvkryvkryvkryvkryvkryvk
 
 * [http://www.webutils.pl/index.php?idx=ascii85](http://www.webutils.pl/index.php?idx=ascii85)
 
-### Dvorak keyboard
+## Dvorak keyboard
 
 ```
 drnajapajrna
@@ -205,7 +206,7 @@ drnajapajrna
 
 * [https://www.geocachingtoolbox.com/index.php?lang=en\&page=dvorakKeyboard](https://www.geocachingtoolbox.com/index.php?lang=en\&page=dvorakKeyboard)
 
-### A1Z26
+## A1Z26
 
 Letters to their numerical value
 
@@ -213,7 +214,7 @@ Letters to their numerical value
 8 15 12 1 3 1 18 1 3 15 12 1
 ```
 
-### Affine Cipher Encode
+## Affine Cipher Encode
 
 Letter to num `(ax+b)%26` (_a_ and _b_ are the keys and _x_ is the letter) and the result back to letter
 
@@ -221,15 +222,15 @@ Letter to num `(ax+b)%26` (_a_ and _b_ are the keys and _x_ is the letter) and t
 krodfdudfrod
 ```
 
-### SMS Code
+## SMS Code
 
 **Multitap** [replaces a letter](https://www.dcode.fr/word-letter-change) by repeated digits defined by the corresponding key code on a mobile [phone keypad](https://www.dcode.fr/phone-keypad-cipher) (This mode is used when writing SMS).\
 For example: 2=A, 22=B, 222=C, 3=D...\
-You can identify this code because you will see\*\* several numbers repeated\*\*.
+You can identify this code because you will see** several numbers repeated**.
 
 You can decode this code in: [https://www.dcode.fr/multitap-abc-cipher](https://www.dcode.fr/multitap-abc-cipher)
 
-### Bacon Code
+## Bacon Code
 
 Substitude each letter for 4 As or Bs (or 1s and 0s)
 
@@ -238,21 +239,21 @@ Substitude each letter for 4 As or Bs (or 1s and 0s)
 AABBB ABBAB ABABA AAAAA AAABA AAAAA BAAAA AAAAA AAABA ABBAB ABABA AAAAA
 ```
 
-### Runes
+## Runes
 
 ![](../.gitbook/assets/runes.jpg)
 
-## Compression
+# Compression
 
 **Raw Deflate** and **Raw Inflate** (you can find both in Cyberchef) can compress and decompress data without headers.
 
-## Easy Crypto
+# Easy Crypto
 
-### XOR - Autosolver
+## XOR - Autosolver
 
 * [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
-### Bifid
+## Bifid
 
 A keywork is needed
 
@@ -260,7 +261,7 @@ A keywork is needed
 fgaargaamnlunesuneoa
 ```
 
-### Vigenere
+## Vigenere
 
 A keywork is needed
 
@@ -272,9 +273,9 @@ wodsyoidrods
 * [https://www.dcode.fr/vigenere-cipher](https://www.dcode.fr/vigenere-cipher)
 * [https://www.mygeocachingprofile.com/codebreaker.vigenerecipher.aspx](https://www.mygeocachingprofile.com/codebreaker.vigenerecipher.aspx)
 
-## Strong Crypto
+# Strong Crypto
 
-### Fernet
+## Fernet
 
 2 base64 strings (token and key)
 
@@ -288,7 +289,7 @@ Key:
 
 * [https://asecuritysite.com/encryption/ferdecode](https://asecuritysite.com/encryption/ferdecode)
 
-### Samir Secret Sharing
+## Samir Secret Sharing
 
 A secret is splitted in X parts and to recover it you need Y parts (_Y <=X_).
 
@@ -300,16 +301,17 @@ A secret is splitted in X parts and to recover it you need Y parts (_Y <=X_).
 
 [http://christian.gen.co/secrets/](http://christian.gen.co/secrets/)
 
-### OpenSSL brute-force
+## OpenSSL brute-force
 
 * [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
-* [https://github.com/carlospolop/easy\_BFopensslCTF](https://github.com/carlospolop/easy\_BFopensslCTF)
+* [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
-## Tools
+# Tools
 
 * [https://github.com/Ganapati/RsaCtfTool](https://github.com/Ganapati/RsaCtfTool)
 * [https://github.com/lockedbyte/cryptovenom](https://github.com/lockedbyte/cryptovenom)
 * [https://github.com/nccgroup/featherduster](https://github.com/nccgroup/featherduster)
+
 
 <details>
 
@@ -326,3 +328,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

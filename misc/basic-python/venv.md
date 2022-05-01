@@ -1,4 +1,4 @@
-# venv
+
 
 <details>
 
@@ -15,6 +15,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
 
 ```bash
 sudo apt-get install python3-venv
@@ -35,6 +36,8 @@ pip3 install wheel
 inside the virtual environment
 ```
 
+
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -50,3 +53,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

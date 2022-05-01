@@ -1,4 +1,4 @@
-# Esoteric languages
+
 
 <details>
 
@@ -16,9 +16,10 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-[Esolangs Wiki](https://esolangs.org/wiki/Main\_Page)
 
-## Malbolge
+[Esolangs Wiki](https://esolangs.org/wiki/Main_Page)
+
+# Malbolge
 
 ```
 ('&%:9]!~}|z2Vxwv-,POqponl$Hjig%eB@@>}=<M:9wv6WsU2T|nm-,jcL(I&%$#"
@@ -27,13 +28,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 [http://malbolge.doleczek.pl/](http://malbolge.doleczek.pl)
 
-## npiet
+# npiet
 
 ![](<../.gitbook/assets/image (146).png>)
 
 [https://www.bertnase.de/npiet/npiet-execute.php](https://www.bertnase.de/npiet/npiet-execute.php)
 
-## Rockstar
+# Rockstar
 
 ```
 Midnight takes your heart and your soul
@@ -66,6 +67,7 @@ Whisper my world
 
 [https://codewithrockstar.com/](https://codewithrockstar.com)
 
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -81,3 +83,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

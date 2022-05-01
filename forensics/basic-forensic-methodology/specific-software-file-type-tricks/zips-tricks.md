@@ -1,4 +1,4 @@
-# ZIPs tricks
+
 
 <details>
 
@@ -15,6 +15,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
 
 There are a handful of command-line tools for zip files that will be useful to know about.
 
@@ -32,6 +33,7 @@ Another note about zip cracking is that if you have an unencrypted/uncompressed 
 
 From: [https://app.gitbook.com/@cpol/s/hacktricks/\~/edit/drafts/-LlM5mCby8ex5pOeV4pJ/forensics/basic-forensics-esp/zips-tricks](https://app.gitbook.com/s/-L\_2uGJGU7AVNRcqRvEi/)
 
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -47,3 +49,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

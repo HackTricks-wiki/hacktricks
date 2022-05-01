@@ -1,4 +1,4 @@
-# Bootloader testing
+
 
 <details>
 
@@ -15,6 +15,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
 
 Copied from [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
@@ -47,6 +48,7 @@ When modifying device start up and bootloaders such as U-boot, attempt the follo
 
 \*Hardware security testing
 
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -62,3 +64,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

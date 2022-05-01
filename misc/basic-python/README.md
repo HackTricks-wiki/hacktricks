@@ -1,4 +1,4 @@
-# Basic Python & Python Sandbox Escape
+
 
 <details>
 
@@ -16,17 +16,18 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Python Basics
 
-### Usefull information
+# Python Basics
+
+## Usefull information
 
 It is an interpreted language\
 list(xrange()) == range() --> In python3 range is the xrange of python2 (it is not a list but a generator)\
 The difference between a Tuple and a List is that the position of a value in a tuple gives it a meaning but the lists are just ordered values. Tuples have structures, lists have order
 
-### Main operations
+## Main operations
 
-To raise a number you should do: 3\*\*2 (it isn't 3^2)\
+To raise a number you should do: 3**2 (it isn't 3^2)\
 If you do 2/3 it returns 1 because you are dividing two ints. If you want decimals you should divide floats (2.0/3.0).\
 i >= j\
 i <= j\
@@ -96,7 +97,7 @@ for letter in "hola":
     #something with letter in "hola"
 ```
 
-### Tuples
+## Tuples
 
 t1 = (1,'2,'three')\
 t2 = (5,6)\
@@ -107,7 +108,7 @@ d += (4,) --> Adding into a tuple\
 CANT! --> t1\[1] == 'New value'\
 list(t2) = \[5,6] --> From tuple to list
 
-### List (array)
+## List (array)
 
 d = \[] empty\
 a = \[1,2,3]\
@@ -116,7 +117,7 @@ a + b = \[1,2,3,4,5]\
 b.append(6) = \[4,5,6]\
 tuple(a) = (1,2,3) --> From list to tuple
 
-### Dictionary
+## Dictionary
 
 d = {} empty\
 monthNumbers={1:’Jan’, 2: ‘feb’,’feb’:2}—> monthNumbers ->{1:’Jan’, 2: ‘feb’,’feb’:2}\
@@ -130,7 +131,7 @@ monthNumbers.update(a) = {'9':9, 1:’Jan’, 2: ‘feb’,’feb’:2}\
 mN = monthNumbers.copy() #Independent copy\
 monthNumbers.get('key',0) #Check if key exists, Return value of monthNumbers\["key"] or 0 if it does not exists
 
-### Set
+## Set
 
 In the sets there are not repetitions\
 myset = set(\['a', 'b']) = {'a', 'b'}\
@@ -143,15 +144,15 @@ myset2 = set(\[1, 2, 3, 4])\
 myset.union(myset2) #Values it myset OR myset2\
 myset.intersection(myset2) #Values in myset AND myset2\
 myset.difference(myset2) #Values in myset but not in myset2\
-myset.symmetric\_difference(myset2) #Values that are not in myset AND myset2 (not in both)\
+myset.symmetric_difference(myset2) #Values that are not in myset AND myset2 (not in both)\
 myset.pop() #Get the first element of the set and remove it\
-myset.intersection\_update(myset2) #myset = Elements in both myset and myset2\
-myset.difference\_update(myset2) #myset = Elements in myset but not in myset2\
-myset.symmetric\_difference\_update(myset2) #myset = Elements that are not in both
+myset.intersection_update(myset2) #myset = Elements in both myset and myset2\
+myset.difference_update(myset2) #myset = Elements in myset but not in myset2\
+myset.symmetric_difference_update(myset2) #myset = Elements that are not in both
 
-### Classes
+## Classes
 
-The method in \_\_It\_\_ will be the one used by sort in order to compare if an object of this class is bigger than other
+The method in \__It\_\_ will be the one used by sort in order to compare if an object of this class is bigger than other
 
 ```python
 class Person(name):
@@ -181,7 +182,7 @@ class MITPerson(Person):
 		return self.idNum < other.idNum
 ```
 
-### map, zip, filter, lambda, sorted and one-liners
+## map, zip, filter, lambda, sorted and one-liners
 
 **Map** is like: \[f(x) for x in iterable] --> map(tutple,\[a,b]) = \[(1,2,3),(4,5)]\
 m = map(lambda x: x % 3 == 0, \[1, 2, 3, 4, 5, 6, 7, 8, 9]) --> \[False, False, True, False, False, True, False, False, True]
@@ -195,7 +196,7 @@ for f, b in zip(foo, bar):
 
 **Lambda** is used to define a function\
 (lambda x,y: x+y)(5,3) = 8 --> Use lambda as simple **function**\
-**sorted**(range(-5,6), key=lambda x: x\*\* 2) = \[0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5] --> Use lambda to sort a list\
+**sorted**(range(-5,6), key=lambda x: x** 2) = \[0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5] --> Use lambda to sort a list\
 m = **filter**(lambda x: x % 3 == 0, \[1, 2, 3, 4, 5, 6, 7, 8, 9]) = \[3, 6, 9] --> Use lambda to filter\
 **reduce** (lambda x,y: x\*y, \[1,2,3,4]) = 24
 
@@ -212,7 +213,7 @@ my_car = Car(); my_car.crash() = 'Boom!'
 
 mult1 = \[x for x in \[1, 2, 3, 4, 5, 6, 7, 8, 9] if x%3 == 0 ]
 
-### Exceptions
+## Exceptions
 
 ```
 def divide(x,y):	
@@ -228,7 +229,7 @@ def divide(x,y):
 		print “executing finally clause in any case”
 ```
 
-### Assert()
+## Assert()
 
 If the condition is false the string will by printed in the screen
 
@@ -238,7 +239,7 @@ def avg(grades, weights):
 	assert len(grades) == 'wrong number grades'
 ```
 
-### Generators, yield
+## Generators, yield
 
 A generator, instead of returning something, it "yields" something. When you access it, it will "return" the first value generated, then, you can access it again and it will return the next value generated. So, all the values are not generated at the same time and a lot of memory could be saved using this instead of a list with all the values.
 
@@ -252,7 +253,7 @@ g = myGen(6) --> 6\
 next(g) --> 7\
 next(g) --> Error
 
-### Regular Expresions
+## Regular Expresions
 
 import re\
 re.search("\w","hola").group() = "h"\
@@ -295,11 +296,11 @@ print(list(permutations('123',2))) = \[('1', '2'), ('1', '3'), ('2', '1'), ('2',
 from itertools import **combinations** --> Generates all possible combinations without repeating characters (if "ab" existing, doesn't generate "ba")\
 print(list(**combinations**('123',2))) --> \[('1', '2'), ('1', '3'), ('2', '3')]
 
-**combinations\_with\_replacement**\
-from itertools import **combinations\_with\_replacement** --> Generates all possible combinations from the char onwards(for example, the 3rd is mixed from the 3rd onwards but not with the 2nd o first)\
-print(list(**combinations\_with\_replacement**('1133',2))) = \[('1', '1'), ('1', '1'), ('1', '3'), ('1', '3'), ('1', '1'), ('1', '3'), ('1', '3'), ('3', '3'), ('3', '3'), ('3', '3')]
+**combinations_with_replacement**\
+from itertools import **combinations_with_replacement** --> Generates all possible combinations from the char onwards(for example, the 3rd is mixed from the 3rd onwards but not with the 2nd o first)\
+print(list(**combinations_with_replacement**('1133',2))) = \[('1', '1'), ('1', '1'), ('1', '3'), ('1', '3'), ('1', '1'), ('1', '3'), ('1', '3'), ('3', '3'), ('3', '3'), ('3', '3')]
 
-### Decorators
+## Decorators
 
 Decorator that size the time that a function needs to be executed (from [here](https://towardsdatascience.com/decorating-functions-in-python-619cbbe82c74)):
 
@@ -329,6 +330,7 @@ Decorated func!
 Execution time: 4.792213439941406e-05 seconds
 ```
 
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -344,3 +346,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

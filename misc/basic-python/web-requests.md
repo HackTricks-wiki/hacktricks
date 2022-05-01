@@ -1,4 +1,4 @@
-# Web Requests
+
 
 <details>
 
@@ -15,6 +15,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
 
 ```python
 import requests
@@ -51,7 +52,7 @@ pr = requests.post(url, data={"submit": "submit"}, files=filedict)
 print(f"\rflag: {flag}{char}", end="")
 ```
 
-## Python cmd to exploit a RCE
+# Python cmd to exploit a RCE
 
 ```python
 import requests
@@ -80,6 +81,8 @@ term = Terminal()
 term.cmdloop()
 ```
 
+
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -95,3 +98,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

@@ -1,4 +1,4 @@
-# Burp Suite
+
 
 <details>
 
@@ -16,7 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Basic Payloads
+
+# Basic Payloads
 
 * **Simple List:** Just a list containing an entry in each line
 * **Runtime File:** A list read in runtime (not loaded in memory). For supporting big lists.
@@ -30,6 +31,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 [https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -45,3 +47,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

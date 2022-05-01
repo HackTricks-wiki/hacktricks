@@ -1,4 +1,4 @@
-# Other Big References
+
 
 <details>
 
@@ -15,6 +15,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
 
 {% embed url="https://highon.coffee/blog/penetration-testing-tools-cheat-sheet/#python-tty-shell-trick" %}
 
@@ -34,6 +35,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 {% embed url="https://anhtai.me/oscp-fun-guide/" %}
 
+
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -49,3 +52,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

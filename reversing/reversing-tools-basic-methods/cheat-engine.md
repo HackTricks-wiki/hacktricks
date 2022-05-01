@@ -1,4 +1,4 @@
-# Cheat Engine
+
 
 <details>
 
@@ -16,10 +16,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+
 [**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
 When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
 
-## What are you searching?
+# What are you searching?
 
 ![](<../../.gitbook/assets/image (580).png>)
 
@@ -36,13 +37,13 @@ You can also check the box to **stop the game while scanning the memory**:
 
 ![](<../../.gitbook/assets/image (584).png>)
 
-### Hotkeys
+## Hotkeys
 
 In _**Edit --> Settings --> Hotkeys**_ you can set different **hotkeys** for different purposes like **stopping** the **game** (which is quiet useful if at some point you want to scan the memory). Other options are available:
 
 ![](<../../.gitbook/assets/image (583).png>)
 
-## Modifying the value
+# Modifying the value
 
 Once you **found** where is the **value** you are **looking for** (more about this in the following steps) you can **modify it** double clicking it, then double clicking its value:
 
@@ -54,11 +55,11 @@ And finally **marking the check** to get the modification done in the memory:
 
 The **change** to the **memory** will be immediately **applied** (note that until the game doesn't use this value again the value **won't be updated in the game**).
 
-## Searching the value
+# Searching the value
 
 So, we are going to suppose that there is an important value (like the life of your user) that you want to improve, and you are looking for this value in the memory)
 
-### Through a known change
+## Through a known change
 
 Supposing you are looking for the value 100, you **perform a scan** searching for that value and you find a lot of coincidences:
 
@@ -71,7 +72,7 @@ Then, you do something so that **value changes**, and you **stop** the game and 
 Cheat Engine will search for the **values** that **went from 100 to the new value**. Congrats, you **found** the **address** of the value you were looking for, you can now modify it.\
 _If you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
 
-### Unknown Value, known change
+## Unknown Value, known change
 
 In the scenario you **don't know the value** but you know **how to make it change** (and even the value of the change) you can look for your number.
 
@@ -93,7 +94,7 @@ Note that there are a **lot of possible changes** and you can do these **steps a
 
 ![](<../../.gitbook/assets/image (592).png>)
 
-### Random Memory Address - Finding the code
+## Random Memory Address - Finding the code
 
 Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.
 
@@ -114,7 +115,7 @@ Now that you found the address it's modifying the value you can **modify the cod
 
 So, you can now modify it so the code won't affect your number, or will always affect in a positive way.
 
-### Random Memory Address - Finding the pointer
+## Random Memory Address - Finding the pointer
 
 Following the previous steps, find where the value you are interested is. Then, using "**Find out what writes to this address**" find out which address writes this value and double click on it to get the disassembly view:
 
@@ -143,7 +144,7 @@ Click OK and a new pointer will be created:
 
 Now, every time you modifies that value you are **modifying the important value even if the memory address where the value is is different.**
 
-### Code Injection
+## Code Injection
 
 Code injection is a technique where you inject a piece of code into the target process, and then reroute the execution of code to go through your own written code (like giving you points instead of resting them).
 
@@ -164,15 +165,17 @@ A template will be generated:
 
 ![](<../../.gitbook/assets/image (604).png>)
 
-So, insert your new assembly code in the "**newmem**" section and remove the original code from the "**originalcode**" if you don't want it to be executed\*\*.\*\* In this example the injected code will add 2 points instead of substracting 1:
+So, insert your new assembly code in the "**newmem**" section and remove the original code from the "**originalcode**" if you don't want it to be executed**.** In this example the injected code will add 2 points instead of substracting 1:
 
 ![](<../../.gitbook/assets/image (605).png>)
 
 **Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
 
-## **References**
+# **References**
 
 * **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+
+
 
 <details>
 
@@ -189,3 +192,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

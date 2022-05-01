@@ -1,4 +1,4 @@
-# Blobrunner
+
 
 <details>
 
@@ -16,7 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-The only modified line from the [original code](https://github.com/OALabs/BlobRunner) is the line 10.\
+
+The only modified line from the [original code](https://github.com/OALabs/BlobRunner) is the line 10.  
 In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
 
 ```c
@@ -223,6 +224,8 @@ int main(int argc, char* argv[])
 }
 ```
 
+
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -238,3 +241,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

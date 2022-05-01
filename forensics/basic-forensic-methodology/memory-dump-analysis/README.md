@@ -1,4 +1,4 @@
-# Memory dump analysis
+
 
 <details>
 
@@ -16,14 +16,15 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+
 Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).
 
-## [Volatility](volatility-examples.md)
+# [Volatility](volatility-examples.md)
 
 The premiere open-source framework for memory dump analysis is [Volatility](volatility-examples.md). Volatility is a Python script for parsing memory dumps that were gathered with an external tool (or a VMware memory image gathered by pausing the VM). So, given the memory dump file and the relevant "profile" (the OS from which the dump was gathered), Volatility can start identifying the structures in the data: running processes, passwords, etc. It is also extensible using plugins for extracting various types of artifact.\
 From: [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 
-## Mini dump crash report
+# Mini dump crash report
 
 When the dump is small (just some KB, maybe a few MB) the it's probably a mini dump crash report and not a memory dump.
 
@@ -43,6 +44,10 @@ Anyway Visual Studio isn't the best tool to perform a analysis in depth of the d
 
 You should **open** it using **IDA** or **Radare** to inspection it in **depth**.
 
+
+
+
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -58,3 +63,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

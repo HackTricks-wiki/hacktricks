@@ -1,4 +1,4 @@
-# Browser Artifacts
+
 
 <details>
 
@@ -16,7 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Browsers Artefacts <a href="#3def" id="3def"></a>
+
+# Browsers Artefacts <a href="#3def" id="3def"></a>
 
 When we talk about browser artefacts we talk about, navigation history, bookmarks, list of downloaded files, cache data…etc.
 
@@ -34,19 +35,19 @@ Let us take a look at the most common artefacts stored by browsers.
 * **Logins :** Self Explanatory.
 * **Favicons :** They are the little icons found in tabs, urls, bookmarks and the such. They can be used as another source to get more information about the website or places the user visited.
 * **Browser Sessions :** Self Explanatory.
-* \*\*Downloads :\*\*Self Explanatory.
+* **Downloads :**Self Explanatory.
 * **Form Data :** Anything typed inside forms is often times stored by the browser, so the next time the user enters something inside of a form the browser can suggest previously entered data.
 * **Thumbnails :** Self Explanatory.
 
-## Firefox
+# Firefox
 
-Firefox use to create the profiles folder in \~/_**.mozilla/firefox/**_ (Linux), in **/Users/$USER/Library/Application Support/Firefox/Profiles/** (MacOS), _**%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\\**_ (Windows)_**.**_\
+Firefox use to create the profiles folder in \~/_**.mozilla/firefox/**_ (Linux),  in **/Users/$USER/Library/Application Support/Firefox/Profiles/** (MacOS), _**%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\\**_ (Windows)_**.**_\
 Inside this folder, the file _**profiles.ini**_ should appear with the name(s) of the used profile(s).\
-Each profile has a "**Path**" variable with the name of the folder where it's data is going to be stored. The folder should be **present in the same directory where the \_profiles.ini**\_\*\* exist\*\*. If it isn't, then, probably it was deleted.
+Each profile has a "**Path**" variable with the name of the folder where it's data is going to be stored. The folder should be **present in the same directory where the **_**profiles.ini**_** exist**. If it isn't, then, probably it was deleted.
 
 Inside the folder **of each profile** (_\~/.mozilla/firefox/\<ProfileName>/_) path you should be able to find the following interesting files:
 
-* _**places.sqlite**_ : History (moz\_\__places), bookmarks (moz\_bookmarks), and downloads (moz_\_\_annos). In windows the tool [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html) can be used to read the history inside _**places.sqlite**_.
+* _**places.sqlite**_ : History (moz_\__places), bookmarks (moz\_bookmarks), and downloads (moz_\__annos). In windows the tool [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html) can be used to read the history inside _**places.sqlite**_.
   * Query to dump history: `select datetime(lastvisitdate/1000000,'unixepoch') as visit_date, url, title, visit_count, visit_type FROM moz_places,moz_historyvisits WHERE moz_places.id = moz_historyvisits.place_id;`
     * Note that the link type is a number that indicates:
       * 1: User followed a link
@@ -63,7 +64,7 @@ Inside the folder **of each profile** (_\~/.mozilla/firefox/\<ProfileName>/_) pa
 * _**formhistory.sqlite**_ : **Web form data** (like emails)
 * _**handlers.json**_ : Protocol handlers (like, which app is going to handle _mailto://_ protocol)
 * _**persdict.dat**_ : Words added to the dictionary
-* _**addons.json**_ and \_**extensions.sqlite** \_ : Installed addons and extensions
+* _**addons.json**_ and _**extensions.sqlite** _ : Installed addons and extensions
 * _**cookies.sqlite**_ : Contains **cookies.** [**MZCookiesView**](https://www.nirsoft.net/utils/mzcv.html) can be used in Windows to inspect this file.
 *   _**cache2/entries**_ or _**startupCache**_ : Cache data (\~350MB). Tricks like **data carving** can also be used to obtain the files saved in the cache. [MozillaCacheView](https://www.nirsoft.net/utils/mozilla\_cache\_viewer.html) can be used to see the **files saved in the cache**.
 
@@ -97,9 +98,9 @@ done < $passfile
 
 ![](<../../../.gitbook/assets/image (417).png>)
 
-## Google Chrome
+# Google Chrome
 
-Google Chrome creates the profile inside the home of the user _**\~/.config/google-chrome/**_ (Linux), in _**C:\Users\XXX\AppData\Local\Google\Chrome\User Data\\**_ (Windows), or in \_**/Users/$USER/Library/Application Support/Google/Chrome/** \_ (MacOS).\
+Google Chrome creates the profile inside the home of the user _**\~/.config/google-chrome/**_ (Linux), in _**C:\Users\XXX\AppData\Local\Google\Chrome\User Data\\**_ (Windows), or in _**/Users/$USER/Library/Application Support/Google/Chrome/** _ (MacOS).\
 Most of the information will be saved inside the _**Default/**_ or _**ChromeDefaultData/**_ folders inside the paths indicated before. Inside here you can find the following interesting files:
 
 * _**History**_ : URLs, downloads and even searched keywords. In Windows you can use the tool [ChromeHistoryView](https://www.nirsoft.net/utils/chrome\_history\_view.html) to read the history. The "Transition Type" column means:
@@ -124,11 +125,11 @@ Most of the information will be saved inside the _**Default/**_ or _**ChromeDefa
 * **Browser’s built-in anti-phishing:** `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`
   * You can simply grep for “**safebrowsing**” and look for `{"enabled: true,"}` in the result to indicate anti-phishing and malware protection is on.
 
-## **SQLite DB Data Recovery**
+# **SQLite DB Data Recovery**
 
 As you can observe in the previous sections, both Chrome and Firefox use **SQLite** databases to store the data. It's possible to **recover deleted entries using the tool** [**sqlparse**](https://github.com/padfoot999/sqlparse) **or** [**sqlparse\_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases).
 
-## **Internet Explorer 11**
+# **Internet Explorer 11**
 
 Internet Explorer stores **data** and **metadata** in different locations. The metadata will allow to find the data.
 
@@ -144,11 +145,11 @@ Inside this table you can find in which other tables or containers each part of 
 
 **Note that this table indicate also metadadata of the cache of other Microsoft tools also (e.g. skype)**
 
-### Cache
+## Cache
 
 You can use the tool [IECacheView](https://www.nirsoft.net/utils/ie\_cache\_viewer.html) to inspect the cache. You need to indicate the folder where you have extracted the cache date.
 
-#### Metadata
+### Metadata
 
 The metadata information about the cache stores:
 
@@ -159,19 +160,19 @@ The metadata information about the cache stores:
 * CreationTime: First time it was cached
 * AccessedTime: Time when the cache was used
 * ModifiedTime: Last webpage version
-* ExpiryTime: Time when the cache will expire
+* ExpiryTime: Time when  the cache will expire
 
-#### Files
+### Files
 
 The cache information can be found in _**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5**_ and _**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5\low**_
 
 The information inside these folders is a **snapshot of what the user was seeing**. The caches has a size of **250 MB** and the timestamps indicate when the page was visited (first time, creation date of the NTFS, last time, modification time of the NTFS).
 
-### Cookies
+## Cookies
 
 You can use the tool [IECookiesView](https://www.nirsoft.net/utils/iecookies.html) to inspect the cookies. You need to indicate the folder where you have extracted the cookies.
 
-#### **Metadata**
+### **Metadata**
 
 The metadata information about the cookies stores:
 
@@ -183,15 +184,15 @@ The metadata information about the cookies stores:
 * AccessedTime: Last time the cookie was accesed
 * ExpiryTime: Time of expiration of the cookie
 
-#### Files
+### Files
 
 The cookies data can be found in _**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies**_ and _**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies\low**_
 
 Session cookies will reside in memory and persistent cookie in the disk.
 
-### Downloads
+## Downloads
 
-#### **Metadata**
+### **Metadata**
 
 Checking the tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html) you can find the container with the metadata of the downloads:
 
@@ -199,25 +200,25 @@ Checking the tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\
 
 Getting the information of the column "ResponseHeaders" you can transform from hex that information and obtain the URL, the file type and the location of the downloaded file.
 
-#### Files
+### Files
 
 Look in the path _**%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory**_
 
-### **History**
+## **History**
 
 The tool [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html) can be used to read the history. But first you need to indicate the browser in advanced options and the location of the extracted history files.
 
-#### **Metadata**
+### **Metadata**
 
 * ModifiedTime: First time a URL is found
 * AccessedTime: Last time
 * AccessCount: Number of times accessed
 
-#### **Files**
+### **Files**
 
-Search in _**userprofile%\Appdata\Local\Microsoft\Windows\History\History.IE5**_ and _**userprofile%\Appdata\Local\Microsoft\Windows\History\Low\History.IE5**_
+Search in _**userprofile%\Appdata\Local\Microsoft\Windows\History\History.IE5**_ and  _**userprofile%\Appdata\Local\Microsoft\Windows\History\Low\History.IE5**_
 
-### **Typed URLs**
+## **Typed URLs**
 
 This information can be found inside the registry NTDUSER.DAT in the path:
 
@@ -226,7 +227,7 @@ This information can be found inside the registry NTDUSER.DAT in the path:
 * _**Software\Microsoft\InternetExplorer\TypedURLsTime**_
   * last time the URL was typed
 
-## Microsoft Edge
+# Microsoft Edge
 
 For analyzing Microsoft Edge artifacts all the **explanations about cache and locations from the previous section (IE 11) remain valid** with the only difference that the base locating in this case is _**%userprofile%\Appdata\Local\Packages**_ (as can be observed in the following paths):
 
@@ -236,7 +237,7 @@ For analyzing Microsoft Edge artifacts all the **explanations about cache and lo
 * Cache: _**C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC#!XXX\MicrosoftEdge\Cache**_
 * Last active sessions: _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active**_
 
-## **Safari**
+# **Safari**
 
 The databases can be found in `/Users/$User/Library/Safari`
 
@@ -255,7 +256,7 @@ The databases can be found in `/Users/$User/Library/Safari`
 * **Browser’s built-in anti-phishing:** `defaults read com.apple.Safari WarnAboutFraudulentWebsites`
   * The reply should be 1 to indicate the setting is active
 
-## Opera
+# Opera
 
 The databases can be found in `/Users/$USER/Library/Application Support/com.operasoftware.Opera`
 
@@ -263,6 +264,7 @@ Opera **stores browser history and download data in the exact same format as Goo
 
 * **Browser’s built-in anti-phishing:** `grep --color 'fraud_protection_enabled' ~/Library/Application Support/com.operasoftware.Opera/Preferences`
   * **fraud\_protection\_enabled** should be **true**
+
 
 <details>
 
@@ -279,3 +281,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

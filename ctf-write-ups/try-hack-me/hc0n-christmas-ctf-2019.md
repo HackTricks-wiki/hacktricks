@@ -1,4 +1,4 @@
-# hc0n Christmas CTF - 2019
+
 
 <details>
 
@@ -16,9 +16,10 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+
 ![](../../.gitbook/assets/41d0cdc8d99a8a3de2758ccbdf637a21.jpeg)
 
-## Enumeration
+# Enumeration
 
 I started **enumerating the machine using my tool** [**Legion**](https://github.com/carlospolop/legion):
 
@@ -54,6 +55,8 @@ perl ./padBuster.pl http://10.10.231.5/index.php "GVrfxWD0mmxRM0RPLht/oUpybgnBn/
 
 ![](<../../.gitbook/assets/image (250).png>)
 
+
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -69,3 +72,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

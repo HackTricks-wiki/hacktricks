@@ -1,4 +1,4 @@
-# Hash Length Extension Attack
+
 
 <details>
 
@@ -16,7 +16,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Summary of the attack
+
+# Summary of the attack
 
 Imagine a server which is **signing** some **data** by **appending** a **secret** to some known clear text data and then hashing that data. If you know:
 
@@ -29,7 +30,7 @@ Imagine a server which is **signing** some **data** by **appending** a **secret*
 
 Then, it's possible for an **attacker** to **append** **data** and **generate** a valid **signature** for the **previos data + appended data**.
 
-### How?
+## How?
 
 Basically the vulnerable algorithms generate the hashes by firstly **hashing a block of data**, and then, **from** the **previously** created **hash** (state), they **add the next block of data** and **hash it**.
 
@@ -41,13 +42,14 @@ If an attacker wants to append the string "append" he can:
 * Append the string "append"
 * Finish the hash and the resulting hash will be a **valid one for "secret" + "data" + "padding" + "append"**
 
-### **Tool**
+## **Tool**
 
 {% embed url="https://github.com/iagox86/hash_extender" %}
 
-## References
+# References
 
 You can find this attack good explained in [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+
 
 <details>
 
@@ -64,3 +66,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

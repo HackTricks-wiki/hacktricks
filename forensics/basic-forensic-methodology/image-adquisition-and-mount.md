@@ -1,4 +1,4 @@
-# Image Adquisition & Mount
+
 
 <details>
 
@@ -16,16 +16,17 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Acquisition
 
-### DD
+# Acquisition
+
+## DD
 
 ```bash
 #This will generate a raw copy of the disk
 dd if=/dev/sdb of=disk.img
 ```
 
-### dcfldd
+## dcfldd
 
 ```bash
 #Raw copy with hashes along the way (more secur s it checks hashes while it's copying the data)
@@ -33,7 +34,7 @@ dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<c
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
 
-### FTK Imager
+## FTK Imager
 
 You can [**download the FTK imager from here**](https://accessdata.com/product-download/debian-and-ubuntu-x64-3-1-1).
 
@@ -41,7 +42,7 @@ You can [**download the FTK imager from here**](https://accessdata.com/product-d
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 --description 'A description' --examiner 'Your name'
 ```
 
-### EWF
+## EWF
 
 You can generate a dick image using the[ **ewf tools**](https://github.com/libyal/libewf).
 
@@ -62,13 +63,13 @@ ewfacquire /dev/sdb
 #It will generate the disk image in the current directory
 ```
 
-## Mount
+# Mount
 
-### Several types
+## Several types
 
 In **Windows** you can try to use the free version of Arsenal Image Mounter ([https://arsenalrecon.com/downloads/](https://arsenalrecon.com/downloads/)) to **mount the forensics image**.
 
-### Raw
+## Raw
 
 ```bash
 #Get file type
@@ -79,7 +80,7 @@ evidence.img: Linux rev 1.0 ext4 filesystem data, UUID=1031571c-f398-4bfb-a414-b
 mount evidence.img /mnt
 ```
 
-### EWF
+## EWF
 
 ```bash
 #Get file type
@@ -96,11 +97,11 @@ output/ewf1: Linux rev 1.0 ext4 filesystem data, UUID=05acca66-d042-4ab2-9e9c-be
 mount output/ewf1 -o ro,norecovery /mnt
 ```
 
-### ArsenalImageMounter
+## ArsenalImageMounter
 
 It's a Windows Application to mount volumes. You can download it here [https://arsenalrecon.com/downloads/](https://arsenalrecon.com/downloads/)
 
-### Errors
+## Errors
 
 * **`cannot mount /dev/loop0 read-only`** in this case you need to use the flags **`-o ro,norecovery`**
 * **`wrong fs type, bad option, bad superblock on /dev/loop0, missing codepage or helper program, or other error.`** in this case the mount failed due as the offset of the filesystem is different than that of the disk image. You need to find the Sector size and the Start sector:
@@ -124,6 +125,8 @@ Note that sector size is **512** and start is **2048**. Then mount the image lik
 mount disk.img /mnt -o ro,offset=$((2048*512))
 ```
 
+
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -139,3 +142,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+

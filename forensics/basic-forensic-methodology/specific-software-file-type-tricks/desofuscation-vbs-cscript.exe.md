@@ -1,4 +1,4 @@
-# Desofuscation vbs (cscript.exe)
+
 
 <details>
 
@@ -16,27 +16,28 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+
 Some things that could be useful to debug/desofuscate a malicious vbs file:
 
-### echo
+## echo
 
 ```bash
 Wscript.Echo "Like this?"
 ```
 
-### Commnets
+## Commnets
 
-```
+```text
 ' this is a comment
 ```
 
-### Test
+## Test
 
-```
+```text
 cscript.exe file.vbs
 ```
 
-### Write data to a file
+## Write data to a file
 
 ```aspnet
 Function writeBinary(strBinary, strPath)
@@ -63,6 +64,8 @@ Function writeBinary(strBinary, strPath)
 End Function
 ```
 
+
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -78,3 +81,5 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+
