@@ -516,7 +516,6 @@
 
 ## ⛈ Cloud Security
 
-* [Cloud Security](cloud-security/cloud-security.md)
 * [GCP Security](cloud-security/gcp-security/README.md)
   * [GCP - Other Services Enumeration](cloud-security/gcp-security/gcp-looting.md)
   * [GCP - Abuse GCP Permissions](cloud-security/gcp-security/gcp-interesting-permissions/README.md)
