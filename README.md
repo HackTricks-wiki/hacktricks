@@ -56,11 +56,11 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 **STM Cyber** also support cybersecurity open source projects like HackTricks :)
 
-### [Intrigiti](https://www.intigriti.com)
+### [Intigriti](https://www.intigriti.com)
 
 ![](<.gitbook/assets/image (620) (2) (1) (1) (1) (12).png>)
 
-**Intrigiti** is the **Europe's #1** ethical hacking and **bug bounty platform**
+**Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform**
 
 **Bug bounty tip**:**sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
