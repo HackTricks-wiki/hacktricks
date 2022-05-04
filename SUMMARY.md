@@ -275,7 +275,6 @@
   * [Artifactory Hacking guide](network-services-pentesting/pentesting-web/artifactory-hacking-guide.md)
   * [Buckets](network-services-pentesting/pentesting-web/buckets/README.md)
     * [Firebase Database](network-services-pentesting/pentesting-web/buckets/firebase-database.md)
-    * [AWS-S3](network-services-pentesting/pentesting-web/buckets/aws-s3.md)
   * [CGI](network-services-pentesting/pentesting-web/cgi.md)
   * [Code Review Tools](network-services-pentesting/pentesting-web/code-review-tools.md)
   * [Drupal](network-services-pentesting/pentesting-web/drupal.md)
