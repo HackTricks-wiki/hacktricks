@@ -249,10 +249,10 @@ We've automated this completely using [this python script](https://gitlab.com/gi
 
 ## Automatic Tools
 
-* [https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_enum:](https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_enum:) Bash script to enumerate a GCP environment using gcloud cli and saving the results in
-* [https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation:](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation:) Scripts to enumerate high IAM privileges and to escalate privileges in GCP abusing them (I couldn’t make run the enumerate script)
-* [https://github.com/lyft/cartography:](https://github.com/lyft/cartography:) Tool to enumerate and print in a graph resources and relations of different cloud platforms
-* [https://github.com/RyanJarv/awesome-cloud-sec:](https://github.com/RyanJarv/awesome-cloud-sec:) This is a list of cloud security tools
+* [https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_enum:](https://gitlab.com/gitlab-com/gl-security/security-operations/gl-redteam/gcp\_enum) Bash script to enumerate a GCP environment using gcloud cli and saving the results in
+* [https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation:](https://github.com/RhinoSecurityLabs/GCP-IAM-Privilege-Escalation) Scripts to enumerate high IAM privileges and to escalate privileges in GCP abusing them (I couldn’t make run the enumerate script)
+* [https://github.com/lyft/cartography:](https://github.com/lyft/cartography) Tool to enumerate and print in a graph resources and relations of different cloud platforms
+* [https://github.com/RyanJarv/awesome-cloud-sec:](https://github.com/RyanJarv/awesome-cloud-sec) This is a list of cloud security tools
 
 ## IAM
 
