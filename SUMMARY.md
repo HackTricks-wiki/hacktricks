@@ -510,6 +510,7 @@
   * [Iframes in XSS, CSP and SOP](pentesting-web/xss-cross-site-scripting/iframes-in-xss-and-csp.md)
   * [Other JS Tricks](pentesting-web/xss-cross-site-scripting/other-js-tricks.md)
   * [Steal Info JS](pentesting-web/xss-cross-site-scripting/steal-info-js.md)
+  * [XSS in Markdown](pentesting-web/xss-cross-site-scripting/xss-in-markdown.md)
 * [XSSI (Cross-Site Script Inclusion)](pentesting-web/xssi-cross-site-script-inclusion.md)
 * [XS-Search](pentesting-web/xs-search.md)
 
