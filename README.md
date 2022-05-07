@@ -58,7 +58,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [Intigriti](https://www.intigriti.com)
 
-![](<.gitbook/assets/image (620) (2) (1) (1) (1) (12).png>)
+![](<.gitbook/assets/image (620) (2) (1) (1) (1) (10) (12).png>)
 
 **Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform**
 
