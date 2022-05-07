@@ -159,8 +159,8 @@ You could use **burpcollab** or [**pingb**](http://pingb.in) for example.
 
 If you are inside a filesystem with the **read-only and noexec protections** there are still ways to **execute arbitrary binaries**. One of them is by the use of **DDexec**, yo can find an explanation of the technique in:
 
-{% content-ref url="ddexec.md" %}
-[ddexec.md](ddexec.md)
+{% content-ref url="../bypass-linux-shell-restrictions/ddexec.md" %}
+[ddexec.md](../bypass-linux-shell-restrictions/ddexec.md)
 {% endcontent-ref %}
 
 ## References & More

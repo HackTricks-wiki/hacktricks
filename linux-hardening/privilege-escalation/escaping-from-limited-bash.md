@@ -146,8 +146,8 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 [https://gtfobins.github.io](https://gtfobins.github.io/\*\*]\(https/gtfobins.github.io)\
 **It could also be interesting the page:**
 
-{% content-ref url="../bypass-linux-shell-restrictions/" %}
-[bypass-linux-shell-restrictions](../bypass-linux-shell-restrictions/)
+{% content-ref url="../useful-linux-commands/bypass-bash-restrictions.md" %}
+[bypass-bash-restrictions.md](../useful-linux-commands/bypass-bash-restrictions.md)
 {% endcontent-ref %}
 
 ## Python Jails
