@@ -6,7 +6,7 @@
 * [About the author](welcome/about-the-author.md)
 * [Getting Started in Hacking](welcome/getting-started-in-hacking.md)
 
-## 🤓 Generic Methodologies & Resources
+## 🤩 Generic Methodologies & Resources
 
 * [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
 * [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
