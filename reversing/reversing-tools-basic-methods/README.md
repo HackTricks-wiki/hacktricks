@@ -1,7 +1,5 @@
 # Reversing Tools & Basic Methods
 
-## Reversing Tools & Basic Methods
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -17,6 +15,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
+
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
 
 ## Wasm decompiler / Wat compiler
 
@@ -397,6 +402,13 @@ So, in this challenge, knowing the values of the buttons, you needed to **press 
 
 * [https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering)
 * [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
+
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
+
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
 
 <details>
 

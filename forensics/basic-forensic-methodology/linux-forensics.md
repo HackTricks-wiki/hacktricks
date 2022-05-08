@@ -1,4 +1,4 @@
-
+# Linux Forensics
 
 <details>
 
@@ -16,10 +16,16 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
 
-# Initial Information Gathering
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
 
-## Basic Information
+## Initial Information Gathering
+
+### Basic Information
 
 First of all, it's recommended to have some **USB** with **good known binaries and libraries on it** (you can just get a ubuntu and copy the folders _/bin_, _/sbin_, _/lib,_ and _/lib64_), then mount the USN, and modify the env variables to use those binaries:
 
@@ -48,7 +54,7 @@ cat /etc/shadow #Unexpected data?
 find /directory -type f -mtime -1 -print #Find modified files during the last minute in the directory
 ```
 
-### Suspicious information
+#### Suspicious information
 
 While obtaining the basic information you should check for weird things like:
 
@@ -56,7 +62,7 @@ While obtaining the basic information you should check for weird things like:
 * Check **registered logins** of users without a shell inside `/etc/passwd`
 * Check for **password hashes** inside `/etc/shadow` for users without a shell
 
-## Memory Dump
+### Memory Dump
 
 In order to obtain the memory of the running system it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).\
 In order to **compile** it you need to use the **exact same kernel** the victim machine is using.
@@ -81,14 +87,14 @@ LiME supports 3 **formats**:
 
 LiME can also be use to **send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
 
-## Disk Imaging
+### Disk Imaging
 
-### Shutting down
+#### Shutting down
 
 First of all you will need to **shutdown the system**. This isn't always an option as some times system will be a production server that the company cannot afford to shutdown.\
 There are **2 ways** of shutting down the system, a **normal shutdown** and a **"plug the plug" shutdown**. The first one will allow the **processes to terminate as usual** and the **filesystem** to be **synchronized**, but I will also allow the possible **malware** to **destroy evidences**. The "pull the plug" approach may carry **some information loss** (as we have already took an image of the memory not much info is going to be lost) and the **malware won't have any opportunity** to do anything about it. Therefore, if you **suspect** that there may be a **malware**, just execute the **`sync`** **command** on the system and pull the plug.
 
-### Taking an image of the disk
+#### Taking an image of the disk
 
 It's important to note that **before connecting to your computer anything related to the case**, you need to be sure that it's going to be **mounted as read only** to avoid modifying the any information.
 
@@ -101,7 +107,7 @@ dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<c
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
 
-## Disk Image pre-analysis
+### Disk Image pre-analysis
 
 Imaging that you receive a disk image with no more data.
 
@@ -158,9 +164,9 @@ icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
 
-# Search for known Malware
+## Search for known Malware
 
-## Modified System Files
+### Modified System Files
 
 Some Linux systems have a feature to **verify the integrity of many installed components**, providing an effective way to identify unusual or out of place files. For instance, `rpm -Va` on Linux is designed to verify all packages that were installed using RedHat Package Manager.
 
@@ -172,7 +178,7 @@ dpkg --verify
 debsums | grep -v "OK$" #apt-get install debsums
 ```
 
-## Malware/Rootkit Detectors
+### Malware/Rootkit Detectors
 
 Read the following page to learn about tools that can be useful to find malware:
 
@@ -180,9 +186,9 @@ Read the following page to learn about tools that can be useful to find malware:
 [malware-analysis.md](malware-analysis.md)
 {% endcontent-ref %}
 
-# Search installed programs
+## Search installed programs
 
-## Package Manager
+### Package Manager
 
 On Debian-based systems, the _**/var/ lib/dpkg/status**_ file contains details about installed packages and the _**/var/log/dpkg.log**_ file records information when a package is installed.\
 On RedHat and related Linux distributions the **`rpm -qa --root=/ mntpath/var/lib/rpm`** command will list the contents of an RPM database on a subject systems.
@@ -195,7 +201,7 @@ cat /var/log/dpkg.log | grep installed
 rpm -qa --root=/ mntpath/var/lib/rpm
 ```
 
-## Other
+### Other
 
 **Not all installed programs will be listed by the above commands** because some applications are not available as packages for certain systems and must be installed from source. Therefore, a review of locations such as _**/usr/local**_ and _**/opt**_ may reveal other applications that have been compiled and installed from source code.
 
@@ -213,13 +219,13 @@ find /sbin/ -exec dpkg -S {} \; | grep "no path found"
 find /sbin/ –exec rpm -qf {} \; | grep "is not"
 ```
 
-# Recover Deleted Running Binaries
+## Recover Deleted Running Binaries
 
 ![](<../../.gitbook/assets/image (641).png>)
 
-# Inspect AutoStart locations
+## Inspect AutoStart locations
 
-## Scheduled Tasks
+### Scheduled Tasks
 
 ```bash
 cat /var/spool/cron/crontabs/*  \
@@ -235,7 +241,7 @@ cat /var/spool/cron/crontabs/*  \
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
 
-## Services
+### Services
 
 It is extremely common for malware to entrench itself as a new, unauthorized service. Linux has a number of scripts that are used to start services as the computer boots. The initialization startup script _**/etc/inittab**_ calls other scripts such as rc.sysinit and various startup scripts under the _**/etc/rc.d/**_ directory, or _**/etc/rc.boot/**_ in some older versions. On other versions of Linux, such as Debian, startup scripts are stored in the _**/etc/init.d/**_ directory. In addition, some common services are enabled in _**/etc/inetd.conf**_ or _**/etc/xinetd/**_ depending on the version of Linux. Digital investigators should inspect each of these startup scripts for anomalous entries.
 
@@ -248,11 +254,11 @@ It is extremely common for malware to entrench itself as a new, unauthorized ser
 * _**/etc/systemd/system**_
 * _**/etc/systemd/system/multi-user.target.wants/**_
 
-## Kernel Modules
+### Kernel Modules
 
 On Linux systems, kernel modules are commonly used as rootkit components to malware packages. Kernel modules are loaded when the system boots up based on the configuration information in the `/lib/modules/'uname -r'` and `/etc/modprobe.d` directories, and the `/etc/modprobe` or `/etc/modprobe.conf` file. These areas should be inspected for items that are related to malware.
 
-## Other AutoStart Locations
+### Other AutoStart Locations
 
 There are several configuration files that Linux uses to automatically launch an executable when a user logs into the system that may contain traces of malware.
 
@@ -260,11 +266,11 @@ There are several configuration files that Linux uses to automatically launch an
 * _**∼/.bashrc**_ , _**∼/.bash\_profile**_ , _**\~/.profile**_ , _**∼/.config/autostart**_ are executed when the specific user logs in.
 * _**/etc/rc.local**_ It is traditionally executed after all the normal system services are started, at the end of the process of switching to a multiuser runlevel.
 
-# Examine Logs
+## Examine Logs
 
 Look in all available log files on the compromised system for traces of malicious execution and associated activities such as creation of a new service.
 
-## Pure Logs
+### Pure Logs
 
 **Logon** events recorded in the system and security logs, including logons via the network, can reveal that **malware** or an **intruder gained access** to a compromised system via a given account at a specific time. Other events around the time of a malware infection can be captured in system logs, including the **creation** of a **new** **service** or new accounts around the time of an incident.\
 Interesting system logons:
@@ -291,7 +297,7 @@ Interesting system logons:
 Linux system logs and audit subsystems may be disabled or deleted in an intrusion or malware incident. In fact, because logs on Linux systems generally contain some of the most useful information about malicious activities, intruders routinely delete them. Therefore, when examining available log files, it is important to look for gaps or out of order entries that might be an indication of deletion or tampering.
 {% endhint %}
 
-## Command History
+### Command History
 
 Many Linux systems are configured to maintain a command history for each user account:
 
@@ -300,7 +306,7 @@ Many Linux systems are configured to maintain a command history for each user ac
 * \~/.sh\_history
 * \~/.\*\_history
 
-## Logins
+### Logins
 
 Using the command `last -Faiwx` it's possible to get the list of users that have logged in.\
 It's recommended to check if those logins make sense:
@@ -312,7 +318,7 @@ This is important as **attackers** some times may copy `/bin/bash` inside `/bin/
 
 Note that you can also **take a look to this information reading the logs**.
 
-## Application Traces
+### Application Traces
 
 * **SSH**: Connections to systems made using SSH to and from a compromised system result in entries being made in files for each user account (_**∼/.ssh/authorized\_keys**_ and _**∼/.ssh/known\_keys**_). These entries can reveal the hostname or IP address of the remote hosts.
 * **Gnome Desktop**: User accounts may have a _**∼/.recently-used.xbel**_ file that contains information about files that were recently accessed using applications running in the Gnome desktop.
@@ -321,20 +327,20 @@ Note that you can also **take a look to this information reading the logs**.
 * **MySQL**: User accounts may have a _**∼/.mysql\_history**_ file that contains queries executed using MySQL.
 * **Less**: User accounts may have a _**∼/.lesshst**_ file that contains details about the use of less, including search string history and shell commands executed via less
 
-## USB Logs
+### USB Logs
 
 [**usbrip**](https://github.com/snovvcrash/usbrip) is a small piece of software written in pure Python 3 which parses Linux log files (`/var/log/syslog*` or `/var/log/messages*` depending on the distro) for constructing USB event history tables.
 
 It is interesting to **know all the USBs that have been used** and it will be more useful if you have an authorized list of USB to find "violation events" (the use of USBs that aren't inside that list).
 
-## Installation
+### Installation
 
 ```
 pip3 install usbrip
 usbrip ids download #Downloal USB ID database
 ```
 
-## Examples
+### Examples
 
 ```
 usbrip events history #Get USB history of your curent linux machine
@@ -346,13 +352,13 @@ usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 
 More examples and info inside the github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-# Review User Accounts and Logon Activities
+## Review User Accounts and Logon Activities
 
 Examine the _**/etc/passwd**_, _**/etc/shadow**_ and **security logs** for unusual names or accounts created and/or used in close proximity to known unauthorized events. Also check possible sudo brute-force attacks.\
 Moreover, check files like _**/etc/sudoers**_ and _**/etc/groups**_ for unexpected privileges given to users.\
 Finally look for accounts with **no passwords** or **easily guessed** passwords.
 
-# Examine File System
+## Examine File System
 
 File system data structures can provide substantial amounts of **information** related to a **malware** incident, including the **timing** of events and the actual **content** of **malware**.\
 **Malware** is increasingly being designed to **thwart file system analysis**. Some malware alter date-time stamps on malicious files to make it more difficult to find them with time line analysis. Other malicious code is designed to only store certain information in memory to minimize the amount of data stored in the file system.\
@@ -375,27 +381,27 @@ You can check the inodes of the files inside a folder using `ls -lai /bin |sort 
 Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modify at the **same time** of the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
 {% endhint %}
 
-# Compare files of different filesystem versions
+## Compare files of different filesystem versions
 
-### Find added files
+#### Find added files
 
 ```bash
 git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/
 ```
 
-### Find Modified content
+#### Find Modified content
 
 ```bash
 git diff --no-index --diff-filter=M _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
 
-### Find deleted files
+#### Find deleted files
 
 ```bash
 git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/
 ```
 
-### Other filters
+#### Other filters
 
 **`-diff-filter=[(A|C|D|M|R|T|U|X|B)…​[*]]`**
 
@@ -405,11 +411,17 @@ Also, **these upper-case letters can be downcased to exclude**. E.g. `--diff-fil
 
 Note that not all diffs can feature all types. For instance, diffs from the index to the working tree can never have Added entries (because the set of paths included in the diff is limited by what is in the index). Similarly, copied and renamed entries cannot appear if detection for those types is disabled.
 
-# References
+## References
 
 * [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems\_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems\_Ch3.pdf)
 * [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
+
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
 
 <details>
 
@@ -426,5 +438,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

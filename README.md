@@ -60,11 +60,20 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ![](<.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (13).png>)
 
-**Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform**
+**Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
 
-**Bug bounty tip**:**sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
+
+### [SecurityBoat](https://securityboat.in)
+
+![](<.gitbook/assets/SB logo black\_034525.png>)
+
+**Securityboat** is a cybersecurity company focused on providing top of the line **penetration testing services** and the most comprehensive **automated security testing** solutions based on an extensive **manual security testing methodology** that utilizes various case-specific and **industry-tested** solutions. They are committed to providing clear communication on cybersecurity issues, developing solutions, and prioritizing **business risk**.\
+**Make the right choice by contacting us for your security:**
+
+{% embed url="https://securityboat.in/contact-us" %}
 
 ### [**INE**](https://ine.com)
 
