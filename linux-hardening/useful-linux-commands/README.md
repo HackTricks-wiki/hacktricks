@@ -1,4 +1,4 @@
-
+# Useful Linux Commands
 
 <details>
 
@@ -16,8 +16,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
-# Common Bash
+## Common Bash
 
 ```bash
 #Exfiltration using Base64
@@ -135,7 +134,7 @@ sudo chattr +i file.txt
 sudo chattr -i file.txt #Remove the bit so you can delete it
 ```
 
-# Bash for Windows
+## Bash for Windows
 
 ```bash
 #Base64 for Windows
@@ -157,7 +156,7 @@ python pyinstaller.py --onefile exploit.py
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
 
-# Greps
+## Greps
 
 ```bash
 #Extract emails from file
@@ -239,7 +238,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
 
-# Nmap search help
+## Nmap search help
 
 ```bash
 #Nmap scripts ((default or version) and smb))
@@ -248,14 +247,14 @@ locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | gre
 nmap --script-help "(default or version) and smb)"
 ```
 
-# Bash
+## Bash
 
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
 ```
 
-# Iptables
+## Iptables
 
 ```bash
 #Delete curent rules and chains
@@ -288,8 +287,6 @@ iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
 
-
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -305,5 +302,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

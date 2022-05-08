@@ -109,7 +109,8 @@
   * [Wildcards Spare tricks](linux-hardening/privilege-escalation/wildcards-spare-tricks.md)
   * [Linux Active Directory](linux-hardening/privilege-escalation/linux-active-directory.md)
 * [Useful Linux Commands](linux-hardening/useful-linux-commands/README.md)
-  * [Bypass Bash Restrictions](linux-hardening/useful-linux-commands/bypass-bash-restrictions.md)
+* [Bypass Linux Shell Restrictions](linux-hardening/useful-linux-commands/bypass-bash-restrictions.md)
+  * [DDexec](linux-hardening/bypass-linux-shell-restrictions/ddexec.md)
 * [Linux Environment Variables](linux-hardening/linux-environment-variables.md)
 
 ## 🍏 MacOS Hardening

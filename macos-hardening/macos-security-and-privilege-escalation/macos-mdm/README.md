@@ -126,7 +126,7 @@ It follows a few steps to get the Activation Record performed by **`MCTeslaConfi
    2. The JSON payload is encrypted using Absinthe (**`NACSign`**)
    3. All requests over HTTPs, built-in root certificates are used
 
-![](<../../../.gitbook/assets/image (566).png>)
+![](<../../../.gitbook/assets/image (566) (1).png>)
 
 The response is a JSON dictionary with some important data like:
 
