@@ -207,7 +207,7 @@ The offsets of any constructors are held in the **\_\_mod\_init\_func** section 
 
 The heart of the file is the final region, the data, which consists of a number of segments as laid out in the load-commands region. **Each segment can contain a number of data sections**. Each of these sections **contains code or data** of one particular type.
 
-![](<../../.gitbook/assets/image (507) (3).png>)
+![](<../../.gitbook/assets/image (555).png>)
 
 **Get the info**
 
