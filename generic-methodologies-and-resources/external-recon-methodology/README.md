@@ -389,6 +389,13 @@ There are several tools out there that will perform part of the proposed actions
 
 * **All free courses of** [**@Jhaddix**](https://twitter.com/Jhaddix) **(like** [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)**)**
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (12).png" alt="" data-size="original">\
+**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+
+{% embed url="https://go.intigriti.com/hacktricks" %}
+{% endhint %}
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
