@@ -68,7 +68,7 @@ The most common format for public key certificates is defined by [X.509](https:/
   * **CRL Distribution Points**: This extension identifies the location of the CRL from which the revocation of this certificate can be checked. The application that processes the certificate can get the location of the CRL from this extension, download the CRL and then check the revocation of this certificate.
   * **CT Precertificate SCTs**: Logs of Certificate transparency regarding the certificate
 
-## Difference between OSCP and CRL Distribution Points
+## Difference between OCSP and CRL Distribution Points
 
 **OCSP** (RFC 2560) is a standard protocol that consists of an **OCSP client and an OCSP responder**. This protocol **determines revocation status of a given digital public-key certificate** **without** having to **download** the **entire CRL**.\
 **CRL** is the **traditional method** of checking certificate validity. A **CRL provides a list of certificate serial numbers** that have been revoked or are no longer valid. CRLs let the verifier check the revocation status of the presented certificate while verifying it. CRLs are limited to 512 entries.\
