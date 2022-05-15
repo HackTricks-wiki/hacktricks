@@ -123,6 +123,11 @@ Download it from [https://github.com/fox-it/BloodHound.py](https://github.com/fo
 bloodhound-python -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all
 ```
 
+If you are running it through proxychains add `--dns-tcp` for the DNS resolution to work throught the proxy.
+
+```bash
+proxychains bloodhound-python -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all --dns-tcp
+```
 
 <details>
 
