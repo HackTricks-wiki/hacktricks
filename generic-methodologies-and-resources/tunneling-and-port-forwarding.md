@@ -296,7 +296,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 ### Cntlm
 
-[http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net)
+[http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
 It authenticates against a proxy and binds a port locally that is forwarded to the external service you specify. Then, you can use the tool of your choice through this port.\
 Example that forward port 443

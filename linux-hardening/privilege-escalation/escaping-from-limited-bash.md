@@ -154,8 +154,8 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 
 Tricks about escaping from python jails in the following page:
 
-{% content-ref url="../../misc/basic-python/bypass-python-sandboxes/" %}
-[bypass-python-sandboxes](../../misc/basic-python/bypass-python-sandboxes/)
+{% content-ref url="../../generic-methodologies-and-resources/python/bypass-python-sandboxes/" %}
+[bypass-python-sandboxes](../../generic-methodologies-and-resources/python/bypass-python-sandboxes/)
 {% endcontent-ref %}
 
 ## Lua Jails

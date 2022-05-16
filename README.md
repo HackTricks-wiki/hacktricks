@@ -58,7 +58,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [Intigriti](https://www.intigriti.com)
 
-![](<.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (13).png>)
+![](<.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (10) (14).png>)
 
 **Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
 
@@ -66,7 +66,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
-### [SecurityBoat](https://securityboat.in)
+### [SecurityBoat](https://securityboat.in/)
 
 ![](<.gitbook/assets/SB logo black\_034525.png>)
 
