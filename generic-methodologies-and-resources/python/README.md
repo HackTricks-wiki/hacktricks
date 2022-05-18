@@ -19,9 +19,10 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Interesting pages to check:**
 
 * [**Pyscript hacking tricks**](pyscript.md)****
-* ****[**Basic python syntax and libraries**](basic-python.md)****
+* ****[**Python deserializations**](../../pentesting-web/deserialization/#python)****
 * [**Tricks to bypass python sandboxes**](./)****
 * ****[**Basic python web requests syntax**](web-requests.md)****
+* [**Basic python syntax and libraries**](basic-python.md)****
 
 <details>
 
