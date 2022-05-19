@@ -560,6 +560,10 @@ gpg2john private_pgp.key #This will generate the hash, save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 ```
 
+### DPAPI Master Key
+
+Use [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) and then john
+
 ### Open Office Pwd Protected Column
 
 If you have xlsx file with a column protected by password you can unprotect it:
