@@ -29,7 +29,7 @@ You can install in your machine this distro builder: [https://github.com/lxc/dis
 sudo su
 #Install requirements
 sudo apt update
-sudo apt install -y golang-go debootstrap rsync gpg squashfs-tools
+sudo apt install -y git golang-go debootstrap rsync gpg squashfs-tools
 #Clone repo
 git clone github.com/lxc/distrobuilder
 #Make distrobuilder
