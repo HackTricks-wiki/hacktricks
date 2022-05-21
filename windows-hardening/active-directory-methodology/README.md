@@ -375,6 +375,17 @@ In this case you can **sign with** the **trusted** key a **TGT impersonating** t
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
 ```
 
+### Attack one-way trusted domain/forest (Trust account attack)
+In short, if an attacker has administrative access to FORESTB which trusts FORESTA, the attacker can obtain the credentials for a _trust account_ located in FORESTA. This account is a member of Domain Users in FORESTA through its Primary Group. As we see too often, Domain Users membership is all that is necessary to identify and use other techniques and attack paths to become Domain Admin.
+
+![](<https://images.squarespace-cdn.com/content/v1/5bbb4a7301232c6e6c8757fa/61a0233f-edd8-40b6-b6ae-8592a29875bd/Picture3.png>)
+
+This technique is not limited to forest trust but works over any domain/forest one-way trust in the direction trusting -> trusted. 
+
+The trust protections (SID filtering, disabled SID history, and disabled TGT delegation) do not mitigate the technique.
+
+[Read more](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
+
 ### Domain trust abuse mitigation
 
 **SID Filtering:**
@@ -384,7 +395,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:<current
 * But, since SID filtering has potential to break applications and user access, it is often disabled.
 * Selective Authentication
   * In an inter-forest trust, if Selective Authentication is configured, users between the trusts will not be automatically authenticated. Individual access to domains and servers in the trusting domain/forest should be given.
-* Does not prevent writeable Configration NC exploitation.
+* Does not prevent writeable Configration NC exploitation and trust account attack.
 
 [**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
