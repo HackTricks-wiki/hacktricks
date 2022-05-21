@@ -317,6 +317,8 @@ There are three **main** ways that security principals (users/groups/computer) f
 
 ### Child-to-Parent forest privilege escalation
 
+#### SID-History Injection
+
 Also, notice that there are **2 trusted keys**, one for _Child --> Parent_ and another one for P\_arent --> Child\_.
 
 ```bash
@@ -356,6 +358,15 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
 
+#### Exploit writeable Configration NC
+The Configuration NC is the primary repository for configuration information for a forest and is replicated to every DC in the forest. Additionally, every writable DC (not read-only DCs) in the forest holds a writable copy of the Configuration NC. Exploiting this require running as SYSTEM on a (child) DC.
+
+It is possible to compromise the root domain in various ways. Examples:
+- [Link GPO to to root DC site](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research)
+- [Compromise gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
+- [Schema attack](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)
+- Exploit ADCS - Create/modify certificate template to allow authentication as any user (e.g. Enterprise Admins)
+
 ### External Forest Domain Privilege escalation
 
 In this case you can **sign with** the **trusted** key a **TGT impersonating** the **Administrator** user of the current domain. In this case you **won't always get Domain Admins privileges in the external domain**, but **only** the privileges the Administrator user of your current domain **was given** in the external domain.
@@ -373,6 +384,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:<current
 * But, since SID filtering has potential to break applications and user access, it is often disabled.
 * Selective Authentication
   * In an inter-forest trust, if Selective Authentication is configured, users between the trusts will not be automatically authenticated. Individual access to domains and servers in the trusting domain/forest should be given.
+* Does not prevent writeable Configration NC exploitation.
 
 [**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
