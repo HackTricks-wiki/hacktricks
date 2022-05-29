@@ -48,7 +48,7 @@ If you want to **share some tricks with the community** you can also submit **pu
 
 ### [STM Cyber](https://www.stmcyber.com)
 
-![](<.gitbook/assets/image (642) (1) (1) (1).png>)
+![](<.gitbook/assets/image (638).png>)
 
 [**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentestings, Red teams and training.
 
@@ -58,7 +58,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [Intigriti](https://www.intigriti.com)
 
-![](<.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (10) (14).png>)
+![](<.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (14).png>)
 
 **Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
 
@@ -77,7 +77,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [**INE**](https://ine.com)
 
-![](.gitbook/assets/ine\_logo-3-.jpg)
+![](<.gitbook/assets/INE\_Logo (3).jpg>)
 
 [**INE**](https://ine.com) is a great platform to start learning or **improve** your **IT knowledge** through their huge range of **courses**. I personally like and have completed many from the [**cybersecurity section**](https://ine.com/pages/cybersecurity). **INE** also provides with the official courses to prepare the **certifications** from [**eLearnSecurity**](https://elearnsecurity.com)**.**
 
