@@ -155,7 +155,7 @@ You could use **burpcollab** or [**pingb**](http://pingb.in) for example.
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
 
-## Rean-Only/Noexec Bypass
+## Read-Only/Noexec Bypass
 
 If you are inside a filesystem with the **read-only and noexec protections** there are still ways to **execute arbitrary binaries**. One of them is by the use of **DDexec**, yo can find an explanation of the technique in:
 
