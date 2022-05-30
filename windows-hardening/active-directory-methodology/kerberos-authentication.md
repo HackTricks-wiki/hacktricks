@@ -41,7 +41,7 @@ If you have any doubt about the topic which it is not well explained, do not be 
 
 Firstly, Kerberos is an authentication protocol, not authorization. In other words, it allows to identify each user, who provides a secret password, however, it does not validates to which resources or services can this user access.
 
-Kerberos is used in Active Directory. In this platform, Kerberos provides information about the privileges of each user, but it is responsability of each service to determine if the user has access to its resources.
+Kerberos is used in Active Directory. In this platform, Kerberos provides information about the privileges of each user, but it is the responsibility of each service to determine if the user has access to its resources.
 
 ### Kerberos items
 
@@ -67,7 +67,7 @@ There are several structures handled by Kerberos, as tickets. Many of those stru
 
 * **KDC or krbtgt key** which is derivate from krbtgt account NTLM hash.
 * **User key** which is derivate from user NTLM hash.
-* **Service key** which is derivate from the NTLM hash of service owner, which can be an user or computer account.
+* **Service key** which is derivate from the NTLM hash of service owner, which can be a user or computer account.
 * **Session key** which is negotiated between the user and KDC.
 * **Service session key** to be use between user and service.
 
@@ -80,9 +80,9 @@ The main structures handled by Kerberos are the tickets. These tickets are deliv
 
 **PAC**
 
-The **PAC** (Privilege Attribute Certificate) is an structure included in almost every ticket. This structure contains the privileges of the user and it is signed with the KDC key.
+The **PAC** (Privilege Attribute Certificate) is a structure included in almost every ticket. This structure contains the privileges of the user and it is signed with the KDC key.
 
-It is possible to services to verify the PAC by comunicating with the KDC, although this does not happens often. Nevertheless, the PAC verification consists of checking only its signature, without inspecting if privileges inside of PAC are correct.
+It is possible to services to verify the PAC by communicating with the KDC, although this does not happen often. Nevertheless, the PAC verification consists of checking only its signature, without inspecting if privileges inside of PAC are correct.
 
 Furthermore, a client can avoid the inclusion of the PAC inside the ticket by specifying it in _KERB-PA-PAC-REQUEST_ field of ticket request.
 
@@ -96,7 +96,7 @@ Kerberos uses differents kinds of messages. The most interesting are the followi
 * **KRB\_TGS\_REP**: Used to deliver the TGS by KDC.
 * **KRB\_AP\_REQ**: Used to authenticate a user against a service, using the TGS.
 * **KRB\_AP\_REP**: (Optional) Used by service to identify itself against the user.
-* **KRB\_ERROR**: Message to comunicate error conditions.
+* **KRB\_ERROR**: Message to communicate error conditions.
 
 Additionally, even if it is not part of Kerberos, but NRPC, the AP optionally could use the **KERB\_VERIFY\_PAC\_REQUEST** message to send to KDC the signature of PAC, and verify if it is correct.
 
