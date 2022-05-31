@@ -94,6 +94,7 @@
     * [Docker --privileged](linux-hardening/privilege-escalation/docker-breakout/docker-privileged.md)
     * [Abusing Docker Socket for Privilege Escalation](linux-hardening/privilege-escalation/docker-breakout/abusing-docker-socket-for-privilege-escalation.md)
   * [Node inspector/CEF debug abuse](linux-hardening/privilege-escalation/electron-cef-chromium-debugger-abuse.md)
+  * [euid, ruid, suid](linux-hardening/privilege-escalation/euid-ruid-suid.md)
   * [Escaping from Jails](linux-hardening/privilege-escalation/escaping-from-limited-bash.md)
   * [Cisco - vmanage](linux-hardening/privilege-escalation/cisco-vmanage.md)
   * [D-Bus Enumeration & Command Injection Privilege Escalation](linux-hardening/privilege-escalation/d-bus-enumeration-and-command-injection-privilege-escalation.md)

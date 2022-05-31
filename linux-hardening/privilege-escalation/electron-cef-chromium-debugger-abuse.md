@@ -1,7 +1,5 @@
 # Node inspector/CEF debug abuse
 
-## Node inspector/CEF debug abuse
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -104,7 +102,7 @@ The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefd
 ```
 
 {% hint style="info" %}
-Note that **NodeJS RCE exploits won't work** if connected to a browser via [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) \*\*\*\* (you need to check the API to find interesting things to do with it).
+Note that **NodeJS RCE exploits won't work** if connected to a browser via [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) (you need to check the API to find interesting things to do with it).
 {% endhint %}
 
 ## RCE in NodeJS Debugger/Inspector
