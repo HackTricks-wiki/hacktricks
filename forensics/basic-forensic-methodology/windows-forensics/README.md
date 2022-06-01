@@ -466,11 +466,16 @@ Inside the EventID 4634/4647 there are interesting sub-types:
 * **3 (network)**: Connection to a shared folder
 * **4 (Batch)**: Process executed
 * **5 (service)**: Service started by the Service Control Manager
-* **7**: Screen unblocked using password
+* **6 (proxy):** Proxy Login
+* **7 (Unlock)**: Screen unblocked using password
 * **8 (network cleartext)**: User authenticated sendin clear text passwords. This event use to come from the IIS
 * **9 (new credentials)**: It's generated when the command `RunAs` is used or the user access to a network service with different credentials.
 * **10 (remote interactive)**: Authentication via Terminal Services or RDP
 * **11 (cache interactive)**: Access using the last cached credentials because it wasn't possible to contact the domain controller
+* **12 (cache remote interactive)**: Login remotely with cached credentials (a combination of 10 and 11).
+* **13 (cached unlock)**: Unlock a locked machine with cached credentials.
+
+In this post you can find how to mimic all these types of login and in which of them you will be able to dump credentials from memory: [https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them)
 
 The Status and sub status information of the event s can indicate more details about the causes of the event. For example take a look to the following Status and Sub Status Codes of the Event ID 4625:
 

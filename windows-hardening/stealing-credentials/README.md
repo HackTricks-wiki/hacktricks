@@ -114,6 +114,22 @@ We just have to keep in mind that this technique can only be executed as **SYSTE
 
 **You can automate this process with** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
 
+### **Dumping lsass with Task Manager**
+
+1. Right click on the Task Bar and click on Task Manager
+2. Click on More details
+3. Search for "Local Security Authority Process" process in the Processes tab
+4. Right click on "Local Security Authority Process" process and click on "Create dump file".
+
+### Dumping lsass with procdump
+
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) is a Microsoft signed binary which is a part of [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) suite.
+
+```
+Get-Process -Name LSASS
+.\procdump.exe -ma 608 lsass.dmp
+```
+
 ## CrackMapExec
 
 ### Dump SAM hashes
