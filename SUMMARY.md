@@ -40,6 +40,7 @@
     * [NTFS](forensics/basic-forensic-methodology/partitions-file-systems-carving/ntfs.md)
   * [Pcap Inspection](forensics/basic-forensic-methodology/pcap-inspection/README.md)
     * [DNSCat pcap analysis](forensics/basic-forensic-methodology/pcap-inspection/dnscat-exfiltration.md)
+    * [Suricata & Iptables cheatsheet](generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/suricata-and-iptables-cheatsheet.md)
     * [USB Keystrokes](forensics/basic-forensic-methodology/pcap-inspection/usb-keystrokes.md)
     * [Wifi Pcap Analysis](forensics/basic-forensic-methodology/pcap-inspection/wifi-pcap-analysis.md)
     * [Wireshark tricks](forensics/basic-forensic-methodology/pcap-inspection/wireshark-tricks.md)
