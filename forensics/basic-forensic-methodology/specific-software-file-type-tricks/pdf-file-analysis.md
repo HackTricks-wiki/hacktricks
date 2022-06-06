@@ -1,4 +1,4 @@
-
+# PDF File analysis
 
 <details>
 
@@ -16,6 +16,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
+
+Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+
+{% embed url="https://securityhubs.io/" %}
+{% endhint %}
 
 From: [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 
@@ -37,10 +44,6 @@ When exploring PDF content for hidden data, some of the hiding places to check i
 
 There are also several Python packages for working with the PDF file format, like [PeepDF](https://github.com/jesparza/peepdf), that enable you to write your own parsing scripts.
 
-
-
-
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -56,5 +59,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

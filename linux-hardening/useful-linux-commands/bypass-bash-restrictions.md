@@ -16,6 +16,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
+
+Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+
+{% embed url="https://securityhubs.io/" %}
+{% endhint %}
+
 ## Common Limitations Bypasses
 
 ### Reverse Shell
@@ -165,13 +173,18 @@ If you are inside a filesystem with the **read-only and noexec protections** the
 
 ## References & More
 
-{% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits" %}
+* [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+* [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+* [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+* [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
 
-{% embed url="https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet" %}
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
 
-{% embed url="https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0" %}
+Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
 
-{% embed url="https://www.secjuice.com/web-application-firewall-waf-evasion/" %}
+{% embed url="https://securityhubs.io/" %}
+{% endhint %}
 
 <details>
 

@@ -1,4 +1,4 @@
-
+# Local Cloud Storage
 
 <details>
 
@@ -16,8 +16,15 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
 
-# OneDrive
+Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+
+{% embed url="https://securityhubs.io/" %}
+{% endhint %}
+
+## OneDrive
 
 In Windows you can find the OneDrive folder in `\Users\<username>\AppData\Local\Microsoft\OneDrive`\
 And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` which contains some interesting data regarding the synchronized files:
@@ -33,7 +40,7 @@ And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` 
 
 Once you have found the CID it's recommended to **search files containing this ID**. You may be able to find files with the name: _**\<CID>.ini**_ and _**\<CID>.dat**_ that may contain interesting information like the names of files syncronized with OneDrive.
 
-# Google Drive
+## Google Drive
 
 In Widows you can find the main Google Drive folder in `\Users\<username>\AppData\Local\Google\Drive\user_default`\
 This folder contains a file called Sync\_log.log with information like the email address of the account, filenames, timestamps, MD5 hashes of the files...\
@@ -44,9 +51,9 @@ In this table you can find: the **name** of the **synchronized** **files**, modi
 
 The table data of the database **`Sync_config.db`** contains the email address of the account, path of the shared folders and Google Drive version.
 
-# Dropbox
+## Dropbox
 
-Dropbox uses **SQLite databases** to mange the files. In this \
+Dropbox uses **SQLite databases** to mange the files. In this\
 You can find the databases in the folders:
 
 * `\Users\<username>\AppData\Local\Dropbox`
@@ -113,6 +120,13 @@ Other tables inside this database contain more interesting information:
 * **deleted\_fields**: Dropbox deleted files
 * **date\_added**
 
+{% hint style="danger" %}
+<img src="../../../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
+
+Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+
+{% embed url="https://securityhubs.io/" %}
+{% endhint %}
 
 <details>
 
@@ -129,5 +143,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

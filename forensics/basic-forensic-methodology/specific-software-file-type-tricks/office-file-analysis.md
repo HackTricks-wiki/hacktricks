@@ -1,4 +1,4 @@
-
+# Office file analysis
 
 <details>
 
@@ -16,8 +16,15 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
 
-# Introduction
+Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+
+{% embed url="https://securityhubs.io/" %}
+{% endhint %}
+
+## Introduction
 
 Microsoft has created **dozens of office document file formats**, many of which are popular for the distribution of phishing attacks and malware because of their ability to **include macros** (VBA scripts).
 
@@ -74,21 +81,20 @@ Sometimes the challenge is not to find hidden static data, but to **analyze a VB
 $ soffice path/to/test.docx macro://./standard.module1.mymacro
 ```
 
-# [oletools](https://github.com/decalage2/oletools)
+## [oletools](https://github.com/decalage2/oletools)
 
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
 
-# Automatic Execution
+## Automatic Execution
 
 Macro functions like `AutoOpen`, `AutoExec` or `Document_Open` will be **automatically** **executed**.
 
-# References
+## References
 
 * [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
-
 
 <details>
 
@@ -105,5 +111,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

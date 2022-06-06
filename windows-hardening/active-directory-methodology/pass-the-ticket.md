@@ -16,6 +16,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
+
+Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+
+{% embed url="https://securityhubs.io/" %}
+{% endhint %}
+
 ## Pass The Ticket (PTT)
 
 This kind of attack is similar to Pass the Key, but instead of using hashes to request a ticket, the ticket itself is stolen and used to authenticate as its owner.
@@ -56,6 +64,14 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 .\PsExec.exe -accepteula \\lab-wdc01.jurassic.park cmd
 ```
 {% endcode %}
+
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
+
+Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+
+{% embed url="https://securityhubs.io/" %}
+{% endhint %}
 
 <details>
 
