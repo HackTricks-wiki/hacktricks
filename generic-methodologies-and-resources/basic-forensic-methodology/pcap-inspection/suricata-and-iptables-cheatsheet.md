@@ -35,9 +35,9 @@ iptables -L
 iptables -S
 
 # Block IP addresses & ports
-iptables -A INPUT -s ip1,ip2,ip3 -j DROP
-iptables -A INPUT -p tcp --dport 443 -j DROP
-iptables -A INPUT -s ip1,ip2 -p tcp --dport 443 -j DROP
+iptables -I INPUT -s ip1,ip2,ip3 -j DROP
+iptables -I INPUT -p tcp --dport 443 -j DROP
+iptables -I INPUT -s ip1,ip2 -p tcp --dport 443 -j DROP
 
 # String based drop
 ## Strings are case sansitive (pretty easy to bypass if you want to check a SQLi for example)
@@ -47,8 +47,8 @@ iptables -I OUTPUT -p tcp --sport <port_listening> -m string --algo bm --string 
 
 # Drop every input port except some
 iptables -P INPUT DROP # Default to drop
-iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
-iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -I INPUT -p tcp --dport 8000 -j ACCEPT
+iptables -I INPUT -p tcp --dport 443 -j ACCEPT
 
 
 # Persist Iptables
@@ -213,13 +213,24 @@ content: "something"
 content: |61 61 61| #Hex: AAA
 content: "http|3A|//" #Mix string and hex
 content: "abc"; nocase; #Case insensitive
+reject tcp any any -> any any (msg: "php-rce"; content: "eval"; nocase; metadata: tag php-rce; sid:101; rev: 1;)
+
+# Replaces string
+## Content and replace string must have same length
+content:"abc"; replace: "def"
+alert tcp any any -> any any (msg: "flag replace"; content: "CTF{a6st"; replace: "CTF{u798"; nocase; sid:100; rev: 1;)
+## The replace works in both input and output packets
+## But it only modifies the first match
 
 # Filter by regex
 pcre:"/<regex>/opts"
 pcre:"/NICK .*USA.*[0-9]{3,}/i"
+drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 
-# Replaces string
-content:"abc"; replace: "def"
+# Other examples
+## Drop by port
+drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
+
 ```
 
 <details>
