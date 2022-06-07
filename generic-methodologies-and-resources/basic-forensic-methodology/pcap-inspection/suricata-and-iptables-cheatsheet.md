@@ -122,6 +122,15 @@ iptables -I OUTPUT -j NFQUEUE
 
 ## Start suricata in IPS mode
 suricata -c /etc/suricata/suricata.yaml  -q 0
+### or modify the service config file as:
+systemctl edit suricata.service
+
+[Service]
+ExecStart=
+ExecStart=/usr/bin/suricata -c /etc/suricata/suricata.yaml --pidfile /run/suricata.pid -q 0 -vvv
+Type=simple
+
+systemctl daemon-reload
 ```
 
 ### Rules Definitions
