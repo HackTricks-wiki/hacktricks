@@ -455,6 +455,23 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
 
+#### Known plaintext zip attack
+
+You need to know the **plaintext** (or part of the plaintext) **of a file contained inside** the encrypted zip. You can check **filenames and size of files contained inside** an encrypted zip running: **`7z l encrypted.zip`**\
+Download [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)from the releases page.
+
+```bash
+# You need to create a zip file containing only the file that is inside the encrypted zip
+zip plaintext.zip plaintext.file
+
+./bkcrack -C <encrypted.zip> -c <plaintext.file> -P <plaintext.zip> -p <plaintext.file>
+# Now wait, this should print akey such as 7b549874 ebc25ec5 7e465e18
+# With that key you can create a new zip file with the content of encrypted.zip
+# but with a different pass that you set (so you can decrypt it)
+./bkcrack -C <encrypted.zip> -U unlocked.zip -k 7b549874 ebc25ec5 7e465e18 new_pwd 
+unzip unlocked.zip #User new_pwd as password
+```
+
 ### 7z
 
 ```bash
