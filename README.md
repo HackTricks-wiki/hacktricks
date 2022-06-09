@@ -56,15 +56,13 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 **STM Cyber** also support cybersecurity open source projects like HackTricks :)
 
-### [Intigriti](https://www.intigriti.com)
+### [Security Hubs](https://securityhubs.io/)
 
-![](<.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (14).png>)
+![](<.gitbook/assets/security-hubs-logo\_v1.2 (1).png>)
 
-**Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
+Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results.** [**Security Hubs**](https://securityhubs.io/) **** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
+{% embed url="https://securityhubs.io/" %}
 
 ### [SecurityBoat](https://securityboat.in/)
 
@@ -74,6 +72,16 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 **Make the right choice by contacting us for your security:**
 
 {% embed url="https://securityboat.in/contact-us" %}
+
+### [Intigriti](https://www.intigriti.com)
+
+![](<.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (14).png>)
+
+**Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
+
+**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+
+{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ### [**INE**](https://ine.com)
 
