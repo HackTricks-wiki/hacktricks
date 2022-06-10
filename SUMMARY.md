@@ -316,7 +316,7 @@
   * [Python](network-services-pentesting/pentesting-web/python.md)
   * [Special HTTP headers](network-services-pentesting/pentesting-web/special-http-headers.md)
   * [Spring Actuators](network-services-pentesting/pentesting-web/spring-actuators.md)
-  * [Symphony](network-services-pentesting/pentesting-web/symphony.md)
+  * [Symfony](network-services-pentesting/pentesting-web/symphony.md)
   * [Tomcat](network-services-pentesting/pentesting-web/tomcat.md)
   * [Uncovering CloudFlare](network-services-pentesting/pentesting-web/uncovering-cloudflare.md)
   * [VMWare (ESX, VCenter...)](network-services-pentesting/pentesting-web/vmware-esx-vcenter....md)
