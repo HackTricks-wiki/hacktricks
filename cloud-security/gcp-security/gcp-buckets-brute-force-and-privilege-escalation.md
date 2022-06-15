@@ -35,7 +35,7 @@ Note that other cloud resources could be searched for and that some times these 
 
 As other clouds, GCP also offers Buckets to its users. These buckets might be (to list the content, read, write...).
 
-![](<../../.gitbook/assets/image (628) (1) (1) (1).png>)
+![](<../../.gitbook/assets/image (618).png>)
 
 The following tools can be used to generate variations of the name given and search for miss-configured buckets with that names:
 
