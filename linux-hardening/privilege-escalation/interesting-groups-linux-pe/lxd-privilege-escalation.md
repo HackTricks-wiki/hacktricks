@@ -31,7 +31,7 @@ sudo su
 sudo apt update
 sudo apt install -y git golang-go debootstrap rsync gpg squashfs-tools
 #Clone repo
-git clone github.com/lxc/distrobuilder
+git clone https://github.com/lxc/distrobuilder
 #Make distrobuilder
 cd distrobuilder
 make
