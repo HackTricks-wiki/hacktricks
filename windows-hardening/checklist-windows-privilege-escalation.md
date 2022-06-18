@@ -20,7 +20,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 ### [System Info](windows-local-privilege-escalation/#system-info)
 
-* [ ] Obtain [**System informatio**](windows-local-privilege-escalation/#system-info)
+* [ ] Obtain [**System information**](windows-local-privilege-escalation/#system-info)
 * [ ] Search for **kernel** [**exploits using scripts**](windows-local-privilege-escalation/#version-exploits)
 * [ ] Use **Google to search** for kernel **exploits**
 * [ ] Use **searchsploit to search** for kernel **exploits**
