@@ -450,6 +450,7 @@
 * [Email Injections](pentesting-web/email-header-injection.md)
 * [File Inclusion/Path traversal](pentesting-web/file-inclusion/README.md)
   * [phar:// deserialization](pentesting-web/file-inclusion/phar-deserialization.md)
+  * [LFI2RCE via PHP Filters](pentesting-web/file-inclusion/lfi2rce-via-php-filters.md)
   * [LFI2RCE via Nginx temp files](pentesting-web/file-inclusion/lfi2rce-via-nginx-temp-files.md)
   * [Via PHP\_SESSION\_UPLOAD\_PROGRESS](pentesting-web/file-inclusion/via-php\_session\_upload\_progress.md)
   * [LFI2RCE via phpinfo()](pentesting-web/file-inclusion/lfi2rce-via-phpinfo.md)
