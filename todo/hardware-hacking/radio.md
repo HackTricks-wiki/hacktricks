@@ -1,4 +1,4 @@
-
+# Radio
 
 <details>
 
@@ -16,12 +16,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
-# SigDigger
+## SigDigger
 
 [**SigDigger** ](https://github.com/BatchDrake/SigDigger)is a free digital signal analyzer for GNU/Linux and macOS, designed to extract information of unknown radio signals. It supports a variety of SDR devices through SoapySDR, and allows adjustable demodulation of FSK, PSK and ASK signals, decode analog video, analyze bursty signals and listen to analog voice channels (all in real time).
 
-## Basic Config
+### Basic Config
 
 After installing there are a few things that you could consider configuring.\
 In settings (the second tab button) you can select the **SDR device** or **select a file** to read and which frequency to syntonise and the Sample rate (recommended to up to 2.56Msps if your PC support it)\\
@@ -36,7 +35,7 @@ In the GUI behaviour it's recommended to enable a few things if your PC support 
 If you realise that your PC is not capturing things try to disable OpenGL and lowering the sample rate.
 {% endhint %}
 
-## Uses
+### Uses
 
 * Just to **capture some time of a signal and analyze it** just maintain the button "Push to capture" as long as you need.
 
@@ -46,13 +45,13 @@ If you realise that your PC is not capturing things try to disable OpenGL and lo
 
 ![](<../../.gitbook/assets/image (658).png>)
 
-## Synchronize with radio channel
+### Synchronize with radio channel
 
 With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with the channel you want to hear, configure "Baseband audio preview" option, configure the bandwith to get all the info being sent and then set the Tuner to the level before the noise is really starting to increase:
 
 ![](<../../.gitbook/assets/image (389).png>)
 
-# Interesting tricks
+## Interesting tricks
 
 * When a device is sending bursts of information, usually the **first part is going to be a preamble** so you **don't** need to **worry** if you **don't find information** in there **or if there are some errors** there.
 * In frames of information you usually should **find different frames well aligned between them**:
@@ -64,7 +63,7 @@ With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with t
 * **After recovering the bits you might need to process them someway**. For example, in Manchester codification a up+down will be a 1 or 0 and a down+up will be the other one. So pairs of 1s and 0s (ups and downs) will be a real 1 or a real 0.
 * Even if a signal is using Manchester codification (it's impossible to find more than two 0s or 1s in a row), you might **find several 1s or 0s together in the preamble**!
 
-## Uncovering modulation type with IQ
+### Uncovering modulation type with IQ
 
 There are 3 ways to store information in signals: Modulating the **amplitude**, **frequency** or **phase**.\
 If you are checking a signal there are different ways to try to figure out what is being used to store information (fin more ways below) but a good one is to check the IQ graph.
@@ -78,13 +77,13 @@ If you are checking a signal there are different ways to try to figure out what 
   Therefore, to identify FM, you should **only see basically a circle** in this graph.\
   Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
 
-# AM Example
+## AM Example
 
 {% file src="../../.gitbook/assets/sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw" %}
 
-## Uncovering AM
+### Uncovering AM
 
-### Checking the envelope
+#### Checking the envelope
 
 Checking AM info with [**SigDigger** ](https://github.com/BatchDrake/SigDigger)and just looking at the **envelop** you can see different clear amplitude levels. The used signal is sending pulses with information in AM, this is how one pulse looks like:
 
@@ -94,7 +93,7 @@ And this is how part of the symbol looks like with the waveform:
 
 ![](<../../.gitbook/assets/image (650) (1).png>)
 
-### Checking the Histogram
+#### Checking the Histogram
 
 You can **select the whole signal** where information is located, select **Amplitude** mode and **Selection** and click on **Histogram.** You can observer that 2 clear levels are only found
 
@@ -106,27 +105,27 @@ For example, if you select Frequency instead of Amplitude in this AM signal you 
 
 If you find a lot of frequencies potentially this won't be a FM, probably the signal frequency was just modified because of the channel.
 
-### With IQ
+#### With IQ
 
 In this example you can see how there is a **big circle** but also **a lot of points in the centre.**
 
 ![](<../../.gitbook/assets/image (640).png>)
 
-## Get Symbol Rate
+### Get Symbol Rate
 
-### With one symbol
+#### With one symbol
 
 Select the smallest symbol you can find (so you are sure it's just 1) and check the "Selection freq". I this case it would be 1.013kHz (so 1kHz).
 
 ![](<../../.gitbook/assets/image (638) (1).png>)
 
-### With a group of symbols
+#### With a group of symbols
 
 You can also indicate the number of symbols you are going to select and SigDigger will calculate the frequency of 1 symbol (the more symbols selected the better probably). In this scenario I selected 10 symbols and the "Selection freq" is 1.004 Khz:
 
 ![](<../../.gitbook/assets/image (635).png>)
 
-## Get Bits
+### Get Bits
 
 Having found this is an **AM modulated** signal and the **symbol rate** (and knowing that in this case something up means 1 and something down means 0), it's very easy to **obtain the bits** encoded in the signal. So, select the signal with info and configure the sampling and decision and press sample (check that **Amplitude** is selected, the discovered **Symbol rate** is configured and the **Gadner clock recovery** is selected):
 
@@ -143,7 +142,7 @@ Pressing sample this appears:
 
 Now, to make SigDigger understand **where is the range** of the level carrying information you need to click on the **lower level** and maintain clicked until the biggest level:
 
-![](<../../.gitbook/assets/image (662) (1) (1).png>)
+![](<../../.gitbook/assets/image (662) (1) (1) (1).png>)
 
 If there would have been for example **4 different levels of amplitude**, you should have need to configure the **Bits per symbol to 2** and select from the smallest to the biggest.
 
@@ -155,13 +154,13 @@ If the signal has more than 1 bit per symbol (for example 2), SigDigger has **no
 
 Also, use **codifications** such as **Manchester**, and **up+down** can be **1 or 0** and an down+up can be a 1 or 0. In those cases you need to **treat the obtained ups (1) and downs (0)** to substitute the pairs of 01 or 10 as 0s or 1s.
 
-# FM Example
+## FM Example
 
 {% file src="../../.gitbook/assets/sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw" %}
 
-## Uncovering FM
+### Uncovering FM
 
-### Checking the frequencies and waveform
+#### Checking the frequencies and waveform
 
 Signal example sending information modulated in FM:
 
@@ -181,7 +180,7 @@ If the synchronized frequency is **closer to one frequency than to the other** y
 
 ![](<../../.gitbook/assets/image (634).png>)
 
-### Checking the histogram
+#### Checking the histogram
 
 Checking the frequency histogram of the signal with information you can easily see 2 different signals:
 
@@ -195,7 +194,7 @@ And this is would be phase histogram (which makes very clear the signal is not m
 
 ![](<../../.gitbook/assets/image (201) (2).png>)
 
-### With IQ
+#### With IQ
 
 IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
 Therefore, to identify FM, you should **only see basically a circle** in this graph.\
@@ -203,14 +202,13 @@ Moreover, a different frequency is "represented" by the IQ graph by a **speed ac
 
 ![](<../../.gitbook/assets/image (643) (1).png>)
 
-## Get Symbol Rate
+### Get Symbol Rate
 
 You can use the **same technique as the one used in the AM example** to get the symbol rate once you have found the frequencies carrying symbols.
 
-## Get Bits
+### Get Bits
 
 You can use the **same technique as the one used in the AM example** to get the bits once you have **found the signal is modulated in frequency** and the **symbol rate**.
-
 
 <details>
 
@@ -227,5 +225,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

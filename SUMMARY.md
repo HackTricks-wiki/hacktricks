@@ -511,6 +511,7 @@
 * [XSS (Cross Site Scripting)](pentesting-web/xss-cross-site-scripting/README.md)
   * [PDF Injection](pentesting-web/xss-cross-site-scripting/pdf-injection.md)
   * [DOM XSS](pentesting-web/xss-cross-site-scripting/dom-xss.md)
+  * [SOME - Same Origin Method Execution](pentesting-web/xss-cross-site-scripting/some-same-origin-method-execution.md)
   * [Debugging Client Side JS](pentesting-web/xss-cross-site-scripting/debugging-client-side-js.md)
   * [Server Side XSS (Dynamic PDF)](pentesting-web/xss-cross-site-scripting/server-side-xss-dynamic-pdf.md)
   * [XSS Tools](pentesting-web/xss-cross-site-scripting/xss-tools.md)
