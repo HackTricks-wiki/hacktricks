@@ -640,6 +640,7 @@
 ## ✍ TODO
 
 * [Other Big References](misc/references.md)
+* [Rust Basics](todo/rust-basics.md)
 * [More Tools](todo/more-tools.md)
 * [MISC](todo/misc.md)
 * [Pentesting DNS](pentesting-dns.md)
