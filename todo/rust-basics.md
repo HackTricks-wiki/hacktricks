@@ -32,6 +32,65 @@ pub enum Option<T> {
 
 You can use functions such as `is_some()` __ or __ `is_none()` to check the value of the Option.
 
+### Macros
+
+Macros are more powerful than functions because they expand to produce more code than the code you’ve written manually. For example, a function signature must declare the number and type of parameters the function has. Macros, on the other hand, can take a variable number of parameters: we can call `println!("hello")` with one argument or `println!("hello {}", name)` with two arguments. Also, macros are expanded before the compiler interprets the meaning of the code, so a macro can, for example, implement a trait on a given type. A function can’t, because it gets called at runtime and a trait needs to be implemented at compile time.
+
+```rust
+macro_rules! my_macro {
+    () => {
+        println!("Check out my macro!");
+    };
+    ($val:expr) => {
+        println!("Look at this other macro: {}", $val);
+    }
+}
+fn main() {
+    my_macro!();
+    my_macro!(7777);
+}
+
+// Export a macro from a module
+mod macros {
+    #[macro_export]
+    macro_rules! my_macro {
+        () => {
+            println!("Check out my macro!");
+        };
+    }
+}
+```
+
+### Iterate
+
+```rust
+// Iterate through a vector
+let my_fav_fruits = vec!["banana", "raspberry"];
+let mut my_iterable_fav_fruits = my_fav_fruits.iter();
+assert_eq!(my_iterable_fav_fruits.next(), Some(&"banana"));
+assert_eq!(my_iterable_fav_fruits.next(), Some(&"raspberry"));
+assert_eq!(my_iterable_fav_fruits.next(), None); // When it's over, it's none
+ 
+// One line iteration with action
+my_fav_fruits.iter().map(|x| capitalize_first(x)).collect()
+
+// Hashmap iteration
+for (key, hashvalue) in &*map {
+for key in map.keys() {
+for value in map.values() {
+```
+
+### Recursive Box
+
+```rust
+enum List {
+    Cons(i32, List),
+    Nil,
+}
+
+let list = Cons(1, Cons(2, Cons(3, Nil)));
+```
+
 ### Conditionals
 
 #### if
@@ -214,6 +273,46 @@ mod tests {
     fn you_can_assert() {
         assert!(true);
         assert_eq!(true, true);
+        assert_ne!(true, false);
+    }
+}
+```
+
+### Threading
+
+#### Arc
+
+An Arc can use Clone to create more references over the object to pass them to the threads. When the last reference pointer to a value is out of scope, the variable is dropped.
+
+```rust
+use std::sync::Arc;
+let apple = Arc::new("the same apple");
+for _ in 0..10 {
+    let apple = Arc::clone(&apple);
+    thread::spawn(move || {
+        println!("{:?}", apple);
+    });
+}
+```
+
+#### Threads
+
+In this case we will pass the thread a variable it will be able to modify
+
+```rust
+fn main() {
+    let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
+    let status_shared = Arc::clone(&status);
+    thread::spawn(move || {
+        for _ in 0..10 {
+            thread::sleep(Duration::from_millis(250));
+            let mut status = status_shared.lock().unwrap();
+            status.jobs_completed += 1;
+        }
+    });
+    while status.lock().unwrap().jobs_completed < 10 {
+        println!("waiting... ");
+        thread::sleep(Duration::from_millis(500));
     }
 }
 ```
