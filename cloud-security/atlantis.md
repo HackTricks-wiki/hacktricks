@@ -305,7 +305,7 @@ Moreover, if you don't have configured in the **branch protection** to ask to **
 
 This is the **setting** in Github branch protections:
 
-![](<../.gitbook/assets/image (375) (1) (1).png>)
+![](<../.gitbook/assets/image (375) (1) (1) (1).png>)
 
 ### Webhook Secret
 

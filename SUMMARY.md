@@ -79,7 +79,6 @@
 
 * [Checklist - Linux Privilege Escalation](linux-hardening/linux-privilege-escalation-checklist.md)
 * [Linux Privilege Escalation](linux-hardening/privilege-escalation/README.md)
-  * [PAM - Pluggable Authentication Modules](linux-hardening/privilege-escalation/pam-pluggable-authentication-modules.md)
   * [SELinux](linux-hardening/privilege-escalation/selinux.md)
   * [Logstash](linux-hardening/privilege-escalation/logstash.md)
   * [Containerd (ctr) Privilege Escalation](linux-hardening/privilege-escalation/containerd-ctr-privilege-escalation.md)
@@ -115,6 +114,8 @@
 * [Bypass Linux Shell Restrictions](linux-hardening/useful-linux-commands/bypass-bash-restrictions.md)
   * [DDexec](linux-hardening/bypass-linux-shell-restrictions/ddexec.md)
 * [Linux Environment Variables](linux-hardening/linux-environment-variables.md)
+* [Linux Post-Exploitation](linux-hardening/linux-post-exploitation/README.md)
+  * [PAM - Pluggable Authentication Modules](linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)
 
 ## 🍏 MacOS Hardening
 
