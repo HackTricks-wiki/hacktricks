@@ -434,8 +434,6 @@
 * [Cross-site WebSocket hijacking (CSWSH)](pentesting-web/cross-site-websocket-hijacking-cswsh.md)
 * [CSRF (Cross Site Request Forgery)](pentesting-web/csrf-cross-site-request-forgery.md)
 * [Dangling Markup - HTML scriptless injection](pentesting-web/dangling-markup-html-scriptless-injection.md)
-  * [HTML Injection / Char-by-char Exfiltration](pentesting-web/dangling-markup-html-scriptless-injection/html-injection-char-by-char-exfiltration/README.md)
-    * [CSS Injection Code](pentesting-web/dangling-markup-html-scriptless-injection/html-injection-char-by-char-exfiltration/css-injection-code.md)
 * [Deserialization](pentesting-web/deserialization/README.md)
   * [NodeJS - \_\_proto\_\_ & prototype Pollution](pentesting-web/deserialization/nodejs-proto-prototype-pollution/README.md)
     * [Client Side Prototype Pollution](pentesting-web/deserialization/nodejs-proto-prototype-pollution/client-side-prototype-pollution.md)
@@ -521,7 +519,9 @@
   * [Steal Info JS](pentesting-web/xss-cross-site-scripting/steal-info-js.md)
   * [XSS in Markdown](pentesting-web/xss-cross-site-scripting/xss-in-markdown.md)
 * [XSSI (Cross-Site Script Inclusion)](pentesting-web/xssi-cross-site-script-inclusion.md)
-* [XS-Search](pentesting-web/xs-search.md)
+* [XS-Search](pentesting-web/xs-search/README.md)
+  * [HTML Injection / Char-by-char Exfiltration](pentesting-web/xs-search/html-injection-char-by-char-exfiltration/README.md)
+    * [CSS Injection Code](pentesting-web/xs-search/html-injection-char-by-char-exfiltration/css-injection-code.md)
 
 ## ⛈ Cloud Security
 
