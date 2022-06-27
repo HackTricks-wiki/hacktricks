@@ -519,9 +519,9 @@
   * [Steal Info JS](pentesting-web/xss-cross-site-scripting/steal-info-js.md)
   * [XSS in Markdown](pentesting-web/xss-cross-site-scripting/xss-in-markdown.md)
 * [XSSI (Cross-Site Script Inclusion)](pentesting-web/xssi-cross-site-script-inclusion.md)
-* [XS-Search](pentesting-web/xs-search/README.md)
-  * [HTML Injection / Char-by-char Exfiltration](pentesting-web/xs-search/html-injection-char-by-char-exfiltration/README.md)
-    * [CSS Injection Code](pentesting-web/xs-search/html-injection-char-by-char-exfiltration/css-injection-code.md)
+* [XS-Search](pentesting-web/xs-search.md)
+  * [CSS Injection](pentesting-web/xs-search/css-injection/README.md)
+    * [CSS Injection Code](pentesting-web/xs-search/css-injection/css-injection-code.md)
 
 ## ⛈ Cloud Security
 
