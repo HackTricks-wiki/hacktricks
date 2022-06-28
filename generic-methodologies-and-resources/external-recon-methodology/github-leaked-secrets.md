@@ -1,4 +1,4 @@
-
+# Github Leaked Secrets
 
 <details>
 
@@ -16,10 +16,16 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+<img src="../../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">\
+**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+
+{% embed url="https://go.intigriti.com/hacktricks" %}
+{% endhint %}
 
 Now that we have built the list of assets of our scope it's time to search for some OSINT low-hanging fruits.
 
-## Api keys leaks in github
+### Api keys leaks in github
 
 * [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
 * [https://github.com/eth0izzle/shhgit](https://github.com/eth0izzle/shhgit)
@@ -31,7 +37,7 @@ Now that we have built the list of assets of our scope it's time to search for s
 * [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 * [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
-## **Dorks**
+### **Dorks**
 
 ```bash
 ".mlab.com password"
@@ -315,8 +321,6 @@ AWS SECRET
 "private" extension:pgp
 ```
 
-
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -332,5 +336,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-
