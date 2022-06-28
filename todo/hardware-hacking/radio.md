@@ -58,7 +58,7 @@ With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with t
 
 ![](<../../.gitbook/assets/image (660).png>)
 
-![](<../../.gitbook/assets/image (652) (1).png>)
+![](<../../.gitbook/assets/image (652) (1) (1).png>)
 
 * **After recovering the bits you might need to process them someway**. For example, in Manchester codification a up+down will be a 1 or 0 and a down+up will be the other one. So pairs of 1s and 0s (ups and downs) will be a real 1 or a real 0.
 * Even if a signal is using Manchester codification (it's impossible to find more than two 0s or 1s in a row), you might **find several 1s or 0s together in the preamble**!
