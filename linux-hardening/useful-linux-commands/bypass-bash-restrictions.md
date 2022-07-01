@@ -166,9 +166,10 @@ First of all check all the [**shell builtins**](https://www.gnu.org/software/bas
 declare builtins
 
 # In these cases PATH won't be set, so you can try to set it
-PATH="/bin"; /bin/ls
+PATH="/bin" /bin/ls
 export PATH="/bin"
 declare PATH="/bin"
+SHELL=/bin/bash
 
 # Hex
 $(echo -e "\x2f\x62\x69\x6e\x2f\x6c\x73")
