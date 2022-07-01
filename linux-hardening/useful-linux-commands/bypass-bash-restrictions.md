@@ -159,7 +159,7 @@ You could use **burpcollab** or [**pingb**](http://pingb.in) for example.
 ### Builtins
 
 In case you cannot execute external functions and only have access to a **limited set of builtins to obtain RCE**, there are some handy tricks to do it. Usually you **won't be able to use all** of the **builtins**, so you should **know all your options** to try to bypass the jail. Idea from [**devploit**](https://twitter.com/devploit).\
-First of all check all the [**shell builtins**](https://www.gnu.org/software/bash/manual/html\_node/Shell-Builtin-Commands.html) in here:
+First of all check all the [**shell builtins**](https://www.gnu.org/software/bash/manual/html\_node/Shell-Builtin-Commands.html)**.** Then here you have some **recommendations**:
 
 ```bash
 # Get list of builtins
@@ -186,7 +186,6 @@ $(printf %.1s "$PWD")bin$(printf %.1s "$PWD")ls
 declare
 declare functions
 declare historywords
-
 
 # Read flag in current dir
 source f*
