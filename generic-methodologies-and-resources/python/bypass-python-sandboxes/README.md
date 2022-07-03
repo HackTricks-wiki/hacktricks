@@ -146,6 +146,7 @@ class Klecko(Exception):
 Klecko.__add__ = os.system
 
 # Generate an object of the class with a try/except + raise
+## Trick from @_nag0mez
 try:
   raise Klecko
 except Klecko as k:
