@@ -78,7 +78,7 @@ If you just have access to an AD environment but you don't have any credentials/
   * `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
   * `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
   * `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-  * [**A more detailed guide on how to enumerate a SMB server can be found here.**](../../windows/active-directory-methodology/broken-reference/)
+  * [**A more detailed guide on how to enumerate a SMB server can be found here.**](../../network-services-pentesting/pentesting-smb.md)
 * **Enumerate Ldap**
   * `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
   * [**A more detailed guide on how to enumerate LDAP can be found here.**](../../network-services-pentesting/pentesting-ldap.md)
