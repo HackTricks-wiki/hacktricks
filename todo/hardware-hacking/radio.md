@@ -56,7 +56,7 @@ With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with t
 * When a device is sending bursts of information, usually the **first part is going to be a preamble** so you **don't** need to **worry** if you **don't find information** in there **or if there are some errors** there.
 * In frames of information you usually should **find different frames well aligned between them**:
 
-![](<../../.gitbook/assets/image (660).png>)
+![](<../../.gitbook/assets/image (660) (1).png>)
 
 ![](<../../.gitbook/assets/image (652) (1) (1).png>)
 
@@ -101,7 +101,7 @@ You can **select the whole signal** where information is located, select **Ampli
 
 For example, if you select Frequency instead of Amplitude in this AM signal you find just 1 frequency (no way information modulated in frequency is just using 1 freq).
 
-![](<../../.gitbook/assets/image (637) (1).png>)
+![](<../../.gitbook/assets/image (637) (1) (1).png>)
 
 If you find a lot of frequencies potentially this won't be a FM, probably the signal frequency was just modified because of the channel.
 

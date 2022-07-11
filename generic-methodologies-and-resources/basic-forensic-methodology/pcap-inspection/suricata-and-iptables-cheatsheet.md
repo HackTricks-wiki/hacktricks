@@ -141,7 +141,7 @@ A rule/signature consists of the following:
 * The **header**, defining the protocol, IP addresses, ports and direction of the rule.
 * The **rule options**, defining the specifics of the rule.
 
-![](<../../../.gitbook/assets/image (642).png>)
+![](<../../../.gitbook/assets/image (642) (3).png>)
 
 #### **Valid actions are**
 
