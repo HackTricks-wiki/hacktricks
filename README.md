@@ -75,7 +75,7 @@ Through Security Skills as a Service, we help organizations to **defend against 
 
 ### [Intigriti](https://www.intigriti.com)
 
-![](<.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (14).png>)
+![](<.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14).png>)
 
 **Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
 
