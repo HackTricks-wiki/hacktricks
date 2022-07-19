@@ -235,7 +235,7 @@ It is possible to use Shodan from the official CLI to quickly analyze all IPs in
 ### **DNS Brute force**
 
 Let's try to find new **subdomains** brute-forcing DNS servers using possible subdomain names.\
-The most recommended tools for this are [**massdns**](https://github.com/blechschmidt/massdns)**,** [**gobuster**](https://github.com/OJ/gobuster)**,** [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) **and** [**shuffledns**](https://github.com/projectdiscovery/shuffledns). The first one is faster but more prone to errors (you should always check for **false positives**) and the second one **is more reliable** (always use gobuster).
+The most recommended tools for this are [**massdns**](https://github.com/blechschmidt/massdns)**,** [**gobuster**](https://github.com/OJ/gobuster)**,** [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) **and** [**shuffledns**](https://github.com/projectdiscovery/shuffledns). The first one is faster but more prone to errors (you should always check for **false positives**) and the second one **is more reliable**. There are other tools like [**gotator**](https://github.com/Josue87/gotator) that helps to generate generate DNS wordlists through permutations.
 
 For this action you will need some common subdomains lists like:
 
