@@ -78,6 +78,14 @@ Then, when **7z** is execute, it will treat `root.txt` as a file containing the 
 
 _More info in Write-ups of the box CTF from HackTheBox._
 
+## Zip
+
+**Execute arbitrary commands:**
+
+```bash
+zip name.zip files -T --unzip-command "sh -c whoami"
+```
+
 __
 
 
