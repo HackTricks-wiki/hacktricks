@@ -501,6 +501,7 @@
   * [Cloud SSRF](pentesting-web/ssrf-server-side-request-forgery/cloud-ssrf.md)
 * [SSTI (Server Side Template Injection)](pentesting-web/ssti-server-side-template-injection/README.md)
   * [EL - Expression Language](pentesting-web/ssti-server-side-template-injection/el-expression-language.md)
+  * [Jinja2 SSTI](pentesting-web/ssti-server-side-template-injection/jinja2-ssti.md)
 * [Reverse Tab Nabbing](pentesting-web/reverse-tab-nabbing.md)
 * [Unicode Normalization vulnerability](pentesting-web/unicode-normalization-vulnerability.md)
 * [Web Tool - WFuzz](pentesting-web/web-tool-wfuzz.md)
