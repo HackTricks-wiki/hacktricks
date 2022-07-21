@@ -17,7 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 {% hint style="danger" %}
-<img src="../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
+<img src="../.gitbook/assets/image (307).png" alt="" data-size="original">
 
 Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
 
@@ -87,7 +87,7 @@ println(hudson.util.Secret.decrypt("{...}"))
 ```
 
 {% hint style="danger" %}
-<img src="../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
+<img src="../.gitbook/assets/image (307).png" alt="" data-size="original">
 
 Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
 
@@ -206,7 +206,7 @@ grep -re "^\s*<[a-zA-Z]*>{[a-zA-Z0-9=+/]*}<"
 * [https://www.pentestgeek.com/penetration-testing/hacking-jenkins-servers-with-no-password](https://www.pentestgeek.com/penetration-testing/hacking-jenkins-servers-with-no-password)
 
 {% hint style="danger" %}
-<img src="../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
+<img src="../.gitbook/assets/image (307).png" alt="" data-size="original">
 
 Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
 

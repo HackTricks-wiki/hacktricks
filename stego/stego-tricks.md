@@ -17,7 +17,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 {% hint style="danger" %}
-<img src="../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
+<img src="../.gitbook/assets/image (307).png" alt="" data-size="original">
 
 Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
 
@@ -91,7 +91,7 @@ If you find that a **text line** is **bigger** than it should be, then some **hi
 To **extract** the **data**, you can use: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
 
 {% hint style="danger" %}
-<img src="../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
+<img src="../.gitbook/assets/image (307).png" alt="" data-size="original">
 
 Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
 
@@ -227,7 +227,7 @@ To read a QR code: [https://online-barcode-reader.inliteresearch.com/](https://o
 * [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
 
 {% hint style="danger" %}
-<img src="../.gitbook/assets/security-hubs-logo_v1.2 (1).png" alt="" data-size="original">
+<img src="../.gitbook/assets/image (307).png" alt="" data-size="original">
 
 Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
 
