@@ -285,7 +285,7 @@ HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce
 HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\RunOnce
 ```
 
-![](<../../.gitbook/assets/image (307).png>)
+![](<../../.gitbook/assets/image (307) (5).png>)
 
 ## Powershell
 
