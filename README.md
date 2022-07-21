@@ -58,7 +58,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [Security Hubs](https://securityhubs.io/)
 
-![](<.gitbook/assets/security-hubs-logo\_v1.2 (1).png>)
+![](<.gitbook/assets/image (307).png>)
 
 Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results.** [**Security Hubs**](https://securityhubs.io/) **** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
 
@@ -75,7 +75,7 @@ Through Security Skills as a Service, we help organizations to **defend against 
 
 ### [Intigriti](https://www.intigriti.com)
 
-![](<.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (14).png>)
+![](<.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14).png>)
 
 **Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
 
