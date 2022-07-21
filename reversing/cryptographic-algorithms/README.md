@@ -28,7 +28,7 @@ If you ends in a code **using shift rights and lefts, xors and several arithmeti
 
 If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
 
-![](<../../.gitbook/assets/image (375) (1) (1) (1) (1).png>)
+![](<../../.gitbook/assets/image (254) (1).png>)
 
 Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
@@ -163,7 +163,7 @@ You can identify both of them checking the constants. Note that the sha\_init ha
 
 Note the use of more constants
 
-![](<../../.gitbook/assets/image (253) (1) (1) (1).png>)
+![](<../../.gitbook/assets/image (253) (1) (1).png>)
 
 ## CRC (hash)
 
@@ -191,7 +191,7 @@ A CRC hash algorithm looks like:
 
 The graph is quiet large:
 
-![](<../../.gitbook/assets/image (207) (2) (1).png>)
+![](<../../.gitbook/assets/image (207) (2).png>)
 
 Check **3 comparisons to recognise it**:
 
