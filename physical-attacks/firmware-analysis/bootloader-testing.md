@@ -24,8 +24,7 @@ When modifying device start up and bootloaders such as U-boot, attempt the follo
 * Attempt to access the bootloaders interpreter shell by pressing "0", space or other identified “magic codes” during boot.
 * Modify configurations to execute a shell command such as adding '`init=/bin/sh`' at the end of boot arguments
   * `#printenv`
-  * `#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3`
-  * `mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 int=/bin/sh`
+  * `#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh`
   * `#saveenv`
   * `#boot`
 * Setup a tftp server to load images over the network locally from your workstation. Ensure the device has network access.
