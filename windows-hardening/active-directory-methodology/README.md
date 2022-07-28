@@ -285,7 +285,7 @@ When **2 domains trust each other they exchange keys**, these **keys** are going
 
 When a **user** tries to **access** a **service** on the **trusting domain** it will request an **inter-realm TGT** to the DC of its domain. The DC wills serve the client this **TGT** which would be **encrypted/signed** with the **inter-realm** **key** (the key both domains **exchanged**). Then, the **client** will **access** the **DC of the other domain** and will **request** a **TGS** for the service using the **inter-realm TGT**. The **DC** of the trusting domain will **check** the **key** used, if it's ok, it will **trust everything in that ticket** and will serve the TGS to the client.
 
-![](<../../.gitbook/assets/image (166).png>)
+![](<../../.gitbook/assets/image (166) (1).png>)
 
 ### Different trusts
 
@@ -359,13 +359,15 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
 
 #### Exploit writeable Configration NC
+
 The Configuration NC is the primary repository for configuration information for a forest and is replicated to every DC in the forest. Additionally, every writable DC (not read-only DCs) in the forest holds a writable copy of the Configuration NC. Exploiting this require running as SYSTEM on a (child) DC.
 
 It is possible to compromise the root domain in various ways. Examples:
-- [Link GPO to to root DC site](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research)
-- [Compromise gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
-- [Schema attack](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)
-- Exploit ADCS - Create/modify certificate template to allow authentication as any user (e.g. Enterprise Admins)
+
+* [Link GPO to to root DC site](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research)
+* [Compromise gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
+* [Schema attack](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)
+* Exploit ADCS - Create/modify certificate template to allow authentication as any user (e.g. Enterprise Admins)
 
 ### External Forest Domain Privilege escalation
 
@@ -376,11 +378,12 @@ Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:<current
 ```
 
 ### Attack one-way trusted domain/forest (Trust account attack)
+
 In short, if an attacker has administrative access to FORESTB which trusts FORESTA, the attacker can obtain the credentials for a _trust account_ located in FORESTA. This account is a member of Domain Users in FORESTA through its Primary Group. As we see too often, Domain Users membership is all that is necessary to identify and use other techniques and attack paths to become Domain Admin.
 
-![](<https://images.squarespace-cdn.com/content/v1/5bbb4a7301232c6e6c8757fa/61a0233f-edd8-40b6-b6ae-8592a29875bd/Picture3.png>)
+![](https://images.squarespace-cdn.com/content/v1/5bbb4a7301232c6e6c8757fa/61a0233f-edd8-40b6-b6ae-8592a29875bd/Picture3.png)
 
-This technique is not limited to forest trust but works over any domain/forest one-way trust in the direction trusting -> trusted. 
+This technique is not limited to forest trust but works over any domain/forest one-way trust in the direction trusting -> trusted.
 
 The trust protections (SID filtering, disabled SID history, and disabled TGT delegation) do not mitigate the technique.
 
