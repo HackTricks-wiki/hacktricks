@@ -282,7 +282,7 @@ system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistC
 
 ### MRT: Malware Removal Tool
 
-Should malware make its way onto a Mac, macOS also includes technology to remediate infections. The _Malware Removal Tool (MRT)_ is an engine in macOS that remediates infections based on updates automatically delivered from Apple (as part of automatic updates of system data files and security updates). **MRT removes malware upon receiving updated information** and it continues to check for infections on restart and login. MRT doesn’t automatically reboot the Mac. (From [here](https://support.apple.com/en-gb/guide/security/sec469d47bd8/web#:\~:text=The%20Malware%20Removal%20Tool%20\(MRT,data%20files%20and%20security%20updates\).))
+Should malware make its way onto a Mac, macOS also includes technology to remediate infections. The _Malware Removal Tool (MRT)_ is an engine in macOS that remediates infections based on updates automatically delivered from Apple (as part of automatic updates of system data files and security updates). **MRT removes malware upon receiving updated information** and it continues to check for infections on restart and login. MRT doesn’t automatically reboot the Mac. (From [here](https://support.apple.com/en-gb/guide/security/sec469d47bd8/web))
 
 ### Automatic Security Updates
 
@@ -402,6 +402,8 @@ csrutil enable --without debug
 For more **information about SIP** read the following response: [https://apple.stackexchange.com/questions/193368/what-is-the-rootless-feature-in-el-capitan-really](https://apple.stackexchange.com/questions/193368/what-is-the-rootless-feature-in-el-capitan-really)
 
 This post about a **SIP bypass vulnerability** is also very interesting: [https://www.microsoft.com/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/](https://www.microsoft.com/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)
+
+**More bypasses** in [https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
 
 ### Apple Binary Signatures
 
