@@ -41,7 +41,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] [**Cached Credentials**](windows-local-privilege-escalation/#cached-credentials)?
 * [ ] Check if any [**AV**](windows-local-privilege-escalation/#av)
 * [ ] [**AppLocker Policy**](windows-local-privilege-escalation/#applocker-policy)?
-* [ ] [**UA**](windows-local-privilege-escalation/#uac)[**User Privileges**](windows-local-privilege-escalation/#users-and-groups)
+* [ ] [**UAC**](windows-local-privilege-escalation/#uac)
+* [ ] [**User Privileges**](windows-local-privilege-escalation/#users-and-groups)
 * [ ] Check [**current** user **privileges**](windows-local-privilege-escalation/#users-and-groups)
 * [ ] Are you [**member of any privileged group**](windows-local-privilege-escalation/#privileged-groups)?
 * [ ] Check if you have [any of these tokens enabled](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
@@ -65,7 +66,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 * [ ] [Can you **modify any service**?](windows-local-privilege-escalation/#permissions)
 * [ ] [Can you **modify** the **binary** that is **executed** by any **service**?](windows-local-privilege-escalation/#modify-service-binary-path)
-* [ ] [Can you **modify** the **registry** of any **service**?](windows-local-privilege-escalation/#services-registry-permissions)
+* [ ] [Can you **modify** the **registry** of any **service**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
 * [ ] [Can you take advantage of any **unquoted service** binary **path**?](windows-local-privilege-escalation/#unquoted-service-paths)
 
 ### [**Applications**](windows-local-privilege-escalation/#applications)
@@ -82,13 +83,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 ### [Network](windows-local-privilege-escalation/#network)
 
-* [ ] Enumerate the network(shares, interfaces, routes, neighbours...)
-* [ ] Take a special look to network services listing on local (127.0.0.1)
+* [ ] Enumerate the network (shares, interfaces, routes, neighbours, ...)
+* [ ] Take a special look at network services listening on localhost (127.0.0.1)
 
 ### [Windows Credentials](windows-local-privilege-escalation/#windows-credentials)
 
 * [ ] [**Winlogon** ](windows-local-privilege-escalation/#winlogon-credentials)credentials
-* [ ] [**Windows Vault**](windows-local-privilege-escalation/#windows-vault) credentials that you could use?
+* [ ] [**Windows Vault**](windows-local-privilege-escalation/#credentials-manager-windows-vault) credentials that you could use?
 * [ ] Interesting [**DPAPI credentials**](windows-local-privilege-escalation/#dpapi)?
 * [ ] Passwords of saved [**Wifi networks**](windows-local-privilege-escalation/#wifi)?
 * [ ] Interesting info in [**saved RDP Connections**](windows-local-privilege-escalation/#saved-rdp-connections)?
@@ -104,14 +105,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] Passwords in [**unattended files**](windows-local-privilege-escalation/#unattended-files)?
 * [ ] Any [**SAM & SYSTEM**](windows-local-privilege-escalation/#sam-and-system-backups) backup?
 * [ ] [**Cloud credentials**](windows-local-privilege-escalation/#cloud-credentials)?
-* [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/#mcafee-sitelist-xml) file?
+* [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/#mcafee-sitelist.xml) file?
 * [ ] [**Cached GPP Password**](windows-local-privilege-escalation/#cached-gpp-pasword)?
 * [ ] Password in [**IIS Web config file**](windows-local-privilege-escalation/#iis-web-config)?
 * [ ] Interesting info in [**web** **logs**](windows-local-privilege-escalation/#logs)?
 * [ ] Do you want to [**ask for credentials**](windows-local-privilege-escalation/#ask-for-credentials) to the user?
 * [ ] Interesting [**files inside the Recycle Bin**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
 * [ ] Other [**registry containing credentials**](windows-local-privilege-escalation/#inside-the-registry)?
-* [ ] Inside [**Browser data**](windows-local-privilege-escalation/#browsers-history) (dbs, history, bookmarks....)?
+* [ ] Inside [**Browser data**](windows-local-privilege-escalation/#browsers-history) (dbs, history, bookmarks, ...)?
 * [ ] [**Generic password search**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry) in files and registry
 * [ ] [**Tools**](windows-local-privilege-escalation/#tools-that-search-for-passwords) to automatically search for passwords
 
