@@ -26,7 +26,7 @@ You can **select the architecture** inside Visual Studio in the **left "Build" T
 
 (\*\*If you can't find this options press in **"Project Tab"** and then in **"\<Project Name> Properties"**)
 
-![](../.gitbook/assets/image.png)
+![](<../.gitbook/assets/image (132).png>)
 
 Then, build both projects (Build -> Build Solution) (Inside the logs will appear the path of the executable):
 
@@ -109,7 +109,7 @@ Open the SalseoLoader project using Visual Studio.
 
 #### **Tools** --> **NuGet Package Manager** --> **Manage NuGet Packages for Solution...**
 
-![](<../.gitbook/assets/image (3).png>)
+![](<../.gitbook/assets/image (3) (1).png>)
 
 #### **Search for DllExport package (using Browse tab), and press Install (and accept the popup)**
 
