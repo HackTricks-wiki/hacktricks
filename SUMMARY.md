@@ -639,6 +639,7 @@
 * [Empire](backdoors/empire.md)
 * [Salseo](backdoors/salseo.md)
 * [ICMPsh](backdoors/icmpsh.md)
+* [Cobalt Strike](c2/cobalt-strike.md)
 
 ## ✍ TODO
 

