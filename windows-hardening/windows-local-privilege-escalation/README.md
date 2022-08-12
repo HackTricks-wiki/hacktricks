@@ -1328,6 +1328,24 @@ Tools to extract passwords from browsers:
 * Mimikatz: `dpapi::chrome`
 * [**SharpWeb**](https://github.com/djhohnstein/SharpWeb)
 
+### **COM DLL Overwriting**
+
+**Component Object Model (COM)** is a technology built within the Windows operating system that allows **intercommunication** between software components of different languages. **** Each COM component is **identified via a class ID (CLSID)** and each component exposes functionality via one or more interfaces, identified via interface IDs (IIDs).
+
+COM classes and interfaces are defined in the registry under **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** and **HKEY\_**_**CLASSES\_**_**ROOT\Interface** respectively. This registry is created by merging the **HKEY\_**_**LOCAL\_**_**MACHINE\Software\Classes** + **HKEY\_**_**CURRENT\_**_**USER\Software\Classes** = **HKEY\_**_**CLASSES\_**_**ROOT.**
+
+Inside the CLSIDs of this registry you can find the child registry **InProcServer32** which contains a **default value** pointing to a **DLL** and a value called **ThreadingModel** that can be **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) or **Neutral** (Thread Neutral).
+
+![](<../../.gitbook/assets/image (638).png>)
+
+Basically, if you can **overwrite any of the DLLs** that are going to be executed, you could **escalate privileges** if that DLL is going to be executed by a different user.
+
+To learn how attackers use COM Hijacking as a persistence mechanism check:
+
+{% content-ref url="com-hijacking.md" %}
+[com-hijacking.md](com-hijacking.md)
+{% endcontent-ref %}
+
 ### **Generic Password search in files and registry**
 
 **Search for file contents**

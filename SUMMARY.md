@@ -139,6 +139,7 @@
   * [Access Tokens](windows-hardening/windows-local-privilege-escalation/access-tokens.md)
   * [ACLs - DACLs/SACLs/ACEs](windows-hardening/windows-local-privilege-escalation/acls-dacls-sacls-aces.md)
   * [Dll Hijacking](windows-hardening/windows-local-privilege-escalation/dll-hijacking.md)
+  * [COM Hijacking](windows-hardening/windows-local-privilege-escalation/com-hijacking.md)
   * [From High Integrity to SYSTEM with Name Pipes](windows-hardening/windows-local-privilege-escalation/from-high-integrity-to-system-with-name-pipes.md)
   * [Integrity Levels](windows-hardening/windows-local-privilege-escalation/integrity-levels.md)
   * [JAWS](windows-hardening/windows-local-privilege-escalation/jaws.md)
