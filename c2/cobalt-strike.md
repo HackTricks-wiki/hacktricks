@@ -40,7 +40,6 @@ If you already has the file you want to host in a web sever just go to `Attacks 
 # Execute local .NET binary
 execute-assembly </path/to/executable.exe>
 
-
 # Screenshots
 printscreen    # Take a single screenshot via PrintScr method
 screenshot     # Take a single screenshot
@@ -50,4 +49,7 @@ screenwatch    # Take periodic screenshots of desktop
 # keylogger
 keylogger [pid] [x86|x64]
 ## View > Keystrokes to see the keys pressed
+
+# Import Powershell module
+powershell-import C:\path\to\PowerView.ps1
 ```
