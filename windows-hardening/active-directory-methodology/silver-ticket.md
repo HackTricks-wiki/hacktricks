@@ -99,8 +99,8 @@ copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 
 You will also be able to obtain a shell inside the host or execute arbitrary commands using **psexec**:
 
-{% content-ref url="../lateral-movement/psexec-and-winexec.md" %}
-[psexec-and-winexec.md](../lateral-movement/psexec-and-winexec.md)
+{% content-ref url="../ntlm/psexec-and-winexec.md" %}
+[psexec-and-winexec.md](../ntlm/psexec-and-winexec.md)
 {% endcontent-ref %}
 
 ### HOST
@@ -135,8 +135,8 @@ wmic remote.computer.local list full /format:list
 
 Find **more information about wmiexec** in the following page:
 
-{% content-ref url="../lateral-movement/wmicexec.md" %}
-[wmicexec.md](../lateral-movement/wmicexec.md)
+{% content-ref url="../ntlm/wmicexec.md" %}
+[wmicexec.md](../ntlm/wmicexec.md)
 {% endcontent-ref %}
 
 ### HOST + WSMAN (WINRM)
@@ -149,8 +149,8 @@ New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 
 Check the following page to learn **more ways to connect with a remote host using winrm**:
 
-{% content-ref url="../lateral-movement/winrm.md" %}
-[winrm.md](../lateral-movement/winrm.md)
+{% content-ref url="../ntlm/winrm.md" %}
+[winrm.md](../ntlm/winrm.md)
 {% endcontent-ref %}
 
 {% hint style="warning" %}

