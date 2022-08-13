@@ -30,7 +30,7 @@ You can **select the architecture** inside Visual Studio in the **left "Build" T
 
 Then, build both projects (Build -> Build Solution) (Inside the logs will appear the path of the executable):
 
-![](<../.gitbook/assets/image (1) (2).png>)
+![](<../.gitbook/assets/image (1) (2) (1).png>)
 
 ## Prepare the Backdoor
 
@@ -103,17 +103,17 @@ Open the SalseoLoader project using Visual Studio.
 
 ### Add before the main function: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1).png>)
 
 ### Install DllExport for this project
 
 #### **Tools** --> **NuGet Package Manager** --> **Manage NuGet Packages for Solution...**
 
-![](<../.gitbook/assets/image (3) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1).png>)
 
 #### **Search for DllExport package (using Browse tab), and press Install (and accept the popup)**
 
-![](<../.gitbook/assets/image (4).png>)
+![](<../.gitbook/assets/image (4) (1).png>)
 
 In your project folder have appeared the files: **DllExport.bat** and **DllExport\_Configure.bat**
 
@@ -131,13 +131,13 @@ Then, go to your **SalseoLoader folder** and **execute DllExport\_Configure.bat*
 
 Select **x64** (if you are going to use it inside a x64 box, that was my case), select **System.Runtime.InteropServices** (inside **Namespace for DllExport**) and press **Apply**
 
-![](<../.gitbook/assets/image (7).png>)
+![](<../.gitbook/assets/image (7) (1).png>)
 
 ### **Open the project again with visual Studio**
 
 **\[DllExport]** should not be longer marked as error
 
-![](<../.gitbook/assets/image (8).png>)
+![](<../.gitbook/assets/image (8) (1).png>)
 
 ### Build the solution
 

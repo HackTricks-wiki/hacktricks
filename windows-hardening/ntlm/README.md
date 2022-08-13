@@ -187,10 +187,9 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ### Manual Windows remote execution with username and password
 
-* [**PsExec**](psexec-and-winexec.md)
-* [**SmbExec**](smbexec.md)
-* [**WmicExec**](wmicexec.md)
-* [**AtExec**](atexec.md)
+{% content-ref url="../lateral-movement/" %}
+[lateral-movement](../lateral-movement/)
+{% endcontent-ref %}
 
 ## Extracting credentials from a Windows Host
 
