@@ -911,6 +911,10 @@ Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 You can use **mimikatz module** `dpapi::cred` with the appropiate `/masterkey` to decrypt.\
 You can **extract many DPAPI** **masterkeys** from **memory** with the `sekurlsa::dpapi` module (if you are root).
 
+{% content-ref url="dpapi-extracting-passwords.md" %}
+[dpapi-extracting-passwords.md](dpapi-extracting-passwords.md)
+{% endcontent-ref %}
+
 ### Wifi
 
 ```bash
@@ -1342,6 +1346,7 @@ Tools to extract passwords from browsers:
 
 * Mimikatz: `dpapi::chrome`
 * [**SharpWeb**](https://github.com/djhohnstein/SharpWeb)
+* [**SharpChromium**](https://github.com/djhohnstein/SharpChromium)
 
 ### **COM DLL Overwriting**
 

