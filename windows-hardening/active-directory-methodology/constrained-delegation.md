@@ -1,4 +1,4 @@
-
+# Constrained Delegation
 
 <details>
 
@@ -16,8 +16,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
-# Constrained Delegation
+## Constrained Delegation
 
 Using this a Domain admin can allow 3rd parties to impersonate a user or computer against a service of a machine.
 
@@ -27,15 +26,15 @@ Using this a Domain admin can allow 3rd parties to impersonate a user or compute
 **Note**: If a user is marked as ‘_Account is sensitive and cannot be delegated_ ’ in AD, you will **not be able to impersonate** them.
 
 This means that if you **compromise the hash of the service** you can **impersonate users** and obtain **access** on their behalf to the **service configured** (possible **privesc**).\
-Also, you **won't only have access to the service that user is able to impersonate, but also to any service that uses the same account as the allowed one** (because the SPN is not being checked, only privileges). For example, if you have access to **CIFS service** you can also have access to **HOST service**.\
+Also, you **won't only have access to the service that the user is able to impersonate, but also to any service that uses the same account as the allowed one** (because the SPN is not being checked, only privileges). For example, if you have access to **CIFS service** you can also have access to **HOST service**.\
 Moreover, notice that if you have access to **LDAP service on DC**, you will have enough privileges to exploit a **DCSync**.
 
-{% code title="Enumerate from Powerview" %}
-```bash
-Get-DomainUser -TrustedToAuth
-Get-DomainComputer -TrustedToAuth
-```
-{% endcode %}
+<pre class="language-bash" data-title="Enumeration"><code class="lang-bash"><strong># Powerview
+</strong><strong>Get-DomainUser -TrustedToAuth
+</strong>Get-DomainComputer -TrustedToAuth
+
+#ADSearch
+ADSearch.exe --search "(&#x26;(objectCategory=computer)(msds-allowedtodelegateto=*))" --attributes cn,dnshostname,samaccountname,msds-allowedtodelegateto --json</code></pre>
 
 {% code title="Using kekeo.exe + Mimikatz.exe" %}
 ```bash
@@ -63,14 +62,13 @@ Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.
 ```
 {% endcode %}
 
-## Mitigation
+### Mitigation
 
 * Disable kerberos delegation where possible
 * Limit DA/Admin logins to specific services
 * Set "Account is sensitive and cannot be delegated" for privileged accounts.
 
 [**More information in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
-
 
 <details>
 
@@ -87,5 +85,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-
