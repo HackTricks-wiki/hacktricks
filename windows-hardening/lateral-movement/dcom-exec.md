@@ -22,7 +22,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 The [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx) COM object allows you to script components of MMC snap-in operations. While enumerating the different methods and properties within this COM object, I noticed that there is a method named `ExecuteShellCommand` under Document.ActiveView.
 
-![](<../../.gitbook/assets/image (4).png>)
+![](<../../.gitbook/assets/image (4) (2).png>)
 
 You can read more on that method [here](https://msdn.microsoft.com/en-us/library/aa815396\(v=vs.85\).aspx). So far, we have a DCOM application that we can access over the network and can execute commands. The final piece is to leverage this DCOM application and the ExecuteShellCommand method to obtain code execution on a remote host.
 
@@ -38,7 +38,7 @@ It is then possible to invoke the `ExecuteShellCommand` method to start a proces
 
 The **MMC20.Application** object lacked explicit “[LaunchPermissions](https://technet.microsoft.com/en-us/library/bb633148.aspx)”, resulting in the default permission set allowing Administrators access:
 
-![](../../.gitbook/assets/image.png)
+![](<../../.gitbook/assets/image (4).png>)
 
 You can read more on that thread [here](https://twitter.com/tiraniddo/status/817532039771525120).\
 Viewing which other objects that have no explicit LaunchPermission set can be achieved using [@tiraniddo](https://twitter.com/tiraniddo)’s [OleView .NET](https://github.com/tyranid/oleviewdotnet), which has excellent Python filters (among other things). In this instance, we can filter down to all objects that have no explicit Launch Permission. When doing so, two objects stood out to me: `ShellBrowserWindow` and `ShellWindows`:

@@ -621,6 +621,21 @@ hash-identifier
 > <HASH>
 ```
 
+### Wordlists
+
+* **Rockyou**
+* ****[**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)****
+* ****[**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)****
+* ****[**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)****
+
+### **Wordlist Generation Tools**
+
+* [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Advanced keyboard-walk generator with configureable basechars, keymap and routes.
+
+```bash
+kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
+```
+
 ### John mutation
 
 Read _**/etc/john/john.conf**_ and configure it
@@ -631,6 +646,78 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 
 ### Hashcat
+
+#### Hashcat attacks
+
+* **Wordlist attack** (`-a 0`) with rules
+
+**Hashcat** already comes with a **folder containing rules** but you can find [**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+
+```
+hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
+```
+
+* **Wordlist combinator** attack
+
+It's possible to **combine 2 wordlist into 1** with hashcat.\
+If the list 1 contained the word **"hello"** and the second contained 2 lines with the words **"world"** and **"earth"**. The words `helloworld` and `helloearth` will be generated.
+
+```bash
+# This will combine 2 wordlists
+hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
+
+# Same attack as before but adding chars in the newly generated words
+# In the rpevious example this will generate:
+## hello-world!
+## hello-earth!
+hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
+```
+
+* **Mask attack** (`-a 3`)
+
+```bash
+# Mask attack with simple mask
+hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt ?u?l?l?l?l?l?l?l?d
+
+hashcat --help #will show the charsets and are as follows
+? | Charset
+===+=========
+l | abcdefghijklmnopqrstuvwxyz
+u | ABCDEFGHIJKLMNOPQRSTUVWXYZ
+d | 0123456789
+h | 0123456789abcdef
+H | 0123456789ABCDEF
+s | !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+a | ?l?u?d?s
+b | 0x00 - 0xff
+
+# Mask attack decalring custom charset
+hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
+## -1 ?d?s defines a custom charset (digits and specials).
+## ?u?l?l?l?l?l?l?l?1 is the mask, where ?1 is the custom charset.
+
+# Mask attack with variable password length
+## Create a file called masks.hcmask with this content:
+?d?s,?u?l?l?l?l?1
+?d?s,?u?l?l?l?l?l?1
+?d?s,?u?l?l?l?l?l?l?1
+?d?s,?u?l?l?l?l?l?l?l?1
+?d?s,?u?l?l?l?l?l?l?l?l?1
+## Use it to crack the password
+hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
+```
+
+* Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) attack
+
+```bash
+# Mask numbers will be appended to each word in the wordlist
+hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
+
+# Mask numbers will be prepended to each word in the wordlist
+hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
+```
+
+#### Hashcat modes
 
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"

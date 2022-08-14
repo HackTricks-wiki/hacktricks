@@ -172,6 +172,50 @@ beacon> socks 1080
 proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ```
 
+### rPort2Port
+
+{% hint style="warning" %}
+In this case the **port is opened in the beacon host**, not in the Team Server and the traffic is sent to the Team Server and from there to the indicated host:port
+{% endhint %}
+
+```bash
+rportfwd [bind port] [forward host] [forward port]
+rportfwd stop [bind port]
+```
+
+To note:
+
+* Beacon's reverse port forward **always tunnels the traffic to the Team Server** and the **Team Server sends the traffic to its intended destination**, so shouldn't be used to relay traffic between individual machines.
+* The **traffic is tunnelled inside Beacon's C2 traffic**, not over separate sockets, and also works over P2P links.
+* You **don't need to be a local admin** to create reverse port forwards on high ports.
+
+### rPort2Port local
+
+{% hint style="warning" %}
+In this case the **port is opened in the beacon host**, not in the Team Server and the **traffic is sent to the Cobalt Strike client** (not to the Team Server) and from there to the indicated host:port
+{% endhint %}
+
+```
+rportfwd_local [bind port] [forward host] [forward port]
+rportfwd_local stop [bind port]
+```
+
+## Windows netsh
+
+### Port2Port
+
+You need to be local admin (for any port)
+
+```bash
+netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
+# Example:
+netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=4444 connectaddress=10.10.10.10 connectport=4444 
+# Check the port forward was created:
+netsh interface portproxy show v4tov4
+# Delete port forward
+netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
+```
+
 ## reGeorg
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)

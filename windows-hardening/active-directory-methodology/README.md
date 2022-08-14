@@ -70,7 +70,7 @@ If you just have access to an AD environment but you don't have any credentials/
   * [**A more detailed guide on how to enumerate LDAP can be found here.**](../../network-services-pentesting/pentesting-ldap.md)
 * **Poison the network**
   * Gather credentials [**impersonating services with Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
-  * Access host by [abusing the relay attack](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
+  * Access host by [**abusing the relay attack**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)****
   * Gather credentials **exposing** [**fake UPnP services with evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 * [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
   * Extract usernames/names from internal documents, social media, services (mainly web) inside the domain environments and also from the publicly available.
@@ -126,21 +126,23 @@ For this phase you need to have **compromised the credentials or a session of a 
 
 ### Enumeration
 
-#### Extracting all domain users
-
-It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser` or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
-
 Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
 
 Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords.
 
-* You could use some [Windows binaries from the CMD to perform a basic recon](../basic-cmd-for-pentesters.md#domain-info), but using [powershell for recon](../basic-powershell-for-pentesters/) will probably be stealthier, and you could even [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information.
+* You could use the [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
+* You can also use [**powershell for recon**](../basic-powershell-for-pentesters/) which will be stealthier
+* You ca also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
 * Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
-* Look in the LDAP database, with **ldapsearch** or **AdExplorer.exe** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
-* If you are using **Linux**, you could also enumerate the domain using [the-useless-one/pywerview](https://github.com/the-useless-one/pywerview).
+* A **tool with GUI** that you can use to enumerate the directory is **AdExplorer.exe** from **SysInternal** Suite.
+* You can also search in the LDAP database with **ldapsearch** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
+* If you are using **Linux**, you could also enumerate the domain using [**pywerview**](https://github.com/the-useless-one/pywerview).
 * You could also try automated tools as:
-  * [tomcarver16/ADSearch](https://github.com/tomcarver16/ADSearch)
-  * [61106960/adPEAS](https://github.com/61106960/adPEAS)
+  * [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)****
+  * ****[**61106960/adPEAS**](https://github.com/61106960/adPEAS)****
+*   #### Extracting all domain users
+
+    It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser` or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
 
 > Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.
 
@@ -171,6 +173,10 @@ It's very **unlikely** that you will find **tickets** in the current user **givi
 .\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 [IO.File]::WriteAllBytes("ticket.kirbi", [Convert]::FromBase64String("<BASE64_TICKET>"))
 ```
+
+### NTML Relay
+
+If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
 
 ## Privilege escalation on Active Directory WITH privileged credentials/session
 
