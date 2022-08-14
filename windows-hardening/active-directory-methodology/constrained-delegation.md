@@ -25,9 +25,11 @@ Using this a Domain admin can **allow** a computer to **impersonate a user or co
 
 **Note**: If a user is marked as ‘_Account is sensitive and cannot be delegated_ ’ in AD, you will **not be able to impersonate** them.
 
-This means that if you **compromise the hash of the service** you can **impersonate users** and obtain **access** on their behalf to the **service configured** (possible **privesc**).\
-Also, you **won't only have access to the service that the user is able to impersonate, but also to any service that uses the same account as the allowed one** (because the SPN is not being checked, only privileges). For example, if you have access to **CIFS service** you can also have access to **HOST service**.\
-Moreover, notice that if you have access to **LDAP service on DC**, you will have enough privileges to exploit a **DCSync**.
+This means that if you **compromise the hash of the service** you can **impersonate users** and obtain **access** on their behalf to the **service configured** (possible **privesc**).
+
+Moreover, you **won't only have access to the service that the user is able to impersonate, but also to any service** because the SPN is not being checked, only privileges. Therefore, if you have access to **CIFS service** you can also have access to **HOST service** using `/altservice` flag in Rubeus.
+
+Also, **LDAP service access on DC**, is what is needed to exploit a **DCSync**.
 
 <pre class="language-bash" data-title="Enumeration"><code class="lang-bash"><strong># Powerview
 </strong><strong>Get-DomainUser -TrustedToAuth
