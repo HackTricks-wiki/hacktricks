@@ -244,59 +244,114 @@ Once you get **Domain Admin** or even better **Enterprise Admin** privileges, yo
 
 [**More information about how to steal the NTDS.dit can be found here**](../stealing-credentials/)
 
-### Persistence
+### Privesc as Persistence
 
-**Some of the techniques discussed before can be used for persistence. For example you could make a user vulnerable to** [**ASREPRoast** ](asreproast.md)**or to** [**Kerberoast**](kerberoast.md)**.**
+Some of the techniques discussed before can be used for persistence.\
+For example you could:
+
+*   Make users vulnerable to [**Kerberoast**](kerberoast.md)
+
+    ```powershell
+    Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
+    ```
+*   Make users vulnerable to [**ASREPRoast** ](asreproast.md)
+
+    ```powershell
+    Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
+    ```
+*   Grant [**DCSync**](./#dcsync) privileges to a user
+
+    ```powershell
+    Add-DomainObjectAcl -TargetIdentity "DC=dev,DC=cyberbotic,DC=io" -PrincipalIdentity bfarmer -Rights DCSync
+    ```
+
+### Silver Ticket
+
+The Silver ticket attack is based on **crafting a valid TGS for a service once the NTLM hash of service is owned** (like the **PC account hash**). Thus, it is possible to **gain access to that service** by forging a custom TGS **as any user** (like privileged access to a computer).
+
+{% content-ref url="silver-ticket.md" %}
+[silver-ticket.md](silver-ticket.md)
+{% endcontent-ref %}
 
 ### Golden Ticket
 
 A valid **TGT as any user** can be created **using the NTLM hash of the krbtgt AD account**. The advantage of forging a TGT instead of TGS is being **able to access any service** (or machine) in the domain ad the impersonated user.
 
-[**More information about Golden Ticket here.**](golden-ticket.md)
+{% content-ref url="golden-ticket.md" %}
+[golden-ticket.md](golden-ticket.md)
+{% endcontent-ref %}
 
-### Silver Ticket
+### Diamond Ticket
 
-The Silver ticket attack is based on **crafting a valid TGS for a service once the NTLM hash of service is owned** (like the **PC account hash**). Thus, it is possible to **gain access to that service** by forging a custom TGS **as any user** (like privileged access to a computer).\
-[**More information about Silver Ticket here.**](silver-ticket.md)
+These are like golden tickets forged in a way that **bypasses common golden tickets detection mechanisms.**
+
+{% content-ref url="diamond-ticket.md" %}
+[diamond-ticket.md](diamond-ticket.md)
+{% endcontent-ref %}
+
+### **Forged Certificates**
+
+{% content-ref url="forged-certificates.md" %}
+[forged-certificates.md](forged-certificates.md)
+{% endcontent-ref %}
 
 ### AdminSDHolder Group
 
-The Access Control List (ACL) of the **AdminSDHolder** object is used as a template to **copy** **permissions** to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins.\
-By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker modifies the ACL of the group **AdminSDHolder** for example, giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group (in an hour).\
+The Access Control List (ACL) of the **AdminSDHolder** object is used as a template to **copy** **permissions** to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins, Backup Operators and krbtgt.\
+By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker **modifies the ACL** of the group **AdminSDHolder** for example, giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group (in an hour).\
 And if someone tries to delete this user from the Domain Admins (for example) in an hour or less, the user will be back in the group.\
-[**More information about AdminSDHolder Group here**](privileged-accounts-and-token-privileges.md)**.**
+****[**More information about AdminDSHolder Group here.**](privileged-accounts-and-token-privileges.md#adminsdholder-group)****
 
 ### DSRM Credentials
 
-There is a **local administrator** account inside each **DC**. Having admin privileges in this machine, you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password** so you can remotely access to this local Administrator user.\
-[**More information about DSRM Credentials here.**](dsrm-credentials.md)
+There is a **local administrator** account inside each **DC**. Having admin privileges in this machine, you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password** so you can remotely access to this local Administrator user.
+
+{% content-ref url="dsrm-credentials.md" %}
+[dsrm-credentials.md](dsrm-credentials.md)
+{% endcontent-ref %}
 
 ### ACL Persistence
 
-You could **give** some **special permissions** to a **user** over some specific domain objects that will let the user **escalate privileges in the future**.\
-[**More information about interesting privileges here.**](acl-persistence-abuse.md)
+You could **give** some **special permissions** to a **user** over some specific domain objects that will let the user **escalate privileges in the future**.
+
+{% content-ref url="acl-persistence-abuse.md" %}
+[acl-persistence-abuse.md](acl-persistence-abuse.md)
+{% endcontent-ref %}
 
 ### Security Descriptors
 
-The **security descriptors** are used to **store** the **permissions** an **object** have **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.\
-[**More information about Security Descriptors here**](security-descriptors.md)**.**
+The **security descriptors** are used to **store** the **permissions** an **object** have **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.
+
+{% content-ref url="security-descriptors.md" %}
+[security-descriptors.md](security-descriptors.md)
+{% endcontent-ref %}
 
 ### Skeleton Key
 
-**Modify LSASS** in memory to create a **master password** that will work for any account in the domain.\
-[**More information about Skeleton Key here.**](skeleton-key.md)
+**Modify LSASS** in memory to create a **master password** that will work for any account in the domain.
+
+{% content-ref url="skeleton-key.md" %}
+[skeleton-key.md](skeleton-key.md)
+{% endcontent-ref %}
 
 ### Custom SSP
 
 [Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs.md#security-support-provider-interface-sspi)\
 You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.\
-[**More information about Custom SSP here**](custom-ssp.md)**.**
+
+
+{% content-ref url="custom-ssp.md" %}
+[custom-ssp.md](custom-ssp.md)
+{% endcontent-ref %}
 
 ### DCShadow
 
 It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.\
-[**More information about DCShadow here.**](dcshadow.md)
+Note that if you use wrong data, pretty ugly logs will appear.
+
+{% content-ref url="dcshadow.md" %}
+[dcshadow.md](dcshadow.md)
+{% endcontent-ref %}
 
 ## Forest Privilege Escalation - Domain Trusts
 

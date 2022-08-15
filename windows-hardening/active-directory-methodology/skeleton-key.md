@@ -1,4 +1,4 @@
-
+# Skeleton Key
 
 <details>
 
@@ -16,8 +16,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-
-# **Skeleton Key**
+## **Skeleton Key**
 
 **From:** [**https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/**](https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/)
 
@@ -47,9 +46,7 @@ If lsass was **already patched** with skeleton, then this **error** will appear:
 
 ![](<../../.gitbook/assets/image (160).png>)
 
-## Mitigations
-
-Skeleton Key
+### Mitigations
 
 * Events:
   * System Event ID 7045 - A service was installed in the system. (Type Kernel Mode driver)
@@ -61,7 +58,6 @@ Skeleton Key
   * Run lsass.exe as a protected process, it forces an attacker to load a kernel mode driver
   * `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
   * Verify after reboot: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "`_`protected process"}`_
-
 
 <details>
 
@@ -78,5 +74,3 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-
