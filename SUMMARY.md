@@ -167,7 +167,7 @@
   * [Golden Ticket](windows-hardening/active-directory-methodology/golden-ticket.md)
   * [Kerberos Authentication](windows-hardening/active-directory-methodology/kerberos-authentication.md)
   * [Kerberoast](windows-hardening/active-directory-methodology/kerberoast.md)
-  * [MSSQL Trusted Links](windows-hardening/active-directory-methodology/mssql-trusted-links.md)
+  * [MSSQL AD Abuse](windows-hardening/active-directory-methodology/abusing-ad-mssql.md)
   * [Over Pass the Hash/Pass the Key](windows-hardening/active-directory-methodology/over-pass-the-hash-pass-the-key.md)
   * [Pass the Ticket](windows-hardening/active-directory-methodology/pass-the-ticket.md)
   * [Password Spraying](windows-hardening/active-directory-methodology/password-spraying.md)
