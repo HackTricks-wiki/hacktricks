@@ -300,6 +300,14 @@ shodan domain <domain>
 shodan search "http.html:help.domain.com"
 ```
 
+* ****[**Censys subdomain finder**](https://github.com/christophetd/censys-subdomain-finder)****
+
+```
+export CENSYS_API_ID=...
+export CENSYS_API_SECRET=...
+python3 censys-subdomain-finder.py tesla.com
+```
+
 #### For bug hunters: [**chaos.projectdiscovery.io**](https://chaos.projectdiscovery.io/#/)
 
 This project offers for **free all the subdomains related to bug-bounty programs**. You can access this data also using [chaospy](https://github.com/dr-0x0x/chaospy) or even access the scope used by this project [https://github.com/projectdiscovery/chaos-public-program-list](https://github.com/projectdiscovery/chaos-public-program-list)
