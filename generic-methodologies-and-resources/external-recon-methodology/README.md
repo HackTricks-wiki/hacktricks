@@ -135,6 +135,25 @@ Moreover, you can also search technologies using the favicon hash as explained i
 shodan search org:"Target" http.favicon.hash:116323821 --fields ip_str,port --separator " " | awk '{print $1":"$2}'
 ```
 
+This is how you can **calculate the favicon hash** of a web:
+
+```python
+import mmh3
+import requests
+import codecs
+
+def fav_hash(url):
+    response = requests.get(url)
+    favicon = codecs.encode(response.content,"base64")
+    fhash = mmh3.hash(favicon)
+    print(f"{url} : {fhash}")
+    return fhash
+```
+
+### **Copyright / Uniq string**
+
+Search inside the web pages **strings that could be shared across different webs in the same organisation**. The **copyright string** could be a good example. Then search for that string in **google**, in other **browsers** or even in **shodan**: `shodan search http.html:"Copyright string"`
+
 ### **Other ways**
 
 **Note that you can use this technique to discover more domain names every time you find a new domain.**
@@ -144,10 +163,6 @@ shodan search org:"Target" http.favicon.hash:116323821 --fields ip_str,port --se
 As you already know the name of the organisation owning the IP space. You can search by that data in shodan using: `org:"Tesla, Inc."` Check the found hosts for new unexpected domains in the TLS certificate.
 
 You could access the **TLS certificate** of the main web page, obtain the **Organisation name** and then search for that name inside the **TLS certificates** of all the web pages known by **shodan** with the filter : `ssl:"Tesla Motors"`
-
-**Google**
-
-Go to the main page an find something that identifies the company, like the copyright ("Tesla © 2020"). Search for that in google or other browsers to find possible new domains/pages.
 
 **Assetfinder**
 
@@ -183,50 +198,106 @@ dnsrecon -a -d tesla.com
 
 The fastest way to obtain a lot of subdomains is search in external sources. I'm not going to discuss which sources are the bests and how to use them, but you can find here several utilities: [https://pentester.land/cheatsheets/2018/11/14/subdomains-enumeration-cheatsheet.html](https://pentester.land/cheatsheets/2018/11/14/subdomains-enumeration-cheatsheet.html)
 
-A really good place to search for subdomains is [https://crt.sh/](https://crt.sh).
+The most used **tools** are the following ones (for better results configure the API keys):
 
-The most used tools are [**Amass**](https://github.com/OWASP/Amass)**,** [**subfinder**](https://github.com/projectdiscovery/subfinder)**,** [**findomain**](https://github.com/Edu4rdSHL/findomain/)**,** [**OneForAll**](https://github.com/shmilylty/OneForAll/blob/master/README.en.md)**,** [**assetfinder**](https://github.com/tomnomnom/assetfinder)**,** [**Sudomy**](https://github.com/Screetsec/Sudomy)**,** [**Crobat**](https://github.com/cgboal/sonarsearch)**.** I would recommend to start using them configuring the API keys, and then start testing other tools or possibilities.
+* [**Amass**](https://github.com/OWASP/Amass)
 
 ```bash
 amass enum [-active] [-ip] -d tesla.com
-./subfinder-linux-amd64 -d tesla.com [-silent]
-./findomain-linux -t tesla.com [--quiet]
-python3 oneforall.py --target tesla.com [--dns False] [--req False] run
-assetfinder --subs-only <domain>
-curl https://sonar.omnisint.io/subdomains/tesla.com
+amass enum -d tesla.com | grep tesla.com # To just list subdomains
 ```
 
-Another possibly interesting tool is [**gau**](https://github.com/lc/gau)**.** It fetches known URLs from AlienVault's Open Threat Exchange, the Wayback Machine, and Common Crawl for any given domain.
+* [**subfinder**](https://github.com/projectdiscovery/subfinder)
 
-[**chaos.projectdiscovery.io**](https://chaos.projectdiscovery.io/#/)
+```bash
+# Subfinder, use -silent to only have subdomains in the output
+./subfinder-linux-amd64 -d tesla.com [-silent]
+```
+
+* [**findomain**](https://github.com/Edu4rdSHL/findomain/)
+
+```bash
+# findomain, use -silent to only have subdomains in the output
+./findomain-linux -t tesla.com [--quiet]
+```
+
+* [**OneForAll**](https://github.com/shmilylty/OneForAll/tree/master/docs/en-us)
+
+```bash
+python3 oneforall.py --target tesla.com [--dns False] [--req False] run
+```
+
+* [**assetfinder**](https://github.com/tomnomnom/assetfinder)
+
+```bash
+assetfinder --subs-only <domain>
+```
+
+* [**Sudomy**](https://github.com/Screetsec/Sudomy)
+
+There are **other interesting tools/APIs** that even if not directly specialised in finding subdomains could be useful to find subdomains, like:
+
+* [**Crobat**](https://github.com/cgboal/sonarsearch)**:** Uses the API [https://sonar.omnisint.io](https://sonar.omnisint.io) to obtain subdomains
+
+```bash
+# Get list of subdomains in output from the API
+## This is the API the crobat tool will use
+curl https://sonar.omnisint.io/subdomains/tesla.com | jq -r ".[]"
+```
+
+* [**RapidDNS**](https://rapiddns.io) free API
+
+```bash
+# Get Domains from rapiddns free API
+rapiddns(){
+ curl -s "https://rapiddns.io/subdomain/$1?full=1" \
+  | grep -oE "[\.a-zA-Z0-9-]+\.$1" \
+  | sort -u
+}
+rapiddns tesla.com
+```
+
+* ****[**https://crt.sh/**](https://crt.sh)****
+
+```bash
+# Get Domains from crt free API
+crt(){
+ curl -s "https://crt.sh/?q=%25.$1" \
+  | grep -oE "[\.a-zA-Z0-9-]+\.$1" \
+  | sort -u
+}
+crt tesla.com
+```
+
+* [**gau**](https://github.com/lc/gau)**:** fetches known URLs from AlienVault's Open Threat Exchange, the Wayback Machine, and Common Crawl for any given domain.
+
+```bash
+# Get subdomains from GAUs found URLs
+gau tesla.com | cut -d "/" -f 3 | sort | uniq
+```
+
+* [**SubDomainizer**](https://github.com/nsonaniya2010/SubDomainizer) **&** [**subscraper**](https://github.com/Cillian-Collins/subscraper): They scrap the web looking for JS files and extract subdomains from there.
+
+```bash
+# Get only subdomains from SubDomainizer
+python3 SubDomainizer.py -u https://tesla.com | grep tesla.com
+
+# Get only subdomains from subscraper, this already perform recursion over the found results
+python subscraper.py -u tesla.com | grep tesla.com | cut -d " " -f
+```
+
+* [**Shodan**](https://www.shodan.io/)****
+
+```bash
+# Get info about the domain
+shodan domain <domain>
+# Get other pages with links to subdomains
+shodan search "http.html:help.domain.com"
+```
+
+#### For bug hunters: [**chaos.projectdiscovery.io**](https://chaos.projectdiscovery.io/#/)
 
 This project offers for **free all the subdomains related to bug-bounty programs**. You can access this data also using [chaospy](https://github.com/dr-0x0x/chaospy) or even access the scope used by this project [https://github.com/projectdiscovery/chaos-public-program-list](https://github.com/projectdiscovery/chaos-public-program-list)
-
-You could also find subdomains scrapping the web pages and parsing them (including JS files) searching for subdomains using [SubDomainizer](https://github.com/nsonaniya2010/SubDomainizer) or [subscraper](https://github.com/Cillian-Collins/subscraper).
-
-### **RapidDNS**
-
-Quickly find subdomains using [RapidDNS](https://rapiddns.io) API (from [link](https://twitter.com/Verry\_\_D/status/1282293265597779968)):
-
-```
-rapiddns(){
-curl -s "https://rapiddns.io/subdomain/$1?full=1" \
- | grep -oP '_blank">\K[^<]*' \
- | grep -v http \
- | sort -u
-}
-```
-
-### **Shodan**
-
-You found **dev-int.bigcompanycdn.com**, make a Shodan query like the following:
-
-* http.html:”dev-int.bigcompanycdn.com”
-* http.html:”[https://dev-int-bigcompanycdn.com”](https://dev-int-bigcompanycdn.xn--com-9o0a)
-
-It is possible to use Shodan from the official CLI to quickly analyze all IPs in a file and see which ones have open ports/ vulnerabilities.
-
-* https://book.hacktricks.xyz/external-recon-methodology
 
 ### **DNS Brute force**
 
@@ -283,7 +354,7 @@ With this technique you may even be able to access internal/hidden endpoints.
 
 ### **CORS Brute Force**
 
-Sometimes you will find pages that only return the header _**Access-Control-Allow-Origin**_ when a valid domain/subdomain is set in the _**Origin**_ header. In these scenarios, you can abuse this behavior to **discover** new **subdomains**.
+Sometimes you will find pages that only return the header _**Access-Control-Allow-Origin**_ when a valid domain/subdomain is set in the _**Origin**_ header. In these scenarios, you can abuse this behaviour to **discover** new **subdomains**.
 
 ```bash
 ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http://FUZZ.crossfit.htb' -mr "Access-Control-Allow-Origin" -ignore-body
