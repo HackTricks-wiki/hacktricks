@@ -224,7 +224,7 @@ amass enum -d tesla.com | grep tesla.com # To just list subdomains
 * [**OneForAll**](https://github.com/shmilylty/OneForAll/tree/master/docs/en-us)
 
 ```bash
-python3 oneforall.py --target tesla.com [--dns False] [--req False] run
+python3 oneforall.py --target tesla.com [--dns False] [--req False] [--brute False] run
 ```
 
 * [**assetfinder**](https://github.com/tomnomnom/assetfinder)
@@ -349,7 +349,7 @@ Note how these tools require a **list of IPs of public DNSs**. If these public D
 
 ### **VHosts / Virtual Hosts**
 
-You can find some VHosts in IPs using [HostHunter](https://github.com/SpiderLabs/HostHunter)
+You can find some VHosts in IPs using [HostHunter](https://github.com/SpiderLabs/HostHunter) or other APIs.
 
 **Brute Force**
 
