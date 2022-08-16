@@ -192,47 +192,74 @@ Then, its time to dump all the hashes in memory and locally.\
 
 **Once you have the hash of a user**, you can use it to **impersonate** it.\
 You need to use some **tool** that will **perform** the **NTLM authentication using** that **hash**, **or** you could create a new **sessionlogon** and **inject** that **hash** inside the **LSASS**, so when any **NTLM authentication is performed**, that **hash will be used.** The last option is what mimikatz does.\
-[**More information about this attack and about how does NTLM works here**](../ntlm/#pass-the-hash)**.**
+****[**Read this page for more information.**](../ntlm/#pass-the-hash)****
 
 ### Over Pass the Hash/Pass the Key
 
-This attack aims to **use the user NTLM hash to request Kerberos tickets**, as an alternative to the common Pass The Hash over NTLM protocol. Therefore, this could be especially **useful in networks where NTLM protocol is disabled** and only **Kerberos is allowed** as authentication protocol.\
-[**More information about Over Pass the Hash/Pass the Key here.**](over-pass-the-hash-pass-the-key.md)
+This attack aims to **use the user NTLM hash to request Kerberos tickets**, as an alternative to the common Pass The Hash over NTLM protocol. Therefore, this could be especially **useful in networks where NTLM protocol is disabled** and only **Kerberos is allowed** as authentication protocol.
+
+{% content-ref url="over-pass-the-hash-pass-the-key.md" %}
+[over-pass-the-hash-pass-the-key.md](over-pass-the-hash-pass-the-key.md)
+{% endcontent-ref %}
 
 ### Pass the Ticket
 
-This attack is similar to Pass the Key, but instead of using hashes to request a ticket, the **ticket itself is stolen** and used to authenticate as its owner.\
-[**More information about Pass the Ticket here**](pass-the-ticket.md)**.**
+This attack is similar to Pass the Key, but instead of using hashes to request a ticket, the **ticket itself is stolen** and used to authenticate as its owner.
+
+{% content-ref url="pass-the-ticket.md" %}
+[pass-the-ticket.md](pass-the-ticket.md)
+{% endcontent-ref %}
 
 ### MSSQL Abuse & Trusted Links
 
 If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA), **steal** the NetNTLM **hash** or even perform a **relay** **attack**.\
 Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. These trusts can be chained and at some point the user might be able to find a misconfigured database where he can execute commands.\
-**The links between databases work even across forest trusts.**\
-[**More information about this technique here.**](abusing-ad-mssql.md)
+**The links between databases work even across forest trusts.**
+
+{% content-ref url="abusing-ad-mssql.md" %}
+[abusing-ad-mssql.md](abusing-ad-mssql.md)
+{% endcontent-ref %}
 
 ### Unconstrained Delegation
 
 If you find any Computer object with the attribute [ADS\_UF\_TRUSTED\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.\
 So, if a **Domain Admin logins onto the computer**, you will be able to dump his TGT and impersonate him using [Pass the Ticket](pass-the-ticket.md).\
-Thanks to constrained delegation you could even **automatically compromise a Print Server** (hopefully it will be a DC).\
-[**More information about this technique here.**](unconstrained-delegation.md)
+Thanks to constrained delegation you could even **automatically compromise a Print Server** (hopefully it will be a DC).
+
+{% content-ref url="unconstrained-delegation.md" %}
+[unconstrained-delegation.md](unconstrained-delegation.md)
+{% endcontent-ref %}
 
 ### Constrained Delegation
 
 If a user or computer is allowed for "Constrained Delegation" it will be able to **impersonate any user to access some services in a computer**.\
-Then, if you **compromise the hash** of this user/computer you will be able to **impersonate any user** (even domain admins) to access some services.\
-[**More information about this attacks and some constrains here.**](constrained-delegation.md)
+Then, if you **compromise the hash** of this user/computer you will be able to **impersonate any user** (even domain admins) to access some services.
+
+{% content-ref url="constrained-delegation.md" %}
+[constrained-delegation.md](constrained-delegation.md)
+{% endcontent-ref %}
 
 ### ACLs Abuse
 
-The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.\
-[**More information about interesting privileges here.**](acl-persistence-abuse.md)
+The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.
+
+{% content-ref url="acl-persistence-abuse.md" %}
+[acl-persistence-abuse.md](acl-persistence-abuse.md)
+{% endcontent-ref %}
 
 ### Printer Spooler service abuse
 
 If you can find any **Spool service listening** inside the domain, you may be able to **abuse** is to **obtain new credentials** and **escalate privileges**.\
-[**More information about how to find a abuse Spooler services here.**](printers-spooler-service-abuse.md)
+[**More information about how to abuse Spooler services here.**](printers-spooler-service-abuse.md)
+
+### Third party sessions abuse
+
+If **other users** **access** the **compromised** machine, it's possible to **gather credentials from memory** and even **inject beacons in their processes** to impersonate them.\
+Usually users will access the system via RDP, so here you have how to performa couple of attacks over third party RDP sessions:
+
+{% content-ref url="rdp-sessions-abuse.md" %}
+[rdp-sessions-abuse.md](rdp-sessions-abuse.md)
+{% endcontent-ref %}
 
 ## Post-exploitation with high privilege account
 
@@ -443,23 +470,53 @@ It is possible to compromise the root domain in various ways. Examples:
 
 ### External Forest Domain - One-Way (Inbound)
 
+```powershell
+Get-DomainTrust
+SourceName      : a.domain.local   --> Current domain
+TargetName      : domain.external  --> Destination domain
+TrustType       : WINDOWS-ACTIVE_DIRECTORY
+TrustAttributes : 
+TrustDirection  : Inbound          --> Inboud trust
+WhenCreated     : 2/19/2021 10:50:56 PM
+WhenChanged     : 2/19/2021 10:50:56 PM
+```
+
 In this scenario **your domain is trusted** by an external one giving you **undetermined permissions** over it. You will need to find **which principals of your domain have which access over the external domain** and then try to exploit it:
 
 {% content-ref url="external-forest-domain-oneway-inbound.md" %}
 [external-forest-domain-oneway-inbound.md](external-forest-domain-oneway-inbound.md)
 {% endcontent-ref %}
 
-### Attack one-way trusted domain/forest (Trust account attack)
+### External Forest Domain - One-Way (Outbound)
 
-In short, if an attacker has administrative access to FORESTB which trusts FORESTA, the attacker can obtain the credentials for a _trust account_ located in FORESTA. This account is a member of Domain Users in FORESTA through its Primary Group. As we see too often, Domain Users membership is all that is necessary to identify and use other techniques and attack paths to become Domain Admin.
+```powershell
+Get-DomainTrust -Domain current.local
 
-![](https://images.squarespace-cdn.com/content/v1/5bbb4a7301232c6e6c8757fa/61a0233f-edd8-40b6-b6ae-8592a29875bd/Picture3.png)
+SourceName      : current.local   --> Current domain
+TargetName      : external.local  --> Destination domain
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : FOREST_TRANSITIVE
+TrustDirection  : Outbound        --> Outbound trust
+WhenCreated     : 2/19/2021 10:15:24 PM
+WhenChanged     : 2/19/2021 10:15:24 PM
+```
 
-This technique is not limited to forest trust but works over any domain/forest one-way trust in the direction trusting -> trusted.
+In this scenario **your domain** is **trusting** some **privileges** to principal from a **different domains**.
 
-The trust protections (SID filtering, disabled SID history, and disabled TGT delegation) do not mitigate the technique.
+However, when a **domain is trusted** by the trusting domain, the trusted domain **creates a user** with a **predictable name** that uses as **password the trusted password**. Which means that it's possible to **access a user from the trusting domain to get inside the trusted one** to enumerate it and try to escalate more privileges:&#x20;
 
-[Read more](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
+{% content-ref url="external-forest-domain-one-way-outbound.md" %}
+[external-forest-domain-one-way-outbound.md](external-forest-domain-one-way-outbound.md)
+{% endcontent-ref %}
+
+Another way to compromise the trusted domain is to find a [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links) created in the **opposite direction** of the domain trust (which isn't very common).
+
+Another way to compromise the trusted domain is to wait in a machine where a **user from the trusted domain can access** to login via **RDP**. Then, the attacker could inject code in the RDP session process and **access the origin domain of the victim** from there.\
+Moreover, if the **victim mounted his hard drive**, from the **RDP session** process the attacker could store **backdoors** in the **startup folder of the hard drive**. This technique is called **RDPInception.**
+
+{% content-ref url="rdp-sessions-abuse.md" %}
+[rdp-sessions-abuse.md](rdp-sessions-abuse.md)
+{% endcontent-ref %}
 
 ### Domain trust abuse mitigation
 

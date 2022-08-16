@@ -1,7 +1,5 @@
 # Privileged Accounts and Token Privileges
 
-## Privileged Accounts and Token Privileges
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>

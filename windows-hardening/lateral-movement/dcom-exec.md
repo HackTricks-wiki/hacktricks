@@ -32,7 +32,7 @@ Fortunately, as an admin, you can remotely interact with DCOM with PowerShell by
 
 It is then possible to invoke the `ExecuteShellCommand` method to start a process on the remote host:
 
-![](<../../.gitbook/assets/image (1).png>)
+![](<../../.gitbook/assets/image (1) (4).png>)
 
 ## ShellWindows & ShellBrowserWindow
 
