@@ -235,6 +235,11 @@ assetfinder --subs-only <domain>
 
 * [**Sudomy**](https://github.com/Screetsec/Sudomy)
 
+```bash
+# It requires taht you create a sudomy.api file with API keys
+sudomy -d tesla.com
+```
+
 There are **other interesting tools/APIs** that even if not directly specialised in finding subdomains could be useful to find subdomains, like:
 
 * [**Crobat**](https://github.com/cgboal/sonarsearch)**:** Uses the API [https://sonar.omnisint.io](https://sonar.omnisint.io) to obtain subdomains
