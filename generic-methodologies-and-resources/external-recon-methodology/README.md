@@ -154,6 +154,18 @@ def fav_hash(url):
 
 Search inside the web pages **strings that could be shared across different webs in the same organisation**. The **copyright string** could be a good example. Then search for that string in **google**, in other **browsers** or even in **shodan**: `shodan search http.html:"Copyright string"`
 
+### **CRT Time**
+
+It's common to have a cron job such as&#x20;
+
+```bash
+# /etc/crontab
+37 13 */10 * * certbot renew --post-hook "systemctl reload nginx"
+```
+
+to renew the all the domain certificates on the server. This means that even if the CA used for this doesn't set the time it was generated in the Validity time, it's possible to **find domains belonging to the same company in the certificate transparency logs**.\
+Check out this [**writeup for more information**](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack/).
+
 ### **Other ways**
 
 **Note that you can use this technique to discover more domain names every time you find a new domain.**
