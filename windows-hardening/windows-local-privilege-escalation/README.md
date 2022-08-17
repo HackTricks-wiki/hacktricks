@@ -307,13 +307,11 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 
 ### LAPS
 
-**LAPS** allows you to **manage the local Administrator password** (which is **randomised**, unique, and **changed regularly**) on domain-joined computers. These passwords are centrally stored in Active Directory and restricted to authorised users using ACLs. Passwords are protected in transit from the client to the server using Kerberos v5 and AES.
+**LAPS** allows you to **manage the local Administrator password** (which is **randomised**, unique, and **changed regularly**) on domain-joined computers. These passwords are centrally stored in Active Directory and restricted to authorised users using ACLs. If your user is given enough permissions you might be able to read the passwords of the local admins.
 
-```bash
-reg query "HKLM\Software\Policies\Microsoft Services\AdmPwd" /v AdmPwdEnabled
-```
-
-When using LAPS, 2 new attributes appear in the computer objects of the domain: _ms-msc-AdmPwd_ and _ms-mcs-AdmPwdExpirationTime._ These attributes contains the plain-text admin password and the expiration time. Then, in a domain environment, it could be interesting to check which users can read these attributes...
+{% content-ref url="../active-directory-methodology/laps.md" %}
+[laps.md](../active-directory-methodology/laps.md)
+{% endcontent-ref %}
 
 ### WDigest
 

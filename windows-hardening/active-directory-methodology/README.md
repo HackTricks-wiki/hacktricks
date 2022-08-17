@@ -261,6 +261,14 @@ Usually users will access the system via RDP, so here you have how to performa c
 [rdp-sessions-abuse.md](rdp-sessions-abuse.md)
 {% endcontent-ref %}
 
+### LAPS
+
+**LAPS** allows you to **manage the local Administrator password** (which is **randomised**, unique, and **changed regularly**) on domain-joined computers. These passwords are centrally stored in Active Directory and restricted to authorised users using ACLs. If you have **enough permission to read these passwords you could move to other computers**.
+
+{% content-ref url="laps.md" %}
+[laps.md](laps.md)
+{% endcontent-ref %}
+
 ## Post-exploitation with high privilege account
 
 ### Dumping Domain Credentials
@@ -378,6 +386,15 @@ Note that if you use wrong data, pretty ugly logs will appear.
 
 {% content-ref url="dcshadow.md" %}
 [dcshadow.md](dcshadow.md)
+{% endcontent-ref %}
+
+### LAPS Persistence
+
+Previously we have discussed about how to escalate privileges if you have **enough permission to read LAPS passwords**. However, these passwords can also be used to **maintain persistence**.\
+Check:
+
+{% content-ref url="laps.md" %}
+[laps.md](laps.md)
 {% endcontent-ref %}
 
 ## Forest Privilege Escalation - Domain Trusts
