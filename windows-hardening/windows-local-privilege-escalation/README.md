@@ -362,12 +362,16 @@ Get-MpComputerStatus
 
 Check which files/extensions are blacklisted/whitelisted.
 
-```
+```powershell
 Get-ApplockerPolicy -Effective -xml
 Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
+
+AppLocker rules applied to a host can also be read from the local registry at `HKLM\Software\Policies\Microsoft\Windows\SrpV2`.
+
+
 
 **Useful Writable folders to bypass AppLocker Policy**
 
@@ -377,6 +381,14 @@ C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
+
+Commonly trusted [**"LOLBAS's"**](https://lolbas-project.github.io/) binaries can be also useful to bypass AppLocker.
+
+**Poorly written rules could also be bypassed**, like `<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`, you can create a folder called allowed anywhere and it will be allowed.
+
+**DLL enforcement very rarely enabled** due to the additional load it can put on a system, and the amount of testing required to ensure nothing will break. So using DLLs as backdoors will help bypassing AppLocker.
+
+You can use [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) or [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) to **execute Powershell** code in any process and bypass AppLocker. For more info check: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ### UAC
 
