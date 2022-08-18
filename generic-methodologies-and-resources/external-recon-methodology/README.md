@@ -296,7 +296,7 @@ crt tesla.com
 
 ```bash
 # Get subdomains from GAUs found URLs
-gau tesla.com | cut -d "/" -f 3 | sort | uniq
+gau --subs tesla.com | cut -d "/" -f 3 | sort -u
 ```
 
 * [**SubDomainizer**](https://github.com/nsonaniya2010/SubDomainizer) **&** [**subscraper**](https://github.com/Cillian-Collins/subscraper): They scrap the web looking for JS files and extract subdomains from there.
