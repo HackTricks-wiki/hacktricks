@@ -338,32 +338,87 @@ This project offers for **free all the subdomains related to bug-bounty programs
 
 ### **DNS Brute force**
 
-Let's try to find new **subdomains** brute-forcing DNS servers using possible subdomain names.\
-The most recommended tools for this are [**massdns**](https://github.com/blechschmidt/massdns)**,** [**gobuster**](https://github.com/OJ/gobuster)**,** [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) **and** [**shuffledns**](https://github.com/projectdiscovery/shuffledns). The first one is faster but more prone to errors (you should always check for **false positives**) and the second one **is more reliable**. There are other tools like [**gotator**](https://github.com/Josue87/gotator) that helps to generate generate DNS wordlists through permutations.
+Let's try to find new **subdomains** brute-forcing DNS servers using possible subdomain names.
 
-For this action you will need some common subdomains lists like:
+For this action you will need some **common subdomains wordlists like**:
 
 * [https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056](https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056)
 * [https://github.com/pentester-io/commonspeak](https://github.com/pentester-io/commonspeak)
+* [https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS](https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS)
 
-{% code title="Gobuster bruteforcing dns" %}
-```bash
-gobuster dns -d mysite.com -t 50 -w subdomains.txt
-```
-{% endcode %}
+And also IPs of good DNS resolvers. In order to generate a list of trusted DNS resolvers you can download the resolvers from [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) and use [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) to filter them. Or you could use: [https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt](https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt)
 
-For **massdns** you will need to pass as argument the file will all the **possible well formed subdomains** you want to bruteforce and list of DNS resolvers to use. Some projects that use massdns as base and provides better results by checking massdns results are [**shuffledns**](https://github.com/projectdiscovery/shuffledns) **and** [**puredns**](https://github.com/d3mondev/puredns)**.**
+The most recommended tools for DNS brute-force are:
+
+* [**massdns**](https://github.com/blechschmidt/massdns): This was the first tool that performed an effective DNS brute-force. It's very fast however it's prone to false positives.
 
 ```bash
 sed 's/$/.domain.com/' subdomains.txt > bf-subdomains.txt
 ./massdns -r resolvers.txt -w /tmp/results.txt bf-subdomains.txt
 grep -E "tesla.com. [0-9]+ IN A .+" /tmp/results.txt
+```
 
+* &#x20;[**gobuster**](https://github.com/OJ/gobuster): This one I think just uses 1 resolver
+
+```
+gobuster dns -d mysite.com -t 50 -w subdomains.txt
+```
+
+* [**shuffledns**](https://github.com/projectdiscovery/shuffledns) **** is a wrapper around `massdns`, written in go, that allows you to enumerate valid subdomains using active bruteforce, as well as resolve subdomains with wildcard handling and easy input-output support.
+
+```
 shuffledns -d example.com -list example-subdomains.txt -r resolvers.txt
+```
+
+* ****[**puredns**](https://github.com/d3mondev/puredns): It also uses `massdns`.
+
+```
 puredns bruteforce all.txt domain.com
 ```
 
-Note how these tools require a **list of IPs of public DNSs**. If these public DNSs are malfunctioning (DNS poisoning for example) you will get bad results. In order to generate a list of trusted DNS resolvers you can download the resolvers from [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) and use [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) to filter them.
+* [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) **** uses asyncio to brute force domain names asynchronously.
+
+```
+aiodnsbrute -r resolvers -w wordlist.txt -vv -t 1024 domain.com
+```
+
+### Second DNS bruteforce round
+
+After having found subdomains using open sources and brute-forcing, you could generate alterations of the subdomains found to try to find even more. Several tools are useful for this purpose:
+
+* [**dnsgen**](https://github.com/ProjectAnte/dnsgen)**:** Given the domains and subdomains generate permutations.
+
+```bash
+cat subdomains.txt | dnsgen -
+```
+
+* ****[**goaltdns**](https://github.com/subfinder/goaltdns): Given the domains and subdomains generate permutations.
+  * You can get goaltdns permutations **wordlist** in [**here**](https://github.com/subfinder/goaltdns/blob/master/words.txt).
+
+```bash
+goaltdns -l subdomains.txt -w /tmp/words-permutations.txt -o /tmp/final-words-s3.txt
+```
+
+* [**gotator**](https://github.com/Josue87/gotator)**:** Given the domains and subdomains generate permutations. If not permutations file is indicated gotator will use its own one.
+
+```
+gotator -sub subdomains.txt -silent [-perm /tmp/words-permutations.txt]
+```
+
+* [**altdns**](https://github.com/infosec-au/altdns): Apart from generating subdomains permutations, it can also try to resolve them (but it's better to use the previous commented tools).
+  * You can get altdns permutations **wordlist** in [**here**](https://github.com/infosec-au/altdns/blob/master/words.txt).
+
+```
+altdns -i subdomains.txt -w /tmp/words-permutations.txt -o /tmp/asd3
+```
+
+* ****[**dmut**](https://github.com/bp0lr/dmut): Another tool to perform permutations, mutations and alteration of subdomains. This tool will brute force the result.
+  * You can get dmut permutations wordlist in [**here**](https://raw.githubusercontent.com/bp0lr/dmut/main/words.txt).
+
+```bash
+dmut subdomains.txt -d /tmp/words-permutations.txt -w 100 \
+    --dns-errorLimit 10 /tmp/s --use-pb --verbose -s /tmp/resolvers-trusted.txt
+```
 
 ### **VHosts / Virtual Hosts**
 
@@ -396,10 +451,6 @@ Sometimes you will find pages that only return the header _**Access-Control-Allo
 ```bash
 ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http://FUZZ.crossfit.htb' -mr "Access-Control-Allow-Origin" -ignore-body
 ```
-
-### **DNS Brute Force v2**
-
-Once you have finished looking for subdomains you can use [**dnsgen**](https://github.com/ProjectAnte/dnsgen)**,** [**altdns**](https://github.com/infosec-au/altdns) and [**gotator**](https://github.com/Josue87/gotator) to generate possible permutations of the discovered subdomains and use again **massdns** and **gobuster** to search new domains.
 
 ### **Buckets Brute Force**
 
