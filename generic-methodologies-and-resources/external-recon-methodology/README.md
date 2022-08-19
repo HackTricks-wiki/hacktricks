@@ -248,8 +248,14 @@ assetfinder --subs-only <domain>
 * [**Sudomy**](https://github.com/Screetsec/Sudomy)
 
 ```bash
-# It requires taht you create a sudomy.api file with API keys
+# It requires that you create a sudomy.api file with API keys
 sudomy -d tesla.com
+```
+
+* ****[**vita**](https://github.com/junnlikestea/vita)****
+
+```
+vita -d tesla.com
 ```
 
 * ****[**theHarvester**](https://github.com/laramies/theHarvester)****
