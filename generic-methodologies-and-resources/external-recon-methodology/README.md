@@ -412,12 +412,12 @@ gotator -sub subdomains.txt -silent [-perm /tmp/words-permutations.txt]
 altdns -i subdomains.txt -w /tmp/words-permutations.txt -o /tmp/asd3
 ```
 
-* ****[**dmut**](https://github.com/bp0lr/dmut): Another tool to perform permutations, mutations and alteration of subdomains. This tool will brute force the result.
+* ****[**dmut**](https://github.com/bp0lr/dmut): Another tool to perform permutations, mutations and alteration of subdomains. This tool will brute force the result (it doesn't support dns wild card).
   * You can get dmut permutations wordlist in [**here**](https://raw.githubusercontent.com/bp0lr/dmut/main/words.txt).
 
 ```bash
-dmut subdomains.txt -d /tmp/words-permutations.txt -w 100 \
-    --dns-errorLimit 10 /tmp/s --use-pb --verbose -s /tmp/resolvers-trusted.txt
+cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
+    --dns-errorLimit 10 --use-pb --verbose -s /tmp/resolvers-trusted.txt
 ```
 
 ### **VHosts / Virtual Hosts**
