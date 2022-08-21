@@ -472,6 +472,7 @@
 * [Formula/Doc/LaTeX Injection](pentesting-web/formula-doc-latex-injection.md)
 * [HTTP Connection Request Smuggling](pentesting-web/http-connection-request-smuggling.md)
 * [HTTP Request Smuggling / HTTP Desync Attack](pentesting-web/http-request-smuggling/README.md)
+  * [Browser HTTP Request Smuggling](pentesting-web/http-request-smuggling/browser-http-request-smuggling.md)
   * [Request Smuggling in HTTP/2 Downgrades](pentesting-web/http-request-smuggling/request-smuggling-in-http-2-downgrades.md)
 * [HTTP Response Smuggling / Desync](pentesting-web/http-response-smuggling-desync.md)
 * [Upgrade Header Smuggling](pentesting-web/h2c-smuggling.md)
