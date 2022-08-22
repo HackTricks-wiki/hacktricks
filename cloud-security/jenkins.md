@@ -102,7 +102,7 @@ This method is very noisy because you have to create a hole new project (obvious
 
 Go to the projects and check **if you can configure any** of them (look for the "Configure button"):
 
-![](<../.gitbook/assets/image (158).png>)
+![](<../.gitbook/assets/image (158) (1).png>)
 
 Or **try to access to the path \_/configure**\_ in each project (example: /_me/my-views/view/all/job/Project0/configure_).
 
