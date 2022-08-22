@@ -30,7 +30,7 @@ You can **select the architecture** inside Visual Studio in the **left "Build" T
 
 Then, build both projects (Build -> Build Solution) (Inside the logs will appear the path of the executable):
 
-![](<../.gitbook/assets/image (1) (2).png>)
+![](<../.gitbook/assets/image (1) (2) (1).png>)
 
 ## Prepare the Backdoor
 
