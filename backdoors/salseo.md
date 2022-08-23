@@ -30,7 +30,7 @@ You can **select the architecture** inside Visual Studio in the **left "Build" T
 
 Then, build both projects (Build -> Build Solution) (Inside the logs will appear the path of the executable):
 
-![](<../.gitbook/assets/image (1) (2).png>)
+![](<../.gitbook/assets/image (1) (2) (1).png>)
 
 ## Prepare the Backdoor
 
@@ -113,7 +113,7 @@ Open the SalseoLoader project using Visual Studio.
 
 #### **Search for DllExport package (using Browse tab), and press Install (and accept the popup)**
 
-![](<../.gitbook/assets/image (4) (1).png>)
+![](<../.gitbook/assets/image (4) (1) (1).png>)
 
 In your project folder have appeared the files: **DllExport.bat** and **DllExport\_Configure.bat**
 
@@ -121,7 +121,7 @@ In your project folder have appeared the files: **DllExport.bat** and **DllExpor
 
 Press **Uninstall** (yeah, its weird but trust me, it is necessary)
 
-![](<../.gitbook/assets/image (5).png>)
+![](<../.gitbook/assets/image (5) (1).png>)
 
 ### **Exit Visual Studio and execute DllExport\_configure**
 

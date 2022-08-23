@@ -38,7 +38,7 @@ It is then possible to invoke the `ExecuteShellCommand` method to start a proces
 
 The **MMC20.Application** object lacked explicit “[LaunchPermissions](https://technet.microsoft.com/en-us/library/bb633148.aspx)”, resulting in the default permission set allowing Administrators access:
 
-![](<../../.gitbook/assets/image (4).png>)
+![](<../../.gitbook/assets/image (4) (1).png>)
 
 You can read more on that thread [here](https://twitter.com/tiraniddo/status/817532039771525120).\
 Viewing which other objects that have no explicit LaunchPermission set can be achieved using [@tiraniddo](https://twitter.com/tiraniddo)’s [OleView .NET](https://github.com/tyranid/oleviewdotnet), which has excellent Python filters (among other things). In this instance, we can filter down to all objects that have no explicit Launch Permission. When doing so, two objects stood out to me: `ShellBrowserWindow` and `ShellWindows`:
