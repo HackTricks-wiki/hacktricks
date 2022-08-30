@@ -16,13 +16,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-{% hint style="danger" %}
-<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
-_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
-
-{% embed url="https://securityboat.in/contact-us" %}
-{% endhint %}
-
 ## ASREPRoast
 
 The ASREPRoast attack looks for **users without Kerberos pre-authentication required attribute (**[_**DONT\_REQ\_PREAUTH**_](https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro)_**)**_.
@@ -75,13 +68,6 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```
 
 [**More information about AS-RRP Roasting in ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
-
-{% hint style="danger" %}
-<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
-_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
-
-{% embed url="https://securityboat.in/contact-us" %}
-{% endhint %}
 
 <details>
 

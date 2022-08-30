@@ -64,15 +64,6 @@ Through Security Skills as a Service, we help organizations to **defend against 
 
 {% embed url="https://securityhubs.io/" %}
 
-### [SecurityBoat](https://securityboat.in/)
-
-![](<.gitbook/assets/SB logo black\_034525.png>)
-
-**Securityboat** is a cybersecurity company focused on providing top of the line **penetration testing services** and the most comprehensive **automated security testing** solutions based on an extensive **manual security testing methodology** that utilizes various case-specific and **industry-tested** solutions. They are committed to providing clear communication on cybersecurity issues, developing solutions, and prioritizing **business risk**.\
-**Make the right choice by contacting us for your security:**
-
-{% embed url="https://securityboat.in/contact-us" %}
-
 ### [Intigriti](https://www.intigriti.com)
 
 ![](.gitbook/assets/i3.png)

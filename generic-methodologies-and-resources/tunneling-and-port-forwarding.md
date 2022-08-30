@@ -16,13 +16,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-{% hint style="danger" %}
-<img src="../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
-_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
-
-{% embed url="https://securityboat.in/contact-us" %}
-{% endhint %}
-
 ## Nmap tip
 
 {% hint style="warning" %}
@@ -271,13 +264,6 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --hashes 9b9850751be2515c8231e5189015bbe6:49ef7638d69a01f26d96ed673bf50c45
 ```
 
-{% hint style="danger" %}
-<img src="../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
-_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
-
-{% embed url="https://securityboat.in/contact-us" %}
-{% endhint %}
-
 ## **Socat**
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
@@ -470,13 +456,6 @@ ping 1.1.1.100 #After a successful connection, the victim will be in the 1.1.1.1
 * [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 * [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
 * [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)
-
-{% hint style="danger" %}
-<img src="../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
-_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
-
-{% embed url="https://securityboat.in/contact-us" %}
-{% endhint %}
 
 <details>
 

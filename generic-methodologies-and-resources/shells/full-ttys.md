@@ -16,13 +16,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-{% hint style="danger" %}
-<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
-_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
-
-{% embed url="https://securityboat.in/contact-us" %}
-{% endhint %}
-
 ## Full TTY
 
 Note that the shell you set in the `SHELL` variable **must** be **listed inside** _**/etc/shells**_ or `The value for the SHELL variable was not found the /etc/shells file This incident has been reported`. Also note that the next snippets only work in bash. If you're in a zsh, change to a bash before obtaining the shell by running `bash`.
@@ -110,13 +103,6 @@ If for some reason you cannot obtain a full TTY you **still can interact with pr
 ```bash
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
-
-{% hint style="danger" %}
-<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
-_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
-
-{% embed url="https://securityboat.in/contact-us" %}
-{% endhint %}
 
 <details>
 
