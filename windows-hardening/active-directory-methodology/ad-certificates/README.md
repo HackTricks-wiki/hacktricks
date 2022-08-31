@@ -16,14 +16,16 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Parts of a certificate
+## Basic Information
+
+### Parts of a certificate
 
 * **Subject** - The owner of the certificate.
 * **Public Key** - Associates the Subject with a private key stored separately.
 * **NotBefore and NotAfter dates** - Define the duration that the certificate is valid.
 * **Serial Number** - An identifier for the certificate assigned by the CA.
 * **Issuer** - Identifies who issued the certificate (commonly a CA).
-* **SubjectAlternativeName** - Defines one or more alternate names that the Subject may go by.
+* **SubjectAlternativeName** - Defines one or more alternate names that the Subject may go by. (_Check below_)
 * **Basic Constraints** - Identifies if the certificate is a CA or an end entity, and if there are any constraints when using the certificate.
 * **Extended Key Usages (EKUs)** - Object identifiers (OIDs) that describe **how the certificate will be used**. Also known as Enhanced Key Usage in Microsoft parlance. Common EKU OIDs include:
   * Code Signing (OID 1.3.6.1.5.5.7.3.3) - The certificate is for signing executable code.
@@ -35,7 +37,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Signature Algorithm** - Specifies the algorithm used to sign the certificate.
 * **Signature** - The signature of the certificates body made using the issuer’s (e.g., a CA’s) private key.
 
-## CAs
+#### Subject Alternative Names
+
+A **Subject Alternative Name** (SAN) is an X.509v3 extension. It allows **additional identities** to be bound to a **certificate**. For example, if a web server hosts **content for multiple domains**, **each** applicable **domain** could be **included** in the **SAN** so that the web server only needs a single HTTPS certificate.
+
+By default, during certificate-based authentication, one way AD maps certificates to user accounts based on a UPN specified in the SAN. If an attacker can **specify an arbitrary SAN** when requesting a certificate that has an **EKU enabling client authentication**, and the CA creates and signs a certificate using the attacker supplied SAN, the **attacker can become any user in the domain**.
+
+### CAs
 
 AD CS defines CA certificates the AD forest trusts in four locations under the container `CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>`, each differing by their purpose:
 
@@ -53,9 +61,9 @@ In AD environments, **clients interact with Enterprise CAs to request a certific
 * The **NTAuthCertificates** AD object defines CA certificates that enable authentication to AD. This object has an **objectClass** of **`certificationAuthority`** and the object’s **`cACertificate`** property defines an array of **trusted CA certificates**. AD-joined Windows machines propagate these CAs to the Intermediate Certification Authorities certificate store on each machine. **Client** applications can **authenticate** to AD using a certificate only if one the **CAs defined by the NTAuthCertificates** object has **signed** the authenticating client’s certificate.
 * The **AIA** (Authority Information Access) container holds the AD objects of intermediate and cross CAs. **Intermediate CAs are “children” of root CAs** in the PKI tree hierarchy; as such, this container exists to aid in **validating certificate chains**. Like the Certification Authorities container, each **CA is represented as an AD object** in the AIA container where the objectClass attribute is set to certificationAuthority and the **`cACertificate`** property contains the **bytes** of the **CA’s certificate**. These CAs are propagated to the Intermediate Certification Authorities certificate store on each Windows machine.
 
-## Client Certificate Request Flow
+### Client Certificate Request Flow
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 It's the process to **obtain a certificate** from AD CS. At a high level, during enrolment clients first **find an Enterprise CA** based on the **objects in the Enrolment Services** container discussed above.
 
@@ -64,7 +72,7 @@ It's the process to **obtain a certificate** from AD CS. At a high level, during
 3. The **CA** server checks if the client **can request certificates**. If so, it determines if it will issue a certificate by looking up the **certificate template** AD object specified in the CSR. The CA will check if the certificate template AD object’s **permissions allow** the authenticating account to **obtain a certificate**.
 4. If so, the **CA generates a certificate** using the “blueprint” settings defined by the **certificate template** (e.g., EKUs, cryptography settings, and issuance requirements) and using the other information supplied in the CSR if allowed by the certificate’s template settings. The **CA signs the certificate** using its private key and then returns it to the client.
 
-## Certificate Templates
+### Certificate Templates
 
 AD CS stores available certificate templates as AD objects with an **objectClass** of **`pKICertificateTemplate`** located in the following container:&#x20;
 
@@ -74,7 +82,7 @@ An AD certificate template object’s attributes **define its settings, and its 
 
 The **`pKIExtendedKeyUsage`** attribute on an AD certificate template object contains an **array of OIDs** enabled in the template. These EKU OIDs affect **what the certificate can be used for.** You can find a [list of possible OIDs here](https://www.pkisolutions.com/object-identifiers-oid-in-pki/).
 
-### Authentication OIDs
+#### Authentication OIDs
 
 * `1.3.6.1.5.5.7.3.2`: Client Authentication
 * `1.3.6.1.5.2.3.4`: PKINIT Client Authentication (needed to be added manually)
@@ -87,7 +95,7 @@ The **`pKIExtendedKeyUsage`** attribute on an AD certificate template object con
 
 An admin needs to **create the certificate** template and then an **Enterprise CA “publishes”** the template, making it available to clients to enrol in. AD CS specifies that a certificate template is enabled on an Enterprise CA by **adding the template’s name to the `certificatetemplates` field** of the AD object.
 
-<figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="warning" %}
 AD CS defines enrolment rights - which **principals can request** a certificate – using two security descriptors: one on the **certificate template** AD object and another on the **Enterprise CA itself**.\
@@ -105,11 +113,11 @@ A client needs to be granted in both security descriptors in order to be able to
 
 The **security descriptor** configured on the **Enterprise CA** defines these rights and is **viewable** in the Certificate Authority MMC snap-in `certsrv.msc` by right clicking on the CA → Properties → Security.
 
-<figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 This ultimately ends up setting the Security registry value in the key **`HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration<CA NAME>`** on the CA server. We have encountered several AD CS servers that grant low-privileged users remote access to this key via remote registry:
 
-<figure><img src="../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
 
 Low-privileged users can also **enumerate this via DCOM** using the `ICertAdminD2` COM interface’s `GetCASecurity` method. However, normal Windows clients need to install the Remote Server Administration Tools (RSAT) to use it since the COM interface and any COM objects that implement it are not present on Windows by default.
 
@@ -121,7 +129,7 @@ Other requirements could be in place to control who can get a certificate.
 
 **CA certificate manager approval** results in the certificate template setting the `CT_FLAG_PEND_ALL_REQUESTS` (0x2) bit on the AD object’s `msPKI-EnrollmentFlag` attribute. This puts all **certificate requests** based on the template into the **pending state** (visible in the “Pending Requests” section in `certsrv.msc`), which requires a certificate manager to **approve or deny** the request before the certificate is issued:
 
-<figure><img src="../../.gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
 
 #### Enrolment Agents, Authorized Signatures, and Application Policies
 
@@ -147,12 +155,6 @@ On a Windows machine, users can request certificates using a GUI by launching `c
 
 One can also use the built-in **`certreq.exe`** command or PowerShell’s **`Get-Certificate`** command for certificate enrolment.
 
-## Subject Alternative Names
-
-A **Subject Alternative Name** (SAN) is an X.509v3 extension. It allows **additional identities** to be bound to a **certificate**. For example, if a web server hosts **content for multiple domains**, **each** applicable **domain** could be **included** in the **SAN** so that the web server only needs a single HTTPS certificate.
-
-By default, during certificate-based authentication, one way AD maps certificates to user accounts based on a UPN specified in the SAN. If an attacker can **specify an arbitrary SAN** when requesting a certificate that has an **EKU enabling client authentication**, and the CA creates and signs a certificate using the attacker supplied SAN, the **attacker can become any user in the domain**.
-
 ## Certificate Authentication
 
 AD supports certificate authentication over **two protocols** by default: **Kerberos** and **Secure Channel** (Schannel).
@@ -173,7 +175,7 @@ The “NTAUTH certificate store” mentioned here refers to an AD object AD CS i
 
 This means that when **AD CS creates a new CA** (or it renews CA certificates), it publishes the new certificate to the **`NTAuthCertificates`** object by adding the new certificate to the object’s `cacertificate` attribute:
 
-<figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
 
 During certificate authentication, the DC can then verify that the authenticating certificate chains to a CA certificate defined by the **`NTAuthCertificates`** object. CA certificates in the **`NTAuthCertificates`** object must in turn chain to a root CA. The big takeaway here is the **`NTAuthCertificates`** object is the root of trust for certificate authentication in Active Directory!
 
@@ -182,13 +184,13 @@ During certificate authentication, the DC can then verify that the authenticatin
 Schannel is the security support provider (SSP) Windows leverages when establishing TLS/SSL connections. Schannel supports **client authentication** (amongst many other capabilities), enabling a remote server to **verify the identity of the connecting user**. It accomplishes this using PKI, with certificates being the primary credential.\
 During the **TLS handshake**, the server **requests a certificate from the client** for authentication. The client, having previously been issued a client authentication certificate from a CA the server trusts, sends its certificate to the server. The **server then validates** the certificate is correct and grants the user access assuming everything is okay.
 
-<figure><img src="../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
 
 When an account authenticates to AD using a certificate, the DC needs to somehow map the certificate credential to an AD account. **Schannel** first attempts to **map** the **credential** to a **user** account use Kerberos’s **S4U2Self** functionality. \
 If that is **unsuccessful**, it will follow the attempt to map the **certificate to a user** account using the certificate’s **SAN extension**, a combination of the **subject** and **issuer** fields, or solely from the issuer. By default, not many protocols in AD environments support AD authentication via Schannel out of the box. WinRM, RDP, and IIS all support client authentication using Schannel, but it **requires additional configuration**, and in some cases – like WinRM – does not integrate with Active Directory.\
 One protocol that does commonly work – assuming AD CS has been setup - is **LDAPS**. The cmdlet `Get-LdapCurrentUser` demonstrates how one can authenticate to LDAP using .NET libraries. The cmdlet performs an LDAP “Who am I?” extended operation to display the currently authenticating user:
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 ## AD CS Enumeration
 
