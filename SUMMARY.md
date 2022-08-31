@@ -156,6 +156,7 @@
   * [Windows C Payloads](windows-hardening/windows-local-privilege-escalation/windows-c-payloads.md)
 * [Active Directory Methodology](windows-hardening/active-directory-methodology/README.md)
   * [Abusing Active Directory ACLs/ACEs](windows-hardening/active-directory-methodology/acl-persistence-abuse.md)
+  * [AD Certificates](windows-hardening/active-directory-methodology/ad-certificates.md)
   * [AD information in printers](windows-hardening/active-directory-methodology/ad-information-in-printers.md)
   * [ASREPRoast](windows-hardening/active-directory-methodology/asreproast.md)
   * [BloodHound](windows-hardening/active-directory-methodology/bloodhound.md)

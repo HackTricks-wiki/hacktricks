@@ -1,7 +1,5 @@
 # Abusing Active Directory ACLs/ACEs
 
-## Abusing Active Directory ACLs/ACEs
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>

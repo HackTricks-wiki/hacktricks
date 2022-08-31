@@ -16,13 +16,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-{% hint style="danger" %}
-<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
-_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
-
-{% embed url="https://securityboat.in/contact-us" %}
-{% endhint %}
-
 ## Initial Information Gathering
 
 ### Basic Information
@@ -415,13 +408,6 @@ Note that not all diffs can feature all types. For instance, diffs from the inde
 
 * [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems\_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems\_Ch3.pdf)
 * [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
-
-{% hint style="danger" %}
-<img src="../../.gitbook/assets/SB logo black_034525.png" alt="" data-size="original">\
-_A **digital transformation** tailored to your organization is unique. It also comes with its **risks**. **Defend yourself against hackers**. Get protection before it's too late. **Talk to the professionals at Securityboat**:_
-
-{% embed url="https://securityboat.in/contact-us" %}
-{% endhint %}
 
 <details>
 

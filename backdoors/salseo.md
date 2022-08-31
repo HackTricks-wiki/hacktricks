@@ -109,7 +109,7 @@ Open the SalseoLoader project using Visual Studio.
 
 #### **Tools** --> **NuGet Package Manager** --> **Manage NuGet Packages for Solution...**
 
-![](<../.gitbook/assets/image (3) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1).png>)
 
 #### **Search for DllExport package (using Browse tab), and press Install (and accept the popup)**
 
@@ -131,13 +131,13 @@ Then, go to your **SalseoLoader folder** and **execute DllExport\_Configure.bat*
 
 Select **x64** (if you are going to use it inside a x64 box, that was my case), select **System.Runtime.InteropServices** (inside **Namespace for DllExport**) and press **Apply**
 
-![](<../.gitbook/assets/image (7).png>)
+![](<../.gitbook/assets/image (7) (1).png>)
 
 ### **Open the project again with visual Studio**
 
 **\[DllExport]** should not be longer marked as error
 
-![](<../.gitbook/assets/image (8).png>)
+![](<../.gitbook/assets/image (8) (1).png>)
 
 ### Build the solution
 
@@ -147,7 +147,7 @@ Select **Output Type = Class Library** (Project --> SalseoLoader Properties --> 
 
 Select **x64** **platform** (Project --> SalseoLoader Properties --> Build --> Platform target = x64)
 
-![](<../.gitbook/assets/image (9).png>)
+![](<../.gitbook/assets/image (9) (1).png>)
 
 To **build** the solution: Build --> Build Solution (Inside the Output console the path of the new DLL will appear)
 
