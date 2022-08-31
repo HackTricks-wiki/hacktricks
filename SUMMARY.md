@@ -158,6 +158,7 @@
   * [Abusing Active Directory ACLs/ACEs](windows-hardening/active-directory-methodology/acl-persistence-abuse.md)
   * [AD Certificates](windows-hardening/active-directory-methodology/ad-certificates.md)
     * [Account Persistence](windows-hardening/active-directory-methodology/ad-certificates/account-persistence.md)
+    * [Domain Escalation](windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md)
     * [Certificate Theft](windows-hardening/active-directory-methodology/ad-certificates/certificate-theft.md)
   * [AD information in printers](windows-hardening/active-directory-methodology/ad-information-in-printers.md)
   * [ASREPRoast](windows-hardening/active-directory-methodology/asreproast.md)
