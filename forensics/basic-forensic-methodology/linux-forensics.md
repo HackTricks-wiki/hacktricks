@@ -1,5 +1,15 @@
 # Linux Forensics
 
+{% hint style="danger" %}
+![](../../.gitbook/assets/image.png)
+
+\
+Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
+
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% endhint %}
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -157,6 +167,16 @@ icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
 
+{% hint style="danger" %}
+![](../../.gitbook/assets/image.png)
+
+\
+Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
+
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% endhint %}
+
 ## Search for known Malware
 
 ### Modified System Files
@@ -211,6 +231,16 @@ find /sbin/ -exec dpkg -S {} \; | grep "no path found"
 #RedHat
 find /sbin/ –exec rpm -qf {} \; | grep "is not"
 ```
+
+{% hint style="danger" %}
+![](../../.gitbook/assets/image.png)
+
+\
+Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
+
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% endhint %}
 
 ## Recover Deleted Running Binaries
 
@@ -345,6 +375,16 @@ usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 
 More examples and info inside the github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
+{% hint style="danger" %}
+![](../../.gitbook/assets/image.png)
+
+\
+Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
+
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% endhint %}
+
 ## Review User Accounts and Logon Activities
 
 Examine the _**/etc/passwd**_, _**/etc/shadow**_ and **security logs** for unusual names or accounts created and/or used in close proximity to known unauthorized events. Also check possible sudo brute-force attacks.\
@@ -424,3 +464,13 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+{% hint style="danger" %}
+![](../../.gitbook/assets/image.png)
+
+\
+Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
+
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% endhint %}

@@ -1,4 +1,14 @@
+# venv
 
+{% hint style="danger" %}
+![](../../.gitbook/assets/image.png)
+
+\
+Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
+
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% endhint %}
 
 <details>
 
@@ -15,7 +25,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 **Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
 
 ```bash
 sudo apt-get install python3-venv
@@ -36,8 +45,6 @@ pip3 install wheel
 inside the virtual environment
 ```
 
-
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -54,4 +61,12 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
+{% hint style="danger" %}
+![](../../.gitbook/assets/image.png)
 
+\
+Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
+
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% endhint %}
