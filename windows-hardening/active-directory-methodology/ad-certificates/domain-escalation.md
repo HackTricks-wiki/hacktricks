@@ -278,6 +278,19 @@ Get-CertificationAuthority | select Name,Enroll* | Format-List *
 
 <figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
+## Compromising Forests with Certificates
+
+### CAs Trusts Breaking Forest Trusts
+
+The setup for **cross-forest enrollment** is relatively simple. Administrators publish the **root CA certificate** from the resource forest **to the account forests** and add the **enterprise CA** certificates from the resource forest to the **`NTAuthCertificates`** and AIA containers **in each account forest**. To be clear, this means that the **CA** in the resource forest has **complete control** over all **other forests it manages PKI for**. If attackers **compromise this CA**, they can **forge certificates for all users in the resource and account forests**, breaking the forest security boundary.
+
+### Foreign Principals With Enrollment Privileges
+
+Another thing organizations need to be careful of in multi-forest environments is Enterprise CAs **publishing certificates templates** that grant **Authenticated Users or foreign principals** (users/groups external to the forest the Enterprise CA belongs to) **enrollment and edit rights**.\
+When an account **authenticates across a trust**, AD adds the **Authenticated Users SID** to the authenticating user’s token. Therefore, if a domain has an Enterprise CA with a template that **grants Authenticated Users enrollment rights**, a user in different forest could potentially **enroll in the template**. Similarly, if a template explicitly grants a **foreign principal enrollment rights**, then a **cross-forest access-control relationship gets created**, permitting a principal in one forest to **enroll in a template in another forest**.
+
+Ultimately both these scenarios **increase the attack surface** from one forest to another. Depending on the certificate template settings, an attacker could abuse this to gain additional privileges in a foreign domain.
+
 ## References
 
 * All the information for this page was taken from [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)
