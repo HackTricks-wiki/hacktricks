@@ -642,7 +642,7 @@ Check if **Authenticated Users** or **NT AUTHORITY\INTERACTIVE** have FullContro
 To change the Path of the binary executed:
 
 ```bash
-reg add HKLM\SYSTEM\CurrentControlSet\srevices\<service_name> /v ImagePath /t REG_EXPAND_SZ /d C:\path\new\binary /f
+reg add HKLM\SYSTEM\CurrentControlSet\services\<service_name> /v ImagePath /t REG_EXPAND_SZ /d C:\path\new\binary /f
 ```
 
 ### Services registry AppendData/AddSubdirectory permissions
