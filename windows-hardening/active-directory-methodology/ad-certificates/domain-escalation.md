@@ -188,6 +188,100 @@ If you find this setting in your environment, you can **remove this flag** with:
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
 
+## Vulnerable Certificate Authority Access Control - ESC7
+
+A certificate authority itself has a **set of permissions** that secure various **CA actions**. These permissions can be access from `certsrv.msc`, right clicking a CA, selecting properties, and switching to the Security tab:
+
+<figure><img src="../../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+
+This can also be enumerated via [**PSPKI’s module**](https://www.pkisolutions.com/tools/pspki/) with `Get-CertificationAuthority | Get-CertificationAuthorityAcl`:
+
+```bash
+Get-CertificationAuthority -ComputerName dc.theshire.local | Get-certificationAuthorityAcl | select -expand Access
+```
+
+The two main rights here are the **`ManageCA`** right and the **`ManageCertificates`** right, which translate to the “CA administrator” and “Certificate Manager”.
+
+If you have a principal with **`ManageCA`** rights on a **certificate authority**, we can use **PSPKI** to remotely flip the **`EDITF_ATTRIBUTESUBJECTALTNAME2`** bit to **allow SAN** specification in any template ([ECS6](domain-escalation.md#editf\_attributesubjectaltname2-esc6)):
+
+<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../../.gitbook/assets/image (73).png" alt=""><figcaption></figcaption></figure>
+
+This is also possible in a simpler form with [**PSPKI’s Enable-PolicyModuleFlag**](https://www.sysadmins.lv/projects/pspki/enable-policymoduleflag.aspx) cmdlet.
+
+The **`ManageCertificates`** rights permits to **approve a pending request**, therefore bypassing the "CA certificate manager approval" protection.
+
+You can use a **combination** of **Certify** and **PSPKI** module to request a certificate, approve it, and download it:
+
+```powershell
+# Request a certificate that will require an approval
+Certify.exe request /ca:dc.theshire.local\theshire-DC-CA /template:ApprovalNeeded
+[...]
+[*] CA Response      : The certificate is still pending.
+[*] Request ID       : 336
+[...]
+
+# Use PSPKI module to approve the request
+Import-Module PSPKI
+Get-CertificationAuthority -ComputerName dc.theshire.local | Get-PendingRequest -RequestID 336 | Approve-CertificateRequest
+
+# Download the certificate
+Certify.exe download /ca:dc.theshire.local\theshire-DC-CA /id:336
+```
+
+## NTLM Relay to AD CS HTTP Endpoints – ESC8
+
+{% hint style="info" %}
+In summary, if an environment has **AD CS installed**, along with a **vulnerable web enrollment endpoint** and at least one **certificate template published** that allows for **domain computer enrollment and client authentication** (like the default **`Machine`** template), then an **attacker can compromise ANY computer with the spooler service running**!
+{% endhint %}
+
+AD CS supports several **HTTP-based enrollment methods** via additional AD CS server roles that administrators can install. These HTTPbased certificate enrollment interfaces are all **vulnerable NTLM relay attacks**. Using NTLM relay, an attacker on a **compromised machine can impersonate any inbound-NTLM-authenticating AD account**. While impersonating the victim account, an attacker could access these web interfaces and **request a client authentication certificate based on the `User` or `Machine` certificate templates**.
+
+* The **web enrollment interface** (an older looking ASP application accessible at `http://<caserver>/certsrv/`), by default only supports HTTP, which cannot protect against NTLM relay attacks. In addition, it explicitly only allows NTLM authentication via its Authorization HTTP header, so more secure protocols like Kerberos are unusable.
+* The **Certificate Enrollment Service** (CES), **Certificate Enrollment Policy** (CEP) Web Service, and **Network Device Enrollment Service** (NDES) support negotiate authentication by default via their Authorization HTTP header. Negotiate authentication **support** Kerberos and **NTLM**; consequently, an attacker can **negotiate down to NTLM** authentication during relay attacks. These web services do at least enable HTTPS by default, but unfortunately HTTPS by itself does **not protect against NTLM relay attacks**. Only when HTTPS is coupled with channel binding can HTTPS services be protected from NTLM relay attacks. Unfortunately, AD CS does not enable Extended Protection for Authentication on IIS, which is necessary to enable channel binding.
+
+Common **problems** with NTLM relay attacks are that the **NTLM sessions are usually short** and that the attacker **cannot** interact with services that **enforce NTLM signing**.
+
+However, abusing a NTLM relay attack to obtain a certificate to the user solves this limitations, as the session will live as long as the certificate is valid and the certificate can be used to use services **enforcing NTLM signing**. To know how to use an stolen cert check:
+
+{% content-ref url="account-persistence.md" %}
+[account-persistence.md](account-persistence.md)
+{% endcontent-ref %}
+
+Another limitation of NTLM relay attacks is that they **require a victim account to authenticate to an attacker-controlled machine**. An attacker could wait or could try to **force** it:
+
+{% content-ref url="../printers-spooler-service-abuse.md" %}
+[printers-spooler-service-abuse.md](../printers-spooler-service-abuse.md)
+{% endcontent-ref %}
+
+****[**Certify**](https://github.com/GhostPack/Certify)’s `cas` command can enumerate **enabled HTTP AD CS endpoints**:
+
+```
+Certify.exe cas
+```
+
+<figure><img src="../../../.gitbook/assets/image (78).png" alt=""><figcaption></figcaption></figure>
+
+Enterprise CAs also **store CES endpoints** in their AD object in the `msPKI-Enrollment-Servers` property. **Certutil.exe** and **PSPKI** can parse and list these endpoints:
+
+```
+certutil.exe -enrollmentServerURL -config CORPDC01.CORP.LOCAL\CORP-CORPDC01-CA
+```
+
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+```powershell
+Import-Module PSPKI
+Get-CertificationAuthority | select Name,Enroll* | Format-List *
+```
+
+<figure><img src="../../../.gitbook/assets/image (81).png" alt=""><figcaption></figcaption></figure>
+
+## References
+
+* All the information for this page was taken from [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)
+
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
