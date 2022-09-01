@@ -117,7 +117,7 @@ The **security descriptor** configured on the **Enterprise CA** defines these ri
 
 This ultimately ends up setting the Security registry value in the key **`HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration<CA NAME>`** on the CA server. We have encountered several AD CS servers that grant low-privileged users remote access to this key via remote registry:
 
-<figure><img src="../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (6) (2).png" alt=""><figcaption></figcaption></figure>
 
 Low-privileged users can also **enumerate this via DCOM** using the `ICertAdminD2` COM interface’s `GetCASecurity` method. However, normal Windows clients need to install the Remote Server Administration Tools (RSAT) to use it since the COM interface and any COM objects that implement it are not present on Windows by default.
 
@@ -129,7 +129,7 @@ Other requirements could be in place to control who can get a certificate.
 
 **CA certificate manager approval** results in the certificate template setting the `CT_FLAG_PEND_ALL_REQUESTS` (0x2) bit on the AD object’s `msPKI-EnrollmentFlag` attribute. This puts all **certificate requests** based on the template into the **pending state** (visible in the “Pending Requests” section in `certsrv.msc`), which requires a certificate manager to **approve or deny** the request before the certificate is issued:
 
-<figure><img src="../../.gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (13) (2).png" alt=""><figcaption></figcaption></figure>
 
 #### Enrolment Agents, Authorized Signatures, and Application Policies
 
@@ -175,7 +175,7 @@ The “NTAUTH certificate store” mentioned here refers to an AD object AD CS i
 
 This means that when **AD CS creates a new CA** (or it renews CA certificates), it publishes the new certificate to the **`NTAuthCertificates`** object by adding the new certificate to the object’s `cacertificate` attribute:
 
-<figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (9) (2).png" alt=""><figcaption></figcaption></figure>
 
 During certificate authentication, the DC can then verify that the authenticating certificate chains to a CA certificate defined by the **`NTAuthCertificates`** object. CA certificates in the **`NTAuthCertificates`** object must in turn chain to a root CA. The big takeaway here is the **`NTAuthCertificates`** object is the root of trust for certificate authentication in Active Directory!
 
@@ -184,13 +184,13 @@ During certificate authentication, the DC can then verify that the authenticatin
 Schannel is the security support provider (SSP) Windows leverages when establishing TLS/SSL connections. Schannel supports **client authentication** (amongst many other capabilities), enabling a remote server to **verify the identity of the connecting user**. It accomplishes this using PKI, with certificates being the primary credential.\
 During the **TLS handshake**, the server **requests a certificate from the client** for authentication. The client, having previously been issued a client authentication certificate from a CA the server trusts, sends its certificate to the server. The **server then validates** the certificate is correct and grants the user access assuming everything is okay.
 
-<figure><img src="../../.gitbook/assets/image (8) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
 
 When an account authenticates to AD using a certificate, the DC needs to somehow map the certificate credential to an AD account. **Schannel** first attempts to **map** the **credential** to a **user** account use Kerberos’s **S4U2Self** functionality. \
 If that is **unsuccessful**, it will follow the attempt to map the **certificate to a user** account using the certificate’s **SAN extension**, a combination of the **subject** and **issuer** fields, or solely from the issuer. By default, not many protocols in AD environments support AD authentication via Schannel out of the box. WinRM, RDP, and IIS all support client authentication using Schannel, but it **requires additional configuration**, and in some cases – like WinRM – does not integrate with Active Directory.\
 One protocol that does commonly work – assuming AD CS has been setup - is **LDAPS**. The cmdlet `Get-LdapCurrentUser` demonstrates how one can authenticate to LDAP using .NET libraries. The cmdlet performs an LDAP “Who am I?” extended operation to display the currently authenticating user:
 
-<figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (4).png" alt=""><figcaption></figcaption></figure>
 
 ## AD CS Enumeration
 
