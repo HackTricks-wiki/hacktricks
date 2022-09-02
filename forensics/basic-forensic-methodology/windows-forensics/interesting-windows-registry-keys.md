@@ -155,7 +155,7 @@ Within this registry it's possible to find:
 
 Moreover, checking the registry `HKLM\SYSTEM\ControlSet001\Enum\USB` and comparing the values of the sub-keys it's possible to find the VID value
 
-![](<../../../.gitbook/assets/image (478).png>)
+![](<../../../.gitbook/assets/image (478) (1).png>)
 
 With the previous information the registry `SOFTWARE\Microsoft\Windows Portable Devices\Devices` can be used to obtain the **`{GUID}`**:
 

@@ -165,7 +165,7 @@ ESC4 is when a user has write privileges over a certificate template. This can f
 
 As we can see in the path above, only `JOHNPC` has these privileges, but our user `JOHN` has the new `AddKeyCredentialLink` edge to `JOHNPC`. Since this technique is related to certificates, I have implemented this attack as well, which is known as [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Here’s a little sneak peak of Certipy’s `shadow auto` command to retrieve the NT hash of the victim.
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 **Certipy** can overwrite the configuration of a certificate template with a single command. By **default**, Certipy will **overwrite** the configuration to make it **vulnerable to ESC1**. We can also specify the **`-save-old` parameter to save the old configuration**, which will be useful for **restoring** the configuration after our attack.
 
@@ -267,7 +267,7 @@ If you have a principal with **`ManageCA`** rights on a **certificate authority*
 
 <figure><img src="../../../.gitbook/assets/image (1) (2).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../../.gitbook/assets/image (70).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (70) (2).png" alt=""><figcaption></figcaption></figure>
 
 This is also possible in a simpler form with [**PSPKI’s Enable-PolicyModuleFlag**](https://www.sysadmins.lv/projects/pspki/enable-policymoduleflag.aspx) cmdlet.
 
@@ -443,6 +443,131 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 [*] Exiting...
 ```
+
+## No Security Extension - ESC9 <a href="#5485" id="5485"></a>
+
+### Explanation
+
+ESC9 refers to the new **`msPKI-Enrollment-Flag`** value **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`). If this flag is set on a certificate template, the **new `szOID_NTDS_CA_SECURITY_EXT` security extension** will **not** be embedded. ESC9 is only useful when `StrongCertificateBindingEnforcement` is set to `1` (default), since a weaker certificate mapping configuration for Kerberos or Schannel can be abused as ESC10 — without ESC9 — as the requirements will be the same.
+
+* `StrongCertificateBindingEnforcement` not set to `2` (default: `1`) or `CertificateMappingMethods` contains `UPN` flag
+* Certificate contains the `CT_FLAG_NO_SECURITY_EXTENSION` flag in the `msPKI-Enrollment-Flag` value
+* Certificate specifies any client authentication EKU
+* `GenericWrite` over any account A to compromise any account B
+
+### Abuse
+
+In this case, `John@corp.local` has `GenericWrite` over `Jane@corp.local`, and we wish to compromise `Administrator@corp.local`. `Jane@corp.local` is allowed to enroll in the certificate template `ESC9` that specifies the `CT_FLAG_NO_SECURITY_EXTENSION` flag in the `msPKI-Enrollment-Flag` value.
+
+First, we obtain the hash of `Jane` with for instance Shadow Credentials (using our `GenericWrite`).
+
+<figure><img src="../../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+
+Next, we change the `userPrincipalName` of `Jane` to be `Administrator`. Notice that we’re leaving out the `@corp.local` part.
+
+<figure><img src="../../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+
+This is not a constraint violation, since the `Administrator` user’s `userPrincipalName` is `Administrator@corp.local` and not `Administrator`.
+
+Now, we request the vulnerable certificate template `ESC9`. We must request the certificate as `Jane`.
+
+<figure><img src="../../../.gitbook/assets/image (478).png" alt=""><figcaption></figcaption></figure>
+
+Notice that the `userPrincipalName` in the certificate is `Administrator` and that the issued certificate contains no “object SID”.
+
+Then, we change back the `userPrincipalName` of `Jane` to be something else, like her original `userPrincipalName` `Jane@corp.local`.
+
+<figure><img src="../../../.gitbook/assets/image (495).png" alt=""><figcaption></figcaption></figure>
+
+Now, if we try to authenticate with the certificate, we will receive the NT hash of the `Administrator@corp.local` user. You will need to add `-domain <domain>` to your command line since there is no domain specified in the certificate.
+
+<figure><img src="../../../.gitbook/assets/image (158).png" alt=""><figcaption></figcaption></figure>
+
+## Weak Certificate Mappings - ESC10
+
+### Explanation
+
+ESC10 refers to two registry key values on the domain controller.
+
+`HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` `CertificateMappingMethods`. Default value `0x18` (`0x8 | 0x10`), previously `0x1F`.
+
+`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` `StrongCertificateBindingEnforcement`. Default value `1`, previously `0`.
+
+**Case 1**
+
+`StrongCertificateBindingEnforcement` set to `0`
+
+**Case 2**
+
+`CertificateMappingMethods` contains `UPN` bit (`0x4`)
+
+### Abuse Case 1
+
+* `StrongCertificateBindingEnforcement` set to `0`
+* `GenericWrite` over any account A to compromise any account B
+
+In this case, `John@corp.local` has `GenericWrite` over `Jane@corp.local`, and we wish to compromise `Administrator@corp.local`. The abuse steps are almost identical to ESC9, except that any certificate template can be used.
+
+First, we obtain the hash of `Jane` with for instance Shadow Credentials (using our `GenericWrite`).
+
+<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+Next, we change the `userPrincipalName` of `Jane` to be `Administrator`. Notice that we’re leaving out the `@corp.local` part.
+
+<figure><img src="../../../.gitbook/assets/image (70).png" alt=""><figcaption></figcaption></figure>
+
+This is not a constraint violation, since the `Administrator` user’s `userPrincipalName` is `Administrator@corp.local` and not `Administrator`.
+
+Now, we request any certificate that permits client authentication, for instance the default `User` template. We must request the certificate as `Jane`.
+
+<figure><img src="../../../.gitbook/assets/image (511).png" alt=""><figcaption></figcaption></figure>
+
+Notice that the `userPrincipalName` in the certificate is `Administrator`.
+
+Then, we change back the `userPrincipalName` of `Jane` to be something else, like her original `userPrincipalName` `Jane@corp.local`.
+
+<figure><img src="../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+
+Now, if we try to authenticate with the certificate, we will receive the NT hash of the `Administrator@corp.local` user. You will need to add `-domain <domain>` to your command line since there is no domain specified in the certificate.
+
+<figure><img src="../../../.gitbook/assets/image (486).png" alt=""><figcaption></figcaption></figure>
+
+### Abuse Case 2
+
+* `CertificateMappingMethods` contains `UPN` bit flag (`0x4`)
+* `GenericWrite` over any account A to compromise any account B without a `userPrincipalName` property (machine accounts and built-in domain administrator `Administrator`)
+
+In this case, `John@corp.local` has `GenericWrite` over `Jane@corp.local`, and we wish to compromise the domain controller `DC$@corp.local`.
+
+First, we obtain the hash of `Jane` with for instance Shadow Credentials (using our `GenericWrite`).
+
+<figure><img src="../../../.gitbook/assets/image (476).png" alt=""><figcaption></figcaption></figure>
+
+Next, we change the `userPrincipalName` of `Jane` to be `DC$@corp.local`.
+
+<figure><img src="../../../.gitbook/assets/image (512).png" alt=""><figcaption></figcaption></figure>
+
+This is not a constraint violation, since the `DC$` computer account does not have `userPrincipalName`.
+
+Now, we request any certificate that permits client authentication, for instance the default `User` template. We must request the certificate as `Jane`.
+
+<figure><img src="../../../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
+
+Then, we change back the `userPrincipalName` of `Jane` to be something else, like her original `userPrincipalName` (`Jane@corp.local`).
+
+<figure><img src="../../../.gitbook/assets/image (389).png" alt=""><figcaption></figcaption></figure>
+
+Now, since this registry key applies to Schannel, we must use the certificate for authentication via Schannel. This is where Certipy’s new `-ldap-shell` option comes in.
+
+If we try to authenticate with the certificate and `-ldap-shell`, we will notice that we’re authenticated as `u:CORP\DC$`. This is a string that is sent by the server.
+
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+
+One of the available commands for the LDAP shell is `set_rbcd` which will set Resource-Based Constrained Delegation (RBCD) on the target. So we could perform a RBCD attack to compromise the domain controller.
+
+<figure><img src="../../../.gitbook/assets/image (479).png" alt=""><figcaption></figcaption></figure>
+
+Alternatively, we can also compromise any user account where there is no `userPrincipalName` set or where the `userPrincipalName` doesn’t match the `sAMAccountName` of that account. From my own testing, the default domain administrator `Administrator@corp.local` doesn’t have a `userPrincipalName` set by default, and this account should by default have more privileges in LDAP than domain controllers.
 
 ## Compromising Forests with Certificates
 

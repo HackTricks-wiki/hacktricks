@@ -46,7 +46,7 @@ When a file is deleted in this folder are created 2 files:
 * `$I{id}`: File information (date of when it was deleted}
 * `$R{id}`: Content of the file
 
-![](<../../../.gitbook/assets/image (486).png>)
+![](<../../../.gitbook/assets/image (486) (1).png>)
 
 Having these files you can sue the tool [**Rifiuti**](https://github.com/abelcheung/rifiuti2) to get the original address of the deleted files and the date it was deleted (use `rifiuti-vista.exe` for Vista – Win10).
 
@@ -140,7 +140,7 @@ It's possible to identify that a USB device was used thanks to the creation of:
 
 Note that some LNK file instead of pointing to the original path, points to the WPDNSE folder:
 
-![](<../../../.gitbook/assets/image (476).png>)
+![](<../../../.gitbook/assets/image (476) (1).png>)
 
 The files in the folder WPDNSE are a copy of the original ones, then won't survive a restart of the PC and the GUID is taken from a shellbag.
 

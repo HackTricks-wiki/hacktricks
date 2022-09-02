@@ -95,7 +95,7 @@ The **`pKIExtendedKeyUsage`** attribute on an AD certificate template object con
 
 An admin needs to **create the certificate** template and then an **Enterprise CA “publishes”** the template, making it available to clients to enrol in. AD CS specifies that a certificate template is enabled on an Enterprise CA by **adding the template’s name to the `certificatetemplates` field** of the AD object.
 
-<figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (11) (2).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="warning" %}
 AD CS defines enrolment rights - which **principals can request** a certificate – using two security descriptors: one on the **certificate template** AD object and another on the **Enterprise CA itself**.\
@@ -113,7 +113,7 @@ A client needs to be granted in both security descriptors in order to be able to
 
 The **security descriptor** configured on the **Enterprise CA** defines these rights and is **viewable** in the Certificate Authority MMC snap-in `certsrv.msc` by right clicking on the CA → Properties → Security.
 
-<figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
 This ultimately ends up setting the Security registry value in the key **`HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration<CA NAME>`** on the CA server. We have encountered several AD CS servers that grant low-privileged users remote access to this key via remote registry:
 
@@ -148,6 +148,7 @@ A common use for these settings is for **enrolment agents**. An enrolment agent 
 1. Using the Windows **Client Certificate Enrolment Protocol** (MS-WCCE), a set of Distributed Component Object Model (DCOM) interfaces that interact with various AD CS features including enrolment. The **DCOM server is enabled on all AD CS servers by default** and is the most common method by which we have seen clients request certificates.
 2. Via the **ICertPassage Remote Protocol** (MS-ICPR), a **remote procedure call** (RPC) protocol can operate over named pipes or TCP/IP.
 3. Accessing the **certificate enrolment web interface**. To use this, the ADCS server needs to have the **Certificate Authority Web Enrolment role installed**. Once enabled, a user can navigate to the IIS-hosted ASP web enrolment application running at `http:///certsrv/`.
+   * `certipy req -ca 'corp-DC-CA' -username john@corp.local -password Passw0rd -web -debug`
 4. Interacting with a **certificate enrolment service** (CES). To use this, a server needs to have the **Certificate Enrolment Web Service role installed**. Once enabled, a user can access the web service at `https:///_CES_Kerberos/service.svc` to request certificates. This service works in tandem with a certificate enrolment policy (CEP) service (installed via the Certificate Enrolment Policy Web Service role), which clients use to **list certificate templates** at the URL `https:///ADPolicyProvider_CEP_Kerberos/service.svc`. Underneath, the certificate enrolment and policy web services implement MS-WSTEP and MS-XCEP, respectively (two SOAP-based protocols).
 5. Using the **network device enrolment service**. To use this, a server needs to have the **Network Device Enrolment Service role installed**, which allows clients (namely network devices) to obtain certificates via the **Simple Certificate Enrolment Protocol** (SCEP). Once enabled, an administrator can obtain a one-time password (OTP) from the URL `http:///CertSrv/mscep_admin/`. The administrator can then provide the OTP to a network device and the device will use the SCEP to request a certificate using the URL `http://NDESSERVER/CertSrv/mscep/`.
 
@@ -190,7 +191,7 @@ When an account authenticates to AD using a certificate, the DC needs to somehow
 If that is **unsuccessful**, it will follow the attempt to map the **certificate to a user** account using the certificate’s **SAN extension**, a combination of the **subject** and **issuer** fields, or solely from the issuer. By default, not many protocols in AD environments support AD authentication via Schannel out of the box. WinRM, RDP, and IIS all support client authentication using Schannel, but it **requires additional configuration**, and in some cases – like WinRM – does not integrate with Active Directory.\
 One protocol that does commonly work – assuming AD CS has been setup - is **LDAPS**. The cmdlet `Get-LdapCurrentUser` demonstrates how one can authenticate to LDAP using .NET libraries. The cmdlet performs an LDAP “Who am I?” extended operation to display the currently authenticating user:
 
-<figure><img src="../../.gitbook/assets/image (2) (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 ## AD CS Enumeration
 
@@ -211,6 +212,7 @@ Certify.exe find /vulnerable #Enumerate vulenrable certificate templater
 
 # https://github.com/ly4k/Certipy
 certipy find -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
+certipy find -vulnerable [-hide-admins] -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128 #Search vulnerable templates
 
 certutil.exe -TCAInfo #enumerate Enterprise CAs
 certutil -v -dstemplate #enumerate certificate templates
