@@ -164,7 +164,7 @@ If it was a **GPT table instead of a MBR** it should appear the signature _EFI P
 
 The **FAT (File Allocation Table)** file system is named for its method of organization, the file allocation table, which resides at the beginning of the volume. To protect the volume, **two copies** of the table are kept, in case one becomes damaged. In addition, the file allocation tables and the root folder must be stored in a **fixed location** so that the files needed to start the system can be correctly located.
 
-![](<../../../.gitbook/assets/image (495) (1).png>)
+![](<../../../.gitbook/assets/image (495).png>)
 
 The minimum space unit used by this file-system is a **cluster, typically 512B** (which is composed by a number of sectors).
 

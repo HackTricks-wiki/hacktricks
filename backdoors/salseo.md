@@ -30,7 +30,7 @@ You can **select the architecture** inside Visual Studio in the **left "Build" T
 
 Then, build both projects (Build -> Build Solution) (Inside the logs will appear the path of the executable):
 
-![](<../.gitbook/assets/image (1) (2) (1).png>)
+![](<../.gitbook/assets/image (1) (2) (1) (1).png>)
 
 ## Prepare the Backdoor
 
@@ -131,7 +131,7 @@ Then, go to your **SalseoLoader folder** and **execute DllExport\_Configure.bat*
 
 Select **x64** (if you are going to use it inside a x64 box, that was my case), select **System.Runtime.InteropServices** (inside **Namespace for DllExport**) and press **Apply**
 
-![](<../.gitbook/assets/image (7) (1).png>)
+![](<../.gitbook/assets/image (7) (1) (1).png>)
 
 ### **Open the project again with visual Studio**
 
@@ -147,7 +147,7 @@ Select **Output Type = Class Library** (Project --> SalseoLoader Properties --> 
 
 Select **x64** **platform** (Project --> SalseoLoader Properties --> Build --> Platform target = x64)
 
-![](<../.gitbook/assets/image (9) (1).png>)
+![](<../.gitbook/assets/image (9) (1) (1).png>)
 
 To **build** the solution: Build --> Build Solution (Inside the Output console the path of the new DLL will appear)
 

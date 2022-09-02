@@ -1,7 +1,7 @@
 # Authentication, Credentials, UAC and EFS
 
 {% hint style="danger" %}
-![](<../.gitbook/assets/image (9) (3).png>)
+![](<../.gitbook/assets/image (9) (1).png>)
 
 \
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
@@ -83,7 +83,7 @@ It is the database of the Active Directory. It is only present in Domain Control
 Allows browsers and other Windows applications to save credentials.
 
 {% hint style="danger" %}
-![](<../.gitbook/assets/image (9) (3).png>)
+![](<../.gitbook/assets/image (9) (1).png>)
 
 \
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
@@ -280,7 +280,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 </details>
 
 {% hint style="danger" %}
-![](<../.gitbook/assets/image (9) (3).png>)
+![](<../.gitbook/assets/image (9) (1).png>)
 
 \
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\

@@ -56,7 +56,7 @@ portscan [targets] [ports] [arp|icmp|none] [max connections]
 # Powershell
 # Import Powershell module
 powershell-import C:\path\to\PowerView.ps1
-powershell just write powershell cmd here
+powershell &#x3C;just write powershell cmd here>
 
 # User impersonation
 ## Token generation with creds
