@@ -184,7 +184,7 @@ During certificate authentication, the DC can then verify that the authenticatin
 Schannel is the security support provider (SSP) Windows leverages when establishing TLS/SSL connections. Schannel supports **client authentication** (amongst many other capabilities), enabling a remote server to **verify the identity of the connecting user**. It accomplishes this using PKI, with certificates being the primary credential.\
 During the **TLS handshake**, the server **requests a certificate from the client** for authentication. The client, having previously been issued a client authentication certificate from a CA the server trusts, sends its certificate to the server. The **server then validates** the certificate is correct and grants the user access assuming everything is okay.
 
-<figure><img src="../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (8) (2).png" alt=""><figcaption></figcaption></figure>
 
 When an account authenticates to AD using a certificate, the DC needs to somehow map the certificate credential to an AD account. **Schannel** first attempts to **map** the **credential** to a **user** account use Kerberos’s **S4U2Self** functionality. \
 If that is **unsuccessful**, it will follow the attempt to map the **certificate to a user** account using the certificate’s **SAN extension**, a combination of the **subject** and **issuer** fields, or solely from the issuer. By default, not many protocols in AD environments support AD authentication via Schannel out of the box. WinRM, RDP, and IIS all support client authentication using Schannel, but it **requires additional configuration**, and in some cases – like WinRM – does not integrate with Active Directory.\
@@ -198,11 +198,19 @@ Just like for most of AD, all the information covered so far is available by que
 
 If we want to **enumerate Enterprise CAs** and their settings, one can query LDAP using the `(objectCategory=pKIEnrollmentService)` LDAP filter on the `CN=Configuration,DC=<domain>,DC=<com>` search base (this search base corresponds with the Configuration naming context of the AD forest). The results will identify the DNS hostname of the CA server, the CA name itself, the certificate start and end dates, various flags, published certificate templates, and more.
 
-To better facilitate the enumeration and abuse of the various misconfigurations detailed in this paper, we built **Certify**. **Certify** is a C# tool that can **enumerate useful configuration and infrastructure information about of AD CS environments** and can request certificates in a variety of different ways.
+**Tools to enumerate vulnerable certificates:**
+
+* ****[**Certify**](https://github.com/GhostPack/Certify) is a C# tool that can **enumerate useful configuration and infrastructure information about of AD CS environments** and can request certificates in a variety of different ways.
+* ****[**Certipy**](https://github.com/ly4k/Certipy) is a **python** tool to be able to **enumerate and abuse** Active Directory Certificate Services (**AD CS**) **from any system** (with access to the DC) that can generate output for BloodHound created by [**Lyak**](https://twitter.com/ly4k\_) (good person better hacker) .
 
 ```bash
+# https://github.com/GhostPack/Certify
 Certify.exe cas #enumerate trusted root CA certificates, certificates defined by the NTAuthCertificates object, and various information about Enterprise CAs
 Certify.exe find #enumerate certificate templates
+Certify.exe find /vulnerable #Enumerate vulenrable certificate templater
+
+# https://github.com/ly4k/Certipy
+certipy find -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 
 certutil.exe -TCAInfo #enumerate Enterprise CAs
 certutil -v -dstemplate #enumerate certificate templates

