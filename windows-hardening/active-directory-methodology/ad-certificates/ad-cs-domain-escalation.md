@@ -1,4 +1,4 @@
-# Domain Escalation
+# AD CS Domain Escalation
 
 <details>
 
@@ -263,7 +263,7 @@ The two main rights here are the **`ManageCA`** right and the **`ManageCertifica
 
 #### Abuse
 
-If you have a principal with **`ManageCA`** rights on a **certificate authority**, we can use **PSPKI** to remotely flip the **`EDITF_ATTRIBUTESUBJECTALTNAME2`** bit to **allow SAN** specification in any template ([ECS6](domain-escalation.md#editf\_attributesubjectaltname2-esc6)):
+If you have a principal with **`ManageCA`** rights on a **certificate authority**, we can use **PSPKI** to remotely flip the **`EDITF_ATTRIBUTESUBJECTALTNAME2`** bit to **allow SAN** specification in any template ([ECS6](ad-cs-domain-escalation.md#editf\_attributesubjectaltname2-esc6)):
 
 <figure><img src="../../../.gitbook/assets/image (1) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -390,8 +390,8 @@ Common **problems** with NTLM relay attacks are that the **NTLM sessions are usu
 
 However, abusing a NTLM relay attack to obtain a certificate to the user solves this limitations, as the session will live as long as the certificate is valid and the certificate can be used to use services **enforcing NTLM signing**. To know how to use an stolen cert check:
 
-{% content-ref url="account-persistence.md" %}
-[account-persistence.md](account-persistence.md)
+{% content-ref url="ad-cs-account-persistence.md" %}
+[ad-cs-account-persistence.md](ad-cs-account-persistence.md)
 {% endcontent-ref %}
 
 Another limitation of NTLM relay attacks is that they **require a victim account to authenticate to an attacker-controlled machine**. An attacker could wait or could try to **force** it:

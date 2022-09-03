@@ -239,6 +239,14 @@ Then, if you **compromise the hash** of this user/computer you will be able to *
 [constrained-delegation.md](constrained-delegation.md)
 {% endcontent-ref %}
 
+### Resourced-based Constrain Delegation
+
+It's possible to gain code execution with **elevated privileges on a remote computer if you have WRITE privilege** on that computer's AD object.
+
+{% content-ref url="resource-based-constrained-delegation.md" %}
+[resource-based-constrained-delegation.md](resource-based-constrained-delegation.md)
+{% endcontent-ref %}
+
 ### ACLs Abuse
 
 The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.
@@ -267,6 +275,22 @@ Usually users will access the system via RDP, so here you have how to performa c
 
 {% content-ref url="laps.md" %}
 [laps.md](laps.md)
+{% endcontent-ref %}
+
+### Certificate Theft
+
+Gathering certificates from the compromised machine could be a way to escalate privileges inside the environment:
+
+{% content-ref url="ad-certificates/ad-cs-certificate-theft.md" %}
+[ad-cs-certificate-theft.md](ad-certificates/ad-cs-certificate-theft.md)
+{% endcontent-ref %}
+
+### Certificate Templates Abuse
+
+If vulnerable templates are configured it's possible to abuse them to escalate privileges:
+
+{% content-ref url="ad-certificates/ad-cs-domain-escalation.md" %}
+[ad-cs-domain-escalation.md](ad-certificates/ad-cs-domain-escalation.md)
 {% endcontent-ref %}
 
 ## Post-exploitation with high privilege account
@@ -324,10 +348,20 @@ These are like golden tickets forged in a way that **bypasses common golden tick
 [diamond-ticket.md](diamond-ticket.md)
 {% endcontent-ref %}
 
-### **Forged Certificates**
+### **Certificates Account Persistence**
 
-{% content-ref url="forged-certificates.md" %}
-[forged-certificates.md](forged-certificates.md)
+**Having certificates of an account or being able to request them** is a very good way to be able to persist in the users account (even if he changes the password):
+
+{% content-ref url="ad-certificates/ad-cs-account-persistence.md" %}
+[ad-cs-account-persistence.md](ad-certificates/ad-cs-account-persistence.md)
+{% endcontent-ref %}
+
+### **Certificates Domain Persistence**
+
+**Using certificates is also possible to persist with high privileges inside the domain:**
+
+{% content-ref url="ad-certificates/ad-cs-domain-persistence.md" %}
+[ad-cs-domain-persistence.md](ad-certificates/ad-cs-domain-persistence.md)
 {% endcontent-ref %}
 
 ### AdminSDHolder Group
