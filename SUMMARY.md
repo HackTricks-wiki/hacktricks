@@ -24,7 +24,7 @@
 * [Phishing Methodology](generic-methodologies-and-resources/phishing-methodology/README.md)
   * [Clone a Website](generic-methodologies-and-resources/phishing-methodology/clone-a-website.md)
   * [Detecting Phising](generic-methodologies-and-resources/phishing-methodology/detecting-phising.md)
-  * [Phishing Documents](generic-methodologies-and-resources/phishing-methodology/phishing-documents.md)
+  * [Phishing Files & Documents](generic-methodologies-and-resources/phishing-methodology/phishing-documents.md)
 * [Basic Forensic Methodology](forensics/basic-forensic-methodology/README.md)
   * [Baseline Monitoring](forensics/basic-forensic-methodology/file-integrity-monitoring.md)
   * [Anti-Forensic Techniques](forensics/basic-forensic-methodology/anti-forensic-techniques.md)

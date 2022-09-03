@@ -1,7 +1,5 @@
 # Phishing Methodology
 
-## Phishing Methodology
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -435,6 +433,15 @@ If for any reason you want to clone the website check the following page:
 
 {% content-ref url="clone-a-website.md" %}
 [clone-a-website.md](clone-a-website.md)
+{% endcontent-ref %}
+
+## Backdoored Documents & Files
+
+In some phishing assessments (mainly for Red Teams) you will want to also **send files containing some kind of backdoor** (maybe a C2 or maybe just something that will trigger an authentication).\
+Check out the following page for some examples:
+
+{% content-ref url="phishing-documents.md" %}
+[phishing-documents.md](phishing-documents.md)
 {% endcontent-ref %}
 
 ## Phishing2.0

