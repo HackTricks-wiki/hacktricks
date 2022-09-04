@@ -444,7 +444,9 @@ Check out the following page for some examples:
 [phishing-documents.md](phishing-documents.md)
 {% endcontent-ref %}
 
-## Phishing2.0
+## Phishing MFA
+
+### Via Proxy MitM
 
 The previous attack is pretty clever as you are faking a real website and gathering the information set by the user. Unfortunately, if the user didn't put the correct password or if the application you faked is configured with 2FA, **this information won't allow you to impersonate the tricked user**.
 
@@ -454,6 +456,11 @@ This is where tools like [**evilginx2**](https://github.com/kgretzky/evilginx2) 
 2. The user **send** his **credentials** to your fake page and the tool send those to the real webpage, **checking if the credentials work**.
 3. If the account is configured with **2FA**, the MitM page will ask for it and once the **user introduces** it the tool will send it to the real web page.
 4. Once the user is authenticated you (as attacker) will have **captured the credentials, the 2FA, the cookie and any information** of every interaction your while the tool is performing a MitM.
+
+### Via VNC
+
+What if instead of **sending the victim to a malicious page** with the same looks as the original one, you send him to a **VNC session with a browser connected to the real web page**? You will be able to see what he does, steal the password, the MFA used, the cookies...\
+You can do this with [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)****
 
 ## Detecting the detection
 
@@ -476,6 +483,7 @@ Use [**Phishious** ](https://github.com/Rices/Phishious)to evaluate if your emai
 
 * [https://zeltser.com/domain-name-variations-in-phishing/](https://zeltser.com/domain-name-variations-in-phishing/)
 * [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)
+* [https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/](https://darkbyte.net/robando-sesiones-y-bypasseando-2fa-con-evilnovnc/)
 
 <details>
 
