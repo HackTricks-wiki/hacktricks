@@ -19,6 +19,15 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 These are useful techniques once, somehow, you have compromised some GCP credentials or machine running in a GCP environment.
 
+# OS Patching
+If you gain access to a service account (either through credentials or by a default service account on a compute instance/cloud function) if it has the `osconfig.patchDeployments.create` permission you can create a [patch deployment](https://cloud.google.com/compute/docs/os-patch-management#patch_deployment_overview). This deployment will run a script on Windows and Linux compute instances at a defined interval under the context of the [OS Config agent](https://cloud.google.com/compute/docs/os-patch-management#how_os_patch_management_works).
+
+Automated tooling such as [patchy]( https://github.com/rek7/patchy) exists to detect and exploit the presence of lax permissions on a compute instance or cloud function.
+
+If you want to manually install the patch deployment run the following gcloud command, a patch boiler plate can be found [here](https://github.com/rek7/patchy/blob/main/pkg/engine/patches/patch_deployment.json):
+
+`gcloud compute os-config patch-deployments create my-update --file=patch.json`
+
 # Google’s Cloud Shell <a href="#e5eb" id="e5eb"></a>
 
 ## Persistent Backdoor
@@ -111,7 +120,7 @@ Some remediations for these techniques are explained in [https://www.netskope.co
 
 * [https://89berner.medium.com/persistant-gcp-backdoors-with-googles-cloud-shell-2f75c83096ec](https://89berner.medium.com/persistant-gcp-backdoors-with-googles-cloud-shell-2f75c83096ec)
 * [https://www.netskope.com/blog/gcp-oauth-token-hijacking-in-google-cloud-part-1](https://www.netskope.com/blog/gcp-oauth-token-hijacking-in-google-cloud-part-1)
-
+* [https://blog.raphael.karger.is/articles/2022-08/GCP-OS-Patching](https://blog.raphael.karger.is/articles/2022-08/GCP-OS-Patching)
 
 <details>
 

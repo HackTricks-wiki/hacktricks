@@ -21,6 +21,29 @@ in this scenario we are going to suppose that you **have compromised a non privi
 
 Amazingly, GPC permissions of the compute engine you have compromised may help you to **escalate privileges locally inside a machine**. Even if that won't always be very helpful in a cloud environment, it's good to know it's possible.
 
+# OS Patching
+Depending on the privileges associated with the service account you have access to, if it has either the `osconfig.patchDeployments.create` or `osconfig.patchJobs.exec` permissions you can create a [patch job or deployment](https://blog.raphael.karger.is/articles/2022-08/GCP-OS-Patching). This will enable you to move laterally in the environment and gain code execution on all the compute instances within a project.
+
+First check all the roles the account has:
+
+`gcloud iam roles list`
+
+Now check the permissions offered by the role, if it has access to either the patch deployment or job continue.
+
+`gcloud iam roles describe roles/<role name> | grep -E '(osconfig.patchDeployments.create|osconfig.patchJobs.exec)'`
+
+
+If you want to manually exploit this you will need to create either a [patch job](https://github.com/rek7/patchy/blob/main/pkg/engine/patches/patch_job.json) or [deployment](https://github.com/rek7/patchy/blob/main/pkg/engine/patches/patch_deployment.json) for a patch job run:
+
+`gcloud compute os-config patch-jobs execute --file=patch.json`
+
+
+To deploy a patch deployment:
+
+`gcloud compute os-config patch-deployments create my-update --file=patch.json`
+
+Automated tooling such as [patchy](https://github.com/rek7/patchy) exists to detect lax permissions and automatically move laterally.
+
 # Read the scripts <a href="#follow-the-scripts" id="follow-the-scripts"></a>
 
 **Compute Instances** are probably there to **execute some scripts** to perform actions with their service accounts.
