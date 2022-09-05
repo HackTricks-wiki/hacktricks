@@ -96,7 +96,7 @@ And bloodhound will be ready to ingest data.
 
 ## Ingestors
 
-### Windows
+### SharpHound
 
 They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
 
@@ -115,7 +115,9 @@ runas /netonly /user:domain\user "powershell.exe -exec bypass"
 
 [**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
 
-### **Python**
+**Windows Silent**
+
+### **Python bloodhound**
 
 If you have domain credentials you can run a **python bloodhound ingestor from any platform** so you don't need to depend on Windows.\
 Download it from [https://github.com/fox-it/BloodHound.py](https://github.com/fox-it/BloodHound.py) or doing `pip3 install bloodhound`
@@ -129,6 +131,12 @@ If you are running it through proxychains add `--dns-tcp` for the DNS resolution
 ```bash
 proxychains bloodhound-python -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all --dns-tcp
 ```
+
+### Python SilentHound
+
+This script will **quietly enumerate an Active Directory Domain via LDAP** parsing users, admins, groups, etc.
+
+Check it out in [**SilentHound github**](https://github.com/layer8secure/SilentHound).
 
 <details>
 
