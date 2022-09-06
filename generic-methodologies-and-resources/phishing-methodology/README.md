@@ -73,8 +73,8 @@ For more information read [https://www.bleepingcomputer.com/news/security/hijack
 
 ### Buy a trusted domain
 
-You can search in [https://www.expireddomains.net/](https://www.expireddomains.net) for a expired domain that you could use.\
-In order to make sure that the expired domain that you are going to buy **has already a good SEO** you could search how is it categorized in:
+You can search at [https://www.expireddomains.net/](https://www.expireddomains.net) for an expired domain that you could use.\
+To make sure that the expired domain that you are going to buy **has already a good SEO** you could search how is it categorized in:
 
 * [http://www.fortiguard.com/webfilter](http://www.fortiguard.com/webfilter)
 * [https://urlfiltering.paloaltonetworks.com/query/](https://urlfiltering.paloaltonetworks.com/query/)
@@ -464,16 +464,16 @@ You can do this with [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)****
 
 ## Detecting the detection
 
-Obviously one of the best ways to know if you have been busted is to **search your domain inside blacklists**. If it appears listed, somehow your domain was detected as suspicions.\
-One easy way to check if you domain appears in any blacklist is to use [https://malwareworld.com/](https://malwareworld.com)
+One of the best ways to know if you have been busted is to **search your domain inside blacklists**. If it appears listed, somehow your domain was detected as suspicious.\
+One easy way to check if your domain appears on any blacklist is to use [https://malwareworld.com/](https://malwareworld.com)
 
-However, there are other ways to know if the victim is **actively looking for suspicions phishing activity in the wild** as explained in:
+However, there are other ways to know if the victim is **actively looking for suspicious phishing activity in the wild** as explained in:
 
 {% content-ref url="detecting-phising.md" %}
 [detecting-phising.md](detecting-phising.md)
 {% endcontent-ref %}
 
-You can **buy a domain with a very similar name** to the victims domain **and/or generate a certificate** for a **subdomain** of a domain controlled by you **containing** the **keyword** of the victim's domain. If the **victim** perform any kind of **DNS or HTTP interaction** with them, you will know that **he is actively looking** for suspicious domains and you will need to be very stealth.
+You can **buy a domain with a very similar name** to the victim's domain **and/or generate a certificate** for a **subdomain** of a domain controlled by you **containing** the **keyword** of the victim's domain. If the **victim** performs any kind of **DNS or HTTP interaction** with them, you will know that **he is actively looking** for suspicious domains and you will need to be very stealthy.
 
 ### Evaluate the phishing
 
