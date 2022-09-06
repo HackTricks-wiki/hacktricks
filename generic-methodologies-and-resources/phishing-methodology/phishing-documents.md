@@ -4,7 +4,7 @@
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
 Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
@@ -12,15 +12,15 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+**Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
 ## Office Documents
 
-Microsoft Word performs file data validation prior to opening a file. Data validation is performed in the form of data structure identification, against the OfficeOpenXML standard. If any error occurs during the data structure identification, the file being analysed will not be opened.
+Microsoft Word performs file data validation before opening a file. Data validation is performed in the form of data structure identification, against the OfficeOpenXML standard. If any error occurs during the data structure identification, the file being analysed will not be opened.
 
-Usually Word files containing macros uses the `.docm` extension. However, it's possible to rename the file changing the file extension and still keep their macro executing capabilities.\
+Usually, Word files containing macros use the `.docm` extension. However, it's possible to rename the file by changing the file extension and still keep their macro executing capabilities.\
 For example, an RTF file does not support macros, by design, but a DOCM file renamed to RTF will be handled by Microsoft Word and will be capable of macro execution.\
 The same internals and mechanisms apply to all software of the Microsoft Office Suite (Excel, PowerPoint etc.).
 
@@ -41,11 +41,11 @@ _**Categories**: Links and References, **Filed names**: includePicture, and **Fi
 
 ### Macros Backdoor
 
-It's possible to use macros to run arbitrary code form the document.
+It's possible to use macros to run arbitrary code from the document.
 
 #### Autoload functions
 
-The more common they are, the more probable the AV will detect it.
+The more common they are, the more probable the AV will detect them.
 
 * AutoOpen()
 * Document\_Open()
@@ -84,7 +84,7 @@ proc.Create "powershell <beacon line generated>
 
 #### Manually remove metadata
 
-Fo to **File > Info > Inspect Document > Inspect Document**, which will bring up the Document Inspector. Click **Inspect** and then **Remove All** next to **Document Properties and Personal Information**.
+Go to **File > Info > Inspect Document > Inspect Document**, which will bring up the Document Inspector. Click **Inspect** and then **Remove All** next to **Document Properties and Personal Information**.
 
 #### Doc Extension
 
@@ -99,9 +99,9 @@ Do this because you **can't save macro's inside a `.docx`** and there's a **stig
 
 ## HTA Files
 
-An HTA is a proprietary Windows program whose **source code consists of HTML and one or more scripting languages** supported by Internet Explorer (VBScript and JScript). The HTML is used to generate the user interface and the scripting language for the program logic. An **HTA executes without the constraints of the browser's security model**, so it executes as a "fully trusted" application.
+An HTA is a proprietary Windows program whose **source code consists of HTML and one or more scripting languages** supported by Internet Explorer (VBScript and JScript). HTML is used to generate the user interface and the scripting language for the program logic. An **HTA executes without the constraints of the browser's security model**, so it executes as a "fully trusted" application.
 
-An HTA is executed using **`mshta.exe`**, which is typically **installed** along with **Internet Explorer**. In fact, **`mshta` is dependant on IE**, so if it has been uninstalled, HTAs will be unable to execute.
+An HTA is executed using **`mshta.exe`**, which is typically **installed** along with **Internet Explorer**. Do note that, **`mshta` is dependant on IE**, so if it has been uninstalled, HTAs will be unable to execute.
 
 <pre class="language-html"><code class="lang-html"><strong>&#x3C;--! Basic HTA Execution -->
 </strong>&#x3C;html>
@@ -161,9 +161,9 @@ An HTA is executed using **`mshta.exe`**, which is typically **installed** along
 
 ## Forcing NTLM Authentication
 
-There are several ways to **force NTLM authentication "remotely"**, for example you could add **invisible images** to emails or HTMLs that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
+There are several ways to **force NTLM authentication "remotely"**, for example, you could add **invisible images** to emails or HTMLs that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
 
-**Check this ideas and more in the following pages:**
+**Check these ideas and more in the following pages:**
 
 {% content-ref url="../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md" %}
 [printers-spooler-service-abuse.md](../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md)
@@ -175,7 +175,7 @@ There are several ways to **force NTLM authentication "remotely"**, for example 
 
 ### NTLM Relay
 
-Don't forget that you cannot only steal the hash or the authentication, but also **perform NTLM relay attacks**:
+Don't forget that you cannot only steal the hash or the authentication but also **perform NTLM relay attacks**:
 
 * [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)****
 * ****[**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)****
@@ -184,7 +184,7 @@ Don't forget that you cannot only steal the hash or the authentication, but also
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
 Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
@@ -192,6 +192,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+**Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
