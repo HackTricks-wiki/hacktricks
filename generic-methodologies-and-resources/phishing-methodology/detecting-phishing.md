@@ -1,4 +1,4 @@
-# Detecting Phising
+# Detecting Phishing
 
 <details>
 
@@ -57,29 +57,29 @@ You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to
 
 ### Advanced checks
 
-If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while (every day? it only takes a few seconds/minutes). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** (yes, attackers also make mistakes) and **monitor the HTTP and HTTPS web pages of the suspicions domains and subdomains** to see if they have copied any login form from the victims web pages.\
-In order to **automate this** I would recommend to to have a list of login forms of the victims domains, spider the suspicions web pages and compare each login form found inside the suspicions domains with each login form of the victim's domain using something like `ssdeep`.\
-If you have located the login forms of the suspicions domains you can try to **send junk credentials** and **check if it's redirecting you to the victims domain**.
+If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while (every day? it only takes a few seconds/minutes). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** (yes, attackers also make mistakes) and **monitor the HTTP and HTTPS web pages of the suspicious domains and subdomains** to see if they have copied any login form from the victim's web pages.\
+To **automate this** I would recommend having a list of login forms of the victim's domains, spider the suspicious web pages and each login form found inside the suspicious domains with each login form of the victim's domain using something like `ssdeep`.\
+If you have located the login forms of the suspicious domains you can try to **send junk credentials** and **check if it's redirecting you to the victim's domain**.
 
 ## Domain names using keywords
 
-The parent page also mentions a domain name variation technique that consist on putting the **victim's domain name inside a bigger domain** (e.g. paypal-financial.com for paypal.com).
+The parent page also mentions a domain name variation technique that consists of putting the **victim's domain name inside a bigger domain** (e.g. paypal-financial.com for paypal.com).
 
 ### Certificate Transparency
 
-It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover this phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside it's name** For example, if attackers generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that that suspicions email is being used.
+It's not possible to take the previous "Brute-Force" approach but it's **possible to uncover these phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that by reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside its name** For example, if attackers generate a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that that suspicions email is being used.
 
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggest that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
 
 ![](<../../.gitbook/assets/image (390).png>)
 
-However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you whish.
+However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and **filter** the results **by date and CA** if you wish.
 
 ![](<../../.gitbook/assets/image (391).png>)
 
-Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domain (note that a suspicious domain can be a false positive).
+Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domains (note that a suspicious domain can be a false positive).
 
-**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing\_catcher**](https://github.com/x0rz/phishing\_catcher) that does just like that.
+**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing\_catcher**](https://github.com/x0rz/phishing\_catcher) that does just that.
 
 ### **New domains**
 
@@ -89,7 +89,7 @@ Using this last option you can even use the field Matching Identities to see if 
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
 Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
@@ -97,6 +97,6 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+**Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
