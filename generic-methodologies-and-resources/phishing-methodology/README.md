@@ -469,8 +469,8 @@ One easy way to check if you domain appears in any blacklist is to use [https://
 
 However, there are other ways to know if the victim is **actively looking for suspicions phishing activity in the wild** as explained in:
 
-{% content-ref url="detecting-phising.md" %}
-[detecting-phising.md](detecting-phising.md)
+{% content-ref url="detecting-phishing.md" %}
+[detecting-phishing.md](detecting-phishing.md)
 {% endcontent-ref %}
 
 You can **buy a domain with a very similar name** to the victims domain **and/or generate a certificate** for a **subdomain** of a domain controlled by you **containing** the **keyword** of the victim's domain. If the **victim** perform any kind of **DNS or HTTP interaction** with them, you will know that **he is actively looking** for suspicious domains and you will need to be very stealth.
