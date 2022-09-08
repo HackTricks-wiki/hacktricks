@@ -4,7 +4,7 @@
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
 Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
@@ -12,7 +12,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+**Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
@@ -29,8 +29,8 @@ Every block group contains the following pieces of information:
 * A copy of the block group descriptors
 * A data block bitmap which is used to identify the free blocks inside the group
 * An inode bitmap, which is used to identify the free inodes inside the group
-* inode table: it consists of a series of consecutive blocks, each of which contains a predefined Figure 1 Ext2 inode number of inodes. All inodes have the same size: 128 bytes. A 1,024 byte block contains 8 inodes, while a 4,096-byte block contains 32 inodes. Note that in Ext2, there is no need to store on disk a mapping between an inode number and the corresponding block number because the latter value can be derived from the block group number and the relative position inside the inode table. For example, suppose that each block group contains 4,096 inodes and that we want to know the address on disk of inode 13,021. In this case, the inode belongs to the third block group and its disk address is stored in the 733rd entry of the corresponding inode table. As you can see, the inode number is just a key used by the Ext2 routines to retrieve the proper inode descriptor on disk quickly
-* data blocks, containing files. Any block which does not contain any meaningful information, it is said to be free.
+* inode table: it consists of a series of consecutive blocks, each of which contains a predefined Figure 1 Ext2 inode number of inodes. All inodes have the same size: 128 bytes. A 1,024 byte block contains 8 inodes, while a 4,096-byte block contains 32 inodes. Note that in Ext2, there is no need to store on disk a mapping between an inode number and the corresponding block number because the latter value can be derived from the block group number and the relative position inside the inode table. For example, suppose that each block group contains 4,096 inodes and that we want to know the address on the disk of inode 13,021. In this case, the inode belongs to the third block group and its disk address is stored in the 733rd entry of the corresponding inode table. As you can see, the inode number is just a key used by the Ext2 routines to retrieve the proper inode descriptor on the disk quickly
+* data blocks, containing files. Any block which does not contain any meaningful information is said to be free.
 
 ![](<../../../.gitbook/assets/image (406).png>)
 
@@ -47,14 +47,14 @@ Ext has optional features that your OS may or may not support, there are 3 possi
 If there are **incompatible** features you won't be able to mount the filesystem as the OS won't know how the access the data.
 
 {% hint style="info" %}
-Suspected attacker might have non-standard extensions
+A suspected attacker might have non-standard extensions
 {% endhint %}
 
-**Any utility** that reads the **superblock** will be able to indicate the **features** of a **Ext filesystem**, but you could also use `file -sL /dev/sd*`
+**Any utility** that reads the **superblock** will be able to indicate the **features** of an **Ext filesystem**, but you could also use `file -sL /dev/sd*`
 
 ## Superblock
 
-The superblock is the first 1024 bytes from the start, it's repeated in the first block of each group and contains:
+The superblock is the first 1024 bytes from the start and it's repeated in the first block of each group and contains:
 
 * Block size
 * Total blocks
@@ -75,13 +75,13 @@ fsstat -o <offsetstart> /pat/to/filesystem-file.ext
 #You can get the <offsetstart> with the "p" command inside fdisk
 ```
 
-You can also use the free gui application: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
+You can also use the free GUI application: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
 Or you can also use **python** to obtain the superblock information: [https://pypi.org/project/superblock/](https://pypi.org/project/superblock/)
 
 ## inodes
 
 The **inodes** contain the list of **blocks** that **contains** the actual **data** of a **file**.\
-If the file is big, and inode **may contain pointers** to **other inodes** that points to the blocks/more inodes containing the file data.
+If the file is big, and inode **may contain pointers** to **other inodes** that point to the blocks/more inodes containing the file data.
 
 ![](<../../../.gitbook/assets/image (416).png>)
 
@@ -103,7 +103,7 @@ Inode structure:
 | 0xC    | 4    | Blocks Io         | Lower 32 bits of block count                     |
 | 0x20   | 4    | Flags             | Flags                                            |
 | 0x24   | 4    | Union osd1        | Linux: I version                                 |
-| 0x28   | 69   | Block\[15]        | 15 pointes to data block                         |
+| 0x28   | 69   | Block\[15]        | 15 points to data block                         |
 | 0x64   | 4    | Version           | File version for NFS                             |
 | 0x68   | 4    | File ACL low      | Lower 32 bits of extended attributes (ACL, etc)  |
 | 0x6C   | 4    | File size hi      | Upper 32 bits of file size (ext4 only)           |
@@ -115,8 +115,8 @@ Inode structure:
 | 0x7A   | 2    | GID hi            | Upper 16 bits of group ID                        |
 | 0x7C   | 2    | Checksum Io       | Lower 16 bits of inode checksum                  |
 
-"Modify" is the timestamp of the last time the file's _content_ has been mofified. This is often called "_mtime_".\
-"Change" is the timestamp of the last time the file's _inode_ has been changed, like by changing permissions, ownership, file name, number of hard links. It's often called "_ctime_".
+"Modify" is the timestamp of the last time the file's _content_ has been modified. This is often called "_mtime_".\
+"Change" is the timestamp of the last time the file's _inode_ has been changed, like by changing permissions, ownership, file name, and the number of hard links. It's often called "_ctime_".
 
 Inode structure extended (Ext4):
 
@@ -153,7 +153,7 @@ Special inodes:
 Not that the creation time only appears in Ext4.
 {% endhint %}
 
-Knowing the inode number you can easily find it's index:
+By knowing the inode number you can easily find its index:
 
 * **Block group** where an inode belongs: (Inode number - 1) / (Inodes per group)
 * **Index inside it's group**: (Inode number - 1) mod(Inodes/groups)
@@ -200,7 +200,7 @@ Directories
 | 0x7    | 1    | File type | <p>0x00 Unknown<br>0x01 Regular</p><p>0x02 Director</p><p>0x03 Char device</p><p>0x04 Block device</p><p>0x05 FIFO</p><p>0x06 Socket</p><p>0x07 Sym link</p> |
 | 0x8    |      | Name      | Name string (up to 255 characters)                                                                                                                           |
 
-**In order to increase the performance, Root hash Directory blocks may be used.**
+**To increase the performance, Root hash Directory blocks may be used.**
 
 **Extended Attributes**
 
@@ -209,9 +209,7 @@ Can be stored in
 * Extra space between inodes (256 - inode size, usually = 100)
 * A data block pointed to by file\_acl in inode
 
-Can be used to store anything as a users attribute if name starts with "user".
-
-Data can ne hidden this way.
+Can be used to store anything as a users attribute if the name starts with "user". So data can be hidden this way.
 
 Extended Attributes Entries
 
@@ -233,7 +231,7 @@ getdattr -n 'user.secret' file.txt #Get extended attribute called "user.secret"
 
 ## Filesystem View
 
-In order to see the contents of the file system you can **use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
+To see the contents of the file system, you can **use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
 Or you can mount it in your linux using `mount` command.
 
 [https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.](https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.)
@@ -243,7 +241,7 @@ Or you can mount it in your linux using `mount` command.
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
 Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
@@ -251,7 +249,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+**Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
