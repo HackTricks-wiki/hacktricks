@@ -4,15 +4,11 @@
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
@@ -24,7 +20,7 @@
 * **Manager approval is disabled**
 * **No authorized signatures are required**
 * An overly permissive **certificate template** security descriptor **grants certificate enrolment rights to low-privileged users**
-* The **certificate template defines EKUs that enable authentication**:&#x20;
+* The **certificate template defines EKUs that enable authentication**:
   * _Client Authentication (OID 1.3.6.1.5.5.7.3.2), PKINIT Client Authentication (1.3.6.1.5.2.3.4), Smart Card Logon (OID 1.3.6.1.4.1.311.20.2.2), Any Purpose (OID 2.5.29.37.0), or no EKU (SubCA)._
 * The **certificate template allows requesters to specify a subjectAltName in the CSR:**
   * **AD** will **use** the identity specified by a certificate’s **subjectAltName** (SAN) field **if** it is **present**. Consequently, if a requester can specify the SAN in a CSR, the requester can **request a certificate as anyone** (e.g., a domain admin user). The certificate template’s AD object **specifies** if the requester **can specify the SAN** in its **`mspki-certificate-name-`**`flag` property. The `mspki-certificate-name-flag` property is a **bitmask** and if the **`CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`** flag is **present**, a **requester can specify the SAN.**
@@ -51,7 +47,6 @@ To **abuse this vulnerability to impersonate an administrator** one could run:
 ```bash
 Certify.exe request /ca:dc.theshire.local-DC-CA /template:VulnTemplate /altname:localadmin
 certipy req 'corp.local/john:Passw0rd!@ca.corp.local' -ca 'corp-CA' -template 'ESC1' -alt 'administrator@corp.local'
-
 ```
 
 Then you can transform the generated **certificate to `.pfx`** format and use it to **authenticate using Rubeus or certipy** again:
@@ -215,7 +210,7 @@ Underneath, this just uses **remote** **registry**, so the following command may
 reg.exe query \\<CA_SERVER>\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration\<CA_NAME>\PolicyModules\CertificateAuthority_MicrosoftDefault.Policy\ /v EditFlags 
 ```
 
-****[**Certify**](https://github.com/GhostPack/Certify) and [**Certipy**](https://github.com/ly4k/Certipy) also checks for this and can be used to abuse this misconfiguration:
+\*\*\*\*[**Certify**](https://github.com/GhostPack/Certify) and [**Certipy**](https://github.com/ly4k/Certipy) also checks for this and can be used to abuse this misconfiguration:
 
 ```bash
 # Check for vulns, including this one
@@ -256,7 +251,7 @@ A certificate authority itself has a **set of permissions** that secure various 
 This can also be enumerated via [**PSPKI’s module**](https://www.pkisolutions.com/tools/pspki/) with `Get-CertificationAuthority | Get-CertificationAuthorityAcl`:
 
 ```bash
-Get-CertificationAuthority -ComputerName dc.theshire.local | Get-certificationAuthorityAcl | select -expand Access
+Get-CertificationAuthority -ComputerName dc.theshire.local | Get-certificationAuthorityAcl | select -expand Access
 ```
 
 The two main rights here are the **`ManageCA`** right and the **`ManageCertificates`** right, which translate to the “CA administrator” and “Certificate Manager”.
@@ -402,7 +397,7 @@ Another limitation of NTLM relay attacks is that they **require a victim account
 
 ### **Abuse**
 
-****[**Certify**](https://github.com/GhostPack/Certify)’s `cas` command can enumerate **enabled HTTP AD CS endpoints**:
+\*\*\*\*[**Certify**](https://github.com/GhostPack/Certify)’s `cas` command can enumerate **enabled HTTP AD CS endpoints**:
 
 ```
 Certify.exe cas
@@ -478,11 +473,11 @@ In this case, `John@corp.local` has `GenericWrite` over `Jane@corp.local`, and w
 
 First, we obtain the hash of `Jane` with for instance Shadow Credentials (using our `GenericWrite`).
 
-<figure><img src="../../../.gitbook/assets/image (13) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
 
 Next, we change the `userPrincipalName` of `Jane` to be `Administrator`. Notice that we’re leaving out the `@corp.local` part.
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
 This is not a constraint violation, since the `Administrator` user’s `userPrincipalName` is `Administrator@corp.local` and not `Administrator`.
 
@@ -494,11 +489,11 @@ Notice that the `userPrincipalName` in the certificate is `Administrator` and th
 
 Then, we change back the `userPrincipalName` of `Jane` to be something else, like her original `userPrincipalName` `Jane@corp.local`.
 
-<figure><img src="../../../.gitbook/assets/image (24).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 Now, if we try to authenticate with the certificate, we will receive the NT hash of the `Administrator@corp.local` user. You will need to add `-domain <domain>` to your command line since there is no domain specified in the certificate.
 
-<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 ## Weak Certificate Mappings - ESC10
 
@@ -527,11 +522,11 @@ In this case, `John@corp.local` has `GenericWrite` over `Jane@corp.local`, and w
 
 First, we obtain the hash of `Jane` with for instance Shadow Credentials (using our `GenericWrite`).
 
-<figure><img src="../../../.gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (13) (1).png" alt=""><figcaption></figcaption></figure>
 
 Next, we change the `userPrincipalName` of `Jane` to be `Administrator`. Notice that we’re leaving out the `@corp.local` part.
 
-<figure><img src="../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 This is not a constraint violation, since the `Administrator` user’s `userPrincipalName` is `Administrator@corp.local` and not `Administrator`.
 
@@ -543,11 +538,11 @@ Notice that the `userPrincipalName` in the certificate is `Administrator`.
 
 Then, we change back the `userPrincipalName` of `Jane` to be something else, like her original `userPrincipalName` `Jane@corp.local`.
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (24).png" alt=""><figcaption></figcaption></figure>
 
 Now, if we try to authenticate with the certificate, we will receive the NT hash of the `Administrator@corp.local` user. You will need to add `-domain <domain>` to your command line since there is no domain specified in the certificate.
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 ### Abuse Case 2
 
@@ -558,7 +553,7 @@ In this case, `John@corp.local` has `GenericWrite` over `Jane@corp.local`, and w
 
 First, we obtain the hash of `Jane` with for instance Shadow Credentials (using our `GenericWrite`).
 
-<figure><img src="../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (13) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Next, we change the `userPrincipalName` of `Jane` to be `DC$@corp.local`.
 
@@ -607,14 +602,10 @@ Ultimately both these scenarios **increase the attack surface** from one forest 
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
