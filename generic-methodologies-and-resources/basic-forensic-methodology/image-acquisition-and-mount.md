@@ -1,40 +1,35 @@
-
+# Image Acquisition & Mount
 
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
+## Acquisition
 
-# Acquisition
-
-## DD
+### DD
 
 ```bash
 #This will generate a raw copy of the disk
 dd if=/dev/sdb of=disk.img
 ```
 
-## dcfldd
+### dcfldd
 
 ```bash
-#Raw copy with hashes along the way (more secur s it checks hashes while it's copying the data)
+#Raw copy with hashes along the way (more secur as it checks hashes while it's copying the data)
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
 
-## FTK Imager
+### FTK Imager
 
 You can [**download the FTK imager from here**](https://accessdata.com/product-download/debian-and-ubuntu-x64-3-1-1).
 
@@ -42,9 +37,9 @@ You can [**download the FTK imager from here**](https://accessdata.com/product-d
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 --description 'A description' --examiner 'Your name'
 ```
 
-## EWF
+### EWF
 
-You can generate a dick image using the[ **ewf tools**](https://github.com/libyal/libewf).
+You can generate a disk image using the[ **ewf tools**](https://github.com/libyal/libewf).
 
 ```bash
 ewfacquire /dev/sdb
@@ -63,13 +58,13 @@ ewfacquire /dev/sdb
 #It will generate the disk image in the current directory
 ```
 
-# Mount
+## Mount
 
-## Several types
+### Several types
 
 In **Windows** you can try to use the free version of Arsenal Image Mounter ([https://arsenalrecon.com/downloads/](https://arsenalrecon.com/downloads/)) to **mount the forensics image**.
 
-## Raw
+### Raw
 
 ```bash
 #Get file type
@@ -80,7 +75,7 @@ evidence.img: Linux rev 1.0 ext4 filesystem data, UUID=1031571c-f398-4bfb-a414-b
 mount evidence.img /mnt
 ```
 
-## EWF
+### EWF
 
 ```bash
 #Get file type
@@ -97,11 +92,11 @@ output/ewf1: Linux rev 1.0 ext4 filesystem data, UUID=05acca66-d042-4ab2-9e9c-be
 mount output/ewf1 -o ro,norecovery /mnt
 ```
 
-## ArsenalImageMounter
+### ArsenalImageMounter
 
 It's a Windows Application to mount volumes. You can download it here [https://arsenalrecon.com/downloads/](https://arsenalrecon.com/downloads/)
 
-## Errors
+### Errors
 
 * **`cannot mount /dev/loop0 read-only`** in this case you need to use the flags **`-o ro,norecovery`**
 * **`wrong fs type, bad option, bad superblock on /dev/loop0, missing codepage or helper program, or other error.`** in this case the mount failed due as the offset of the filesystem is different than that of the disk image. You need to find the Sector size and the Start sector:
@@ -125,22 +120,14 @@ Note that sector size is **512** and start is **2048**. Then mount the image lik
 mount disk.img /mnt -o ro,offset=$((2048*512))
 ```
 
-
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-
