@@ -18,7 +18,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 </details>
 
-<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (3).png" alt="" data-size="original">\
+<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10).png" alt="" data-size="original">\
 **Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
@@ -163,7 +163,7 @@ echo bye >> ftp.txt
 ftp -n -v -s:ftp.txt
 ```
 
-<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (3).png" alt="" data-size="original">\
+<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10).png" alt="" data-size="original">\
 **Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
@@ -375,7 +375,7 @@ Now we just copy-paste the text into our windows-shell. And it will automaticall
 
 * [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
-<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (3).png" alt="" data-size="original">\
+<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10).png" alt="" data-size="original">\
 **Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}

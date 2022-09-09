@@ -48,7 +48,7 @@ If you want to **share some tricks with the community** you can also submit **pu
 
 ### [STM Cyber](https://www.stmcyber.com)
 
-![](<.gitbook/assets/image (638) (2) (1).png>)
+![](<.gitbook/assets/image (642) (1) (1) (1).png>)
 
 [**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentestings, Red teams and training.
 
@@ -86,7 +86,7 @@ Get Access Today:
 
 ### [**INE**](https://ine.com)
 
-![](<.gitbook/assets/INE\_Logo (3).jpg>)
+![](.gitbook/assets/ine\_logo-3-.jpg)
 
 [**INE**](https://ine.com) is a great platform to start learning or **improve** your **IT knowledge** through their huge range of **courses**. I personally like and have completed many from the [**cybersecurity section**](https://ine.com/pages/cybersecurity). **INE** also provides with the official courses to prepare the **certifications** from [**eLearnSecurity**](https://elearnsecurity.com)**.**
 

@@ -478,11 +478,11 @@ In this case, `John@corp.local` has `GenericWrite` over `Jane@corp.local`, and w
 
 First, we obtain the hash of `Jane` with for instance Shadow Credentials (using our `GenericWrite`).
 
-<figure><img src="../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (13) (1).png" alt=""><figcaption></figcaption></figure>
 
 Next, we change the `userPrincipalName` of `Jane` to be `Administrator`. Notice that we’re leaving out the `@corp.local` part.
 
-<figure><img src="../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 This is not a constraint violation, since the `Administrator` user’s `userPrincipalName` is `Administrator@corp.local` and not `Administrator`.
 
@@ -494,11 +494,11 @@ Notice that the `userPrincipalName` in the certificate is `Administrator` and th
 
 Then, we change back the `userPrincipalName` of `Jane` to be something else, like her original `userPrincipalName` `Jane@corp.local`.
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (24).png" alt=""><figcaption></figcaption></figure>
 
 Now, if we try to authenticate with the certificate, we will receive the NT hash of the `Administrator@corp.local` user. You will need to add `-domain <domain>` to your command line since there is no domain specified in the certificate.
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 ## Weak Certificate Mappings - ESC10
 
@@ -527,11 +527,11 @@ In this case, `John@corp.local` has `GenericWrite` over `Jane@corp.local`, and w
 
 First, we obtain the hash of `Jane` with for instance Shadow Credentials (using our `GenericWrite`).
 
-<figure><img src="../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
 
 Next, we change the `userPrincipalName` of `Jane` to be `Administrator`. Notice that we’re leaving out the `@corp.local` part.
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
 This is not a constraint violation, since the `Administrator` user’s `userPrincipalName` is `Administrator@corp.local` and not `Administrator`.
 
@@ -543,11 +543,11 @@ Notice that the `userPrincipalName` in the certificate is `Administrator`.
 
 Then, we change back the `userPrincipalName` of `Jane` to be something else, like her original `userPrincipalName` `Jane@corp.local`.
 
-<figure><img src="../../../.gitbook/assets/image (24).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 Now, if we try to authenticate with the certificate, we will receive the NT hash of the `Administrator@corp.local` user. You will need to add `-domain <domain>` to your command line since there is no domain specified in the certificate.
 
-<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Abuse Case 2
 
@@ -558,7 +558,7 @@ In this case, `John@corp.local` has `GenericWrite` over `Jane@corp.local`, and w
 
 First, we obtain the hash of `Jane` with for instance Shadow Credentials (using our `GenericWrite`).
 
-<figure><img src="../../../.gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 Next, we change the `userPrincipalName` of `Jane` to be `DC$@corp.local`.
 
