@@ -20,20 +20,20 @@
 
 ## Partitions
 
-A hard drive or a **SSD disk can contain different partitions** with the goal of separating data physically.\
-The **minimum** unit of a disk is the **sector** (normally composed by 512B). So, each partition size needs to be multiple of that size.
+A hard drive or an **SSD disk can contain different partitions** with the goal of separating data physically.\
+The **minimum** unit of a disk is the **sector** (normally composed of 512B). So, each partition size needs to be multiple of that size.
 
 ### MBR (master Boot Record)
 
-It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate the PC what and from where a partition should be mounted.\
-It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**.. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
+It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate to the PC what and from where a partition should be mounted.\
+It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
 MBR allows **max 2.2TB**.
 
 ![](<../../../.gitbook/assets/image (489).png>)
 
 ![](<../../../.gitbook/assets/image (490).png>)
 
-From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** (if Windows is used). The logical drive letters of the hard disk depend on the Windows Disk Signature. Changing this signature could prevent Windows from booting (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** (if Windows is used). The logical drive letter of the hard disk depends on the Windows Disk Signature. Changing this signature could prevent Windows from booting (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
 ![](<../../../.gitbook/assets/image (493).png>)
 
@@ -63,11 +63,11 @@ From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Sig
 | 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
 | 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
 
-In order to mount a MBR in Linux you first need to get the start offset (you can use `fdisk` and the the `p` command)
+In order to mount an MBR in Linux you first need to get the start offset (you can use `fdisk` and the `p` command)
 
 ![](<../../../.gitbook/assets/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (5).png>)
 
-An then use the following code
+And then use the following code
 
 ```bash
 #Mount MBR in Linux
@@ -88,7 +88,7 @@ Just like MBR it starts in the **sector 0**. The MBR occupies 32bits while **GPT
 GPT **allows up to 128 partitions** in Windows and up to **9.4ZB**.\
 Also, partitions can have a 36 character Unicode name.
 
-On an MBR disk, the partitioning and boot data is stored in one place. If this data is overwritten or corrupted, you’re in trouble. In contrast, **GPT stores multiple copies of this data across the disk**, so it’s much more robust and can recover if the data is corrupted.
+On an MBR disk, the partitioning and boot data are stored in one place. If this data is overwritten or corrupted, you’re in trouble. In contrast, **GPT stores multiple copies of this data across the disk**, so it’s much more robust and can recover if the data is corrupted.
 
 GPT also stores **cyclic redundancy check (CRC)** values to check that its data is intact. If the data is corrupted, GPT can notice the problem and **attempt to recover the damaged data** from another location on the disk.
 
@@ -118,7 +118,7 @@ The partition table header defines the usable blocks on the disk. It also define
 | 40 (0x28) | 8 bytes  | First usable LBA for partitions (primary partition table last LBA + 1)                                                                                                          |
 | 48 (0x30) | 8 bytes  | Last usable LBA (secondary partition table first LBA − 1)                                                                                                                       |
 | 56 (0x38) | 16 bytes | Disk GUID in mixed endian                                                                                                                                                       |
-| 72 (0x48) | 8 bytes  | Starting LBA of array of partition entries (always 2 in primary copy)                                                                                                           |
+| 72 (0x48) | 8 bytes  | Starting LBA of an array of partition entries (always 2 in primary copy)                                                                                                           |
 | 80 (0x50) | 4 bytes  | Number of partition entries in array                                                                                                                                            |
 | 84 (0x54) | 4 bytes  | Size of a single partition entry (usually 80h or 128)                                                                                                                           |
 | 88 (0x58) | 4 bytes  | CRC32 of partition entries array in little endian                                                                                                                               |
@@ -144,11 +144,11 @@ More partition types in [https://en.wikipedia.org/wiki/GUID\_Partition\_Table](h
 
 ### Inspecting
 
-After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image a **MBR** was detected on the **sector 0** and interpreted:
+After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image an **MBR** was detected on the **sector 0** and interpreted:
 
 ![](<../../../.gitbook/assets/image (494).png>)
 
-If it was a **GPT table instead of a MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
+If it was a **GPT table instead of an MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
 
 ## File-Systems
 
@@ -166,11 +166,11 @@ The **FAT (File Allocation Table)** file system is named for its method of organ
 
 ![](<../../../.gitbook/assets/image (495).png>)
 
-The minimum space unit used by this file-system is a **cluster, typically 512B** (which is composed by a number of sectors).
+The minimum space unit used by this file system is a **cluster, typically 512B** (which is composed of a number of sectors).
 
 The earlier **FAT12** had a **cluster addresses to 12-bit** values with up to **4078** **clusters**; it allowed up to 4084 clusters with UNIX. The more efficient **FAT16** increased to **16-bit** cluster address allowing up to **65,517 clusters** per volume. FAT32 uses 32-bit cluster address allowing up to **268,435,456 clusters** per volume
 
-The **maximum file-size allowed by FAT is 4GB** (minus one byte) because the file system uses a 32-bit field to store the file size in bytes, and 2^32 bytes = 4 GiB. This happens for FAT12, FAT16 and FAT32.
+The **maximum file size allowed by FAT is 4GB** (minus one byte) because the file system uses a 32-bit field to store the file size in bytes, and 2^32 bytes = 4 GiB. This happens for FAT12, FAT16 and FAT32.
 
 The **root directory** occupies a **specific position** for both FAT12 and FAT16 (in FAT32 it occupies a position like any other folder). Each file/folder entry contains this information:
 
@@ -182,7 +182,7 @@ The **root directory** occupies a **specific position** for both FAT12 and FAT16
 * Address of the FAT table where the first cluster of the file starts
 * Size
 
-When a file is "deleted" using a FAT file system, the directory entry remains almost **unchanged** except for the **first character of the file name** (modified to 0xE5), preserving most of the "deleted" file's name, along with its time stamp, file length and — most importantly — its physical location on the disk. The list of disk clusters occupied by the file will, however, be erased from the File Allocation Table, marking those sectors available for use by other files created or modified thereafter. In case of FAT32, it is additionally erased field responsible for upper 16 bits of file start cluster value.
+When a file is "deleted" using a FAT file system, the directory entry remains almost **unchanged** except for the **first character of the file name** (modified to 0xE5), preserving most of the "deleted" file's name, along with its time stamp, file length and — most importantly — its physical location on the disk. The list of disk clusters occupied by the file will, however, be erased from the File Allocation Table, marking those sectors available for use by other files created or modified thereafter. In the case of FAT32, it is additionally an erased field responsible for the upper 16 bits of the file start cluster value.
 
 ### **NTFS**
 
@@ -192,7 +192,7 @@ When a file is "deleted" using a FAT file system, the directory entry remains al
 
 ### EXT
 
-**Ext2** is the most common file-system for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
+**Ext2** is the most common file system for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
 
 {% content-ref url="ext.md" %}
 [ext.md](ext.md)
@@ -200,7 +200,7 @@ When a file is "deleted" using a FAT file system, the directory entry remains al
 
 ## **Metadata**
 
-Some files contains metadata. This is information about the content of the file which sometimes might be interesting for the analyst as depending on the file-type it might have information like:
+Some files contain metadata. This information is about the content of the file which sometimes might be interesting to an analyst as depending on the file type, it might have information like:
 
 * Title
 * MS Office Version used
@@ -216,7 +216,7 @@ You can use tools like [**exiftool**](https://exiftool.org) and [**Metadiver**](
 
 ### Logged Deleted Files
 
-As it was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file-system just mark it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files (like the MFT) and find the deleted files.
+As was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file system just marks it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files (like the MFT) and find the deleted files.
 
 Also, the OS usually saves a lot of information about file system changes and backups, so it's possible to try to use them to recover the file or as much information as possible.
 
@@ -226,11 +226,11 @@ Also, the OS usually saves a lot of information about file system changes and ba
 
 ### **File Carving**
 
-**File carving** is a technique that tries to **find files in a bulk of data**. There are 3 main ways tools like this works: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
+**File carving** is a technique that tries to **find files in the bulk of data**. There are 3 main ways tools like this work: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
 
 Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
 
-There are several tools that you can use for file Carving indicating them the file-types you want search for
+There are several tools that you can use for file Carving indicating the file types you want to search for
 
 {% content-ref url="file-data-carving-recovery-tools.md" %}
 [file-data-carving-recovery-tools.md](file-data-carving-recovery-tools.md)
@@ -238,7 +238,7 @@ There are several tools that you can use for file Carving indicating them the fi
 
 ### Data Stream **C**arving
 
-Data Stream Carving is similar to File Carving but i**nstead of looking for complete files, it looks for interesting fragments** of information.\
+Data Stream Carving is similar to File Carving but **instead of looking for complete files, it looks for interesting fragments** of information.\
 For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
 
 {% content-ref url="file-data-carving-recovery-tools.md" %}
