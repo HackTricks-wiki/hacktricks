@@ -18,7 +18,7 @@
 
 **NTFS** (**New Technology File System**) is a proprietary journaling file system developed by Microsoft.
 
-The cluster is the minimum size unit of NTFS and the size of the cluster depends on the size of a partition.
+The cluster is the smallest unit of size in NTFS and the size of the cluster depends on the size of a partition.
 
 | Partition size           | Sectors per cluster | Cluster size |
 | ------------------------ | ------------------- | ------------ |
@@ -33,21 +33,21 @@ The cluster is the minimum size unit of NTFS and the size of the cluster depends
 
 ### **Slack-Space**
 
-As the **minimum** size unit of NTFS is a **cluster**. Each file will be occupying a number of complete clusters. Then, it's highly probable that **each file occupies more space than necessary**. These **unused** **spaces** **booked** by a file which is called **slacking** **space**. And people could take advantage of this technique to **hide** **information**.
+As the **smallest** size unit of NTFS is a **cluster**. Each file will be occupying several complete clusters. Then, it's highly probable that **each file occupies more space than necessary**. These **unused** **spaces** **booked** by a file which is called a **slacking** **space** and people could take advantage of this area to **hide** **information**.
 
 ![](<../../../.gitbook/assets/image (498).png>)
 
 ### **NTFS boot sector**
 
-When you format an NTFS volume, the format program allocates the first 16 sectors for the $Boot metadata file. First sector, in fact, is a boot sector with a "bootstrap" code and the following 15 sectors are the boot sector's IPL (initial program loader). To increase file system reliability the very last sector an NTFS partition contains a spare copy of the boot sector.
+When you format an NTFS volume, the format program allocates the first 16 sectors for the Boot metadata file. The first sector is a boot sector with a "bootstrap" code and the following 15 sectors are the boot sector's IPL (Initial Program Loader). To increase file system reliability the very last sector of an NTFS partition contains a spare copy of the boot sector.
 
-### **Master File Table o $MFT**
+### **Master File Table (MFT)**
 
-The NTFS file system contains a file called the _master file table_, or MFT. There is at least **one entry in the MFT for every file on an NTFS file system** volume, including the MFT itself. All information about a file, including its **size, time and date stamps, permissions, and data content**, is stored either in MFT entries, or in space outside the MFT that is described by MFT entries.
+The NTFS file system contains a file called the  Master File Table (MFT). There is at least **one entry in the MFT for every file on an NTFS file system** volume, including the MFT itself. All information about a file, including its **size, time and date stamps, permissions, and data content**, is stored either in MFT entries or in space outside the MFT that is described by MFT entries.
 
 As **files are added** to an NTFS file system volume, more entries are added to the MFT and the **MFT increases in size**. When **files** are **deleted** from an NTFS file system volume, their **MFT entries are marked as free** and may be reused. However, disk space that has been allocated for these entries is not reallocated, and the size of the MFT does not decrease.
 
-The NTFS file system **reserves space for the MFT to keep the MFT as contiguous as possible** as it grows. The space reserved by the NTFS file system for the MFT in each volume is called the **MFT zone**. Space for file and directories are also allocated from this space, but only after all of the volume space outside of the MFT zone has been allocated.
+The NTFS file system **reserves space for the MFT to keep the MFT as contiguous as possible** as it grows. The space reserved by the NTFS file system for the MFT in each volume is called the **MFT zone**. Space for files and directories is also allocated from this space, but only after all of the volume space outside of the MFT zone has been allocated.
 
 Depending on the average file size and other variables, **either the reserved MFT zone or the unreserved space on the disk may be allocated first as the disk fills to capacity**. Volumes with a small number of relatively large files will allocate the unreserved space first, while volumes with a large number of relatively small files allocate the MFT zone first. In either case, fragmentation of the MFT starts to take place when one region or the other becomes fully allocated. If the unreserved space is completely allocated, space for user files and directories will be allocated from the MFT zone. If the MFT zone is completely allocated, space for new MFT entries will be allocated from the unreserved space.
 
@@ -72,13 +72,13 @@ NTFS reserves the first 16 records of the table for special information:
 |                       |           | 12-15      | Reserved for future use.                                                                                                                                                                                                      |
 | Quota management file | $Quota    | 24         | Contains user assigned quota limits on the volume space.                                                                                                                                                                      |
 | Object Id file        | $ObjId    | 25         | Contains file object IDs.                                                                                                                                                                                                     |
-| Reparse point file    | $Reparse  | 26         | This file contains information about files and folders on the volume include reparse point data.                                                                                                                              |
+| Reparse point file    | $Reparse  | 26         | This file contains information about files and folders on the volume including reparse point data.                                                                                                                              |
 
 ### Each entry of the MFT looks like the following:
 
 ![](<../../../.gitbook/assets/image (499).png>)
 
-Note how each entry starts with "FILE". Each entry occupies 1024 bits. So after 1024 bit from the start of a MFT entry you will find the next one.
+Note how each entry starts with "FILE". Each entry occupies 1024 bits. So after 1024 bit from the start of an MFT entry, you will find the next one.
 
 Using the [**Active Disk Editor**](https://www.disk-editor.org/index.html) it's very easy to inspect the entry of a file in the MFT. Just right click on the file and then click "Inspect File Record"
 
@@ -105,7 +105,7 @@ Each attribute indicates some entry information identified by the type:
 | Type Identifier | Name                     | Description                                                                                                       |
 | --------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
 | 16              | $STANDARD\_INFORMATION   | General information, such as flags; the last accessed, written, and created times; and the owner and security ID. |
-| 32              | $ATTRIBUTE\_LIST         | List where other attributes for file can be found.                                                                |
+| 32              | $ATTRIBUTE\_LIST         | List where other attributes for a file can be found.                                                                |
 | 48              | $FILE\_NAME              | File name, in Unicode, and the last accessed, written, and created times.                                         |
 | 64              | $VOLUME\_VERSION         | Volume information. Exists only in version 1.2 (Windows NT).                                                      |
 | 64              | $OBJECT\_ID              | A 16-byte unique identifier for the file or directory. Exists only in versions 3.0+ and after (Windows 2000+).    |
@@ -126,7 +126,7 @@ For example the **type 48 (0x30)** identifies the **file name**:
 
 ![](<../../../.gitbook/assets/image (508).png>)
 
-It is also useful to understand that **these attributes can be resident** (meaning, they exist within a given MFT record) or **nonresident** (meaning, they exist outside a given MFT record, elsewhere on the disk, and are simply referenced within the record). For example, if the attribute **$Data is resident**, these means that the **whole file is saved in the MFT**, if it's nonresident, then the content of the file is in other part of the file system.
+It is also useful to understand that **these attributes can be resident** (meaning, they exist within a given MFT record) or **nonresident** (meaning, they exist outside a given MFT record, elsewhere on the disk, and are simply referenced within the record). For example, if the attribute **$Data is resident**, this means that the **whole file is saved in the MFT**, if it's nonresident, then the content of the file is in another part of the file system.
 
 Some interesting attributes:
 
@@ -146,7 +146,7 @@ Some interesting attributes:
   * Real size
   * [File reference](https://flatcap.org/linux-ntfs/ntfs/concepts/file\_reference.html) to the parent directory.
 * [$Data](https://flatcap.org/linux-ntfs/ntfs/attributes/data.html) (among others):
-  * Contains the file's data or the indication of the sectors where the data resides. In the following example the attribute data is not resident so the attribute gives information about the sectors where the data resides.
+  * Contains the file's data or the indication of the sectors where the data resides. In the following example, the attribute data is not resident so the attribute gives information about the sectors where the data resides.
 
 ![](<../../../.gitbook/assets/image (507) (1).png>)
 
@@ -156,20 +156,18 @@ Some interesting attributes:
 
 ![](<../../../.gitbook/assets/image (512).png>)
 
-Another useful tool to analyze the MFT is [**MFT2csv**](https://github.com/jschicht/Mft2Csv) (select the mft file or the image and press dump all and extract to extract al the objects).\
-This program will extract all the MFT data and present it in CSV format. It can also be used to dump the files.
+Another useful tool to analyze the MFT is [**MFT2csv**](https://github.com/jschicht/Mft2Csv) (select the mft file or the image and press dump all and extract to extract all the objects).\
+This program will extract all the MFT data and present it in CSV format. It can also be used to dump files.
 
 ![](<../../../.gitbook/assets/image (513).png>)
 
 ### $LOGFILE
 
 The file **`$LOGFILE`** contains **logs** about the **actions** that have been **performed** **to** **files**. It also **saves** the **action** it would need to perform in case of a **redo** and the action needed to **go back** to the **previous** **state**.\
-These logs are useful for the MFT to rebuild the file system in case some kind of error happened.
+These logs are useful for the MFT to rebuild the file system in case some kind of error happened. The maximum size of this file is **65536KB**.
 
-The maximum file size of this file is **65536KB**.
-
-In order to inspect the `$LOGFILE` you need to extract it and inspect the `$MFT` previously with [**MFT2csv**](https://github.com/jschicht/Mft2Csv).\
-Then run [**LogFileParser**](https://github.com/jschicht/LogFileParser) against this file and selecting the exported `$LOGFILE` file and the CVS of the inspection of the `$MFT` you will obtain a csv file with the logs of the file system activity recorded by the `$LOGFILE` log.
+To inspect the `$LOGFILE` you need to extract it and inspect the `$MFT` previously with [**MFT2csv**](https://github.com/jschicht/Mft2Csv).\
+Then run [**LogFileParser**](https://github.com/jschicht/LogFileParser) against this file and select the exported `$LOGFILE` file and the CVS of the inspection of the `$MFT`. You will obtain a CSV file with the logs of the file system activity recorded by the `$LOGFILE` log.
 
 ![](<../../../.gitbook/assets/image (515).png>)
 
@@ -179,11 +177,11 @@ Filtering by filenames you can see **all the actions performed against a file**:
 
 ### $USNJnrl
 
-The file `$EXTEND/$USNJnrl/$J` is and alternate data stream of the file `$EXTEND$USNJnrl` . This artifact contains a **registry of changes produced inside the NTFS volume with more detail than `$LOGFILE`**.
+The file `$EXTEND/$USNJnrl/$J` is an alternate data stream of the file `$EXTEND$USNJnrl`. This artifact contains a **registry of changes produced inside the NTFS volume with more detail than `$LOGFILE`**.
 
 To inspect this file you can use the tool [**UsnJrnl2csv**](https://github.com/jschicht/UsnJrnl2Csv).
 
-Filtering by the filename it's possible to see **all the actions performed against a file**. Also you can find the `MFTReference` of the parent folder. Then, looking for that `MFTReference` you can find i**nformation of the parent folder.**
+Filtering by the filename it's possible to see **all the actions performed against a file**. Also, you can find the `MFTReference` in the parent folder. Then looking at that `MFTReference` you can find **information from the parent folder.**
 
 ![](<../../../.gitbook/assets/image (516).png>)
 
@@ -195,34 +193,34 @@ You can get the `$I30` file of a directory from the **FTK Imager** and inspect i
 
 ![](<../../../.gitbook/assets/image (519).png>)
 
-With this data you can find **information about the file changes performed inside the folder** but note that the deletion time of a file isn't saved inside this logs. However, you can see that **last modified date** of the **`$I30` file**, and if the **last action performed** over the directory is the **deletion** of a file, the times may be the same.
+With this data, you can find **information about the file changes performed inside the folder** but note that the deletion time of a file isn't saved inside this log. However, you can see that **last modified date** of the **`$I30` file**, and if the **last action performed** over the directory is the **deletion** of a file, the times may be the same.
 
 ### $Bitmap
 
-The **`$BitMap`** is a special file within the NTFS file system. This file keeps **track of all of the used and unused clusters** on an NTFS volume. When a file takes up space on the NTFS volume the location is uses is marked out in the `$BitMap`.
+The **`$BitMap`** is a special file within the NTFS file system. This file keeps **track of all of the used and unused clusters** on an NTFS volume. When a file takes up space on the NTFS volume the location used is marked out in the `$BitMap`.
 
 ![](<../../../.gitbook/assets/image (523).png>)
 
 ### ADS (Alternate Data Stream)
 
 Alternate data streams allow files to contain more than one stream of data. Every file has at least one data stream. In Windows, this default data stream is called `:$DATA`.\
-In this [page you can see different ways to create/access/discover alternate data streams](../../../windows-hardening/basic-cmd-for-pentesters.md#alternate-data-streams-cheatsheet-ads-alternate-data-stream) from the console. In the past this cause a vulnerability in IIS as people was able to access the source code of a page by accessing the `:$DATA` stream like `http://www.alternate-data-streams.com/default.asp::$DATA`.
+In this [page you can see different ways to create/access/discover alternate data streams](../../../windows-hardening/basic-cmd-for-pentesters.md#alternate-data-streams-cheatsheet-ads-alternate-data-stream) from the console. In the past, this cause a vulnerability in IIS as people were able to access the source code of a page by accessing the `:$DATA` stream like `http://www.alternate-data-streams.com/default.asp::$DATA`.
 
 Using the tool [**AlternateStreamView**](https://www.nirsoft.net/utils/alternate\_data\_streams.html) you can search and export all the files with some ADS.
 
 ![](<../../../.gitbook/assets/image (518).png>)
 
-Using the FTK imager and double clicking in a file with ADS you can **access the ADS data**:
+Using the FTK imager and double clicking on a file with ADS you can **access the ADS data**:
 
 ![](<../../../.gitbook/assets/image (517).png>)
 
-If you find an ADS called **`Zone.Identifier`** (see previous image) this usually contains **information about how was the file downloaded**. There would be a "ZoneId" field with the following info:
+If you find an ADS called **`Zone.Identifier`** (see the above image), this usually contains **information about how the file was downloaded**. There would be a "ZoneId" field with the following info:
 
 * Zone ID = 0 -> Mycomputer
 * Zone ID = 1 -> Intranet
 * Zone ID = 2 -> Trusted
 * Zone ID = 3 -> Internet
-* Zone ID = 4 -> Unstrusted
+* Zone ID = 4 -> Untrusted
 
 Moreover, different software may store additional information:
 
