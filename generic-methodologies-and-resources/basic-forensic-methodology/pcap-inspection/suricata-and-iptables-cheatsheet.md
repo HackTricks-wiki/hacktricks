@@ -22,8 +22,8 @@
 
 Iptables chains are just lists of rules, processed in order. You will always find the following 3, but others such as NAT might also be supported.
 
-* **Input** – This chain is used to control the behavior for incoming connections.
-* **Forward** – This chain is used for incoming connections that aren’t actually being delivered locally. Think of a router – data is always being sent to it but rarely actually destined for the router itself; the data is just forwarded to its target. Unless you’re doing some kind of routing, NATing, or something else on your system that requires forwarding, you won’t even use this chain.
+* **Input** – This chain is used to control the behavior of incoming connections.
+* **Forward** – This chain is used for incoming connections that aren’t being delivered locally. Think of a router – data is always being sent to it but rarely actually destined for the router itself; the data is just forwarded to its target. Unless you’re doing some kind of routing, NATing, or something else on your system that requires forwarding, you won’t even use this chain.
 * **Output** – This chain is used for outgoing connections.
 
 ```bash
@@ -40,7 +40,7 @@ iptables -I INPUT -p tcp --dport 443 -j DROP
 iptables -I INPUT -s ip1,ip2 -p tcp --dport 443 -j DROP
 
 # String based drop
-## Strings are case sansitive (pretty easy to bypass if you want to check a SQLi for example)
+## Strings are case sensitive (pretty easy to bypass if you want to check an SQLi for example)
 iptables -I INPUT -p tcp --dport <port_listening> -m string --algo bm --string '<payload>' -j DROP
 iptables -I OUTPUT -p tcp --sport <port_listening> -m string --algo bm --string 'CTF{' -j DROP
 ## You can also check for the hex, base64 and double base64 of the expected CTF flag chars
@@ -110,7 +110,7 @@ detect-engine:
 suricata -T -c /etc/suricata/suricata.yaml -v
 
 # Configure suricata as IPs
-## Config dropto generate alerts
+## Config drop to generate alerts
 ## Search for the following lines in /etc/suricata/suricata.yaml and remove comments:
 - drop:
     alerts: yes
@@ -137,9 +137,9 @@ systemctl daemon-reload
 
 A rule/signature consists of the following:
 
-* The **action**, that determines what happens when the signature matches.
-* The **header**, defining the protocol, IP addresses, ports and direction of the rule.
-* The **rule options**, defining the specifics of the rule.
+* The **action**, determines what happens when the signature matches.
+* The **header**, defines the protocol, IP addresses, ports and direction of the rule.
+* The **rule options**, define the specifics of the rule.
 
 ![](<../../../.gitbook/assets/image (642) (3).png>)
 
@@ -148,9 +148,9 @@ A rule/signature consists of the following:
 * alert - generate an alert
 * pass - stop further inspection of the packet
 * **drop** - drop packet and generate alert
-* **reject** - send RST/ICMP unreach error to the sender of the matching packet.
+* **reject** - send RST/ICMP unreachable error to the sender of the matching packet.
 * rejectsrc - same as just _reject_
-* rejectdst - send RST/ICMP error packet to receiver of the matching packet.
+* rejectdst - send RST/ICMP error packet to the receiver of the matching packet.
 * rejectboth - send RST/ICMP error packets to both sides of the conversation.
 
 #### **Protocols**
@@ -163,7 +163,7 @@ A rule/signature consists of the following:
 
 #### Source and Destination Addresses
 
-It supports IP ranges, negations and list of addresses:
+It supports IP ranges, negations and a list of addresses:
 
 | Example                        | Meaning                                  |
 | ------------------------------ | ---------------------------------------- |
@@ -189,7 +189,7 @@ It supports port ranges, negations and lists of ports
 
 #### Direction
 
-It's possible to indicate the direction of the communication the rule is applying to:
+It's possible to indicate the direction of the communication rule being applied:
 
 ```
 source -> destination
@@ -198,7 +198,7 @@ source <> destination  (both directions)
 
 #### Keywords
 
-There are **hundreds of options** that Suricata has to search for the **specific packet** you are looking for, here It will be mentioned someone that if found interesting, but check the [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)for more!
+There are **hundreds of options** available in Suricata to search for the **specific packet** you are looking for, here it will be mentioned if something interesting is found. Check the [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)for more!
 
 ```bash
 # Meta Keywords
@@ -225,7 +225,7 @@ content: "abc"; nocase; #Case insensitive
 reject tcp any any -> any any (msg: "php-rce"; content: "eval"; nocase; metadata: tag php-rce; sid:101; rev: 1;)
 
 # Replaces string
-## Content and replace string must have same length
+## Content and replace string must have the same length
 content:"abc"; replace: "def"
 alert tcp any any -> any any (msg: "flag replace"; content: "CTF{a6st"; replace: "CTF{u798"; nocase; sid:100; rev: 1;)
 ## The replace works in both input and output packets
