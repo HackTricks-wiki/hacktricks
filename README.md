@@ -1,7 +1,7 @@
 ---
 description: >-
   Welcome to the page where you will find each hacking trick/technique/whatever
-  I have learnt in CTFs, real life apps, and reading researches and news.
+  I have learnt from CTFs, real life apps, reading researches, and news.
 ---
 
 # HackTricks
@@ -20,7 +20,7 @@ description: >-
 
 ![](.gitbook/assets/p.png)
 
-**Welcome to the page where you will find each hacking trick/technique/whatever I have learnt in CTFs, real life apps, and reading researches and news.**
+**Welcome to the page where you will find each hacking trick/technique/whatever I have learnt from CTFs, real life apps, reading researches, and news.**
 
 Here you can find a little **introduction:**
 
@@ -28,7 +28,7 @@ Here you can find a little **introduction:**
 
 Here you will find the **typical flow** that **you should follow when pentesting** one or more **machines**.
 
-**Click in the title to start!**
+**Click on the title to start!**
 
 ## Support HackTricks
 
@@ -46,7 +46,7 @@ If you want to **share some tricks with the community** you can also submit **pu
 
 ![](<.gitbook/assets/image (638) (2) (1).png>)
 
-[**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentestings, Red teams and training.
+[**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentesting, Red teams and training.
 
 You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
@@ -56,7 +56,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ![](<.gitbook/assets/image (307).png>)
 
-Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results.** [**Security Hubs**](https://securityhubs.io/) \*\*\*\* bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results.** [**Security Hubs**](https://securityhubs.io/) \*\*\*\* bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
 
 {% embed url="https://securityhubs.io/" %}
 
@@ -90,7 +90,7 @@ Get Access Today:
 
 **Courses and Certifications reviews**
 
-You can find **my reviews of the certifications eMAPT and eWPTXv2** (and their **respective preparation courses**) in the following page:
+You can find **my reviews of the certifications eMAPT and eWPTXv2** (and their **respective preparation courses**) on the following page:
 
 {% content-ref url="courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md" %}
 [ine-courses-and-elearnsecurity-certifications-reviews.md](courses-and-certifications-reviews/ine-courses-and-elearnsecurity-certifications-reviews.md)
