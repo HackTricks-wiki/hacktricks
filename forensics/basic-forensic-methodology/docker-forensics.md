@@ -26,7 +26,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
 
-You can easily **find the modifications done to this container respecting to the image** with:
+You can easily **find the modifications done to this container with regards to the image** with:
 
 ```bash
 docker diff wordpress
@@ -46,7 +46,7 @@ In the previous command **C** means **Changed** and **A,** **Added**.\
 If you find that some interesting file like `/etc/shadow` was modified you can download it from the container to check for malicious activity with:
 
 ```bash
-docker cp wordpress:/etc/shadow .
+docker cp wordpress:/etc/shadow.
 ```
 
 You can also **compare it with the original one** running a new container and extracting the file from it:
@@ -114,7 +114,7 @@ Loaded image: flask:latest
 sudo dive flask:latest
 ```
 
-This allow you to **navigate through the different blobs of docker images** and check which files were modified/added. **Red** means added and **yellow** means modified. Use **tab** to move to the other view and **space** to to collapse/open folders.
+This allows you to **navigate through the different blobs of docker images** and check which files were modified/added. **Red** means added and **yellow** means modified. Use **tab** to move to the other view and **space** to collapse/open folders.
 
 With die you won't be able to access the content of the different stages of the image. To do so you will need to **decompress each layer and access it**.\
 You can decompress all the layers from an image from the directory where the image was decompressed executing:
