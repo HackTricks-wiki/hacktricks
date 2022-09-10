@@ -32,8 +32,8 @@ This tool **modifies** the timestamp information inside **`$STANDARD_INFORMATION
 
 ## Usnjrnl
 
-The **USN Journal** (Update Sequence Number Journal), or Change Journal, is a feature of the Windows NT file system (NTFS) which **maintains a record of changes made to the volume**.\
-It's possible to use the tool [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) to search for modifications of this record.
+The **USN Journal** (Update Sequence Number Journal), or Change Journal, is a feature of the Windows NT file system (NTFS) that **maintains a record of changes made to the volume**.\
+It's possible to use the tool [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) to search for modifications to this record.
 
 ![](<../../.gitbook/assets/image (449).png>)
 
@@ -55,12 +55,12 @@ Using the same tool it's possible to identify to **which time the timestamps wer
 
 * CTIME: File's creation time
 * ATIME: File's modification time
-* MTIME: File's MFT registry modifiction
+* MTIME: File's MFT registry modification
 * RTIME: File's access time
 
 ## `$STANDARD_INFORMATION` and `$FILE_NAME` comparison
 
-Another way to identify suspicions modified files would be to compare the time on both attributes looking for **mismatches**.
+Another way to identify suspicious modified files would be to compare the time on both attributes looking for **mismatches**.
 
 ## Nanoseconds
 
@@ -68,21 +68,21 @@ Another way to identify suspicions modified files would be to compare the time o
 
 ## SetMace - Anti-forensic Tool
 
-This tool can modify both attributes `$STARNDAR_INFORMATION` and `$FILE_NAME` . However, from Windows Vista it's necessary a live OS to modify this information.
+This tool can modify both attributes `$STARNDAR_INFORMATION` and `$FILE_NAME`. However, from Windows Vista, it's necessary for a live OS to modify this information.
 
 # Data Hiding
 
-NFTS uses a cluster and the minimum information size. That means that if a file occupies uses and cluster and a half, the **reminding half is never going to be used** until the files is deleted. Then, it's possible to **hide data in this slack space**.
+NFTS uses a cluster and the minimum information size. That means that if a file occupies uses and cluster and a half, the **reminding half is never going to be used** until the file is deleted. Then, it's possible to **hide data in this slack space**.
 
-There are tools like slacker that allows to hide data in this "hidden" space. However, an analysis of the `$logfile` and `$usnjrnl` can show that some data was added:
+There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the `$logfile` and `$usnjrnl` can show that some data was added:
 
 ![](<../../.gitbook/assets/image (452).png>)
 
-Then, it's possible to retrieve the slack space using tools like FTK Imager. Note that this can of tools can save the content obfuscated or even encrypted.
+Then, it's possible to retrieve the slack space using tools like FTK Imager. Note that this kind of tool can save the content obfuscated or even encrypted.
 
 # UsbKill
 
-This is a tool that will **turn off the computer is any change in the USB** ports is detected.\
+This is a tool that will **turn off the computer if any change in the USB** ports is detected.\
 A way to discover this would be to inspect the running processes and **review each python script running**.
 
 # Live Linux Distributions
@@ -110,7 +110,7 @@ Disabling UserAssist requires two steps:
 
 This will save information about the applications executed with the goal of improving the performance of the Windows system. However, this can also be useful for forensics practices.
 
-* Rexecute `regedit`
+* Execute `regedit`
 * Select the file path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
 * Right-click on both `EnablePrefetcher` and `EnableSuperfetch`
 * Select Modify on each of these to change the value from 1 (or 3) to 0
@@ -127,7 +127,7 @@ Whenever a folder is opened from an NTFS volume on a Windows NT server, the syst
 
 ## Delete USB History
 
-All the **USB Device Entries** are stored in Windows Registry Under **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device in your PC or Laptop. You can find this key here H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
+All the **USB Device Entries** are stored in Windows Registry Under the **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device into your PC or Laptop. You can find this key here H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
 You may also use the tool [**USBDeview**](https://www.nirsoft.net/utils/usb\_devices\_view.html) to be sure you have deleted them (and to delete them).
 
 Another file that saves information about the USBs is the file `setupapi.dev.log` inside `C:\Windows\INF`. This should also be deleted.
@@ -142,7 +142,7 @@ You can also delete them via GUI following the steps proposed in [https://www.ub
 To disable shadow copies:
 
 1. Go to the Windows start button and type "services" into the text search box; open the Services program.
-2. Locate "Volume Shadow Copy" from the list, highlight it, and then and the right-click > Properties.
+2. Locate "Volume Shadow Copy" from the list, highlight it,  and then right-click > Properties.
 3. From the "Startup type" drop-down menu, select Disabled, and then click Apply and OK.
 
 ![](<../../.gitbook/assets/image (453).png>)
