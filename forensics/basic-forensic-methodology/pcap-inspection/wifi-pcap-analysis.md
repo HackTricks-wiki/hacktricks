@@ -37,7 +37,7 @@ aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 
 If you suspect that **data is being leaked inside beacons of a Wifi network** you can check the beacons of the network using a filter like the following one: `wlan contains <NAMEofNETWORK>`, or `wlan.ssid == "NAMEofNETWORK"` search inside the filtered packets for suspicious strings.
 
-# Find unknown MAC addresses in a Wiffi network
+# Find Unknown MAC Addresses in A Wifi Network
 
 The following link will be useful to find the **machines sending data inside a Wifi Network**:
 
