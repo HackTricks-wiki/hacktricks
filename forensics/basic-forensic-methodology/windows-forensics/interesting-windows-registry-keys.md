@@ -124,12 +124,12 @@ Desktop Access:
 * `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU`
 * `NTUSER.DAT\Software\Microsoft\Windows\Shell\Bags`
 
-To analyze the Shellbags you can use [**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md) and you will be able to find the\*\* MAC time of the folder **and also the** creation date and modified date of the shellbag **which are related with the** first time the folder was accessed and the last time\*\*.
+To analyze the Shellbags you can use [**Shellbag Explorer**](https://ericzimmerman.github.io/#!index.md) and you will be able to find the\*\* MAC time of the folder **and also the** creation date and modified date of the shellbag which are related to the** first time and the last time** the folder was accessed.
 
 Note 2 things from the following image:
 
 1. We know the **name of the folders of the USB** that was inserted in **E:**
-2. We know when the **shellbag was created and modified** and when the folder was created an accessed
+2. We know when the **shellbag was created and modified** and when the folder was created and accessed
 
 ![](<../../../.gitbook/assets/image (475).png>)
 
@@ -149,7 +149,7 @@ Within this registry it's possible to find:
 
 ![](<../../../.gitbook/assets/image (479) (1) (1).png>)
 
-Moreover, checking the registry `HKLM\SYSTEM\ControlSet001\Enum\USB` and comparing the values of the sub-keys it's possible to find the VID value
+Moreover, by checking the registry `HKLM\SYSTEM\ControlSet001\Enum\USB` and comparing the values of the sub-keys it's possible to find the VID value.
 
 ![](<../../../.gitbook/assets/image (478).png>)
 
@@ -159,13 +159,13 @@ With the previous information the registry `SOFTWARE\Microsoft\Windows Portable 
 
 ### User that used the device
 
-Having the **{GUID}** of the device it's now possible to **check all the NTUDER.DAT hives of all the users** searching for the GUID until you find it in one of them (`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\Mountpoints2`)
+Having the **{GUID}** of the device it's now possible to **check all the NTUDER.DAT hives of all the users**, searching for the GUID until you find it in one of them (`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\Mountpoints2`).
 
 ![](<../../../.gitbook/assets/image (481).png>)
 
 ### Last mounted
 
-Checking the registry `System\MoutedDevices` it's possible to find out **which device was the last one mounted**. In the following image check how the last device mounted in `E:` is the Thoshiba one (using the tool Registry Explorer).
+Checking the registry `System\MoutedDevices` it's possible to find out **which device was the last one mounted**. In the following image check how the last device mounted in `E:` is the Toshiba one (using the tool Registry Explorer).
 
 ![](<../../../.gitbook/assets/image (483) (1).png>)
 
