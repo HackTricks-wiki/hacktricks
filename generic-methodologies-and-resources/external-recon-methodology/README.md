@@ -559,6 +559,41 @@ With the **domains,** **subdomains**, **** and **emails** you can start looking 
 
 If you find **valid leaked** credentials, this is a very easy win.
 
+## Secrets Leaks
+
+Credential leaks are related to hacks of companies where **sensitive information was leaked and sold**. However, companies might be affected for **other leaks** whose info isn't in those databases:
+
+### Github Leaks
+
+Credentials and APIs might be leaked in the **public repositories** of the **company** or of the **users** working by that github company.\
+You can use the **tool** [**Leakos**](https://github.com/carlospolop/Leakos) to **download** all the **public repos** of an **organization** and of its **developers** and run [**gitleaks**](https://github.com/zricethezav/gitleaks) over them automatically.
+
+**Leakos** can also be used to run **gitleaks** agains all the **text** provided **URLs passed** to it as sometimes **web pages also contains secrets**.
+
+#### Github Dorks
+
+Check also this **page** for potential **github dorks** you could also search for in the organization you are attacking:
+
+{% content-ref url="github-dorks-and-leaks.md" %}
+[github-dorks-and-leaks.md](github-dorks-and-leaks.md)
+{% endcontent-ref %}
+
+### Pastes Leaks
+
+Sometimes attackers or just workers will **publish company content in a paste site**. This might or might not contain **sensitive information**, but it's very interesting to search for it.\
+You can use the tool [**Pastos**](https://github.com/carlospolop/Pastos) **** to search in more that 80 paste sites at the same time.
+
+### Google Dorks
+
+Old but gold google dorks are always useful to find **exposed information that shouldn't be there**. The only problem is that the [**google-hacking-database**](https://www.exploit-db.com/google-hacking-database) contains several **thousands** of possible queries that you cannot run manually. So, you can get your favourite 10 ones or you could use a **tool such as** [**Gorks**](https://github.com/carlospolop/Gorks) **to run them all**.
+
+_Note that the tools that expect to run all the database using the regular Google browser will never end as google will block you very very soon._
+
+__\
+__**Looking for vulnerabilities**
+
+If you find **valid leaked** credentials or API tokens, this is a very easy win.
+
 ## Recapitulation 1
 
 > Congratulations! At this point you have already perform **all the basic enumeration**. Yes, it's basic because a lot more enumeration can be done (will see more tricks later).
@@ -577,8 +612,8 @@ Then, it's time for the real Bug Bounty hunt! In this methodology I'm **not goin
 
 ### Github leaked secrets
 
-{% content-ref url="github-leaked-secrets.md" %}
-[github-leaked-secrets.md](github-leaked-secrets.md)
+{% content-ref url="github-dorks-and-leaks.md" %}
+[github-dorks-and-leaks.md](github-dorks-and-leaks.md)
 {% endcontent-ref %}
 
 You can also search for leaked secrets in all open repository platforms using: [https://searchcode.com/?q=auth\_key](https://searchcode.com/?q=auth\_key)
