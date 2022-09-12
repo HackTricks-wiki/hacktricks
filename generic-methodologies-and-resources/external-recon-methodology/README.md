@@ -515,7 +515,7 @@ To perform the proposed idea you can use [**EyeWitness**](https://github.com/For
 
 Moreover, you could then use [**eyeballer**](https://github.com/BishopFox/eyeballer) **** to run over all the **screenshots** to tell you **what's likely to contain vulnerabilities**, and what isn't.
 
-## Cloud Assets
+## Public Cloud Assets
 
 In order to find potential cloud assets belonging to a company you should **start with a list of keywords that identify that company**. For example, a crypto for a crypto company you might use words such as: `"crypto", "wallet", "dao", "<domain_name>", <"subdomain_names">`.
 
@@ -531,10 +531,37 @@ With the resulting wordlists you could use tools such as [**cloud\_enum**](https
 
 Remember that when looking for Cloud Assets you should l**ook for more than just buckets in AWS**.
 
+### **Looking for vulnerabilities**
+
+If you find things such as **open buckets or cloud functions exposed** you should **access them** and try to see what they offer you and if you can abuse them.
+
+## Emails
+
+With the **domains** and **subdomains** inside the scope you basically have all what you **need to start searching for emails**. These are the **APIs** and **tools** that have worked the best for me to find emails of a company:
+
+* [**theHarvester**](https://github.com/laramies/theHarvester) **** - with APIs
+* API of [**https://hunter.io/**](https://hunter.io/) **** (free version)
+* API of [**https://app.snov.io/**](https://app.snov.io/) (free version)
+* API of [**https://minelead.io/**](https://minelead.io/) (free version)
+
+### **Looking for vulnerabilities**
+
+Emails will come handy later to **brute-force web logins and auth services** (such as SSH). Also, they are needed for **phishings**. Moreover, these APIs will give you even more **info about the person** behind the email, which is useful for the phishing campaign.
+
+## Credential Leaks
+
+With the **domains,** **subdomains**, **** and **emails** you can start looking for credentials leaked in the past belonging to those emails:
+
+* [https://leak-lookup.com](https://leak-lookup.com/account/login)
+* [https://www.dehashed.com/](https://www.dehashed.com/)
+
+### **Looking for vulnerabilities**
+
+If you find **valid leaked** credentials, this is a very easy win.
+
 ## Recapitulation 1
 
-> Congratulations! At this point you have already perform all the basic enumeration. Yes, it's basic because a lot more enumeration can be done (will see more tricks later).\
-> Do you know that the BBs experts recommends to spend only 10-15mins in this phase? But don't worry, one you have practice you will do this even faster than that.
+> Congratulations! At this point you have already perform **all the basic enumeration**. Yes, it's basic because a lot more enumeration can be done (will see more tricks later).
 
 So you have already:
 
@@ -542,7 +569,9 @@ So you have already:
 2. Found all the **assets** belonging to the companies (and perform some vuln scan if in scope)
 3. Found all the **domains** belonging to the companies
 4. Found all the **subdomains** of the domains (any subdomain takeover?)
-5. Found all the **web servers** and took a **screenshot** of them (anything weird worth a deeper look?)
+5. Found all the **IPs** (from and **not from CDNs**) inside the scope.
+6. Found all the **web servers** and took a **screenshot** of them (anything weird worth a deeper look?)
+7. Found all the **potential public cloud assets** belonging to the company.
 
 Then, it's time for the real Bug Bounty hunt! In this methodology I'm **not going to talk about how to scan hosts** (you can see a [guide for that here](../pentesting-network/)), how to use tools like Nessus or OpenVas to perform a **vuln scan** or how to **look for vulnerabilities** in the services open (this book already contains tons of information about possible vulnerabilities on a lot of common services). **But, don't forget that if the scope allows it, you should give it a try.**
 
