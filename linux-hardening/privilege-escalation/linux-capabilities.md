@@ -953,7 +953,7 @@ int main(int argc,char* argv[] )
 I exploit needs to find a pointer to something mounted on the host. The original exploit used the file /.dockerinit and this modified version uses /etc/hostname. If the exploit isn't working maybe you need to set a different file. To find a file that is mounted in the host just execute mount command:
 {% endhint %}
 
-![](<../../.gitbook/assets/image (407) (2).png>)
+![](<../../.gitbook/assets/image (407) (1).png>)
 
 **The code of this technique was copied from the laboratory of "Abusing DAC\_READ\_SEARCH Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
 

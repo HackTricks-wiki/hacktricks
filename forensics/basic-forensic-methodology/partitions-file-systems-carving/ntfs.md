@@ -43,7 +43,7 @@ When you format an NTFS volume, the format program allocates the first 16 sector
 
 ### **Master File Table (MFT)**
 
-The NTFS file system contains a file called the  Master File Table (MFT). There is at least **one entry in the MFT for every file on an NTFS file system** volume, including the MFT itself. All information about a file, including its **size, time and date stamps, permissions, and data content**, is stored either in MFT entries or in space outside the MFT that is described by MFT entries.
+The NTFS file system contains a file called the Master File Table (MFT). There is at least **one entry in the MFT for every file on an NTFS file system** volume, including the MFT itself. All information about a file, including its **size, time and date stamps, permissions, and data content**, is stored either in MFT entries or in space outside the MFT that is described by MFT entries.
 
 As **files are added** to an NTFS file system volume, more entries are added to the MFT and the **MFT increases in size**. When **files** are **deleted** from an NTFS file system volume, their **MFT entries are marked as free** and may be reused. However, disk space that has been allocated for these entries is not reallocated, and the size of the MFT does not decrease.
 
@@ -72,7 +72,7 @@ NTFS reserves the first 16 records of the table for special information:
 |                       |           | 12-15      | Reserved for future use.                                                                                                                                                                                                      |
 | Quota management file | $Quota    | 24         | Contains user assigned quota limits on the volume space.                                                                                                                                                                      |
 | Object Id file        | $ObjId    | 25         | Contains file object IDs.                                                                                                                                                                                                     |
-| Reparse point file    | $Reparse  | 26         | This file contains information about files and folders on the volume including reparse point data.                                                                                                                              |
+| Reparse point file    | $Reparse  | 26         | This file contains information about files and folders on the volume including reparse point data.                                                                                                                            |
 
 ### Each entry of the MFT looks like the following:
 
@@ -105,7 +105,7 @@ Each attribute indicates some entry information identified by the type:
 | Type Identifier | Name                     | Description                                                                                                       |
 | --------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
 | 16              | $STANDARD\_INFORMATION   | General information, such as flags; the last accessed, written, and created times; and the owner and security ID. |
-| 32              | $ATTRIBUTE\_LIST         | List where other attributes for a file can be found.                                                                |
+| 32              | $ATTRIBUTE\_LIST         | List where other attributes for a file can be found.                                                              |
 | 48              | $FILE\_NAME              | File name, in Unicode, and the last accessed, written, and created times.                                         |
 | 64              | $VOLUME\_VERSION         | Volume information. Exists only in version 1.2 (Windows NT).                                                      |
 | 64              | $OBJECT\_ID              | A 16-byte unique identifier for the file or directory. Exists only in versions 3.0+ and after (Windows 2000+).    |
@@ -148,7 +148,7 @@ Some interesting attributes:
 * [$Data](https://flatcap.org/linux-ntfs/ntfs/attributes/data.html) (among others):
   * Contains the file's data or the indication of the sectors where the data resides. In the following example, the attribute data is not resident so the attribute gives information about the sectors where the data resides.
 
-![](<../../../.gitbook/assets/image (507) (1).png>)
+![](<../../../.gitbook/assets/image (507) (1) (1).png>)
 
 ![](<../../../.gitbook/assets/image (509).png>)
 

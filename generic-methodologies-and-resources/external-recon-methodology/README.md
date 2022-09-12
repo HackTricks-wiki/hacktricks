@@ -4,15 +4,11 @@
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
@@ -156,7 +152,7 @@ Search inside the web pages **strings that could be shared across different webs
 
 ### **CRT Time**
 
-It's common to have a cron job such as&#x20;
+It's common to have a cron job such as
 
 ```bash
 # /etc/crontab
@@ -252,13 +248,13 @@ assetfinder --subs-only <domain>
 sudomy -d tesla.com
 ```
 
-* ****[**vita**](https://github.com/junnlikestea/vita)****
+* [**vita**](https://github.com/junnlikestea/vita)
 
 ```
 vita -d tesla.com
 ```
 
-* ****[**theHarvester**](https://github.com/laramies/theHarvester)****
+* [**theHarvester**](https://github.com/laramies/theHarvester)
 
 ```bash
 theHarvester -d tesla.com -b "anubis, baidu, bing, binaryedge, bingapi, bufferoverun, censys, certspotter, crtsh, dnsdumpster, duckduckgo, fullhunt, github-code, google, hackertarget, hunter, intelx, linkedin, linkedin_links, n45ht, omnisint, otx, pentesttools, projectdiscovery, qwant, rapiddns, rocketreach, securityTrails, spyse, sublist3r, threatcrowd, threatminer, trello, twitter, urlscan, virustotal, yahoo, zoomeye"
@@ -274,6 +270,12 @@ There are **other interesting tools/APIs** that even if not directly specialised
 curl https://sonar.omnisint.io/subdomains/tesla.com | jq -r ".[]"
 ```
 
+* ****[**JLDC free API**](https://jldc.me/anubis/subdomains/google.com)****
+
+```bash
+curl https://jldc.me/anubis/subdomains/tesla.com | jq -r ".[]"
+```
+
 * [**RapidDNS**](https://rapiddns.io) free API
 
 ```bash
@@ -286,7 +288,7 @@ rapiddns(){
 rapiddns tesla.com
 ```
 
-* ****[**https://crt.sh/**](https://crt.sh)****
+* [**https://crt.sh/**](https://crt.sh)
 
 ```bash
 # Get Domains from crt free API
@@ -315,7 +317,7 @@ python3 SubDomainizer.py -u https://tesla.com | grep tesla.com
 python subscraper.py -u tesla.com | grep tesla.com | cut -d " " -f
 ```
 
-* [**Shodan**](https://www.shodan.io/)****
+* [**Shodan**](https://www.shodan.io/)
 
 ```bash
 # Get info about the domain
@@ -324,7 +326,7 @@ shodan domain <domain>
 shodan search "http.html:help.domain.com"
 ```
 
-* ****[**Censys subdomain finder**](https://github.com/christophetd/censys-subdomain-finder)****
+* [**Censys subdomain finder**](https://github.com/christophetd/censys-subdomain-finder)
 
 ```
 export CENSYS_API_ID=...
@@ -332,7 +334,8 @@ export CENSYS_API_SECRET=...
 python3 censys-subdomain-finder.py tesla.com
 ```
 
-#### For bug hunters: [**chaos.projectdiscovery.io**](https://chaos.projectdiscovery.io/#/)
+* [**securitytrails.com**](https://securitytrails.com/) has a free API to search for subdomains and IP history
+* [**chaos.projectdiscovery.io**](https://chaos.projectdiscovery.io/#/)
 
 This project offers for **free all the subdomains related to bug-bounty programs**. You can access this data also using [chaospy](https://github.com/dr-0x0x/chaospy) or even access the scope used by this project [https://github.com/projectdiscovery/chaos-public-program-list](https://github.com/projectdiscovery/chaos-public-program-list)
 
@@ -360,25 +363,25 @@ sed 's/$/.domain.com/' subdomains.txt > bf-subdomains.txt
 grep -E "tesla.com. [0-9]+ IN A .+" /tmp/results.txt
 ```
 
-* &#x20;[**gobuster**](https://github.com/OJ/gobuster): This one I think just uses 1 resolver
+* [**gobuster**](https://github.com/OJ/gobuster): This one I think just uses 1 resolver
 
 ```
 gobuster dns -d mysite.com -t 50 -w subdomains.txt
 ```
 
-* [**shuffledns**](https://github.com/projectdiscovery/shuffledns) **** is a wrapper around `massdns`, written in go, that allows you to enumerate valid subdomains using active bruteforce, as well as resolve subdomains with wildcard handling and easy input-output support.
+* [**shuffledns**](https://github.com/projectdiscovery/shuffledns) is a wrapper around `massdns`, written in go, that allows you to enumerate valid subdomains using active bruteforce, as well as resolve subdomains with wildcard handling and easy input-output support.
 
 ```
 shuffledns -d example.com -list example-subdomains.txt -r resolvers.txt
 ```
 
-* ****[**puredns**](https://github.com/d3mondev/puredns): It also uses `massdns`.
+* [**puredns**](https://github.com/d3mondev/puredns): It also uses `massdns`.
 
 ```
 puredns bruteforce all.txt domain.com
 ```
 
-* [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) **** uses asyncio to brute force domain names asynchronously.
+* [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) uses asyncio to brute force domain names asynchronously.
 
 ```
 aiodnsbrute -r resolvers -w wordlist.txt -vv -t 1024 domain.com
@@ -394,7 +397,7 @@ After having found subdomains using open sources and brute-forcing, you could ge
 cat subdomains.txt | dnsgen -
 ```
 
-* ****[**goaltdns**](https://github.com/subfinder/goaltdns): Given the domains and subdomains generate permutations.
+* [**goaltdns**](https://github.com/subfinder/goaltdns): Given the domains and subdomains generate permutations.
   * You can get goaltdns permutations **wordlist** in [**here**](https://github.com/subfinder/goaltdns/blob/master/words.txt).
 
 ```bash
@@ -414,17 +417,21 @@ gotator -sub subdomains.txt -silent [-perm /tmp/words-permutations.txt]
 altdns -i subdomains.txt -w /tmp/words-permutations.txt -o /tmp/asd3
 ```
 
-* ****[**dmut**](https://github.com/bp0lr/dmut): Another tool to perform permutations, mutations and alteration of subdomains. This tool will brute force the result (it doesn't support dns wild card).
+* [**dmut**](https://github.com/bp0lr/dmut): Another tool to perform permutations, mutations and alteration of subdomains. This tool will brute force the result (it doesn't support dns wild card).
   * You can get dmut permutations wordlist in [**here**](https://raw.githubusercontent.com/bp0lr/dmut/main/words.txt).
 
 ```bash
-cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
+cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
     --dns-errorLimit 10 --use-pb --verbose -s /tmp/resolvers-trusted.txt
 ```
 
 ### **VHosts / Virtual Hosts**
 
-You can find some VHosts in IPs using [HostHunter](https://github.com/SpiderLabs/HostHunter) or other APIs.
+If you found an IP address containing **one or several web pages** belonging to subdomains, you could try to **find other subdomains with webs in that IP** by looking in **OSINT sources** for domains in an IP or by **brute-forcing VHost domain names in that IP**.
+
+#### OSINT
+
+You can find some **VHosts in IPs using** [**HostHunter**](https://github.com/SpiderLabs/HostHunter) **or other APIs**.
 
 **Brute Force**
 
@@ -471,6 +478,19 @@ If the **subdomain** is pointing to some **S3 bucket**, [**check the permissions
 If you find any **subdomain with an IP different** from the ones you already found in the assets discovery, you should perform a **basic vulnerability scan** (using Nessus or OpenVAS) and some [**port scan**](../pentesting-network/#discovering-hosts-from-the-outside) with **nmap/masscan/shodan**. Depending on which services are running you can find in **this book some tricks to "attack" them**.\
 _Note that sometimes the subdomain is hosted inside an IP that is not controlled by the client, so it's not in the scope, be careful._
 
+## IPs
+
+In the initial steps you might have **found some IP ranges, domains and subdomains**.\
+It’s time to **recollect all the IPs from those ranges** and for the **domains/subdomains (DNS queries).**
+
+Using services from the following **free apis** you can also find **previous IPs used by domains and subdomains**. These IPs might still be owned by the client (and might allow you to find [**CloudFlare bypasses**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
+
+* ****[**https://securitytrails.com/**](https://securitytrails.com/)****
+
+### **Looking for vulnerabilities**
+
+**Port scan all the IPs that doesn’t belong to CDNs** (as you highly probably won’t find anything interested in there). In the running services discovered you might be **able to find vulnerabilities**.
+
 ## Web servers hunting
 
 > We have found all the companies and their assets and we know IP ranges, domains and subdomains inside the scope. It's time to search for web servers.
@@ -480,7 +500,7 @@ In the previous steps you have probably already performed some **recon of the IP
 Please, note that this will be **oriented for web apps discovery**, so you should **perform the vulnerability** and **port scanning** also (**if allowed** by the scope).
 
 A **fast method** to discover **ports open** related to **web** servers using [**masscan** can be found here](../pentesting-network/#http-port-discovery).\
-Another friendly tool to look for web servers is [**httprobe**](https://github.com/tomnomnom/httprobe) **and** [**fprobe**](https://github.com/theblackturtle/fprobe). You just pass a list of domains and it will try to connect to port 80 (http) and 443 (https). Additionaly, you can indicate to try other ports:
+Another friendly tool to look for web servers is [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe) **** and **** [**httpx**](https://github.com/projectdiscovery/httpx). You just pass a list of domains and it will try to connect to port 80 (http) and 443 (https). Additionally, you can indicate to try other ports:
 
 ```bash
 cat /tmp/domains.txt | httprobe #Test all domains inside the file for port 80 and 443
@@ -555,14 +575,10 @@ There are several tools out there that will perform part of the proposed actions
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
