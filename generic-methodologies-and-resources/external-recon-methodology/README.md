@@ -387,7 +387,7 @@ puredns bruteforce all.txt domain.com
 aiodnsbrute -r resolvers -w wordlist.txt -vv -t 1024 domain.com
 ```
 
-### Second DNS bruteforce round
+### Second DNS Brute-Force Round
 
 After having found subdomains using open sources and brute-forcing, you could generate alterations of the subdomains found to try to find even more. Several tools are useful for this purpose:
 
@@ -511,11 +511,25 @@ cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 a
 
 Now that you have discovered **all the web servers** present in the scope (among the **IPs** of the company and all the **domains** and **subdomains**) you probably **don't know where to start**. So, let's make it simple and start just taking screenshots of all of them. Just by **taking a look** at the **main page** you can find **weird** endpoints that are more **prone** to be **vulnerable**.
 
-To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), \[shutter]\([**https://shutter-project.org/downloads/**](https://shutter-project.org/downloads/)) or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
+To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/) or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
-### Cloud Assets
+Moreover, you could then use [**eyeballer**](https://github.com/BishopFox/eyeballer) **** to run over all the **screenshots** to tell you **what's likely to contain vulnerabilities**, and what isn't.
 
-Just with some **specific keywords** identifying the company it's possible to enumerate possible cloud assets belonging to them with tools like [**cloud\_enum**](https://github.com/initstring/cloud\_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper) **or** [**cloudlist**](https://github.com/projectdiscovery/cloudlist)**.**
+## Cloud Assets
+
+In order to find potential cloud assets belonging to a company you should **start with a list of keywords that identify that company**. For example, a crypto for a crypto company you might use words such as: `"crypto", "wallet", "dao", "<domain_name>", <"subdomain_names">`.
+
+You will also need wordlists of **common words used in buckets**:
+
+* [https://raw.githubusercontent.com/cujanovic/goaltdns/master/words.txt](https://raw.githubusercontent.com/cujanovic/goaltdns/master/words.txt)
+* [https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt](https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt)
+* [https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt](https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt)
+
+Then, with those words you should generate **permutations** (check the [**Second Round DNS Brute-Force**](./#second-dns-bruteforce-round) for more info).&#x20;
+
+With the resulting wordlists you could use tools such as [**cloud\_enum**](https://github.com/initstring/cloud\_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**,** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **or** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)**.**
+
+Remember that when looking for Cloud Assets you should l**ook for more than just buckets in AWS**.
 
 ## Recapitulation 1
 
