@@ -491,6 +491,8 @@ Using services from the following **free apis** you can also find **previous IPs
 
 **Port scan all the IPs that doesn’t belong to CDNs** (as you highly probably won’t find anything interested in there). In the running services discovered you might be **able to find vulnerabilities**.
 
+**Find a** [**guide**](../pentesting-network/) **about how to scan hosts.**
+
 ## Web servers hunting
 
 > We have found all the companies and their assets and we know IP ranges, domains and subdomains inside the scope. It's time to search for web servers.
@@ -574,8 +576,8 @@ You can use the **tool** [**Leakos**](https://github.com/carlospolop/Leakos) to 
 
 Check also this **page** for potential **github dorks** you could also search for in the organization you are attacking:
 
-{% content-ref url="github-dorks-and-leaks.md" %}
-[github-dorks-and-leaks.md](github-dorks-and-leaks.md)
+{% content-ref url="github-leaked-secrets.md" %}
+[github-leaked-secrets.md](github-leaked-secrets.md)
 {% endcontent-ref %}
 
 ### Pastes Leaks
@@ -589,12 +591,17 @@ Old but gold google dorks are always useful to find **exposed information that s
 
 _Note that the tools that expect to run all the database using the regular Google browser will never end as google will block you very very soon._
 
-__\
-__**Looking for vulnerabilities**
+### **Looking for vulnerabilities**
 
 If you find **valid leaked** credentials or API tokens, this is a very easy win.
 
-## Recapitulation 1
+## [**Pentesting Web Methodology**](../../network-services-pentesting/pentesting-web/)
+
+The **majority of the vulnerabilities** found by bug hunters resides inside **web applications**, so at this point I would like to talk about a **web application testing methodology**, and you can [**find this information here**](../../network-services-pentesting/pentesting-web/).
+
+I also want to do a special mention to the section [**Web Automated Scanners open source tools**](../../network-services-pentesting/pentesting-web/#automatic-scanners), as, if you shouldn't expect them to find you very sensitive vulnerabilities, they come handy to implement them on **workflows to have some initial web information.**
+
+## Recapitulation
 
 > Congratulations! At this point you have already perform **all the basic enumeration**. Yes, it's basic because a lot more enumeration can be done (will see more tricks later).
 
@@ -607,31 +614,10 @@ So you have already:
 5. Found all the **IPs** (from and **not from CDNs**) inside the scope.
 6. Found all the **web servers** and took a **screenshot** of them (anything weird worth a deeper look?)
 7. Found all the **potential public cloud assets** belonging to the company.
+8. **Emails**, **credentials leaks**, and **secret leaks** that could give you a **big win very easily**.
+9. **Pentesting all the webs you found**
 
-Then, it's time for the real Bug Bounty hunt! In this methodology I'm **not going to talk about how to scan hosts** (you can see a [guide for that here](../pentesting-network/)), how to use tools like Nessus or OpenVas to perform a **vuln scan** or how to **look for vulnerabilities** in the services open (this book already contains tons of information about possible vulnerabilities on a lot of common services). **But, don't forget that if the scope allows it, you should give it a try.**
-
-### Github leaked secrets
-
-{% content-ref url="github-dorks-and-leaks.md" %}
-[github-dorks-and-leaks.md](github-dorks-and-leaks.md)
-{% endcontent-ref %}
-
-You can also search for leaked secrets in all open repository platforms using: [https://searchcode.com/?q=auth\_key](https://searchcode.com/?q=auth\_key)
-
-### [**Pentesting Web Methodology**](../../network-services-pentesting/pentesting-web/)
-
-Anyway, the **majority of the vulnerabilities** found by bug hunters resides inside **web applications**, so at this point I would like to talk about a **web application testing methodology**, and you can [**find this information here**](../../network-services-pentesting/pentesting-web/).
-
-## Recapitulation 2
-
-> Congratulations! The testing has finished! I hope you have find some vulnerabilities.
-
-At this point you should have already read the Pentesting Web Methodology and applied it to the scope.\
-As you can see there is a lot of different vulnerabilities to search for.
-
-**If you have find any vulnerability thanks to this book, please reference the book in your write-up.**
-
-### **Automatic Tools**
+## **Full Recon Automatic Tools**
 
 There are several tools out there that will perform part of the proposed actions against a given scope.
 
@@ -643,6 +629,8 @@ There are several tools out there that will perform part of the proposed actions
 ## **References**
 
 * **All free courses of** [**@Jhaddix**](https://twitter.com/Jhaddix) **(like** [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)**)**
+
+****
 
 <img src="../../.gitbook/assets/i3.png" alt="" data-size="original">\
 **Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!

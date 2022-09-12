@@ -10,7 +10,7 @@
 
 * [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
 * [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
-  * [Github Dorks & Leaks](generic-methodologies-and-resources/external-recon-methodology/github-dorks-and-leaks.md)
+  * [Github Dorks & Leaks](generic-methodologies-and-resources/external-recon-methodology/github-leaked-secrets.md)
 * [Pentesting Network](generic-methodologies-and-resources/pentesting-network/README.md)
   * [Spoofing LLMNR, NBT-NS, mDNS/DNS and WPAD and Relay Attacks](generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
   * [Spoofing SSDP and UPnP Devices with EvilSSDP](generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)
