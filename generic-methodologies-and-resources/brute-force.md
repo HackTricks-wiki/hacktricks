@@ -28,7 +28,7 @@ Get Access Today:
 
 ## Default Credentials
 
-**Search in google** for default credentials of the technology that is being used, or **try this links**:
+**Search in google** for default credentials of the technology that is being used, or **try these links**:
 
 * [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 * [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -156,7 +156,7 @@ medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
-# Use https-get mode for httpS
+# Use https-get mode for https
 medusa -h <IP> -u <username> -P  <passwords.txt> -M  http -m DIR:/path/to/auth -T 10
 ```
 
@@ -164,7 +164,7 @@ medusa -h <IP> -u <username> -P  <passwords.txt> -M  http -m DIR:/path/to/auth -
 
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
-# Use https-post-form mode for httpS
+# Use https-post-form mode for https
 ```
 
 For http**s** you have to change from "http-post-form" to "**https-post-form"**
@@ -272,7 +272,7 @@ msf> set RHOSTS <IP>
 msf> set RPORTS 1521
 msf> set SID <SID>
 
-#nmap fails sometimes for some reson executing this script
+#for some reason nmap fails sometimes when executing this script
 nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 ```
 
@@ -398,8 +398,8 @@ nmap  -vvv -sCV --script socks-brute --script-args userdb=users.txt,passdb=/usr/
 crackmapexec mssql <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 hydra -L /root/Desktop/user.txt –P /root/Desktop/pass.txt <IP> mssql
 medusa -h <IP> –U /root/Desktop/user.txt –P /root/Desktop/pass.txt –M mssql
-nmap -p 1433 --script ms-sql-brute --script-args mssql.domain=DOMAIN,userdb=customuser.txt,passdb=custompass.txt,ms-sql-brute.brute-windows-accounts <host> #Use domain if needed. Be carefull with the number of password in the list, this could block accounts
-msf> use auxiliary/scanner/mssql/mssql_login #Be carefull, you can block accounts. If you have a domain set it and use USE_WINDOWS_ATHENT
+nmap -p 1433 --script ms-sql-brute --script-args mssql.domain=DOMAIN,userdb=customuser.txt,passdb=custompass.txt,ms-sql-brute.brute-windows-accounts <host> #Use domain if needed. Be careful with the number of passwords in the list, this could block accounts
+msf> use auxiliary/scanner/mssql/mssql_login #Be careful, you can block accounts. If you have a domain set it and use USE_WINDOWS_ATHENT
 ```
 
 ### SSH
@@ -465,7 +465,7 @@ Get Access Today:
 * [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 * [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Check this out before trying to bruteforce a Hash.
+Check this out before trying to brute force a Hash.
 
 ### ZIP
 
@@ -495,7 +495,7 @@ Download [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)f
 zip plaintext.zip plaintext.file
 
 ./bkcrack -C <encrypted.zip> -c <plaintext.file> -P <plaintext.zip> -p <plaintext.file>
-# Now wait, this should print akey such as 7b549874 ebc25ec5 7e465e18
+# Now wait, this should print a key such as 7b549874 ebc25ec5 7e465e18
 # With that key you can create a new zip file with the content of encrypted.zip
 # but with a different pass that you set (so you can decrypt it)
 ./bkcrack -C <encrypted.zip> -U unlocked.zip -k 7b549874 ebc25ec5 7e465e18 new_pwd 
@@ -520,7 +520,7 @@ apt-get install libcompress-raw-lzma-perl
 ```bash
 apt-get install pdfcrack
 pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
-#pdf2john didnt worked well, john didnt know which hash type was
+#pdf2john didn't work well, john didn't know which hash type was
 # To permanently decrypt the pdf
 sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
@@ -557,8 +557,8 @@ hashcat -a 0 -m 1000 --username file_NTLM.hashes /usr/share/wordlists/rockyou.tx
 ```bash
 sudo apt-get install -y kpcli #Install keepass tools like keepass2john
 keepass2john file.kdbx > hash #The keepass is only using password
-keepass2john -k <file-password> file.kdbx > hash # The keepas is also using a file as a needed credential
-#The keepass can use password and/or a file as credentials, if it is using both you need to provide them to keepass2john
+keepass2john -k <file-password> file.kdbx > hash # The keepass is also using a file as a needed credential
+#The keepass can use a password and/or a file as credentials, if it is using both you need to provide them to keepass2john
 john --wordlist=/usr/share/wordlists/rockyou.txt hash
 ```
 
@@ -607,7 +607,7 @@ dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c9
 ### PGP/GPG Private key
 
 ```bash
-gpg2john private_pgp.key #This will generate the hash, save it in a file
+gpg2john private_pgp.key #This will generate the hash and save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 ```
 
@@ -617,7 +617,7 @@ Use [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](h
 
 ### Open Office Pwd Protected Column
 
-If you have xlsx file with a column protected by password you can unprotect it:
+If you have an xlsx file with a column protected by a password you can unprotect it:
 
 * **Upload it to google drive** and the password will be automatically removed
 * To **remove** it **manually**:
@@ -670,7 +670,7 @@ hash-identifier
 
 ### **Wordlist Generation Tools**
 
-* [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Advanced keyboard-walk generator with configureable basechars, keymap and routes.
+* [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Advanced keyboard-walk generator with configurable base chars, keymap and routes.
 
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
@@ -699,15 +699,15 @@ hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 
 * **Wordlist combinator** attack
 
-It's possible to **combine 2 wordlist into 1** with hashcat.\
-If the list 1 contained the word **"hello"** and the second contained 2 lines with the words **"world"** and **"earth"**. The words `helloworld` and `helloearth` will be generated.
+It's possible to **combine 2 wordlists into 1** with hashcat.\
+If list 1 contained the word **"hello"** and the second contained 2 lines with the words **"world"** and **"earth"**. The words `helloworld` and `helloearth` will be generated.
 
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 
 # Same attack as before but adding chars in the newly generated words
-# In the rpevious example this will generate:
+# In the previous example this will generate:
 ## hello-world!
 ## hello-earth!
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
@@ -731,10 +731,10 @@ s | !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
 a | ?l?u?d?s
 b | 0x00 - 0xff
 
-# Mask attack decalring custom charset
+# Mask attack declaring custom charset
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## -1 ?d?s defines a custom charset (digits and specials).
-## ?u?l?l?l?l?l?l?l?1 is the mask, where ?1 is the custom charset.
+## ?u?l?l?l?l?l?l?l?1 is the mask, where "?1" is the custom charset.
 
 # Mask attack with variable password length
 ## Create a file called masks.hcmask with this content:
