@@ -428,7 +428,8 @@
 
 ## 🕸 Pentesting Web
 
-* [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology.md)
+* [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology/README.md)
+  * [Browser Extensions](pentesting-web/web-vulnerabilities-methodology/browser-extensions.md)
 * [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet/README.md)
   * [Web Vulns List](pentesting-web/pocs-and-polygloths-cheatsheet/web-vulns-list.md)
 * [2FA/OTP Bypass](pentesting-web/2fa-bypass.md)
