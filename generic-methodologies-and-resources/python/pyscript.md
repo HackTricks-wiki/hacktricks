@@ -18,7 +18,7 @@
 
 ## PyScript Pentesting Guide
 
-PyScript is a new framework developed for integrating Python in the HTML so, it can be used alongside HTML. In this cheat sheet you'll find how to use the PyScript for your penetration testing purposes.
+PyScript is a new framework developed for integrating Python into HTML so, it can be used alongside HTML. In this cheat sheet, you'll find how to use PyScript for your penetration testing purposes.
 
 ### Dumping / Retrieving files from the Emscripten virtual memory filesystem:
 
@@ -46,7 +46,7 @@ Code:
 
 ```html
    <py-script>
-x = yberGuy"
+x = "CyberGuy"
 if x == "CyberGuy":
     with open('/lib/python3.10/asyncio/tasks.py') as output:
         contents = output.read()
