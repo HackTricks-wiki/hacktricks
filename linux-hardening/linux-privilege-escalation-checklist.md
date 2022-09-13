@@ -43,10 +43,10 @@
 ### [Processes](privilege-escalation/#processes)
 
 * [ ] Is any **unknown software running**?
-* [ ] Is any software with **more privileges that it should have running**?
-* [ ] Search for **exploits for running processes** (specially if running of versions)
+* [ ] Is any software running with **more privileges than it should have**?
+* [ ] Search for **exploits of running processes** (especially the version running).
 * [ ] Can you **modify the binary** of any running process?
-* [ ] **Monitor processes** and check if any interesting process is running frequently
+* [ ] **Monitor processes** and check if any interesting process is running frequently.
 * [ ] Can you **read** some interesting **process memory** (where passwords could be saved)?
 
 ### [Scheduled/Cron jobs?](privilege-escalation/#scheduled-jobs)
@@ -89,7 +89,7 @@
 * [ ] Can you [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/) you belong to?
 * [ ] **Clipboard** data?
 * [ ] Password Policy?
-* [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without password.
+* [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without a password.
 
 ### [Writable PATH](privilege-escalation/#writable-path-abuses)
 
@@ -97,7 +97,7 @@
 
 ### [SUDO and SUID commands](privilege-escalation/#sudo-and-suid)
 
-* [ ] Can you execute **any comand with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
+* [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
 * [ ] Is any **exploitable suid binary**? ([**GTFOBins**](https://gtfobins.github.io))
 * [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/#sudo-execution-bypassing-paths)?
 * [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
@@ -132,7 +132,7 @@
 * [ ] **Profile files** - Read sensitive data? Write to privesc?
 * [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
 * [ ] **Check commonly interesting folders** for sensitive data
-* [ ] **Weird Localtion/Owned files,** you may have access or alter executable files
+* [ ] **Weird Location/Owned files,** you may have access to or alter executable files
 * [ ] **Modified** in last mins
 * [ ] **Sqlite DB files**
 * [ ] **Hidden files**
