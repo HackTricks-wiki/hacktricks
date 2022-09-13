@@ -59,7 +59,7 @@ pr = requests.post(url, json=params, headers=headers, cookies=cookies, verify=Fa
 filedict = {"<FILE_PARAMETER_NAME>" : ("filename.png", open("filename.png", 'rb').read(), "image/png")}
 pr = requests.post(url, data={"submit": "submit"}, files=filedict)
 
-#Useful for presenting results in boolean/timebased injections
+#Useful for presenting results in boolean/time based injections
 print(f"\rflag: {flag}{char}", end="")
 
 
@@ -96,7 +96,7 @@ def get_random_string(guid, path):
     return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 
-## Python cmd to exploit a RCE
+## Python cmd to exploit an RCE
 
 ```python
 import requests
