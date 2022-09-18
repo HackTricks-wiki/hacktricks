@@ -21,12 +21,12 @@
 ### Useful information
 
 list(xrange()) == range() --> In python3 range is the xrange of python2 (it is not a list but a generator)\
-The difference between a Tuple and a List is that the position of a value in a tuple gives it a meaning but the lists are just ordered values. Tuples have structures, lists have order
+The difference between a Tuple and a List is that the position of a value in a tuple gives it meaning but the lists are just ordered values. Tuples have structures but lists have an order.
 
 ### Main operations
 
-To raise a number you should do: 3\*\*2 (it isn't 3^2)\
-If you do 2/3 it returns 1 because you are dividing two ints. If you want decimals you should divide floats (2.0/3.0).\
+To raise a number you use: 3\*\*2 (not 3^2)\
+If you do 2/3 it returns 1 because you are dividing two ints (integers). If you want decimals you should divide floats (2.0/3.0).\
 i >= j\
 i <= j\
 i == j\
@@ -48,7 +48,7 @@ isinstance(1, int) = True\
 "abcdef".contains("abc") = True\
 "abc\n".strip() = "abc"\
 "apbc".replace("p","") = "abc"\
-dir(str) = List of all the availble methods\
+dir(str) = List of all the available methods\
 help(str) = Definition of the class str\
 "a".upper() = "A"\
 "A".lower() = "a"\
@@ -92,7 +92,7 @@ for i in range(0,100):
     #something from 0 to 99
 
 for letter in "hola":
-    #something with letter in "hola"
+    #something with a letter in "hola"
 ```
 
 ### Tuples
@@ -131,7 +131,7 @@ monthNumbers.get('key',0) #Check if key exists, Return value of monthNumbers\["k
 
 ### Set
 
-In the sets there are not repetitions\
+In sets there are no repetitions\
 myset = set(\['a', 'b']) = {'a', 'b'}\
 myset.add('c') = {'a', 'b', 'c'}\
 myset.add('a') = {'a', 'b', 'c'} #No repetitions\
@@ -150,7 +150,7 @@ myset.symmetric\_difference\_update(myset2) #myset = Elements that are not in bo
 
 ### Classes
 
-The method in \_\_It\_\_ will be the one used by sort in order to compare if an object of this class is bigger than other
+The method in \_\_It\_\_ will be the one used by sort to compare if an object of this class is bigger than other
 
 ```python
 class Person(name):
@@ -229,7 +229,7 @@ def divide(x,y):
 
 ### Assert()
 
-If the condition is false the string will by printed in the screen
+If the condition is false the string will be printed in the screen
 
 ```
 def avg(grades, weights):
@@ -288,7 +288,7 @@ print list(**product**(\[1,2,3],repeat = 2)) = \[(1, 1), (1, 2), (1, 3), (2, 1),
 **permutations**\
 from **itertools** import **permutations** --> Generates combinations of all characters in every position\
 print list(permutations(\['1','2','3'])) = \[('1', '2', '3'), ('1', '3', '2'), ('2', '1', '3'),... Every posible combination\
-print(list(permutations('123',2))) = \[('1', '2'), ('1', '3'), ('2', '1'), ('2', '3'), ('3', '1'), ('3', '2')] Every posible combination of lenght 2
+print(list(permutations('123',2))) = \[('1', '2'), ('1', '3'), ('2', '1'), ('2', '3'), ('3', '1'), ('3', '2')] Every possible combination of length 2
 
 **combinations**\
 from itertools import **combinations** --> Generates all possible combinations without repeating characters (if "ab" existing, doesn't generate "ba")\
