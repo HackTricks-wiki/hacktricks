@@ -17,7 +17,7 @@
 </details>
 
 
-Some things that could be useful to debug/desofuscate a malicious vbs file:
+Some things that could be useful to debug/deobfuscate a malicious VBS file:
 
 ## echo
 
@@ -44,7 +44,7 @@ Function writeBinary(strBinary, strPath)
 
     Dim oFSO: Set oFSO = CreateObject("Scripting.FileSystemObject")
 
-    ' below lines pupose: checks that write access is possible!
+    ' below lines purpose: checks that write access is possible!
     Dim oTxtStream
 
     On Error Resume Next
