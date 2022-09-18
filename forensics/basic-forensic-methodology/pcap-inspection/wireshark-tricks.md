@@ -83,7 +83,7 @@ Other interesting filters:
 
 ### Search
 
-If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_\. You can add new layers to the main information bar (No., Time, Source, etc.) by pressing the right button and then the edit column.
+If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_. You can add new layers to the main information bar (No., Time, Source, etc.) by pressing the right button and then the edit column.
 
 Practice: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)
 
@@ -95,7 +95,7 @@ You can add a column that shows the Host HTTP header:
 
 And a column that add the Server name from an initiating HTTPS connection (**ssl.handshake.type == 1**):
 
-![](<../../../.gitbook/assets/image (408) (1).png>)
+![](<../../../.gitbook/assets/image (408).png>)
 
 ## Identifying local hostnames
 
@@ -128,7 +128,7 @@ A file of shared keys will look like this:
 
 ![](<../../../.gitbook/assets/image (99).png>)
 
-To import this in wireshark go to _edit > preference > protocol > ssl > and import it in (Pre)-Master-Secret log filename:
+To import this in wireshark go to \_edit > preference > protocol > ssl > and import it in (Pre)-Master-Secret log filename:
 
 ![](<../../../.gitbook/assets/image (100).png>)
 

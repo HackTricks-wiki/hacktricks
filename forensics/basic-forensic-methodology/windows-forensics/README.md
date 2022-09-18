@@ -26,7 +26,7 @@ Inside this SQLite database, you can find the `Notification` table with all the 
 
 Timeline is a Windows characteristic that provides **chronological history** of web pages visited, edited documents, and executed applications.
 
-The database resides in the path `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`\. This database can be opened with an SQLite tool or with the tool [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **which generates 2 files that can be opened with the tool** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
+The database resides in the path `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. This database can be opened with an SQLite tool or with the tool [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **which generates 2 files that can be opened with the tool** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
 ### ADS (Alternate Data Streams)
 
@@ -95,16 +95,15 @@ To inspect these files you can use [**LinkParser**](http://4discovery.com/our-to
 
 In this tools you will find **2 sets** of timestamps:
 
-- **First Set:**
-    1.  FileModifiedDate
-    2.  FileAccessDate
-    3.  FileCreationDate
-        
-- **Second Set:**
-    1.  LinkModifiedDate
-    2.  LinkAccessDate
-    3.  LinkCreationDate.
-        
+* **First Set:**
+  1. FileModifiedDate
+  2. FileAccessDate
+  3. FileCreationDate
+* **Second Set:**
+  1. LinkModifiedDate
+  2. LinkAccessDate
+  3. LinkCreationDate.
+
 The first set of timestamp references the **timestamps of the file itself**. The second set references the **timestamps of the linked file**.
 
 You can get the same information running the Windows CLI tool: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
@@ -157,7 +156,7 @@ The files in the folder WPDNSE are a copy of the original ones, then won't survi
 
 Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about when the USB connection was produced (search for `Section start`).
 
-![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (8).png>)
 
 ### USB Detective
 
@@ -431,8 +430,7 @@ Information that appears inside Windows events are:
 * Hosts involved (hostname, IP)
 * Assets accessed (files, folder, printer, services)
 
-The logs are located in `C:\Windows\System32\config` before Windows Vista and in `C:\Windows\System32\winevt\Logs` after Windows Vista. 
-Before Windows Vista, the event logs were in binary format and after it, they are in **XML format** and use the **.evtx** extension.
+The logs are located in `C:\Windows\System32\config` before Windows Vista and in `C:\Windows\System32\winevt\Logs` after Windows Vista. Before Windows Vista, the event logs were in binary format and after it, they are in **XML format** and use the **.evtx** extension.
 
 The location of the event files can be found in the SYSTEM registry in **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`**
 
