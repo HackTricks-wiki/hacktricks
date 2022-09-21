@@ -86,7 +86,7 @@ Get Access Today:
 
 WebSec is an **all-in-one security company** which means they do it all; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing and much more.
 
-Another cool thing about WebSec is that unlike the industry average WebSec is **very confident in their skills**, to such an extent that they **guarantee the best quality results**, it states on their website "If we can't hack it, You don't pay it!". Form more info take a look to their [**website**](https://websec.nl/en/) and [**blog**](https://websec.nl/blog/)!
+Another cool thing about WebSec is that unlike the industry average WebSec is **very confident in their skills**, to such an extent that they **guarantee the best quality results**, it states on their website "**If we can't hack it, You don't pay it!**". For more info take a look to their [**website**](https://websec.nl/en/) and [**blog**](https://websec.nl/blog/)!
 
 In addition to the above WebSec is also a **committed supporter of HackTricks.**
 
