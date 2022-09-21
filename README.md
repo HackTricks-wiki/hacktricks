@@ -80,6 +80,18 @@ Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
+<figure><img src=".gitbook/assets/logo.svg" alt=""><figcaption></figcaption></figure>
+
+****[**WebSec**](https://websec.nl) **** is a professional cybersecurity company based in **Amsterdam** which helps **protecting** businesses **all over the world** against the latest cybersecurity threats by providing **offensive-security services** with a **modern** approach.
+
+WebSec is an **all-in-one security company** which means they do it all; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing and much more.
+
+Another cool thing about WebSec is that unlike the industry average WebSec is **very confident in their skills**, to such an extent that they **guarantee the best quality results**, it states on their website "If we can't hack it, You don't pay it!". Form more info take a look to their [**website**](https://websec.nl/en/) and [**blog**](https://websec.nl/blog/)!
+
+In addition to the above WebSec is also a **committed supporter of HackTricks.**
+
+{% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
+
 ### [**INE**](https://ine.com)
 
 ![](.gitbook/assets/ine\_logo-3-.jpg)
