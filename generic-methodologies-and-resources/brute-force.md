@@ -1,6 +1,5 @@
 # Brute Force - CheatSheet
 
-{% hint style="danger" %}
 ![](<../.gitbook/assets/image (9) (1).png>)
 
 \
@@ -8,21 +7,16 @@ Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=ba
 Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-{% endhint %}
 
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
@@ -83,7 +77,6 @@ python3 cupp.py -h
 * [**https://github.com/google/fuzzing/tree/master/dictionaries**](https://github.com/carlospolop/hacktricks/tree/95b16dc7eb952272459fc877e4c9d0777d746a16/google/fuzzing/tree/master/dictionaries/README.md)
 * [**https://crackstation.net/crackstation-wordlist-password-cracking-dictionary.htm**](https://crackstation.net/crackstation-wordlist-password-cracking-dictionary.htm)
 
-{% hint style="danger" %}
 ![](<../.gitbook/assets/image (9) (1).png>)
 
 \
@@ -91,7 +84,6 @@ Use [**Trickest**](https://trickest.io/) to easily build and **automate workflow
 Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-{% endhint %}
 
 ## Services
 
@@ -440,7 +432,6 @@ set PASS_FILE /usr/share/metasploit-framework/data/wordlists/passwords.lst
 crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 
-{% hint style="danger" %}
 ![](<../.gitbook/assets/image (9) (1).png>)
 
 \
@@ -448,7 +439,6 @@ Use [**Trickest**](https://trickest.io/) to easily build and **automate workflow
 Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-{% endhint %}
 
 ## Local
 
@@ -498,7 +488,7 @@ zip plaintext.zip plaintext.file
 # Now wait, this should print a key such as 7b549874 ebc25ec5 7e465e18
 # With that key you can create a new zip file with the content of encrypted.zip
 # but with a different pass that you set (so you can decrypt it)
-./bkcrack -C <encrypted.zip> -U unlocked.zip -k 7b549874 ebc25ec5 7e465e18 new_pwd 
+./bkcrack -C <encrypted.zip> -k 7b549874 ebc25ec5 7e465e18 -U unlocked.zip new_pwd 
 unzip unlocked.zip #User new_pwd as password
 ```
 
@@ -640,7 +630,6 @@ zip -r file.xls .
 crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
 
-{% hint style="danger" %}
 ![](<../.gitbook/assets/image (9) (1).png>)
 
 \
@@ -648,7 +637,6 @@ Use [**Trickest**](https://trickest.io/) to easily build and **automate workflow
 Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-{% endhint %}
 
 ## Tools
 
@@ -664,9 +652,9 @@ hash-identifier
 ### Wordlists
 
 * **Rockyou**
-* ****[**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)****
-* ****[**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)****
-* ****[**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)****
+* [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
+* [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
+* [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
 ### **Wordlist Generation Tools**
 
@@ -708,7 +696,7 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 
 # Same attack as before but adding chars in the newly generated words
 # In the previous example this will generate:
-## hello-world!
+## hello-world!
 ## hello-earth!
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
@@ -733,8 +721,8 @@ b | 0x00 - 0xff
 
 # Mask attack declaring custom charset
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
-## -1 ?d?s defines a custom charset (digits and specials).
-## ?u?l?l?l?l?l?l?l?1 is the mask, where "?1" is the custom charset.
+## -1 ?d?s defines a custom charset (digits and specials).
+## ?u?l?l?l?l?l?l?l?1 is the mask, where "?1" is the custom charset.
 
 # Mask attack with variable password length
 ## Create a file called masks.hcmask with this content:
@@ -795,19 +783,14 @@ Cracking Common Application Hashes
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
-{% hint style="danger" %}
 ![](<../.gitbook/assets/image (9) (1).png>)
 
 \
@@ -815,4 +798,3 @@ Use [**Trickest**](https://trickest.io/) to easily build and **automate workflow
 Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-{% endhint %}
