@@ -595,6 +595,20 @@ _Note that the tools that expect to run all the database using the regular Googl
 
 If you find **valid leaked** credentials or API tokens, this is a very easy win.
 
+## Public Code Vulnerabilities
+
+If you found that the company has **open-source code** you can **analyse** it and search for **vulnerabilities** on it.
+
+**Depending on the language** there are different **tools** you can use:
+
+{% content-ref url="../../network-services-pentesting/pentesting-web/code-review-tools.md" %}
+[code-review-tools.md](../../network-services-pentesting/pentesting-web/code-review-tools.md)
+{% endcontent-ref %}
+
+There are also free services that allow you to **scan public repositories**, such as:
+
+* ****[**Snyk**](https://app.snyk.io/)****
+
 ## [**Pentesting Web Methodology**](../../network-services-pentesting/pentesting-web/)
 
 The **majority of the vulnerabilities** found by bug hunters resides inside **web applications**, so at this point I would like to talk about a **web application testing methodology**, and you can [**find this information here**](../../network-services-pentesting/pentesting-web/).
