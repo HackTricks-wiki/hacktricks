@@ -30,16 +30,6 @@ Here you will find the **typical flow** that **you should follow when pentesting
 
 **Click on the title to start!**
 
-## Support HackTricks
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-LinPEAS, WinPEAS and MacPEAS aren’t enough for you? **Welcome** [**The PEASS Family**](https://opensea.io/collection/the-peass-family), a limited collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family) of our favourite PEASS in disguise, designed by my team. **Go get your favourite and make it yours!** (access to the latest PEASS-ng is also granted buying NFTs)\
-And if you are a PEASS & HackTricks enthusiast, you can get your hands now on our [**custom swag**](https://peass.creator-spring.com) **and show how much you like our projects!**
-
-You can also, - **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) **to learn about latest news in cybersecurity and meet other cybersecurity enthusiasts**, or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**\
-If you want to **share some tricks with the community** you can also submit **pull requests** to [**https://github.com/carlospolop/hacktricks**](https://github.com/carlospolop/hacktricks) that will be reflected in this book and don't forget to **give ⭐** on **github** to **motivate** **me** to continue developing this book.
-
 ## Corporate Sponsors
 
 ### [STM Cyber](https://www.stmcyber.com)
@@ -52,13 +42,13 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 **STM Cyber** also support cybersecurity open source projects like HackTricks :)
 
-### [Security Hubs](https://securityhubs.io/)
+### [SYN CUBES](https://www.syncubes.com/)
 
-![](<.gitbook/assets/image (307).png>)
+<figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
-Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results.** [**Security Hubs**](https://securityhubs.io/) \*\*\*\* bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
-{% embed url="https://securityhubs.io/" %}
+{% embed url="https://www.syncubes.com/" %}
 
 ### [Intigriti](https://www.intigriti.com)
 
