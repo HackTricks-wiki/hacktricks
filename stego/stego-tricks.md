@@ -18,11 +18,11 @@
 
 {% hint style="danger" %}
 
-<img src="../.gitbook/assets/image (307).png" alt="" data-size="original">
+<img src="../.gitbook/assets/image.png" alt="" data-size="original">
 
-Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
-{% embed url="https://securityhubs.io/" %}
+{% embed url="https://www.syncubes.com/" %}
 {% endhint %}
 
 ## Extracting data from all files
@@ -92,11 +92,11 @@ If you find that a **text line** is **bigger** than it should be, then some **hi
 To **extract** the **data**, you can use: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
 
 {% hint style="danger" %}
-<img src="../.gitbook/assets/image (307).png" alt="" data-size="original">
+<img src="../.gitbook/assets/image.png" alt="" data-size="original">
 
-Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
-{% embed url="https://securityhubs.io/" %}
+{% embed url="https://www.syncubes.com/" %}
 {% endhint %}
 
 ## Extracting data from images
@@ -228,11 +228,11 @@ To read a QR code: [https://online-barcode-reader.inliteresearch.com/](https://o
 * [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
 
 {% hint style="danger" %}
-<img src="../.gitbook/assets/image (307).png" alt="" data-size="original">
+<img src="../.gitbook/assets/image.png" alt="" data-size="original">
 
-Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
-{% embed url="https://securityhubs.io/" %}
+{% embed url="https://www.syncubes.com/" %}
 {% endhint %}
 
 <details>

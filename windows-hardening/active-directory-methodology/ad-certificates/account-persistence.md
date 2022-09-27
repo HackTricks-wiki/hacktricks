@@ -59,7 +59,7 @@ If a certificate template allowed for **Domain Computers** as enrolment principa
 
 If an **attacker elevates privileges** on compromised system, the attacker can use the **SYSTEM** account to enrol in certificate templates that grant enrolment privileges to machine accounts (more information in [**THEFT3**](certificate-theft.md#machine-certificate-theft-via-dpapi-theft3)).
 
-You can use [**Certify**](https://github.com/GhostPack/Certify) **** to **** gather a certificate for the machine account elevating automatically to SYSTEM with:
+You can use [**Certify**](https://github.com/GhostPack/Certify)  to  gather a certificate for the machine account elevating automatically to SYSTEM with:
 
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine

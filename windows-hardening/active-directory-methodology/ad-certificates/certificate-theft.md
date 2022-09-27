@@ -106,7 +106,7 @@ If you find a **PKCS#12** certificate file and it is **password protected**, you
 
 So, if account authenticates and gets a **TGT through PKINIT**, there is a built-in “failsafe” that allows the current host to **obtain our NTLM hash from the TGT** to support legacy authentication. This involves **decrypting** a **`PAC_CREDENTIAL_DATA`** **structure** that is a Network Data Representation (NDR) serialized representation of the NTLM plaintext.
 
-****[**Kekeo**](https://github.com/gentilkiwi/kekeo) can be used to ask for a TGT with this information an retrieve the users NTML
+[**Kekeo**](https://github.com/gentilkiwi/kekeo) can be used to ask for a TGT with this information an retrieve the users NTML
 
 ```bash
 tgt::pac /caname:thename-DC-CA /subject:harmj0y /castore:current_user /domain:domain.local

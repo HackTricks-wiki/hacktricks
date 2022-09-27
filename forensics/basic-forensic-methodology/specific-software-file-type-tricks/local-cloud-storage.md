@@ -17,11 +17,11 @@
 </details>
 
 {% hint style="danger" %}
-<img src="../../../.gitbook/assets/image (307).png" alt="" data-size="original">
+<img src="../../../.gitbook/assets/image.png" alt="" data-size="original">
 
-Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
-{% embed url="https://securityhubs.io/" %}
+{% embed url="https://www.syncubes.com/" %}
 {% endhint %}
 
 ## OneDrive
@@ -118,11 +118,11 @@ Other tables inside this database contain more interesting information:
 * **date\_added**
 
 {% hint style="danger" %}
-<img src="../../../.gitbook/assets/image (307).png" alt="" data-size="original">
+<img src="../../../.gitbook/assets/image.png" alt="" data-size="original">
 
-Through Security Skills as a Service, we help organizations to **defend against the Dark Hacking Arts**. Security Skills as a Service is an offensive cybersecurity consultancy model that combines an Intelligent Platform with the top-class, globally distributed, offensive security engineers, delivering **high-quality penetration testing results. Security Hubs** bring together offensive penetration testing tactics with human behavioral science, providing real-time insights into threat actors' tradecraft and a **complete assessment of any risks**.
+**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
-{% embed url="https://securityhubs.io/" %}
+{% embed url="https://www.syncubes.com/" %}
 {% endhint %}
 
 <details>

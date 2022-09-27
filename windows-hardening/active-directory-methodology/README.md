@@ -70,7 +70,7 @@ If you just have access to an AD environment but you don't have any credentials/
   * [**A more detailed guide on how to enumerate LDAP can be found here.**](../../network-services-pentesting/pentesting-ldap.md)
 * **Poison the network**
   * Gather credentials [**impersonating services with Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
-  * Access host by [**abusing the relay attack**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)****
+  * Access host by [**abusing the relay attack**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
   * Gather credentials **exposing** [**fake UPnP services with evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 * [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
   * Extract usernames/names from internal documents, social media, services (mainly web) inside the domain environments and also from the publicly available.
@@ -94,7 +94,7 @@ crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
 {% hint style="warning" %}
 You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names).
 
-However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) **** to generate potential valid usernames.
+However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951)  to generate potential valid usernames.
 {% endhint %}
 
 #### **OWA (Outlook Web Access) Server**
@@ -138,8 +138,8 @@ Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulner
 * You can also search in the LDAP database with **ldapsearch** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
 * If you are using **Linux**, you could also enumerate the domain using [**pywerview**](https://github.com/the-useless-one/pywerview).
 * You could also try automated tools as:
-  * [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)****
-  * ****[**61106960/adPEAS**](https://github.com/61106960/adPEAS)****
+  * [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
+  * [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
 *   #### Extracting all domain users
 
     It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser` or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
@@ -192,7 +192,7 @@ Then, its time to dump all the hashes in memory and locally.\
 
 **Once you have the hash of a user**, you can use it to **impersonate** it.\
 You need to use some **tool** that will **perform** the **NTLM authentication using** that **hash**, **or** you could create a new **sessionlogon** and **inject** that **hash** inside the **LSASS**, so when any **NTLM authentication is performed**, that **hash will be used.** The last option is what mimikatz does.\
-****[**Read this page for more information.**](../ntlm/#pass-the-hash)****
+[**Read this page for more information.**](../ntlm/#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
 
@@ -369,7 +369,7 @@ These are like golden tickets forged in a way that **bypasses common golden tick
 The Access Control List (ACL) of the **AdminSDHolder** object is used as a template to **copy** **permissions** to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins, Backup Operators and krbtgt.\
 By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker **modifies the ACL** of the group **AdminSDHolder** for example, giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group (in an hour).\
 And if someone tries to delete this user from the Domain Admins (for example) in an hour or less, the user will be back in the group.\
-****[**More information about AdminDSHolder Group here.**](privileged-accounts-and-token-privileges.md#adminsdholder-group)****
+[**More information about AdminDSHolder Group here.**](privileged-accounts-and-token-privileges.md#adminsdholder-group)
 
 ### DSRM Credentials
 

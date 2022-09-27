@@ -201,8 +201,8 @@ If we want to **enumerate Enterprise CAs** and their settings, one can query LDA
 
 **Tools to enumerate vulnerable certificates:**
 
-* ****[**Certify**](https://github.com/GhostPack/Certify) is a C# tool that can **enumerate useful configuration and infrastructure information about of AD CS environments** and can request certificates in a variety of different ways.
-* ****[**Certipy**](https://github.com/ly4k/Certipy) is a **python** tool to be able to **enumerate and abuse** Active Directory Certificate Services (**AD CS**) **from any system** (with access to the DC) that can generate output for BloodHound created by [**Lyak**](https://twitter.com/ly4k\_) (good person better hacker) .
+* [**Certify**](https://github.com/GhostPack/Certify) is a C# tool that can **enumerate useful configuration and infrastructure information about of AD CS environments** and can request certificates in a variety of different ways.
+* [**Certipy**](https://github.com/ly4k/Certipy) is a **python** tool to be able to **enumerate and abuse** Active Directory Certificate Services (**AD CS**) **from any system** (with access to the DC) that can generate output for BloodHound created by [**Lyak**](https://twitter.com/ly4k\_) (good person better hacker) .
 
 ```bash
 # https://github.com/GhostPack/Certify

@@ -173,7 +173,7 @@ Notice that metasploit will try to abuse only the `openquery()` function in MSSQ
 
 From **Linux** you could obtain a MSSQL console shell with **sqsh** and **mssqlclient.py.**
 
-From **Windows** you could also find the links and execute commands manually using a **MSSQL client like** [**HeidiSQL**](https://www.heidisql.com)****
+From **Windows** you could also find the links and execute commands manually using a **MSSQL client like** [**HeidiSQL**](https://www.heidisql.com)
 
 _Login using Windows authentication:_
 

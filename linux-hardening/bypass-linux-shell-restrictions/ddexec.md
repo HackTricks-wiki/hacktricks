@@ -75,7 +75,7 @@ The steps are relatively easy and do not require any kind of expertise to unders
 * Pass the program we want to run to the stdin of the process (will be `read()` by said "shell"code).
 * At this point it is up to the loader to load the necessary libraries for our program and jump into it.
 
-**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)****
+**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
 
 <details>
 

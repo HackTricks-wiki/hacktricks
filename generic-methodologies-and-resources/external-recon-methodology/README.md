@@ -270,7 +270,7 @@ There are **other interesting tools/APIs** that even if not directly specialised
 curl https://sonar.omnisint.io/subdomains/tesla.com | jq -r ".[]"
 ```
 
-* ****[**JLDC free API**](https://jldc.me/anubis/subdomains/google.com)****
+* [**JLDC free API**](https://jldc.me/anubis/subdomains/google.com)
 
 ```bash
 curl https://jldc.me/anubis/subdomains/tesla.com | jq -r ".[]"
@@ -485,7 +485,7 @@ It’s time to **recollect all the IPs from those ranges** and for the **domains
 
 Using services from the following **free apis** you can also find **previous IPs used by domains and subdomains**. These IPs might still be owned by the client (and might allow you to find [**CloudFlare bypasses**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
 
-* ****[**https://securitytrails.com/**](https://securitytrails.com/)****
+* [**https://securitytrails.com/**](https://securitytrails.com/)
 
 ### **Looking for vulnerabilities**
 
@@ -502,7 +502,7 @@ In the previous steps you have probably already performed some **recon of the IP
 Please, note that this will be **oriented for web apps discovery**, so you should **perform the vulnerability** and **port scanning** also (**if allowed** by the scope).
 
 A **fast method** to discover **ports open** related to **web** servers using [**masscan** can be found here](../pentesting-network/#http-port-discovery).\
-Another friendly tool to look for web servers is [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe) **** and **** [**httpx**](https://github.com/projectdiscovery/httpx). You just pass a list of domains and it will try to connect to port 80 (http) and 443 (https). Additionally, you can indicate to try other ports:
+Another friendly tool to look for web servers is [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe)  and  [**httpx**](https://github.com/projectdiscovery/httpx). You just pass a list of domains and it will try to connect to port 80 (http) and 443 (https). Additionally, you can indicate to try other ports:
 
 ```bash
 cat /tmp/domains.txt | httprobe #Test all domains inside the file for port 80 and 443
@@ -515,7 +515,7 @@ Now that you have discovered **all the web servers** present in the scope (among
 
 To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/) or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
-Moreover, you could then use [**eyeballer**](https://github.com/BishopFox/eyeballer) **** to run over all the **screenshots** to tell you **what's likely to contain vulnerabilities**, and what isn't.
+Moreover, you could then use [**eyeballer**](https://github.com/BishopFox/eyeballer)  to run over all the **screenshots** to tell you **what's likely to contain vulnerabilities**, and what isn't.
 
 ## Public Cloud Assets
 
@@ -541,8 +541,8 @@ If you find things such as **open buckets or cloud functions exposed** you shoul
 
 With the **domains** and **subdomains** inside the scope you basically have all what you **need to start searching for emails**. These are the **APIs** and **tools** that have worked the best for me to find emails of a company:
 
-* [**theHarvester**](https://github.com/laramies/theHarvester) **** - with APIs
-* API of [**https://hunter.io/**](https://hunter.io/) **** (free version)
+* [**theHarvester**](https://github.com/laramies/theHarvester)  - with APIs
+* API of [**https://hunter.io/**](https://hunter.io/)  (free version)
 * API of [**https://app.snov.io/**](https://app.snov.io/) (free version)
 * API of [**https://minelead.io/**](https://minelead.io/) (free version)
 
@@ -552,7 +552,7 @@ Emails will come handy later to **brute-force web logins and auth services** (su
 
 ## Credential Leaks
 
-With the **domains,** **subdomains**, **** and **emails** you can start looking for credentials leaked in the past belonging to those emails:
+With the **domains,** **subdomains**,  and **emails** you can start looking for credentials leaked in the past belonging to those emails:
 
 * [https://leak-lookup.com](https://leak-lookup.com/account/login)
 * [https://www.dehashed.com/](https://www.dehashed.com/)
@@ -583,7 +583,7 @@ Check also this **page** for potential **github dorks** you could also search fo
 ### Pastes Leaks
 
 Sometimes attackers or just workers will **publish company content in a paste site**. This might or might not contain **sensitive information**, but it's very interesting to search for it.\
-You can use the tool [**Pastos**](https://github.com/carlospolop/Pastos) **** to search in more that 80 paste sites at the same time.
+You can use the tool [**Pastos**](https://github.com/carlospolop/Pastos)  to search in more that 80 paste sites at the same time.
 
 ### Google Dorks
 
@@ -607,7 +607,7 @@ If you found that the company has **open-source code** you can **analyse** it an
 
 There are also free services that allow you to **scan public repositories**, such as:
 
-* ****[**Snyk**](https://app.snyk.io/)****
+* [**Snyk**](https://app.snyk.io/)
 
 ## [**Pentesting Web Methodology**](../../network-services-pentesting/pentesting-web/)
 
@@ -644,7 +644,7 @@ There are several tools out there that will perform part of the proposed actions
 
 * **All free courses of** [**@Jhaddix**](https://twitter.com/Jhaddix) **(like** [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)**)**
 
-****
+
 
 <img src="../../.gitbook/assets/i3.png" alt="" data-size="original">\
 **Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
