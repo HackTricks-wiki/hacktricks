@@ -476,7 +476,7 @@
   * [LFI2RCE Via compress.zlib + PHP\_STREAM\_PREFER\_STUDIO + Path Disclosure](pentesting-web/file-inclusion/lfi2rce-via-compress.zlib-+-php\_stream\_prefer\_studio-+-path-disclosure.md)
 * [File Upload](pentesting-web/file-upload/README.md)
   * [PDF Upload - XXE and CORS bypass](pentesting-web/file-upload/pdf-upload-xxe-and-cors-bypass.md)
-* [Formula/Doc/LaTeX Injection](pentesting-web/formula-doc-latex-injection.md)
+* [Formula/CSV/Doc/LaTeX Injection](pentesting-web/formula-doc-latex-injection.md)
 * [HTTP Connection Request Smuggling](pentesting-web/http-connection-request-smuggling.md)
 * [HTTP Request Smuggling / HTTP Desync Attack](pentesting-web/http-request-smuggling/README.md)
   * [Browser HTTP Request Smuggling](pentesting-web/http-request-smuggling/browser-http-request-smuggling.md)
