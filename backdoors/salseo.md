@@ -139,7 +139,7 @@ Select **x64** (if you are going to use it inside a x64 box, that was my case), 
 
 Select **Output Type = Class Library** (Project --> SalseoLoader Properties --> Application --> Output type = Class Library)
 
-![](<../.gitbook/assets/image (10).png>)
+![](<../.gitbook/assets/image (10) (1).png>)
 
 Select **x64** **platform** (Project --> SalseoLoader Properties --> Build --> Platform target = x64)
 

@@ -4,15 +4,11 @@
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
@@ -67,14 +63,14 @@ In AD environments, **clients interact with Enterprise CAs to request a certific
 
 It's the process to **obtain a certificate** from AD CS. At a high level, during enrolment clients first **find an Enterprise CA** based on the **objects in the Enrolment Services** container discussed above.
 
-1. Clients then generate a **public-private key pair** and&#x20;
+1. Clients then generate a **public-private key pair** and
 2. place the public key in a **certificate signing request (CSR)** message along with other details such as the subject of the certificate and the **certificate template name**. Clients then **sign the CSR with their private key** and send the CSR to an Enterprise CA server.
 3. The **CA** server checks if the client **can request certificates**. If so, it determines if it will issue a certificate by looking up the **certificate template** AD object specified in the CSR. The CA will check if the certificate template AD object’s **permissions allow** the authenticating account to **obtain a certificate**.
 4. If so, the **CA generates a certificate** using the “blueprint” settings defined by the **certificate template** (e.g., EKUs, cryptography settings, and issuance requirements) and using the other information supplied in the CSR if allowed by the certificate’s template settings. The **CA signs the certificate** using its private key and then returns it to the client.
 
 ### Certificate Templates
 
-AD CS stores available certificate templates as AD objects with an **objectClass** of **`pKICertificateTemplate`** located in the following container:&#x20;
+AD CS stores available certificate templates as AD objects with an **objectClass** of **`pKICertificateTemplate`** located in the following container:
 
 `CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>`
 
@@ -95,7 +91,7 @@ The **`pKIExtendedKeyUsage`** attribute on an AD certificate template object con
 
 An admin needs to **create the certificate** template and then an **Enterprise CA “publishes”** the template, making it available to clients to enrol in. AD CS specifies that a certificate template is enabled on an Enterprise CA by **adding the template’s name to the `certificatetemplates` field** of the AD object.
 
-<figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (11) (2).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="warning" %}
 AD CS defines enrolment rights - which **principals can request** a certificate – using two security descriptors: one on the **certificate template** AD object and another on the **Enterprise CA itself**.\
@@ -113,7 +109,7 @@ A client needs to be granted in both security descriptors in order to be able to
 
 The **security descriptor** configured on the **Enterprise CA** defines these rights and is **viewable** in the Certificate Authority MMC snap-in `certsrv.msc` by right clicking on the CA → Properties → Security.
 
-<figure><img src="../../.gitbook/assets/image (7) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (7) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
 This ultimately ends up setting the Security registry value in the key **`HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration<CA NAME>`** on the CA server. We have encountered several AD CS servers that grant low-privileged users remote access to this key via remote registry:
 
@@ -185,9 +181,9 @@ During certificate authentication, the DC can then verify that the authenticatin
 Schannel is the security support provider (SSP) Windows leverages when establishing TLS/SSL connections. Schannel supports **client authentication** (amongst many other capabilities), enabling a remote server to **verify the identity of the connecting user**. It accomplishes this using PKI, with certificates being the primary credential.\
 During the **TLS handshake**, the server **requests a certificate from the client** for authentication. The client, having previously been issued a client authentication certificate from a CA the server trusts, sends its certificate to the server. The **server then validates** the certificate is correct and grants the user access assuming everything is okay.
 
-<figure><img src="../../.gitbook/assets/image (8) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (8) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
-When an account authenticates to AD using a certificate, the DC needs to somehow map the certificate credential to an AD account. **Schannel** first attempts to **map** the **credential** to a **user** account use Kerberos’s **S4U2Self** functionality. \
+When an account authenticates to AD using a certificate, the DC needs to somehow map the certificate credential to an AD account. **Schannel** first attempts to **map** the **credential** to a **user** account use Kerberos’s **S4U2Self** functionality.\
 If that is **unsuccessful**, it will follow the attempt to map the **certificate to a user** account using the certificate’s **SAN extension**, a combination of the **subject** and **issuer** fields, or solely from the issuer. By default, not many protocols in AD environments support AD authentication via Schannel out of the box. WinRM, RDP, and IIS all support client authentication using Schannel, but it **requires additional configuration**, and in some cases – like WinRM – does not integrate with Active Directory.\
 One protocol that does commonly work – assuming AD CS has been setup - is **LDAPS**. The cmdlet `Get-LdapCurrentUser` demonstrates how one can authenticate to LDAP using .NET libraries. The cmdlet performs an LDAP “Who am I?” extended operation to display the currently authenticating user:
 
@@ -227,14 +223,10 @@ certutil -v -dstemplate #enumerate certificate templates
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>

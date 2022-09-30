@@ -42,7 +42,7 @@ And as you may see in the last image a **login** page was discovered.
 
 Checking the source code of the root page, a username is discovered: `R1ckRul3s`
 
-![](<../../.gitbook/assets/image (237).png>)
+![](<../../.gitbook/assets/image (237) (1).png>)
 
 Therefore, you can login on the login page using the credentials `R1ckRul3s:Wubbalubbadubdub`
 
@@ -58,11 +58,11 @@ Some commands like cat aren't allowed but you can read the first ingredient (fla
 
 Then I used:
 
-![](<../../.gitbook/assets/image (243).png>)
+![](<../../.gitbook/assets/image (243) (1).png>)
 
 To obtain a reverse shell:
 
-![](<../../.gitbook/assets/image (239).png>)
+![](<../../.gitbook/assets/image (239) (1).png>)
 
 The **second ingredient** can be found in `/home/rick`
 

@@ -154,7 +154,7 @@ Interesting rights over certificate templates:
 
 An example of a privesc like the previous one:
 
-<figure><img src="../../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (15) (2).png" alt=""><figcaption></figcaption></figure>
 
 ESC4 is when a user has write privileges over a certificate template. This can for instance be abused to overwrite the configuration of the certificate template to make the template vulnerable to ESC1.
 
@@ -246,7 +246,7 @@ As such, **to abuse ESC6**, the environment must be **vulnerable to ESC10** (Wea
 
 A certificate authority itself has a **set of permissions** that secure various **CA actions**. These permissions can be access from `certsrv.msc`, right clicking a CA, selecting properties, and switching to the Security tab:
 
-<figure><img src="../../../.gitbook/assets/image (73).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (73) (2).png" alt=""><figcaption></figcaption></figure>
 
 This can also be enumerated via [**PSPKI’s module**](https://www.pkisolutions.com/tools/pspki/) with `Get-CertificationAuthority | Get-CertificationAuthorityAcl`:
 
@@ -262,7 +262,7 @@ If you have a principal with **`ManageCA`** rights on a **certificate authority*
 
 <figure><img src="../../../.gitbook/assets/image (1) (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../../.gitbook/assets/image (70).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (70) (2).png" alt=""><figcaption></figcaption></figure>
 
 This is also possible in a simpler form with [**PSPKI’s Enable-PolicyModuleFlag**](https://www.sysadmins.lv/projects/pspki/enable-policymoduleflag.aspx) cmdlet.
 
@@ -411,14 +411,14 @@ Enterprise CAs also **store CES endpoints** in their AD object in the `msPKI-Enr
 certutil.exe -enrollmentServerURL -config CORPDC01.CORP.LOCAL\CORP-CORPDC01-CA
 ```
 
-<figure><img src="../../../.gitbook/assets/image (2) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (2) (2).png" alt=""><figcaption></figcaption></figure>
 
 ```powershell
 Import-Module PSPKI
 Get-CertificationAuthority | select Name,Enroll* | Format-List *
 ```
 
-<figure><img src="../../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (8) (2).png" alt=""><figcaption></figcaption></figure>
 
 #### Abuse with Certify
 
@@ -477,19 +477,19 @@ First, we obtain the hash of `Jane` with for instance Shadow Credentials (using 
 
 Next, we change the `userPrincipalName` of `Jane` to be `Administrator`. Notice that we’re leaving out the `@corp.local` part.
 
-<figure><img src="../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (5) (3).png" alt=""><figcaption></figcaption></figure>
 
 This is not a constraint violation, since the `Administrator` user’s `userPrincipalName` is `Administrator@corp.local` and not `Administrator`.
 
 Now, we request the vulnerable certificate template `ESC9`. We must request the certificate as `Jane`.
 
-<figure><img src="../../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (16) (2).png" alt=""><figcaption></figcaption></figure>
 
 Notice that the `userPrincipalName` in the certificate is `Administrator` and that the issued certificate contains no “object SID”.
 
 Then, we change back the `userPrincipalName` of `Jane` to be something else, like her original `userPrincipalName` `Jane@corp.local`.
 
-<figure><img src="../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 Now, if we try to authenticate with the certificate, we will receive the NT hash of the `Administrator@corp.local` user. You will need to add `-domain <domain>` to your command line since there is no domain specified in the certificate.
 
@@ -526,23 +526,23 @@ First, we obtain the hash of `Jane` with for instance Shadow Credentials (using 
 
 Next, we change the `userPrincipalName` of `Jane` to be `Administrator`. Notice that we’re leaving out the `@corp.local` part.
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (2).png" alt=""><figcaption></figcaption></figure>
 
 This is not a constraint violation, since the `Administrator` user’s `userPrincipalName` is `Administrator@corp.local` and not `Administrator`.
 
 Now, we request any certificate that permits client authentication, for instance the default `User` template. We must request the certificate as `Jane`.
 
-<figure><img src="../../../.gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (14) (2).png" alt=""><figcaption></figcaption></figure>
 
 Notice that the `userPrincipalName` in the certificate is `Administrator`.
 
 Then, we change back the `userPrincipalName` of `Jane` to be something else, like her original `userPrincipalName` `Jane@corp.local`.
 
-<figure><img src="../../../.gitbook/assets/image (24).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (24) (2).png" alt=""><figcaption></figcaption></figure>
 
 Now, if we try to authenticate with the certificate, we will receive the NT hash of the `Administrator@corp.local` user. You will need to add `-domain <domain>` to your command line since there is no domain specified in the certificate.
 
-<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Abuse Case 2
 
@@ -557,27 +557,27 @@ First, we obtain the hash of `Jane` with for instance Shadow Credentials (using 
 
 Next, we change the `userPrincipalName` of `Jane` to be `DC$@corp.local`.
 
-<figure><img src="../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (18) (2).png" alt=""><figcaption></figcaption></figure>
 
 This is not a constraint violation, since the `DC$` computer account does not have `userPrincipalName`.
 
 Now, we request any certificate that permits client authentication, for instance the default `User` template. We must request the certificate as `Jane`.
 
-<figure><img src="../../../.gitbook/assets/image (20).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (20) (2).png" alt=""><figcaption></figcaption></figure>
 
 Then, we change back the `userPrincipalName` of `Jane` to be something else, like her original `userPrincipalName` (`Jane@corp.local`).
 
-<figure><img src="../../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (9) (1).png" alt=""><figcaption></figcaption></figure>
 
 Now, since this registry key applies to Schannel, we must use the certificate for authentication via Schannel. This is where Certipy’s new `-ldap-shell` option comes in.
 
 If we try to authenticate with the certificate and `-ldap-shell`, we will notice that we’re authenticated as `u:CORP\DC$`. This is a string that is sent by the server.
 
-<figure><img src="../../../.gitbook/assets/image (21).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (21) (2).png" alt=""><figcaption></figcaption></figure>
 
 One of the available commands for the LDAP shell is `set_rbcd` which will set Resource-Based Constrained Delegation (RBCD) on the target. So we could perform a RBCD attack to compromise the domain controller.
 
-<figure><img src="../../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (7) (1).png" alt=""><figcaption></figcaption></figure>
 
 Alternatively, we can also compromise any user account where there is no `userPrincipalName` set or where the `userPrincipalName` doesn’t match the `sAMAccountName` of that account. From my own testing, the default domain administrator `Administrator@corp.local` doesn’t have a `userPrincipalName` set by default, and this account should by default have more privileges in LDAP than domain controllers.
 

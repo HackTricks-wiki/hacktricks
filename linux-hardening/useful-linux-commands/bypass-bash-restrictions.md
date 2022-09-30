@@ -12,7 +12,7 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (33).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (10).png" alt="" data-size="original">
 
 **Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
@@ -310,7 +310,7 @@ If you are inside a filesystem with the **read-only and noexec protections** the
 * [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 * [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
 
-<img src="../../.gitbook/assets/image (33).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (10).png" alt="" data-size="original">
 
 **Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 

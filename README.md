@@ -44,7 +44,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [SYN CUBES](https://www.syncubes.com/)
 
-<figure><img src=".gitbook/assets/image (33).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (10).png" alt=""><figcaption></figcaption></figure>
 
 **Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
@@ -62,7 +62,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [Trickest](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)
 
-<figure><img src=".gitbook/assets/image (9) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (9) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
 \
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
