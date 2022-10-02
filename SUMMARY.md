@@ -301,6 +301,7 @@
     * [Firebase Database](network-services-pentesting/pentesting-web/buckets/firebase-database.md)
   * [CGI](network-services-pentesting/pentesting-web/cgi.md)
   * [Code Review Tools](network-services-pentesting/pentesting-web/code-review-tools.md)
+  * [DotNetNuke (DNN)](network-services-pentesting/pentesting-web/dotnetnuke-dnn.md)
   * [Drupal](network-services-pentesting/pentesting-web/drupal.md)
   * [Flask](network-services-pentesting/pentesting-web/flask.md)
   * [NodeJS Express](network-services-pentesting/pentesting-web/nodejs-express.md)
