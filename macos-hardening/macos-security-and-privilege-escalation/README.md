@@ -806,6 +806,10 @@ ls -Rl /Library/Managed\ Preferences/
 
 In order to dump the memory in a MacOS machine you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
+**Note**: The following instructions will only work for Macs with Intel architecture. This tool is now archived and the last release was in 2017. 
+The binary downloaded using the instructions below targets Intel chips as Apple Silicon wasn't around in 2017. It may be possible to compile
+the binary for arm64 architecture but you'll have to try for yourself.
+
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
