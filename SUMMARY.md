@@ -187,7 +187,7 @@
   * [Pass the Ticket](windows-hardening/active-directory-methodology/pass-the-ticket.md)
   * [Password Spraying](windows-hardening/active-directory-methodology/password-spraying.md)
   * [Force NTLM Privileged Authentication](windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md)
-  * [Privileged Groups and Token Privileges](windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges.md)
+  * [Privileged Groups](windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges.md)
   * [RDP Sessions Abuse](windows-hardening/active-directory-methodology/rdp-sessions-abuse.md)
   * [Resource-based Constrained Delegation](windows-hardening/active-directory-methodology/resource-based-constrained-delegation.md)
   * [Security Descriptors](windows-hardening/active-directory-methodology/security-descriptors.md)

