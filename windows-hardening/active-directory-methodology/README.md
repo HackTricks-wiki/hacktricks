@@ -186,6 +186,14 @@ You can get help from automatic tools such as:
 
 Specially interesting from shares are the files called `Registry.xml` as they **may contain passwords** for users configured with **autologon** via Group Policy.
 
+### CVE-2021-1675/CVE-2021-34527 PrintNightmare
+
+This vulnerability allowed any authenticated user to **compromise the domain controller**.
+
+{% content-ref url="printnightmare.md" %}
+[printnightmare.md](printnightmare.md)
+{% endcontent-ref %}
+
 ## Privilege escalation on Active Directory WITH privileged credentials/session
 
 **For the following techniques a regular domain user is not enough, you need some special privileges/credentials to perform these attacks.**

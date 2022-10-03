@@ -186,6 +186,7 @@
   * [Over Pass the Hash/Pass the Key](windows-hardening/active-directory-methodology/over-pass-the-hash-pass-the-key.md)
   * [Pass the Ticket](windows-hardening/active-directory-methodology/pass-the-ticket.md)
   * [Password Spraying](windows-hardening/active-directory-methodology/password-spraying.md)
+  * [PrintNightmare](windows-hardening/active-directory-methodology/printnightmare.md)
   * [Force NTLM Privileged Authentication](windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md)
   * [Privileged Groups](windows-hardening/active-directory-methodology/privileged-groups-and-token-privileges.md)
   * [RDP Sessions Abuse](windows-hardening/active-directory-methodology/rdp-sessions-abuse.md)

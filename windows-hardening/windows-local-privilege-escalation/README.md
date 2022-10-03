@@ -61,6 +61,8 @@ Get-Hotfix -description "Security update" #List only "Security Update" patches
 
 ### Version Exploits
 
+This [site](https://msrc.microsoft.com/update-guide/vulnerability) is handy for searching out detailed information about Microsoft security vulnerabilities. This database has more than 4,700 security vulnerabilities, showing the **massive attack surface** that a Windows environment presents.
+
 **On the system**
 
 * _post/windows/gather/enum\_patches_
