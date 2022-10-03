@@ -1,13 +1,5 @@
 # Authentication, Credentials, UAC and EFS
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
-
-\
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -19,6 +11,13 @@ Get Access Today:
 * **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
+
+![](<../.gitbook/assets/image (9) (1) (2).png>)
+
+Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
+
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## Security Support Provider Interface (SSPI)
 
@@ -75,6 +74,8 @@ It is the database of the Active Directory. It is only present in Domain Control
 ### Credential Manager store
 
 Allows browsers and other Windows applications to save credentials.
+
+
 
 ![](<../.gitbook/assets/image (9) (1) (2).png>)
 
