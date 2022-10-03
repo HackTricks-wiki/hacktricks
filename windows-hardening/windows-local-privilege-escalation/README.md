@@ -1372,6 +1372,7 @@ Tools to extract passwords from browsers:
 * Mimikatz: `dpapi::chrome`
 * [**SharpWeb**](https://github.com/djhohnstein/SharpWeb)
 * [**SharpChromium**](https://github.com/djhohnstein/SharpChromium)
+* [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI)****
 
 ### **COM DLL Overwriting**
 
