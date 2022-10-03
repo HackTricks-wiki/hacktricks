@@ -339,7 +339,7 @@
   * [Special HTTP headers](network-services-pentesting/pentesting-web/special-http-headers.md)
   * [Spring Actuators](network-services-pentesting/pentesting-web/spring-actuators.md)
   * [Symfony](network-services-pentesting/pentesting-web/symphony.md)
-  * [Tomcat](network-services-pentesting/pentesting-web/tomcat/README.md)
+  * [Tomcat](network-services-pentesting/pentesting-web/tomcat.md)
     * [Basic Tomcat Info](network-services-pentesting/pentesting-web/tomcat/basic-tomcat-info.md)
   * [Uncovering CloudFlare](network-services-pentesting/pentesting-web/uncovering-cloudflare.md)
   * [VMWare (ESX, VCenter...)](network-services-pentesting/pentesting-web/vmware-esx-vcenter....md)
