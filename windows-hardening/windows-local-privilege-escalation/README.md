@@ -1451,6 +1451,22 @@ When a **client writes on a pipe**, the **server** that created the pipe can **i
 
 **Also the following tool allows to intercept a named pipe communication with a tool like burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept)
 
+## Misc
+
+### **Monitoring Command Lines for passwords**
+
+When getting a shell as a user, there may be scheduled tasks or other processes being executed which **pass credentials on the command line**. The script below captures process command lines every two seconds and compares the current state with the previous state, outputting any differences.
+
+```powershell
+while($true)
+{
+  $process = Get-WmiObject Win32_Process | Select-Object CommandLine
+  Start-Sleep 1
+  $process2 = Get-WmiObject Win32_Process | Select-Object CommandLine
+  Compare-Object -ReferenceObject $process -DifferenceObject $process2
+}
+```
+
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
 [**Read this to learn about Integrity Levels**](integrity-levels.md) **and** [**this to learn what is UAC**](../authentication-credentials-uac-and-efs.md#uac)**, then read how to**[ **bypass it**](../authentication-credentials-uac-and-efs.md#uac)**.**
