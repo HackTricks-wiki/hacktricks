@@ -1,4 +1,4 @@
-# Privilege Escalation Abusing Tokens
+# Abusing Tokens
 
 <details>
 
@@ -16,8 +16,8 @@
 
 If you **don't know what are Windows Access Tokens** read this page before continuing:
 
-{% content-ref url="access-tokens.md" %}
-[access-tokens.md](access-tokens.md)
+{% content-ref url="../access-tokens.md" %}
+[access-tokens.md](../access-tokens.md)
 {% endcontent-ref %}
 
 **Maybe you could be able to escalate privileges abusing the tokens you already have**
@@ -26,12 +26,12 @@ If you **don't know what are Windows Access Tokens** read this page before conti
 
 Any process holding this privilege can **impersonate** (but not create) any **token** for which it is able to gethandle. You can get a **privileged token** from a **Windows service** (DCOM) making it perform an **NTLM authentication** against the exploit, then execute a process as **SYSTEM**. Exploit it with [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM ](https://github.com/antonioCoco/RogueWinRM)(needs winrm disabled), [SweetPotato](https://github.com/CCob/SweetPotato), [PrintSpoofer](https://github.com/itm4n/PrintSpoofer):
 
-{% content-ref url="roguepotato-and-printspoofer.md" %}
-[roguepotato-and-printspoofer.md](roguepotato-and-printspoofer.md)
+{% content-ref url="../roguepotato-and-printspoofer.md" %}
+[roguepotato-and-printspoofer.md](../roguepotato-and-printspoofer.md)
 {% endcontent-ref %}
 
-{% content-ref url="juicypotato.md" %}
-[juicypotato.md](juicypotato.md)
+{% content-ref url="../juicypotato.md" %}
+[juicypotato.md](../juicypotato.md)
 {% endcontent-ref %}
 
 ### SeAssignPrimaryPrivilege (3.1.2)
@@ -49,7 +49,16 @@ If you have enabled this token you can use **KERB\_S4U\_LOGON** to get an **impe
 This privilege causes the system to **grant all read access** control to any file (only read).\
 Use it to **read the password hashes of local Administrator** accounts from the registry and then use "**psexec**" or "**wmicexec**" with the hash (PTH).\
 This attack won't work if the Local Administrator is disabled, or if it is configured that a Local Admin isn't admin if he is connected remotely.\
-You can **abuse this privilege** with: [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1) or with [https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug](https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug) or following IppSec in [https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab\_channel=IppSec](https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab\_channel=IppSec)
+You can **abuse this privilege** with:
+
+* [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
+* [https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug](https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug)
+* following **IppSec** in [https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab\_channel=IppSec](https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab\_channel=IppSec)
+* Or as explained in the **escalating privileges with Backup Operators** section of:
+
+{% content-ref url="../../active-directory-methodology/privileged-groups-and-token-privileges.md" %}
+[privileged-groups-and-token-privileges.md](../../active-directory-methodology/privileged-groups-and-token-privileges.md)
+{% endcontent-ref %}
 
 ### SeRestorePrivilege (3.1.5)
 
@@ -68,7 +77,11 @@ In this case, the user could **create an impersonation token** and add to it a p
 You need to create an entry in the registry with values for ImagePath and Type.\
 As you don't have access to write to HKLM, you have to **use HKCU**. But HKCU doesn't mean anything for the kernel, the way to guide the kernel here and use the expected path for a driver config is to use the path: "\Registry\User\S-1-5-21-582075628-3447520101-2530640108-1003\System\CurrentControlSet\Services\DriverName" (the ID is the **RID** of the current user).\
 So, you have to **create all that path inside HKCU and set the ImagePath** (path to the binary that is going to be executed) **and Type** (SERVICE\_KERNEL\_DRIVER 0x00000001).\
-[**Learn how to exploit it here.**](../active-directory-methodology/privileged-accounts-and-token-privileges.md#seloaddriverprivilege)
+
+
+{% content-ref url="abuse-seloaddriverprivilege.md" %}
+[abuse-seloaddriverprivilege.md](abuse-seloaddriverprivilege.md)
+{% endcontent-ref %}
 
 ### SeTakeOwnershipPrivilege (3.1.8)
 

