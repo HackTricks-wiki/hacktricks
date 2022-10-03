@@ -36,9 +36,10 @@ Let us take a look at the most common artifacts stored by browsers.
 * **Logins:** Self Explanatory.
 * **Favicons:** They are the little icons found in tabs, urls, bookmarks and the such. They can be used as another source to get more information about the website or places the user visited.
 * **Browser Sessions:** Self Explanatory.
-* \*\*Downloads:\*\*Self Explanatory.
+* **Downloads**: Self Explanatory.
 * **Form Data:** Anything typed inside forms is oftentimes stored by the browser, so the next time the user enters something inside of a form the browser can suggest previously entered data.
 * **Thumbnails:** Self Explanatory.
+* **Custom Dictionary.txt**: Words added to the dictionary by the user.
 
 ## Firefox
 

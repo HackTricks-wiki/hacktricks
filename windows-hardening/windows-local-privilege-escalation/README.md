@@ -919,6 +919,23 @@ You can **extract many DPAPI** **masterkeys** from **memory** with the `sekurlsa
 [dpapi-extracting-passwords.md](dpapi-extracting-passwords.md)
 {% endcontent-ref %}
 
+### PowerShell Credentials
+
+**PowerShell credentials** are often used for **scripting** and automation tasks as a way to store encrypted credentials conveniently. The credentials are protected using **DPAPI**, which typically means they can only be decrypted by the same user on the same computer they were created on.
+
+To **decrypt** a PS credentials from the file containing it you can do:
+
+```
+PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
+PS C:\> $credential.GetNetworkCredential().username
+
+john
+
+PS C:\htb> $credential.GetNetworkCredential().password
+
+JustAPWD!
+```
+
 ### Wifi
 
 ```bash
@@ -950,6 +967,10 @@ HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 
 Use the **Mimikatz** `dpapi::rdg` module with appropriate `/masterkey` to **decrypt any .rdg files**\
 You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurlsa::dpapi` module
+
+### Sticky Notes
+
+People often use the StickyNotes app on Windows workstations to **save passwords** and other information, not realizing it is a database file. This file is located at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` and is always worth searching for and examining.
 
 ### AppCmd.exe
 
