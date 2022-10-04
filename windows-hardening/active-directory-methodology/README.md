@@ -79,16 +79,19 @@ If you just have access to an AD environment but you don't have any credentials/
 
 When an **invalid username is requested** the server will respond using the **Kerberos error** code _KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response or the error _KRB5KDC\_ERR\_PREAUTH\_REQUIRED_, indicating that the user is required to perform pre-authentication.
 
-```
-./kerbrute_linux_amd64 userenum -d lab.ropnop.com usernames.txt
+```bash
+./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
+
 nmap -p 88 --script=krb5-enum-users --script-args="krb5-enum-users.realm='DOMAIN'" <IP>
 Nmap -p 88 --script=krb5-enum-users --script-args krb5-enum-users.realm='<domain>',userdb=/root/Desktop/usernames.txt <IP>
+
 msf> use auxiliary/gather/kerberos_enumusers
+
 crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
 ```
 
 {% hint style="warning" %}
-You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names).
+You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) **** and this one ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
 
 However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) to generate potential valid usernames.
 {% endhint %}
@@ -115,6 +118,26 @@ Ok, so you know you have already a valid username but no passwords... Then try:
 
 * [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _DONT\_REQ\_PREAUTH_ you can **request a AS\_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
 * [**Password Spraying**](password-spraying.md): Let's try the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy!) or could login with empty password: [Invoke-SprayEmptyPassword.ps1](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1).
+
+### LLMNR/NBT-NS Poisoning
+
+You might be able to **obtain** some challenge **hashes** to crack **poisoning** some protocols of the **network**:
+
+{% content-ref url="../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md" %}
+[spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
+{% endcontent-ref %}
+
+### NTML Relay
+
+If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) **** to get access to the AD env.
+
+### Steal NTLM Creds
+
+If you can **access other PCs or shares** with the **null or guest user** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTML authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+
+{% content-ref url="../ntlm/places-to-steal-ntlm-creds.md" %}
+[places-to-steal-ntlm-creds.md](../ntlm/places-to-steal-ntlm-creds.md)
+{% endcontent-ref %}
 
 ## Enumerating Active Directory WITH credentials/session
 
@@ -185,6 +208,14 @@ You can get help from automatic tools such as:
   * `--pattern txt`
 
 Specially interesting from shares are the files called `Registry.xml` as they **may contain passwords** for users configured with **autologon** via Group Policy.
+
+### Steal NTLM Creds
+
+If you can **access other PCs or shares** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTML authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+
+{% content-ref url="../ntlm/places-to-steal-ntlm-creds.md" %}
+[places-to-steal-ntlm-creds.md](../ntlm/places-to-steal-ntlm-creds.md)
+{% endcontent-ref %}
 
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
