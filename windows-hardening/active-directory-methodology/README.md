@@ -62,8 +62,8 @@ If you just have access to an AD environment but you don't have any credentials/
   * `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
   * A more detailed guide on how to enumerate a SMB server can be found here:
 
-{% content-ref url="../../network-services-pentesting/pentesting-smb/" %}
-[pentesting-smb](../../network-services-pentesting/pentesting-smb/)
+{% content-ref url="../../network-services-pentesting/pentesting-smb.md" %}
+[pentesting-smb.md](../../network-services-pentesting/pentesting-smb.md)
 {% endcontent-ref %}
 
 * **Enumerate Ldap**
@@ -87,7 +87,8 @@ If you just have access to an AD environment but you don't have any credentials/
 
 ### User enumeration
 
-When an **invalid username is requested** the server will respond using the **Kerberos error** code _KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response or the error _KRB5KDC\_ERR\_PREAUTH\_REQUIRED_, indicating that the user is required to perform pre-authentication.
+* **Anonymous SMB/LDAP enum:** Check the [**pentesting SMB**](../../network-services-pentesting/pentesting-smb.md) and [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) pages.
+* **Kerbrute enum**: When an **invalid username is requested** the server will respond using the **Kerberos error** code _KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response or the error _KRB5KDC\_ERR\_PREAUTH\_REQUIRED_, indicating that the user is required to perform pre-authentication.
 
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
@@ -100,13 +101,7 @@ msf> use auxiliary/gather/kerberos_enumusers
 crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
 ```
 
-{% hint style="warning" %}
-You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) **** and this one ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
-
-However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) to generate potential valid usernames.
-{% endhint %}
-
-#### **OWA (Outlook Web Access) Server**
+* **OWA (Outlook Web Access) Server**
 
 If you found one of these servers in the network you can also perform **user enumeration against it**. For example, you could use the tool [**MailSniper**](https://github.com/dafthack/MailSniper):
 
@@ -122,12 +117,23 @@ Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summe
 Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
 ```
 
+{% hint style="warning" %}
+You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) **** and this one ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
+
+However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) to generate potential valid usernames.
+{% endhint %}
+
 ### Knowing one or several usernames
 
 Ok, so you know you have already a valid username but no passwords... Then try:
 
 * [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _DONT\_REQ\_PREAUTH_ you can **request a AS\_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
-* [**Password Spraying**](password-spraying.md): Let's try the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy!) or could login with empty password: [Invoke-SprayEmptyPassword.ps1](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1).
+* [**Password Spraying**](password-spraying.md): Let's try the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy!).
+  * Note that you can also **spray OWA servers** to try to get access to the users mail servers.
+
+{% content-ref url="password-spraying.md" %}
+[password-spraying.md](password-spraying.md)
+{% endcontent-ref %}
 
 ### LLMNR/NBT-NS Poisoning
 
@@ -266,6 +272,20 @@ This attack is similar to Pass the Key, but instead of using hashes to request a
 {% content-ref url="pass-the-ticket.md" %}
 [pass-the-ticket.md](pass-the-ticket.md)
 {% endcontent-ref %}
+
+### Credentials Reuse
+
+If you have the **hash** or **password** of a **local administrato**r you should try to **login locally** to other **PCs** with it.
+
+```bash
+# Local Auth Spray (once you found some local admin pass or hash)
+## --local-auth flag indicate to only try 1 time per machine
+crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
+```
+
+{% hint style="warning" %}
+Note that this is quite **noisy** and **LAPS** would **mitigate** it.
+{% endhint %}
 
 ### MSSQL Abuse & Trusted Links
 
@@ -462,7 +482,7 @@ The **security descriptors** are used to **store** the **permissions** an **obje
 
 ### Custom SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs.md#security-support-provider-interface-sspi)\
+[Learn what is a SSP (Security Support Provider) here.](../windows-security-controls/#security-support-provider-interface-sspi)\
 You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.\\
 
 {% content-ref url="custom-ssp.md" %}

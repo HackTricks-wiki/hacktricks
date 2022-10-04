@@ -40,6 +40,14 @@
 [integrity-levels.md](integrity-levels.md)
 {% endcontent-ref %}
 
+## Windows Security Controls
+
+There are different things in Windows that could **prevent you from enumerating the system**, run executables or even **detect your activities**. You should **read** the following **page** and **enumerate** all these **defenses** **mechanisms** before starting the privilege escalation enumeration:
+
+{% content-ref url="../windows-security-controls/" %}
+[windows-security-controls](../windows-security-controls/)
+{% endcontent-ref %}
+
 ## System Info
 
 ### Version info enumeration
@@ -347,54 +355,6 @@ reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
 
-### AV
-
-Check is there is any anti virus running:
-
-```bash
-WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List | more
-Get-MpComputerStatus 
-```
-
-### AppLocker Policy
-
-Check which files/extensions are blacklisted/whitelisted.
-
-```powershell
-Get-ApplockerPolicy -Effective -xml
-Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
-$a = Get-ApplockerPolicy -effective
-$a.rulecollections
-```
-
-AppLocker rules applied to a host can also be read from the local registry at `HKLM\Software\Policies\Microsoft\Windows\SrpV2`.
-
-**Useful Writable folders to bypass AppLocker Policy**
-
-```
-C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
-C:\Windows\System32\spool\drivers\color
-C:\Windows\Tasks
-C:\windows\tracing
-```
-
-Commonly trusted [**"LOLBAS's"**](https://lolbas-project.github.io/) binaries can be also useful to bypass AppLocker.
-
-**Poorly written rules could also be bypassed**, like `<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`, you can create a folder called allowed anywhere and it will be allowed.
-
-**DLL enforcement very rarely enabled** due to the additional load it can put on a system, and the amount of testing required to ensure nothing will break. So using DLLs as backdoors will help bypassing AppLocker.
-
-You can use [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) or [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) to **execute Powershell** code in any process and bypass AppLocker. For more info check: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
-
-### UAC
-
-UAC is used to allow an **administrator user to not give administrator privileges to each process executed**. This is **achieved using default** the **low privileged token** of the user.\
-[**More information about UAC here**](../authentication-credentials-uac-and-efs.md#uac).
-
-```
- reg query HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ 
-```
-
 ## Users & Groups
 
 ### Enumerate Users & Groups
@@ -426,7 +386,7 @@ If you **belongs to some privileged group you may be able to escalate privileges
 
 ### Token manipulation
 
-**Learn more** about what is a **token** in this page: [**Windows Tokens**](../authentication-credentials-uac-and-efs.md#access-tokens).\
+**Learn more** about what is a **token** in this page: [**Windows Tokens**](../windows-security-controls/#access-tokens).\
 Check the following page to **learn about interesting tokens** and how to abuse them:
 
 {% content-ref url="privilege-escalation-abusing-tokens/" %}
@@ -1471,7 +1431,17 @@ while($true)
 
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
-[**Read this to learn about Integrity Levels**](integrity-levels.md) **and** [**this to learn what is UAC**](../authentication-credentials-uac-and-efs.md#uac)**, then read how to**[ **bypass it**](../authentication-credentials-uac-and-efs.md#uac)**.**
+Read this to **learn about Integrity Levels**:
+
+{% content-ref url="integrity-levels.md" %}
+[integrity-levels.md](integrity-levels.md)
+{% endcontent-ref %}
+
+Then **read this to learn about UAC and UAC bypasses:**
+
+{% content-ref url="../windows-security-controls/uac-user-account-control.md" %}
+[uac-user-account-control.md](../windows-security-controls/uac-user-account-control.md)
+{% endcontent-ref %}
 
 ## **From High Integrity to System**
 

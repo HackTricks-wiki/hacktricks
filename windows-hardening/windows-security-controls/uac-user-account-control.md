@@ -1,4 +1,4 @@
-# Authentication, Credentials, UAC and EFS
+# UAC - User Account Control
 
 <details>
 
@@ -12,74 +12,8 @@
 
 </details>
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
-## Security Support Provider Interface (SSPI)
-
-Is the API that can be use to authenticate users.
-
-The SSPI will be in charge of finding the adequate protocol for two machines that want to communicate. The preferred method for this is Kerberos. Then the SSPI will negotiate which authentication protocol will be used, these authentication protocols are called Security Support Provider (SSP), are located inside each Windows machine in the form of a DLL and both machines must support the same to be able to communicate.
-
-### Main SSPs
-
-* **Kerberos**: The preferred one
-  * %windir%\Windows\System32\kerberos.dll
-* **NTLMv1** and **NTLMv2**: Compatibility reasons
-  * %windir%\Windows\System32\msv1\_0.dll
-* **Digest**: Web servers and LDAP, password in form of a MD5 hash
-  * %windir%\Windows\System32\Wdigest.dll
-* **Schannel**: SSL and TLS
-  * %windir%\Windows\System32\Schannel.dll
-* **Negotiate**: It is used to negotiate the protocol to use (Kerberos or NTLM being Kerberos the default one)
-  * %windir%\Windows\System32\lsasrv.dll
-
-#### The negotiation could offer several methods or only one.
-
-## Local Security Authority (LSA)
-
-The **credentials** (hashed) are **saved** in the **memory** of this subsystem for Single Sign-On reasons.\
-**LSA** administrates the local **security policy** (password policy, users permissions...), **authentication**, **access tokens**...\
-LSA will be the one that will **check** for provided credentials inside the **SAM** file (for a local login) and **talk** with the **domain controller** to authenticate a domain user.
-
-The **credentials** are **saved** inside the **process \_LSASS**\_: Kerberos tickets, hashes NT and LM, easily decrypted passwords.
-
-## Credentials Storage
-
-### Security Accounts Manager (SAM)
-
-Local credentials are present in this file, the passwords are hashed.
-
-### LSASS
-
-We have talk about this. Different credentials are saved in the memory of this process.
-
-### LSA secrets
-
-LSA could save in disk some credentials:
-
-* Password of the computer account of the Active Directory (unreachable domain controller).
-* Passwords of the accounts of Windows services
-* Passwords for scheduled tasks
-* More (password of IIS applications...)
-
-### NTDS.dit
-
-It is the database of the Active Directory. It is only present in Domain Controllers.
-
-### Credential Manager store
-
-Allows browsers and other Windows applications to save credentials.
-
-
-
-![](<../.gitbook/assets/image (9) (1) (2).png>)
-
-\
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
 Get Access Today:
 
@@ -91,8 +25,8 @@ Get Access Today:
 
 For more info about integrity levels:
 
-{% content-ref url="windows-local-privilege-escalation/integrity-levels.md" %}
-[integrity-levels.md](windows-local-privilege-escalation/integrity-levels.md)
+{% content-ref url="../windows-local-privilege-escalation/integrity-levels.md" %}
+[integrity-levels.md](../windows-local-privilege-escalation/integrity-levels.md)
 {% endcontent-ref %}
 
 When UAC is in place, an administrator user is given 2 tokens: a standard user key, to perform regular actions as regular level, and one with the admin privileges.
@@ -253,13 +187,13 @@ Also, using [this](https://en.wikipedia.org/wiki/Windows\_10\_version\_history) 
 
 You can get using a **meterpreter** session. Migrate to a **process** that has the **Session** value equals to **1**:
 
-![](<../.gitbook/assets/image (96).png>)
+![](<../../.gitbook/assets/image (96).png>)
 
 (_explorer.exe_ should works)
 
 ### Your own bypass - Basic UAC bypass methodology
 
-If you take a look to **UACME** you will note that **most UAC bypasses abuse a Dll Hijacking vulnerabilit**y (mainly writing the malicious dll on _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](windows-local-privilege-escalation/dll-hijacking.md).
+If you take a look to **UACME** you will note that **most UAC bypasses abuse a Dll Hijacking vulnerabilit**y (mainly writing the malicious dll on _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking.md).
 
 1. Find a binary that will **autoelevate** (check that when it is executed it runs in a high integrity level).
 2. With procmon find "**NAME NOT FOUND**" events that can be vulnerable to **DLL Hijacking**.
@@ -272,33 +206,16 @@ If you take a look to **UACME** you will note that **most UAC bypasses abuse a D
 
 Consists on watching if an **autoElevated binary** tries to **read** from the **registry** the **name/path** of a **binary** or **command** to be **executed** (this is more interesting if the binary searches this information inside the **HKCU**).
 
-## EFS (Encrypted File System)
 
-EFS works by encrypting a file with a bulk **symmetric key**, also known as the File Encryption Key, or **FEK**. The FEK is then **encrypted** with a **public key** that is associated with the user who encrypted the file, and this encrypted FEK is stored in the $EFS **alternative data stream** of the encrypted file. To decrypt the file, the EFS component driver uses the **private key** that matches the EFS digital certificate (used to encrypt the file) to decrypt the symmetric key that is stored in the $EFS stream. From [here](https://en.wikipedia.org/wiki/Encrypting\_File\_System).
 
-Examples of files being decrypted without the user asking for it:
 
-* Files and folders are decrypted before being copied to a volume formatted with another file system, like [FAT32](https://en.wikipedia.org/wiki/File\_Allocation\_Table).
-* Encrypted files are copied over the network using the SMB/CIFS protocol, the files are decrypted before they are sent over the network.
 
-The encrypted files using this method can be **tansparently access by the owner user** (the one who has encrypted them), so if you can **become that user** you can decrypt the files (changing the password of the user and logins as him won't work).
+![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
-### Check EFS info
+Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
 
-Check if a **user** has **used** this **service** checking if this path exists:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
-
-Check **who** has **access** to the file using cipher /c \<file>\
-You can also use `cipher /e` and `cipher /d` inside a folder to **encrypt** and **decrypt** all the files
-
-### Decrypting EFS files
-
-#### Being Authority System
-
-This way requires the **victim user** to be **running** a **process** inside the host. If that is the case, using a `meterpreter` sessions you can impersonate the token of the process of the user (`impersonate_token` from `incognito`). Or you could just `migrate` to process of the user.
-
-#### Knowing the users password
-
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 
@@ -311,11 +228,3 @@ This way requires the **victim user** to be **running** a **process** inside the
 * **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-![](<../.gitbook/assets/image (9) (1) (2).png>)
-
-\
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
