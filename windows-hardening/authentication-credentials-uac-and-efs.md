@@ -12,7 +12,7 @@
 
 </details>
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+![](<../.gitbook/assets/image (9) (1) (2).png>)
 
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
 Get Access Today:
@@ -148,8 +148,8 @@ This way requires the **victim user** to be **running** a **process** inside the
 
 ****[**Local Administrator Password Solution (LAPS)**](https://www.microsoft.com/en-us/download/details.aspx?id=46899) allows you to **manage the local Administrator password** (which is **randomised**, unique, and **changed regularly**) on domain-joined computers. These passwords are centrally stored in Active Directory and restricted to authorised users using ACLs. If your user is given enough permissions you might be able to read the passwords of the local admins.
 
-{% content-ref url="../active-directory-methodology/laps.md" %}
-[laps.md](../active-directory-methodology/laps.md)
+{% content-ref url="active-directory-methodology/laps.md" %}
+[laps.md](active-directory-methodology/laps.md)
 {% endcontent-ref %}
 
 ## PS Constrained Language Mode
@@ -212,13 +212,13 @@ The SSPI will be in charge of finding the adequate protocol for two machines tha
 
 [User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a feature that enables a **consent prompt for elevated activities**.&#x20;
 
-{% content-ref url="uac-user-account-control.md" %}
-[uac-user-account-control.md](uac-user-account-control.md)
+{% content-ref url="windows-security-controls/uac-user-account-control.md" %}
+[uac-user-account-control.md](windows-security-controls/uac-user-account-control.md)
 {% endcontent-ref %}
 
 
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+![](<../.gitbook/assets/image (9) (1) (2).png>)
 
 \
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\

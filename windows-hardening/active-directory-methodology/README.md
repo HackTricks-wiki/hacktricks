@@ -482,7 +482,7 @@ The **security descriptors** are used to **store** the **permissions** an **obje
 
 ### Custom SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../windows-security-controls/#security-support-provider-interface-sspi)\
+[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs.md#security-support-provider-interface-sspi)\
 You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.\\
 
 {% content-ref url="custom-ssp.md" %}

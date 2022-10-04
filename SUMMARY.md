@@ -205,7 +205,7 @@
   * [SmbExec/ScExec](windows-hardening/ntlm/smbexec.md)
   * [WinRM](windows-hardening/ntlm/winrm.md)
   * [WmicExec](windows-hardening/ntlm/wmicexec.md)
-* [Windows Security Controls](windows-hardening/windows-security-controls/README.md)
+* [Windows Security Controls](windows-hardening/authentication-credentials-uac-and-efs.md)
   * [UAC - User Account Control](windows-hardening/windows-security-controls/uac-user-account-control.md)
 * [Stealing Credentials](windows-hardening/stealing-credentials/README.md)
   * [Credentials Protections](windows-hardening/stealing-credentials/credentials-protections.md)

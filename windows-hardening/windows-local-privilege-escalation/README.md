@@ -44,8 +44,8 @@
 
 There are different things in Windows that could **prevent you from enumerating the system**, run executables or even **detect your activities**. You should **read** the following **page** and **enumerate** all these **defenses** **mechanisms** before starting the privilege escalation enumeration:
 
-{% content-ref url="../windows-security-controls/" %}
-[windows-security-controls](../windows-security-controls/)
+{% content-ref url="../authentication-credentials-uac-and-efs.md" %}
+[authentication-credentials-uac-and-efs.md](../authentication-credentials-uac-and-efs.md)
 {% endcontent-ref %}
 
 ## System Info
@@ -386,7 +386,7 @@ If you **belongs to some privileged group you may be able to escalate privileges
 
 ### Token manipulation
 
-**Learn more** about what is a **token** in this page: [**Windows Tokens**](../windows-security-controls/#access-tokens).\
+**Learn more** about what is a **token** in this page: [**Windows Tokens**](../authentication-credentials-uac-and-efs.md#access-tokens).\
 Check the following page to **learn about interesting tokens** and how to abuse them:
 
 {% content-ref url="privilege-escalation-abusing-tokens/" %}

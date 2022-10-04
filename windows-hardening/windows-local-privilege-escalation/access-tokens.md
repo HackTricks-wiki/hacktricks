@@ -69,7 +69,7 @@ or using _Process Explorer_ from Sysinternals (select process and access"Securit
 ### Local administrator
 
 When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../windows-security-controls/#uac)**.**
+If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs.md#uac)**.**
 
 ### Credentials user impersonation
 
