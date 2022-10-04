@@ -23,11 +23,24 @@ Notice that you **could lockout some accounts if you try several wrong passwords
 
 ### Get password policy
 
-If you have some user credentials or a shell as a domain user you can get the password policy with:
+If you have some user credentials or a shell as a domain user you can **get the password policy with**:
 
-* `crackmapexec <IP> -u 'user' -p 'password' --pass-pol`
-* `enum4linx -u 'username' -p 'password' -P <IP>`
-* `(Get-DomainPolicy)."SystemAccess" #From powerview`
+```bash
+# From Linux
+crackmapexec <IP> -u 'user' -p 'password' --pass-pol
+
+enum4linx -u 'username' -p 'password' -P <IP>
+
+rpcclient -U "" -N 10.10.10.10; 
+rpcclient $>querydominfo
+
+ldapsearch -h 10.10.10.10 -x -b "DC=DOMAIN_NAME,DC=LOCAL" -s sub "*" | grep -m 1 -B 10 pwdHistoryLength
+
+# From Windows
+net accounts
+
+(Get-DomainPolicy)."SystemAccess" #From powerview
+```
 
 ### Exploitation
 

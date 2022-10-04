@@ -60,10 +60,20 @@ If you just have access to an AD environment but you don't have any credentials/
   * `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
   * `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
   * `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-  * [**A more detailed guide on how to enumerate a SMB server can be found here.**](../../network-services-pentesting/pentesting-smb.md)
+  * A more detailed guide on how to enumerate a SMB server can be found here:
+
+{% content-ref url="../../network-services-pentesting/pentesting-smb/" %}
+[pentesting-smb](../../network-services-pentesting/pentesting-smb/)
+{% endcontent-ref %}
+
 * **Enumerate Ldap**
   * `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
-  * [**A more detailed guide on how to enumerate LDAP can be found here.**](../../network-services-pentesting/pentesting-ldap.md)
+  * A more detailed guide on how to enumerate LDAP can be found here (pay **special attention to the anonymous access**):
+
+{% content-ref url="../../network-services-pentesting/pentesting-ldap.md" %}
+[pentesting-ldap.md](../../network-services-pentesting/pentesting-ldap.md)
+{% endcontent-ref %}
+
 * **Poison the network**
   * Gather credentials [**impersonating services with Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
   * Access host by [**abusing the relay attack**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
