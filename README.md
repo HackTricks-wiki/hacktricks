@@ -70,6 +70,8 @@ Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
+### [WebSec](https://websec.nl/)
+
 <figure><img src=".gitbook/assets/logo.svg" alt=""><figcaption></figcaption></figure>
 
 [**WebSec**](https://websec.nl) is a professional cybersecurity company based in **Amsterdam** which helps **protecting** businesses **all over the world** against the latest cybersecurity threats by providing **offensive-security services** with a **modern** approach.
