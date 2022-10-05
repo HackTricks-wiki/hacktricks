@@ -183,9 +183,12 @@ Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulner
 
 ### Kerberoast
 
-The goal of Kerberoasting is to harvest **TGS tickets for services that run on behalf of domain user accounts**. Part of these TGS tickets are **encrypted wit keys derived from user passwords**. As a consequence, their credentials could be **cracked offline**.
+The goal of Kerberoasting is to harvest **TGS tickets for services that run on behalf of domain user accounts**. Part of these TGS tickets are **encrypted wit keys derived from user passwords**. As a consequence, their credentials could be **cracked offline**.\
+More about this in:
 
-**Find more information about this attack** [**in the Kerberoast page**](kerberoast.md)**.**
+{% content-ref url="kerberoast.md" %}
+[kerberoast.md](kerberoast.md)
+{% endcontent-ref %}
 
 ### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
 
