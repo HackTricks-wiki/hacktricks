@@ -225,24 +225,9 @@ If you have managed to enumerate the active directory you will have **more email
 
 ### **Looks for Creds in Computer Shares**
 
-Now that you have some basic credentials you should check if you can **find** any **interesting files being shared inside the AD**. You could do that manually but it's a very boring repetitive task (and more if you find hundreds of docs you need to check).\
-You can get help from automatic tools such as:
+Now that you have some basic credentials you should check if you can **find** any **interesting files being shared inside the AD**. You could do that manually but it's a very boring repetitive task (and more if you find hundreds of docs you need to check).
 
-* [**Snaffler**](https://github.com/SnaffCon/Snaffler)****
-
-```bash
-Snaffler.exe -s -d domain.local -o snaffler.log -v data
-```
-
-* [**CrackMapExec**](https://wiki.porchetta.industries/smb-protocol/spidering-shares) spider.
-  * `-M spider_plus [--share <share_name>]`
-  * `--pattern txt`
-
-```bash
-sudo crackmapexec smb 10.10.10.10 -u username -p pass -M spider_plus --share 'Department Shares'
-```
-
-Specially interesting from shares are the files called `Registry.xml` as they **may contain passwords** for users configured with **autologon** via Group Policy.
+****[**Follow this link to learn about tools you could use.**](../../network-services-pentesting/pentesting-smb.md#domain-shared-folders-search)****
 
 ### Steal NTLM Creds
 

