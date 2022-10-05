@@ -168,6 +168,7 @@
     * [AD CS Domain Persistence](windows-hardening/active-directory-methodology/ad-certificates/domain-persistence.md)
     * [AD CS Certificate Theft](windows-hardening/active-directory-methodology/ad-certificates/certificate-theft.md)
   * [AD information in printers](windows-hardening/active-directory-methodology/ad-information-in-printers.md)
+  * [AD DNS Records](windows-hardening/active-directory-methodology/ad-dns-records.md)
   * [ASREPRoast](windows-hardening/active-directory-methodology/asreproast.md)
   * [BloodHound](windows-hardening/active-directory-methodology/bloodhound.md)
   * [Constrained Delegation](windows-hardening/active-directory-methodology/constrained-delegation.md)

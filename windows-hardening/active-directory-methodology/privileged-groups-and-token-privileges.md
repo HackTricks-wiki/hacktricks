@@ -276,6 +276,7 @@ Members of the [**Event Log Readers**](https://docs.microsoft.com/en-us/previous
 ```powershell
 #Get members of the group
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
+Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Event Log Readers"
 
 # To find "net [...] /user:blahblah password"
 wevtutil qe Security /rd:true /f:text | Select-String "/user"
@@ -284,6 +285,18 @@ wevtutil qe Security /rd:true /f:text /r:share01 /u:<username> /p:<pwd> | findst
 
 # Search using PowerShell
 Get-WinEvent -LogName security [-Credential $creds] | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'} | Select-Object @{name='CommandLine';expression={ $_.Properties[8].Value }}
+```
+
+## Exchange Windows Permissions
+
+Members are granted the ability to **write a DACL to the domain object**. An attacker could abuse this to **give a user** [**DCSync**](dcsync.md) privileges.\
+If Microsoft Exchange is installed in the AD environment, It is common to find user accounts and even computers as members of this group.
+
+This [**GitHub repo**](https://github.com/gdedrouas/Exchange-AD-Privesc) explains a few **techniques** to **escalate privileges** abusing this group permissions.
+
+```powershell
+#Get members of the group
+Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 
 ## Hyper-V Administrators
@@ -321,6 +334,12 @@ C:\htb> sc.exe start MozillaMaintenance
 {% hint style="info" %}
 This vector has been mitigated by the March 2020 Windows security updates, which changed behavior relating to hard links.
 {% endhint %}
+
+## Organization Management
+
+This group is also in environments with **Microsoft Exchange** installed.\
+members of this group can **access** the **mailboxes** of **all** domain users.\
+This group also has **full control** of the OU called `Microsoft Exchange Security Groups`, which contains the group [**`Exchange Windows Permissions`**](privileged-groups-and-token-privileges.md#exchange-windows-permissions) **** (follow the link to see how to abuse this group to privesc).
 
 ## Print Operators
 

@@ -142,7 +142,7 @@ Root:
 
 Regular user:
 
-![](<../.gitbook/assets/image (88) (1).png>)
+![](<../.gitbook/assets/image (88).png>)
 
 One, two and three backgrounded jobs:
 
@@ -150,7 +150,7 @@ One, two and three backgrounded jobs:
 
 One background job, one stopped and last command didn't finish correctly:
 
-![](<../.gitbook/assets/image (90) (1).png>)
+![](<../.gitbook/assets/image (90).png>)
 
 <details>
 
