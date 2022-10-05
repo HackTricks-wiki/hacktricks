@@ -159,6 +159,12 @@ If you can **access other PCs or shares** with the **null or guest user** you co
 
 For this phase you need to have **compromised the credentials or a session of a valid domain account.** If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
 
+Before start the authenticated enumeration you should know what is the **Kerberos double hop problem.**
+
+{% content-ref url="kerberos-double-hop-problem.md" %}
+[kerberos-double-hop-problem.md](kerberos-double-hop-problem.md)
+{% endcontent-ref %}
+
 ### Enumeration
 
 Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
