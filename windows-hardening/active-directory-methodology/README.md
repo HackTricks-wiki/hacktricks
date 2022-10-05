@@ -219,9 +219,18 @@ Now that you have some basic credentials you should check if you can **find** an
 You can get help from automatic tools such as:
 
 * [**Snaffler**](https://github.com/SnaffCon/Snaffler)****
-* Or [**CrackMapExec**](https://wiki.porchetta.industries/smb-protocol/spidering-shares) spider.
+
+```bash
+Snaffler.exe -s -d domain.local -o snaffler.log -v data
+```
+
+* [**CrackMapExec**](https://wiki.porchetta.industries/smb-protocol/spidering-shares) spider.
   * `-M spider_plus [--share <share_name>]`
   * `--pattern txt`
+
+```bash
+sudo crackmapexec smb 10.10.10.10 -u username -p pass -M spider_plus --share 'Department Shares'
+```
 
 Specially interesting from shares are the files called `Registry.xml` as they **may contain passwords** for users configured with **autologon** via Group Policy.
 
