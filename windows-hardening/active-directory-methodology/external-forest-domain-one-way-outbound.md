@@ -89,7 +89,7 @@ Sometimes when creating a trust relationship, a password must be typed in by the
 
 The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT using the Kerberos secret key of the trust account. Here, querying root.local from ext.local for members of Domain Admins:
 
-![](<../../.gitbook/assets/image (1) (1) (1) (2).png>)
+![](<../../.gitbook/assets/image (1) (1) (1).png>)
 
 ## References
 

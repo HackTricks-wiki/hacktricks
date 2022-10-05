@@ -115,7 +115,7 @@ In current Wireshark instead of `bootp` you need to search for `DHCP`
 
 _edit>preference>protocol>ssl>_
 
-![](<../../../.gitbook/assets/image (98).png>)
+![](<../../../.gitbook/assets/image (98) (1).png>)
 
 Press _Edit_ and add all the data of the server and the private key (_IP, Port, Protocol, Key file and password_)
 
