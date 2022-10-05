@@ -372,6 +372,22 @@ The tool [**https://github.com/huntergregal/mimipenguin**](https://github.com/hu
 | Apache2 (Active HTTP Basic Auth Sessions)         | apache2              |
 | OpenSSH (Active SSH Sessions - Sudo Usage)        | sshd:                |
 
+#### Search Regexes/[truffleproc](https://github.com/controlplaneio/truffleproc)
+
+```bash
+# un truffleproc.sh against your current Bash shell (e.g. $$)
+./truffleproc.sh $$
+# coredumping pid 6174
+Reading symbols from od...
+Reading symbols from /usr/lib/systemd/systemd...
+Reading symbols from /lib/systemd/libsystemd-shared-247.so...
+Reading symbols from /lib/x86_64-linux-gnu/librt.so.1...
+[...]
+# extracting strings to /tmp/tmp.o6HV0Pl3fe
+# finding secrets
+# results in /tmp/tmp.o6HV0Pl3fe/results.txt
+```
+
 ## Scheduled/Cron jobs
 
 Check if any scheduled job is vulnerable. Maybe you can take advantage of a script being executed by root (wildcard vuln? can modify files that root uses? use symlinks? create specific files in the directory that root uses?).
