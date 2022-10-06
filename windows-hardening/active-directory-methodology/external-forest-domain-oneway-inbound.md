@@ -74,37 +74,19 @@ In the previous enumeration it was found that the user **`crossuser`** is inside
 
 If you **couldn't** find any **special** access of your user in the other domain, you can still go back to the AD Methodology and try to **privesc from an unprivileged user** (things like kerberoasting for example):
 
-You can use **Powerview functions** to **enumerate** the **other domain** using the `-Domain` param like in:
-
-```powershell
-Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
-```
-
 {% content-ref url="./" %}
 [.](./)
 {% endcontent-ref %}
 
 ## Impersonation
 
-### Logging in
-
-Using a regular method with the credentials of the users who is has access to the external domain you should be able to access:
-
-```powershell
-Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
-```
-
-### SID History Abuse
-
-You could also abuse [**SID History**](sid-history-injection.md) across a forest trust.
-
-If a user is migrated **from one forest to another** and **SID Filtering is not enabled**, it becomes possible to **add a SID from the other forest**, and this **SID** will be **added** to the **user's token** when authenticating **across the trust**.
+### With signing key
 
 {% hint style="warning" %}
 As a reminder, you can get the signing key with
 
 ```powershell
-Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
+Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
 {% endhint %}
 
