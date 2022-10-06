@@ -532,16 +532,19 @@ It's important to notice that **a trust can be 1 way or 2 ways**. In the 2 ways 
 
 If Domain A trusts Domain B, A is the trusting domain and B ins the trusted one. Moreover, in **Domain A**, this would be an **Outbound trust**; and in **Domain B**, this would be an **Inbound trust**.
 
-A trust relationship can also be **transitive** (A trust B, B trust C, then A trust C) or **non-transitive**.
+**Different trusting relationships**
 
-**Different trusting relationships:**
-
-* **Parent/Child** – part of the same forest – a child domain retains an implicit two-way transitive trust with its parent. This is probably the most common type of trust that you’ll encounter.
+* **Parent-Child** – part of the same forest – a child domain retains an implicit two-way transitive trust with its parent. This is probably the most common type of trust that you’ll encounter.
 * **Cross-link** – aka a “shortcut trust” between child domains to improve referral times. Normally referrals in a complex forest have to filter up to the forest root and then back down to the target domain, so for a geographically spread out scenario, cross-links can make sense to cut down on authentication times.
 * **External** – an implicitly non-transitive trust created between disparate domains. “[External trusts provide access to resources in a domain outside of the forest that is not already joined by a forest trust.](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx)” External trusts enforce SID filtering, a security protection covered later in this post.
 * **Tree-root** – an implicit two-way transitive trust between the forest root domain and the new tree root you’re adding. I haven’t encountered tree-root trusts too often, but from the [Microsoft documentation](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx), they’re created when you create a new domain tree in a forest. These are intra-forest trusts, and they [preserve two-way transitivity](https://technet.microsoft.com/en-us/library/cc757352\(v=ws.10\).aspx) while allowing the tree to have a separate domain name (instead of child.parent.com).
-* **Forest** – a transitive trust between one forest root domain and another forest root domain. Forest trusts also enforce SID filtering.
+* **Forest** – a transitive trust between two forest root domain. Forest trusts also enforce SID filtering.
 * **MIT** – a trust with a non-Windows [RFC4120-compliant](https://tools.ietf.org/html/rfc4120) Kerberos domain. I hope to dive more into MIT trusts in the future.
+
+#### Other differences in **trusting relationships**
+
+* A trust relationship can also be **transitive** (A trust B, B trust C, then A trust C) or **non-transitive**.
+* A trust relationship can be set up as **bidirectional trust** (both trust each other) or as **one-way trust** (only one of them trust the other).
 
 ### Attack Path
 
@@ -599,7 +602,7 @@ It is possible to compromise the root domain in various ways. Examples:
 * [Schema attack](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)
 * Exploit ADCS - Create/modify certificate template to allow authentication as any user (e.g. Enterprise Admins)
 
-### External Forest Domain - One-Way (Inbound)
+### External Forest Domain - One-Way (Inbound) or bidirectional
 
 ```powershell
 Get-DomainTrust

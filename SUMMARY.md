@@ -177,7 +177,7 @@
   * [DCSync](windows-hardening/active-directory-methodology/dcsync.md)
   * [Diamond Ticket](windows-hardening/active-directory-methodology/diamond-ticket.md)
   * [DSRM Credentials](windows-hardening/active-directory-methodology/dsrm-credentials.md)
-  * [External Forest Domain - OneWay (Inbound)](windows-hardening/active-directory-methodology/external-forest-domain-oneway-inbound.md)
+  * [External Forest Domain - OneWay (Inbound) or bidirectional](windows-hardening/active-directory-methodology/external-forest-domain-oneway-inbound.md)
   * [External Forest Domain - One-Way (Outbound)](windows-hardening/active-directory-methodology/external-forest-domain-one-way-outbound.md)
   * [Golden Ticket](windows-hardening/active-directory-methodology/golden-ticket.md)
   * [Kerberoast](windows-hardening/active-directory-methodology/kerberoast.md)
