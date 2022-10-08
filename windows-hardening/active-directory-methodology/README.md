@@ -403,7 +403,7 @@ For example you could:
 *   Grant [**DCSync**](./#dcsync) privileges to a user
 
     ```powershell
-    Add-DomainObjectAcl -TargetIdentity "DC=dev,DC=cyberbotic,DC=io" -PrincipalIdentity bfarmer -Rights DCSync
+    Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
     ```
 
 ### Silver Ticket
