@@ -521,7 +521,7 @@
   * [MS Access SQL Injection](pentesting-web/sql-injection/ms-access-sql-injection.md)
   * [MSSQL Injection](pentesting-web/sql-injection/mssql-injection.md)
   * [MySQL injection](pentesting-web/sql-injection/mysql-injection/README.md)
-    * [Mysql File priv to  SSRF/RCE](pentesting-web/sql-injection/mysql-injection/mysql-ssrf.md)
+    * [MySQL File priv to SSRF/RCE](pentesting-web/sql-injection/mysql-injection/mysql-ssrf.md)
   * [Oracle injection](pentesting-web/sql-injection/oracle-injection.md)
   * [PostgreSQL injection](pentesting-web/sql-injection/postgresql-injection/README.md)
     * [dblink/lo\_import data exfiltration](pentesting-web/sql-injection/postgresql-injection/dblink-lo\_import-data-exfiltration.md)
