@@ -69,6 +69,20 @@ bulk_extractor memory.img -o out_folder
 
 Navigate through **all the information** that the tool has gathered (passwords?), **analyse** the **packets** (read[ **Pcaps analysis**](../pcap-inspection/)), search for **weird domains** (domains related to **malware** or **non-existent**).
 
+## Volatility
+
+[Volatility](https://www.volatilityfoundation.org/) is an advanced memory forensics framework. This tool scans a memory image and extracts a lot of information about Processes, Process Memory, Kernel Memory and Objects, Networking, System Information, etc.
+
+```bash
+volatility -f <path to mem image> --profile=<profile_name> plugin_name <plugin_options>
+```
+
+**pstree** - This plugin prints a parent/child relationship tree by walking the `task_struct.children` and `task_struct.sibling` members.
+
+```bash
+volatility -f memdump.mem --profile=Win7SP1x64 pstree
+```
+
 ## PhotoRec
 
 You can find it in [https://www.cgsecurity.org/wiki/TestDisk\_Download](https://www.cgsecurity.org/wiki/TestDisk\_Download)
