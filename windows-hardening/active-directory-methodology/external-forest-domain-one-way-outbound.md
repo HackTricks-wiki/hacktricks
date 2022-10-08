@@ -33,16 +33,16 @@ WhenChanged     : 2/19/2021 10:15:24 PM
 Get-DomainForeignGroupMember
 GroupDomain             : root.local
 GroupName               : External Users
-GroupDistinguishedName  : CN=External Users,CN=Users,DC=cyberbotic,DC=io
+GroupDistinguishedName  : CN=External Users,CN=Users,DC=DOMAIN,DC=LOCAL
 MemberDomain            : root.io
-MemberName              : S-1-5-21-3022719512-2989052766-178205875-1115
-MemberDistinguishedName : CN=S-1-5-21-3022719512-2989052766-178205875-1115,CN=ForeignSecurityPrincipals,DC=cyberbotic,DC=io
+MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
+MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
 
 ## Trust Account Attack
 
-When an Active Directory domain or forest trust is set up from a domain _B_ to a domain _A_ (_**B**_\*\* trusts **\_**A**\_), a \_**trust account**\_** is created in domain **\_**A**\_**, named **\_**B$**\_. Kerberos \_**trust keys\*\*,\_ derived from the **trust account’s password**, are used for **encrypting inter-realm TGTs**, when users of domain A request service tickets for services in domain B.
+When an Active Directory domain or forest trust is set up from a domain _B_ to a domain _A_ (_**B**_ trusts A), a trust account is created in domain **A**, named **B. Kerberos trust keys**,\_derived from the **trust account’s password**, are used for **encrypting inter-realm TGTs**, when users of domain A request service tickets for services in domain B.
 
 It's possible to obtain the password and hash of the trusted account from a Domain Controller using:
 
