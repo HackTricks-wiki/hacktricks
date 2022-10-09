@@ -111,8 +111,8 @@ EXEC xp_cmdshell 'powershell -w hidden -enc <blah>';
 
 ### MSSQL Extra
 
-{% content-ref url="../../network-services-pentesting/pentesting-mssql-microsoft-sql-server.md" %}
-[pentesting-mssql-microsoft-sql-server.md](../../network-services-pentesting/pentesting-mssql-microsoft-sql-server.md)
+{% content-ref url="../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/" %}
+[pentesting-mssql-microsoft-sql-server](../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/)
 {% endcontent-ref %}
 
 ## MSSQL Trusted Links
