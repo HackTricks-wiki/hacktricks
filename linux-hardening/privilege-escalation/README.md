@@ -1062,7 +1062,7 @@ The project collects legitimate functions of Unix binaries that can be abused to
 
 ### FallOfSudo
 
-If you can access `sudo -l` you can use the tool [**FallOfSudo**](https://github.com/Critical-Start/FallofSudo) to check if it finds how to exploit any sudo rule.
+If you can access `sudo -l` you can use the tool [**FallOfSudo**](https://github.com/CyberOne-Security/FallofSudo) to check if it finds how to exploit any sudo rule.
 
 ### Reusing Sudo Tokens
 
