@@ -333,8 +333,8 @@ It's possible to gain code execution with **elevated privileges on a remote comp
 
 The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.
 
-{% content-ref url="acl-persistence-abuse.md" %}
-[acl-persistence-abuse.md](acl-persistence-abuse.md)
+{% content-ref url="acl-persistence-abuse/" %}
+[acl-persistence-abuse](acl-persistence-abuse/)
 {% endcontent-ref %}
 
 ### Printer Spooler service abuse
@@ -465,8 +465,8 @@ There is a **local administrator** account inside each **DC**. Having admin priv
 
 You could **give** some **special permissions** to a **user** over some specific domain objects that will let the user **escalate privileges in the future**.
 
-{% content-ref url="acl-persistence-abuse.md" %}
-[acl-persistence-abuse.md](acl-persistence-abuse.md)
+{% content-ref url="acl-persistence-abuse/" %}
+[acl-persistence-abuse](acl-persistence-abuse/)
 {% endcontent-ref %}
 
 ### Security Descriptors
