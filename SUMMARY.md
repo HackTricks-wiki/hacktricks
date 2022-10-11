@@ -502,6 +502,7 @@
 * [Upgrade Header Smuggling](pentesting-web/h2c-smuggling.md)
 * [hop-by-hop headers](pentesting-web/abusing-hop-by-hop-headers.md)
 * [IDOR](pentesting-web/idor.md)
+* [Integer Overflow](pentesting-web/integer-overflow.md)
 * [JWT Vulnerabilities (Json Web Tokens)](pentesting-web/hacking-jwt-json-web-tokens.md)
 * [LDAP Injection](pentesting-web/ldap-injection.md)
 * [Login Bypass](pentesting-web/login-bypass/README.md)
