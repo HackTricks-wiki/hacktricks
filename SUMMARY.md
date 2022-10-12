@@ -561,6 +561,7 @@
   * [XSS in Markdown](pentesting-web/xss-cross-site-scripting/xss-in-markdown.md)
 * [XSSI (Cross-Site Script Inclusion)](pentesting-web/xssi-cross-site-script-inclusion.md)
 * [XS-Search/XS-Leaks](pentesting-web/xs-search.md)
+  * [Connection Pool Example](pentesting-web/xs-search/connection-pool-example.md)
   * [CSS Injection](pentesting-web/xs-search/css-injection/README.md)
     * [CSS Injection Code](pentesting-web/xs-search/css-injection/css-injection-code.md)
 
