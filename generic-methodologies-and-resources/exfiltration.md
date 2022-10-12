@@ -67,6 +67,8 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 
 [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 
+[**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)****
+
 #### **HTTPS Server**
 
 ```python
