@@ -217,7 +217,7 @@ or
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
 
-## OpenSSH
+## OpenSSL
 
 The Attacker (Kali)
 
