@@ -16,7 +16,7 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) is from Sysinternal Suite:
 
-> An advanced Active Directory (AD) viewer and editor. You can use AD Explorer to navigate an AD database easily, define favorite locations, view object properties, and attributes without opening dialog boxes, edit permissions, view an object's schema, and execute sophisticated searches that you can save and re-execute.
+> An advanced Active Directory (AD) viewer and editor. You can use AD Explorer to navigate an AD database easily, define favourite locations, view object properties, and attributes without opening dialog boxes, edit permissions, view an object's schema, and execute sophisticated searches that you can save and re-execute.
 
 ### Snapshots
 
@@ -155,6 +155,10 @@ proxychains bloodhound-python -u support -p '#00^BlackKnight' -ns 10.10.10.192 -
 This script will **quietly enumerate an Active Directory Domain via LDAP** parsing users, admins, groups, etc.
 
 Check it out in [**SilentHound github**](https://github.com/layer8secure/SilentHound).
+
+### RustHound
+
+BloodHound in Rust, [**check it here**](https://github.com/OPENCYBER-FR/RustHound).
 
 ## Group3r
 
