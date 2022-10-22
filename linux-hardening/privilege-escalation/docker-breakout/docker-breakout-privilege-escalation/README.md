@@ -12,7 +12,7 @@
 
 </details>
 
-<img src="../../../../.gitbook/assets/image (10).png" alt="" data-size="original">
+<img src="../../../../.gitbook/assets/image (10) (1).png" alt="" data-size="original">
 
 **Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
@@ -508,7 +508,7 @@ If you only have `hostIPC=true`, you most likely can't do much. If any process o
 
 The second technique explained in the post [https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) indicates how you can abuse bind mounts with user namespaces, to affect files inside the host (in that specific case, delete files).
 
-<img src="../../../../.gitbook/assets/image (10).png" alt="" data-size="original">
+<img src="../../../../.gitbook/assets/image (10) (1).png" alt="" data-size="original">
 
 **Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
@@ -557,7 +557,7 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket)
 * [https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4](https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4)
 
-<img src="../../../../.gitbook/assets/image (10).png" alt="" data-size="original">
+<img src="../../../../.gitbook/assets/image (10) (1).png" alt="" data-size="original">
 
 **Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 

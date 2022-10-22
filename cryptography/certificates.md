@@ -12,7 +12,7 @@
 
 </details>
 
-<img src="../.gitbook/assets/image (10).png" alt="" data-size="original">
+<img src="../.gitbook/assets/image (10) (1).png" alt="" data-size="original">
 
 **Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
@@ -195,7 +195,7 @@ openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.cer
 openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certificatename.pfx -certfile  cacert.cer
 ```
 
-<img src="../.gitbook/assets/image (10).png" alt="" data-size="original">
+<img src="../.gitbook/assets/image (10) (1).png" alt="" data-size="original">
 
 **Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 

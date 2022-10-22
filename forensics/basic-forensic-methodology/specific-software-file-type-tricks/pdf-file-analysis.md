@@ -12,7 +12,7 @@
 
 </details>
 
-<img src="../../../.gitbook/assets/image (10).png" alt="" data-size="original">
+<img src="../../../.gitbook/assets/image (10) (1).png" alt="" data-size="original">
 
 **Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
