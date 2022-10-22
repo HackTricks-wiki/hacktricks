@@ -115,7 +115,7 @@ c:\Users\Public>
 
 ### Launch a new CMD (if you have RDP access)
 
-![](<../../.gitbook/assets/image (37).png>)
+![](<../../.gitbook/assets/image (37) (1).png>)
 
 ## CLSID Problems
 

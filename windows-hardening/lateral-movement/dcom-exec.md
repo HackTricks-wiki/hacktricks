@@ -39,7 +39,7 @@ The **MMC20.Application** object lacked explicit “[LaunchPermissions](https://
 You can read more on that thread [here](https://twitter.com/tiraniddo/status/817532039771525120).\
 Viewing which other objects that have no explicit LaunchPermission set can be achieved using [@tiraniddo](https://twitter.com/tiraniddo)’s [OleView .NET](https://github.com/tyranid/oleviewdotnet), which has excellent Python filters (among other things). In this instance, we can filter down to all objects that have no explicit Launch Permission. When doing so, two objects stood out to me: `ShellBrowserWindow` and `ShellWindows`:
 
-![](<../../.gitbook/assets/image (3) (1) (1).png>)
+![](<../../.gitbook/assets/image (3) (1) (1) (1).png>)
 
 Another way to identify potential target objects is to look for the value `LaunchPermission` missing from keys in `HKCR:\AppID\{guid}`. An object with Launch Permissions set will look like below, with data representing the ACL for the object in Binary format:
 

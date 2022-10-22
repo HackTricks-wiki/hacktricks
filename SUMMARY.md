@@ -120,6 +120,7 @@
 * [Linux Environment Variables](linux-hardening/linux-environment-variables.md)
 * [Linux Post-Exploitation](linux-hardening/linux-post-exploitation/README.md)
   * [PAM - Pluggable Authentication Modules](linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)
+* [FreeIPA Pentesting](linux-hardening/freeipa-pentesting.md)
 
 ## 🍏 MacOS Hardening
 
