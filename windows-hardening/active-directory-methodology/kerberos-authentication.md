@@ -116,7 +116,7 @@ Note: the encrypted timestamp is only necessary if user requires preauthenticati
 
 After receiving the request, the KDC verifies the user identity by decrypting the timestamp. If the message is correct, then it must respond with a _KRB\_AS\_REP_:
 
-![KRB\_AS\_REP schema message](<../../.gitbook/assets/image (176).png>)
+![KRB\_AS\_REP schema message](<../../.gitbook/assets/image (176) (1).png>)
 
 _KRB\_AS\_REP_ includes the next information:
 

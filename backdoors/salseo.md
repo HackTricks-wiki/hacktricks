@@ -117,7 +117,7 @@ In your project folder have appeared the files: **DllExport.bat** and **DllExpor
 
 Press **Uninstall** (yeah, its weird but trust me, it is necessary)
 
-![](<../.gitbook/assets/image (5) (1) (1).png>)
+![](<../.gitbook/assets/image (5) (1).png>)
 
 ### **Exit Visual Studio and execute DllExport\_configure**
 
@@ -139,7 +139,7 @@ Select **x64** (if you are going to use it inside a x64 box, that was my case), 
 
 Select **Output Type = Class Library** (Project --> SalseoLoader Properties --> Application --> Output type = Class Library)
 
-![](<../.gitbook/assets/image (10) (1) (1).png>)
+![](<../.gitbook/assets/image (10) (1).png>)
 
 Select **x64** **platform** (Project --> SalseoLoader Properties --> Build --> Platform target = x64)
 
