@@ -154,7 +154,7 @@
   * [Named Pipe Client Impersonation](windows-hardening/windows-local-privilege-escalation/named-pipe-client-impersonation.md)
   * [PowerUp](windows-hardening/windows-local-privilege-escalation/powerup.md)
   * [Privilege Escalation with Autoruns](windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md)
-  * [RoguePotato and PrintSpoofer](windows-hardening/windows-local-privilege-escalation/roguepotato-and-printspoofer.md)
+  * [RoguePotato, PrintSpoofer, SharpEfsPotato](windows-hardening/windows-local-privilege-escalation/roguepotato-and-printspoofer.md)
   * [RottenPotato](windows-hardening/windows-local-privilege-escalation/rottenpotato.md)
   * [Seatbelt](windows-hardening/windows-local-privilege-escalation/seatbelt.md)
   * [SeDebug + SeImpersonate copy token](windows-hardening/windows-local-privilege-escalation/sedebug-+-seimpersonate-copy-token.md)
