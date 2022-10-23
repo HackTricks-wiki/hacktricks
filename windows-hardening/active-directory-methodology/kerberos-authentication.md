@@ -1,25 +1,20 @@
-
+# Kerberos Authentication
 
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
-
 **This information was extracted from the post:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
-# Kerberos (I): How does Kerberos work? – Theory
+## Kerberos (I): How does Kerberos work? – Theory
 
 20 - MAR - 2019 - ELOY PÉREZ
 
@@ -31,13 +26,13 @@ In this first post only basic functionality will be discussed. In later posts it
 
 If you have any doubt about the topic which it is not well explained, do not be afraid on leave a comment or question about it. Now, onto the topic.
 
-## What is Kerberos?
+### What is Kerberos?
 
 Firstly, Kerberos is an authentication protocol, not authorization. In other words, it allows to identify each user, who provides a secret password, however, it does not validates to which resources or services can this user access.
 
-Kerberos is used in Active Directory. In this platform, Kerberos provides information about the privileges of each user, but it is responsability of each service to determine if the user has access to its resources.
+Kerberos is used in Active Directory. In this platform, Kerberos provides information about the privileges of each user, but it is the responsibility of each service to determine if the user has access to its resources.
 
-## Kerberos items
+### Kerberos items
 
 In this section several components of Kerberos environment will be studied.
 
@@ -61,7 +56,7 @@ There are several structures handled by Kerberos, as tickets. Many of those stru
 
 * **KDC or krbtgt key** which is derivate from krbtgt account NTLM hash.
 * **User key** which is derivate from user NTLM hash.
-* **Service key** which is derivate from the NTLM hash of service owner, which can be an user or computer account.
+* **Service key** which is derivate from the NTLM hash of service owner, which can be a user or computer account.
 * **Session key** which is negotiated between the user and KDC.
 * **Service session key** to be use between user and service.
 
@@ -74,9 +69,9 @@ The main structures handled by Kerberos are the tickets. These tickets are deliv
 
 **PAC**
 
-The **PAC** (Privilege Attribute Certificate) is an structure included in almost every ticket. This structure contains the privileges of the user and it is signed with the KDC key.
+The **PAC** (Privilege Attribute Certificate) is a structure included in almost every ticket. This structure contains the privileges of the user and it is signed with the KDC key.
 
-It is possible to services to verify the PAC by comunicating with the KDC, although this does not happens often. Nevertheless, the PAC verification consists of checking only its signature, without inspecting if privileges inside of PAC are correct.
+It is possible to services to verify the PAC by communicating with the KDC, although this does not happen often. Nevertheless, the PAC verification consists of checking only its signature, without inspecting if privileges inside of PAC are correct.
 
 Furthermore, a client can avoid the inclusion of the PAC inside the ticket by specifying it in _KERB-PA-PAC-REQUEST_ field of ticket request.
 
@@ -90,15 +85,15 @@ Kerberos uses differents kinds of messages. The most interesting are the followi
 * **KRB\_TGS\_REP**: Used to deliver the TGS by KDC.
 * **KRB\_AP\_REQ**: Used to authenticate a user against a service, using the TGS.
 * **KRB\_AP\_REP**: (Optional) Used by service to identify itself against the user.
-* **KRB\_ERROR**: Message to comunicate error conditions.
+* **KRB\_ERROR**: Message to communicate error conditions.
 
 Additionally, even if it is not part of Kerberos, but NRPC, the AP optionally could use the **KERB\_VERIFY\_PAC\_REQUEST** message to send to KDC the signature of PAC, and verify if it is correct.
 
 Below is shown a summary of message sequency to perform authentication
 
-![Kerberos messages summary](<../../.gitbook/assets/image (174).png>)
+![Kerberos messages summary](<../../.gitbook/assets/image (174) (1).png>)
 
-## Authentication process
+### Authentication process
 
 In this section, the sequency of messages to perform authentication will be studied, starting from a user without tickets, up to being authenticated against the desired service.
 
@@ -106,7 +101,7 @@ In this section, the sequency of messages to perform authentication will be stud
 
 Firstly, user must get a TGT from KDC. To achieve this, a KRB\_AS\_REQ must be sent:
 
-![KRB\_AS\_REQ schema message](<../../.gitbook/assets/image (175).png>)
+![KRB\_AS\_REQ schema message](<../../.gitbook/assets/image (175) (1).png>)
 
 _KRB\_AS\_REQ_ has, among others, the following fields:
 
@@ -115,13 +110,13 @@ _KRB\_AS\_REQ_ has, among others, the following fields:
 * The service **SPN** asociated with **krbtgt** account
 * A **Nonce** generated by the user
 
-Note: the encrypted timestamp is only necessary if user requires preauthentication, which is common, except if [_DONT\_REQ\_PREAUTH_](https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro) __ flag is set in user account.
+Note: the encrypted timestamp is only necessary if user requires preauthentication, which is common, except if [_DONT\_REQ\_PREAUTH_](https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro) \_\_ flag is set in user account.
 
 **KRB\_AS\_REP**
 
 After receiving the request, the KDC verifies the user identity by decrypting the timestamp. If the message is correct, then it must respond with a _KRB\_AS\_REP_:
 
-![KRB\_AS\_REP schema message](<../../.gitbook/assets/image (176).png>)
+![KRB\_AS\_REP schema message](<../../.gitbook/assets/image (176) (1).png>)
 
 _KRB\_AS\_REP_ includes the next information:
 
@@ -157,7 +152,7 @@ _KRB\_TGS\_REQ_ includes:
 
 After receiving the _KRB\_TGS\_REQ_ message, the KDC returns a TGS inside of _KRB\_TGS\_REP_:
 
-![KRB\_TGS\_REP schema message](<../../.gitbook/assets/image (178).png>)
+![KRB\_TGS\_REP schema message](<../../.gitbook/assets/image (178) (1).png>)
 
 _KRB\_TGS\_REP_ includes:
 
@@ -176,7 +171,7 @@ _KRB\_TGS\_REP_ includes:
 
 To finish, if everything went well, the user already has a valid TGS to interact with service. In order to use it, user must send to the AP a _KRB\_AP\_REQ_ message:
 
-![KRB\_AP\_REQ schema message](<../../.gitbook/assets/image (179).png>)
+![KRB\_AP\_REQ schema message](<../../.gitbook/assets/image (179) (1).png>)
 
 _KRB\_AP\_REQ_ includes:
 
@@ -187,7 +182,7 @@ _KRB\_AP\_REQ_ includes:
 
 After that, if user privileges are rigth, this can access to service. If is the case, which not usually happens, the AP will verify the PAC against the KDC. And also, if mutual authentication is needed it will respond to user with a _KRB\_AP\_REP_ message.
 
-## References
+### References
 
 * Kerberos v5 RFC: [https://tools.ietf.org/html/rfc4120](https://tools.ietf.org/html/rfc4120)
 * \[MS-KILE] – Kerberos extension: [https://msdn.microsoft.com/en-us/library/cc233855.aspx](https://msdn.microsoft.com/en-us/library/cc233855.aspx)
@@ -195,7 +190,7 @@ After that, if user privileges are rigth, this can access to service. If is the 
 * Mimikatz and Active Directory Kerberos Attacks: [https://adsecurity.org/?p=556](https://adsecurity.org/?p=556)
 * Explain like I’m 5: Kerberos: [https://www.roguelynn.com/words/explain-like-im-5-kerberos/](https://www.roguelynn.com/words/explain-like-im-5-kerberos/)
 * Kerberos & KRBTGT: [https://adsecurity.org/?p=483](https://adsecurity.org/?p=483)
-* Mastering Windows Network Forensics and Investigation, 2 Edition .  Autores: S. Anson , S. Bunting, R. Johnson y S. Pearson. Editorial Sibex.
+* Mastering Windows Network Forensics and Investigation, 2 Edition . Autores: S. Anson , S. Bunting, R. Johnson y S. Pearson. Editorial Sibex.
 * Active Directory , 5 Edition. Autores: B. Desmond, J. Richards, R. Allen y A.G. Lowe-Norris
 * Service Principal Names: [https://msdn.microsoft.com/en-us/library/ms677949(v=vs.85).aspx](https://msdn.microsoft.com/en-us/library/ms677949\(v=vs.85\).aspx)
 * Niveles funcionales de Active Directory: [https://technet.microsoft.com/en-us/library/dbf0cdec-d72f-4ba3-bc7a-46410e02abb0](https://technet.microsoft.com/en-us/library/dbf0cdec-d72f-4ba3-bc7a-46410e02abb0)
@@ -213,21 +208,14 @@ After that, if user privileges are rigth, this can access to service. If is the 
 * Mitigating Pass-the-Hash (PtH) Attacks and Other Credential Theft: [https://www.microsoft.com/en-us/download/details.aspx?id=36036](https://www.microsoft.com/en-us/download/details.aspx?id=36036)
 * Fun with LDAP, Kerberos (and MSRPC) in AD Environments: [https://speakerdeck.com/ropnop/fun-with-ldap-kerberos-and-msrpc-in-ad-environments?slide=58](https://speakerdeck.com/ropnop/fun-with-ldap-kerberos-and-msrpc-in-ad-environments?slide=58)
 
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

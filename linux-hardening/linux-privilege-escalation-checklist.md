@@ -4,15 +4,15 @@
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
-Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
@@ -43,10 +43,10 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 ### [Processes](privilege-escalation/#processes)
 
 * [ ] Is any **unknown software running**?
-* [ ] Is any software with **more privileges that it should have running**?
-* [ ] Search for **exploits for running processes** (specially if running of versions)
+* [ ] Is any software running with **more privileges than it should have**?
+* [ ] Search for **exploits of running processes** (especially the version running).
 * [ ] Can you **modify the binary** of any running process?
-* [ ] **Monitor processes** and check if any interesting process is running frequently
+* [ ] **Monitor processes** and check if any interesting process is running frequently.
 * [ ] Can you **read** some interesting **process memory** (where passwords could be saved)?
 
 ### [Scheduled/Cron jobs?](privilege-escalation/#scheduled-jobs)
@@ -54,7 +54,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] Is the [**PATH** ](privilege-escalation/#cron-path)being modified by some cron and you can **write** in it?
 * [ ] Any [**wildcard** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)in a cron job?
 * [ ] Some [**modifiable script** ](privilege-escalation/#cron-script-overwriting-and-symlink)is being **executed** or is inside **modifiable folder**?
-* [ ] Have you detected that some **script** could be being [**executed** very **frequently**](privilege-escalation/#frequent-cron-jobs)? (every 1, 2 or 5 minutes)
+* [ ] Have you detected that some **script** could be or are being [**executed** very **frequently**](privilege-escalation/#frequent-cron-jobs)? (every 1, 2 or 5 minutes)
 
 ### [Services](privilege-escalation/#services)
 
@@ -89,7 +89,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] Can you [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/) you belong to?
 * [ ] **Clipboard** data?
 * [ ] Password Policy?
-* [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without password.
+* [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without a password.
 
 ### [Writable PATH](privilege-escalation/#writable-path-abuses)
 
@@ -97,8 +97,8 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 ### [SUDO and SUID commands](privilege-escalation/#sudo-and-suid)
 
-* [ ] Can you execute **any comand with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
-* [ ] Is any **exploitable suid binary**? ([**GTFOBins**](https://gtfobins.github.io))
+* [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
+* [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
 * [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/#sudo-execution-bypassing-paths)?
 * [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
 * [ ] [**SUID binary specifying path**](privilege-escalation/#suid-binary-with-command-path)? Bypass
@@ -132,7 +132,7 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * [ ] **Profile files** - Read sensitive data? Write to privesc?
 * [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
 * [ ] **Check commonly interesting folders** for sensitive data
-* [ ] **Weird Localtion/Owned files,** you may have access or alter executable files
+* [ ] **Weird Location/Owned files,** you may have access to or alter executable files
 * [ ] **Modified** in last mins
 * [ ] **Sqlite DB files**
 * [ ] **Hidden files**
@@ -158,14 +158,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
-Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
 
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>

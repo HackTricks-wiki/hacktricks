@@ -4,15 +4,11 @@
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
@@ -44,6 +40,14 @@ Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 [integrity-levels.md](integrity-levels.md)
 {% endcontent-ref %}
 
+## Windows Security Controls
+
+There are different things in Windows that could **prevent you from enumerating the system**, run executables or even **detect your activities**. You should **read** the following **page** and **enumerate** all these **defenses** **mechanisms** before starting the privilege escalation enumeration:
+
+{% content-ref url="../authentication-credentials-uac-and-efs.md" %}
+[authentication-credentials-uac-and-efs.md](../authentication-credentials-uac-and-efs.md)
+{% endcontent-ref %}
+
 ## System Info
 
 ### Version info enumeration
@@ -64,6 +68,8 @@ Get-Hotfix -description "Security update" #List only "Security Update" patches
 ```
 
 ### Version Exploits
+
+This [site](https://msrc.microsoft.com/update-guide/vulnerability) is handy for searching out detailed information about Microsoft security vulnerabilities. This database has more than 4,700 security vulnerabilities, showing the **massive attack surface** that a Windows environment presents.
 
 **On the system**
 
@@ -214,9 +220,9 @@ You can exploit this vulnerability using the tool [**WSUSpicious**](https://gith
 ## KrbRelayUp
 
 This is essentially a universal no-fix **local privilege escalation** in windows **domain** environments where **LDAP signing is not enforced,** where the **user has self rights** (to configure **RBCD**) and where the **user can create computers in the domain.**\
-\*\*\*\*All the requirements \*\*\*\* are satisfied with **default settings**.
+All the **requirements** are satisfied with **default settings**.
 
-Find the **exploit in** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)\*\*\*\*
+Find the **exploit in** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
 Even if the attack is For more information about the flow of the attack check [https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/)
 
@@ -262,6 +268,21 @@ Read this tutorial to learn how to create a MSI wrapper using this tools. Note t
 [create-msi-with-wix.md](create-msi-with-wix.md)
 {% endcontent-ref %}
 
+### Create MSI with Visual Studio
+
+* **Generate** with Cobalt Strike or Metasploit a **new Windows EXE TCP payload** in `C:\privesc\beacon.exe`
+* Open **Visual Studio**, select **Create a new project** and type "installer" into the search box. Select the **Setup Wizard** project and click **Next**.
+* Give the project a name, like **AlwaysPrivesc**, use **`C:\privesc`** for the location, select **place solution and project in the same directory**, and click **Create**.
+* Keep clicking **Next** until you get to step 3 of 4 (choose files to include). Click **Add** and select the Beacon payload you just generated. Then click **Finish**.
+* Highlight the **AlwaysPrivesc** project in the **Solution Explorer** and in the **Properties**, change **TargetPlatform** from **x86** to **x64**.
+  * There are other properties you can change, such as the **Author** and **Manufacturer** which can make the installed app look more legitimate.
+* Right-click the project and select **View > Custom Actions**.
+* Right-click **Install** and select **Add Custom Action**.
+* Double-click on **Application Folder**, select your **beacon.exe** file and click **OK**. This will ensure that the beacon payload is executed as soon as the installer is run.
+* Under the **Custom Action Properties**, change **Run64Bit** to **True**.
+* Finally, **build it**.
+  * If the warning `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'` is shown, make sure you set the platform to x64.
+
 ### MSI Installation
 
 To execute the **installation** of the malicious `.msi` file in **background:**
@@ -292,13 +313,11 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 
 ### LAPS
 
-**LAPS** allows you to **manage the local Administrator password** (which is **randomised**, unique, and **changed regularly**) on domain-joined computers. These passwords are centrally stored in Active Directory and restricted to authorised users using ACLs. Passwords are protected in transit from the client to the server using Kerberos v5 and AES.
+**LAPS** allows you to **manage the local Administrator password** (which is **randomised**, unique, and **changed regularly**) on domain-joined computers. These passwords are centrally stored in Active Directory and restricted to authorised users using ACLs. If your user is given enough permissions you might be able to read the passwords of the local admins.
 
-```bash
-reg query "HKLM\Software\Policies\Microsoft Services\AdmPwd" /v AdmPwdEnabled
-```
-
-When using LAPS, 2 new attributes appear in the computer objects of the domain: _ms-msc-AdmPwd_ and _ms-mcs-AdmPwdExpirationTime._ These attributes contains the plain-text admin password and the expiration time. Then, in a domain environment, it could be interesting to check which users can read these attributes...
+{% content-ref url="../active-directory-methodology/laps.md" %}
+[laps.md](../active-directory-methodology/laps.md)
+{% endcontent-ref %}
 
 ### WDigest
 
@@ -336,44 +355,6 @@ reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
 
-### AV
-
-Check is there is any anti virus running:
-
-```bash
-WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List | more
-Get-MpComputerStatus 
-```
-
-### AppLocker Policy
-
-Check which files/extensions are blacklisted/whitelisted.
-
-```
-Get-ApplockerPolicy -Effective -xml
-Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
-$a = Get-ApplockerPolicy -effective
-$a.rulecollections
-```
-
-**Useful Writable folders to bypass AppLocker Policy**
-
-```
-C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
-C:\Windows\System32\spool\drivers\color
-C:\Windows\Tasks
-C:\windows\tracing
-```
-
-### UAC
-
-UAC is used to allow an **administrator user to not give administrator privileges to each process executed**. This is **achieved using default** the **low privileged token** of the user.\
-[**More information about UAC here**](../authentication-credentials-uac-and-efs.md#uac).
-
-```
- reg query HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ 
-```
-
 ## Users & Groups
 
 ### Enumerate Users & Groups
@@ -399,8 +380,8 @@ Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 
 If you **belongs to some privileged group you may be able to escalate privileges**. Learn about privileged groups and how to abuse them to escalate privileges here:
 
-{% content-ref url="../active-directory-methodology/privileged-accounts-and-token-privileges.md" %}
-[privileged-accounts-and-token-privileges.md](../active-directory-methodology/privileged-accounts-and-token-privileges.md)
+{% content-ref url="../active-directory-methodology/privileged-groups-and-token-privileges.md" %}
+[privileged-groups-and-token-privileges.md](../active-directory-methodology/privileged-groups-and-token-privileges.md)
 {% endcontent-ref %}
 
 ### Token manipulation
@@ -408,8 +389,8 @@ If you **belongs to some privileged group you may be able to escalate privileges
 **Learn more** about what is a **token** in this page: [**Windows Tokens**](../authentication-credentials-uac-and-efs.md#access-tokens).\
 Check the following page to **learn about interesting tokens** and how to abuse them:
 
-{% content-ref url="privilege-escalation-abusing-tokens.md" %}
-[privilege-escalation-abusing-tokens.md](privilege-escalation-abusing-tokens.md)
+{% content-ref url="privilege-escalation-abusing-tokens/" %}
+[privilege-escalation-abusing-tokens](privilege-escalation-abusing-tokens/)
 {% endcontent-ref %}
 
 ### Logged users / Sessions
@@ -617,7 +598,7 @@ Check if **Authenticated Users** or **NT AUTHORITY\INTERACTIVE** have FullContro
 To change the Path of the binary executed:
 
 ```bash
-reg add HKLM\SYSTEM\CurrentControlSet\srevices\<service_name> /v ImagePath /t REG_EXPAND_SZ /d C:\path\new\binary /f
+reg add HKLM\SYSTEM\CurrentControlSet\services\<service_name> /v ImagePath /t REG_EXPAND_SZ /d C:\path\new\binary /f
 ```
 
 ### Services registry AppendData/AddSubdirectory permissions
@@ -896,6 +877,27 @@ Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 You can use **mimikatz module** `dpapi::cred` with the appropiate `/masterkey` to decrypt.\
 You can **extract many DPAPI** **masterkeys** from **memory** with the `sekurlsa::dpapi` module (if you are root).
 
+{% content-ref url="dpapi-extracting-passwords.md" %}
+[dpapi-extracting-passwords.md](dpapi-extracting-passwords.md)
+{% endcontent-ref %}
+
+### PowerShell Credentials
+
+**PowerShell credentials** are often used for **scripting** and automation tasks as a way to store encrypted credentials conveniently. The credentials are protected using **DPAPI**, which typically means they can only be decrypted by the same user on the same computer they were created on.
+
+To **decrypt** a PS credentials from the file containing it you can do:
+
+```
+PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
+PS C:\> $credential.GetNetworkCredential().username
+
+john
+
+PS C:\htb> $credential.GetNetworkCredential().password
+
+JustAPWD!
+```
+
 ### Wifi
 
 ```bash
@@ -927,6 +929,10 @@ HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 
 Use the **Mimikatz** `dpapi::rdg` module with appropriate `/masterkey` to **decrypt any .rdg files**\
 You can **extract many DPAPI masterkeys** from memory with the Mimikatz `sekurlsa::dpapi` module
+
+### Sticky Notes
+
+People often use the StickyNotes app on Windows workstations to **save passwords** and other information, not realizing it is a database file. This file is located at `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` and is always worth searching for and examining.
 
 ### AppCmd.exe
 
@@ -1148,6 +1154,12 @@ Search in `C:\ProgramData\Microsoft\Group Policy\history` or in _**C:\Documents 
 gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
 ```
 
+Using crackmapexec to get the passwords:
+
+```shell-session
+crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
+```
+
 ### IIS Web Config
 
 ```bash
@@ -1327,6 +1339,26 @@ Tools to extract passwords from browsers:
 
 * Mimikatz: `dpapi::chrome`
 * [**SharpWeb**](https://github.com/djhohnstein/SharpWeb)
+* [**SharpChromium**](https://github.com/djhohnstein/SharpChromium)
+* [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI)****
+
+### **COM DLL Overwriting**
+
+**Component Object Model (COM)** is a technology built within the Windows operating system that allows **intercommunication** between software components of different languages. Each COM component is **identified via a class ID (CLSID)** and each component exposes functionality via one or more interfaces, identified via interface IDs (IIDs).
+
+COM classes and interfaces are defined in the registry under **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** and **HKEY\_**_**CLASSES\_**_**ROOT\Interface** respectively. This registry is created by merging the **HKEY\_**_**LOCAL\_**_**MACHINE\Software\Classes** + **HKEY\_**_**CURRENT\_**_**USER\Software\Classes** = **HKEY\_**_**CLASSES\_**_**ROOT.**
+
+Inside the CLSIDs of this registry you can find the child registry **InProcServer32** which contains a **default value** pointing to a **DLL** and a value called **ThreadingModel** that can be **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) or **Neutral** (Thread Neutral).
+
+![](<../../.gitbook/assets/image (638).png>)
+
+Basically, if you can **overwrite any of the DLLs** that are going to be executed, you could **escalate privileges** if that DLL is going to be executed by a different user.
+
+To learn how attackers use COM Hijacking as a persistence mechanism check:
+
+{% content-ref url="com-hijacking.md" %}
+[com-hijacking.md](com-hijacking.md)
+{% endcontent-ref %}
 
 ### **Generic Password search in files and registry**
 
@@ -1383,11 +1415,39 @@ A `pipe` is a block of shared memory that processes can use for communication an
 
 `Named Pipes` is a Windows mechanism that enables two unrelated processes to exchange data between themselves, even if the processes are located on two different networks. It's very similar to client/server architecture as notions such as `a named pipe server` and a named `pipe client` exist.
 
-When a **client writes on a pipe**, the **server** that created the pipe can **impersonate** the **client** if it has **SeImpersonate** privileges. Then, if you can find a **privileged process that is going to write on any pipe that you can impersonate**, you could be able to **escalate privileges** impersonating that process after it writes inside your created pipe. [**You can read this to learn how to perform this attack**](named-pipe-client-impersonation.md)**.**
+When a **client writes on a pipe**, the **server** that created the pipe can **impersonate** the **client** if it has **SeImpersonate** privileges. Then, if you can find a **privileged process that is going to write on any pipe that you can impersonate**, you could be able to **escalate privileges** impersonating that process after it writes inside your created pipe. [**You can read this to learn how to perform this attack**](named-pipe-client-impersonation.md) **or** [**this**](./#from-high-integrity-to-system)**.**
+
+**Also the following tool allows to intercept a named pipe communication with a tool like burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept)
+
+## Misc
+
+### **Monitoring Command Lines for passwords**
+
+When getting a shell as a user, there may be scheduled tasks or other processes being executed which **pass credentials on the command line**. The script below captures process command lines every two seconds and compares the current state with the previous state, outputting any differences.
+
+```powershell
+while($true)
+{
+  $process = Get-WmiObject Win32_Process | Select-Object CommandLine
+  Start-Sleep 1
+  $process2 = Get-WmiObject Win32_Process | Select-Object CommandLine
+  Compare-Object -ReferenceObject $process -DifferenceObject $process2
+}
+```
 
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
-[**Read this to learn about Integrity Levels**](integrity-levels.md) **and** [**this to learn what is UAC**](../authentication-credentials-uac-and-efs.md#uac)**, then read how to**[ **bypass it**](../authentication-credentials-uac-and-efs.md#uac)**.**
+Read this to **learn about Integrity Levels**:
+
+{% content-ref url="integrity-levels.md" %}
+[integrity-levels.md](integrity-levels.md)
+{% endcontent-ref %}
+
+Then **read this to learn about UAC and UAC bypasses:**
+
+{% content-ref url="../windows-security-controls/uac-user-account-control.md" %}
+[uac-user-account-control.md](../windows-security-controls/uac-user-account-control.md)
+{% endcontent-ref %}
 
 ## **From High Integrity to System**
 
@@ -1461,6 +1521,7 @@ If you manages to **hijack a dll** being **loaded** by a **process** running as 
 [**Watson**](https://github.com/rasta-mouse/Watson) -- Search for known privesc vulnerabilities (needs to be compiled using VisualStudio) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
 [**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Enumerates the host searching for misconfigurations (more a gather info tool than privesc) (needs to be compiled) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
 [**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Extracts credentials from lots of softwares (precompiled exe in github)**\
+[**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Port of PowerUp to C#**\
 [~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **\~\~**\~\~ -- Check for misconfiguration (executable precompiled in github). Not recommended. It does not work well in Win10.\
 [~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Check for possible misconfigurations (exe from python). Not recommended. It does not work well in Win10.
 
@@ -1504,14 +1565,10 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-**Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-**Share your hacking tricks submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
