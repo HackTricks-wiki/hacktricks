@@ -12,6 +12,16 @@
 
 </details>
 
+<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+
+​​[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+
+{% embed url="https://www.rootedcon.com/" %}
+
+
+
+
+
 While creating this post mimikatz was having problems with every action that interacted with DPAPI therefore **most of the examples and images were taken from**: [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin)
 
 ## What is DPAPI
@@ -120,8 +130,6 @@ dpapi::masterkey /in:"C:\Users\<username>\AppData\Roaming\Microsoft\Protect\S-1-
 
 The master key of the file will appear in the output.
 
-![](<../../.gitbook/assets/image (325).png>)
-
 Finally, you can use that **masterkey** to **decrypt** the **credential file**:
 
 ```
@@ -154,8 +162,6 @@ Using the retrieved backup key, let's decrypt user's `spotless` master key:
 dpapi::masterkey /in:"C:\Users\spotless.OFFENSE\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /pvk:ntds_capi_0_d2685b31-402d-493b-8d12-5fe48ee26f5a.pvk
 ```
 
-![](<../../.gitbook/assets/image (328).png>)
-
 We can now decrypt user's `spotless` chrome secrets using their decrypted master key:
 
 ```
@@ -183,8 +189,6 @@ With extracted from LDAP computers list you can find every sub network even if y
 
 "Because Domain Admin rights are not enough. Hack them all."
 
-![](../../.gitbook/assets/HEKATOMB.png)
-
 ## DonPAPI
 
 [**DonPAPI**](https://github.com/login-securite/DonPAPI) can dump secrets protected by DPAPI automatically.
@@ -193,6 +197,14 @@ With extracted from LDAP computers list you can find every sub network even if y
 
 * [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13)
 * [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
+
+
+
+<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+
+[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+
+{% embed url="https://www.rootedcon.com/" %}
 
 <details>
 

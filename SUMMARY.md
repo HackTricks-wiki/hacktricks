@@ -36,7 +36,7 @@
   * [Linux Forensics](forensics/basic-forensic-methodology/linux-forensics.md)
   * [Malware Analysis](forensics/basic-forensic-methodology/malware-analysis.md)
   * [Memory dump analysis](forensics/basic-forensic-methodology/memory-dump-analysis/README.md)
-    * [Volatility - CheatSheet](forensics/basic-forensic-methodology/memory-dump-analysis/volatility-examples.md)
+    * [Volatility - CheatSheet](generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/volatility-cheatsheet.md)
   * [Partitions/File Systems/Carving](forensics/basic-forensic-methodology/partitions-file-systems-carving/README.md)
     * [EXT](forensics/basic-forensic-methodology/partitions-file-systems-carving/ext.md)
     * [File/Data Carving & Recovery Tools](forensics/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md)

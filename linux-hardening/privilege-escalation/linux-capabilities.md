@@ -1,7 +1,5 @@
 # Linux Capabilities
 
-## Linux Capabilities
-
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
@@ -14,9 +12,16 @@
 
 </details>
 
-Linux capabilities **provide a subset of the available root privileges** to a process. This effectively breaks up root privileges into smaller and distinctive units. Each of these units can then be independently be granted to processes. This way the full set of privileges is reduced and decreasing the risks of exploitation.
+<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+
+​​​​​​​​​[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.\
+
+
+{% embed url="https://www.rootedcon.com/" %}
 
 ## Why capabilities?
+
+Linux capabilities **provide a subset of the available root privileges** to a process. This effectively breaks up root privileges into smaller and distinctive units. Each of these units can then be independently be granted to processes. This way the full set of privileges is reduced and decreasing the risks of exploitation.
 
 To better understand how Linux capabilities work, let’s have a look first at the problem it tries to solve.
 
@@ -327,6 +332,14 @@ docker run --rm -it --cap-add=ALL r.j3ss.co/amicontained bash
 # Remove all and add only one
 docker run --rm -it  --cap-drop=ALL --cap-add=SYS_PTRACE r.j3ss.co/amicontained bash
 ```
+
+​
+
+<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+
+​​​​​​​​​​[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+
+{% embed url="https://www.rootedcon.com/" %}
 
 ## Privesc/Container Escape
 
@@ -957,6 +970,14 @@ I exploit needs to find a pointer to something mounted on the host. The original
 
 **The code of this technique was copied from the laboratory of "Abusing DAC\_READ\_SEARCH Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
 
+​
+
+<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+
+​​​​​​​​​​​[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+
+{% embed url="https://www.rootedcon.com/" %}
+
 ## CAP\_DAC\_OVERRIDE
 
 **This mean that you can bypass write permission checks on any file, so you can write any file.**
@@ -1350,6 +1371,14 @@ kill -s SIGUSR1 <nodejs-ps>
 [electron-cef-chromium-debugger-abuse.md](electron-cef-chromium-debugger-abuse.md)
 {% endcontent-ref %}
 
+​
+
+<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+
+​​​​​​​​​​​​[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+
+{% embed url="https://www.rootedcon.com/" %}
+
 ## CAP\_NET\_BIND\_SERVICE
 
 **This means that it's possible to listen in any port (even in privileged ones).** You cannot escalate privileges directly with this capability.
@@ -1539,6 +1568,14 @@ In addition, this capability also allows the process to view `dmesg` output, if 
 * [https://linux-audit.com/linux-capabilities-101/](https://linux-audit.com/linux-capabilities-101/)
 * [https://www.linuxjournal.com/article/5737](https://www.linuxjournal.com/article/5737)
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap\_sys\_module](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap\_sys\_module)
+
+​
+
+<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+
+[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+
+{% embed url="https://www.rootedcon.com/" %}
 
 <details>
 
