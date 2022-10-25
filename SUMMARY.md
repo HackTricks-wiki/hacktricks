@@ -211,6 +211,7 @@
   * [SmbExec/ScExec](windows-hardening/ntlm/smbexec.md)
   * [WinRM](windows-hardening/ntlm/winrm.md)
   * [WmicExec](windows-hardening/ntlm/wmicexec.md)
+* [Pivoting to the Cloud](https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements)
 * [Stealing Credentials](windows-hardening/stealing-credentials/README.md)
   * [Credentials Protections](windows-hardening/stealing-credentials/credentials-protections.md)
   * [Mimikatz](windows-hardening/stealing-credentials/credentials-mimikatz.md)

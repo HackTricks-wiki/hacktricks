@@ -666,6 +666,10 @@ Moreover, if the **victim mounted his hard drive**, from the **RDP session** pro
 
 [**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
+## AD -> Cloud & Cloud -> AD
+
+{% embed url="https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/azure-ad-connect-hybrid-identity" %}
+
 ## Some General Defenses
 
 [**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)\
