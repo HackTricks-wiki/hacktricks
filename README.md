@@ -40,10 +40,9 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [RootedCON](https://www.rootedcon.com/)
 
-<figure><a href="https://www.rootedcon.com/"><img src=".gitbook/assets/image.png" alt=""></a><figcaption></figcaption></figure>
+<figure><img src="https://www.rootedcon.com/img/sprites/logo-header-rooted.png" alt=""><figcaption></figcaption></figure>
 
-
-****[**RootedCON**](https://www.rootedcon.com) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+[**RootedCON**](https://www.rootedcon.com) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
 
 {% embed url="https://www.rootedcon.com/" %}
 
