@@ -230,6 +230,7 @@
   * [APK decompilers](mobile-pentesting/android-app-pentesting/apk-decompilers.md)
   * [AVD - Android Virtual Device](mobile-pentesting/android-app-pentesting/avd-android-virtual-device.md)
   * [Burp Suite Configuration for Android](mobile-pentesting/android-app-pentesting/android-burp-suite-settings.md)
+  * [Bypass Biometric Authentication (Android)](mobile-pentesting/android-app-pentesting/bypass-biometric-authentication-android.md)
   * [content:// protocol](mobile-pentesting/android-app-pentesting/content-protocol.md)
   * [Drozer Tutorial](mobile-pentesting/android-app-pentesting/drozer-tutorial/README.md)
     * [Exploiting Content Providers](mobile-pentesting/android-app-pentesting/drozer-tutorial/exploiting-content-providers.md)
