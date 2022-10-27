@@ -425,6 +425,12 @@ cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
     --dns-errorLimit 10 --use-pb --verbose -s /tmp/resolvers-trusted.txt
 ```
 
+### **Subdomain Discovery Workflow**
+
+Check this blog post I wrote about how to **automate the subdomain discovery** from a domain using **Trickest workflows** so I don't need to launch manually a bunch of tools in my computer:
+
+{% embed url="https://trickest.com/blog/full-subdomain-discovery-using-workflow/" %}
+
 ### **VHosts / Virtual Hosts**
 
 If you found an IP address containing **one or several web pages** belonging to subdomains, you could try to **find other subdomains with webs in that IP** by looking in **OSINT sources** for domains in an IP or by **brute-forcing VHost domain names in that IP**.
