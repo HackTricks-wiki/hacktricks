@@ -425,6 +425,16 @@ cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
     --dns-errorLimit 10 --use-pb --verbose -s /tmp/resolvers-trusted.txt
 ```
 
+#### Smart permutations generation
+
+* [**regulator**](https://github.com/cramppet/regulator): For more info read this [**post**](https://cramppet.github.io/regulator/index.html) but it will basically get the **main parts** from the **discovered subdomains** and will mix them to find more subdomains.
+
+```bash
+python3 main.py adobe.com adobe adobe.rules
+make_brute_list.sh adobe.rules adobe.brute
+puredns resolve adobe.brute --write adobe.valid
+```
+
 ### **Subdomain Discovery Workflow**
 
 Check this blog post I wrote about how to **automate the subdomain discovery** from a domain using **Trickest workflows** so I don't need to launch manually a bunch of tools in my computer:
