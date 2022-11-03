@@ -454,6 +454,7 @@
 * [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet/README.md)
   * [Web Vulns List](pentesting-web/pocs-and-polygloths-cheatsheet/web-vulns-list.md)
 * [2FA/OTP Bypass](pentesting-web/2fa-bypass.md)
+* [Account Takeover](pentesting-web/account-takeover.md)
 * [Bypass Payment Process](pentesting-web/bypass-payment-process.md)
 * [Captcha Bypass](pentesting-web/captcha-bypass.md)
 * [Cache Poisoning and Cache Deception](pentesting-web/cache-deception.md)
