@@ -539,6 +539,7 @@
     * [PL/pgSQL Password Bruteforce](pentesting-web/sql-injection/postgresql-injection/pl-pgsql-password-bruteforce.md)
     * [Network - Privesc, Port Scanner and NTLM chanllenge response disclosure](pentesting-web/sql-injection/postgresql-injection/network-privesc-port-scanner-and-ntlm-chanllenge-response-disclosure.md)
     * [Big Binary Files Upload (PostgreSQL)](pentesting-web/sql-injection/postgresql-injection/big-binary-files-upload-postgresql.md)
+    * [RCE with PostgreSQL Languages](pentesting-web/sql-injection/postgresql-injection/rce-with-postgresql-languages.md)
     * [RCE with PostgreSQL Extensions](pentesting-web/sql-injection/postgresql-injection/rce-with-postgresql-extensions.md)
   * [SQLMap - Cheetsheat](pentesting-web/sql-injection/sqlmap/README.md)
     * [Second Order Injection - SQLMap](pentesting-web/sql-injection/sqlmap/second-order-injection-sqlmap.md)
