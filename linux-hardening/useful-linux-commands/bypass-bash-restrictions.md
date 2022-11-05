@@ -214,6 +214,9 @@ declare historywords
 source f*
 flag.txt:1: command not found: CTF{asdasdasd}
 
+# Read file with read
+while read -r line; do echo $line; done < /etc/passwd
+
 # Get env variables
 declare
 
