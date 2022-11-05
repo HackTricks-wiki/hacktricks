@@ -17,9 +17,9 @@
 Did you know that crypto projects pay more bounty rewards than their web2 counterparts?\
 This [**crypto bounty alone**](https://hackenproof.com/jungle/jungle-smart-contract) is worth $1.000.000!\
 Check out the [**top-paying bounties**](https://hackenproof.com/programs) among crypto projects.\
-[**Sign up on HackenProof**](https://hackenproof.com/register) to get rewarded without delays and become the web3 hacker legend.
+[**Sign up on HackenProof**](https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
 
-{% embed url="https://hackenproof.com/register" %}
+{% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
 
 ## Linux Privesc
 
@@ -458,9 +458,9 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 Did you know that crypto projects pay more bounty rewards than their web2 counterparts?\
 This [**crypto bounty alone**](https://hackenproof.com/jungle/jungle-smart-contract) is worth $1.000.000!\
 Check out the [**top-paying bounties**](https://hackenproof.com/programs) among crypto projects.\
-[**Sign up on HackenProof**](https://hackenproof.com/register) to get rewarded without delays and become the web3 hacker legend.
+[**Sign up on HackenProof**](https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
 
-{% embed url="https://hackenproof.com/register" %}
+{% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
 
 ## Auto Start Extensibility Point (ASEP)
 
@@ -1265,9 +1265,9 @@ sudo killall -HUP mDNSResponder
 Did you know that crypto projects pay more bounty rewards than their web2 counterparts?\
 This [**crypto bounty alone**](https://hackenproof.com/jungle/jungle-smart-contract) is worth $1.000.000!\
 Check out the [**top-paying bounties**](https://hackenproof.com/programs) among crypto projects.\
-[**Sign up on HackenProof**](https://hackenproof.com/register) to get rewarded without delays and become the web3 hacker legend.
+[**Sign up on HackenProof**](https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
 
-{% embed url="https://hackenproof.com/register" %}
+{% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
 
 <details>
 

@@ -82,9 +82,9 @@ Get Access Today:
 **Become the web3 hacker legend**\
 ****Gain reputation points with each verified bug and conquer the top of the weekly leaderboard.
 
-[**Sign up on HackenProof**](https://hackenproof.com/register) to start earning from your hacks!
+[**Sign up on HackenProof**](https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA) to start earning from your hacks!
 
-{% embed url="https://hackenproof.com/register" %}
+{% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
 
 ### [WebSec](https://websec.nl/)
 
