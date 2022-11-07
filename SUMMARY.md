@@ -419,6 +419,7 @@
 * [5000 - Pentesting Docker Registry](network-services-pentesting/5000-pentesting-docker-registry.md)
 * [5353/UDP Multicast DNS (mDNS) and DNS-SD](network-services-pentesting/5353-udp-multicast-dns-mdns.md)
 * [5432,5433 - Pentesting Postgresql](network-services-pentesting/pentesting-postgresql.md)
+* [5439 - Pentesting Redshift](network-services-pentesting/5439-pentesting-redshift.md)
 * [5555 - Android Debug Bridge](network-services-pentesting/5555-android-debug-bridge.md)
 * [5601 - Pentesting Kibana](network-services-pentesting/5601-pentesting-kibana.md)
 * [5671,5672 - Pentesting AMQP](network-services-pentesting/5671-5672-pentesting-amqp.md)
