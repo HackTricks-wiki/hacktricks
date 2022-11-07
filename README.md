@@ -40,7 +40,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [RootedCON](https://www.rootedcon.com/)
 
-<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 [**RootedCON**](https://www.rootedcon.com) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
 
@@ -74,15 +74,15 @@ Get Access Today:
 **HackenProof is home to all crypto bug bounties.**
 
 **Get rewarded without delays**\
-****HackenProof bounties launch only when their customers deposit the reward budget. You'll get the reward after the bug is verified.
+\*\*\*\*HackenProof bounties launch only when their customers deposit the reward budget. You'll get the reward after the bug is verified.
 
 **Get experience in web3 pentesting**\
-****Blockchain protocols and smart contracts are the new Internet! Master web3 security at its rising days.
+\*\*\*\*Blockchain protocols and smart contracts are the new Internet! Master web3 security at its rising days.
 
 **Become the web3 hacker legend**\
-****Gain reputation points with each verified bug and conquer the top of the weekly leaderboard.
+\*\*\*\*Gain reputation points with each verified bug and conquer the top of the weekly leaderboard.
 
-[**Sign up on HackenProof**](https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA) to start earning from your hacks!
+[**Sign up on HackenProof**](https://hackenproof.com/register?referral\_code=i\_E6M25i\_Um9gB56o-XsIA) to start earning from your hacks!
 
 {% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
 
