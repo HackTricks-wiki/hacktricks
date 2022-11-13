@@ -36,7 +36,7 @@ One can also use the `-a` to specify the architecture or the `--platform`
 # Listing
 
 ```bash
-msfvenom -l #Payloads
+msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
 
