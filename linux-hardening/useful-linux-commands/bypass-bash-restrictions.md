@@ -51,6 +51,7 @@ nma? -p 80 localhost # /usr/bin/nmap -p 80 localhost
 # Wildcard + local directory arguments
 touch -- -la # -- stops processing options after the --
 ls *
+echo * #List current files and folders with echo and wildcard
 
 # [chars]
 /usr/bin/n[c] # /usr/bin/nc
