@@ -62,7 +62,7 @@ This applies to domains too. For example, _windows.com_ becomes _01110111..._ in
 However, what if one of these bits got automatically flipped due to a solar flare, cosmic rays, or a hardware error? That is one of the 0's becomes a 1 and vice versa.\
 Applying this concept to DNS request, it's possible that the **domain requested** that arrives to the DNS server **isn't the same as the domain initially requested.**
 
-For example a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
+For example a 1 bit modification in the domain windows.com can transform it into _windnws.com._\
 **Attackers may register as many bit-flipping domains as possible related to the victim in order to redirect legitimate users to their infrastructure**.
 
 For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
