@@ -4,15 +4,11 @@
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
@@ -30,13 +26,13 @@ If a **non-root process** wants to **change it’s `euid`**, it can only **set**
 
 ## set\*uid
 
-On first look, it’s easy to think that the system calls **`setuid` ** would set the `ruid`. In fact, when for a privileged process, it does. But in the general case, it actually **sets the `euid`**. From the [man page](https://man7.org/linux/man-pages/man2/setuid.2.html):
+On first look, it’s easy to think that the system calls **`setuid`** would set the `ruid`. In fact, when for a privileged process, it does. But in the general case, it actually **sets the `euid`**. From the [man page](https://man7.org/linux/man-pages/man2/setuid.2.html):
 
 > setuid() **sets the effective user ID of the calling process**. If the calling process is privileged (more precisely: if the process has the CAP\_SETUID capability in its user namespace), the real UID and saved set-user-ID are also set.
 
 So in the case where you’re running `setuid(0)` as root, this is sets all the ids to root, and basically locks them in (because `suid` is 0, it loses the knowledge or any previous user - of course, root processes can change to any user they want).
 
-Two less common syscalls, **`setreuid` ** (`re` for real and effective) and **`setresuid` ** (`res` includes saved) set the specific ids. Being in an unprivileged process limits these calls (from [man page](https://man7.org/linux/man-pages/man2/setresuid.2.html) for `setresuid`, though the [page](https://man7.org/linux/man-pages/man2/setreuid.2.html) for `setreuid` has similar language):
+Two less common syscalls, **`setreuid`** (`re` for real and effective) and **`setresuid`** (`res` includes saved) set the specific ids. Being in an unprivileged process limits these calls (from [man page](https://man7.org/linux/man-pages/man2/setresuid.2.html) for `setresuid`, though the [page](https://man7.org/linux/man-pages/man2/setreuid.2.html) for `setreuid` has similar language):
 
 > An unprivileged process may change its **real UID, effective UID, and saved set-user-ID**, each to one of: the current real UID, the current effective UID, or the current saved set-user-ID.
 >
@@ -76,13 +72,13 @@ The `suid` is copied from the `euid` when `execve` is called:
 
 ### sh and bash SUID <a href="#sh-and-bash-suid" id="sh-and-bash-suid"></a>
 
-**`bash` ** has a **`-p` option**, which the [man page](https://linux.die.net/man/1/bash) describes as:
+**`bash`** has a **`-p` option**, which the [man page](https://linux.die.net/man/1/bash) describes as:
 
 > Turn on _privileged_ mode. In this mode, the **$ENV** and **$BASH\_ENV** files are not processed, shell functions are not inherited from the environment, and the **SHELLOPTS**, **BASHOPTS**, **CDPATH**, and **GLOBIGNORE** variables, if they appear in the environment, are ignored. If the shell is started with the effective user (group) id not equal to the real user (group) id, and the **-p option is not supplied**, these actions are taken and the **effective user id is set to the real user id**. If the **-p** option **is supplied** at startup, the **effective user id is not reset**. Turning this option off causes the effective user and group ids to be set to the real user and group ids.
 
 In short, without `-p`, `euid` is set to `ruid` when Bash is run. **`-p` prevents this**.
 
-The **`sh` ** shell **doesn’t have a feature like this**. The [man page](https://man7.org/linux/man-pages/man1/sh.1p.html) doesn’t mention “user ID”, other than with the `-i` option, which says:
+The **`sh`** shell **doesn’t have a feature like this**. The [man page](https://man7.org/linux/man-pages/man1/sh.1p.html) doesn’t mention “user ID”, other than with the `-i` option, which says:
 
 > \-i Specify that the shell is interactive; see below. An implementation may treat specifying the -i option as an error if the real user ID of the calling process does not equal the effective user ID or if the real group ID does not equal the effective group ID.
 
@@ -253,14 +249,10 @@ Or I could call `setreuid` or `setresuid` instead of `setuid`.
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
