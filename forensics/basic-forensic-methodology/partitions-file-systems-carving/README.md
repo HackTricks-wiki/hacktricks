@@ -61,7 +61,7 @@ From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Sig
 
 In order to mount an MBR in Linux you first need to get the start offset (you can use `fdisk` and the `p` command)
 
-![](<../../../.gitbook/assets/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (1) (1) (1) (1) (7).png>)
+![](<../../../.gitbook/assets/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (6).png>)
 
 And then use the following code
 

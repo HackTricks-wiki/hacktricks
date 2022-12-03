@@ -71,7 +71,7 @@ Using _Restricted Admin mode for RDP_, when you connect to a remote computer usi
 
 Note that as your credentials are not being saved on the RDP session if **try to access network resources** your credentials won't be used. **The machine identity will be used instead**.
 
-![](../../.gitbook/assets/RAM.png)
+![](../../.gitbook/assets/ram.png)
 
 From [here](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 

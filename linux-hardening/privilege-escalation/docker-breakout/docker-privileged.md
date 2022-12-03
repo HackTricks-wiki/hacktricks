@@ -1,27 +1,22 @@
-
+# Docker --privileged
 
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
-
-# What Affects
+## What Affects
 
 When you run a container as privileged these are the protections you are disabling:
 
-## Mount /dev
+### Mount /dev
 
 In a privileged container, all the **devices can be accessed in `/dev/`**. Therefore you can **escape** by **mounting** the disk of the host.
 
@@ -48,7 +43,7 @@ cpu              nbd0             pts              stdout           tty27       
 {% endtab %}
 {% endtabs %}
 
-## Read-only kernel file systems
+### Read-only kernel file systems
 
 Kernel file systems provide a mechanism for a **process to alter the way the kernel runs.** By default, we **don't want container processes to modify the kernel**, so we mount kernel file systems as read-only within the container.
 
@@ -68,12 +63,11 @@ cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,c
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
-
 ```
 {% endtab %}
 {% endtabs %}
 
-## Masking over kernel file systems
+### Masking over kernel file systems
 
 The **/proc** file system is namespace-aware, and certain writes can be allowed, so we don't mount it read-only. However, specific directories in the /proc file system need to be **protected from writing**, and in some instances, **from reading**. In these cases, the container engines mount **tmpfs** file systems over potentially dangerous directories, preventing processes inside of the container from using them.
 
@@ -100,7 +94,7 @@ mount  | grep /proc.*tmpfs
 {% endtab %}
 {% endtabs %}
 
-## Linux capabilities
+### Linux capabilities
 
 Container engines launch the containers with a **limited number of capabilities** to control what goes on inside of the container by default. **Privileged** ones have **all** the **capabilities** accesible. To learn about capabilities read:
 
@@ -134,7 +128,7 @@ Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fset
 
 You can manipulate the capabilities available to a container without running in `--privileged` mode by using the `--cap-add` and `--cap-drop` flags.
 
-## Seccomp
+### Seccomp
 
 **Seccomp** is useful to **limit** the **syscalls** a container can call. A default seccomp profile is enabled by default when running docker containers, but in privileged mode it is disabled. Learn more about Seccomp here:
 
@@ -169,7 +163,7 @@ Seccomp_filters:	0
 
 Also, note that when Docker (or other CRIs) are used in a **Kubernetes** cluster, the **seccomp filter is disabled by default**
 
-## AppArmor
+### AppArmor
 
 **AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**. When you run with the `--privileged` flag, this protection is disabled.
 
@@ -182,7 +176,7 @@ Also, note that when Docker (or other CRIs) are used in a **Kubernetes** cluster
 --security-opt apparmor=unconfined
 ```
 
-## SELinux
+### SELinux
 
 When you run with the `--privileged` flag, **SELinux labels are disabled**, and the container runs with the **label that the container engine was executed with**. This label is usually `unconfined` and has **full access to the labels that the container engine does**. In rootless mode, the container runs with `container_runtime_t`. In root mode, it runs with `spc_t`.
 
@@ -195,9 +189,9 @@ When you run with the `--privileged` flag, **SELinux labels are disabled**, and 
 --security-opt label:disable
 ```
 
-# What Doesn't Affect
+## What Doesn't Affect
 
-## Namespaces
+### Namespaces
 
 Namespaces are **NOT affected** by the `--privileged` flag. Even though they don't have the security constraints enabled, they **do not see all of the processes on the system or the host network, for example**. Users can disable individual namespaces by using the **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** container engines flags.
 
@@ -225,29 +219,22 @@ PID   USER     TIME  COMMAND
 {% endtab %}
 {% endtabs %}
 
-## User namespace
+### User namespace
 
 Container engines do **NOT use user namespace by default**. However, rootless containers always use it to mount file systems and use more than a single UID. In the rootless case, user namespace can not be disabled; it is required to run rootless containers. User namespaces prevent certain privileges and add considerable security.
 
-# References
+## References
 
 * [https://www.redhat.com/sysadmin/privileged-flag-container-engines](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
-
 
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-

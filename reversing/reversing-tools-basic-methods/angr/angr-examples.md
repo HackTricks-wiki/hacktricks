@@ -1,27 +1,22 @@
-
+# Angr - Examples
 
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
 
-
 {% hint style="info" %}
-If the program is using **`scanf` ** to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
+If the program is using \*\*`scanf` \*\* to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
 {% endhint %}
 
-## Input to reach address (indicating the address)
+### Input to reach address (indicating the address)
 
 ```python
 import angr
@@ -56,7 +51,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-## Input to reach address (indicating prints)
+### Input to reach address (indicating prints)
 
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
@@ -93,7 +88,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-## Registry values
+### Registry values
 
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex: 
@@ -159,7 +154,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-## Stack values
+### Stack values
 
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to 
@@ -227,7 +222,7 @@ In this scenario, the input was taken with `scanf("%u %u")` and the value `"1 1"
 
 ![](<../../../.gitbook/assets/image (614).png>)
 
-## Static Memory values (Global variables)
+### Static Memory values (Global variables)
 
 ```python
 import angr
@@ -290,7 +285,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-## Dynamic Memory Values (Malloc)
+### Dynamic Memory Values (Malloc)
 
 ```python
 import angr
@@ -351,7 +346,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-## File Simulation
+### File Simulation
 
 ```python
 #In this challenge a password is read from a file and we want to simulate its content
@@ -433,7 +428,7 @@ Note that the symbolic file could also contain constant data merged with symboli
 ```
 {% endhint %}
 
-## Applying Constrains
+### Applying Constrains
 
 {% hint style="info" %}
 Sometimes simple human operations like compare 2 words of length 16 **char by char** (loop), **cost** a lot to a **angr** because it needs to generate branches **exponentially** because it generates 1 branch per if: `2^16`\
@@ -519,7 +514,7 @@ In some scenarios you can activate **veritesting**, which will merge similar sta
 Another thing you can do in these scenarios is to **hook the function giving angr something it can understand** more easily.
 {% endhint %}
 
-## Simulation Managers
+### Simulation Managers
 
 Some simulation managers can be more useful than others. In the previous example there was a problem as a lot of useful branches were created. Here, the **veritesting** technique will merge those and will find a solution.\
 This simulation manager can also be activated with: `simulation = project.factory.simgr(initial_state, veritesting=True)`
@@ -562,7 +557,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-## Hooking/Bypassing one call to a function
+### Hooking/Bypassing one call to a function
 
 ```python
 # This level performs the following computations:
@@ -632,7 +627,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-## Hooking a function / Simprocedure
+### Hooking a function / Simprocedure
 
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
@@ -718,7 +713,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-## Simulate scanf with several params
+### Simulate scanf with several params
 
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
@@ -782,7 +777,7 @@ if __name__ == '__main__':
   main(sys.argv)
 ```
 
-## Static Binaries
+### Static Binaries
 
 ```python
 # This challenge is the exact same as the first challenge, except that it was
@@ -849,24 +844,16 @@ def main(argv):
 
 if __name__ == '__main__':
   main(sys.argv)
-
 ```
-
 
 <details>
 
 <summary><strong>Support HackTricks and get benefits!</strong></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks github repo**](https://github.com/carlospolop/hacktricks)**.**
 
 </details>
-
-
