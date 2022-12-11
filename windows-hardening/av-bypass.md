@@ -114,7 +114,7 @@ These are the steps I followed:
 
 The last command will give us 2 files: a DLL source code template, and the original renamed DLL.
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/sharpdllproxy.gif" alt=""><figcaption></figcaption></figure>
 
 {% code overflow="wrap" %}
 ```
@@ -124,7 +124,7 @@ The last command will give us 2 files: a DLL source code template, and the origi
 
 These are the results:
 
-<figure><img src="../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
 Both our shellcode (encoded with [SGN](https://github.com/EgeBalci/sgn)) and the proxy DLL have a 0/26 Detection rate in [antiscan.me](https://antiscan.me)! I would call that a success.
 
@@ -147,7 +147,7 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 3. Profit, no alerts from defender
 ```
 
-<figure><img src="../.gitbook/assets/image (10).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 Evasion is just a cat & mouse game, what works today could be detected tomorrow, so never rely on only one tool, if possible, try chaining multiple evasion techniques.
@@ -275,7 +275,7 @@ Burning file onto ISO:
 
 Here is a demo for bypassing SmartScreen by packaging payloads inside ISO files using [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
 
-<figure><img src="../.gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/packmypayload_demo.gif" alt=""><figcaption></figcaption></figure>
 
 ## C# Assembly Reflection
 
