@@ -50,11 +50,11 @@ Dynamic analysis is when the AV runs your binary in a sandbox and watches for ma
 
 It turns out that Microsoft Defender's Sandbox computername is HAL9TH, so, you can check for the computer name in your malware before detonation, if the name matches HAL9TH, it means you're inside defender's sandbox, so you can make your program exit.
 
-<figure><img src="../.gitbook/assets/image (3).png" alt=""><figcaption><p>source: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (6).png" alt=""><figcaption><p>source: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
 Some other really good tips from [@mgeeky](https://twitter.com/mariuszbit) for going against Sandboxes&#x20;
 
-<figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev channel</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev channel</p></figcaption></figure>
 
 As we've said before in this post, **public tools** will eventually **get detected**, so, you should ask yourself something:
 
@@ -72,7 +72,7 @@ Whenever it's possible, always **prioritize using DLLs for evasion**, in my expe
 
 As we can see in this image, a DLL Payload from Havoc has a detection rate of 4/26 in antiscan.me, while the EXE payload has a 7/26 detection rate.
 
-<figure><img src="../.gitbook/assets/image (6).png" alt=""><figcaption><p>antiscan.me comparison of a normal Havoc EXE payload vs a normal Havoc DLL</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (6) (3).png" alt=""><figcaption><p>antiscan.me comparison of a normal Havoc EXE payload vs a normal Havoc DLL</p></figcaption></figure>
 
 Now we'll show some tricks you can use with DLL files to be much more stealthier.
 
@@ -231,7 +231,7 @@ You may have seen this screen when downloading some executables from the interne
 
 Microsoft Defender SmartScreen is a security mechanism intended to protect the end user against running potentially malicious applications.
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 SmartScreen mainly works with a reputation-based approach, meaning that uncommonly download applications will trigger SmartScreen thus alerting and preventing the end user from executing the file (although the file can still be executed by clicking More Info -> Run anyway).
 

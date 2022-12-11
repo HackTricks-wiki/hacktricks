@@ -93,6 +93,7 @@
     * [Seccomp](linux-hardening/privilege-escalation/docker-breakout/seccomp.md)
     * [AppArmor](linux-hardening/privilege-escalation/docker-breakout/apparmor.md)
     * [Namespaces](linux-hardening/privilege-escalation/docker-breakout/namespaces.md)
+    * [Cgroups](linux-hardening/privilege-escalation/docker-breakout/cgroups.md)
     * [Docker --privileged](linux-hardening/privilege-escalation/docker-breakout/docker-privileged.md)
     * [Abusing Docker Socket for Privilege Escalation](linux-hardening/privilege-escalation/docker-breakout/abusing-docker-socket-for-privilege-escalation.md)
   * [Escaping from Jails](linux-hardening/privilege-escalation/escaping-from-limited-bash.md)

@@ -1,21 +1,16 @@
-
+# Namespaces
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
-
 
 To get the namespace of a container you can do:
 
@@ -32,7 +27,7 @@ docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 docker run -ti --name ubuntu2 -v /usr:/ubuntu2 ubuntu bash
 ```
 
-## **PID namespace**
+### **PID namespace**
 
 Let’s look at processes running in Container ubuntu1:
 
@@ -62,7 +57,7 @@ root      5516  1697  0 05:54 pts/31   00:00:00 bash
 
 bash process in Container1 and Container2 have the same PID 1 since they have their own process namespace. The same bash process shows up in host machine as a different pid.
 
-## **Mount namespace**
+### **Mount namespace**
 
 Let’s look at the root directory content in Container ubuntu1:
 
@@ -82,7 +77,7 @@ boot  etc  lib   media  opt  root  sbin  sys  ubuntu2  var
 
 As we can see above, each Container has its own filesystem and we can see “/usr” from host machine mounted as “/ubuntu1” in Container1 and as “/ubuntu2” in Container2.
 
-## **Network namespace**
+### **Network namespace**
 
 Let’s look at ifconfig output in Container ubuntu1:
 
@@ -132,7 +127,7 @@ lo        Link encap:Local Loopback
 
 As we can see above, each Container has their own IP address.
 
-## **IPC Namespace**
+### **IPC Namespace**
 
 Let’s create shared memory in Container ubuntu1:
 
@@ -160,7 +155,7 @@ key        shmid      owner      perms      bytes      nattch     status
 
 As we can see above, each Container has its own IPC namespace and shared memory created in Container 1 is not visible in Container 2.
 
-## **UTS namespace**
+### **UTS namespace**
 
 Let’s look at hostname of Container ubuntu1:
 
@@ -178,7 +173,7 @@ root@8beb85abe6a5:/# hostname
 
 As we can see above, each Container has its own hostname and domainname.
 
-## User namespace
+### User namespace
 
 User namespaces are available from Linux kernel versions > 3.8. With User namespace, **userid and groupid in a namespace is different from host machine’s userid and groupid** for the same user and group. When Docker Containers use User namespace, each **container gets their own userid and groupid**. For example, **root** user **inside** **Container** is **not** root **inside** **host** **machine**. This provides greater security. In case the Container gets compromised and the hacker gets root access inside Container, the hacker still cannot break inside the host machine since the root user inside the Container is not root inside the host machine. Docker introduced support for user namespace in version 1.10.\
 To use user namespace, Docker daemon needs to be started with **`--userns-remap=default`**(In ubuntu 14.04, this can be done by modifying `/etc/default/docker` and then executing `sudo service docker restart`)\
@@ -212,30 +207,35 @@ smakam14@jungle1:/usr$ cat /proc/8955/uid_map
 As we can see above, userid 0(root) in container 1 is mapped to userid 231072 in host machine.\
 In the current Docker user namespace implementation, UID and GID mapping happens at Docker daemon level. There is work ongoing to allow the mappings to be done at Container level so that multi-tenant support is possible.
 
-## CGroup Namespace
+It's possible to check the user map from the docker container with:
+
+```
+cat /proc/self/uid_map 
+         0          0 4294967295  --> Root is root in host
+         0     231072      65536  --> Root is 231072 userid in host
+```
+
+### CGroup Namespace
 
 Each cgroup namespace has its **own set of cgroup root directories**. These root directories are the base points for the relative locations displayed in the corresponding records in the `/proc/[pid]/cgroup` file. When a process creates a new cgroup namespace using clone(2) or unshare(2) with the CLONE\_NEWCGROUP flag, its current cgroups directories become the cgroup root directories of the new namespace. (This applies both for the cgroups version 1 hierarchies and the cgroups version 2 unified hierarchy.)
 
-# References
+{% content-ref url="cgroups.md" %}
+[cgroups.md](cgroups.md)
+{% endcontent-ref %}
+
+## References
 
 * [https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)
 * [https://man7.org/linux/man-pages/man7/cgroup\_namespaces.7.html](https://man7.org/linux/man-pages/man7/cgroup\_namespaces.7.html)
 
-
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
-
-

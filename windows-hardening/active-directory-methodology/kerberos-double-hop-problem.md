@@ -136,7 +136,7 @@ Download the latest [OpenSSH Release zip from github](https://github.com/PowerSh
 
 Uncompress the zip to where you’d like. Then, run the install script - `Install-sshd.ps1`
 
-<figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 Lastly, just add a firewall rule to **open port 22**. Verify the SSH services are installed, and start them. Both of these services will need to be running for SSH to work.
 
