@@ -231,7 +231,7 @@ You may have seen this screen when downloading some executables from the interne
 
 Microsoft Defender SmartScreen is a security mechanism intended to protect the end user against running potentially malicious applications.
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (4).png" alt=""><figcaption></figcaption></figure>
 
 SmartScreen mainly works with a reputation-based approach, meaning that uncommonly download applications will trigger SmartScreen thus alerting and preventing the end user from executing the file (although the file can still be executed by clicking More Info -> Run anyway).
 
