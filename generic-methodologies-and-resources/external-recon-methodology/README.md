@@ -2,13 +2,13 @@
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -435,6 +435,12 @@ make_brute_list.sh adobe.rules adobe.brute
 puredns resolve adobe.brute --write adobe.valid
 ```
 
+* [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ is a subdomain brute-force fuzzer coupled with an immensly simple but effective DNS reponse-guided algorithm. It utilizes a provided set of input data, like a tailored wordlist or historical DNS/TLS records, to accurately synthesize more corresponding domain names and expand them even further in a loop based on information gathered during DNS scan.
+
+```
+echo www | subzuf facebook.com
+```
+
 ### **Subdomain Discovery Workflow**
 
 Check this blog post I wrote about how to **automate the subdomain discovery** from a domain using **Trickest workflows** so I don't need to launch manually a bunch of tools in my computer:
@@ -669,12 +675,12 @@ There are several tools out there that will perform part of the proposed actions
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
