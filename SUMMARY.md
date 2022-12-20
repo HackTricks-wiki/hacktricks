@@ -498,7 +498,7 @@
   * [LFI2RCE via Segmentation Fault](pentesting-web/file-inclusion/lfi2rce-via-segmentation-fault.md)
   * [LFI2RCE via phpinfo()](pentesting-web/file-inclusion/lfi2rce-via-phpinfo.md)
   * [LFI2RCE Via temp file uploads](pentesting-web/file-inclusion/lfi2rce-via-temp-file-uploads.md)
-  * [LFI2RCE via Eternal Waiting](pentesting-web/file-inclusion/lfi2rce-via-eternal-waiting.md)
+  * [LFI2RCE via Eternal waiting](pentesting-web/file-inclusion/lfi2rce-via-eternal-waiting.md)
   * [LFI2RCE Via compress.zlib + PHP\_STREAM\_PREFER\_STUDIO + Path Disclosure](pentesting-web/file-inclusion/lfi2rce-via-compress.zlib-+-php\_stream\_prefer\_studio-+-path-disclosure.md)
 * [File Upload](pentesting-web/file-upload/README.md)
   * [PDF Upload - XXE and CORS bypass](pentesting-web/file-upload/pdf-upload-xxe-and-cors-bypass.md)
