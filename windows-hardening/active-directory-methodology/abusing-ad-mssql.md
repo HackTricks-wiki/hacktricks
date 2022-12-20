@@ -102,7 +102,7 @@ If a MSSQL instance is trusted (database link) by a different MSSQL instance. If
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
 
-#Crawl trusted links, starting form the given one (the user being used by the MSSQL instance is also specified)
+#Crawl trusted links, starting from the given one (the user being used by the MSSQL instance is also specified)
 Get-SQLServerLinkCrawl -Instance mssql-srv.domain.local -Verbose
 
 #If you are sysadmin in some trusted link you can enable xp_cmdshell with:
