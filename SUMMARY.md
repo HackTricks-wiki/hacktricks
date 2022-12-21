@@ -540,6 +540,7 @@
   * [MySQL injection](pentesting-web/sql-injection/mysql-injection/README.md)
     * [MySQL File priv to SSRF/RCE](pentesting-web/sql-injection/mysql-injection/mysql-ssrf.md)
   * [Oracle injection](pentesting-web/sql-injection/oracle-injection.md)
+  * [Cypher Injection (neo4j)](pentesting-web/sql-injection/cypher-injection-neo4j.md)
   * [PostgreSQL injection](pentesting-web/sql-injection/postgresql-injection/README.md)
     * [dblink/lo\_import data exfiltration](pentesting-web/sql-injection/postgresql-injection/dblink-lo\_import-data-exfiltration.md)
     * [PL/pgSQL Password Bruteforce](pentesting-web/sql-injection/postgresql-injection/pl-pgsql-password-bruteforce.md)
