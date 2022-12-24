@@ -37,13 +37,13 @@ Some times, when you get a card you will find the ID (or part) of it written in 
 For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
 The other 2 can be brute-forced if you cannot read them from the card.
 
-<figure><img src="../../../.gitbook/assets/image (41).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (30).png" alt=""><figcaption></figcaption></figure>
 
 * **HID**
 
 Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
 
-<figure><img src="../../../.gitbook/assets/image (43).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
 
 ### Emulate/Write
 

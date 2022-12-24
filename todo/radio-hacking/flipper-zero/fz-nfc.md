@@ -59,7 +59,7 @@ Flipper Zero can **read NFC cards**, however, it **doesn't understand all the pr
 
 #### Reading the UID VS Reading the Data Inside <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
-<figure><img src="../../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (26).png" alt=""><figcaption></figcaption></figure>
 
 In Flipper, reading 13.56 MHz tags can be divided into two parts:
 
