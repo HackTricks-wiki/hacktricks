@@ -57,11 +57,11 @@ To explore the cgroup setup of a shell, you can look in the `/proc/self/cgroup` 
 
 Among the many files that can be here, **the primary cgroup interface files begin with `cgroup`**. Start by looking at `cgroup.procs` (using cat is fine), which lists the processes in the cgroup. A similar file, `cgroup.threads`, also includes threads.
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Most cgroups used for shells have these two controllers, which can control the **amount of memory** used and the **total number of processes in the cgroup**. To interact with a controller, look for the **files that match the controller prefix**. For example, if you want to see the number of threads running in the cgroup, consult pids.current:
 
-<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (5).png" alt=""><figcaption></figcaption></figure>
 
 A value of **max means that this cgroup has no specific limit**, but because cgroups are hierarchical, a cgroup back down the subdirectory chain might limit it.
 

@@ -12,7 +12,17 @@
 
 </details>
 
-##
+## Intro <a href="#kfpn7" id="kfpn7"></a>
+
+Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.
+
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
+
+Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and a radio antenna (the maximum range is 50 meters). Both the CC1101 chip and the antenna are designed to operate at frequencies in the 300-348 MHz, 387-464 MHz, and 779-928 MHz bands.
+
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 ## Actions
 
@@ -99,9 +109,10 @@ Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://doc
 Get dBms of the saved frequencies
 {% endhint %}
 
-## 125 kHz RFID
+## Reference
 
-
+* [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
+*
 
 <details>
 

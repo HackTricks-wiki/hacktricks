@@ -104,7 +104,7 @@ netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP lo
 
 Now establish the session, which will forward us to **the first server**.
 
-<figure><img src="../../.gitbook/assets/image (3) (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (5) (1).png" alt=""><figcaption></figcaption></figure>
 
 #### winrs.exe <a href="#winrsexe" id="winrsexe"></a>
 
