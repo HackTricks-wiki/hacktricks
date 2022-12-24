@@ -1,4 +1,4 @@
-# FZ - 125kHz RFID
+# Infrared
 
 <details>
 
@@ -12,46 +12,23 @@
 
 </details>
 
-## Actions
+### How the Infrared Port Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-For more info about these types of tags [**read this intro**](../../../radio-hacking/pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+**Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.
 
-### Read
+To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.
 
-Tries to **read** the card info. Then it can **emulate** them.
+### Attacks
 
-{% hint style="warning" %}
-Note that some intercoms try to protect themselves from key duplication by sending a write command prior to reading. If the write succeeds, that tag is considered fake. When Flipper emulates RFID there is no way for the reader to distinguish it from the original one, so no such problems occur.
-{% endhint %}
+You can attack Infrared with Flipper Zero:
 
-### Add Manually
-
-You can create **fake cards in Flipper Zero indicating the data** you manually and then emulate it.
-
-#### IDs on cards
-
-Some times, when you get a card you will find the ID (or part) of it written in the card visible.&#x20;
-
-* **EM Marin**
-
-For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
-The other 2 can be brute-forced if you cannot read them from the card.
-
-<figure><img src="../../../.gitbook/assets/image (106).png" alt=""><figcaption></figcaption></figure>
-
-* **HID**
-
-Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
-
-<figure><img src="../../../.gitbook/assets/image (116).png" alt=""><figcaption></figcaption></figure>
-
-### Emulate/Write
-
-After **copying** a card or **entering** the ID **manually** it's possible to **emulate** it with Flipper Zero or **write** it in a real card.
+{% content-ref url="flipper-zero/fz-infrared.md" %}
+[fz-infrared.md](flipper-zero/fz-infrared.md)
+{% endcontent-ref %}
 
 ## References
 
-* [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
+* [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 <details>
 

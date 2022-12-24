@@ -1,4 +1,4 @@
-# FZ - 125kHz RFID
+# FZ - Infrared
 
 <details>
 
@@ -12,46 +12,17 @@
 
 </details>
 
-## Actions
+### IR Signal Receiver in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-For more info about these types of tags [**read this intro**](../../../radio-hacking/pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+Flipper uses a digital IR signal receiver TSOP, which **allows intercepting signals from IR remotes**. There are some **smartphones** like Xiaomi, which also have an IR port, but keep in mind that **most of them can only transmit** signals and are **unable to receive** them.
 
-### Read
+The Flipper infrared **receiver is quite sensitive**. You can even **catch the signal** while remaining **somewhere in between** the remote and the TV. Pointing the remote directly at Flipper's IR port is unnecessary. This comes in handy when someone is switching channels while standing near the TV, and both you and Flipper are some distance away.
 
-Tries to **read** the card info. Then it can **emulate** them.
-
-{% hint style="warning" %}
-Note that some intercoms try to protect themselves from key duplication by sending a write command prior to reading. If the write succeeds, that tag is considered fake. When Flipper emulates RFID there is no way for the reader to distinguish it from the original one, so no such problems occur.
-{% endhint %}
-
-### Add Manually
-
-You can create **fake cards in Flipper Zero indicating the data** you manually and then emulate it.
-
-#### IDs on cards
-
-Some times, when you get a card you will find the ID (or part) of it written in the card visible.&#x20;
-
-* **EM Marin**
-
-For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
-The other 2 can be brute-forced if you cannot read them from the card.
-
-<figure><img src="../../../.gitbook/assets/image (106).png" alt=""><figcaption></figcaption></figure>
-
-* **HID**
-
-Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
-
-<figure><img src="../../../.gitbook/assets/image (116).png" alt=""><figcaption></figcaption></figure>
-
-### Emulate/Write
-
-After **copying** a card or **entering** the ID **manually** it's possible to **emulate** it with Flipper Zero or **write** it in a real card.
+As the **decoding of the infrared** signal happens on the **software** side, Flipper Zero potentially supports the **reception and transmission of any IR remote codes**. In the case of **unknown** protocols which could not be recognized - it **records and plays back** the raw signal exactly as received.
 
 ## References
 
-* [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
+* [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 <details>
 

