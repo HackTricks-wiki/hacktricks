@@ -1,4 +1,4 @@
-# Google CTF 2018 - Shall We Play a Game?
+# iButton
 
 <details>
 
@@ -12,69 +12,29 @@
 
 </details>
 
-Download the APK here:
+## Intro
 
-I am going to upload the APK to [https://appetize.io/](https://appetize.io) (free account) to see how the apk is behaving:
+iButton is a generic name for an electronic identification key packed in a **coin-shaped metal container**. It is also called **Dallas Touch** Memory or contact memory. Even though it is often wrongly referred to as a “magnetic” key, there is **nothing magnetic** in it. In fact, a full-fledged **microchip** operating on a digital protocol is hidden inside.
 
-![](<../../.gitbook/assets/image (46) (1).png>)
+<figure><img src="../../.gitbook/assets/image (44).png" alt=""><figcaption></figcaption></figure>
 
-Looks like you need to win 1000000 times to get the flag.
+### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Following the steps from [pentesting Android](./) you can decompile the application to get the smali code and read the Java code using jadx.
+Usually, iButton implies the physical form of the key and reader - a round coin with two contacts. For the frame surrounding it, there are lots of variations from the most common plastic holder with a hole to rings, pendants, etc.
 
-Reading the java code:
+<figure><img src="../../.gitbook/assets/image (39).png" alt=""><figcaption></figcaption></figure>
 
-![](<../../.gitbook/assets/image (47) (1).png>)
+When the key reaches the reader, the **contacts come to touch** and the key is powered to **transmit** its ID. Sometimes the key is **not read** immediately because the **contact PSD of an intercom is larger** than it should be. So the outer contours of the key and the reader couldn't touch. If that's the case, you'll have to press the key over one of the walls of the reader.
 
-It looks like the function that is going print the flag is **m().**
+<figure><img src="../../.gitbook/assets/image (40).png" alt=""><figcaption></figcaption></figure>
 
-## **Smali changes**
+### Attacks
 
-### **Call m() the first time**
+iButtons can be attacked with Flipper Zero:
 
-Lets make the application call m() if the variable _this.o != 1000000_ to do so, just cange the condition:
-
-```
- if-ne v0, v9, :cond_2 
-```
-
-to:
-
-```
- if-eq v0, v9, :cond_2 
-```
-
-![Before](<../../.gitbook/assets/image (48) (1).png>)
-
-![After](<../../.gitbook/assets/image (49) (1).png>)
-
-Follow the steps of [pentest Android](./) to recompile and sign the APK. Then, upload it to [https://appetize.io/](https://appetize.io) and lets see what happens:
-
-![](<../../.gitbook/assets/image (50) (1).png>)
-
-Looks like the flag is written without being completely decrypted. Probably the m() function should be called 1000000 times.
-
-**Other way** to do this is to not change the instrucction but change the compared instructions:
-
-![](<../../.gitbook/assets/image (55).png>)
-
-**Another way** is instead of comparing with 1000000, set the value to 1 so this.o is compared with 1:
-
-![](<../../.gitbook/assets/image (57).png>)
-
-A forth way is to add an instruction to move to value of v9(1000000) to v0 _(this.o)_:
-
-![](<../../.gitbook/assets/image (58).png>)
-
-![](<../../.gitbook/assets/image (52).png>)
-
-## Solution
-
-Make the application run the loop 100000 times when you win the first time. To do so, you only need to create the **:goto\_6** loop and make the application **junp there if \_this.o**\_\*\* does not value 100000\*\*:
-
-![](<../../.gitbook/assets/image (59).png>)
-
-You need to do this inside a physical device as (I don't know why) this doesn't work in an emulated device.
+{% content-ref url="flipper-zero/fz-ibutton.md" %}
+[fz-ibutton.md](flipper-zero/fz-ibutton.md)
+{% endcontent-ref %}
 
 <details>
 

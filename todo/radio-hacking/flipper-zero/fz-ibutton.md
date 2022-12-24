@@ -1,4 +1,4 @@
-# Google CTF 2018 - Shall We Play a Game?
+# FZ - iButton
 
 <details>
 
@@ -12,69 +12,25 @@
 
 </details>
 
-Download the APK here:
+## Design
 
-I am going to upload the APK to [https://appetize.io/](https://appetize.io) (free account) to see how the apk is behaving:
+The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.
 
-![](<../../.gitbook/assets/image (46) (1).png>)
+<figure><img src="../../../.gitbook/assets/image (46).png" alt=""><figcaption></figcaption></figure>
 
-Looks like you need to win 1000000 times to get the flag.
+## Actions
 
-Following the steps from [pentesting Android](./) you can decompile the application to get the smali code and read the Java code using jadx.
+### Read
 
-Reading the java code:
+In Read Mode Flipper is waiting for the iButton key to touch and is able to digest any of three types of keys: **Dallas, Cyfral, and Metakom**. Flipper will **figure out the type of the key itself**. The name of the key protocol will be displayed on the screen above the ID number.
 
-![](<../../.gitbook/assets/image (47) (1).png>)
+### Add manually
 
-It looks like the function that is going print the flag is **m().**
+It's possible to **add manually** an iButton of type: **Dallas, Cyfral, and Metakom**
 
-## **Smali changes**
+### **Emulate**
 
-### **Call m() the first time**
-
-Lets make the application call m() if the variable _this.o != 1000000_ to do so, just cange the condition:
-
-```
- if-ne v0, v9, :cond_2 
-```
-
-to:
-
-```
- if-eq v0, v9, :cond_2 
-```
-
-![Before](<../../.gitbook/assets/image (48) (1).png>)
-
-![After](<../../.gitbook/assets/image (49) (1).png>)
-
-Follow the steps of [pentest Android](./) to recompile and sign the APK. Then, upload it to [https://appetize.io/](https://appetize.io) and lets see what happens:
-
-![](<../../.gitbook/assets/image (50) (1).png>)
-
-Looks like the flag is written without being completely decrypted. Probably the m() function should be called 1000000 times.
-
-**Other way** to do this is to not change the instrucction but change the compared instructions:
-
-![](<../../.gitbook/assets/image (55).png>)
-
-**Another way** is instead of comparing with 1000000, set the value to 1 so this.o is compared with 1:
-
-![](<../../.gitbook/assets/image (57).png>)
-
-A forth way is to add an instruction to move to value of v9(1000000) to v0 _(this.o)_:
-
-![](<../../.gitbook/assets/image (58).png>)
-
-![](<../../.gitbook/assets/image (52).png>)
-
-## Solution
-
-Make the application run the loop 100000 times when you win the first time. To do so, you only need to create the **:goto\_6** loop and make the application **junp there if \_this.o**\_\*\* does not value 100000\*\*:
-
-![](<../../.gitbook/assets/image (59).png>)
-
-You need to do this inside a physical device as (I don't know why) this doesn't work in an emulated device.
+It's possible to **emulate** saved iButtons (read or manually added).
 
 <details>
 
