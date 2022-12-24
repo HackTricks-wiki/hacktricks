@@ -12,6 +12,14 @@
 
 </details>
 
+## Intro
+
+For more info about how 125kHz tags work check:
+
+{% content-ref url="../../../radio-hacking/pentesting-rfid.md" %}
+[pentesting-rfid.md](../../../radio-hacking/pentesting-rfid.md)
+{% endcontent-ref %}
+
 ## Actions
 
 For more info about these types of tags [**read this intro**](../../../radio-hacking/pentesting-rfid.md#low-frequency-rfid-tags-125khz).

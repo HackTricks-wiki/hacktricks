@@ -12,6 +12,14 @@
 
 </details>
 
+## Intro
+
+For more info about what is an iButton check:
+
+{% content-ref url="../ibutton.md" %}
+[ibutton.md](../ibutton.md)
+{% endcontent-ref %}
+
 ## Design
 
 The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.

@@ -12,6 +12,14 @@
 
 </details>
 
+## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+
+For more info about how Infrared works check:
+
+{% content-ref url="../infrared.md" %}
+[infrared.md](../infrared.md)
+{% endcontent-ref %}
+
 ## IR Signal Receiver in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
 Flipper uses a digital IR signal receiver TSOP, which **allows intercepting signals from IR remotes**. There are some **smartphones** like Xiaomi, which also have an IR port, but keep in mind that **most of them can only transmit** signals and are **unable to receive** them.

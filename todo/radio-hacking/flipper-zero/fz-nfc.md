@@ -12,6 +12,14 @@
 
 </details>
 
+## Intro <a href="#9wrzi" id="9wrzi"></a>
+
+For info about RFID and NFC check the following page:
+
+{% content-ref url="../../../radio-hacking/pentesting-rfid.md" %}
+[pentesting-rfid.md](../../../radio-hacking/pentesting-rfid.md)
+{% endcontent-ref %}
+
 ## Supported NFC cards <a href="#9wrzi" id="9wrzi"></a>
 
 {% hint style="danger" %}

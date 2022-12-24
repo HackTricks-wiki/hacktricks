@@ -675,6 +675,7 @@
   * [iButton](todo/radio-hacking/ibutton.md)
   * [Flipper Zero](todo/radio-hacking/flipper-zero/README.md)
     * [FZ - NFC](todo/radio-hacking/flipper-zero/fz-nfc.md)
+    * [FZ - Sub-Ghz](todo/radio-hacking/flipper-zero/fz-sub-ghz.md)
     * [FZ - Infrared](todo/radio-hacking/flipper-zero/fz-infrared.md)
     * [FZ - iButton](todo/radio-hacking/flipper-zero/fz-ibutton.md)
     * [FZ - 125kHz RFID](todo/radio-hacking/flipper-zero/fz-125khz-rfid.md)

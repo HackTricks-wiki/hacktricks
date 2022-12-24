@@ -12,94 +12,16 @@
 
 </details>
 
-## Sub-Ghz
+With [**Flipper Zero**](https://flipperzero.one/) you can:
 
-### Frequency Analyser
-
-{% hint style="info" %}
-How to find which frequency is the remote using
-{% endhint %}
-
-When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).
-
-To determine the remote's frequency, do the following:
-
-1. Place the remote control very close to the left of Flipper Zero.
-2. Go to **Main Menu** **→ Sub-GHz**.
-3. Select **Frequency Analyzer**, then press and hold the button on the remote control you want to analyze.
-4. Review the frequency value on the screen.
-
-### Read
-
-{% hint style="info" %}
-Find info about the frequency used (also another way to find which frequency is used)
-{% endhint %}
-
-The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.
-
-While Read is in use, it's possible to press the **left button** and **configure it**.\
-At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
-
-<figure><img src="../../../.gitbook/assets/image (28).png" alt=""><figcaption></figcaption></figure>
-
-You can set **any that interests you**, however, if you are **not sure which frequency** could be the one used by the remote you have, **set Hopping to ON** (Off by default), and press the button several times until Flipper captures it and give you the info you need to set the frequency.
-
-{% hint style="danger" %}
-Switching between frequencies takes some time, therefore signals transmitted at the time of switching can be missed. For better signal reception, set a fixed frequency determined by Frequency Analyzer.
-{% endhint %}
-
-### **Read Raw**
-
-{% hint style="info" %}
-Steal (and replay) a signal in the configured frequency
-{% endhint %}
-
-The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
-
-By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
-
-### Add Manually
-
-{% hint style="info" %}
-Add signals from a configured list of protocols
-{% endhint %}
-
-#### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#3iglu" id="3iglu"></a>
-
-| Princeton\_433 (works with the majority of static code systems)﻿ | 433.92 | Static  |
-| ---------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit\_433                                              | 433.92 | Static  |
-| Nice Flo 24bit\_433                                              | 433.92 | Static  |
-| CAME 12bit\_433                                                  | 433.92 | Static  |
-| CAME 24bit\_433                                                  | 433.92 | Static  |
-| Linear\_300                                                      | 300.00 | Static  |
-| CAME TWEE                                                        | 433.92 | Static  |
-| Gate TX\_433                                                     | 433.92 | Static  |
-| DoorHan\_315                                                     | 315.00 | Dynamic |
-| DoorHan\_433                                                     | 433.92 | Dynamic |
-| LiftMaster\_315                                                  | 315.00 | Dynamic |
-| LiftMaster\_390                                                  | 390.00 | Dynamic |
-| Security+2.0\_310                                                | 310.00 | Dynamic |
-| Security+2.0\_315                                                | 315.00 | Dynamic |
-| Security+2.0\_390                                                | 390.00 | Dynamic |
-
-### Supported Sub-GHz vendors
-
-Check the list in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
-
-### Suppoerted Frequencies by region
-
-Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
-
-### Test
-
-{% hint style="info" %}
-Get dBms of the saved frequencies
-{% endhint %}
-
-## 125 kHz RFID
-
-
+* **Listen/Capture/Replay radio frequencies:** [**Sub-GHz**](fz-sub-ghz.md)****
+* **Read/Capture/Emulate NFC cards:** [**NFC**](fz-nfc.md)****
+* **Read/Capture/Emulate 125kHz tags:** [**125kHz RFID**](fz-125khz-rfid.md)****
+* **Read/Capture/Send Infrared signals:** [**Infrared**](fz-infrared.md)****
+* **Read/Capture/Emulate iButtons:** [**iButton**](../ibutton.md)****
+* **Use is as Bad USB**
+* **Use it as security key (U2F)**
+* **Play Snake**
 
 <details>
 
