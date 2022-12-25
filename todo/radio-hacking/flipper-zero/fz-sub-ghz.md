@@ -70,6 +70,10 @@ The **Read Raw** option **records signals** send in the listening frequency. Thi
 
 By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
 
+### Brute-Force
+
+If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)****
+
 ### Add Manually
 
 {% hint style="info" %}
@@ -99,7 +103,7 @@ Add signals from a configured list of protocols
 
 Check the list in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
 
-### Suppoerted Frequencies by region
+### Supported Frequencies by region
 
 Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
 

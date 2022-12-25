@@ -82,6 +82,10 @@ The attacker can **jam the car receiver and not his receiver** because if the ca
 Other implementations seen in specifications show that the **rolling code is a portion** of the total code sent. Ie the code sent is a **24 bit key** where the first **12 are the rolling code**, the **second 8 are the command** (such as lock or unlock) and the last 4 is the **checksum**. Vehicles implementing this type are also naturally susceptible as the attacker merely needs to replace the rolling code segment to be able to **use any rolling code on both frequencies**.
 {% endhint %}
 
+{% hint style="danger" %}
+Note that if the victim sends a third code while the attacker is sending the first one, the first and second code will be invalidated.
+{% endhint %}
+
 ### Alarm Sounding Jamming Attack
 
 Testing against an aftermarket rolling code system installed on a car, **sending the same code twice** immediately **activated the alarm** and immobiliser providing a unique **denial of service** opportunity. Ironically the means of **disabling the alarm** and immobiliser was to **press** the **remote**, providing an attacker with the ability to **continually perform DoS attack**. Or mix this attack with the **previous one to obtain more codes** as the victim would like to stop the attack asap.
