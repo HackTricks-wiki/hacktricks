@@ -1,4 +1,4 @@
-# FZ - Sub-Ghz
+# FZ - Sub-GHz
 
 <details>
 
@@ -16,7 +16,7 @@
 
 Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 ## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
 

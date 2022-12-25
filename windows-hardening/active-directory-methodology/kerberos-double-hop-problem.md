@@ -116,7 +116,7 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 
 Like `Invoke-Command`, this can be easily scripted so the attacker can simply issue system commands as an argument. A generic batch script example _winrm.bat_:
 
-<figure><img src="../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (6) (2).png" alt=""><figcaption></figcaption></figure>
 
 ### OpenSSH <a href="#openssh" id="openssh"></a>
 

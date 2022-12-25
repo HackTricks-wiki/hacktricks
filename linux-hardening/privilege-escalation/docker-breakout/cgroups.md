@@ -89,7 +89,7 @@ An exception to these rules is the **root cgroup** found at the bottom of the hi
 
 Even with no controllers enabled, you can see the CPU usage of a cgroup by looking at its cpu.stat file:
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
 
 Because this is the accumulated CPU usage over the entire lifespan of the cgroup, you can see how a service consumes processor time even if it spawns many subprocesses that eventually terminate.
 
