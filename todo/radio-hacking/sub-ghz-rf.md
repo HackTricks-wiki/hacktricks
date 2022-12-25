@@ -37,7 +37,7 @@ Moreover, by using the De Bruijn Sequence (a way to reduce the number of bits ne
 
 Example of this attack was implemented in [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
 
-Requiring a preamble will avoid the De Bruijn Sequence optimization and rolling codes will prevent this attack.
+Requiring **a preamble will avoid the De Bruijn Sequence** optimization and **rolling codes will prevent this attack** (supposing the code is long enough to not be bruteforceable).
 
 ## Sub-GHz Attack
 
@@ -91,6 +91,7 @@ Testing against an aftermarket rolling code system installed on a car, **sending
 * [https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/](https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/)
 * [https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
 * [https://samy.pl/defcon2015/](https://samy.pl/defcon2015/)
+* [https://hackaday.io/project/164566-how-to-hack-a-car/details](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
 <details>
 
