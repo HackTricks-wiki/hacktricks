@@ -123,6 +123,11 @@ For example, forwarding all the traffic going to 10.10.10.0/24
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
+Connect with a private key
+```bash
+sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
+# -D : Daemon mode
+```
 
 ## Meterpreter
 
