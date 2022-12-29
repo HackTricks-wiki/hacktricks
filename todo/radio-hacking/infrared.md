@@ -38,7 +38,7 @@ Bits are encoded by modulating the duration of the space between pulses. The wid
 
 Bits are encoded by modulation of the pulse width. The width of space after pulse burst is constant.
 
-<figure><img src="../../.gitbook/assets/image (29).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (29) (1).png" alt=""><figcaption></figcaption></figure>
 
 **3. Phase Encoding**
 

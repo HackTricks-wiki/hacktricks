@@ -521,6 +521,7 @@
 * [OAuth to Account takeover](pentesting-web/oauth-to-account-takeover.md)
 * [Open Redirect](pentesting-web/open-redirect.md)
 * [Parameter Pollution](pentesting-web/parameter-pollution.md)
+* [Phone Number Injections](pentesting-web/phone-number-injections.md)
 * [PostMessage Vulnerabilities](pentesting-web/postmessage-vulnerabilities/README.md)
   * [Blocking main page to steal postmessage](pentesting-web/postmessage-vulnerabilities/blocking-main-page-to-steal-postmessage.md)
   * [Bypassing SOP with Iframes - 1](pentesting-web/postmessage-vulnerabilities/bypassing-sop-with-iframes-1.md)
