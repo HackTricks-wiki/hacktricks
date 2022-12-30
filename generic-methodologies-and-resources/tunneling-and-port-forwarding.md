@@ -96,9 +96,11 @@ You need **root in both devices** (as you are going to create new interfaces) an
 `PermitTunnel yes`
 
 ```bash
-ssh username@server -w any:any #This will create Tun interfaces in both devices
+ssh root@server -w any:any #This will create Tun interfaces in both devices
 ip addr add 1.1.1.2/32 peer 1.1.1.1 dev tun0 #Client side VPN IP
+ifconfig tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
+ifconfig tun0 up #Activate the server side network interface
 ```
 
 Enable forwarding on the Server side
