@@ -36,7 +36,7 @@ Files downloaded may contain the **ADS Zone.Identifier** indicating **how** it w
 
 ### Recycle Bin
 
-In Vista/Win7/Win8/Win10 the **Recycle Bin** can be found in the folder **`$Recycle.bin`** in the root of the drive (`C:\$Reciycle.bin`).\
+In Vista/Win7/Win8/Win10 the **Recycle Bin** can be found in the folder **`$Recycle.bin`** in the root of the drive (`C:\$Recycle.bin`).\
 When a file is deleted in this folder 2 specific files are created:
 
 * `$I{id}`: File information (date of when it was deleted}
