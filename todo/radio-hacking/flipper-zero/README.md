@@ -23,6 +23,8 @@ With [**Flipper Zero**](https://flipperzero.one/) you can:
 * **Use it as security key (U2F)**
 * **Play Snake**
 
+**Other Flipper Zero resources in** [**https://github.com/djsime1/awesome-flipperzero**](https://github.com/djsime1/awesome-flipperzero)****
+
 <details>
 
 <summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
