@@ -12,11 +12,13 @@
 
 </details>
 
-<img src="../../../.gitbook/assets/image (10) (2).png" alt="" data-size="original">
+![](<../.gitbook/assets/image (9) (1) (2).png>)
 
-**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
+\
+Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
 
-{% embed url="https://www.syncubes.com/" %}
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## OneDrive
 
@@ -111,11 +113,13 @@ Other tables inside this database contain more interesting information:
 * **deleted\_fields**: Dropbox deleted files
 * **date\_added**
 
-<img src="../../../.gitbook/assets/image (10) (2).png" alt="" data-size="original">
+![](<../.gitbook/assets/image (9) (1) (2).png>)
 
-**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
+\
+Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
 
-{% embed url="https://www.syncubes.com/" %}
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 

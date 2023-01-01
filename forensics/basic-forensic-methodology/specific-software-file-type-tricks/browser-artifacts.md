@@ -12,11 +12,13 @@
 
 </details>
 
-<img src="../../../.gitbook/assets/image (10) (2).png" alt="" data-size="original">
+![](<../.gitbook/assets/image (9) (1) (2).png>)
 
-**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
+\
+Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
 
-{% embed url="https://www.syncubes.com/" %}
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## Browsers Artifacts <a href="#3def" id="3def"></a>
 
@@ -266,11 +268,13 @@ Opera **stores browser history and download data in the exact same format as Goo
 * **Browser’s built-in anti-phishing:** `grep --color 'fraud_protection_enabled' ~/Library/Application Support/com.operasoftware.Opera/Preferences`
   * **fraud\_protection\_enabled** should be **true**
 
-<img src="../../../.gitbook/assets/image (10) (2).png" alt="" data-size="original">
+![](<../.gitbook/assets/image (9) (1) (2).png>)
 
-**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
+\
+Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
+Get Access Today:
 
-{% embed url="https://www.syncubes.com/" %}
+{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 <details>
 
