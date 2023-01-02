@@ -582,6 +582,7 @@
 * [XS-Search/XS-Leaks](pentesting-web/xs-search.md)
   * [Connection Pool Example](pentesting-web/xs-search/connection-pool-example.md)
   * [Connection Pool by Destination Example](pentesting-web/xs-search/connection-pool-by-destination-example.md)
+  * [Cookie Bomb + Onerror XS Leak](pentesting-web/xs-search/cookie-bomb-+-onerror-xs-leak.md)
   * [performance.now example](pentesting-web/xs-search/performance.now-example.md)
   * [performance.now + Force heavy task](pentesting-web/xs-search/performance.now-+-force-heavy-task.md)
   * [Event Loop Blocking + Lazy images](pentesting-web/xs-search/event-loop-blocking-+-lazy-images.md)
