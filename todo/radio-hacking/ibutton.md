@@ -26,7 +26,7 @@ Usually, iButton implies the physical form of the key and reader - a round coin 
 
 When the key reaches the reader, the **contacts come to touch** and the key is powered to **transmit** its ID. Sometimes the key is **not read** immediately because the **contact PSD of an intercom is larger** than it should be. So the outer contours of the key and the reader couldn't touch. If that's the case, you'll have to press the key over one of the walls of the reader.
 
-<figure><img src="../../.gitbook/assets/image (21).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (21) (2).png" alt=""><figcaption></figcaption></figure>
 
 ### **1-Wire protocol** <a href="#1-wire-protocol" id="1-wire-protocol"></a>
 

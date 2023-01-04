@@ -33,7 +33,7 @@ and if you **remove the 2 ms waiting** period between signals you can **reduce t
 
 Moreover, by using the De Bruijn Sequence (a way to reduce the number of bits needed to send all the potential binary numbers to burteforce) this **time is reduced just to 8 seconds**:
 
-<figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (5) (2).png" alt=""><figcaption></figcaption></figure>
 
 Example of this attack was implemented in [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
 

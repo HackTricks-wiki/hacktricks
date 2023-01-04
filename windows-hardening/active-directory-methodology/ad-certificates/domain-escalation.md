@@ -573,7 +573,7 @@ Now, since this registry key applies to Schannel, we must use the certificate fo
 
 If we try to authenticate with the certificate and `-ldap-shell`, we will notice that we’re authenticated as `u:CORP\DC$`. This is a string that is sent by the server.
 
-<figure><img src="../../../.gitbook/assets/image (21) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (21) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 One of the available commands for the LDAP shell is `set_rbcd` which will set Resource-Based Constrained Delegation (RBCD) on the target. So we could perform a RBCD attack to compromise the domain controller.
 

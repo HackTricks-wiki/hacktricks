@@ -59,7 +59,7 @@ In AD environments, **clients interact with Enterprise CAs to request a certific
 
 ### Client Certificate Request Flow
 
-<figure><img src="../../.gitbook/assets/image (5) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (5) (2) (2).png" alt=""><figcaption></figcaption></figure>
 
 It's the process to **obtain a certificate** from AD CS. At a high level, during enrolment clients first **find an Enterprise CA** based on the **objects in the Enrolment Services** container discussed above.
 
