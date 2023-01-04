@@ -2,13 +2,13 @@
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -33,7 +33,7 @@ Get-NetGroupMember -Identity "Account Operators" -Recurse
 
 Note the spotless' user membership:
 
-![](<../../.gitbook/assets/1 (2) (1) (1).png>)
+![](<../../.gitbook/assets/1 (2) (1).png>)
 
 However, we can still add new users:
 
@@ -97,7 +97,7 @@ The story changes:
 
 ### Privesc <a href="#backup-operators" id="backup-operators"></a>
 
-Use [`PsService`](https://docs.microsoft.com/en-us/sysinternals/downloads/psservice) or `sc`, form Sysinternals, to check permissions on a service.&#x20;
+Use [`PsService`](https://docs.microsoft.com/en-us/sysinternals/downloads/psservice) or `sc`, form Sysinternals, to check permissions on a service.
 
 ```
 C:\> .\PsService.exe security AppReadiness
@@ -119,7 +119,7 @@ You can abuse this service to [**make the service execute arbitrary commands**](
 
 As with `Server Operators` membership, we can **access the `DC01` file system** if we belong to `Backup Operators`.
 
-This is because this group grants its **members** the [**`SeBackup`**](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#sebackupprivilege-3.1.4) and [**`SeRestore`**](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#serestoreprivilege-3.1.5) privileges. The **SeBackupPrivilege** allows us to **traverse any folder and list** the folder contents. This will let us **copy a file from a folder,** even if nothing else is giving you permissions. However, to abuse this permissions to copy a file the flag [**FILE\_FLAG\_BACKUP\_SEMANTICS**](https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea) **** must be used. Therefore, special tools are needed.
+This is because this group grants its **members** the [**`SeBackup`**](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#sebackupprivilege-3.1.4) and [**`SeRestore`**](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#serestoreprivilege-3.1.5) privileges. The **SeBackupPrivilege** allows us to **traverse any folder and list** the folder contents. This will let us **copy a file from a folder,** even if nothing else is giving you permissions. However, to abuse this permissions to copy a file the flag [**FILE\_FLAG\_BACKUP\_SEMANTICS**](https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea) \*\*\*\* must be used. Therefore, special tools are needed.
 
 For this purpose you can use [**these scripts**](https://github.com/giuliano108/SeBackupPrivilege)**.**
 
@@ -154,7 +154,7 @@ For instance, you can directly access the Domain Controller file system:
 
 You can abuse this access to **steal** the active directory database **`NTDS.dit`** to get all the **NTLM hashes** for all user and computer objects in the domain.
 
-Using [**diskshadow**](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/diskshadow)  you can **create a shadow copy** of the **`C` drive** and in the `F` drive for example. The, you can steal the `NTDS.dit` file from this shadow copy as it won't be in use by the system:
+Using [**diskshadow**](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/diskshadow) you can **create a shadow copy** of the **`C` drive** and in the `F` drive for example. The, you can steal the `NTDS.dit` file from this shadow copy as it won't be in use by the system:
 
 ```
 diskshadow.exe
@@ -205,7 +205,7 @@ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 A user who is member of the **DNSAdmins** group or have **write privileges to a DNS** server object can load an **arbitrary DLL** with **SYSTEM** privileges on the **DNS server**.\
 This is really interesting as the **Domain Controllers** are **used** very frequently as **DNS servers**.
 
-As shown in this **** [**post**](https://adsecurity.org/?p=4064), the following attack can be performed when DNS is run on a Domain Controller (which is very common):
+As shown in this \*\*\*\* [**post**](https://adsecurity.org/?p=4064), the following attack can be performed when DNS is run on a Domain Controller (which is very common):
 
 * DNS management is performed over RPC
 * [**ServerLevelPluginDll**](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-dnsp/c9d38538-8827-44e6-aa5e-022a016ed723) allows us to **load** a custom **DLL** with **zero verification** of the DLL's path. This can be done with the `dnscmd` tool from the command line
@@ -257,13 +257,13 @@ sc.exe \\dc01 start dns
 
 #### Mimilib.dll
 
-As detailed in this [**post**](http://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html), It's also possible to use [**mimilib.dll**](https://github.com/gentilkiwi/mimikatz/tree/master/mimilib) from the creator of the `Mimikatz` tool to gain command execution by **modifying** the [**kdns.c**](https://github.com/gentilkiwi/mimikatz/blob/master/mimilib/kdns.c) **** file to execute a **reverse shell** one-liner or another command of our choosing.
+As detailed in this [**post**](http://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html), It's also possible to use [**mimilib.dll**](https://github.com/gentilkiwi/mimikatz/tree/master/mimilib) from the creator of the `Mimikatz` tool to gain command execution by **modifying** the [**kdns.c**](https://github.com/gentilkiwi/mimikatz/blob/master/mimilib/kdns.c) \*\*\*\* file to execute a **reverse shell** one-liner or another command of our choosing.
 
 ### WPAD Record for MitM
 
 Another way to **abuse DnsAdmins** group privileges is by creating a **WPAD record**. Membership in this group gives us the rights to [disable global query block security](https://docs.microsoft.com/en-us/powershell/module/dnsserver/set-dnsserverglobalqueryblocklist?view=windowsserver2019-ps), which by default blocks this attack. Server 2008 first introduced the ability to add to a global query block list on a DNS server. By default, Web Proxy Automatic Discovery Protocol (WPAD) and Intra-site Automatic Tunnel Addressing Protocol (ISATAP) are on the global query block list. These protocols are quite vulnerable to hijacking, and any domain user can create a computer object or DNS record containing those names.
 
-After **disabling the global query** block list and creating a **WPAD record**, **every machine** running WPAD with default settings will have its **traffic proxied through our attack machine**. We could use a tool such as **** [**Responder**](https://github.com/lgandx/Responder) **or** [**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **to perform traffic spoofing**, and attempt to capture password hashes and crack them offline or perform an SMBRelay attack.
+After **disabling the global query** block list and creating a **WPAD record**, **every machine** running WPAD with default settings will have its **traffic proxied through our attack machine**. We could use a tool such as \*\*\*\* [**Responder**](https://github.com/lgandx/Responder) **or** [**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **to perform traffic spoofing**, and attempt to capture password hashes and crack them offline or perform an SMBRelay attack.
 
 {% content-ref url="../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md" %}
 [spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
@@ -271,7 +271,7 @@ After **disabling the global query** block list and creating a **WPAD record**, 
 
 ## Event Log Readers
 
-Members of the [**Event Log Readers**](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/dn579255\(v=ws.11\)?redirectedfrom=MSDN#event-log-readers) **** group have **permission to access the event logs** generated (such as the new process creation logs). In the logs **sensitive information** could be found. Let's see how to visualize the logs:
+Members of the [**Event Log Readers**](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/dn579255\(v=ws.11\)?redirectedfrom=MSDN#event-log-readers) \*\*\*\* group have **permission to access the event logs** generated (such as the new process creation logs). In the logs **sensitive information** could be found. Let's see how to visualize the logs:
 
 ```powershell
 #Get members of the group
@@ -339,7 +339,7 @@ This vector has been mitigated by the March 2020 Windows security updates, which
 
 This group is also in environments with **Microsoft Exchange** installed.\
 members of this group can **access** the **mailboxes** of **all** domain users.\
-This group also has **full control** of the OU called `Microsoft Exchange Security Groups`, which contains the group [**`Exchange Windows Permissions`**](privileged-groups-and-token-privileges.md#exchange-windows-permissions) **** (follow the link to see how to abuse this group to privesc).
+This group also has **full control** of the OU called `Microsoft Exchange Security Groups`, which contains the group [**`Exchange Windows Permissions`**](privileged-groups-and-token-privileges.md#exchange-windows-permissions) \*\*\*\* (follow the link to see how to abuse this group to privesc).
 
 ## Print Operators
 
@@ -402,7 +402,7 @@ This membership allows users to configure Domain Controllers with the following 
 
 * Allow log on locally
 * Back up files and directories
-* ``[`SeBackupPrivilege`](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#sebackupprivilege-3.1.4) and [`SeRestorePrivilege`](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#serestoreprivilege-3.1.5)&#x20;
+* \`\`[`SeBackupPrivilege`](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#sebackupprivilege-3.1.4) and [`SeRestorePrivilege`](../windows-local-privilege-escalation/privilege-escalation-abusing-tokens/#serestoreprivilege-3.1.5)
 * Change the system time
 * Change the time zone
 * Force shutdown from a remote system
@@ -448,12 +448,12 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
