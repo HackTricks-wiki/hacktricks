@@ -114,7 +114,7 @@ To enumerate it you could also run:
 
 ```bash
 WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
-wmic /namespace:\\root\securitycenter2 path antivirusproduc
+wmic /namespace:\\root\securitycenter2 path antivirusproduct
 sc query windefend
 
 #Delete all rules of Defender (useful for machines without internet access)
