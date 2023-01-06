@@ -64,6 +64,7 @@
 * [Python Sandbox Escape & Pyscript](generic-methodologies-and-resources/python/README.md)
   * [Pyscript](generic-methodologies-and-resources/python/pyscript.md)
   * [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
+  * [Class Pollution (Python's Prototype Pollution)](generic-methodologies-and-resources/python/class-pollution-pythons-prototype-pollution.md)
   * [venv](generic-methodologies-and-resources/python/venv.md)
   * [Bypass Python sandboxes](generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md)
     * [Output Searching Python internals](generic-methodologies-and-resources/python/bypass-python-sandboxes/output-searching-python-internals.md)
