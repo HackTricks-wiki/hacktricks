@@ -568,6 +568,7 @@
 * [XXE - XEE - XML External Entity](pentesting-web/xxe-xee-xml-external-entity.md)
 * [XSS (Cross Site Scripting)](pentesting-web/xss-cross-site-scripting/README.md)
   * [Abusing Service Workers](pentesting-web/xss-cross-site-scripting/abusing-service-workers.md)
+  * [Chrome Cache to XSS](pentesting-web/xss-cross-site-scripting/chrome-cache-to-xss.md)
   * [Debugging Client Side JS](pentesting-web/xss-cross-site-scripting/debugging-client-side-js.md)
   * [Dom Clobbering](pentesting-web/xss-cross-site-scripting/dom-clobbering.md)
   * [DOM XSS](pentesting-web/xss-cross-site-scripting/dom-xss.md)
