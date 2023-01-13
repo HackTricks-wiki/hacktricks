@@ -67,7 +67,7 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 
 And click on **compile**:
 
-![](<../../.gitbook/assets/image (314) (1).png>)
+![](<../../.gitbook/assets/image (314) (1) (1).png>)
 
 Then save the new file on _**File >> Save module...**_:
 

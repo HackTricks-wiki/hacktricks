@@ -22,21 +22,13 @@ Here you will find the **typical flow** that **you should follow when pentesting
 
 ### [STM Cyber](https://www.stmcyber.com)
 
-![](<.gitbook/assets/image (642) (1) (1) (1).png>)
+![](<.gitbook/assets/image (638) (2) (1).png>)
 
 [**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentesting, Red teams and training.
 
 You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
 **STM Cyber** also support cybersecurity open source projects like HackTricks :)
-
-### [SYN CUBES](https://www.syncubes.com/)
-
-<figure><img src=".gitbook/assets/image (10) (2).png" alt=""><figcaption></figcaption></figure>
-
-**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
-
-{% embed url="https://www.syncubes.com/" %}
 
 ### [RootedCON](https://www.rootedcon.com/)
 
@@ -69,7 +61,7 @@ Get Access Today:
 
 ### [HACKENPROOF](https://hackenproof.com/)
 
-<figure><img src=".gitbook/assets/image (4) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof is home to all crypto bug bounties.**
 
@@ -99,6 +91,14 @@ Another cool thing about WebSec is that unlike the industry average WebSec is **
 In addition to the above WebSec is also a **committed supporter of HackTricks.**
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
+
+### [SYN CUBES](https://www.syncubes.com/)
+
+<figure><img src=".gitbook/assets/image (10) (2).png" alt=""><figcaption></figcaption></figure>
+
+**Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
+
+{% embed url="https://www.syncubes.com/" %}
 
 ## License
 
