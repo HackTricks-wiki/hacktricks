@@ -114,7 +114,7 @@ There are a lot of various **memory injection** strategies that can be used with
 
 One example of **abuse of this privilege** is to run [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) from the [SysInternals](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) to **dump a process memory**. For example, the **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local\_Security\_Authority\_Subsystem\_Service)**)** process, which stores user credentials after a user logs on to a system.
 
-You can hen load this dump in mimikatz to obtain passwords:
+You can then load this dump in mimikatz to obtain passwords:
 
 ```
 mimikatz.exe

