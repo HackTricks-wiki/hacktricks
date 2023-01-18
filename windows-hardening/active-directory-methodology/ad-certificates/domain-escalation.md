@@ -210,7 +210,7 @@ Underneath, this just uses **remote** **registry**, so the following command may
 reg.exe query \\<CA_SERVER>\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration\<CA_NAME>\PolicyModules\CertificateAuthority_MicrosoftDefault.Policy\ /v EditFlags 
 ```
 
-\*\*\*\*[**Certify**](https://github.com/GhostPack/Certify) and [**Certipy**](https://github.com/ly4k/Certipy) also checks for this and can be used to abuse this misconfiguration:
+[**Certify**](https://github.com/GhostPack/Certify) and [**Certipy**](https://github.com/ly4k/Certipy) also checks for this and can be used to abuse this misconfiguration:
 
 ```bash
 # Check for vulns, including this one
