@@ -114,27 +114,29 @@ Change the **value of this variable to 0**, so when you **end your session** any
 export HISTSIZE=0
 ```
 
-### http\_proxy
+### http\_proxy & https\_proxy
 
-The processes will use the **proxy** declared here to connect to internet through **http**.
+The processes will use the **proxy** declared here to connect to internet through **http or https**.
 
 ```bash
 export http_proxy="http://10.10.10.10:8080"
+export https_proxy="http://10.10.10.10:8080"
 ```
 
-### https\_proxy
+### SSL\_CERT\_FILE & SSL\_CERT\_DIR
 
-The processes will use the **proxy** declared here to connect to internet through **https**.
+The processes will trust the certificates indicated in **these env variables**.
 
 ```bash
-export https_proxy="http://10.10.10.10:8080"
+export SSL_CERT_FILE=/path/to/ca-bundle.pem
+export SSL_CERT_DIR=/path/to/ca-certificates
 ```
 
 ### PS1
 
 Change how your prompt looks.
 
-\*\*I have created \*\*[**this one**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808) (based on another, read the code).
+I have created [**this one**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808) (based on another, read the code).
 
 Root:
 
