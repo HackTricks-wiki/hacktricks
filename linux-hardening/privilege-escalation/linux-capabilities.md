@@ -965,7 +965,7 @@ int main(int argc,char* argv[] )
 I exploit needs to find a pointer to something mounted on the host. The original exploit used the file /.dockerinit and this modified version uses /etc/hostname. If the exploit isn't working maybe you need to set a different file. To find a file that is mounted in the host just execute mount command:
 {% endhint %}
 
-![](<../../.gitbook/assets/image (407) (1).png>)
+![](<../../.gitbook/assets/image (407) (2).png>)
 
 **The code of this technique was copied from the laboratory of "Abusing DAC\_READ\_SEARCH Capability" from** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
 
@@ -1559,8 +1559,9 @@ In addition, this capability also allows the process to view `dmesg` output, if 
 ## CAP\_MKNOD
 
 [CAP\_MKNOD](https://man7.org/linux/man-pages/man7/capabilities.7.html) allows an extended usage of [mknod](https://man7.org/linux/man-pages/man2/mknod.2.html) by permitting creation of something other than a regular file (`S_IFREG`), FIFO (named pipe)(`S_IFIFO`), or UNIX domain socket (`S_IFSOCK`). The special files are:
-- `S_IFCHR` (Character special file (a device like a terminal))
-- `S_IFBLK` (Block special file (a device like a disk)).
+
+* `S_IFCHR` (Character special file (a device like a terminal))
+* `S_IFBLK` (Block special file (a device like a disk)).
 
 It is a default capability ([https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)).
 
@@ -1588,8 +1589,8 @@ useradd -u 1000 unprivileged
 su unprivileged
 ```
 
-3. Back on the host:
-   
+1. Back on the host:
+
 ```bash
 # Find the PID linked to the container owns by the user "unprivileged"
 # Example only (Depends on the shell program, etc.). Here: PID=18802.
@@ -1603,7 +1604,6 @@ head /proc/18802/root/dev/sda
 ```
 
 The attacker can now read, dump, copy the device /dev/sda from unprivileged user.
-
 
 ## References
 
