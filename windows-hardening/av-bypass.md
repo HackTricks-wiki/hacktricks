@@ -72,7 +72,7 @@ Whenever it's possible, always **prioritize using DLLs for evasion**, in my expe
 
 As we can see in this image, a DLL Payload from Havoc has a detection rate of 4/26 in antiscan.me, while the EXE payload has a 7/26 detection rate.
 
-<figure><img src="../.gitbook/assets/image (6) (3).png" alt=""><figcaption><p>antiscan.me comparison of a normal Havoc EXE payload vs a normal Havoc DLL</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (6) (3) (1).png" alt=""><figcaption><p>antiscan.me comparison of a normal Havoc EXE payload vs a normal Havoc DLL</p></figcaption></figure>
 
 Now we'll show some tricks you can use with DLL files to be much more stealthier.
 
