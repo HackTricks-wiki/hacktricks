@@ -349,6 +349,7 @@
       * [disable\_functions bypass - mod\_cgi](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable\_functions-open\_basedir-bypass/disable\_functions-bypass-mod\_cgi.md)
       * [disable\_functions bypass - PHP 4 >= 4.2.0, PHP 5 pcntl\_exec](network-services-pentesting/pentesting-web/php-tricks-esp/php-useful-functions-disable\_functions-open\_basedir-bypass/disable\_functions-bypass-php-4-greater-than-4.2.0-php-5-pcntl\_exec.md)
     * [PHP - RCE abusing object creation: new $\_GET\["a"\]($\_GET\["b"\])](network-services-pentesting/pentesting-web/php-tricks-esp/php-rce-abusing-object-creation-new-usd\_get-a-usd\_get-b.md)
+    * [PHP SSRF](network-services-pentesting/pentesting-web/php-tricks-esp/php-ssrf.md)
   * [Python](network-services-pentesting/pentesting-web/python.md)
   * [Special HTTP headers](network-services-pentesting/pentesting-web/special-http-headers.md)
   * [Spring Actuators](network-services-pentesting/pentesting-web/spring-actuators.md)
