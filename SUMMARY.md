@@ -592,6 +592,7 @@
   * [performance.now example](pentesting-web/xs-search/performance.now-example.md)
   * [performance.now + Force heavy task](pentesting-web/xs-search/performance.now-+-force-heavy-task.md)
   * [Event Loop Blocking + Lazy images](pentesting-web/xs-search/event-loop-blocking-+-lazy-images.md)
+  * [JavaScript Execution XS Leak](pentesting-web/xs-search/javascript-execution-xs-leak.md)
   * [CSS Injection](pentesting-web/xs-search/css-injection/README.md)
     * [CSS Injection Code](pentesting-web/xs-search/css-injection/css-injection-code.md)
 
