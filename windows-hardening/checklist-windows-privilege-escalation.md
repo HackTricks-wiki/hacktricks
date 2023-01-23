@@ -18,7 +18,7 @@
 
 ### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
-### [System Info](windows-local-privilege-escalation/#system-info)
+### [System Information](windows-local-privilege-escalation/#system-info)
 
 * [ ] Obtain [**System information**](windows-local-privilege-escalation/#system-info)
 * [ ] Search for **kernel** [**exploits using scripts**](windows-local-privilege-escalation/#version-exploits)
