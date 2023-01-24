@@ -1,4 +1,4 @@
-# Credentials Protections
+# Windows Credentials Protections
 
 ## Credentials Protections
 

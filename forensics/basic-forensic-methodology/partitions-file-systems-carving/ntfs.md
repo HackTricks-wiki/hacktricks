@@ -204,7 +204,7 @@ The **`$BitMap`** is a special file within the NTFS file system. This file keeps
 ### ADS (Alternate Data Stream)
 
 Alternate data streams allow files to contain more than one stream of data. Every file has at least one data stream. In Windows, this default data stream is called `:$DATA`.\
-In this [page you can see different ways to create/access/discover alternate data streams](../../../windows-hardening/basic-win-cmd-for-pentesters.md#alternate-data-streams-cheatsheet-ads-alternate-data-stream) from the console. In the past, this cause a vulnerability in IIS as people were able to access the source code of a page by accessing the `:$DATA` stream like `http://www.alternate-data-streams.com/default.asp::$DATA`.
+In this [page you can see different ways to create/access/discover alternate data streams](../../../windows-hardening/basic-cmd-for-pentesters.md#alternate-data-streams-cheatsheet-ads-alternate-data-stream) from the console. In the past, this cause a vulnerability in IIS as people were able to access the source code of a page by accessing the `:$DATA` stream like `http://www.alternate-data-streams.com/default.asp::$DATA`.
 
 Using the tool [**AlternateStreamView**](https://www.nirsoft.net/utils/alternate\_data\_streams.html) you can search and export all the files with some ADS.
 

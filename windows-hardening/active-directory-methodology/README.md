@@ -171,7 +171,7 @@ Having compromised an account is a **big step to start compromising the whole do
 
 Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords.
 
-* You could use the [**CMD to perform a basic recon**](../basic-win-cmd-for-pentesters.md#domain-info)
+* You could use the [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
 * You can also use [**powershell for recon**](../basic-powershell-for-pentesters/) which will be stealthier
 * You ca also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
 * Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
@@ -254,7 +254,7 @@ This vulnerability allowed any authenticated user to **compromise the domain con
 
 Hopefully you have managed to **compromise some local admin** account using [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) including relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/).\
 Then, its time to dump all the hashes in memory and locally.\
-[**Read this page about different ways to obtain the hashes.**](../stealing-windows-credentials/)
+[**Read this page about different ways to obtain the hashes.**](../stealing-credentials/)
 
 ### Pass the Hash
 
@@ -383,7 +383,7 @@ Once you get **Domain Admin** or even better **Enterprise Admin** privileges, yo
 
 [**More information about DCSync attack can be found here**](dcsync.md).
 
-[**More information about how to steal the NTDS.dit can be found here**](../stealing-windows-credentials/)
+[**More information about how to steal the NTDS.dit can be found here**](../stealing-credentials/)
 
 ### Privesc as Persistence
 
@@ -672,7 +672,7 @@ Moreover, if the **victim mounted his hard drive**, from the **RDP session** pro
 
 ## Some General Defenses
 
-[**Learn more about how to protect credentials here.**](../stealing-windows-credentials/windows-credentials-protections.md)\
+[**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)\
 **Please, find some migrations against each technique in the description of the technique.**
 
 * Not allow Domain Admins to login on any other hosts apart from Domain Controllers

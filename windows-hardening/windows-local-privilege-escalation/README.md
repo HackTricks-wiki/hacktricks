@@ -322,7 +322,7 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 ### WDigest
 
 If active, **plain-text passwords are stored in LSASS** (Local Security Authority Subsystem Service).\
-[**More info about WDigest in this page**](../stealing-windows-credentials/windows-credentials-protections.md#wdigest).
+[**More info about WDigest in this page**](../stealing-credentials/credentials-protections.md#wdigest).
 
 ```
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
@@ -331,7 +331,7 @@ reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v Use
 ### LSA Protection
 
 Microsoft in **Windows 8.1 and later** has provided additional protection for the LSA to **prevent** untrusted processes from being able to **read its memory** or to inject code.\
-[**More info about LSA Protection here**](../stealing-windows-credentials/windows-credentials-protections.md#lsa-protection).
+[**More info about LSA Protection here**](../stealing-credentials/credentials-protections.md#lsa-protection).
 
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
@@ -340,7 +340,7 @@ reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ### Credentials Guard
 
 **Credential Guard** is a new feature in Windows 10 (Enterprise and Education edition) that helps to protect your credentials on a machine from threats such as pass the hash.\
-[**More info about Credentials Guard here.**](../stealing-windows-credentials/windows-credentials-protections.md#credential-guard)
+[**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
 
 ```
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
@@ -349,7 +349,7 @@ reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ### Cached Credentials
 
 **Domain credentials** are used by operating system components and are **authenticated** by the **Local** **Security Authority** (LSA). Typically, domain credentials are established for a user when a registered security package authenticates the user's logon data.\
-[**More info about Cached Credentials here**](../stealing-windows-credentials/windows-credentials-protections.md#cached-credentials).
+[**More info about Cached Credentials here**](../stealing-credentials/credentials-protections.md#cached-credentials).
 
 ```
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
@@ -775,9 +775,9 @@ Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 
 ### Firewall Rules
 
-[**Check this page for Firewall related commands**](../basic-win-cmd-for-pentesters.md#firewall) **(list rules, create rules, turn off, turn off...)**
+[**Check this page for Firewall related commands**](../basic-cmd-for-pentesters.md#firewall) **(list rules, create rules, turn off, turn off...)**
 
-More[ commands for network enumeration here](../basic-win-cmd-for-pentesters.md#network)
+More[ commands for network enumeration here](../basic-cmd-for-pentesters.md#network)
 
 ### Windows Subsystem for Linux (wsl)
 

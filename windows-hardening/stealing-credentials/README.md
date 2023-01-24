@@ -49,7 +49,7 @@ Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
 
-[**Learn about some possible credentials protections here.**](windows-credentials-protections.md) **This protections could prevent Mimikatz from extracting some credentials.**
+[**Learn about some possible credentials protections here.**](credentials-protections.md) **This protections could prevent Mimikatz from extracting some credentials.**
 
 ## Credentials with Meterpreter
 
@@ -330,7 +330,7 @@ Download it from:[ http://www.tarasco.org/security/pwdump\_7](http://www.tarasco
 
 ## Defenses
 
-[**Learn about some credentials protections here.**](windows-credentials-protections.md)
+[**Learn about some credentials protections here.**](credentials-protections.md)
 
 ​
 

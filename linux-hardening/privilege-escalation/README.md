@@ -638,7 +638,7 @@ Now, you can execute commands on the container from this `socat` connection.
 
 ### Others
 
-Note that if you have write permissions over the docker socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-privesc/#docker-group). If the [**docker API is listening in a port** you can also be able to compromise it](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
+Note that if you have write permissions over the docker socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-pe/#docker-group). If the [**docker API is listening in a port** you can also be able to compromise it](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
 
 Check **more ways to break out from docker or abuse it to escalate privileges** in:
 
@@ -775,8 +775,8 @@ Some Linux versions were affected by a bug that allows users with **UID > INT\_M
 
 Check if you are a **member of some group** that could grant you root privileges:
 
-{% content-ref url="interesting-groups-linux-privesc/" %}
-[interesting-groups-linux-privesc](interesting-groups-linux-privesc/)
+{% content-ref url="interesting-groups-linux-pe/" %}
+[interesting-groups-linux-pe](interesting-groups-linux-pe/)
 {% endcontent-ref %}
 
 ### Clipboard
@@ -1500,7 +1500,7 @@ aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
 grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
 ```
 
-In order to **read logs the group** [**adm**](interesting-groups-linux-privesc/#adm-group) will be really helpful.
+In order to **read logs the group** [**adm**](interesting-groups-linux-pe/#adm-group) will be really helpful.
 
 ### Shell files
 

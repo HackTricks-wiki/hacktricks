@@ -91,7 +91,7 @@ Check out the [**top-paying bounties**](https://hackenproof.com/programs) among 
 
 * [ ] Generic users/groups **enumeration**
 * [ ] Do you have a **very big UID**? Is the **machine** **vulnerable**?
-* [ ] Can you [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-privesc/) you belong to?
+* [ ] Can you [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/) you belong to?
 * [ ] **Clipboard** data?
 * [ ] Password Policy?
 * [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without a password.
