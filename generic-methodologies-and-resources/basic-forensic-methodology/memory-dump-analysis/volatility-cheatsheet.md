@@ -2,13 +2,13 @@
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -19,8 +19,6 @@
 ​​[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
 
 {% embed url="https://www.rootedcon.com/" %}
-
-
 
 If you want something **fast and crazy** that will launch several Volatility plugins on parallel you can use: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 
@@ -154,7 +152,7 @@ The plugin `banners.Banners` can be used in **vol3 to try to find linux banners*
 
 ## Hashes/Passwords
 
-Extract SAM hashes, [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) and [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs.md#lsa-secrets).
+Extract SAM hashes, [domain cached credentials](../../../windows-hardening/stealing-windows-credentials/windows-credentials-protections.md#cached-credentials) and [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs.md#lsa-secrets).
 
 {% tabs %}
 {% tab title="vol3" %}
@@ -181,8 +179,6 @@ The memory dump of a process will **extract everything** of the current status o
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
-
-
 
 ​
 
@@ -414,8 +410,6 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp userassist
 ```
 {% endtab %}
 {% endtabs %}
-
-
 
 ​
 
@@ -812,8 +806,6 @@ volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 
 The MBR holds the information on how the logical partitions, containing [file systems](https://en.wikipedia.org/wiki/File\_system), are organized on that medium. The MBR also contains executable code to function as a loader for the installed operating system—usually by passing control over to the loader's [second stage](https://en.wikipedia.org/wiki/Second-stage\_boot\_loader), or in conjunction with each partition's [volume boot record](https://en.wikipedia.org/wiki/Volume\_boot\_record) (VBR). This MBR code is usually referred to as a [boot loader](https://en.wikipedia.org/wiki/Boot\_loader). From [here](https://en.wikipedia.org/wiki/Master\_boot\_record).
 
-
-
 ​
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
@@ -824,12 +816,12 @@ The MBR holds the information on how the logical partitions, containing [file sy
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

