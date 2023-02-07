@@ -577,7 +577,7 @@
   * [Dom Clobbering](pentesting-web/xss-cross-site-scripting/dom-clobbering.md)
   * [DOM XSS](pentesting-web/xss-cross-site-scripting/dom-xss.md)
   * [Iframes in XSS, CSP and SOP](pentesting-web/xss-cross-site-scripting/iframes-in-xss-and-csp.md)
-  * [Other JS Tricks](pentesting-web/xss-cross-site-scripting/other-js-tricks.md)
+  * [Misc JS Tricks & Relevant Info](pentesting-web/xss-cross-site-scripting/other-js-tricks.md)
   * [PDF Injection](pentesting-web/xss-cross-site-scripting/pdf-injection.md)
   * [Server Side XSS (Dynamic PDF)](pentesting-web/xss-cross-site-scripting/server-side-xss-dynamic-pdf.md)
   * [SOME - Same Origin Method Execution](pentesting-web/xss-cross-site-scripting/some-same-origin-method-execution.md)
