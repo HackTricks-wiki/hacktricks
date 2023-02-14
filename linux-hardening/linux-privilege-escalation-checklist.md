@@ -19,7 +19,7 @@ Did you know that crypto projects pay more bounty rewards than their web2 counte
 Check out the [**top-paying bounties**](https://hackenproof.com/programs) among crypto projects.\
 [**Sign up on HackenProof**](https://hackenproof.com/register?referral\_code=i\_E6M25i\_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
 
-{% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
+{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
 
 ### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
@@ -166,7 +166,7 @@ Did you know that crypto projects pay more bounty rewards than their web2 counte
 Check out the [**top-paying bounties**](https://hackenproof.com/programs) among crypto projects.\
 [**Sign up on HackenProof**](https://hackenproof.com/register?referral\_code=i\_E6M25i\_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
 
-{% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
+{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
 
 <details>
 

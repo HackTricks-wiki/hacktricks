@@ -21,7 +21,7 @@ This [**crypto bounty alone**](https://hackenproof.com/jungle/jungle-smart-contr
 Check out the [**top-paying bounties**](https://hackenproof.com/programs) among crypto projects.\
 [**Sign up on HackenProof**](https://hackenproof.com/register?referral\_code=i\_E6M25i\_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
 
-{% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
+{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
 
 ## Credentials Mimikatz
 
@@ -173,7 +173,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 Check out the [**top-paying bounties**](https://hackenproof.com/programs) among crypto projects.\
 [**Sign up on HackenProof**](https://hackenproof.com/register?referral\_code=i\_E6M25i\_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
 
-{% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
+{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
 
 ## Stealing SAM & SYSTEM
 
@@ -341,7 +341,7 @@ Download it from:[ http://www.tarasco.org/security/pwdump\_7](http://www.tarasco
 Check out the [**top-paying bounties**](https://hackenproof.com/programs) among crypto projects.\
 [**Sign up on HackenProof**](https://hackenproof.com/register?referral\_code=i\_E6M25i\_Um9gB56o-XsIA) to get rewarded without delays and become the web3 hacker legend.
 
-{% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
+{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
 
 <details>
 

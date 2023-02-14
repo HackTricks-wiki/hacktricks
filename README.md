@@ -76,7 +76,7 @@ Gain reputation points with each verified bug and conquer the top of the weekly 
 
 [**Sign up on HackenProof**](https://hackenproof.com/register?referral\_code=i\_E6M25i\_Um9gB56o-XsIA) to start earning from your hacks!
 
-{% embed url="https://hackenproof.com/register?referral_code=i_E6M25i_Um9gB56o-XsIA" %}
+{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
 
 ### [WebSec](https://websec.nl/)
 
