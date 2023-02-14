@@ -254,7 +254,7 @@ This vulnerability allowed any authenticated user to **compromise the domain con
 
 Hopefully you have managed to **compromise some local admin** account using [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) including relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/).\
 Then, its time to dump all the hashes in memory and locally.\
-[**Read this page about different ways to obtain the hashes.**](../stealing-credentials/)
+[**Read this page about different ways to obtain the hashes.**](broken-reference)
 
 ### Pass the Hash
 
@@ -383,7 +383,7 @@ Once you get **Domain Admin** or even better **Enterprise Admin** privileges, yo
 
 [**More information about DCSync attack can be found here**](dcsync.md).
 
-[**More information about how to steal the NTDS.dit can be found here**](../stealing-credentials/)
+[**More information about how to steal the NTDS.dit can be found here**](broken-reference)
 
 ### Privesc as Persistence
 

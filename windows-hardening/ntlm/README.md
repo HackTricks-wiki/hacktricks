@@ -189,7 +189,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## Extracting credentials from a Windows Host
 
-**For more information about** [**how to obtain credentials from a Windows host you should read this page**](../stealing-credentials/)**.**
+**For more information about** [**how to obtain credentials from a Windows host you should read this page**](broken-reference)**.**
 
 ## NTLM Relay and Responder
 
