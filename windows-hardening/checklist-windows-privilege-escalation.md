@@ -39,9 +39,9 @@
 * [ ] [**LSA Protection**](windows-local-privilege-escalation/#lsa-protection)?
 * [ ] [**Credentials Guard**](windows-local-privilege-escalation/#credentials-guard)[?](windows-local-privilege-escalation/#cached-credentials)
 * [ ] [**Cached Credentials**](windows-local-privilege-escalation/#cached-credentials)?
-* [ ] Check if any [**AV**](windows-local-privilege-escalation/#av)
-* [ ] [**AppLocker Policy**](windows-local-privilege-escalation/#applocker-policy)?
-* [ ] [**UAC**](windows-local-privilege-escalation/#uac)
+* [ ] Check if any [**AV**](windows-av-bypass)
+* [ ] [**AppLocker Policy**](authentication-credentials-uac-and-efs#applocker-policy)?
+* [ ] [**UAC**](authentication-credentials-uac-and-efs/uac-user-account-control)
 * [ ] [**User Privileges**](windows-local-privilege-escalation/#users-and-groups)
 * [ ] Check [**current** user **privileges**](windows-local-privilege-escalation/#users-and-groups)
 * [ ] Are you [**member of any privileged group**](windows-local-privilege-escalation/#privileged-groups)?
@@ -64,7 +64,7 @@
 
 ### [Services](windows-local-privilege-escalation/#services)
 
-* [ ] [Can you **modify any service**?](windows-local-privilege-escalation/#permissions)
+* [ ] [Can you **modify any service**?](windows-local-privilege-escalation#permissions)
 * [ ] [Can you **modify** the **binary** that is **executed** by any **service**?](windows-local-privilege-escalation/#modify-service-binary-path)
 * [ ] [Can you **modify** the **registry** of any **service**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
 * [ ] [Can you take advantage of any **unquoted service** binary **path**?](windows-local-privilege-escalation/#unquoted-service-paths)
