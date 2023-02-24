@@ -470,7 +470,7 @@ In the previous method we managed to access the docker host disk.\
 In case you find that the host is running an **ssh** server, you could **create a user inside the docker host** disk and access it via SSH:
 
 ```bash
-#Like in the example before, the first step is to moun the dosker host disk
+#Like in the example before, the first step is to mount the docker host disk
 fdisk -l
 mount /dev/sda /mnt/
 
