@@ -119,7 +119,7 @@ And bloodhound will be ready to ingest data.
 They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
 
 ```
-./SharpHound.exe --CollectionMethod All
+./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
 
