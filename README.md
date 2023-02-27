@@ -61,7 +61,7 @@ Get Access Today:
 
 ### [HACKENPROOF](https://hackenproof.com/)
 
-<figure><img src=".gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof is home to all crypto bug bounties.**
 
