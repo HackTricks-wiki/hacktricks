@@ -22,7 +22,7 @@
 
 💬 Participate in community discussions
 
-{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
+
 
 
 ### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
@@ -174,7 +174,7 @@
 
 💬 Participate in community discussions
 
-{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
+
 
 
 <details>

