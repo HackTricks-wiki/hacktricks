@@ -63,6 +63,8 @@ Get Access Today:
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
+**[Follow HackenProof](bit.ly/3xrrDrL) to learn more about web3 bugs**
+
 🐞 Read web3 bug tutorials
 
 🔔 Get notified about new bug bounties
