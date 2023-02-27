@@ -64,7 +64,9 @@ Get Access Today:
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 🐞 Read web3 bug tutorials
+
 🔔 Get notified about new bug bounties
+
 💬 Participate in community discussions
 
 {% embed url="https://twitter.com/intent/follow?original_referer=https%3A%2F%2Fwww.hackenproof.com%2F&screen_name=hackenproof" %}
