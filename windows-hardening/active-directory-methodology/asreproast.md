@@ -19,7 +19,7 @@
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](bit.ly/3xrrDrL) to learn more about web3 bugs**
+**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
@@ -88,7 +88,7 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](bit.ly/3xrrDrL) to learn more about web3 bugs**
+**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 

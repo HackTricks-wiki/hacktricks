@@ -59,11 +59,11 @@ Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-### [HACKENPROOF](https://hackenproof.com/)
+### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](bit.ly/3xrrDrL) to learn more about web3 bugs**
+**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 

@@ -16,7 +16,7 @@
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](bit.ly/3xrrDrL) to learn more about web3 bugs**
+**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
@@ -172,7 +172,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](bit.ly/3xrrDrL) to learn more about web3 bugs**
+**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
@@ -344,7 +344,7 @@ Download it from:[ http://www.tarasco.org/security/pwdump\_7](http://www.tarasco
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](bit.ly/3xrrDrL) to learn more about web3 bugs**
+**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
