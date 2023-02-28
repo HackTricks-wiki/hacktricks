@@ -63,7 +63,7 @@ Get Access Today:
 
 <figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
+[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
@@ -71,7 +71,7 @@ Get Access Today:
 
 💬 Participate in community discussions
 
-
+>
 
 ### [WebSec](https://websec.nl/)
 
