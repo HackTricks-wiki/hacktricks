@@ -484,6 +484,7 @@
 * [Deserialization](pentesting-web/deserialization/README.md)
   * [NodeJS - \_\_proto\_\_ & prototype Pollution](pentesting-web/deserialization/nodejs-proto-prototype-pollution/README.md)
     * [Client Side Prototype Pollution](pentesting-web/deserialization/nodejs-proto-prototype-pollution/client-side-prototype-pollution.md)
+    * [Express Prototype Pollution Gadgets](pentesting-web/deserialization/nodejs-proto-prototype-pollution/express-prototype-pollution-gadgets.md)
     * [Prototype Pollution to RCE](pentesting-web/deserialization/nodejs-proto-prototype-pollution/prototype-pollution-to-rce.md)
   * [Java JSF ViewState (.faces) Deserialization](pentesting-web/deserialization/java-jsf-viewstate-.faces-deserialization.md)
   * [Java DNS Deserialization, GadgetProbe and Java Deserialization Scanner](pentesting-web/deserialization/java-dns-deserialization-and-gadgetprobe.md)
