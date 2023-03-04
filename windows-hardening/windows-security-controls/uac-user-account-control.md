@@ -203,7 +203,7 @@ If you don't care about being noisy you could always **run something like** [**h
 
 ### Your own bypass - Basic UAC bypass methodology
 
-If you take a look to **UACME** you will note that **most UAC bypasses abuse a Dll Hijacking vulnerabilit**y (mainly writing the malicious dll on _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking.md).
+If you take a look to **UACME** you will note that **most UAC bypasses abuse a Dll Hijacking vulnerabilit**y (mainly writing the malicious dll on _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/).
 
 1. Find a binary that will **autoelevate** (check that when it is executed it runs in a high integrity level).
 2. With procmon find "**NAME NOT FOUND**" events that can be vulnerable to **DLL Hijacking**.
