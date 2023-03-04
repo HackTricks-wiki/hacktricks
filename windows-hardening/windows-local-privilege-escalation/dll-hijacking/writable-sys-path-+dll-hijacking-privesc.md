@@ -88,7 +88,7 @@ However, that user has the **`seImpersonate`** privilege, so you can use the[ **
 
 At the moment of writing the **Task Scheduler** service is run with **Nt AUTHORITY\SYSTEM**.
 
-Having **generated the malicious Dll**, save it in the writable System Path with the name **WptsExtensions.dll** and **restart** the computer (or restart the service or do whatever it takes to rerun the affected service/program).
+Having **generated the malicious Dll** (in my case I used x64 rev shell and I got a shell back), save it in the writable System Path with the name **WptsExtensions.dll** and **restart** the computer (or restart the service or do whatever it takes to rerun the affected service/program).
 
 When the service is re-started, the **dll should be loaded and executed** (you can **reuse** the **procmon** trick to check if the **library was loaded as expected**).
 

