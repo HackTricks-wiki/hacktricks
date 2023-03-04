@@ -557,7 +557,7 @@ First, we obtain the hash of `Jane` with for instance Shadow Credentials (using 
 
 Next, we change the `userPrincipalName` of `Jane` to be `DC$@corp.local`.
 
-<figure><img src="../../../.gitbook/assets/image (18) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (18) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 This is not a constraint violation, since the `DC$` computer account does not have `userPrincipalName`.
 

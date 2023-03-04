@@ -424,7 +424,7 @@ powershell -command "Get-Clipboard"
 ### File and Folder Permissions
 
 First of all, listing the processes **check for passwords inside the command line of the process**.\
-Check if you can **overwrite some binary running** or if you have write permissions of the binary folder to exploit possible [**DLL Hijacking attacks**](dll-hijacking/):
+Check if you can **overwrite some binary running** or if you have write permissions of the binary folder to exploit possible [**DLL Hijacking attacks**](dll-hijacking.md):
 
 ```bash
 Tasklist /SVC #List processes running and services
@@ -450,7 +450,7 @@ for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executabl
 )
 ```
 
-**Checking permissions of the folders of the processes binaries (**[**DLL Hijacking**](dll-hijacking/)**)**
+**Checking permissions of the folders of the processes binaries (**[**DLL Hijacking**](dll-hijacking.md)**)**
 
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v 
@@ -562,7 +562,7 @@ Other Permissions can be used to escalate privileges:\
 
 ### Services binaries weak permissions
 
-**Check if you can modify the binary that is executed by a service** or if you have **write permissions on the folder** where the binary is located ([**DLL Hijacking**](dll-hijacking/))**.**\
+**Check if you can modify the binary that is executed by a service** or if you have **write permissions on the folder** where the binary is located ([**DLL Hijacking**](dll-hijacking.md))**.**\
 You can get every binary that is executed by a service using **wmic** (not in system32) and check your permissions using **icacls**:
 
 ```bash
@@ -654,7 +654,7 @@ It's possible to indicate Windows what it should do[ when executing a service th
 
 ### Installed Applications
 
-Check **permissions of the binaries** (maybe you can overwrite one and escalate privileges) and of the **folders** ([DLL Hijacking](dll-hijacking/)).
+Check **permissions of the binaries** (maybe you can overwrite one and escalate privileges) and of the **folders** ([DLL Hijacking](dll-hijacking.md)).
 
 ```bash
 dir /a "C:\Program Files"
@@ -722,6 +722,12 @@ Check permissions of all folders inside PATH:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
+
+For more information about how to abuse this check:
+
+{% content-ref url="dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md" %}
+[writable-sys-path-+dll-hijacking-privesc.md](dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md)
+{% endcontent-ref %}
 
 ## Network
 
@@ -1484,7 +1490,7 @@ If you want to read an example of [**how to go from high integrity to System usi
 ### Dll Hijacking
 
 If you manages to **hijack a dll** being **loaded** by a **process** running as **SYSTEM** you will be able to execute arbitrary code with those permissions. Therefore Dll Hijacking is also useful to this kind of privilege escalation, and, moreover, if far **more easy to achieve from a high integrity process** as it will have **write permissions** on the folders used to load dlls.\
-**You can** [**learn more about Dll hijacking here**](dll-hijacking/)**.**
+**You can** [**learn more about Dll hijacking here**](dll-hijacking.md)**.**
 
 ### **From Administrator or Network Service to System**
 
