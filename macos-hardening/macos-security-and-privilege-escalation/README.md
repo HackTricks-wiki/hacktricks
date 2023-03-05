@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="/.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 **[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
@@ -457,7 +457,7 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 
 
-<figure><img src="/.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 **[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
@@ -1268,7 +1268,7 @@ sudo killall -HUP mDNSResponder
 
 
 
-<figure><img src="/.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 **[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
