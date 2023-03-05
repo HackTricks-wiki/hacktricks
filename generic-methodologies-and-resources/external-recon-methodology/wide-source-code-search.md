@@ -17,7 +17,10 @@ The goal of this page is to enumerate **platforms that allow to search for code*
 This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
 
 * ****[**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-* ****[**Github Code Search**](https://cs.github.com/): Search across Github. It supports regexes.
+* ****[**Github Search**](https://github.com/search): Search across Github. It supports regexes.
+  * Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
+* ****[**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced\_search.html): Search across Gitlab projects. Support regexes.
+* ****[**SearchCode**](https://searchcode.com/): Search code in millions of projects.
 
 <details>
 
