@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 **[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
@@ -164,7 +164,7 @@
 * [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?
 
 
-<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 **[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
