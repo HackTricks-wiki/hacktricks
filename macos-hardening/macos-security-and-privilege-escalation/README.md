@@ -452,7 +452,9 @@ launchctl print system
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 
-<figure><img src=".gitbook/assets/image%20(7).png" alt=""><figcaption></figcaption></figure>
+
+
+<figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 [**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
 
@@ -1258,7 +1260,9 @@ sudo killall -HUP mDNSResponder
 * [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
 * [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
 
-<figure><img src=".gitbook/assets/image%20(7).png" alt=""><figcaption></figcaption></figure>
+
+
+<figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 [**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
 

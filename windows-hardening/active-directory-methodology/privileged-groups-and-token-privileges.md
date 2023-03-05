@@ -33,7 +33,7 @@ Get-NetGroupMember -Identity "Account Operators" -Recurse
 
 Note the spotless' user membership:
 
-![](<../../.gitbook/assets/1 (2) (1) (1).png>)
+![](<../../.gitbook/assets/1 (2) (1).png>)
 
 However, we can still add new users:
 

@@ -12,18 +12,15 @@
 
 </details>
 
-<figure><img src=".gitbook/assets/image%20(7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
+[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
 🔔 Get notified about new bug bounties
 
 💬 Participate in community discussions
-
-
-
 
 ### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
@@ -163,19 +160,15 @@
 * [ ] Can you [**abuse NFS to escalate privileges**](privilege-escalation/#nfs-privilege-escalation)?
 * [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?
 
+<figure><img src="../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src=".gitbook/assets/image%20(7).png" alt=""><figcaption></figcaption></figure>
-
-**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
+[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
 🔔 Get notified about new bug bounties
 
 💬 Participate in community discussions
-
-
-
 
 <details>
 

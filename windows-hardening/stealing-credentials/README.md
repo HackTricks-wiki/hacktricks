@@ -12,20 +12,15 @@
 
 </details>
 
-​
+<figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src=".gitbook/assets/image%20(7).png" alt=""><figcaption></figcaption></figure>
-
-**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
+[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
 🔔 Get notified about new bug bounties
 
 💬 Participate in community discussions
-
-
-
 
 ## Credentials Mimikatz
 
@@ -170,18 +165,17 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
 
-<figure><img src=".gitbook/assets/image%20(7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
+
+<figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+
+[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
 🔔 Get notified about new bug bounties
 
 💬 Participate in community discussions
-
-
-
 
 ## Stealing SAM & SYSTEM
 
@@ -342,18 +336,15 @@ Download it from:[ http://www.tarasco.org/security/pwdump\_7](http://www.tarasco
 
 ​
 
-<figure><img src=".gitbook/assets/image%20(7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
-**[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
+[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
 
 🐞 Read web3 bug tutorials
 
 🔔 Get notified about new bug bounties
 
 💬 Participate in community discussions
-
-
-
 
 <details>
 
