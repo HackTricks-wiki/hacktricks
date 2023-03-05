@@ -17,7 +17,7 @@
 </details>
 
 
-<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image%20(7).png" alt=""><figcaption></figcaption></figure>
 
 **[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 
@@ -86,7 +86,7 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 [**More information about AS-RRP Roasting in ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 
-<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image%20(7).png" alt=""><figcaption></figcaption></figure>
 
 **[Follow HackenProof](https://bit.ly/3xrrDrL) to learn more about web3 bugs**
 

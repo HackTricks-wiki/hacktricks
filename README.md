@@ -61,7 +61,7 @@ Get Access Today:
 
 ### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
-<figure><img src=".gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image%20(7).png" alt=""><figcaption></figcaption></figure>
 
 [**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
 
