@@ -136,7 +136,7 @@ Moreover, in the **next sectio**n you can find some **basic dll codes** that mig
 
 Basically a **Dll proxy** is a Dll capable of **execute your malicious code when loaded** but also to **expose** and **work** as **exected** by **relaying all the calls to the real library**.
 
-With the tool **** [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) **** you can actually **indicate an executable and select the library** you want to proxify and **generate a proxified dll** or **indicate the Dll** and **generate a proxified dll**.
+With the tool **** [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) **** or **** [**Spartacus**](https://github.com/Accenture/Spartacus) **** you can actually **indicate an executable and select the library** you want to proxify and **generate a proxified dll** or **indicate the Dll** and **generate a proxified dll**.
 
 ### **Meterpreter**
 

@@ -10,6 +10,7 @@
 
 * [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
 * [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
+  * [Wide Source Code Search](generic-methodologies-and-resources/external-recon-methodology/wide-source-code-search.md)
   * [Github Dorks & Leaks](generic-methodologies-and-resources/external-recon-methodology/github-leaked-secrets.md)
 * [Pentesting Network](generic-methodologies-and-resources/pentesting-network/README.md)
   * [DHCPv6](generic-methodologies-and-resources/pentesting-network/dhcpv6.md)
@@ -96,6 +97,7 @@
     * [AppArmor](linux-hardening/privilege-escalation/docker-breakout/apparmor.md)
     * [Namespaces](linux-hardening/privilege-escalation/docker-breakout/namespaces.md)
     * [Cgroups](linux-hardening/privilege-escalation/docker-breakout/cgroups.md)
+    * [Weaponizing Distroless](linux-hardening/privilege-escalation/docker-breakout/weaponizing-distroless.md)
     * [Docker --privileged](linux-hardening/privilege-escalation/docker-breakout/docker-privileged.md)
     * [Abusing Docker Socket for Privilege Escalation](linux-hardening/privilege-escalation/docker-breakout/abusing-docker-socket-for-privilege-escalation.md)
   * [Escaping from Jails](linux-hardening/privilege-escalation/escaping-from-limited-bash.md)
