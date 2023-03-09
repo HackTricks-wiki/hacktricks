@@ -45,7 +45,7 @@ It's interesting to find if the **company have assigned any ASN** to find its **
 You can **search** by company **name**, by **IP** or by **domain** in [**https://bgp.he.net/**](https://bgp.he.net)**.**\
 **Depending on the region of the company this links could be useful to gather more data:** [**AFRINIC**](https://www.afrinic.net) **(Africa),** [**Arin**](https://www.arin.net/about/welcome/region/)**(North America),** [**APNIC**](https://www.apnic.net) **(Asia),** [**LACNIC**](https://www.lacnic.net) **(Latin America),** [**RIPE NCC**](https://www.ripe.net) **(Europe). Anyway, probably all the** useful information **(IP ranges and Whois)** appears already in the first link.
 
-BBOT's subdomain enumeration automatically aggregates and summarizes ASNs at the end of the scan.
+[BBOT](https://github.com/blacklanternsecurity/bbot)'s subdomain enumeration automatically aggregates and summarizes ASNs at the end of the scan.
 ```bash
 bbot -t tesla.com -f subdomain-enum
 ...
