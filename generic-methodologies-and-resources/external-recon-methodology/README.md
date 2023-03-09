@@ -45,6 +45,24 @@ It's interesting to find if the **company have assigned any ASN** to find its **
 You can **search** by company **name**, by **IP** or by **domain** in [**https://bgp.he.net/**](https://bgp.he.net)**.**\
 **Depending on the region of the company this links could be useful to gather more data:** [**AFRINIC**](https://www.afrinic.net) **(Africa),** [**Arin**](https://www.arin.net/about/welcome/region/)**(North America),** [**APNIC**](https://www.apnic.net) **(Asia),** [**LACNIC**](https://www.lacnic.net) **(Latin America),** [**RIPE NCC**](https://www.ripe.net) **(Europe). Anyway, probably all the** useful information **(IP ranges and Whois)** appears already in the first link.
 
+BBOT's subdomain enumeration automatically aggregates and summarizes ASNs at the end of the scan.
+```bash
+bbot -t tesla.com -f subdomain-enum
+...
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+[INFO] bbot.modules.asn: | AS394161 | 8.244.131.0/24      | 5            | TESLA          | Tesla Motors, Inc.         | US        |
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+[INFO] bbot.modules.asn: | AS16509  | 54.148.0.0/15       | 4            | AMAZON-02      | Amazon.com, Inc.           | US        |
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+[INFO] bbot.modules.asn: | AS394161 | 8.45.124.0/24       | 3            | TESLA          | Tesla Motors, Inc.         | US        |
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+[INFO] bbot.modules.asn: | AS3356   | 8.32.0.0/12         | 1            | LEVEL3         | Level 3 Parent, LLC        | US        |
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+[INFO] bbot.modules.asn: | AS3356   | 8.0.0.0/9           | 1            | LEVEL3         | Level 3 Parent, LLC        | US        |
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+
+```
+
 ```bash
 #You can try "automate" this with amass, but it's not very recommended
 amass intel -org tesla
@@ -207,7 +225,28 @@ dnsrecon -a -d tesla.com
 
 The fastest way to obtain a lot of subdomains is search in external sources. I'm not going to discuss which sources are the bests and how to use them, but you can find here several utilities: [https://pentester.land/cheatsheets/2018/11/14/subdomains-enumeration-cheatsheet.html](https://pentester.land/cheatsheets/2018/11/14/subdomains-enumeration-cheatsheet.html)
 
+You can find a comparison of many of these tools here: [https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off](https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off)
+
 The most used **tools** are the following ones (for better results configure the API keys):
+
+* [**BBOT**](https://github.com/blacklanternsecurity/bbot)
+
+```bash
+# recursive
+# dns brute-force with massdns + smart mutations
+# automatic PTR,A,AAAA,MX,TXT,NS,SOA,SRV,CNAME lookups
+# returns a summary of ASNs at the end of the scan
+# API keys go in ~/.config/bbot/secrets.yaml
+
+# subdomains
+bbot -t tesla.com -f subdomain-enum
+
+# subdomains (passive only)
+bbot -t tesla.com -f subdomain-enum -rf passive
+
+# subdomains + port scan + web screenshots
+bbot -t tesla.com -f subdomain-enum -m naabu gowitness -n my_scan -o .
+```
 
 * [**Amass**](https://github.com/OWASP/Amass)
 
