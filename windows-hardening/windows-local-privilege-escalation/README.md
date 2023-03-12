@@ -1441,6 +1441,60 @@ while($true)
 }
 ```
 
+## From Low Priv User to NT\AUTHORITY SYSTEM (CVE-2019-1388) / UAC Bypass
+
+If you have access to the graphical interface (via console or RDP) and UAC is enabled, in some versions of Microsoft Windows it's possible to run a terminal or any other process such as "NT\AUTHORITY SYSTEM" from an unprivileged user.
+
+This makes it possible to escalate privileges and bypass UAC at the same time with the same vulnerability. Additionally, there is no need to install anything and the binary used during the process, is signed and issued by Microsoft.
+
+Some of the affected systems are the following:
+
+```
+SERVER
+======
+
+Windows 2008r2	7601	** link OPENED AS SYSTEM **
+Windows 2012r2	9600	** link OPENED AS SYSTEM **
+Windows 2016	14393	** link OPENED AS SYSTEM **
+Windows 2019	17763	link NOT opened
+
+
+WORKSTATION
+===========
+
+Windows 7 SP1	7601	** link OPENED AS SYSTEM **
+Windows 8		9200	** link OPENED AS SYSTEM **
+Windows 8.1		9600	** link OPENED AS SYSTEM **
+Windows 10 1511	10240	** link OPENED AS SYSTEM **
+Windows 10 1607	14393	** link OPENED AS SYSTEM **
+Windows 10 1703	15063	link NOT opened
+Windows 10 1709	16299	link NOT opened
+```
+
+To exploit this vulnerability, it's necessary to perform the following steps:
+
+ ```
+ 1) Right click on the HHUPD.EXE file and run it as Administrator.
+
+ 2) When the UAC prompt appears, select "Show more details".
+
+ 3) Click "Show publisher certificate information".
+
+ 4) If the system is vulnerable, when clicking on the "Issued by" URL link, the default web browser may appear.
+
+ 5) Wait for the site to load completely and select "Save as" to bring up an explorer.exe window.
+
+ 6) In the address path of the explorer window, enter cmd.exe, powershell.exe or any other interactive process.
+
+ 7) You now will have an "NT\AUTHORITY SYSTEM" command prompt.
+
+ 8) Remember to cancel setup and the UAC prompt to return to your desktop. 
+ ```
+
+You have all the necessary files and information in the following GitHub repository:
+
+https://github.com/jas502n/CVE-2019-1388
+
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
 Read this to **learn about Integrity Levels**:
