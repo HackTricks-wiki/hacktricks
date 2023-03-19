@@ -1045,7 +1045,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 
 ### Bypass Defenses
 
-In previous examples at the begging of this post, you can see **how to execute any python code using the `compile` function**. This is interesting because you can **execute whole scripts** with loops and everything in a **one liner** (and we could do the same using **`exec`**).\
+In previous examples at the beginning of this post, you can see **how to execute any python code using the `compile` function**. This is interesting because you can **execute whole scripts** with loops and everything in a **one liner** (and we could do the same using **`exec`**).\
 Anyway, sometimes it could be useful to **create** a **compiled object** in a local machine and execute it in the **CTF machine** (for example because we don't have the `compiled` function in the CTF).
 
 For example, let's compile and execute manually a function that reads _./poc.py_:
