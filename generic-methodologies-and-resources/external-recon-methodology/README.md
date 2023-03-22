@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>HackTricks in</strong> <a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
@@ -49,6 +49,25 @@ You can **search** by company **name**, by **IP** or by **domain** in [**https:/
 #You can try "automate" this with amass, but it's not very recommended
 amass intel -org tesla
 amass intel -asn 8911,50313,394161
+```
+
+Also, [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'s** subdomain enumeration automatically aggregates and summarizes ASNs at the end of the scan.
+
+```bash
+bbot -t tesla.com -f subdomain-enum
+...
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+[INFO] bbot.modules.asn: | AS394161 | 8.244.131.0/24      | 5            | TESLA          | Tesla Motors, Inc.         | US        |
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+[INFO] bbot.modules.asn: | AS16509  | 54.148.0.0/15       | 4            | AMAZON-02      | Amazon.com, Inc.           | US        |
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+[INFO] bbot.modules.asn: | AS394161 | 8.45.124.0/24       | 3            | TESLA          | Tesla Motors, Inc.         | US        |
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+[INFO] bbot.modules.asn: | AS3356   | 8.32.0.0/12         | 1            | LEVEL3         | Level 3 Parent, LLC        | US        |
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+[INFO] bbot.modules.asn: | AS3356   | 8.0.0.0/9           | 1            | LEVEL3         | Level 3 Parent, LLC        | US        |
+[INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
+
 ```
 
 You can find the IP ranges of an organisation also using [http://asnlookup.com/](http://asnlookup.com) (it has free API).\
@@ -107,7 +126,7 @@ For example, if you see the same **Google Analytics ID** or the same **Adsense I
 
 There are some pages and tools that let you search by these trackers and more:
 
-* ****[**Udon**](https://github.com/dhn/udon)****
+* [**Udon**](https://github.com/dhn/udon)
 * [**BuiltWith**](https://builtwith.com)
 * [**Sitesleuth**](https://www.sitesleuth.io)
 * [**Publicwww**](https://publicwww.com)
@@ -205,9 +224,20 @@ dnsrecon -a -d tesla.com
 
 ### **OSINT**
 
-The fastest way to obtain a lot of subdomains is search in external sources. I'm not going to discuss which sources are the bests and how to use them, but you can find here several utilities: [https://pentester.land/cheatsheets/2018/11/14/subdomains-enumeration-cheatsheet.html](https://pentester.land/cheatsheets/2018/11/14/subdomains-enumeration-cheatsheet.html)
+The fastest way to obtain a lot of subdomains is search in external sources. The most used **tools** are the following ones (for better results configure the API keys):
 
-The most used **tools** are the following ones (for better results configure the API keys):
+* [**BBOT**](https://github.com/blacklanternsecurity/bbot)
+
+```bash
+# subdomains
+bbot -t tesla.com -f subdomain-enum
+
+# subdomains (passive only)
+bbot -t tesla.com -f subdomain-enum -rf passive
+
+# subdomains + port scan + web screenshots
+bbot -t tesla.com -f subdomain-enum -m naabu gowitness -n my_scan -o .
+```
 
 * [**Amass**](https://github.com/OWASP/Amass)
 
@@ -339,6 +369,8 @@ python3 censys-subdomain-finder.py tesla.com
 * [**chaos.projectdiscovery.io**](https://chaos.projectdiscovery.io/#/)
 
 This project offers for **free all the subdomains related to bug-bounty programs**. You can access this data also using [chaospy](https://github.com/dr-0x0x/chaospy) or even access the scope used by this project [https://github.com/projectdiscovery/chaos-public-program-list](https://github.com/projectdiscovery/chaos-public-program-list)
+
+You can find a **comparison** of many of these tools here: [https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off](https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off)
 
 ### **DNS Brute force**
 
@@ -678,7 +710,7 @@ There are several tools out there that will perform part of the proposed actions
 
 <details>
 
-<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>HackTricks in</strong> <a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)

@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><strong>HackTricks in </strong><a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 - Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
@@ -122,7 +122,7 @@ Note also that if you can **mount `/etc`** or any other folder **containing conf
 
 ## Unchecked API Endpoint
 
-The of the sysadmin configuring this plugin would be to control which actions and with which privileges each user can perform. Therefore, if the admin takes a **blacklist** approach with the endpoints and the attributes he might **forget some of them** that could allow an attacker to **escalate privileges.**
+The responsibility of the sysadmin configuring this plugin would be to control which actions and with which privileges each user can perform. Therefore, if the admin takes a **blacklist** approach with the endpoints and the attributes he might **forget some of them** that could allow an attacker to **escalate privileges.**
 
 You can check the docker API in [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
@@ -218,7 +218,7 @@ Remember to **re-enable the plugin after escalating**, or a **restart of docker 
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><strong>HackTricks in </strong><a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 - Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 

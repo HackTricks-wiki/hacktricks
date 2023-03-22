@@ -4,7 +4,7 @@
 
 <details>
 
-<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>HackTricks in </strong><a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
@@ -24,7 +24,7 @@ If you ends in a code **using shift rights and lefts, xors and several arithmeti
 
 If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
 
-![](<../../.gitbook/assets/image (375) (1) (1) (1) (1).png>)
+![](<../../.gitbook/assets/image (254) (1).png>)
 
 Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
@@ -159,7 +159,7 @@ You can identify both of them checking the constants. Note that the sha\_init ha
 
 Note the use of more constants
 
-![](<../../.gitbook/assets/image (253) (1) (1) (1).png>)
+![](<../../.gitbook/assets/image (253) (1) (1).png>)
 
 ## CRC (hash)
 
@@ -187,7 +187,7 @@ A CRC hash algorithm looks like:
 
 The graph is quiet large:
 
-![](<../../.gitbook/assets/image (207) (2) (1).png>)
+![](<../../.gitbook/assets/image (207) (2).png>)
 
 Check **3 comparisons to recognise it**:
 
@@ -195,7 +195,7 @@ Check **3 comparisons to recognise it**:
 
 <details>
 
-<summary><a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ HackTricks LIVE Twitch</strong></a> <strong>Wednesdays 5.30pm (UTC) 🎙️ -</strong> <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>HackTricks in </strong><a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)

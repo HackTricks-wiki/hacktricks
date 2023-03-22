@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><strong>HackTricks in </strong><a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 - Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
@@ -39,9 +39,9 @@
 * [ ] [**LSA Protection**](windows-local-privilege-escalation/#lsa-protection)?
 * [ ] [**Credentials Guard**](windows-local-privilege-escalation/#credentials-guard)[?](windows-local-privilege-escalation/#cached-credentials)
 * [ ] [**Cached Credentials**](windows-local-privilege-escalation/#cached-credentials)?
-* [ ] Check if any [**AV**](windows-local-privilege-escalation/#av)
-* [ ] [**AppLocker Policy**](windows-local-privilege-escalation/#applocker-policy)?
-* [ ] [**UAC**](windows-local-privilege-escalation/#uac)
+* [ ] Check if any [**AV**](windows-av-bypass)
+* [ ] [**AppLocker Policy**](authentication-credentials-uac-and-efs#applocker-policy)?
+* [ ] [**UAC**](authentication-credentials-uac-and-efs/uac-user-account-control)
 * [ ] [**User Privileges**](windows-local-privilege-escalation/#users-and-groups)
 * [ ] Check [**current** user **privileges**](windows-local-privilege-escalation/#users-and-groups)
 * [ ] Are you [**member of any privileged group**](windows-local-privilege-escalation/#privileged-groups)?
@@ -64,7 +64,7 @@
 
 ### [Services](windows-local-privilege-escalation/#services)
 
-* [ ] [Can you **modify any service**?](windows-local-privilege-escalation/#permissions)
+* [ ] [Can you **modify any service**?](windows-local-privilege-escalation#permissions)
 * [ ] [Can you **modify** the **binary** that is **executed** by any **service**?](windows-local-privilege-escalation/#modify-service-binary-path)
 * [ ] [Can you **modify** the **registry** of any **service**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
 * [ ] [Can you take advantage of any **unquoted service** binary **path**?](windows-local-privilege-escalation/#unquoted-service-paths)
@@ -126,7 +126,7 @@
 
 <details>
 
-<summary><strong><a href="https://www.twitch.tv/hacktricks_live/schedule">🎙️ HackTricks LIVE Twitch</a> Wednesdays 5.30pm (UTC) 🎙️ - <a href="https://www.youtube.com/@hacktricks_LIVE">🎥 Youtube 🎥</a></strong></summary>
+<summary><strong>HackTricks in </strong><a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 - Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 
