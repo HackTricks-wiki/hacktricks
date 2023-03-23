@@ -492,6 +492,7 @@
   * [Java JSF ViewState (.faces) Deserialization](pentesting-web/deserialization/java-jsf-viewstate-.faces-deserialization.md)
   * [Java DNS Deserialization, GadgetProbe and Java Deserialization Scanner](pentesting-web/deserialization/java-dns-deserialization-and-gadgetprobe.md)
   * [Basic Java Deserialization (ObjectInputStream, readObject)](pentesting-web/deserialization/basic-java-deserialization-objectinputstream-readobject.md)
+  * [PHP - Deserialization + Autoload Classes](pentesting-web/deserialization/php-deserialization-+-autoload-classes.md)
   * [CommonsCollection1 Payload - Java Transformers to Rutime exec() and Thread Sleep](pentesting-web/deserialization/java-transformers-to-rutime-exec-payload.md)
   * [Basic .Net deserialization (ObjectDataProvider gadget, ExpandedWrapper, and Json.Net)](pentesting-web/deserialization/basic-.net-deserialization-objectdataprovider-gadgets-expandedwrapper-and-json.net.md)
   * [Exploiting \_\_VIEWSTATE knowing the secrets](pentesting-web/deserialization/exploiting-\_\_viewstate-knowing-the-secret.md)
