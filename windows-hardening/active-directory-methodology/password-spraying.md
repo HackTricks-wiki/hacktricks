@@ -29,7 +29,7 @@ If you have some user credentials or a shell as a domain user you can **get the 
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
 
-enum4linx -u 'username' -p 'password' -P <IP>
+enum4linux -u 'username' -p 'password' -P <IP>
 
 rpcclient -U "" -N 10.10.10.10; 
 rpcclient $>querydominfo
