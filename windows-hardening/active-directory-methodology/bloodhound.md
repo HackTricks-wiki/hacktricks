@@ -84,7 +84,7 @@ This repo has a nice collections of queries: https://github.com/CompassSecurity/
 Installation process:
 
 ```
-$ curl -o "~/.config/bloodhound/customqueries.json" "https://raw.githubusercontent.com/CompassSecurity/BloodHoundQueries/master/customqueries.json"
+$ curl -o "~/.config/bloodhound/customqueries.json" "https://raw.githubusercontent.com/CompassSecurity/BloodHoundQueries/master/BloodHound_Custom_Queries/customqueries.json"
 ```
 
 ### Visualisation app Execution
