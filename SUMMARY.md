@@ -118,7 +118,7 @@
   * [Splunk LPE and Persistence](linux-hardening/privilege-escalation/splunk-lpe-and-persistence.md)
   * [SSH Forward Agent exploitation](linux-hardening/privilege-escalation/ssh-forward-agent-exploitation.md)
   * [Wildcards Spare tricks](linux-hardening/privilege-escalation/wildcards-spare-tricks.md)
-  * [Write to Root](linux-hardening/privilege-escalation/write-to-root.md)
+  * [Arbitrary File Write to Root](linux-hardening/privilege-escalation/write-to-root.md)
 * [Useful Linux Commands](linux-hardening/useful-linux-commands/README.md)
 * [Bypass Linux Shell Restrictions](linux-hardening/useful-linux-commands/bypass-bash-restrictions.md)
   * [DDexec](linux-hardening/bypass-linux-shell-restrictions/ddexec.md)
