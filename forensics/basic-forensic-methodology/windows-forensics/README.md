@@ -50,7 +50,7 @@ Having these files you can use the tool [**Rifiuti**](https://github.com/abelche
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
 
-![](<../../../.gitbook/assets/image (495) (1) (1).png>)
+![](<../../../.gitbook/assets/image (495) (1) (1) (1).png>)
 
 ### Volume Shadow Copies
 
@@ -156,7 +156,7 @@ The files in the folder WPDNSE are a copy of the original ones, then won't survi
 
 Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about when the USB connection was produced (search for `Section start`).
 
-![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (17).png>)
+![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (4).png>)
 
 ### USB Detective
 

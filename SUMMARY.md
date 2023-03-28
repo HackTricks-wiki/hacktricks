@@ -313,6 +313,7 @@
   * [AEM - Adobe Experience Cloud](network-services-pentesting/pentesting-web/aem-adobe-experience-cloud.md)
   * [Apache](network-services-pentesting/pentesting-web/apache.md)
   * [Artifactory Hacking guide](network-services-pentesting/pentesting-web/artifactory-hacking-guide.md)
+  * [Bolt CMS](network-services-pentesting/pentesting-web/bolt-cms.md)
   * [Buckets](network-services-pentesting/pentesting-web/buckets/README.md)
     * [Firebase Database](network-services-pentesting/pentesting-web/buckets/firebase-database.md)
   * [CGI](network-services-pentesting/pentesting-web/cgi.md)
