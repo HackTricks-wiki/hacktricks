@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>HackTricks in </strong><a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>HackTricks in</strong> <a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
@@ -16,7 +16,7 @@
 
 Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.
 
-<figure><img src="../../../.gitbook/assets/image (3) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 ## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
 
@@ -72,7 +72,7 @@ By default **Read Raw is also in 433.92 in AM650**, but if with the Read option 
 
 ### Brute-Force
 
-If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)****
+If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)\*\*\*\*
 
 ### Add Manually
 
@@ -82,22 +82,22 @@ Add signals from a configured list of protocols
 
 #### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#3iglu" id="3iglu"></a>
 
-| Princeton\_433 (works with the majority of static code systems)﻿ | 433.92 | Static  |
-| ---------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit\_433                                              | 433.92 | Static  |
-| Nice Flo 24bit\_433                                              | 433.92 | Static  |
-| CAME 12bit\_433                                                  | 433.92 | Static  |
-| CAME 24bit\_433                                                  | 433.92 | Static  |
-| Linear\_300                                                      | 300.00 | Static  |
-| CAME TWEE                                                        | 433.92 | Static  |
-| Gate TX\_433                                                     | 433.92 | Static  |
-| DoorHan\_315                                                     | 315.00 | Dynamic |
-| DoorHan\_433                                                     | 433.92 | Dynamic |
-| LiftMaster\_315                                                  | 315.00 | Dynamic |
-| LiftMaster\_390                                                  | 390.00 | Dynamic |
-| Security+2.0\_310                                                | 310.00 | Dynamic |
-| Security+2.0\_315                                                | 315.00 | Dynamic |
-| Security+2.0\_390                                                | 390.00 | Dynamic |
+| Princeton\_433 (works with the majority of static code systems) | 433.92 | Static  |
+| --------------------------------------------------------------- | ------ | ------- |
+| Nice Flo 12bit\_433                                             | 433.92 | Static  |
+| Nice Flo 24bit\_433                                             | 433.92 | Static  |
+| CAME 12bit\_433                                                 | 433.92 | Static  |
+| CAME 24bit\_433                                                 | 433.92 | Static  |
+| Linear\_300                                                     | 300.00 | Static  |
+| CAME TWEE                                                       | 433.92 | Static  |
+| Gate TX\_433                                                    | 433.92 | Static  |
+| DoorHan\_315                                                    | 315.00 | Dynamic |
+| DoorHan\_433                                                    | 433.92 | Dynamic |
+| LiftMaster\_315                                                 | 315.00 | Dynamic |
+| LiftMaster\_390                                                 | 390.00 | Dynamic |
+| Security+2.0\_310                                               | 310.00 | Dynamic |
+| Security+2.0\_315                                               | 315.00 | Dynamic |
+| Security+2.0\_390                                               | 390.00 | Dynamic |
 
 ### Supported Sub-GHz vendors
 
@@ -120,7 +120,7 @@ Get dBms of the saved frequencies
 
 <details>
 
-<summary><strong>HackTricks in </strong><a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>HackTricks in</strong> <a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)

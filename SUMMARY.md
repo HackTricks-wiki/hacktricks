@@ -355,6 +355,7 @@
     * [PHP - RCE abusing object creation: new $\_GET\["a"\]($\_GET\["b"\])](network-services-pentesting/pentesting-web/php-tricks-esp/php-rce-abusing-object-creation-new-usd\_get-a-usd\_get-b.md)
     * [PHP SSRF](network-services-pentesting/pentesting-web/php-tricks-esp/php-ssrf.md)
   * [Python](network-services-pentesting/pentesting-web/python.md)
+  * [Rocket Chat](network-services-pentesting/pentesting-web/rocket-chat.md)
   * [Special HTTP headers](network-services-pentesting/pentesting-web/special-http-headers.md)
   * [Spring Actuators](network-services-pentesting/pentesting-web/spring-actuators.md)
   * [Symfony](network-services-pentesting/pentesting-web/symphony.md)
