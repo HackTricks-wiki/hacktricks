@@ -366,7 +366,7 @@
   * [WAF Bypass](network-services-pentesting/pentesting-web/waf-bypass.md)
   * [Web API Pentesting](network-services-pentesting/pentesting-web/web-api-pentesting.md)
   * [WebDav](network-services-pentesting/pentesting-web/put-method-webdav.md)
-  * [werkzeug](network-services-pentesting/pentesting-web/werkzeug.md)
+  * [Werkzeug / Flask Debug](network-services-pentesting/pentesting-web/werkzeug.md)
   * [Wordpress](network-services-pentesting/pentesting-web/wordpress.md)
   * [XSS to RCE Electron Desktop Apps](network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/README.md)
     * [Electron contextIsolation RCE via preload code](network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/electron-contextisolation-rce-via-preload-code.md)
