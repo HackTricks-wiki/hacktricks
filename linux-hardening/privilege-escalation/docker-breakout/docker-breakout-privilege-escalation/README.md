@@ -167,7 +167,7 @@ mount: /mnt: permission denied. ---> Failed! but if not, you may have access to 
 debugfs /dev/sda1
 ```
 
-#### Privileged Escape Abusing release\_agent - PoC1
+#### Privileged Escape Abusing existent release\_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
 
 {% code title="Initial PoC" %}
 ```bash
@@ -205,7 +205,7 @@ cat /o
 ```
 {% endcode %}
 
-#### Privileged Escape Abusing release\_agent - PoC2
+#### Privileged Escape Abusing created release\_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
 
 {% code title="Second PoC" %}
 ```bash
