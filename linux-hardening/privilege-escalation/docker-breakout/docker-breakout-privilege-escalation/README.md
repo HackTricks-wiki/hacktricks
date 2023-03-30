@@ -510,6 +510,16 @@ If you only have `hostIPC=true`, you most likely can't do much. If any process o
 * **Inspect /dev/shm** - Look for any files in this shared memory location: `ls -la /dev/shm`
 * **Inspect existing IPC facilities** – You can check to see if any IPC facilities are being used with `/usr/bin/ipcs`. Check it with: `ipcs -a`
 
+### Recover capabilities
+
+If the syscall **`unshare`** is not forbidden you can recover all the capabilities running:
+
+```bash
+unshare -UrmC
+# Check them with
+cat /proc/self/status | grep CapEff
+```
+
 ### User namespace abuse via symlink
 
 The second technique explained in the post [https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) indicates how you can abuse bind mounts with user namespaces, to affect files inside the host (in that specific case, delete files).
