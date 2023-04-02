@@ -26,6 +26,8 @@ We use cookies on our websites for the following purposes:
 3. Functionality cookies: These cookies enable our websites to remember choices you make, such as your language or region, to provide a more personalized experience.
 4. Targeting/advertising cookies: These cookies are used to deliver relevant ads and marketing communications based on your interests, browsing history, and interactions with our websites.
 
+Moreover, the pages book.hacktricks.xyz and cloud.hacktricks.xyz are hosted in Gitbook. You can find more information about Gitbooks cookies in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+
 ### Third-party cookies
 
 In addition to our own cookies, we may also use third-party cookies to report website usage statistics, deliver advertisements, and enable social media sharing buttons. The use of third-party cookies is subject to their respective privacy policies.
