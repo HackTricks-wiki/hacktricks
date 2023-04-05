@@ -30,7 +30,7 @@ pub enum Option<T> {
 }
 ```
 
-You can use functions such as `is_some()` __ or __ `is_none()` to check the value of the Option.
+You can use functions such as `is_some()` or `is_none()` to check the value of the Option.
 
 ### Macros
 

@@ -12,7 +12,7 @@
 
 </details>
 
-![](../.gitbook/assets/image%20\(9\)%20\(1\)%20\(2\).png)
+![](<../../../../.gitbook/assets/image (9) (1) (2).png>)
 
 \
 Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
@@ -495,8 +495,8 @@ Like in the following examples:
 
 You will be able also to access **network services binded to localhost** inside the host or even access the **metadata permissions of the node** (which might be different those a container can access):
 
-{% content-ref url="broken-reference/" %}
-[broken-reference](broken-reference/)
+{% content-ref url="../../docker-breakout/docker-breakout-privilege-escalation/broken-reference/" %}
+[broken-reference](../../docker-breakout/docker-breakout-privilege-escalation/broken-reference/)
 {% endcontent-ref %}
 
 ### hostIPC
@@ -524,7 +524,7 @@ cat /proc/self/status | grep CapEff
 
 The second technique explained in the post [https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) indicates how you can abuse bind mounts with user namespaces, to affect files inside the host (in that specific case, delete files).
 
-![](../.gitbook/assets/image%20\(9\)%20\(1\)%20\(2\).png)
+![](../../docker-breakout/.gitbook/assets/image%20\(9\)%20\(1\)%20\(2\).png)
 
 \
 Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
@@ -551,7 +551,99 @@ For more information: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape
 There are other CVEs the container can be vulnerable too, you can find a list in [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
 {% endhint %}
 
-## Breakout Templates
+## Docker Custom Escape
+
+### Docker Escape Surface
+
+* **Namespaces:** The process should be **completely separated from other processes** via namespaces, so we cannot escape interacting with other procs due to namespaces (by default cannot communicate via IPCs, unix sockets, network svcs, D-Bus, `/proc` of other procs).
+* **Root user**: By default the user running the process is the root user (however its privileges are limited).
+* **Capabilities**: Docker leaves the following capabilities: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
+* **Syscalls**: These are the syscalls that the **root user won't be able to call** (because of lacking capabilities + Seccomp). The other syscalls could be used to try to escape.
+
+{% tabs %}
+{% tab title="x64 syscalls" %}
+```yaml
+0x067 -- syslog
+0x070 -- setsid
+0x09b -- pivot_root
+0x0a3 -- acct
+0x0a4 -- settimeofday
+0x0a7 -- swapon
+0x0a8 -- swapoff
+0x0aa -- sethostname
+0x0ab -- setdomainname
+0x0af -- init_module
+0x0b0 -- delete_module
+0x0d4 -- lookup_dcookie
+0x0f6 -- kexec_load
+0x12c -- fanotify_init
+0x130 -- open_by_handle_at
+0x139 -- finit_module
+0x140 -- kexec_file_load
+0x141 -- bpf
+```
+{% endtab %}
+
+{% tab title="arm64 syscalls" %}
+```
+0x029 -- pivot_root
+0x059 -- acct
+0x069 -- init_module
+0x06a -- delete_module
+0x074 -- syslog
+0x09d -- setsid
+0x0a1 -- sethostname
+0x0a2 -- setdomainname
+0x0aa -- settimeofday
+0x0e0 -- swapon
+0x0e1 -- swapoff
+0x106 -- fanotify_init
+0x109 -- open_by_handle_at
+0x111 -- finit_module
+0x118 -- bpf
+```
+{% endtab %}
+
+{% tab title="syscall_bf.c" %}
+````c
+// From a conversation I had with @arget131
+// Fir bfing syscalss in x64
+
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <errno.h>
+
+int main()
+{
+    for(int i = 0; i < 333; ++i)
+    {
+        if(i == SYS_rt_sigreturn) continue;
+        if(i == SYS_select) continue;
+        if(i == SYS_pause) continue;
+        if(i == SYS_exit_group) continue;
+        if(i == SYS_exit) continue;
+        if(i == SYS_clone) continue;
+        if(i == SYS_fork) continue;
+        if(i == SYS_vfork) continue;
+        if(i == SYS_pselect6) continue;
+        if(i == SYS_ppoll) continue;
+        if(i == SYS_seccomp) continue;
+        if(i == SYS_vhangup) continue;
+        if(i == SYS_reboot) continue;
+        if(i == SYS_shutdown) continue;
+        if(i == SYS_msgrcv) continue;
+        printf("Probando: 0x%03x . . . ", i); fflush(stdout);
+        if((syscall(i, NULL, NULL, NULL, NULL, NULL, NULL) < 0) && (errno == EPERM))
+            printf("Error\n");
+        else
+            printf("OK\n");
+    }
+}
+```
+````
+{% endtab %}
+{% endtabs %}
 
 ### Container Breakout through Usermode helper Template
 
@@ -575,7 +667,7 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 * [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/exposed-docker-socket)
 * [https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4](https://bishopfox.com/blog/kubernetes-pod-privilege-escalation#Pod4)
 
-![](../.gitbook/assets/image%20\(9\)%20\(1\)%20\(2\).png)
+![](../../docker-breakout/.gitbook/assets/image%20\(9\)%20\(1\)%20\(2\).png)
 
 \
 Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\

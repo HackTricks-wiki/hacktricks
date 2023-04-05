@@ -1,4 +1,4 @@
-# Docker Basics & Breakout
+# Docker Security
 
 ![](<../../../.gitbook/assets/image (9) (1) (2).png>)
 
@@ -22,9 +22,9 @@ Get Access Today:
 
 ## **Basic Docker Engine Security**
 
-Docker engine does the heavy lifting of running and managing Containers. Docker engine uses Linux kernel features like **Namespaces** and **Cgroups** to provide basic **isolation** across Containers. Advanced isolation can be achieved using Linux kernel features like **Capabilities**, **Seccomp**, **SELinux/AppArmor**. Docker exposes these Linux kernel capabilities either at Docker daemon level or at each Container level.
+Docker engine does the heavy lifting of running and managing Containers. Docker engine uses Linux kernel features like **Namespaces** and **Cgroups** to provide basic **isolation** across Containers. It also uses features like **Capabilities dropping**, **Seccomp**, **SELinux/AppArmor to achieve a better isolation**.
 
-Finally, an **auth plugin** can be used to **limit the actions** users can perform.\\
+Finally, an **auth plugin** can be used to **limit the actions** users can perform.
 
 ![](<../../../.gitbook/assets/image (625) (1) (1).png>)
 
@@ -61,7 +61,7 @@ For more [**information read this**](https://docs.docker.com/engine/scan/).
 
 The `docker scan` command allows you to scan existing Docker images using the image name or ID. For example, run the following command to scan the hello-world image:
 
-```
+```bash
 docker scan hello-world
 
 Testing hello-world...
@@ -90,7 +90,7 @@ Following are some details on Docker content trust:
 
 Following is the **error** we get when **content trust is enabled and image is not signed**.
 
-```
+```shell-session
 $ docker pull smakam/mybusybox
 Using default tag: latest
 No trust data for latest
@@ -98,7 +98,7 @@ No trust data for latest
 
 Following output shows Container **image being pushed to Docker hub with signing** enabled. Since this is not the first time, user is requested to enter only the passphrase for repository key.
 
-```
+```shell-session
 $ docker push smakam/mybusybox:v2
 The push refers to a repository [docker.io/smakam/mybusybox]
 a7022f99b0cc: Layer already exists 
@@ -111,7 +111,7 @@ Enter passphrase for repository key with ID 001986b (docker.io/smakam/mybusybox)
 
 It is needed to store root key, repository key as well as passphrase in a safe place. Following command can be used to take backup of private keys:
 
-```
+```bash
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
 
@@ -125,7 +125,47 @@ Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Containers Security Improvements
+## Containers Security Features
+
+<details>
+
+<summary>Summary of Container Security Features</summary>
+
+#### Namespaces
+
+Namespaces are useful to isolate a project from the other ones, isolating process communications, network, mounts... It's useful to isolate the docker process from other processes (and even the /proc folder) so it cannot escape abusing other processes.
+
+It could be possible "escape" or more exactly **create new namespaces** using the binary **`unshare`** (that uses the **`unshare`** syscall). Docker by default prevents it, but kubernetes doesn't (at the time of this writtiing).\
+Ayway, this is helpful to create new namespaces, but **not to get back to the host defaults namespaces** (unless you have access to some `/proc` inside the host namespaces, where you could use **`nsenter`** to enter in the host namespaces.).
+
+#### CGroups
+
+This allows to limit resources and doesn't affect the security of the isolation of the process (except for the `release_agent` that could be used to escape).
+
+#### Capabilities Drop
+
+I find this to be one of the **most important** features regarding the process isolation security. This is because without the capabilities, even if the process is running as root **you won't be able to do some privileged actions** (because the called **`syscall`** will return permission error because the process doesn't have the needed capabilities).
+
+These are the **remaining capabilities** after the process drop the others:
+
+{% code overflow="wrap" %}
+```
+Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep
+```
+{% endcode %}
+
+#### Seccomp
+
+It's enabled by default in Docker. It helps to **limit even more the syscalls** that the process can call.\
+The **default Docker Seccomp profile** can be found in [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
+
+#### AppArmor
+
+Docker has a template that you can activate: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+
+This will allow to reduce capabilities, syscalls, access to files and folders...
+
+</details>
 
 ### Namespaces
 
@@ -162,9 +202,17 @@ ps -ef | grep 1234 #Get info about the sleep process
 ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the hosts and some may be shred with it)
 ```
 
+For more information check:
+
+{% content-ref url="cgroups.md" %}
+[cgroups.md](cgroups.md)
+{% endcontent-ref %}
+
 ### Capabilities
 
 Capabilities allow **finer control for the capabilities that can be allowed** for root user. Docker uses the Linux kernel capability feature to **limit the operations that can be done inside a Container** irrespective of the type of user.
+
+When a docker container is run, the **process drops sensitive capabilities that the proccess could use to escape from the isolation**. This try to assure that the proccess won't be able to perform sensitive actions and escape:
 
 {% content-ref url="../linux-capabilities.md" %}
 [linux-capabilities.md](../linux-capabilities.md)

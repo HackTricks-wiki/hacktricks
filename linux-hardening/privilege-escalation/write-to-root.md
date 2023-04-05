@@ -36,7 +36,7 @@ void _init() {
 
 ### Git hooks
 
-****[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) **** are **scripts** that are **run** on various **events** in a git repository ñlike when a commit is created, a merge... So if a **privileged script or user** is performing this actions frequently and it's possible to **write in the `.git` folder**, this can be used to **privesc**.
+[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) are **scripts** that are **run** on various **events** in a git repository ñlike when a commit is created, a merge... So if a **privileged script or user** is performing this actions frequently and it's possible to **write in the `.git` folder**, this can be used to **privesc**.
 
 For example, It's possible to **generate a script** in a git repo in **`.git/hooks`** so it's always executed when a new commit is created:
 
