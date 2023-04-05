@@ -515,7 +515,7 @@ If you only have `hostIPC=true`, you most likely can't do much. If any process o
 If the syscall **`unshare`** is not forbidden you can recover all the capabilities running:
 
 ```bash
-unshare -UrmC
+unshare -UrmCpf bash
 # Check them with
 cat /proc/self/status | grep CapEff
 ```
