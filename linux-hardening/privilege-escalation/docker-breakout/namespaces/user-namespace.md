@@ -131,6 +131,41 @@ ps -ef | grep bash # The user inside the host is still root, not nobody
 root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 ```
 
+### Recovering Capabilities
+
+In the case of user namespaces, **when a new user namespace is created, the process that enters the namespace is granted a full set of capabilities within that namespace**. These capabilities allow the process to perform privileged operations such as **mounting** **filesystems**, creating devices, or changing ownership of files, but **only within the context of its user namespace**.
+
+For example, when you have the `CAP_SYS_ADMIN` capability within a user namespace, you can perform operations that typically require this capability, like mounting filesystems, but only within the context of your user namespace. Any operations you perform with this capability won't affect the host system or other namespaces.
+
+{% hint style="warning" %}
+Therefore, even if getting a new process inside a new User namespace **will give you all the capabilities back** (CapEff: 000001ffffffffff), you actually can **only use the ones related to the namespace** (mount for example) but not every one. So, this on its own is not enough to escape from a Docker container.
+{% endhint %}
+
+```bash
+# There are the syscalls that are filtered after changing User namespace with:
+unshare -UmCpf  bash
+
+Probando: 0x067 . . . Error
+Probando: 0x070 . . . Error
+Probando: 0x074 . . . Error
+Probando: 0x09b . . . Error
+Probando: 0x0a3 . . . Error
+Probando: 0x0a4 . . . Error
+Probando: 0x0a7 . . . Error
+Probando: 0x0a8 . . . Error
+Probando: 0x0aa . . . Error
+Probando: 0x0ab . . . Error
+Probando: 0x0af . . . Error
+Probando: 0x0b0 . . . Error
+Probando: 0x0f6 . . . Error
+Probando: 0x12c . . . Error
+Probando: 0x130 . . . Error
+Probando: 0x139 . . . Error
+Probando: 0x140 . . . Error
+Probando: 0x141 . . . Error
+Probando: 0x143 . . . Error
+```
+
 <details>
 
 <summary><strong>HackTricks in</strong> <a href="https://twitter.com/carlospolopm"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch</strong></a> <strong>Wed - 18.30(UTC) 🎙️</strong> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
