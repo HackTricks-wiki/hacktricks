@@ -464,6 +464,8 @@ cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
     --dns-errorLimit 10 --use-pb --verbose -s /tmp/resolvers-trusted.txt
 ```
 
+* [**alterx**](https://github.com/projectdiscovery/alterx)**:** Based on a domain it **generates new potential subdomains names** based on indicated patterns to try to discover more subdomains.
+
 #### Smart permutations generation
 
 * [**regulator**](https://github.com/cramppet/regulator): For more info read this [**post**](https://cramppet.github.io/regulator/index.html) but it will basically get the **main parts** from the **discovered subdomains** and will mix them to find more subdomains.
