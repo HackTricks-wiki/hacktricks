@@ -100,6 +100,7 @@ A privileged container can be created with the flag `--privileged` or disabling 
 * `--userns=host`
 * `--uts=host`
 * `--cgroupns=host`
+* `Mount /dev`
 
 The `--privileged` flag introduces significant security concerns, and the exploit relies on launching a docker container with it enabled. When using this flag, containers have full access to all devices and lack restrictions from seccomp, AppArmor, and Linux capabilities. You can r**ead all the effects of `--privileged`** in this page:
 
@@ -259,7 +260,7 @@ Find an **explanation of the technique** in:
 
 #### Privileged Escape Abusing release\_agent without known the relative path - PoC3
 
-In the previous exploits the **absolute path of the continer inside the hosts filesystem is disclosed**. However, this isn’t always the case. In cases where you **don’t know the absolute path of the continer inside the host** you can use this technique:
+In the previous exploits the **absolute path of the container inside the hosts filesystem is disclosed**. However, this isn’t always the case. In cases where you **don’t know the absolute path of the container inside the host** you can use this technique:
 
 {% content-ref url="release_agent-exploit-relative-paths-to-pids.md" %}
 [release\_agent-exploit-relative-paths-to-pids.md](release\_agent-exploit-relative-paths-to-pids.md)
