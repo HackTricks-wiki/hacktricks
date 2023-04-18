@@ -1049,7 +1049,7 @@ that means that the library you have generated need to have a function called `a
 
 ### GTFOBins
 
-[**GTFOBins**](https://gtfobins.github.io) is a curated list of Unix binaries that can be exploited by an attacker to bypass local security restrictions.
+[**GTFOBins**](https://gtfobins.github.io) is a curated list of Unix binaries that can be exploited by an attacker to bypass local security restrictions. [**GTFOArgs**](https://gtfoargs.github.io/) is the same but for cases where you can **only inject arguments** in a command.
 
 The project collects legitimate functions of Unix binaries that can be abused to break out restricted shells, escalate or maintain elevated privileges, transfer files, spawn bind and reverse shells, and facilitate the other post-exploitation tasks.
 
@@ -1059,6 +1059,8 @@ The project collects legitimate functions of Unix binaries that can be abused to
 > sudo awk 'BEGIN {system("/bin/sh")}'
 
 {% embed url="https://gtfobins.github.io/" %}
+
+{% embed url="https://gtfoargs.github.io/" %}
 
 ### FallOfSudo
 

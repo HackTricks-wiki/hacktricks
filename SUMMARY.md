@@ -232,7 +232,7 @@
 * [Basic Win CMD for Pentesters](windows-hardening/basic-cmd-for-pentesters.md)
 * [Basic PowerShell for Pentesters](windows-hardening/basic-powershell-for-pentesters/README.md)
   * [PowerView/SharpView](windows-hardening/basic-powershell-for-pentesters/powerview.md)
-* [AV Bypass](windows-hardening/av-bypass.md)
+* [Antivirus (AV) Bypass](windows-hardening/av-bypass.md)
 
 ## 📱 Mobile Pentesting
 
