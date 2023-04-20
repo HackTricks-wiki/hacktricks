@@ -12,6 +12,11 @@
 
 </details>
 
+## ImgGui Based Reversing tools
+
+Software:
+* ReverseKit: [https://github.com/wwwg/wasmdec](https://github.com/zer0condition/ReverseKit)](https://github.com/zer0condition/ReverseKit)
+
 ## Wasm decompiler / Wat compiler
 
 Online:
