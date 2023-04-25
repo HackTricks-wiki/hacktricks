@@ -45,7 +45,10 @@ foreach ($Task in $Tasks)
   {
     if ($Task.Triggers.Enabled -eq $true)
     {
-      if ($Task.Principal.GroupId -eq "Users")
+      $usersSid = "S-1-5-32-545"
+      $usersGroup = Get-LocalGroup | Where-Object { $_.SID -eq $usersSid }
+
+      if ($Task.Principal.GroupId -eq $usersGroup)
       {
         Write-Host "Task Name: " $Task.TaskName
         Write-Host "Task Path: " $Task.TaskPath
