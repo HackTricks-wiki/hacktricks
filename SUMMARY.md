@@ -169,7 +169,7 @@
   * [Named Pipe Client Impersonation](windows-hardening/windows-local-privilege-escalation/named-pipe-client-impersonation.md)
   * [PowerUp](windows-hardening/windows-local-privilege-escalation/powerup.md)
   * [Privilege Escalation with Autoruns](windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md)
-  * [RoguePotato, PrintSpoofer, SharpEfsPotato](windows-hardening/windows-local-privilege-escalation/roguepotato-and-printspoofer.md)
+  * [RoguePotato, PrintSpoofer, SharpEfsPotato, GodPotato](windows-hardening/windows-local-privilege-escalation/roguepotato-and-printspoofer.md)
   * [RottenPotato](windows-hardening/windows-local-privilege-escalation/rottenpotato.md)
   * [Seatbelt](windows-hardening/windows-local-privilege-escalation/seatbelt.md)
   * [SeDebug + SeImpersonate copy token](windows-hardening/windows-local-privilege-escalation/sedebug-+-seimpersonate-copy-token.md)
@@ -232,7 +232,7 @@
 * [Basic Win CMD for Pentesters](windows-hardening/basic-cmd-for-pentesters.md)
 * [Basic PowerShell for Pentesters](windows-hardening/basic-powershell-for-pentesters/README.md)
   * [PowerView/SharpView](windows-hardening/basic-powershell-for-pentesters/powerview.md)
-* [AV Bypass](windows-hardening/av-bypass.md)
+* [Antivirus (AV) Bypass](windows-hardening/av-bypass.md)
 
 ## 📱 Mobile Pentesting
 
@@ -302,6 +302,9 @@
   * [Print Job Retention](network-services-pentesting/pentesting-printers/print-job-retention.md)
   * [Scanner and Fax](network-services-pentesting/pentesting-printers/scanner-and-fax.md)
 * [Pentesting SAP](network-services-pentesting/pentesting-sap.md)
+* [Pentesting VoIP](network-services-pentesting/pentesting-voip/README.md)
+  * [Basic VoIP Protocols](network-services-pentesting/pentesting-voip/basic-voip-protocols/README.md)
+    * [SIP (Session Initiation Protocol)](network-services-pentesting/pentesting-voip/basic-voip-protocols/sip-session-initiation-protocol.md)
 * [Pentesting Remote GdbServer](network-services-pentesting/pentesting-remote-gdbserver.md)
 * [7/tcp/udp - Pentesting Echo](network-services-pentesting/7-tcp-udp-pentesting-echo.md)
 * [21 - Pentesting FTP](network-services-pentesting/pentesting-ftp/README.md)
