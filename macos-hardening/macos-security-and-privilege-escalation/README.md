@@ -7,7 +7,7 @@
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -63,6 +63,33 @@ First of all, please note that **most of the tricks about privilege escalation a
 * **/Volumes**: The mounted drives will apear here.
 * **/.vol**: Running `stat a.txt` you obtain something like `16777223 7545753 -rw-r--r-- 1 username wheel ...` where the first number is the id number of the volume where the file exists and the second one is the inode number. You can access the content of this file through /.vol/ with that information running `cat /.vol/16777223/7545753`
 
+### Applications Folders
+
+* **System applications** are located under `/System/Applications`
+* **Installed** applications are usually installed in `/Applications` or in `~/Applications`
+* **Application data** can be found in `/Library/Application Support` for the applications running as root and `~/Library/Application Support` for applications running as the user.
+* Third-party applications **daemons** that **need to run as root** as usually located in `/Library/PrivilegedHelperTools/`
+* **Sandboxed** apps are mapped into the `~/Library/Containers` folder. Each app has a folder named according to the application’s bundle ID (`com.apple.Safari`).
+* The **kernel** is located in `/System/Library/Kernels/kernel`
+* **Apple's kernel extensions** are located in `/System/Library/Extensions`
+* **Third-party kernel extensions** are stored in `/Library/Extensions`
+
+### Firmlinks
+
+The `Data` volume is mounted in **`/System/Volumes/Data`** (you can check this with `diskutil apfs list`).
+
+The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
+
+```bash
+cat /usr/share/firmlinks
+/AppleInternal	AppleInternal
+/Applications	Applications
+/Library	Library
+[...]
+```
+
+On the **left**, there is the directory path on the **System volume**, and on the **right**, the directory path where it maps on the **Data volume**. So, `/library` --> `/system/Volumes/data/library`
+
 ### Special MacOS files and folders
 
 * **`.DS_Store`**: This file is on each directory, it saves the attributes and customisations of the directory.
@@ -87,7 +114,14 @@ First of all, please note that **most of the tricks about privilege escalation a
     _amavisd, _analyticsd, _appinstalld, _appleevents, _applepay, _appowner, _appserver, _appstore, _ard, _assetcache, _astris, _atsserver, _avbdeviced, _calendar, _captiveagent, _ces, _clamav, _cmiodalassistants, _coreaudiod, _coremediaiod, _coreml, _ctkd, _cvmsroot, _cvs, _cyrus, _datadetectors, _demod, _devdocs, _devicemgr, _diskimagesiod, _displaypolicyd, _distnote, _dovecot, _dovenull, _dpaudio, _driverkit, _eppc, _findmydevice, _fpsd, _ftp, _fud, _gamecontrollerd, _geod, _hidd, _iconservices, _installassistant, _installcoordinationd, _installer, _jabber, _kadmin_admin, _kadmin_changepw, _knowledgegraphd, _krb_anonymous, _krb_changepw, _krb_kadmin, _krb_kerberos, _krb_krbtgt, _krbfast, _krbtgt, _launchservicesd, _lda, _locationd, _logd, _lp, _mailman, _mbsetupuser, _mcxalr, _mdnsresponder, _mobileasset, _mysql, _nearbyd, _netbios, _netstatistics, _networkd, _nsurlsessiond, _nsurlstoraged, _oahd, _ondemand, _postfix, _postgres, _qtss, _reportmemoryexception, _rmd, _sandbox, _screensaver, _scsd, _securityagent, _softwareupdate, _spotlight, _sshd, _svn, _taskgated, _teamsserver, _timed, _timezone, _tokend, _trustd, _trustevaluationagent, _unknown, _update_sharing, _usbmuxd, _uucp, _warmd, _webauthserver, _windowserver, _www, _wwwproxy, _xserverdocs
     ```
 * **Guest**: Account for guests with very strict permissions
-  * `state=("automaticTime" "afpGuestAccess" "filesystem" "guestAccount" "smbGuestAccess"); for i in "${state[@]}"; do sysadminctl -"${i}" status; done;`
+
+{% code overflow="wrap" %}
+```bash
+state=("automaticTime" "afpGuestAccess" "filesystem" "guestAccount" "smbGuestAccess")
+for i in "${state[@]}"; do sysadminctl -"${i}" status; done;
+```
+{% endcode %}
+
 * **Nobody**: Processes are executed with this user when minimal permissions are required
 * **Root**
 
@@ -138,9 +172,11 @@ ls -l a.txt #The file length is still q
 
 You can **find all the files containing this extended attribute** with:
 
+{% code overflow="wrap" %}
 ```bash
 find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
 ```
+{% endcode %}
 
 ### Risk Files Mac OS
 
@@ -369,10 +405,10 @@ Note that there are **exceptions specified by Apple**: The file **`/System/Libra
 For example, the config lines:
 
 ```bash
-        /usr
-*				/usr/libexec/cups
-*				/usr/local
-*				/usr/share/man
+                /usr
+*		/usr/libexec/cups
+*		/usr/local
+*		/usr/share/man
 ```
 
 Means that `/usr` **cannot be modified** **except** for the **3 allowed** folders allowed.
@@ -381,7 +417,7 @@ The final exception to these rules is that **any installer package signed with t
 
 Note that if **a file is specified** in the previous config file **but** it **doesn't exist, it can be created**. This might be used by malware to obtain stealth persistence. For example, imagine that a **.plist** in `/System/Library/LaunchDaemons` appears listed but it doesn't exist. A malware may c**reate one and use it as persistence mechanism.**
 
-Also, note how files and directories specified in **`rootless.conf`** have a **rootless extended attribute**:
+Also, note how files and directories specified in the previous **`rootless.conf`** file have a **rootless extended attribute**:
 
 ```bash
 xattr /System/Library/LaunchDaemons/com.apple.UpdateSettings.plist
@@ -389,6 +425,16 @@ com.apple.rootless
 
 ls -lO /System/Library/LaunchDaemons/com.apple.UpdateSettings.plist
 -rw-r--r--@ 1 root  wheel  restricted,compressed 412  1 Jan  2020 /System/Library/LaunchDaemons/com.apple.UpdateSettings.plist
+```
+
+Running a `ls -lO` you can find the directories protected by SIP because of the **`restricted`** flag. Moreover, directories with the **`sunlnk`** flag cannot be deleted (although files can be created and deleted inside of it).
+
+```bash
+ls -lO /
+drwxr-xr-x@ 10 root  wheel  restricted         320 Feb  9 10:39 System
+
+ls -lO /usr/
+drwxr-xr-x    8 root  wheel  sunlnk       256 Apr  8 00:49 local
 ```
 
 **SIP** handles a number of **other limitations as well**. Like it **doesn't allows for the loading of unsigned kexts**. SIP is also responsible for **ensuring** that no OS X **system processes are debugged**. This also means that Apple put a stop to dtrace inspecting system processes.
@@ -428,6 +474,55 @@ codesign --verify --verbose /Applications/Safari.app
 spctl --assess --verbose /Applications/Safari.app
 ```
 
+### Sealed Snapshots
+
+The command **`diskutil apfs list`** lists the **details of the APFS volumes** and their layout:
+
+<pre><code>+-- Container disk3 966B902E-EDBA-4775-B743-CF97A0556A13
+|   ====================================================
+|   APFS Container Reference:     disk3
+|   Size (Capacity Ceiling):      494384795648 B (494.4 GB)
+|   Capacity In Use By Volumes:   219214536704 B (219.2 GB) (44.3% used)
+|   Capacity Not Allocated:       275170258944 B (275.2 GB) (55.7% free)
+|   |
+|   +-&#x3C; Physical Store disk0s2 86D4B7EC-6FA5-4042-93A7-D3766A222EBE
+|   |   -----------------------------------------------------------
+|   |   APFS Physical Store Disk:   disk0s2
+|   |   Size:                       494384795648 B (494.4 GB)
+|   |
+|   +-> Volume disk3s1 7A27E734-880F-4D91-A703-FB55861D49B7
+|   |   ---------------------------------------------------
+|   |   APFS Volume Disk (Role):   disk3s1 (System)
+|   |   Name:                      Macintosh HD (Case-insensitive)
+|   |   Mount Point:               /System/Volumes/Update/mnt1
+|   |   Capacity Consumed:         12819210240 B (12.8 GB)
+|   |   Sealed:                    Broken
+|   |   FileVault:                 Yes (Unlocked)
+|   |   Encrypted:                 No
+|   |   |
+|   |   Snapshot:                  FAA23E0C-791C-43FF-B0E7-0E1C0810AC61
+|   |   Snapshot Disk:             disk3s1s1
+|   |   Snapshot Mount Point:      /
+<strong>|   |   Snapshot Sealed:           Yes
+</strong>[...]
+</code></pre>
+
+In the previous output it's possible to see that **macOS System volume snapshot is sealed** (cryptographically signed by the OS). SO, if SIP is bypassed and modifies it, the **OS won't boot anymore**.
+
+It's also possible to verify that seal is enabled by running:
+
+```bash
+csrutil authenticated-root status
+Authenticated Root status: enabled
+```
+
+Moreover, it's mounted as **read-only**:
+
+```
+mount
+/dev/disk3s1s1 on / (apfs, sealed, local, read-only, journaled)
+```
+
 ## Installed Software & Services
 
 Check for **suspicious** applications installed and **privileges** over the.installed resources:
@@ -451,8 +546,6 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
-
-
 
 <figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
@@ -1260,8 +1353,6 @@ sudo killall -HUP mDNSResponder
 * [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
 * [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
 
-
-
 <figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 [**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
@@ -1279,7 +1370,7 @@ sudo killall -HUP mDNSResponder
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
