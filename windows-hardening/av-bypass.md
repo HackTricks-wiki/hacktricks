@@ -319,11 +319,11 @@ You can also load C# Assemblies **from PowerShell**, check out [Invoke-SharpLoad
 
 ## Using Other Programming Languages
 
-As proposed in [https://github.com/deeexcee-io/LOI-Bins](https://github.com/deeexcee-io/LOI-Bins), it's possible to execute malicious code using other languages just by giving access to the compromise machine to the interpreter binary.
+As proposed in [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), it's possible to execute malicious code using other languages by giving the compromised machine access **to the interpreter environment installed on the Attacker Controlled SMB share**.&#x20;
 
-So, you could just download for example **go, java, python or the php interpreter binaries** inside the machine (or **access them via a smb share**) and **execute arbitrary code in those languages**.
+By allowing access to the Interpreter Binaries and the environment on the SMB share you can **execute arbitrary code in these languages within memory** of the compromised machine.
 
-The repo indicates: Defender still scans the scripts but by utilising **Go, Java, PHP etc** we have more flexibility to bypass static signatures. Testing with random un-obfuscated reverse shell scripts in these languages has proved successful.
+The repo indicates: Defender still scans the scripts but by utilising Go, Java, PHP etc we have **more flexibility to bypass static signatures**. Testing with random un-obfuscated reverse shell scripts in these languages has proved successful.
 
 ## Advanced Evasion
 
