@@ -12,7 +12,7 @@
 
 </details>
 
-## ImgGui Based Reversing tools
+## ImGui Based Reversing tools
 
 Software:
 * ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
