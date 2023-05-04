@@ -132,7 +132,7 @@ As you may be thinking usually a universal binary compiled for 2 architectures *
 
 ![](<../../.gitbook/assets/image (559).png>)
 
-**Header**
+**mach Header**
 
 The header contains basic information about the file, such as magic bytes to identify it as a Mach-O file and information about the target architecture. You can find it in: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 
@@ -153,6 +153,56 @@ Filetypes:
 * MH\_EXECUTE (0x2): Standard Mach-O executable
 * MH\_DYLIB (0x6): A Mach-O dynamic linked library (i.e. .dylib)
 * MH\_BUNDLE (0x8): A Mach-O bundle (i.e. .bundle)
+
+#### fat Header
+
+Search for the file with: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
+
+<pre class="language-c"><code class="lang-c"><strong>#define FAT_MAGIC	0xcafebabe
+</strong><strong>#define FAT_CIGAM	0xbebafeca	/* NXSwapLong(FAT_MAGIC) */
+</strong>
+struct fat_header {
+<strong>	uint32_t	magic;		/* FAT_MAGIC or FAT_MAGIC_64 */
+</strong><strong>	uint32_t	nfat_arch;	/* number of structs that follow */
+</strong>};
+
+struct fat_arch {
+	cpu_type_t	cputype;	/* cpu specifier (int) */
+	cpu_subtype_t	cpusubtype;	/* machine specifier (int) */
+	uint32_t	offset;		/* file offset to this object file */
+	uint32_t	size;		/* size of this object file */
+	uint32_t	align;		/* alignment as a power of 2 */
+};
+</code></pre>
+
+The header has the **magic** bytes followed by the **number** of **archs** the file **contains** (`nfat_arch`) and each arch will have a `fat_arch` struct.
+
+Check it with:
+
+<pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
+/bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
+/bin/ls (for architecture x86_64):	Mach-O 64-bit executable x86_64
+/bin/ls (for architecture arm64e):	Mach-O 64-bit executable arm64e
+
+% otool -f -v /bin/ls
+Fat headers
+fat_magic FAT_MAGIC
+<strong>nfat_arch 2
+</strong><strong>architecture x86_64
+</strong>    cputype CPU_TYPE_X86_64
+    cpusubtype CPU_SUBTYPE_X86_64_ALL
+    capabilities 0x0
+<strong>    offset 16384
+</strong><strong>    size 72896
+</strong>    align 2^14 (16384)
+<strong>architecture arm64e
+</strong>    cputype CPU_TYPE_ARM64
+    cpusubtype CPU_SUBTYPE_ARM64E
+    capabilities PTR_AUTH_VERSION USERSPACE 0
+<strong>    offset 98304
+</strong><strong>    size 88816
+</strong>    align 2^14 (16384)
+</code></pre>
 
 **Load commands**
 
