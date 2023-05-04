@@ -40,7 +40,9 @@ First of all, please note that **most of the tricks about privilege escalation a
   * Can be XML or binary. Binary ones can be read with:
     * `defaults read config.plist`
     * `/usr/libexec/PlistBuddy -c print config.plsit`
-    * `plutil -p config.plist`
+    * `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
+    * `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
+    * `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
 * **`.app`**: Apple applications that follows directory structure.
 * **`.dylib`**: Dynamic libraries (like Windows DLL files)
 * **`.pkg`**: Are the same as xar (eXtensible Archive format). The installer command can be use to install the contents of these files.
@@ -105,6 +107,25 @@ On the **left**, there is the directory path on the **System volume**, and on th
 * **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Data about wireless access points.
 * **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List of daemons deactivated.
 * **`/private/etc/kcpassword`**: If autologin is enabled this file will contain the users login password XORed with a key.
+
+### macOS Bundles
+
+The goal of a **bundle** is to have **all the resources** the application needs in a **single location**: executables, resource files, metadata, and unique dylibs or custom frameworks. \
+The **common** frequent bundle we will encounter is the **`.app` bundle**, but many other executables are also packaged as bundles, such as **`.framework`** and **`.systemextension`**.
+
+```shell-session
+% ls /Applications/Signal.app
+Contents
+
+% ls /Applications/Signal.app/Contents
+CodeResources	Frameworks	Info.plist	MacOS		PkgInfo		Resources	_CodeSignature
+
+% ls /Applications/Signal.app/Contents/MacOS #Here is the executable
+Signal
+
+% # You can find a .framework bundle example in: 
+% ls -l /System/Library/Frameworks/AVFoundation.framework
+```
 
 ### Common users
 
