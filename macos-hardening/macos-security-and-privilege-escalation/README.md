@@ -110,22 +110,9 @@ On the **left**, there is the directory path on the **System volume**, and on th
 
 ### macOS Bundles
 
-The goal of a **bundle** is to have **all the resources** the application needs in a **single location**: executables, resource files, metadata, and unique dylibs or custom frameworks. \
-The **common** frequent bundle we will encounter is the **`.app` bundle**, but many other executables are also packaged as bundles, such as **`.framework`** and **`.systemextension`**.
-
-```shell-session
-% ls /Applications/Signal.app
-Contents
-
-% ls /Applications/Signal.app/Contents
-CodeResources	Frameworks	Info.plist	MacOS		PkgInfo		Resources	_CodeSignature
-
-% ls /Applications/Signal.app/Contents/MacOS #Here is the executable
-Signal
-
-% # You can find a .framework bundle example in: 
-% ls -l /System/Library/Frameworks/AVFoundation.framework
-```
+{% content-ref url="mac-os-architecture/macos-bundles.md" %}
+[macos-bundles.md](mac-os-architecture/macos-bundles.md)
+{% endcontent-ref %}
 
 ### Common users
 
@@ -233,8 +220,8 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 
 ### MacOS Architecture
 
-{% content-ref url="mac-os-architecture.md" %}
-[mac-os-architecture.md](mac-os-architecture.md)
+{% content-ref url="mac-os-architecture/" %}
+[mac-os-architecture](mac-os-architecture/)
 {% endcontent-ref %}
 
 ### MacOS Serial Number
@@ -670,7 +657,7 @@ kextunload /path/to/kext.kext
 kextunload -b com.apple.driver.ExampleBundle
 ```
 
-For more information about [**kernel extensions check this section**](mac-os-architecture.md#i-o-kit-drivers).
+For more information about [**kernel extensions check this section**](mac-os-architecture/#i-o-kit-drivers).
 
 ### **Login Items**
 

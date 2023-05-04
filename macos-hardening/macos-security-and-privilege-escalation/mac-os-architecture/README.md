@@ -1,7 +1,5 @@
 # Mac OS Architecture
 
-## Mac OS Architecture
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
@@ -109,215 +107,17 @@ A kernel without applications isn’t very useful. **Darwin** is the non-Aqua, *
 
 On the **other** hand, many familiar pieces of Mac OS X are **not open source**. The main missing piece to someone running just the Darwin code will be **Aqua**, the **Mac OS X windowing and graphical-interface environment**. Additionally, most of the common **high-level applications**, such as Safari, Mail, QuickTime, iChat, etc., are not open source (although some of their components are open source). Interestingly, these closed-source applications often **rely on open- source software**, for example, Safari relies on the WebKit project for HTML and JavaScript rendering. **For perhaps this reason, you also typically have many more symbols in these applications when debugging than you would in a Windows environment.**
 
-### **Universal binaries**
+### **Universal binaries &** Mach-o Format
 
-Mac OS binaries usually are compiled as universal binaries. A **universal binary** can **support multiple architectures in the same file**.
-
-```bash
-file /bin/ls
-/bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
-/bin/ls (for architecture x86_64):	Mach-O 64-bit executable x86_64
-/bin/ls (for architecture arm64e):	Mach-O 64-bit executable arm64e
-```
-
-In the following example, a universal binary for the **x86** **and** **PowerPC** architectures is created:
-
-```bash
-gcc -arch ppc -arch i386 -o test-universal test.c
-```
-
-As you may be thinking usually a universal binary compiled for 2 architectures **doubles the size** of one compiled for just 1 arch.
-
-### Mach-o Format
-
-![](<../../.gitbook/assets/image (559).png>)
-
-**mach Header**
-
-The header contains basic information about the file, such as magic bytes to identify it as a Mach-O file and information about the target architecture. You can find it in: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
-
-```c
-struct mach_header {
-	uint32_t	magic;		/* mach magic number identifier */
-	cpu_type_t	cputype;	/* cpu specifier (e.g. I386) */
-	cpu_subtype_t	cpusubtype;	/* machine specifier */
-	uint32_t	filetype;	/* type of file (usage and alignment for the file) */
-	uint32_t	ncmds;		/* number of load commands */
-	uint32_t	sizeofcmds;	/* the size of all the load commands */
-	uint32_t	flags;		/* flags */
-};
-```
-
-Filetypes:
-
-* MH\_EXECUTE (0x2): Standard Mach-O executable
-* MH\_DYLIB (0x6): A Mach-O dynamic linked library (i.e. .dylib)
-* MH\_BUNDLE (0x8): A Mach-O bundle (i.e. .bundle)
-
-#### fat Header
-
-Search for the file with: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
-
-<pre class="language-c"><code class="lang-c"><strong>#define FAT_MAGIC	0xcafebabe
-</strong><strong>#define FAT_CIGAM	0xbebafeca	/* NXSwapLong(FAT_MAGIC) */
-</strong>
-struct fat_header {
-<strong>	uint32_t	magic;		/* FAT_MAGIC or FAT_MAGIC_64 */
-</strong><strong>	uint32_t	nfat_arch;	/* number of structs that follow */
-</strong>};
-
-struct fat_arch {
-	cpu_type_t	cputype;	/* cpu specifier (int) */
-	cpu_subtype_t	cpusubtype;	/* machine specifier (int) */
-	uint32_t	offset;		/* file offset to this object file */
-	uint32_t	size;		/* size of this object file */
-	uint32_t	align;		/* alignment as a power of 2 */
-};
-</code></pre>
-
-The header has the **magic** bytes followed by the **number** of **archs** the file **contains** (`nfat_arch`) and each arch will have a `fat_arch` struct.
-
-Check it with:
-
-<pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
-/bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
-/bin/ls (for architecture x86_64):	Mach-O 64-bit executable x86_64
-/bin/ls (for architecture arm64e):	Mach-O 64-bit executable arm64e
-
-% otool -f -v /bin/ls
-Fat headers
-fat_magic FAT_MAGIC
-<strong>nfat_arch 2
-</strong><strong>architecture x86_64
-</strong>    cputype CPU_TYPE_X86_64
-    cpusubtype CPU_SUBTYPE_X86_64_ALL
-    capabilities 0x0
-<strong>    offset 16384
-</strong><strong>    size 72896
-</strong>    align 2^14 (16384)
-<strong>architecture arm64e
-</strong>    cputype CPU_TYPE_ARM64
-    cpusubtype CPU_SUBTYPE_ARM64E
-    capabilities PTR_AUTH_VERSION USERSPACE 0
-<strong>    offset 98304
-</strong><strong>    size 88816
-</strong>    align 2^14 (16384)
-</code></pre>
-
-**Load commands**
-
-This specifies the **layout of the file in memory**. It contains the **location of the symbol table**, the main thread context at the beginning of execution, and which **shared libraries** are required.\
-The commands basically instruct the dynamic loader **(dyld) how to load the binary in memory.**
-
-Load commands all begin with a **load\_command** structure, defined in mach-o/loader.h:
-
-```objectivec
-struct load_command {
-        uint32_t cmd;           /* type of load command */
-        uint32_t cmdsize;       /* total size of command in bytes */
-};
-```
-
-A **common** type of load command is **LC\_SEGMENT/LC\_SEGMENT\_64**, which **describes** a **segment:**\
-_A segment defines a **range of bytes** in a Mach-O file and the **addresses** and **memory**_ _**protection**_ _**attributes** at which those bytes are **mapped into** virtual memory when the dynamic linker loads the application._
-
-![](<../../.gitbook/assets/image (557).png>)
-
-Common segments:
-
-* **`__TEXT`**: Contains **executable** **code** and **data** that is **read-only.** Common sections of this segment:
-  * `__text`: Compiled binary code
-  * `__const`: Constant data
-  * `__cstring`: String constants
-* **`__DATA`**: Contains data that is **writable.**
-  * `__data`: Global variables (that have been initialized)
-  * `__bss`: Static variables (that have not been initialized)
-  * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Information used by the Objective-C runtime
-* **`__LINKEDIT`**: Contains information for the linker (dyld) such as, "symbol, string, and relocation table entries."
-* **`__OBJC`**: Contains information used by the Objective-C runtime. Though this information might also be found in the \_\_DATA segment, within various in \_\_objc\_\* sections.
-* **`LC_MAIN`**: Contains the entrypoint in the **entryoff attribute.** At load time, **dyld** simply **adds** this value to the (in-memory) **base of the binary**, then **jumps** to this instruction to kickoff execution of the binary’s code.
-*   **`LC_LOAD_DYLIB`**: This load command describes a **dynamic** **library** dependency which **instructs** the **loader** (dyld) to l**oad and link said library**. There is a LC\_LOAD\_DYLIB load command **for each library** that the Mach-O binary requires.
-
-    * This load command is a structure of type **`dylib_command`** (which contains a struct dylib, describing the actual dependent dynamic library):
-
-    ```objectivec
-    struct dylib_command {
-            uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
-            uint32_t        cmdsize;        /* includes pathname string */
-            struct dylib    dylib;          /* the library identification */ 
-    };
-
-    struct dylib {
-        union lc_str  name;                 /* library's path name */
-        uint32_t timestamp;                 /* library's build time stamp */
-        uint32_t current_version;           /* library's current version number */
-        uint32_t compatibility_version;     /* library's compatibility vers number*/
-    };
-    ```
-
-![](<../../.gitbook/assets/image (558).png>)
-
-Some potential malware related libraries are:
-
-* **DiskArbitration**: Monitoring USB drives
-* **AVFoundation:** Capture audio and video
-* **CoreWLAN**: Wifi scans.
-
-{% hint style="info" %}
-A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC\_MAIN**.\
-The offsets of any constructors are held in the **\_\_mod\_init\_func** section of the **\_\_DATA\_CONST** segment.
-{% endhint %}
-
-**Data**
-
-The heart of the file is the final region, the data, which consists of a number of segments as laid out in the load-commands region. **Each segment can contain a number of data sections**. Each of these sections **contains code or data** of one particular type.
-
-![](<../../.gitbook/assets/image (507) (3).png>)
-
-**Get the info**
-
-```bash
-otool -f /bin/ls #Get universal headers info
-otool -hv /bin/ls #Get the Mach header
-otool -l /bin/ls #Get Load commands
-otool -L /bin/ls #Get libraries used by the binary
-```
-
-Or you can use the GUI tool [**machoview**](https://sourceforge.net/projects/machoview/).
+{% content-ref url="universal-binaries-and-mach-o-format.md" %}
+[universal-binaries-and-mach-o-format.md](universal-binaries-and-mach-o-format.md)
+{% endcontent-ref %}
 
 ### Bundles
 
-Basically, a bundle is a **directory structure** within the file system. Interestingly, by default this directory **looks like a single object in Finder**. The types of resources contained within a bundle may consist of applications, libraries, images, documentation, header files, etc. All these files are inside `<application>.app/Contents/`
-
-```bash
-ls -lR /Applications/Safari.app/Contents
-```
-
-*   `Contents/_CodeSignature`
-
-    Contains **code-signing information** about the application (i.e., hashes, etc.).
-*   `Contents/MacOS`
-
-    Contains the **application’s binary** (which is executed when the user double-clicks the application icon in the UI).
-*   `Contents/Resources`
-
-    Contains **UI elements of the application**, such as images, documents, and nib/xib files (that describe various user interfaces).
-* `Contents/Info.plist`\
-  The application’s main “**configuration file.**” Apple notes that “the system relies on the presence of this file to identify relevant information about \[the] application and any related files”.
-  * **Plist** **files** contains configuration information. You can find find information about the meaning of they plist keys in [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
-  *   Pairs that may be of interest when analyzing an application include:\\
-
-      * **CFBundleExecutable**
-
-      Contains the **name of the application’s binary** (found in Contents/MacOS).
-
-      * **CFBundleIdentifier**
-
-      Contains the application’s bundle identifier (often used by the system to **globally** **identify** the application).
-
-      * **LSMinimumSystemVersion**
-
-      Contains the **oldest** **version** of **macOS** that the application is compatible with.
+{% content-ref url="macos-bundles.md" %}
+[macos-bundles.md](macos-bundles.md)
+{% endcontent-ref %}
 
 ### Objective-C
 

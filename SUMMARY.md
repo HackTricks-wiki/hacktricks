@@ -138,7 +138,9 @@
 ## 🍏 MacOS Hardening
 
 * [MacOS Security & Privilege Escalation](macos-hardening/macos-security-and-privilege-escalation/README.md)
-  * [Mac OS Architecture](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture.md)
+  * [Mac OS Architecture](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/README.md)
+    * [macOS Bundles](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-bundles.md)
+    * [Universal binaries & Mach-O Format](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/universal-binaries-and-mach-o-format.md)
   * [MacOS MDM](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/README.md)
     * [Enrolling Devices in Other Organisations](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/enrolling-devices-in-other-organisations.md)
   * [MacOS Protocols](macos-hardening/macos-security-and-privilege-escalation/macos-protocols.md)
