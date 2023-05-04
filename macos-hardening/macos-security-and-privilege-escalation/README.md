@@ -96,7 +96,7 @@ On the **left**, there is the directory path on the **System volume**, and on th
 * **`.Spotlight-V100`**: This folder appears on the root directory of every volume on the system.
 * **`.metadata_never_index`**: If this file is at the root of a volume Spotlight won't index that volume.
 * **`<name>.noindex`**: Files and folder with this extension won't be indexed by Spotlight.
-* \*\*`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV`\*\*2: Contains information about downloaded files, like the URL from where they were downloaded.
+* **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contains information about downloaded files, like the URL from where they were downloaded.
 * **`/var/log/system.log`**: Main log of OSX systems. com.apple.syslogd.plist is responsible for the execution of syslogging (you can check if it's disabled looking for "com.apple.syslogd" in `launchctl list`.
 * **`/private/var/log/asl/*.asl`**: These are the Apple System Logs which may contain interesting information.
 * **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Stores recently accessed files and applications through "Finder".
