@@ -73,14 +73,6 @@ Get Access Today:
 
 \---
 
-###
-
-<figure><img src=".gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-
-
-
-
 ### [WebSec](https://websec.nl/)
 
 <figure><img src=".gitbook/assets/logo.svg" alt=""><figcaption></figcaption></figure>
