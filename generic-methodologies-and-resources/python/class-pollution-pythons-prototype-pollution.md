@@ -257,7 +257,7 @@ app.secret_key = '(:secret:)'
 
 In this scenario you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** to change the Flask secret key and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-A payload like this one:
+A payload like this one [from this writeup](https://ctftime.org/writeup/36082):
 
 {% code overflow="wrap" %}
 ```python
