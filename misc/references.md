@@ -51,4 +51,34 @@
 
 </details>
 
+# The go to
+| Description                                           | URL                                                                                                                              |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Small Infoshare with good content                | [https://f1shh.gitbook.io/pentest-tips/](https://f1shh.gitbook.io/pentest-tips/)                                                                     |
+| IRedTeam public notes Infoshare                       | [https://www.ired.team/](https://www.ired.team/)                                                                                 |
+| List of OSINT tools and techniques                    | [https://osintframework.com/](https://osintframework.com/)                                                                       |
+| Penetration testing Infoshare                         | [https://pentestbook.six2dez.com/](https://pentestbook.six2dez.com/)                                                             |
+| Offensive Security's Metasploit guide                   | [https://www.offensive-security.com/metasploit-unleashed/](https://www.offensive-security.com/metasploit-unleashed/)             |
+| List of honeypot servers for a wide array of services | [https://github.com/paralax/awesome-honeypots#honeypots](https://github.com/paralax/awesome-honeypots#honeypots)                 |
+| Amazing list of red team tools and techniques         | [https://github.com/infosecn1nja/Red-Teaming-Toolkit](https://github.com/infosecn1nja/Red-Teaming-Toolkit#Payload%20Development) | 
+
+# General Pentesting
+| Description                                                                 | URL                                                                                                                                                  |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Meta Infoshare with a lot of links covering a wide array of security topics | [https://github.com/zbetcheckin/Security_list](https://github.com/zbetcheckin/Security_list)                                                         |
+| A good guide for new CTF players.                                           | [https://d00mfist.gitbooks.io/ctf/content/general_tips.html](https://d00mfist.gitbooks.io/ctf/content/general_tips.html)                             |
+| MITRE Attack Framework                                                      | [https://attack.mitre.org/](https://attack.mitre.org/)                                                                                               |
+| Windows Security Infoshare                                                  | [https://github.com/alphaSeclab/windows-security/blob/master/Readme_en.md](https://github.com/alphaSeclab/windows-security/blob/master/Readme_en.md) | 
+
+# Game Hacking 
+| Description                 | URL                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| Game Hacking Meta Infoshare | [https://github.com/dsasmblr/game-hacking](https://github.com/dsasmblr/game-hacking) | 
+
+# Web Exploitation
+| Description                      | URL                                                                                          |
+| -------------------------------- | -------------------------------------------------------------------------------------------- |
+| XSS Command Injection Cheatsheet | [Command Injection Cheatsheet](https://github.com/payloadbox/command-injection-payload-list) | 
+
+
 
