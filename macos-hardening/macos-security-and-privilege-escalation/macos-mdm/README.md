@@ -1,6 +1,4 @@
-# MacOS MDM
-
-## MacOS MDM
+# macOS MDM
 
 <details>
 

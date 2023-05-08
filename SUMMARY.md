@@ -137,16 +137,17 @@
 
 ## 🍏 MacOS Hardening
 
-* [MacOS Security & Privilege Escalation](macos-hardening/macos-security-and-privilege-escalation/README.md)
-  * [Mac OS Architecture](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/README.md)
+* [macOS Security & Privilege Escalation](macos-hardening/macos-security-and-privilege-escalation/README.md)
+  * [macOS Architecture](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/README.md)
     * [macOS Bundles](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-bundles.md)
     * [Universal binaries & Mach-O Format](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/universal-binaries-and-mach-o-format.md)
-  * [MacOS MDM](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/README.md)
+  * [macOS MDM](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/README.md)
     * [Enrolling Devices in Other Organisations](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/enrolling-devices-in-other-organisations.md)
-  * [MacOS Protocols](macos-hardening/macos-security-and-privilege-escalation/macos-protocols.md)
-  * [MacOS Red Teaming](macos-hardening/macos-security-and-privilege-escalation/macos-red-teaming.md)
-  * [MacOS Serial Number](macos-hardening/macos-security-and-privilege-escalation/macos-serial-number.md)
-  * [MacOS Apps - Inspecting, debugging and Fuzzing](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing.md)
+  * [macOS Basic Objective-C](macos-hardening/macos-security-and-privilege-escalation/macos-basic-objective-c.md)
+  * [macOS Protocols](macos-hardening/macos-security-and-privilege-escalation/macos-protocols.md)
+  * [macOS Red Teaming](macos-hardening/macos-security-and-privilege-escalation/macos-red-teaming.md)
+  * [macOS Serial Number](macos-hardening/macos-security-and-privilege-escalation/macos-serial-number.md)
+  * [macOS Apps - Inspecting, debugging and Fuzzing](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing.md)
 
 ## 🪟 Windows Hardening
 
