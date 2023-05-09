@@ -1,4 +1,4 @@
-# MacOS Security & Privilege Escalation
+# macOS Security & Privilege Escalation
 
 <details>
 
@@ -354,6 +354,10 @@ The TCC database is just a **sqlite3 database**, which makes the task of investi
 
 This information was [taken from here](https://rainforest.engineering/2021-02-09-macos-tcc/) (read the **original source for more information**).
 
+{% hint style="info" %}
+Some TCC permissions are: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... However, there is no public list that defines all of them.
+{% endhint %}
+
 Some protected directories:
 
 * $HOME/Desktop
@@ -472,14 +476,20 @@ This post about a **SIP bypass vulnerability** is also very interesting: [https:
 When checking some **malware sample** you should always **check the signature** of the binary as the **developer** that signed it may be already **related** with **malware.**
 
 ```bash
-#Get signer
+# Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
 
-#Check if the app’s contents have been modified
+# Check if the app’s contents have been modified
 codesign --verify --verbose /Applications/Safari.app
 
-#Check if the signature is valid
+# Get entitlements from the binary
+codesign -d --entitlements :- /System/Applications/Automator.app # Check the TCC perms
+
+# Check if the signature is valid
 spctl --assess --verbose /Applications/Safari.app
+
+# Sign a binary
+codesign -s <cert-name-keychain> toolsdemo
 ```
 
 ### Sealed Snapshots

@@ -144,7 +144,7 @@
   * [macOS MDM](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/README.md)
     * [Enrolling Devices in Other Organisations](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/enrolling-devices-in-other-organisations.md)
   * [macOS Basic Objective-C](macos-hardening/macos-security-and-privilege-escalation/macos-basic-objective-c.md)
-  * [macOS Protocols](macos-hardening/macos-security-and-privilege-escalation/macos-protocols.md)
+  * [macOS Network Protocols](macos-hardening/macos-security-and-privilege-escalation/macos-protocols.md)
   * [macOS Red Teaming](macos-hardening/macos-security-and-privilege-escalation/macos-red-teaming.md)
   * [macOS Serial Number](macos-hardening/macos-security-and-privilege-escalation/macos-serial-number.md)
   * [macOS Apps - Inspecting, debugging and Fuzzing](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing.md)
