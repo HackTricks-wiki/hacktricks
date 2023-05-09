@@ -42,9 +42,31 @@ brew install --cask jtool2
 jtool2 -l /bin/ls # Get commands (headers)
 jtool2 -L /bin/ls # Get libraries
 jtool2 -S /bin/ls # Get symbol info
+jtool2 -d /bin/ls # Dump binary
+jtool2 -D /bin/ls # Decompile binary
 
-#
+# Get signature information
 ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Automator
+
+```
+
+### Codesign
+
+```bash
+# Get signer
+codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
+
+# Check if the app’s contents have been modified
+codesign --verify --verbose /Applications/Safari.app
+
+# Get entitlements from the binary
+codesign -d --entitlements :- /System/Applications/Automator.app # Check the TCC perms
+
+# Check if the signature is valid
+spctl --assess --verbose /Applications/Safari.app
+
+# Sign a binary
+codesign -s <cert-name-keychain> toolsdemo
 ```
 
 ### SuspiciousPackage
@@ -97,8 +119,30 @@ Note that in order to debug binaries, **SIP needs to be disabled** (`csrutil dis
 {% endhint %}
 
 {% hint style="warning" %}
-Note that in order to **instrument system binarie**s, (such as `cloudconfigurationd`) on macOS, **SIP must be disabled** (just removing the signature won't work).
+Note that in order to **instrument system binaries**, (such as `cloudconfigurationd`) on macOS, **SIP must be disabled** (just removing the signature won't work).
 {% endhint %}
+
+### Hopper
+
+#### Left panel
+
+In the left panel of hopper it's possible to see the symbols (**Labels**) of the binary, the list of procedures and functions (**Proc**) and the strings (**Str**). Those aren't all the strings but the ones defined in several parts of the Mac-O file (like _cstring or_ `objc_methname`).
+
+#### Middle panel
+
+In the middle panel you can see the **dissasembled code**. And you can see it a **raw** disassemble, as **graph**, as **decompiled** and as **binary** by clicking on the respective icon:
+
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+Right clicking in a code object you can see **references to/from that object** or even change its name (this doesn't work in decompiled pseudocode):
+
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+
+Moreover, in the **middle down you can write python commands**.
+
+#### Right panel
+
+In the right panel you can see interesting information such as the **navigation history** (so you know how you arrived at the current situation), the **call grap**h where you can see all the **functions that call this function** and all the functions that **this function calls**, and **local variables** information.
 
 ### dtruss
 

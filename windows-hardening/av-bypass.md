@@ -54,7 +54,7 @@ It turns out that Microsoft Defender's Sandbox computername is HAL9TH, so, you c
 
 Some other really good tips from [@mgeeky](https://twitter.com/mariuszbit) for going against Sandboxes
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev channel</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1) (2).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev channel</p></figcaption></figure>
 
 As we've said before in this post, **public tools** will eventually **get detected**, so, you should ask yourself something:
 
