@@ -273,6 +273,95 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 {% endcode %}
 
+### Blocks
+
+Blocks are **functions that behaves as objects** so they can be passed to functions or **stored** in **arrays** or **dictionaries**. Also, they can **represent a value if they are given values** so it's similar to lambdas.
+
+{% code overflow="wrap" %}
+```objectivec
+returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
+    //Perform operations here
+};
+
+// For example
+
+int (^suma)(int, int) = ^(int a, int b){ 
+    return a+b;
+};
+NSLog(@"3+4 = %d", suma(3,4));
+```
+{% endcode %}
+
+It's also possible to **define a block type to be used as a parameter** in functions:
+
+```objectivec
+// Define the block type
+typedef void (^callbackLogger)(void);
+
+// Create a bloack with the block type
+callbackLogger myLogger = ^{ 
+    NSLog(@"%@", @"This is my block");
+};
+
+// Use it inside a function as a param
+void genericLogger(callbackLogger blockParam) {
+    NSLog(@"%@", @"This is my function");
+    blockParam();
+}
+genericLogger(myLogger);
+
+// Call it inline
+genericLogger(^{
+    NSLog(@"%@", @"This is my second block");
+});
+```
+
+### Files
+
+{% code overflow="wrap" %}
+```objectivec
+// Manager to manage files
+NSFileManager *fileManager = [NSFileManager defaultManager];
+
+// Check if file exists:
+if ([fileManager fileExistsAtPath:@"/path/to/file.txt" ] == YES) {
+    NSLog (@"File exists");
+}
+
+// copy files
+if ([fileManager copyItemAtPath: @"/path/to/file1.txt" toPath: @"/path/to/file2.txt" error:nil] == YES) {
+    NSLog (@"Copy successful");
+}
+
+// Check if the content of 2 files match
+if ([fileManager contentsEqualAtPath:@"/path/to/file1.txt" andPath:@"/path/to/file2.txt"] == YES) {
+    NSLog (@"File contents match");
+}
+
+// Delete file
+if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
+    NSLog(@"Removed successfully");
+}
+```
+{% endcode %}
+
+It's also possible to manage files **using `NSURL` objects instead of `NSString`** objects. The method names are similar, but **with `URL` instead of `Path`**.
+
+```objectivec
+NSURL *fileSrc = [NSURL fileURLWithPath:@"/path/to/file1.txt"];
+NSURL *fileDst = [NSURL fileURLWithPath:@"/path/to/file2.txt"];
+[fileManager moveItemAtURL:fileSrc toURL:fileDst error: nil];
+```
+
+Most basic classes has a method `writeToFile:<path> atomically:<YES> encoding:<encoding> error:nil` defined that allows them to be directly be written to a file:
+
+{% code overflow="wrap" %}
+```objectivec
+NSString* tmp = @"something temporary";
+[tmp writeToFile:@"/tmp/tmp1.txt" atomically:YES encoding:NSASCIIStringEncoding error:nil];
+```
+{% endcode %}
+
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
