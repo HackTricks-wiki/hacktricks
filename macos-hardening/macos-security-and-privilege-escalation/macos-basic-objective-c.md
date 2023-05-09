@@ -14,7 +14,7 @@
 
 ## Classes, Methods & Objects
 
-* Declare an **interface** with the **properties** & **methods**
+### Interface, Properties & Methods
 
 ```objectivec
 // Declare the interface of the class
@@ -31,7 +31,7 @@
 @end
 ```
 
-* **Implement** the **class** from the interface
+### **Class**
 
 ```objectivec
 @implementation MyVehicle : NSObject
@@ -49,7 +49,7 @@
 @end
 ```
 
-* **Create an object** of the class & **call** a **method**
+### **Object & Call Method**
 
 To create an instance of a class the **`alloc`** method is called which **allocate memory** for each **property** and **zero** those allocations. Then **`init`** is called, which **initilize the properties** to the **required values**.
 
@@ -65,7 +65,7 @@ MyVehicle *newVehicle = [MyVehicle new];
 [newVehicle addWheels:4];
 ```
 
-* **Class methods**
+### **Class Methods**
 
 Class methods are defined with the **plus sign** (+) not the hyphen (-) that is used with instance methods. Like the **NSString** class method **`stringWithString`**:
 
@@ -73,7 +73,7 @@ Class methods are defined with the **plus sign** (+) not the hyphen (-) that is 
 + (id)stringWithString:(NSString *)aString;
 ```
 
-* **Setter** & **Getter** Methods
+### Setter & Getter
 
 To **set** & **get** properties, you could do it with a **dot notation** or like if you were **calling a method**:
 
@@ -87,15 +87,191 @@ NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
 
-* **Instance Variables**
+### **Instance Variables**
 
 Alternatively to setter & getter methods you can use instance variables. These variables have the same name as the properties but starting with a "\_":
 
 ```objectivec
 - (void)makeLongTruck {
-    _numberOfWheels = 10000;
+    _numberOfWheels = +10000;
+    NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
+
+### Protocols
+
+Protocols are set of method declarations (without properties). A class that implements a protocol implement the declared methods.
+
+There are 2 types of methods: **mandatory** and **optional**. By **default** a method is **mandatory** (but you can also indicate it with a **`@required`** tag). To indicate that a method is optional use **`@optional`**.
+
+```objectivec
+@protocol myNewProtocol
+- (void) method1; //mandatory
+@required
+- (void) method2; //mandatory
+@optional
+- (void) method3; //optional
+@end
+```
+
+### All together
+
+```objectivec
+// gcc -framework Foundation test_obj.m -o test_obj
+#import <Foundation/Foundation.h>
+
+@protocol myVehicleProtocol
+- (void) startEngine; //mandatory
+@required
+- (void) addWheels:(int)value; //mandatory
+@optional
+- (void) makeLongTruck; //optional
+@end
+
+@interface MyVehicle : NSObject <myVehicleProtocol>
+
+@property int numberOfWheels;
+
+- (void)startEngine;
+- (void)addWheels:(int)value;
+- (void)makeLongTruck;
+
+@end
+
+@implementation MyVehicle : NSObject
+
+- (void)startEngine {
+    NSLog(@"Engine started");
+}
+
+- (void)addWheels:(int)value {
+    self.numberOfWheels += value;
+}
+
+- (void)makeLongTruck {
+    _numberOfWheels = +10000;
+    NSLog(@"Number of wheels: %i", self.numberOfWheels);
+}
+
+@end
+
+int main() {
+    MyVehicle* mySuperCar = [MyVehicle new];
+    [mySuperCar startEngine];
+    mySuperCar.numberOfWheels = 4;
+    NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
+    [mySuperCar setNumberOfWheels:3];
+    NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
+    [mySuperCar makeLongTruck];
+}
+```
+
+### Basic Classes
+
+#### String
+
+{% code overflow="wrap" %}
+```objectivec
+// NSString
+NSString *bookTitle = @"The Catcher in the Rye";
+NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
+NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
+```
+{% endcode %}
+
+Basic classes are **immutable**, so to append a string to an existing one a **new NSString needs to be created**.
+
+{% code overflow="wrap" %}
+```objectivec
+NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
+```
+{% endcode %}
+
+Or you could also use a **mutable** string class:
+
+{% code overflow="wrap" %}
+```objectivec
+NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
+[mutableString appendString:bookTitle];
+[mutableString appendString:@" was written by "];
+[mutableString appendString:bookAuthor];
+[mutableString appendString:@" and published in "];
+[mutableString appendString:bookPublicationYear];
+```
+{% endcode %}
+
+#### Number
+
+{% code overflow="wrap" %}
+```objectivec
+// character literals.
+NSNumber *theLetterZ = @'Z'; // equivalent to [NSNumber numberWithChar:'Z']
+
+// integral literals.
+NSNumber *fortyTwo = @42; // equivalent to [NSNumber numberWithInt:42]
+NSNumber *fortyTwoUnsigned = @42U; // equivalent to [NSNumber numberWithUnsignedInt:42U]
+NSNumber *fortyTwoLong = @42L; // equivalent to [NSNumber numberWithLong:42L]
+NSNumber *fortyTwoLongLong = @42LL; // equivalent to [NSNumber numberWithLongLong:42LL]
+
+// floating point literals.
+NSNumber *piFloat = @3.141592654F; // equivalent to [NSNumber numberWithFloat:3.141592654F]
+NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:3.1415926535]
+
+// BOOL literals.
+NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
+NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
+```
+{% endcode %}
+
+#### Array, Sets & Dictionary
+
+{% code overflow="wrap" %}
+```objectivec
+// Inmutable arrays
+NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
+NSArray *colorsArray2 = @[@"yellow", @"cyan", @"magenta"];
+NSArray *colorsArray3 = @[firstColor, secondColor, thirdColor];
+
+// Mutable arrays
+NSMutableArray *mutColorsArray = [NSMutableArray array];
+[mutColorsArray addObject:@"red"];
+[mutColorsArray addObject:@"green"];
+[mutColorsArray addObject:@"blue"];
+[mutColorsArray addObject:@"yellow"];
+[mutColorsArray replaceObjectAtIndex:0 withObject:@"purple"];
+
+// Sets
+NSSet *fruitsSet1 = [NSSet setWithObjects:@"apple", @"banana", @"orange", nil];
+NSSet *fruitsSet2 = [NSSet setWithArray:@[@"apple", @"banana", @"orange"]];
+
+// Inmutable sets
+NSMutableSet *mutFruitsSet = [NSMutableSet setWithObjects:@"apple", @"banana", @"orange", nil];
+[mutFruitsSet addObject:@"grape"];
+[mutFruitsSet removeObject:@"apple"];
+
+
+// Dictionary
+NSDictionary *fruitColorsDictionary = @{
+    @"apple" : @"red",
+    @"banana" : @"yellow",
+    @"orange" : @"orange",
+    @"grape" : @"purple"
+};
+
+// In dictionaryWithObjectsAndKeys you specify the value and then the key:
+NSDictionary *fruitColorsDictionary2 = [NSDictionary dictionaryWithObjectsAndKeys:
+    @"red", @"apple",
+    @"yellow", @"banana",
+    @"orange", @"orange",
+    @"purple", @"grape",
+nil];
+
+// Mutable dictionary
+NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryWithDictionary:fruitColorsDictionary];
+[mutFruitColorsDictionary setObject:@"green" forKey:@"apple"];
+[mutFruitColorsDictionary removeObjectForKey:@"grape"];
+```
+{% endcode %}
 
 <details>
 
