@@ -17,13 +17,14 @@
 {% hint style="success" %}
 These are the **values of the HackTricks Project**:
 
-* Give **FREE** access to **hacking** **educational** resources to **ALL** Internet.
+* Give **FREE** access to **educational hacking** resources to **ALL** Internet.
   * Hacking is about learning, and learning should be as free as possible.
-* **STORE** awesome **hacking** techniques that the community publish giving the **ORIGINAL** **AUTHORS** all the **credits**.
-  * **We don't want the credit of other people**, we just want to store cool tricks for everyone.
-  * In several cases we will just write **in HackTricks a summary of the important parts** of the technique and will **encourage the lector to visit the original post** for more details&#x20;
+* **STORE** awesome **hacking** techniques that the community publishes giving the **ORIGINAL** **AUTHORS** all the **credits**.
+  * **We don't want the credit from other people**, we just want to store cool tricks for everyone.
+  * We also write **our own researches** in HackTricks.
+  * In several cases we will just write **in HackTricks a summary of the important parts** of the technique and will **encourage the lector to visit the original post** for more details.
 * **ORGANIZE** all the hacking techniques in the book so it's **MORE ACCESSIBLE**
-  * The HackTricks team has dedicated hundreds of hours for free **only to organize the content** so people can **learn faster**
+  * The HackTricks team has dedicated thousands of hours for free **only to organize the content** so people can **learn faster**
 {% endhint %}
 
 ## HackTricks faq
@@ -34,13 +35,13 @@ These are the **values of the HackTricks Project**:
 
 You can publicly thanks HackTricks teams for putting together all these resources publicly in a tweet mentioning [**@hacktricks\_live**](https://twitter.com/hacktricks\_live).\
 If you are specially grateful you can also [**sponsor the project here**](https://github.com/sponsors/carlospolop).\
-And don't forget to **give a star in the Github projects!** (Find the links bellow).
+And don't forget to **give a star in the Github projects!** (Find the links below).
 
 {% hint style="success" %}
 * **How can I contribute to the project?**
 {% endhint %}
 
-You can **share new tips and tricks with the community or fix bugs** you find in the books sending a Pull Request to the respective Github pages:&#x20;
+You can **share new tips and tricks with the community or fix bugs** you find in the books sending a **Pull Request** to the respective Github pages:&#x20;
 
 * [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 * [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
@@ -74,10 +75,18 @@ We have sponsors because, even if all the content is FREE, we want to **offer th
 You won't find HackTricks filled with annoying ads like other blogs with much less content than HackTricks, because HackTricks is not made for commercial purposes.
 
 {% hint style="danger" %}
-* **Your content is based on my blog post but it isn't referenced.**
+* **What should I do if some HackTricks page is based on my blog post but it isn't referenced?**
 {% endhint %}
 
-Still on TODO, I needed to leave!
+**We are very sorry. This shouldn't have happened**. Please, let us know via Github issues, Twitter, Discord... the link of the HackTricks page with the content and the link of your blog and **we will check it and add it ASAP**.
+
+{% hint style="danger" %}
+* **What should I do if there is content from my blog in HackTricks and I don't want it there?**
+{% endhint %}
+
+In any case know that HackTricks in this case would be improving your **SEO** and **encouraging** people to **check your page**. If you still want the content of your blog to be removed from HackTricks let us know.
+
+Note that asking this we will definitely **remove every link to your blog**, but if the same technique can be found in other web pages we will just change the source of the information and the explanation, so the real content won't probably leave HackTricks (in cybersecurity, in general, there are always several post talking about the same technique).
 
 <details>
 
