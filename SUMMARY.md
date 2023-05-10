@@ -3,6 +3,7 @@
 ## 👾 Welcome!
 
 * [HackTricks](README.md)
+* [HackTricks Values & faq](welcome/hacktricks-values-and-faq.md)
 * [About the author](welcome/about-the-author.md)
 * [Getting Started in Hacking](welcome/getting-started-in-hacking.md)
 
