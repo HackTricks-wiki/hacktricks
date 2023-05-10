@@ -17,8 +17,9 @@
 {% hint style="success" %}
 These are the **values of the HackTricks Project**:
 
-* Give **FREE** access to **educational hacking** resources to **ALL** Internet.
+* Give **FREE** access to **EDUCATIONAL hacking** resources to **ALL** Internet.
   * Hacking is about learning, and learning should be as free as possible.
+  * The purpose of this book is to serve as a comprehensive **educational resource**.
 * **STORE** awesome **hacking** techniques that the community publishes giving the **ORIGINAL** **AUTHORS** all the **credits**.
   * **We don't want the credit from other people**, we just want to store cool tricks for everyone.
   * We also write **our own researches** in HackTricks.
@@ -70,7 +71,7 @@ The first **HacTricks** **value** is to offer **FREE** hacking educational resou
 
 If you think HackTricks is made for **commercial purposes** you are **COMPLETELY WRONG**.
 
-We have sponsors because, even if all the content is FREE, we want to **offer the community the possibility of appreciating our work** if they want to. Therefore, we offer people the option to sponsors HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), and **relevant cybersecurity companies** to sponsor HackTricks and to **have some ads** in the book being the **ads** always placed in places where make them **visible** but **doesn't disturb the learning** process if someone focus in the content.
+We have sponsors because, even if all the content is FREE, we want to **offer the community the possibility of appreciating our work** if they want to. Therefore, we offer people the option to donate to HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), and **relevant cybersecurity companies** to sponsor HackTricks and to **have some ads** in the book being the **ads** always placed in places where make them **visible** but **doesn't disturb the learning** process if someone focus in the content.
 
 You won't find HackTricks filled with annoying ads like other blogs with much less content than HackTricks, because HackTricks is not made for commercial purposes.
 
