@@ -28,6 +28,8 @@ These are the **values of the HackTricks Project**:
   * The HackTricks team has dedicated thousands of hours for free **only to organize the content** so people can **learn faster**
 {% endhint %}
 
+<figure><img src="../.gitbook/assets/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
+
 ## HackTricks faq
 
 {% hint style="success" %}
