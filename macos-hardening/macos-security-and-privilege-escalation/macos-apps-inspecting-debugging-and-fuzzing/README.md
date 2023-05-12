@@ -88,7 +88,7 @@ It will be mounted in `/Volumes`
 
 When a function is called in a binary that uses objective-C, the compiled code instead of calling that function, it will call **`objc_msgSend`**. Which will be calling the final function:
 
-![](<../../.gitbook/assets/image (560).png>)
+![](<../../../.gitbook/assets/image (560).png>)
 
 The params this function expects are:
 
@@ -132,11 +132,11 @@ In the left panel of hopper it's possible to see the symbols (**Labels**) of the
 
 In the middle panel you can see the **dissasembled code**. And you can see it a **raw** disassemble, as **graph**, as **decompiled** and as **binary** by clicking on the respective icon:
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 Right clicking in a code object you can see **references to/from that object** or even change its name (this doesn't work in decompiled pseudocode):
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 Moreover, in the **middle down you can write python commands**.
 
@@ -163,6 +163,8 @@ ktrace trace -s -S -t c -c ls | grep "ls("
 
 It allows users access to applications at an extremely **low level** and provides a way for users to **trace** **programs** and even change their execution flow. Dtrace uses **probes** which are **placed throughout the kernel** and are at locations such as the beginning and end of system calls.
 
+DTrace uses the **`dtrace_probe_create`** function to create a probe for each system call. These probes can be fired in the **entry and exit point of each system call**. The interaction with DTrace occur through /dev/dtrace which is only available for the root user.
+
 The available probes of dtrace can be obtained with:
 
 ```bash
@@ -177,9 +179,13 @@ dtrace -l | head
 
 The probe name consists of four parts: the provider, module, function, and name (`fbt:mach_kernel:ptrace:entry`). If you not specifies some part of the name, Dtrace will apply that part as a wildcard.
 
+To configure DTrace to activate probes and to specify what actions to perform when they fire, we will need to use the D language.
+
 A more detailed explanation and more examples can be found in [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)
 
 #### Examples
+
+Run `man -k dtrace` to list the **DTrace scripts available**. Example: `sudo dtruss -n binary`
 
 * In line
 
@@ -261,22 +267,23 @@ lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
 
-| **(lldb) Command**            | **Description**                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **run (r)**                   | Starting execution, which will continue unabated until a breakpoint is hit or the process terminates.                                                                                                                                                                                                                                                                                                                         |
-| **continue (c)**              | Continue execution of the debugged process.                                                                                                                                                                                                                                                                                                                                                                                   |
-| **nexti (n)**                 | Execute the next instruction. This command will skip over function calls.                                                                                                                                                                                                                                                                                                                                                     |
-| **stepi (s)**                 | Execute the next instruction. Unlike the nexti command, this command will step into function calls.                                                                                                                                                                                                                                                                                                                           |
-| **finish (f)**                | Execute the rest of the instructions in the current function (“frame”) return and halt.                                                                                                                                                                                                                                                                                                                                       |
-| **control + c**               | Pause execution. If the process has been run (r) or continued (c), this will cause the process to halt ...wherever it is currently executing.                                                                                                                                                                                                                                                                                 |
-| **breakpoint (b)**            | <p>b main</p><p>b -[NSDictionary objectForKey:]</p><p>b 0x0000000100004bd9</p><p>br l #Breakpoint list</p><p>br e/dis &#x3C;num> #Enable/Disable breakpoint</p><p>breakpoint delete &#x3C;num></p>                                                                                                                                                                                                                            |
-| **help**                      | <p>help breakpoint #Get help of breakpoint command</p><p>help memory write #Get help to write into the memory</p>                                                                                                                                                                                                                                                                                                             |
-| **reg**                       | <p>reg read $rax</p><p>reg write $rip 0x100035cc0</p>                                                                                                                                                                                                                                                                                                                                                                         |
-| **x/s \<reg/memory address>** | Display the memory as a null-terminated string.                                                                                                                                                                                                                                                                                                                                                                               |
-| **x/i \<reg/memory address>** | Display the memory as assembly instruction.                                                                                                                                                                                                                                                                                                                                                                                   |
-| **x/b \<reg/memory address>** | Display the memory as byte.                                                                                                                                                                                                                                                                                                                                                                                                   |
-| **print object (po)**         | <p>This will print the object referenced by the param</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Note that most of Apple’s Objective-C APIs or methods return objects, and thus should be displayed via the “print object” (po) command. If po doesn't produce a meaningful output use <code>x/b</code><br></p> |
-| **memory write**              | memory write 0x100600000 -s 4 0x41414141 #Write AAAA in that address                                                                                                                                                                                                                                                                                                                                                          |
+| **(lldb) Command**            | **Description**                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **run (r)**                   | Starting execution, which will continue unabated until a breakpoint is hit or the process terminates.                                                                                                                                                                                                                                                                                                                     |
+| **continue (c)**              | Continue execution of the debugged process.                                                                                                                                                                                                                                                                                                                                                                               |
+| **nexti (n / ni)**            | Execute the next instruction. This command will skip over function calls.                                                                                                                                                                                                                                                                                                                                                 |
+| **stepi (s / si)**            | Execute the next instruction. Unlike the nexti command, this command will step into function calls.                                                                                                                                                                                                                                                                                                                       |
+| **finish (f)**                | Execute the rest of the instructions in the current function (“frame”) return and halt.                                                                                                                                                                                                                                                                                                                                   |
+| **control + c**               | Pause execution. If the process has been run (r) or continued (c), this will cause the process to halt ...wherever it is currently executing.                                                                                                                                                                                                                                                                             |
+| **breakpoint (b)**            | <p>b main</p><p>b -[NSDictionary objectForKey:]</p><p>b 0x0000000100004bd9</p><p>br l #Breakpoint list</p><p>br e/dis &#x3C;num> #Enable/Disable breakpoint</p><p>breakpoint delete &#x3C;num><br>b set -n main --shlib &#x3C;lib_name></p>                                                                                                                                                                               |
+| **help**                      | <p>help breakpoint #Get help of breakpoint command</p><p>help memory write #Get help to write into the memory</p>                                                                                                                                                                                                                                                                                                         |
+| **reg**                       | <p>reg read</p><p>reg read $rax</p><p>reg write $rip 0x100035cc0</p>                                                                                                                                                                                                                                                                                                                                                      |
+| **x/s \<reg/memory address>** | Display the memory as a null-terminated string.                                                                                                                                                                                                                                                                                                                                                                           |
+| **x/i \<reg/memory address>** | Display the memory as assembly instruction.                                                                                                                                                                                                                                                                                                                                                                               |
+| **x/b \<reg/memory address>** | Display the memory as byte.                                                                                                                                                                                                                                                                                                                                                                                               |
+| **print object (po)**         | <p>This will print the object referenced by the param</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Note that most of Apple’s Objective-C APIs or methods return objects, and thus should be displayed via the “print object” (po) command. If po doesn't produce a meaningful output use <code>x/b</code></p> |
+| **memory**                    | <p>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Write AAAA in that address<br>memory write -f s $rip+0x11f+7 "AAAA" #Write AAAA in the addr</p>                                                                                                                                                                                                                            |
+| **disassembly**               | <p>dis #Disas current function<br>dis -c 6 #Disas 6 lines<br>dis -c 0x100003764 -e 0x100003768 # From one add until the other<br>dis -p -c 4 # Start in current addres disassembling</p>                                                                                                                                                                                                                                  |
 
 {% hint style="info" %}
 When calling the **`objc_sendMsg`** function, the **rsi** register holds the **name of the method** as a null-terminated (“C”) string. To print the name via lldb do:
@@ -346,7 +353,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 
 ### Internal Handlers
 
-[**Checkout this section**](./#file-extensions-apps) to find out how you can find which app is responsible of **handling the specified scheme or protocol**.
+[**Checkout this section**](../#file-extensions-apps) to find out how you can find which app is responsible of **handling the specified scheme or protocol**.
 
 ### Enumerating Network Processes
 

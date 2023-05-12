@@ -244,8 +244,8 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 
 ### MacOS - Inspecting, Debugging and Fuzzing
 
-{% content-ref url="macos-apps-inspecting-debugging-and-fuzzing.md" %}
-[macos-apps-inspecting-debugging-and-fuzzing.md](macos-apps-inspecting-debugging-and-fuzzing.md)
+{% content-ref url="macos-apps-inspecting-debugging-and-fuzzing/" %}
+[macos-apps-inspecting-debugging-and-fuzzing](macos-apps-inspecting-debugging-and-fuzzing/)
 {% endcontent-ref %}
 
 ## MacOS Security Mechanisms

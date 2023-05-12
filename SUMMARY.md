@@ -148,7 +148,8 @@
   * [macOS Network Protocols](macos-hardening/macos-security-and-privilege-escalation/macos-protocols.md)
   * [macOS Red Teaming](macos-hardening/macos-security-and-privilege-escalation/macos-red-teaming.md)
   * [macOS Serial Number](macos-hardening/macos-security-and-privilege-escalation/macos-serial-number.md)
-  * [macOS Apps - Inspecting, debugging and Fuzzing](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing.md)
+  * [macOS Apps - Inspecting, debugging and Fuzzing](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing/README.md)
+    * [ARM64 Basic Assembly](macos-hardening/macos-security-and-privilege-escalation/macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
 
 ## 🪟 Windows Hardening
 
