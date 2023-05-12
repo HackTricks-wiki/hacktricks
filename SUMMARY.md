@@ -600,6 +600,7 @@
   * [Chrome Cache to XSS](pentesting-web/xss-cross-site-scripting/chrome-cache-to-xss.md)
   * [Debugging Client Side JS](pentesting-web/xss-cross-site-scripting/debugging-client-side-js.md)
   * [Dom Clobbering](pentesting-web/xss-cross-site-scripting/dom-clobbering.md)
+  * [DOM Invader](pentesting-web/xss-cross-site-scripting/dom-invader.md)
   * [DOM XSS](pentesting-web/xss-cross-site-scripting/dom-xss.md)
   * [Iframes in XSS, CSP and SOP](pentesting-web/xss-cross-site-scripting/iframes-in-xss-and-csp.md)
   * [Misc JS Tricks & Relevant Info](pentesting-web/xss-cross-site-scripting/other-js-tricks.md)
