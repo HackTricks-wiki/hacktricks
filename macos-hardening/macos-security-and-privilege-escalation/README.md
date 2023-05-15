@@ -1093,23 +1093,9 @@ This makes the password pretty easy to recover, for example using scripts like [
 
 ## **Library injection**
 
-### Dylib Hijacking
-
-As in Windows, in MacOS you can also **hijack dylibs** to make **applications** **execute** **arbitrary** **code**.\
-However, the way **MacOS** applications **load** libraries is **more restricted** than in Windows. This implies that **malware** developers can still use this technique for **stealth**, but the probably to be able to **abuse this to escalate privileges is much lower**.
-
-First of all, is **more common** to find that **MacOS binaries indicates the full path** to the libraries to load. And second, **MacOS never search** in the folders of the **$PATH** for libraries.
-
-However, there are 2 types of dylib hijacking:
-
-* **Missing weak linked libraries**: This means that the application will try to load a library that doesn't exist configured with **LC\_LOAD\_WEAK\_DYLIB**. Then, **if an attacker places a dylib where it's expected it will be loaded**.
-  * The fact that the link is "weak" means that the application will continue running even if the library isn't found.
-* **Configured with @rpath**: The path to the library configured contains "**@rpath**" and it's configured with **multiple** **LC\_RPATH** containing **paths**. Therefore, **when loading** the dylib, the loader is going to **search** (in order) **through all the paths** specified in the **LC\_RPATH** **configurations**. If anyone is missing and **an attacker can place a dylib there** and it will be loaded.
-
-The way to **escalate privileges** abusing this functionality would be in the rare case that an **application** being executed **by** **root** is **looking** for some **library in some folder where the attacker has write permissions.**
-
-**A nice scanner to find missing libraries in applications is** [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) **or a** [**CLI version**](https://github.com/pandazheng/DylibHijack)**.**\
-**A nice report with technical details about this technique can be found** [**here**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x)**.**
+{% hint style="danger" %}
+The code of **dyld is open source** and can be found in [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) and cab be downloaded a tar using a **URL such as** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+{% endhint %}
 
 ### **DYLD\_INSERT\_LIBRARIES**
 
@@ -1118,8 +1104,6 @@ The way to **escalate privileges** abusing this functionality would be in the ra
 This is like the [**LD\_PRELOAD on Linux**](../../linux-hardening/privilege-escalation/#ld\_preload).
 
 This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
-
-The code of **dyld is open source** and can be found in [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) and cab be downloaded a tar using a **URL such as** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 {% hint style="info" %}
 Since 2012 **Apple has drastically reduced the power** of the **`DYLD_INSERT_LIBRARIES`**.
@@ -1131,17 +1115,146 @@ In the function **`processRestricted`** the reason of the restriction is set. Ch
 * The binary is `setuid/setgid`
 * Existence of `__RESTRICT/__restrict` section in the macho binary.
 * The software has entitlements (hardened runtime) without [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables) entitlement or [`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
-* If the lib is signed with the same certificate as the binary
-  * This will bypass the previous restrictions
+  * Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
+* If the lib is signed with a different certificate as the binary
+  * If the lib & the bin are signed with the same cert, this will bypass the previous restrictions
 
 In more updated versions you can find this logic at the second part of the function **`configureProcessRestrictions`.** However, what is executed in newer versions is the **beginning checks of the function** (you can remove the ifs related to iOS or simulation as those won't be used in macOS.
 {% endhint %}
 
 Find a example on how to (ab)use this and check the restrictions in:
 
-{% content-ref url="dyld_insert_libraries.md" %}
-[dyld\_insert\_libraries.md](dyld\_insert\_libraries.md)
+{% content-ref url="macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
+[macos-dyld-hijacking-and-dyld\_insert\_libraries.md](macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
 {% endcontent-ref %}
+
+### Dylib Hijacking
+
+{% hint style="warning" %}
+Remember that **previous restrictions also apply** to perform Dylib hijacking attacks.
+{% endhint %}
+
+As in Windows, in MacOS you can also **hijack dylibs** to make **applications** **execute** **arbitrary** **code**.\
+However, the way **MacOS** applications **load** libraries is **more restricted** than in Windows. This implies that **malware** developers can still use this technique for **stealth**, but the probably to be able to **abuse this to escalate privileges is much lower**.
+
+First of all, is **more common** to find that **MacOS binaries indicates the full path** to the libraries to load. And second, **MacOS never search** in the folders of the **$PATH** for libraries.
+
+The **main** part of the **code** related to this functionality is in **`ImageLoader::recursiveLoadLibraries`** in `ImageLoader.cpp`.
+
+However, there are **2 types of dylib hijacking**:
+
+* **Missing weak linked libraries**: This means that the application will try to load a library that doesn't exist configured with **LC\_LOAD\_WEAK\_DYLIB**. Then, **if an attacker places a dylib where it's expected it will be loaded**.
+  * The fact that the link is "weak" means that the application will continue running even if the library isn't found.
+  * The **code related** to this is in the function `ImageLoaderMachO::doGetDependentLibraries` of `ImageLoaderMachO.cpp` where `lib->required` is only `false` when `LC_LOAD_WEAK_DYLIB` is true.
+  * **Find weak liked libraries** in binaries with (you have later an example on how to create hijacking libraries):&#x20;
+    * ```bash
+      otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
+      cmdsize 56
+      name /var/tmp/lib/libUtl.1.dylib (offset 24)
+      time stamp 2 Wed Jun 21 12:23:31 1969
+      current version 1.0.0
+      compatibility version 1.0.0
+      ```
+* **Configured with @rpath**: Mach-O binaries can have the commands **`LC_RPATH`** and **`LC_LOAD_DYLIB`**.  Base on the **values** of those commands, **libraries** are going to be **loaded** from **different directories**.
+  * **`LC_RPATH`** contains the paths of some folders used to load libraries by the binary.&#x20;
+  * **`LC_LOAD_DYLIB`** contains the path to specific libraries to load. These paths can contain **`@rpath`**, which will be **replaced** by the values in **`LC_RPATH`**. If there are several paths in **`LC_RPATH`** everyone will be used to search the library to load. Example:
+    * If **`LC_LOAD_DYLIB`** contains `@rpath/library.dylib` and **`LC_RPATH`** contains `/application/app.app/Contents/Framework/v1/` and `/application/app.app/Contents/Framework/v2/`. Both folders are going to be used to load `library.dylib`**.** If the library doesn't exist in `[...]/v1/` and attacker could place it there to hijack the load of the library in `[...]/v2/` as the order of paths in **`LC_LOAD_DYLIB`** is followed.
+  * **Find rpath paths and libraries** in binaries with: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
+
+{% hint style="info" %}
+**`@executable_path`**: Is the **path** to the directory containing the **main executable file**.&#x20;
+
+**`@loader_path`**: Is the **path** to the **directory** containing the **Mach-O binary** which contains the load command.&#x20;
+
+* When used in an executable, **`@loader_path`** is effectively the **same** as **`@executable_path`**.&#x20;
+* When used in a **dylib**, **`@loader_path`** gives the **path** to the **dylib**.
+{% endhint %}
+
+The way to **escalate privileges** abusing this functionality would be in the rare case that an **application** being executed **by** **root** is **looking** for some **library in some folder where the attacker has write permissions.**
+
+{% hint style="success" %}
+A nice **scanner** to find **missing libraries** in applications is [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) or a [**CLI version**](https://github.com/pandazheng/DylibHijack).\
+A nice **report with technical details** about this technique can be found [**here**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x).
+{% endhint %}
+
+#### Example
+
+{% content-ref url="macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
+[macos-dyld-hijacking-and-dyld\_insert\_libraries.md](macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
+{% endcontent-ref %}
+
+### Dlopen Hijacking
+
+From **`man dlopen`**:
+
+* When path **does not contain a slash character** (i.e. it is just a leaf name), **dlopen() will do searching**. If **`$DYLD_LIBRARY_PATH`** was set at launch, dyld will first **look in that director**y. Next, if the calling mach-o file or the main executable specify an **`LC_RPATH`**, then dyld will **look in those** directories. Next, if the process is **unrestricted**, dyld will search in the **current working directory**. Lastly, for old binaries, dyld will try some fallbacks. If **`$DYLD_FALLBACK_LIBRARY_PATH`** was set at launch, dyld will search in **those directories**, otherwise, dyld will look in **`/usr/local/lib/`** (if the process is unrestricted), and then in **`/usr/lib/`**.
+  1. `$DYLD_LIBRARY_PATH`
+  2. `LC_RPATH`
+  3. `CWD`(if unrestricted)
+  4. `$DYLD_FALLBACK_LIBRARY_PATH`
+  5. `/usr/local/lib/` (if unrestricted)
+  6. `/usr/lib/`
+* When path **looks like a framework** path (e.g. /stuff/foo.framework/foo), if **`$DYLD_FRAMEWORK_PATH`** was set at launch, dyld will first look in that directory for the framework partial path (e.g. foo.framework/foo). Next, dyld will try the **supplied path as-is** (using current working directory for relative paths). Lastly, for old binaries, dyld will try some fallbacks. If **`$DYLD_FALLBACK_FRAMEWORK_PATH`** was set at launch, dyld will search those directories. Otherwise, it will search **`/Library/Frameworks`** (on macOS if process is unrestricted), then **`/System/Library/Frameworks`**.
+  1. `$DYLD_FRAMEWORK_PATH`
+  2. supplied path (using current working directory for relative paths)
+  3. `$DYLD_FALLBACK_FRAMEWORK_PATH`(if unrestricted)
+  4. `/Library/Frameworks` (if unrestricted)
+  5. `/System/Library/Frameworks`
+* When path **contains a slash but is not a framework path** (i.e. a full path or a partial path to a dylib), dlopen() first looks in (if set) in **`$DYLD_LIBRARY_PATH`** (with leaf part from path ). Next, dyld **tries the supplied path** (using current working directory for relative paths (but only for unrestricted processes)). Lastly, for older binaries, dyld will try fallbacks. If **`$DYLD_FALLBACK_LIBRARY_PATH`** was set at launch, dyld will search in those directories, otherwise, dyld will look in **`/usr/local/lib/`** (if the process is unrestricted), and then in **`/usr/lib/`**.
+  1. `$DYLD_LIBRARY_PATH`
+  2. supplied path (using current working directory for relative paths if unrestricted)
+  3. `$DYLD_FALLBACK_LIBRARY_PATH`
+  4. `/usr/local/lib/` (if unrestricted)
+  5. `/usr/lib/`
+
+Note: If the main executable is a **set\[ug]id binary or codesigned with entitlements**, then **all environment variables are ignored**, and only a full path can be used.
+
+#### Check paths
+
+Lets check all the options with the following code:
+
+```c
+#include <dlfcn.h>
+#include <stdio.h>
+
+int main(void)
+{
+    void* handle;
+
+    handle = dlopen("just_name_dlopentest.dylib",1);
+    if (!handle) {
+        fprintf(stderr, "Error loading: %s\n", dlerror());
+    }
+
+    handle = dlopen("a/framework/rel_framework_dlopentest.dylib",1);
+    if (!handle) {
+        fprintf(stderr, "Error loading: %s\n", dlerror());
+    }
+
+    handle = dlopen("/a/abs/framework/abs_framework_dlopentest.dylib",1);
+    if (!handle) {
+        fprintf(stderr, "Error loading: %s\n", dlerror());
+    }
+
+    handle = dlopen("a/folder/rel_folder_dlopentest.dylib",1);
+    if (!handle) {
+        fprintf(stderr, "Error loading: %s\n", dlerror());
+    }
+
+    handle = dlopen("/a/abs/folder/abs_folder_dlopentest.dylib",1);
+    if (!handle) {
+        fprintf(stderr, "Error loading: %s\n", dlerror());
+    }
+
+    return 0;
+}
+```
+
+If you compile and execute it you can see **where each library was unsuccessfully searched for**. Also, you could **filter the FS logs**:
+
+```bash
+sudo fs_usage | grep "dlopentest"
+```
 
 ## Interesting Information in Databases
 
