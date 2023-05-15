@@ -1132,11 +1132,12 @@ In the function **`processRestricted`** the reason of the restriction is set. Ch
 * Existence of `__RESTRICT/__restrict` section in the macho binary.
 * The software has entitlements (hardened runtime) without [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables) entitlement or [`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
 * If the lib is signed with the same certificate as the binary
+  * This will bypass the previous restrictions
 
-In more updated versions you can find this logic at the second part of the function **`configureProcessRestrictions`.** However, what is executed in newer versions is the **beginning checks of the function** (you can remove the ifs related to iOS or simulation as those won't be used in macOS:.
+In more updated versions you can find this logic at the second part of the function **`configureProcessRestrictions`.** However, what is executed in newer versions is the **beginning checks of the function** (you can remove the ifs related to iOS or simulation as those won't be used in macOS.
 {% endhint %}
 
-Find a example on how to (ab)use this in:
+Find a example on how to (ab)use this and check the restrictions in:
 
 {% content-ref url="dyld_insert_libraries.md" %}
 [dyld\_insert\_libraries.md](dyld\_insert\_libraries.md)

