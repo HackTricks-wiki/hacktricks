@@ -1119,13 +1119,28 @@ This is like the [**LD\_PRELOAD on Linux**](../../linux-hardening/privilege-esca
 
 This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
 
+The code of **dyld is open source** and can be found in [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) and cab be downloaded a tar using a **URL such as** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+
 {% hint style="info" %}
-Since 2012 when [OSX.FlashBack.B](https://www.f-secure.com/v-descs/trojan-downloader\_osx\_flashback\_b.shtml) \[22] abused this technique, **Apple has drastically reduced the “power”** of the DYLD\_INSERT\_LIBRARIES.
+Since 2012 **Apple has drastically reduced the power** of the **`DYLD_INSERT_LIBRARIES`**.
 
-For example the dynamic loader (dyld) ignores the DYLD\_INSERT\_LIBRARIES environment variable in a wide range of cases, such as setuid and platform binaries. And, starting with macOS Catalina, only 3rd-party applications that are not compiled with the hardened runtime (which “protects the runtime integrity of software” \[22]), or have an exception such as the com.apple.security.cs.allow-dyld-environment-variables entitlement) are susceptible to dylib insertions.
+Go to the code and **check `src/dyld.cpp`**. In the function **`pruneEnvironmentVariables`** you can see that  **`DYLD_*`** variables are removed.
 
-For more details on the security features afforded by the hardened runtime, see Apple’s documentation: “[Hardened Runtime](https://developer.apple.com/documentation/security/hardened\_runtime)”
+In the function **`processRestricted`** the reason of the restriction is set. Checking that code you can see that the reasons are:
+
+* The binary is `setuid/setgid`
+* Existence of `__RESTRICT/__restrict` section in the macho binary.
+* The software has entitlements (hardened runtime) without [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables) entitlement or [`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
+* If the lib is signed with the same certificate as the binary
+
+In more updated versions you can find this logic at the second part of the function **`configureProcessRestrictions`.** However, what is executed in newer versions is the **beginning checks of the function** (you can remove the ifs related to iOS or simulation as those won't be used in macOS:.
 {% endhint %}
+
+Find a example on how to (ab)use this in:
+
+{% content-ref url="dyld_insert_libraries.md" %}
+[dyld\_insert\_libraries.md](dyld\_insert\_libraries.md)
+{% endcontent-ref %}
 
 ## Interesting Information in Databases
 

@@ -139,6 +139,7 @@
 ## 🍏 MacOS Hardening
 
 * [macOS Security & Privilege Escalation](macos-hardening/macos-security-and-privilege-escalation/README.md)
+  * [DYLD\_INSERT\_LIBRARIES](macos-hardening/macos-security-and-privilege-escalation/dyld\_insert\_libraries.md)
   * [macOS Architecture](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/README.md)
     * [macOS Bundles](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-bundles.md)
     * [Universal binaries & Mach-O Format](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/universal-binaries-and-mach-o-format.md)
