@@ -66,12 +66,12 @@ Yes, you can, but **don't forget to mention the specific link(s)** where the con
 If you fear that it will disappear, just fork it in Github or download it, as I said it's already free.
 
 {% hint style="warning" %}
-* **Why do you have sponsors? Is HackTricks for commercial purposes?**
+* **Why do you have sponsors? Are HackTricks books for commercial purposes?**
 {% endhint %}
 
 The first **HacTricks** **value** is to offer **FREE** hacking educational resources to **ALL** the world. The HackTricks team has **dedicated thousands of hours** to offer this content, again, for **FREE**.
 
-If you think HackTricks is made for **commercial purposes** you are **COMPLETELY WRONG**.
+If you think HackTricks books are made for **commercial purposes** you are **COMPLETELY WRONG**.
 
 We have sponsors because, even if all the content is FREE, we want to **offer the community the possibility of appreciating our work** if they want to. Therefore, we offer people the option to donate to HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), and **relevant cybersecurity companies** to sponsor HackTricks and to **have some ads** in the book being the **ads** always placed in places where make them **visible** but **doesn't disturb the learning** process if someone focus in the content.
 
