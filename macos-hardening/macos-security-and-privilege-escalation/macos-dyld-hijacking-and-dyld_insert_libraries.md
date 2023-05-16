@@ -167,6 +167,10 @@ And **execute** the binary and check the **library was loaded**:
            (to execute a class)
 </code></pre>
 
+{% hint style="info" %}
+A nice writeup about how to abuse this vulnerability to abuse the camera permissions of telegram can be found in [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+{% endhint %}
+
 ## Bigger Scale
 
 If you are planing on trying to inject libraries in unexpected binaries you could check the event messages to find out when the library is loaded inside a process (in this case remove the printf and the `/bin/bash` execution).

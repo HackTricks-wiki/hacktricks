@@ -1,4 +1,4 @@
-# Mac OS Architecture
+# macOS Architecture
 
 <details>
 
@@ -81,6 +81,10 @@ To load and unload kernel extensions do:
 kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
 ```
+
+### IPC - Inter Process Communication
+
+
 
 ## Apple Propietary File System (APFS)
 
