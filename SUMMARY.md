@@ -143,6 +143,7 @@
   * [macOS Architecture](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/README.md)
     * [macOS Bundles](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-bundles.md)
     * [macOS IPC](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc.md)
+    * [macOS Function Hooking](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-function-hooking.md)
     * [Universal binaries & Mach-O Format](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/universal-binaries-and-mach-o-format.md)
   * [macOS MDM](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/README.md)
     * [Enrolling Devices in Other Organisations](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/enrolling-devices-in-other-organisations.md)
