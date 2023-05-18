@@ -62,6 +62,196 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./hello
 [+] Hello from interpose
 ```
 
+### Method Swizzling
+
+In ObjectiveC this is how a method is called: `[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`
+
+It's needed the **object**, the **method** and the **params**. And when a method is called a **msg is sent** using the function **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+
+The object is **`someObject`**, the method is **`@selector(method1p1:p2:)`** and the arguments are **value1**, **value2**.
+
+Following the object structures, it's possible to reach an **array of methods** where the **names** and **pointers** to the method code are **located**.
+
+#### Accessing the raw methods
+
+It's possible to access the information of the methods such as name, number of params or address like in the following example:
+
+```objectivec
+// gcc -framework Foundation test.m -o test
+
+#import <Foundation/Foundation.h>
+#import <objc/runtime.h>
+#import <objc/message.h>
+
+int main() {
+    // Get class of the variable
+    NSString* str = @"This is an example";
+    Class strClass = [str class];
+    NSLog(@"str's Class name: %s", class_getName(strClass));
+
+    // Get parent class of a class
+    Class strSuper = class_getSuperclass(strClass); 
+    NSLog(@"Superclass name: %@",NSStringFromClass(strSuper));
+
+    // Get information about a method
+    SEL sel = @selector(length);
+    NSLog(@"Selector name: %@", NSStringFromSelector(sel));
+    Method m = class_getInstanceMethod(strClass,sel);
+    NSLog(@"Number of arguments: %d", method_getNumberOfArguments(m));
+    NSLog(@"Implementation address: 0x%lx", (unsigned long)method_getImplementation(m));
+
+    // Iterate through the class hierarchy
+    NSLog(@"Listing methods:");
+    Class currentClass = strClass;
+    while (currentClass != NULL) {
+        unsigned int inheritedMethodCount = 0;
+        Method* inheritedMethods = class_copyMethodList(currentClass, &inheritedMethodCount);
+        
+        NSLog(@"Number of inherited methods in %s: %u", class_getName(currentClass), inheritedMethodCount);
+        
+        for (unsigned int i = 0; i < inheritedMethodCount; i++) {
+            Method method = inheritedMethods[i];
+            SEL selector = method_getName(method);
+            const char* methodName = sel_getName(selector);
+            unsigned long address = (unsigned long)method_getImplementation(m);
+            NSLog(@"Inherited method name: %s (0x%lx)", methodName, address);
+        }
+        
+        // Free the memory allocated by class_copyMethodList
+        free(inheritedMethods);
+        currentClass = class_getSuperclass(currentClass);
+    }
+
+    // Other ways to call uppercaseString method
+    if([str respondsToSelector:@selector(uppercaseString)]) {
+        NSString *uppercaseString = [str performSelector:@selector(uppercaseString)];
+        NSLog(@"Uppercase string: %@", uppercaseString);
+    }
+
+    // Using objc_msgSend directly
+    NSString *uppercaseString2 = ((NSString *(*)(id, SEL))objc_msgSend)(str, @selector(uppercaseString));
+    NSLog(@"Uppercase string: %@", uppercaseString2);
+
+    // Calling the address directly
+    IMP imp = method_getImplementation(class_getInstanceMethod(strClass, @selector(uppercaseString))); // Get the function address
+    NSString *(*callImp)(id,SEL) = (typeof(callImp))imp; // Generates a function capable to method from imp
+    NSString *uppercaseString3 = callImp(str,@selector(uppercaseString)); // Call the method
+    NSLog(@"Uppercase string: %@", uppercaseString3);
+
+    return 0;
+}
+```
+
+#### Method Swizzling with method\_exchangeImplementations
+
+The function method\_exchangeImplementations allows to change the address of one function for the other. So when a function is called what is executed is the other one.
+
+```objectivec
+//gcc -framework Foundation swizzle_str.m -o swizzle_str
+
+#import <Foundation/Foundation.h>
+#import <objc/runtime.h>
+
+
+// Create a new category for NSString with the method to execute
+@interface NSString (SwizzleString)
+
+- (NSString *)swizzledSubstringFromIndex:(NSUInteger)from;
+
+@end
+
+@implementation NSString (SwizzleString)
+
+- (NSString *)swizzledSubstringFromIndex:(NSUInteger)from {
+    NSLog(@"Custom implementation of substringFromIndex:");
+    
+    // Call the original method
+    return [self swizzledSubstringFromIndex:from];
+}
+
+@end
+
+int main(int argc, const char * argv[]) {
+    // Perform method swizzling
+    Method originalMethod = class_getInstanceMethod([NSString class], @selector(substringFromIndex:));
+    Method swizzledMethod = class_getInstanceMethod([NSString class], @selector(swizzledSubstringFromIndex:));
+    method_exchangeImplementations(originalMethod, swizzledMethod);
+
+    // We changed the address of one method for the other
+    // Now when the method substringFromIndex is called, what is really coode is swizzledSubstringFromIndex
+    // And when swizzledSubstringFromIndex is called, substringFromIndex is really colled
+    
+    // Example usage
+    NSString *myString = @"Hello, World!";
+    NSString *subString = [myString substringFromIndex:7];
+    NSLog(@"Substring: %@", subString);
+    
+    return 0;
+}
+```
+
+#### Method Swizzling with method\_setImplementation
+
+The previous format is weird because you are changing the implementation of 2 methods one from the other. Using the function **`method_setImplementation`** you can **change** the **implementation** of a **method for the other one**.
+
+Just remember to **store the address of the implementation of the original one** if you are going to to call it from the new implementation before overwriting it because later it will be much complicated to locate that address.
+
+```objectivec
+#import <Foundation/Foundation.h>
+#import <objc/runtime.h>
+#import <objc/message.h>
+
+static IMP original_substringFromIndex = NULL;
+
+@interface NSString (Swizzlestring)
+
+- (NSString *)swizzledSubstringFromIndex:(NSUInteger)from;
+
+@end
+
+@implementation NSString (Swizzlestring)
+
+- (NSString *)swizzledSubstringFromIndex:(NSUInteger)from {
+    NSLog(@"Custom implementation of substringFromIndex:");
+        
+    // Call the original implementation using objc_msgSendSuper
+    return ((NSString *(*)(id, SEL, NSUInteger))original_substringFromIndex)(self, _cmd, from);
+}
+
+@end
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        // Get the class of the target method
+        Class stringClass = [NSString class];
+        
+        // Get the swizzled and original methods
+        Method originalMethod = class_getInstanceMethod(stringClass, @selector(substringFromIndex:));
+        
+        // Get the function pointer to the swizzled method's implementation
+        IMP swizzledIMP = method_getImplementation(class_getInstanceMethod(stringClass, @selector(swizzledSubstringFromIndex:)));
+        
+        // Swap the implementations
+        // It return the now overwritten implementation of the original method to store it
+        original_substringFromIndex = method_setImplementation(originalMethod, swizzledIMP);
+        
+        // Example usage
+        NSString *myString = @"Hello, World!";
+        NSString *subString = [myString substringFromIndex:7];
+        NSLog(@"Substring: %@", subString);
+        
+        // Set the original implementation back
+        method_setImplementation(originalMethod, original_substringFromIndex);
+        
+        return 0;
+    }
+}
+```
+
+## References
+
+* [https://nshipster.com/method-swizzling/](https://nshipster.com/method-swizzling/)
+
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
