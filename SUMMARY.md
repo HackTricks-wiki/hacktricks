@@ -142,7 +142,7 @@
   * [macOS Dyld Hijacking & DYLD\_INSERT\_LIBRARIES](macos-hardening/macos-security-and-privilege-escalation/macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
   * [macOS Architecture](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/README.md)
     * [macOS Bundles](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-bundles.md)
-    * [macOS IPC](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc.md)
+    * [macOS IPC - Inter Process Communication](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc-inter-process-communication.md)
     * [macOS Function Hooking](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-function-hooking.md)
     * [Universal binaries & Mach-O Format](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/universal-binaries-and-mach-o-format.md)
   * [macOS MDM](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/README.md)

@@ -62,7 +62,7 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./hello
 [+] Hello from interpose
 ```
 
-### Method Swizzling
+## Method Swizzling
 
 In ObjectiveC this is how a method is called: `[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`
 
@@ -72,7 +72,11 @@ The object is **`someObject`**, the method is **`@selector(method1p1:p2:)`** and
 
 Following the object structures, it's possible to reach an **array of methods** where the **names** and **pointers** to the method code are **located**.
 
-#### Accessing the raw methods
+{% hint style="danger" %}
+Note that because methods and classes are accessed based on their names, this information is store in the binary, so it's possible to retrieve it with `otool -ov </path/bin>` or [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+{% endhint %}
+
+### Accessing the raw methods
 
 It's possible to access the information of the methods such as name, number of params or address like in the following example:
 
@@ -142,7 +146,7 @@ int main() {
 }
 ```
 
-#### Method Swizzling with method\_exchangeImplementations
+### Method Swizzling with method\_exchangeImplementations
 
 The function method\_exchangeImplementations allows to change the address of one function for the other. So when a function is called what is executed is the other one.
 
@@ -190,7 +194,7 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
-#### Method Swizzling with method\_setImplementation
+### Method Swizzling with method\_setImplementation
 
 The previous format is weird because you are changing the implementation of 2 methods one from the other. Using the function **`method_setImplementation`** you can **change** the **implementation** of a **method for the other one**.
 
@@ -247,6 +251,28 @@ int main(int argc, const char * argv[]) {
     }
 }
 ```
+
+## Hooking Attack Methodology
+
+In this page different ways to hook functions were discussed. However, they involved **running code inside the process to attack**.
+
+In order to do that the easiest technique to use is to inject a [Dyld via environment variables or hijacking](../macos-dyld-hijacking-and-dyld\_insert\_libraries.md). However, I guess this could also be done via [Dylib process injection](macos-ipc-inter-process-communication.md#dylib-process-injection-via-task-port).
+
+However, both options are **limited** to **unprotected** binaries/processes. Check each technique to learn more about the limitations.
+
+However, a function hooking attack is very specific, an attacker will do this to **steal sensitive information from inside a process** (if not you would just do a process injection attack). And this sensitive information might be located in user downloaded Apps such as MacPass.
+
+So the attacker vector would be to either find a vulnerability or strip the signature of the application, inject the **`DYLD_INSERT_LIBRARIES`** env variable through the Info.plist of the application adding something like:
+
+```xml
+<key>LSEnvironment</key>
+<dict>
+    <key>DYLD_INSERT_LIBRARIES</key> 
+    <string>/Applications/MacPass.app/Contents/malicious.dylib</string>
+</dict>
+```
+
+Add in that library the hooking code to exfiltrate the information: Passwords, messages...
 
 ## References
 

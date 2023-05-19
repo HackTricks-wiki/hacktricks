@@ -1,4 +1,4 @@
-# macOS IPC
+# macOS IPC - Inter Process Communication
 
 <details>
 
@@ -12,9 +12,7 @@
 
 </details>
 
-## IPC - Inter Process Communication
-
-### Ports
+## Mach messaging via Ports
 
 Mach uses **tasks** as the **smallest unit** for sharing resources, and each task can contain **multiple threads**. These **tasks and threads are mapped 1:1 to POSIX processes and threads**.
 
@@ -698,6 +696,81 @@ int main(int argc, const char * argv[])
 gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
+
+## XPC
+
+### Basic Information
+
+XPC, which stands for XNU (the kernel used by macOS) inter-Process Communication, is a framework for **communication between processes** on macOS and iOS. XPC provides a mechanism for making **safe, asynchronous method calls between different processes** on the system. It's a part of Apple's security paradigm, allowing for the **creation of privilege-separated applications** where each **component** runs with **only the permissions it needs** to do its job, thereby limiting the potential damage from a compromised process.
+
+XPC uses a form of Inter-Process Communication (IPC), which is a set of methods for different programs running on the same system to send data back and forth.
+
+The primary benefits of XPC include:
+
+1. **Security**: By separating work into different processes, each process can be granted only the permissions it needs. This means that even if a process is compromised, it has limited ability to do harm.
+2. **Stability**: XPC helps isolate crashes to the component where they occur. If a process crashes, it can be restarted without affecting the rest of the system.
+3. **Performance**: XPC allows for easy concurrency, as different tasks can be run simultaneously in different processes.
+
+The only **drawback** is that **separating an application is several processes** making them communicate via XPC is **less efficient**. But in todays systems this isn't almost noticeable and the benefits are much better.
+
+An example can be seen in QuickTime Player, where a component using XPC is responsible for video decoding. The component is specifically designed to perform computational tasks, thus, in the event of a breach, it wouldn't provide any useful gains to the attacker, such as access to files or the network.
+
+### Application Specific XPC services
+
+The XPC components of an applications are **inside the application itself.** For example, in Safari you can find them in **`/Applications/Safari.app/Contents/XPCServices`**. They have extension **`.xpc`** (like **`com.apple.Safari.SandboxBroker.xpc`**) and are **also bundles** with the main binary inside of it: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`
+
+As you might be thinking a **XPC component will have different entitlements and privileges** than the other XPC components or the main app binary. EXCEPT if an XPC service is configured with [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession) set to “True” in its **Info.plist** file. In this case, the XPC service will run in the same security session as the application that called it.
+
+XPC services are **started** by **launchd** when required and **shut down** once all tasks are **complete** to free system resources. **Application-specific XPC components can only be utilized by the application**, thereby reducing the risk associated with potential vulnerabilities.
+
+### System Wide XPC services
+
+**System-wide XPC services** are accessible to all users. These services, either launchd or Mach-type, need to be **defined in plist** files located in specified directories such as **`/System/Library/LaunchDameons`**, **`/Library/LaunchDameons`**, **`/System/Library/LaunchAgents`**, or **`/Library/LaunchAgents`**.
+
+These plists files will have a key called **`MachServices`** with the name of the service, and a key called **`Program`** with the path to the binary:
+
+```xml
+cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Program</key>
+	<string>/Library/Application Support/JAMF/Jamf.app/Contents/MacOS/JamfDaemon.app/Contents/MacOS/JamfDaemon</string>
+	<key>AbandonProcessGroup</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Label</key>
+	<string>com.jamf.management.daemon</string>
+	<key>MachServices</key>
+	<dict>
+		<key>com.jamf.management.daemon.aad</key>
+		<true/>
+		<key>com.jamf.management.daemon.agent</key>
+		<true/>
+		<key>com.jamf.management.daemon.binary</key>
+		<true/>
+		<key>com.jamf.management.daemon.selfservice</key>
+		<true/>
+		<key>com.jamf.management.daemon.service</key>
+		<true/>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+</dict>
+</plist>
+```
+
+The ones in **`LaunchDameons`** are run by root. So if an unprivileged process can talk with one of these it could be able to escalate privileges.
+
+### XPC Event Messages
+
+Applications can **subscribe** to different event **messages**, enabling them to be **initiated on-demand** when such events happen. The **setup** for these services is done in l**aunchd plist files**, located in the **same directories as the previous ones** and containing an extra **`LaunchEvent`** key.
+
+\
+
 
 ## References
 
