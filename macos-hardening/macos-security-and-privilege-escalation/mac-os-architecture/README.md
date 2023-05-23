@@ -84,8 +84,8 @@ kextunload com.apple.iokit.IOReportFamily
 
 ### IPC - Inter Process Communication
 
-{% content-ref url="macos-ipc-inter-process-communication.md" %}
-[macos-ipc-inter-process-communication.md](macos-ipc-inter-process-communication.md)
+{% content-ref url="macos-ipc-inter-process-communication/" %}
+[macos-ipc-inter-process-communication](macos-ipc-inter-process-communication/)
 {% endcontent-ref %}
 
 ## Apple Propietary File System (APFS)

@@ -197,8 +197,8 @@ int main() {
 
 You can grab a shellcode from:
 
-{% content-ref url="../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
-[arm64-basic-assembly.md](../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
+{% content-ref url="../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
+[arm64-basic-assembly.md](../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
 {% endcontent-ref %}
 
 {% tabs %}
@@ -411,8 +411,8 @@ It was possible to **inject a simple shellcode** to execute a command because it
 
 You can find **example dylibs** in (for example the one that generates a log and then you can listen to it):
 
-{% content-ref url="../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
-[macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
+{% content-ref url="../../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
+[macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
 {% endcontent-ref %}
 
 <details>
@@ -769,72 +769,21 @@ The ones in **`LaunchDameons`** are run by root. So if an unprivileged process c
 
 Applications can **subscribe** to different event **messages**, enabling them to be **initiated on-demand** when such events happen. The **setup** for these services is done in l**aunchd plist files**, located in the **same directories as the previous ones** and containing an extra **`LaunchEvent`** key.
 
-### XPC Security
+### XPC Connecting Process Check
 
-When a connection is stablished to an XPC service, the server will check if the connection is allowed. These are the checks it would usually perform:
+When a process tries to call a method from via an XPC connection, the **XPC service should check if that process is allowed to connect**. Here are the common ways to check that and the common pitfalls:
 
-1. Check if the connecting **process is signed with an Apple-signed** certificate (only given out by Apple).
-   * If this **isn't verified**, an attacker could can create a **fake certificate** to match any other check.
-2. Check if the connecting process is signed with the **organization’s certificate**, (team ID verification).
-   * If this **isn't verified**, **any developer certificate** from Apple can be used for signing, and connect to the service.
-3. Check if the connecting process **contains a proper bundle ID**.
-4. Check if the connecting process has a **proper software version number**.
-   * If this **isn't verified,** an old, insecure clients, vulnerable to process injection could be used to connect to the XPC service even with the other checks in place.
-5. Check if the connecting process has an **entitlement** that allows it to connect to the service. This is applicable for Apple binaries.
-6. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents PID reuse attacks.
-   * Developers rarely use the audit token API call since it’s **private**, so Apple could **change** at any time. Additionally, private API usage is not allowed in Mac App Store apps.
+{% content-ref url="macos-xpc-connecting-process-check.md" %}
+[macos-xpc-connecting-process-check.md](macos-xpc-connecting-process-check.md)
+{% endcontent-ref %}
 
-The server will implement this **verification** in a function called **`shouldAcceptNewConnection`**.
+### XPC Authorization
 
-{% code overflow="wrap" %}
-```objectivec
-- (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
-    //Check connection
-    return YES;
-}
-```
-{% endcode %}
+Apple also allows apps to **configure some rights and how to get them** so if the calling process have them it would be **allowed to call a method** from the XPC service:
 
-The object NSXPCConnection has a **private** property **`auditToken`** (the one that should be used but could change) and a the **public** property **`processIdentifier`** (the one that shouldn't be used).
-
-The connecting process could be verified with something like:
-
-{% code overflow="wrap" %}
-```objectivec
-[...]
-SecRequirementRef requirementRef = NULL;
-NSString requirementString = @"anchor apple generic and identifier \"xyz.hacktricks.service\" and certificate leaf [subject.CN] = \"TEAMID\" and info [CFBundleShortVersionString] >= \"1.0\"";
-/* Check:
-- Signed by a cert signed by Apple
-- Check the bundle ID
-- Check the TEAMID of the signing cert
-- Check the version used
-*/
-
-// Check the requirements
-SecRequirementCreateWithString(requirementString, kSecCSDefaultFlags, &requirementRef);
-SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
-```
-{% endcode %}
-
-If a developer doesn't want to ceck the version of the client, he could check that the client is not vulnerable to process injection at least:
-
-{% code overflow="wrap" %}
-```objectivec
-[...]
-CFDictionaryRef csInfo = NULL;
-SecCodeCopySigningInformation(code, kSecCSDynamicInformation, &csInfo);
-uint32_t csFlags = [((__bridge NSDictionary *)csInfo)[(__bridge NSString *)kSecCodeInfoStatus] intValue];
-const uint32_t cs_hard = 0x100;        // don't load invalid page. 
-const uint32_t cs_kill = 0x200;        // Kill process if page is invalid
-const uint32_t cs_restrict = 0x800;    // Prevent debugging
-const uint32_t cs_require_lv = 0x2000; // Library Validation
-const uint32_t cs_runtime = 0x10000;   // hardened runtime
-if ((csFlags & (cs_hard | cs_require_lv)) {
-    return Yes; // Accept connection
-}
-```
-{% endcode %}
+{% content-ref url="macos-xpc-authorization.md" %}
+[macos-xpc-authorization.md](macos-xpc-authorization.md)
+{% endcontent-ref %}
 
 ### C Code Example
 
