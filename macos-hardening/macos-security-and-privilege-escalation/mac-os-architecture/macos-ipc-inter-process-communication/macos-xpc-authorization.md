@@ -16,7 +16,7 @@
 
 Apple also proposes another way to authenticate if the connecting process has **permissions to call the an exposed XPC method**.
 
-When an application needs to **execute actions as a privileged user**, instead of running the app as a privileged user it usually installs as root a HelperTool as an XPC service that could be acalled from the app to perform those actions. However, the app calling the service should have enough authorization.
+When an application needs to **execute actions as a privileged user**, instead of running the app as a privileged user it usually installs as root a HelperTool as an XPC service that could be called from the app to perform those actions. However, the app calling the service should have enough authorization.
 
 ### ShuoldAcceptNewConnection always YES
 
@@ -192,21 +192,21 @@ static NSString * kCommandKeyAuthRightDesc    = @"authRightDescription";
 
 This means that at the end of this process, the permissions declared inside `commandInfo` will be stored in `/var/db/auth.db`. Note how there you can find for **each method** that will r**equire authentication**,  **permission name** and the **`kCommandKeyAuthRightDefault`**. The later one **indicates who can get this right**.
 
-There are different scopes to indicate who can access a right. They are defined in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity\_authorization/lib/AuthorizationDB.h), but as summary:
+There are different scopes to indicate who can access a right. Some of them are defined in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity\_authorization/lib/AuthorizationDB.h) (you can find [all of them in here](https://www.dssw.co.uk/reference/authorization-rights/)), but as summary:
 
-| Name                                        | Value                      | Description                                       |
-| ------------------------------------------- | -------------------------- | ------------------------------------------------- |
-| kAuthorizationRuleClassAllow                | allow                      | Anyone                                            |
-| kAuthorizationRuleClassDeny                 | deny                       | Nobody                                            |
-| kAuthorizationRuleIsAdmin                   | is-admin                   | Current user needs to be an admin                 |
-| kAuthorizationRuleAuthenticateAsSessionUser | authenticate-session-owner | Ask user to authenticate.                         |
-| kAuthorizationRuleAuthenticateAsAdmin       | authenticate-admin         | Ask user to authenticate. He needs to be an admin |
-| kAuthorizationRightRule                     | rule                       | Specify rules                                     |
-| kAuthorizationComment                       | comment                    | Specify some extra comments on the right          |
+| Name                                        | Value                      | Description                                                            |
+| ------------------------------------------- | -------------------------- | ---------------------------------------------------------------------- |
+| kAuthorizationRuleClassAllow                | allow                      | Anyone                                                                 |
+| kAuthorizationRuleClassDeny                 | deny                       | Nobody                                                                 |
+| kAuthorizationRuleIsAdmin                   | is-admin                   | Current user needs to be an admin (inside admin group)                 |
+| kAuthorizationRuleAuthenticateAsSessionUser | authenticate-session-owner | Ask user to authenticate.                                              |
+| kAuthorizationRuleAuthenticateAsAdmin       | authenticate-admin         | Ask user to authenticate. He needs to be an admin (inside admin group) |
+| kAuthorizationRightRule                     | rule                       | Specify rules                                                          |
+| kAuthorizationComment                       | comment                    | Specify some extra comments on the right                               |
 
 ### Rights Verification
 
-In `HelperTool/HelperTool.m` the function `readLicenseKeyAuthorization` checks if the caller is authorized to **execute such method** calling the function **`checkAuthorization`**. This function will check the **authData** sent by the calling process has a **correct format** and then will check **what is needed to get the right** to call the specific method. If all goes good the **returned `error` will be `nil`**:
+In `HelperTool/HelperTool.m` the function **`readLicenseKeyAuthorization`** checks if the caller is authorized to **execute such method** calling the function **`checkAuthorization`**. This function will check the **authData** sent by the calling process has a **correct format** and then will check **what is needed to get the right** to call the specific method. If all goes good the **returned `error` will be `nil`**:
 
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
@@ -256,9 +256,25 @@ In `HelperTool/HelperTool.m` the function `readLicenseKeyAuthorization` checks i
 }
 ```
 
-Note that to **check the requirements to get the right** to call that method the function `authorizationRightForCommand` will just check the previously comment object **`commandInfo`**.
+Note that to **check the requirements to get the right** to call that method the function `authorizationRightForCommand` will just check the previously comment object **`commandInfo`**. Then, it will call **`AuthorizationCopyRights`** to check **if it has the rights** to call the function (note that the flags allow interaction with the user).
 
 In this case, to call the function `readLicenseKeyAuthorization` the `kCommandKeyAuthRightDefault` is defined to `@kAuthorizationRuleClassAllow`. So **anyone can call it**.
+
+### DB Information
+
+It was mentioned that this information is stored in `/var/db/auth.db`. You can list all the stored rules with:
+
+```sql
+sudo sqlite3 /var/db/auth.db
+SELECT name FROM rules;
+SELECT name FROM rules WHERE name LIKE '%safari%';
+```
+
+Then, you can read who can access the right with:
+
+```bash
+security authorizationdb read com.apple.safaridriver.allow
+```
 
 <details>
 
