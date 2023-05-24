@@ -144,6 +144,7 @@
     * [macOS Bundles](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-bundles.md)
     * [macOS IPC - Inter Process Communication](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc-inter-process-communication/README.md)
       * [macOS XPC Connecting Process Check](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc-inter-process-communication/macos-xpc-connecting-process-check.md)
+      * [macOS PID Reuse](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc-inter-process-communication/macos-pid-reuse.md)
       * [macOS XPC Authorization](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc-inter-process-communication/macos-xpc-authorization.md)
     * [macOS Function Hooking](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-function-hooking.md)
     * [Universal binaries & Mach-O Format](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/universal-binaries-and-mach-o-format.md)

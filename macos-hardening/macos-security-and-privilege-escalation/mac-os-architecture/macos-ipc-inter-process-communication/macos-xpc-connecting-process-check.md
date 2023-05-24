@@ -27,6 +27,12 @@ When a connection is stablished to an XPC service, the server will check if the 
 6. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents PID reuse attacks.
    * Developers rarely use the audit token API call since it’s **private**, so Apple could **change** at any time. Additionally, private API usage is not allowed in Mac App Store apps.
 
+For more information about the PID reuse attack check:
+
+{% content-ref url="macos-pid-reuse.md" %}
+[macos-pid-reuse.md](macos-pid-reuse.md)
+{% endcontent-ref %}
+
 ### Code Examples
 
 The server will implement this **verification** in a function called **`shouldAcceptNewConnection`**.

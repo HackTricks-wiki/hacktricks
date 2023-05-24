@@ -194,15 +194,7 @@ This means that at the end of this process, the permissions declared inside `com
 
 There are different scopes to indicate who can access a right. Some of them are defined in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity\_authorization/lib/AuthorizationDB.h) (you can find [all of them in here](https://www.dssw.co.uk/reference/authorization-rights/)), but as summary:
 
-| Name                                        | Value                      | Description                                                            |
-| ------------------------------------------- | -------------------------- | ---------------------------------------------------------------------- |
-| kAuthorizationRuleClassAllow                | allow                      | Anyone                                                                 |
-| kAuthorizationRuleClassDeny                 | deny                       | Nobody                                                                 |
-| kAuthorizationRuleIsAdmin                   | is-admin                   | Current user needs to be an admin (inside admin group)                 |
-| kAuthorizationRuleAuthenticateAsSessionUser | authenticate-session-owner | Ask user to authenticate.                                              |
-| kAuthorizationRuleAuthenticateAsAdmin       | authenticate-admin         | Ask user to authenticate. He needs to be an admin (inside admin group) |
-| kAuthorizationRightRule                     | rule                       | Specify rules                                                          |
-| kAuthorizationComment                       | comment                    | Specify some extra comments on the right                               |
+<table><thead><tr><th width="284.3333333333333">Name</th><th width="165">Value</th><th>Description</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Anyone</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Nobody</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Current user needs to be an admin (inside admin group)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Ask user to authenticate.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Ask user to authenticate. He needs to be an admin (inside admin group)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Specify rules</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Specify some extra comments on the right</td></tr></tbody></table>
 
 ### Rights Verification
 
