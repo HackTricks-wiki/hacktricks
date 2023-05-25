@@ -382,11 +382,100 @@ Here you can find examples of how some **malwares have been able to bypass this 
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
-### Seatbelt Sandbox
+### Sandbox
 
-MacOS Sandbox works with the kernel extension Seatbelt. It makes applications run inside the sandbox **need to request access to resources outside of the limited sandbox**. This helps to ensure that **the application will be accessing only expected resources** and if it wants to access anything else it will need to ask for permissions to the user.
+MacOS Sandbox (initially called Seatbelt) makes applications run inside the sandbox **need to request access to resources outside of the limited sandbox**. This helps to ensure that **the application will be accessing only expected resources** and if it wants to access anything else it will need to ask for permissions to the user.
 
-Important **system services** also run inside their own custom **sandbox** such as the mdnsresponder service. You can view these custom **sandbox profiles** inside the **`/usr/share/sandbox`** directory. Other sandbox profiles can be checked in [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
+Any app with the **entitlement** `com.apple.security.app-sandbox` will be executed inside the sandbox. In order to publish inside the App Store, **this entitlement is mandatory**. So most applications will be executed inside the sandbox.
+
+Some important components of the Sandbox are:
+
+* The **kernel extension** `/System/Library/Extensions/Sandbox.kext`
+* The **private framework** `/System/Library/PrivateFrameworks/AppSandbox.framework`
+* A **daemon** running in userland `/usr/libexec/sandboxd`
+* The **containers** `~/Library/Containers`
+
+Inside the containers folder you can find **a folder for each app executed sanboxed** with the name of the bundle id:
+
+```bash
+ls -l ~/Library/Containers
+total 0
+drwx------@ 4 username  staff  128 May 23 20:20 com.apple.AMPArtworkAgent
+drwx------@ 4 username  staff  128 May 23 20:13 com.apple.AMPDeviceDiscoveryAgent
+drwx------@ 4 username  staff  128 Mar 24 18:03 com.apple.AVConference.Diagnostic
+drwx------@ 4 username  staff  128 Mar 25 14:14 com.apple.Accessibility-Settings.extension
+drwx------@ 4 username  staff  128 Mar 25 14:10 com.apple.ActionKit.BundledIntentHandler
+[...]
+```
+
+Inside each bundle id folder you can find the **plist** and the **Data directory** of the App:
+
+```bash
+cd /Users/username/Library/Containers/com.apple.Safari
+ls -la
+total 104
+drwx------@   4 username  staff    128 Mar 24 18:08 .
+drwx------  348 username  staff  11136 May 23 20:57 ..
+-rw-r--r--    1 username  staff  50214 Mar 24 18:08 .com.apple.containermanagerd.metadata.plist
+drwx------   13 username  staff    416 Mar 24 18:05 Data
+
+ls -l Data
+total 0
+drwxr-xr-x@  8 username  staff   256 Mar 24 18:08 CloudKit
+lrwxr-xr-x   1 username  staff    19 Mar 24 18:02 Desktop -> ../../../../Desktop
+drwx------   2 username  staff    64 Mar 24 18:02 Documents
+lrwxr-xr-x   1 username  staff    21 Mar 24 18:02 Downloads -> ../../../../Downloads
+drwx------  35 username  staff  1120 Mar 24 18:08 Library
+lrwxr-xr-x   1 username  staff    18 Mar 24 18:02 Movies -> ../../../../Movies
+lrwxr-xr-x   1 username  staff    17 Mar 24 18:02 Music -> ../../../../Music
+lrwxr-xr-x   1 username  staff    20 Mar 24 18:02 Pictures -> ../../../../Pictures
+drwx------   2 username  staff    64 Mar 24 18:02 SystemData
+drwx------   2 username  staff    64 Mar 24 18:02 tmp
+```
+
+{% hint style="danger" %}
+Note that even if the symlinks are there to "escape" from the Sandbox and access other folders, the App still needs to **have permissions** to access them. These permissions are inside the **`.plist`**.
+{% endhint %}
+
+```bash
+# Get permissions
+plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
+
+# In this file you can find the entitlements:
+<key>Entitlements</key>
+	<dict>
+		<key>com.apple.MobileAsset.PhishingImageClassifier2</key>
+		<true/>
+		<key>com.apple.accounts.appleaccount.fullaccess</key>
+		<true/>
+		<key>com.apple.appattest.spi</key>
+		<true/>
+[...]
+
+# Some parameters
+<key>Parameters</key>
+	<dict>
+		<key>_HOME</key>
+		<string>/Users/username</string>
+		<key>_UID</key>
+		<string>501</string>
+		<key>_USER</key>
+		<string>username</string>
+[...]
+
+# The paths it can access
+<key>RedirectablePaths</key>
+	<array>
+		<string>/Users/username/Downloads</string>
+		<string>/Users/username/Documents</string>
+		<string>/Users/username/Library/Calendars</string>
+		<string>/Users/username/Desktop</string>
+[...]
+```
+
+
+
+Important **system services** also run inside their own custom **sandbox** such as the mdnsresponder service. You can view these custom **sandbox profiles** written in a language called Sandbox Profile Language (SBPL) inside the **`/usr/share/sandbox`** directory. Other sandbox profiles can be checked in [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
 
 To start an application with a sandbox config you can use:
 

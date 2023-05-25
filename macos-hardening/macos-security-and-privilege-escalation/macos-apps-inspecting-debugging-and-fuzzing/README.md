@@ -132,7 +132,7 @@ In the left panel of hopper it's possible to see the symbols (**Labels**) of the
 
 In the middle panel you can see the **dissasembled code**. And you can see it a **raw** disassemble, as **graph**, as **decompiled** and as **binary** by clicking on the respective icon:
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
 
 Right clicking in a code object you can see **references to/from that object** or even change its name (this doesn't work in decompiled pseudocode):
 
