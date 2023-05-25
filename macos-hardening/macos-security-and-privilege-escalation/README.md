@@ -480,7 +480,8 @@ Important **system services** also run inside their own custom **sandbox** such 
 To start an application with a sandbox config you can use:
 
 ```bash
-sandbox-exec -f example.sb /Path/To/The/Application
+# Use -t to rtace the execution
+sandbox-exec [-t] -f example.sb /Path/To/The/Application
 ```
 
 {% hint style="info" %}

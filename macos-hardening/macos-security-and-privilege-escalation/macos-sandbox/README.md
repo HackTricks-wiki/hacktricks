@@ -26,7 +26,18 @@ Processes are automatically Sandboxed from userland when they start if they have
 [macos-sandbox-debug-and-bypass.md](macos-sandbox-debug-and-bypass.md)
 {% endcontent-ref %}
 
+### **Check PID Privileges**
 
+[According to this](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s), the **`sandbox_check`** (it's a `__mac_syscall`), can check **if an operation is allowed or not** by the sandbox in a certain PID.
+
+The [**tool sbtool**](http://newosxbook.com/src.jl?tree=listings\&file=sbtool.c) can check if a PID can perform a certain action:
+
+```bash
+sbtool <pid> mach #Check mac-ports (got from launchd with an api)
+sbtool <pid> file /tmp #Check file access
+sbtool <pid> inspect #Gives you an explaination of the sandbox profile
+sbtool <pid> all
+```
 
 <details>
 
