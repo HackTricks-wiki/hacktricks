@@ -18,8 +18,6 @@ When a macOS **XPC service** is checking the called process based on the **PID**
 
 This function will make the **allowed binary own the PID** but the **malicious XPC message would have been sent** just before. So, if the **XPC** service **use** the **PID** to **authenticate** the sender and checks it **AFTER** the execution of **`posix_spawn`**, it will think it comes from an **authorized** process.
 
-
-
 ### Exploit example
 
 If you find the function **`shouldAcceptNewConnection`** or a function called by it **calling** **`processIdentifier`** and not calling **`auditToken`**. It highly probable means that it's v**erifying the process PID** and not the audit token.\
@@ -150,8 +148,7 @@ int main(int argc, const char * argv[]) {
 ## Refereces
 
 * [https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
-
-
+* [https://saelo.github.io/presentations/warcon18\_dont\_trust\_the\_pid.pdf](https://saelo.github.io/presentations/warcon18\_dont\_trust\_the\_pid.pdf)
 
 <details>
 

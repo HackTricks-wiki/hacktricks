@@ -26,7 +26,7 @@ Here you will find the **typical flow** that **you should follow when pentesting
 
 ### [STM Cyber](https://www.stmcyber.com)
 
-![](<.gitbook/assets/image (642) (1) (1) (1).png>)
+![](<.gitbook/assets/image (638) (2) (1).png>)
 
 [**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentesting, Red teams and training.
 
