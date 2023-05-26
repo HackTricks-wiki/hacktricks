@@ -346,6 +346,16 @@ Apple issues the **updates for XProtect and MRT automatically** based on the lat
 
 From a user’s perspective, they see TCC in action **when an application wants access to one of the features protected by TCC**. When this happens the user is prompted with a dialog asking them whether they want to allow access or not. This response is then stored in the TCC database.
 
+Permissions are **inherited from the parent** application and the **permissions** are **tracked** based on the **Bundle ID** and the **Developer ID**.
+
+In the entitlements of the daemon it's possible to see that only the **notification center UI** is the one that can make **changes in the TCC database**:
+
+{% code overflow="wrap" %}
+```bash
+codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
+```
+{% endcode %}
+
 ![An example of a TCC prompt](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
 Check some of the **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
@@ -372,7 +382,7 @@ Unprotected directories:
 * $HOME/.ssh, $HOME/.aws, etc
 * /tmp
 
-#### Bypasses
+#### SSH Bypass
 
 By default an access via **SSH** will have **"Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):
 
@@ -382,11 +392,23 @@ Here you can find examples of how some **malwares have been able to bypass this 
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
+#### Electron Bypass
+
+The JS code of an Electron App is not signed, so an attacker could move the app to a writable location, inject malicious JS code and launch that app and abuse the TCC permissions.
+
+Electron is working on **`ElectronAsarIntegrity`** key in Info.plist that will contain a hash of the app.asar file to check the integrity of the JS code before executing it.
+
+#### Code Injection Bypass
+
+I you manage to **inject code in a process** you will be able to abuse the TCC permissions of that process.
+
 ### Sandbox
 
 MacOS Sandbox (initially called Seatbelt) makes applications run inside the sandbox **need to request access to resources outside of the limited sandbox**. This helps to ensure that **the application will be accessing only expected resources** and if it wants to access anything else it will need to ask for permissions to the user.
 
-Any app with the **entitlement** `com.apple.security.app-sandbox` will be executed inside the sandbox. In order to publish inside the App Store, **this entitlement is mandatory**. So most applications will be executed inside the sandbox.
+Any app with the **entitlement** `com.apple.security.app-sandbox` will be executed inside the sandbox. **Apple binaries** are usually executed inside a Sanbox and in order to publish inside the **App Store**, **this entitlement is mandatory**. So most applications will be executed inside the sandbox.
+
+In order to control what a process can or cannot do the **Sandbox has hooks** in all **syscalls** across the kernel. **Depending** on the **entitlements** of the app the Sandbox will **allow** certain actions.
 
 Some important components of the Sandbox are:
 
@@ -477,6 +499,10 @@ plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 
 Important **system services** also run inside their own custom **sandbox** such as the mdnsresponder service. You can view these custom **sandbox profiles** written in a language called Sandbox Profile Language (SBPL) inside the **`/usr/share/sandbox`** directory. Other sandbox profiles can be checked in [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
 
+**App Store** apps use the fixed **Mac App Sandbox profile**.
+
+SIP is a Sandbox profile called platform\_profile in /System/Library/Sandbox/rootless.conf
+
 To start an application with a sandbox config you can use:
 
 ```bash
@@ -560,6 +586,8 @@ For more **information about SIP** read the following response: [https://apple.s
 This post about a **SIP bypass vulnerability** is also very interesting: [https://www.microsoft.com/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/](https://www.microsoft.com/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)
 
 **More bypasses** in [https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
+
+The entitlement **`com.apple.rootless.install.heritable`** allows to **write** in **SIP** **protected** locations.
 
 ### Apple Binary Signatures
 
@@ -1208,6 +1236,7 @@ In the function **`processRestricted`** the reason of the restriction is set. Ch
   * Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
 * If the lib is signed with a different certificate as the binary
   * If the lib & the bin are signed with the same cert, this will bypass the previous restrictions
+* Programs with the entitlements **`system.install.apple-software`** and **`system.install.apple-software.standar-user`** can **install software** signed by Apple without asking the user for a password (privesc)
 
 In more updated versions you can find this logic at the second part of the function **`configureProcessRestrictions`.** However, what is executed in newer versions is the **beginning checks of the function** (you can remove the ifs related to iOS or simulation as those won't be used in macOS.
 {% endhint %}
@@ -1591,6 +1620,7 @@ sudo killall -HUP mDNSResponder
 * [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 * [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
 * [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
+* [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
 <figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
