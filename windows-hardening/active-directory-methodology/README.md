@@ -598,10 +598,12 @@ The Configuration NC is the primary repository for configuration information for
 
 It is possible to compromise the root domain in various ways. Examples:
 
-* [Link GPO to to root DC site](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research)
+* [Link GPO to root DC site](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research)
 * [Compromise gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
 * [Schema attack](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)
-* Exploit ADCS - Create/modify certificate template to allow authentication as any user (e.g. Enterprise Admins)
+* Exploit ADCS 
+  * AD forest with existing ADCS: [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c)
+  * AD forest without existing ADCS: [Escalating from child domain’s admins to enterprise admins in 5 minutes by abusing AD CS, a follow up](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/)
 
 ### External Forest Domain - One-Way (Inbound) or bidirectional
 
