@@ -495,11 +495,37 @@ plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 [...]
 ```
 
+### Sandbox Profiles
 
+The Sandbox profiles are configuration files that indicates what is going to be **allowed/forbidden** in that **Sandbox**. It uses the **Sandbox Profile Language (SBPL)**, which uses the [**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\)) programming language.
+
+Here you can find an example:
+
+```scheme
+(version 1) ; First you get the version
+
+(deny default) ; Then you shuold indicate the default action when no rule applies
+
+(allow network*) ; You can use wildcards and allow everything
+
+(allow file-read* ; You can specify where to apply the rule
+    (subpath "/Users/username/")
+    (literal "/tmp/afile")
+    (regex #"^/private/etc/.*")
+)
+
+(allow mach-lookup
+    (global-name "com.apple.analyticsd")
+)
+```
+
+{% hint style="success" %}
+Check this [**research**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **to check more actions that could be allowed or denied.**
+{% endhint %}
 
 Important **system services** also run inside their own custom **sandbox** such as the mdnsresponder service. You can view these custom **sandbox profiles** written in a language called Sandbox Profile Language (SBPL) inside the **`/usr/share/sandbox`** and **`/System/Library/Sandbox/Profiles`** directories. Other sandbox profiles can be checked in [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
 
-[Research about the](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **which actions** and how they can be **forbidden** by the macOS Sandbox using SBPL.
+
 
 **App Store** apps use the fixed **Mac App Sandbox profile**.
 
