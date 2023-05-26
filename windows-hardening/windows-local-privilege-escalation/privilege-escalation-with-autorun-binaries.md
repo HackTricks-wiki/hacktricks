@@ -14,7 +14,7 @@
 
 <img src="../../.gitbook/assets/image (1) (1) (1) (1).png" alt="" data-size="original">
 
-If you are interested in **hacking carer** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -353,7 +353,7 @@ Find more Autoruns like registries in [https://www.microsoftpressstore.com/artic
 
 <img src="../../.gitbook/assets/image (1) (1) (1) (1).png" alt="" data-size="original">
 
-If you are interested in **hacking carer** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
