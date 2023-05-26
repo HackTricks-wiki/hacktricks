@@ -23,7 +23,13 @@ The compiler will link `/usr/lib/libSystem.B.dylib` to the binary.
 Then, **`libSystem.B`** will be calling other several functions until the **`xpc_pipe_routine`** sends the entitlements of the app to **`securityd`**. Securityd checks if the process should be quarantine inside the Sandbox, and if so, it will be quarentine.\
 Finally, the sandbox will be activated will a call to **`__sandbox_ms`** which will call **`__mac_syscall`**.
 
-### Sanbox load debug & bypass
+## Possible Bypasses
+
+### Run binary without Sandbox
+
+If you run a binary that won't be sandboxed from a sandboxed binary, it will **run within the sandbox of the parent process**.
+
+### Debug & bypass Sandbox with lldb
 
 Let's compile an application that should be sandboxed:
 
@@ -265,6 +271,12 @@ Note that **even shellcodes** in ARM64 needs to be linked in `libSystem.dylib`:
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
+
+### Abusing Write & Execute
+
+If a sandboxed process can **write** in a place where **later an unsandboxed application is going to run the binary**, it will be able to **escape just by placing** there the binary. A good example of this kind of locations are `~/Library/LaunchAgents` or `/System/Library/LaunchDaemons`.
+
+For this you might even need **2 steps**: To make a process with a **more permissive sandbox** (`file-read*`, `file-write*`) to execute your code which will actually write in a place where it will be **executed unsandboxed**.
 
 ## References
 
