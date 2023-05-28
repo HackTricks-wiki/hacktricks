@@ -176,7 +176,7 @@ In the header first you find the **segment header**:
 
 Example of segment header:
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (2).png" alt=""><figcaption></figcaption></figure>
 
 This header defines the **number of sections whose headers appear after** it:
 

