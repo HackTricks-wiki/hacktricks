@@ -344,63 +344,9 @@ Apple issues the **updates for XProtect and MRT automatically** based on the lat
 
 **TCC (Transparency, Consent, and Control)** is a mechanism in macOS to **limit and control application access to certain features**, usually from a privacy perspective. This can include things such as location services, contacts, photos, microphone, camera, accessibility, full disk access, and a bunch more.
 
-From a user’s perspective, they see TCC in action **when an application wants access to one of the features protected by TCC**. When this happens the user is prompted with a dialog asking them whether they want to allow access or not. This response is then stored in the TCC database.
-
-Permissions are **inherited from the parent** application and the **permissions** are **tracked** based on the **Bundle ID** and the **Developer ID**.
-
-In the entitlements of the daemon it's possible to see that only the **notification center UI** is the one that can make **changes in the TCC database**:
-
-{% code overflow="wrap" %}
-```bash
-codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/Support/tccd
-```
-{% endcode %}
-
-![An example of a TCC prompt](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
-
-Check some of the **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
-
-The TCC database is just a **sqlite3 database**, which makes the task of investigating it much simpler. There are two different databases, a global one in `/Library/Application Support/com.apple.TCC/TCC.db` and a per-user one located in `/Users/<username>/Library/Application Support/com.apple.TCC/TCC.db`. The first database is **protected from editing with SIP**(System Integrity Protection), but you can read them by granting terminal(or your editor) **full disk access**.
-
-This information was [taken from here](https://rainforest.engineering/2021-02-09-macos-tcc/) (read the **original source for more information**).
-
-{% hint style="info" %}
-Some TCC permissions are: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... However, there is no public list that defines all of them.
-{% endhint %}
-
-Some protected directories:
-
-* $HOME/Desktop
-* $HOME/Documents
-* $HOME/Downloads
-* iCloud Drive
-* ...
-
-Unprotected directories:
-
-* $HOME (itself)
-* $HOME/.ssh, $HOME/.aws, etc
-* /tmp
-
-#### SSH Bypass
-
-By default an access via **SSH** will have **"Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):
-
-![](<../../.gitbook/assets/image (569).png>)
-
-Here you can find examples of how some **malwares have been able to bypass this protection**:
-
-* [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
-
-#### Electron Bypass
-
-The JS code of an Electron App is not signed, so an attacker could move the app to a writable location, inject malicious JS code and launch that app and abuse the TCC permissions.
-
-Electron is working on **`ElectronAsarIntegrity`** key in Info.plist that will contain a hash of the app.asar file to check the integrity of the JS code before executing it.
-
-#### Code Injection Bypass
-
-I you manage to **inject code in a process** you will be able to abuse the TCC permissions of that process.
+{% content-ref url="macos-tcc.md" %}
+[macos-tcc.md](macos-tcc.md)
+{% endcontent-ref %}
 
 ### Sandbox
 
