@@ -235,6 +235,22 @@ sbtool <pid> inspect #Gives you an explaination of the sandbox profile
 sbtool <pid> all
 ```
 
+### Custom SBPL in App Store apps
+
+It could be possible for companies to make their apps run **with custom Sandbox profiles** (instead of with the default one). They need to use the entitlement **`com.apple.security.temporary-exception.sbpl`** which needs to be authorized by Apple.
+
+It's possible to check the definition of this entitlement in **`/System/Library/Sandbox/Profiles/application.sb:`**
+
+```scheme
+(sandbox-array-entitlement
+  "com.apple.security.temporary-exception.sbpl"
+  (lambda (string)
+    (let* ((port (open-input-string string)) (sbpl (read port)))
+      (with-transparent-redirection (eval sbpl)))))
+```
+
+This will **eval the string after this entitlement** as an Sandbox profile.
+
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
