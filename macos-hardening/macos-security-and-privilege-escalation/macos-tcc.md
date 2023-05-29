@@ -279,7 +279,7 @@ An app with the **`kTCCServiceAppleEvents`** permission will be able to **contro
 
 For example, if an App has **Automation permission over `iTerm`**, for example in this example **`Terminal`** has access over iTerm:
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (2).png" alt=""><figcaption></figcaption></figure>
 
 #### Over iTerm
 
