@@ -32,6 +32,42 @@ First of all, please note that **most of the tricks about privilege escalation a
 
 ## Basic MacOS
 
+### Special File Permissions
+
+#### Folder permissions
+
+In a **folder**, **read** allows to **list it**, **write** allows to **delete** and **write** files on it, and **execute** allows to **traverse** the directory. So, for example, a user with **read permission over a file** inside a directory where he **doesn't have execute** permission **won't be able to read** the file.
+
+#### Flag modifiers
+
+There are some flags that could be set in the files that will make file behave differently. You can **check the flags** of the files inside a directory with `ls -lO /path/directory`
+
+* **`uchg`**: Known as **uchange** flag will **prevent any action** changing or deleting the **file**. To set it do: `chflags uchg file.txt`
+  * The root user could **remove the flag** and modify the file
+* **`restricted`**: This flag makes the file be **protected by SIP** (you cannot add this flag to a file).
+* **`Sticky bit`**: If a directory with sticky bit, **only** the **directories owner or root can remane or delete** files. Typically this is set on the /tmp directory to prevent ordinary users from deleting or moving other users’ files.
+
+#### ACLs
+
+File **ACLs** contain **ACE** (Access Control Entries) where more **granular permissions** can be assigned to different users.
+
+It's possible to grant a **directory** these permissions: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
+Ans to a **file**: `read`, `write`, `append`, `execute`.
+
+You can see the ACLs of file with `ls -le`: **`ls -le ~/Library`**
+
+#### Privilege Escalation via File permissions
+
+If a **process running as root writes** a file that can be controlled by a user, the user could abuse this to **escalate privileges**.\
+This could occur in the following situations:
+
+* File used was already created by a user (owned by the user)
+* File used is writable by the user because of a group
+* File used is inside a directory owned by the user (the user could create the file)
+* File used is inside a directory owned by root but user has write access over it because of a group (the user could create the file)
+
+Being able to **create a file** that is going to be **used by root**, allows a user to **take advantage of its content** or even create **symlinks/hardlinks** to point it to another place.
+
 ### OS X Specific Extensions
 
 * **`.dmg`**: Apple Disk Image files are very frequent for installers.
