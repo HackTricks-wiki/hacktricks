@@ -107,7 +107,7 @@ In addition to the above WebSec is also a **committed supporter of HackTricks.**
 
 {% embed url="https://www.syncubes.com/" %}
 
-### HACK THE BOX
+### [HACK THE BOX](https://www.hackthebox.com/)
 
 <figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
