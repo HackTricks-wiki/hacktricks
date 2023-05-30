@@ -109,7 +109,7 @@ In addition to the above WebSec is also a **committed supporter of HackTricks.**
 
 ### [HACK THE BOX](https://www.hackthebox.com/)
 
-<figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (2) (2).png" alt=""><figcaption></figcaption></figure>
 
 Hack The Box is an online platform designed to facilitate **learning and advancement in the field of cybersecurity**. Providing an array of real-life scenarios in a safe and controlled environment, Hack The Box allows users to test and grow their skills in penetration testing and ethical hacking.
 
