@@ -32,250 +32,44 @@ First of all, please note that **most of the tricks about privilege escalation a
 
 ## Basic MacOS
 
-### Special File Permissions
+If you are not familiar with macOS, you should start learning the basics of macOS:&#x20;
 
-#### Folder permissions
+* Special macOS **files & permissions:**
 
-In a **folder**, **read** allows to **list it**, **write** allows to **delete** and **write** files on it, and **execute** allows to **traverse** the directory. So, for example, a user with **read permission over a file** inside a directory where he **doesn't have execute** permission **won't be able to read** the file.
-
-#### Flag modifiers
-
-There are some flags that could be set in the files that will make file behave differently. You can **check the flags** of the files inside a directory with `ls -lO /path/directory`
-
-* **`uchg`**: Known as **uchange** flag will **prevent any action** changing or deleting the **file**. To set it do: `chflags uchg file.txt`
-  * The root user could **remove the flag** and modify the file
-* **`restricted`**: This flag makes the file be **protected by SIP** (you cannot add this flag to a file).
-* **`Sticky bit`**: If a directory with sticky bit, **only** the **directories owner or root can remane or delete** files. Typically this is set on the /tmp directory to prevent ordinary users from deleting or moving other users’ files.
-
-#### ACLs
-
-File **ACLs** contain **ACE** (Access Control Entries) where more **granular permissions** can be assigned to different users.
-
-It's possible to grant a **directory** these permissions: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
-Ans to a **file**: `read`, `write`, `append`, `execute`.
-
-You can see the ACLs of file with `ls -le`: **`ls -le ~/Library`**
-
-#### Privilege Escalation via File permissions
-
-If a **process running as root writes** a file that can be controlled by a user, the user could abuse this to **escalate privileges**.\
-This could occur in the following situations:
-
-* File used was already created by a user (owned by the user)
-* File used is writable by the user because of a group
-* File used is inside a directory owned by the user (the user could create the file)
-* File used is inside a directory owned by root but user has write access over it because of a group (the user could create the file)
-
-Being able to **create a file** that is going to be **used by root**, allows a user to **take advantage of its content** or even create **symlinks/hardlinks** to point it to another place.
-
-### OS X Specific Extensions
-
-* **`.dmg`**: Apple Disk Image files are very frequent for installers.
-* **`.kext`**: It must follow a specific structure and it's the OS X version of a driver.
-* **`.plist`**: Also known as property list stores information in XML or binary format.
-  * Can be XML or binary. Binary ones can be read with:
-    * `defaults read config.plist`
-    * `/usr/libexec/PlistBuddy -c print config.plsit`
-    * `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
-    * `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
-    * `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
-* **`.app`**: Apple applications that follows directory structure.
-* **`.dylib`**: Dynamic libraries (like Windows DLL files)
-* **`.pkg`**: Are the same as xar (eXtensible Archive format). The installer command can be use to install the contents of these files.
-
-### File hierarchy layout
-
-* **/Applications**: The installed apps should be here. All the users will be able to access them.
-* **/bin**: Command line binaries
-* **/cores**: If exists, it's used to store core dumps
-* **/dev**: Everything is treated as a file so you may see hardware devices stored here.
-* **/etc**: Configuration files
-* **/Library**: A lot of subdirectories and files related to preferences, caches and logs can be found here. A Library folder exists in root and on each user's directory.
-* **/private**: Undocumented but a lot of the mentioned folders are symbolic links to the private directory.
-* **/sbin**: Essential system binaries (related to administration)
-* **/System**: File fo making OS X run. You should find mostly only Apple specific files here (not third party).
-* **/tmp**: Files are deleted after 3 days (it's a soft link to /private/tmp)
-* **/Users**: Home directory for users.
-* **/usr**: Config and system binaries
-* **/var**: Log files
-* **/Volumes**: The mounted drives will apear here.
-* **/.vol**: Running `stat a.txt` you obtain something like `16777223 7545753 -rw-r--r-- 1 username wheel ...` where the first number is the id number of the volume where the file exists and the second one is the inode number. You can access the content of this file through /.vol/ with that information running `cat /.vol/16777223/7545753`
-
-### Applications Folders
-
-* **System applications** are located under `/System/Applications`
-* **Installed** applications are usually installed in `/Applications` or in `~/Applications`
-* **Application data** can be found in `/Library/Application Support` for the applications running as root and `~/Library/Application Support` for applications running as the user.
-* Third-party applications **daemons** that **need to run as root** as usually located in `/Library/PrivilegedHelperTools/`
-* **Sandboxed** apps are mapped into the `~/Library/Containers` folder. Each app has a folder named according to the application’s bundle ID (`com.apple.Safari`).
-* The **kernel** is located in `/System/Library/Kernels/kernel`
-* **Apple's kernel extensions** are located in `/System/Library/Extensions`
-* **Third-party kernel extensions** are stored in `/Library/Extensions`
-
-### Firmlinks
-
-The `Data` volume is mounted in **`/System/Volumes/Data`** (you can check this with `diskutil apfs list`).
-
-The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
-
-```bash
-cat /usr/share/firmlinks
-/AppleInternal	AppleInternal
-/Applications	Applications
-/Library	Library
-[...]
-```
-
-On the **left**, there is the directory path on the **System volume**, and on the **right**, the directory path where it maps on the **Data volume**. So, `/library` --> `/system/Volumes/data/library`
-
-### Special MacOS files and folders
-
-* **`.DS_Store`**: This file is on each directory, it saves the attributes and customisations of the directory.
-* **`.Spotlight-V100`**: This folder appears on the root directory of every volume on the system.
-* **`.metadata_never_index`**: If this file is at the root of a volume Spotlight won't index that volume.
-* **`<name>.noindex`**: Files and folder with this extension won't be indexed by Spotlight.
-* **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contains information about downloaded files, like the URL from where they were downloaded.
-* **`/var/log/system.log`**: Main log of OSX systems. com.apple.syslogd.plist is responsible for the execution of syslogging (you can check if it's disabled looking for "com.apple.syslogd" in `launchctl list`.
-* **`/private/var/log/asl/*.asl`**: These are the Apple System Logs which may contain interesting information.
-* **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Stores recently accessed files and applications through "Finder".
-* **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Stores items to launch upon system startup
-* **`$HOME/Library/Logs/DiskUtility.log`**: Log file for thee DiskUtility App (info about drives, including USBs)
-* **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Data about wireless access points.
-* **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List of daemons deactivated.
-* **`/private/etc/kcpassword`**: If autologin is enabled this file will contain the users login password XORed with a key.
-
-### macOS Bundles
-
-{% content-ref url="mac-os-architecture/macos-bundles.md" %}
-[macos-bundles.md](mac-os-architecture/macos-bundles.md)
+{% content-ref url="macos-files-folders-and-binaries/" %}
+[macos-files-folders-and-binaries](macos-files-folders-and-binaries/)
 {% endcontent-ref %}
 
-### Common users
+* Common macOS **users**
 
-*   **Daemon**: User reserved for system daemons. The default daemon account names usually start with a "\_":
+{% content-ref url="macos-users.md" %}
+[macos-users.md](macos-users.md)
+{% endcontent-ref %}
 
-    ```bash
-    _amavisd, _analyticsd, _appinstalld, _appleevents, _applepay, _appowner, _appserver, _appstore, _ard, _assetcache, _astris, _atsserver, _avbdeviced, _calendar, _captiveagent, _ces, _clamav, _cmiodalassistants, _coreaudiod, _coremediaiod, _coreml, _ctkd, _cvmsroot, _cvs, _cyrus, _datadetectors, _demod, _devdocs, _devicemgr, _diskimagesiod, _displaypolicyd, _distnote, _dovecot, _dovenull, _dpaudio, _driverkit, _eppc, _findmydevice, _fpsd, _ftp, _fud, _gamecontrollerd, _geod, _hidd, _iconservices, _installassistant, _installcoordinationd, _installer, _jabber, _kadmin_admin, _kadmin_changepw, _knowledgegraphd, _krb_anonymous, _krb_changepw, _krb_kadmin, _krb_kerberos, _krb_krbtgt, _krbfast, _krbtgt, _launchservicesd, _lda, _locationd, _logd, _lp, _mailman, _mbsetupuser, _mcxalr, _mdnsresponder, _mobileasset, _mysql, _nearbyd, _netbios, _netstatistics, _networkd, _nsurlsessiond, _nsurlstoraged, _oahd, _ondemand, _postfix, _postgres, _qtss, _reportmemoryexception, _rmd, _sandbox, _screensaver, _scsd, _securityagent, _softwareupdate, _spotlight, _sshd, _svn, _taskgated, _teamsserver, _timed, _timezone, _tokend, _trustd, _trustevaluationagent, _unknown, _update_sharing, _usbmuxd, _uucp, _warmd, _webauthserver, _windowserver, _www, _wwwproxy, _xserverdocs
-    ```
-* **Guest**: Account for guests with very strict permissions
+* **AppleFS**
 
-{% code overflow="wrap" %}
-```bash
-state=("automaticTime" "afpGuestAccess" "filesystem" "guestAccount" "smbGuestAccess")
-for i in "${state[@]}"; do sysadminctl -"${i}" status; done;
-```
-{% endcode %}
+{% content-ref url="macos-applefs.md" %}
+[macos-applefs.md](macos-applefs.md)
+{% endcontent-ref %}
 
-* **Nobody**: Processes are executed with this user when minimal permissions are required
-* **Root**
-
-### User Privileges
-
-* **Standard User:** The most basic of users. This user needs permissions granted from an admin user when attempting to install software or perform other advanced tasks. They are not able to do it on their own.
-* **Admin User**: A user who operates most of the time as a standard user but is also allowed to perform root actions such as install software and other administrative tasks. All users belonging to the admin group are **given access to root via the sudoers file**.
-* **Root**: Root is a user allowed to perform almost any action (there are limitations imposed by protections like System Integrity Protection).
-  * For example root won't be able to place a file inside `/System`
-
-### **File ACLs**
-
-When the file contains ACLs you will **find a "+" when listing the permissions like in**:
-
-```bash
-ls -ld Movies
-drwx------+   7 username  staff     224 15 Apr 19:42 Movies
-```
-
-You can **read the ACLs** of the file with:
-
-```bash
-ls -lde Movies
-drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
- 0: group:everyone deny delete
-```
-
-You can find **all the files with ACLs** with (this is veeery slow):
-
-```bash
-ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
-```
-
-### Resource Forks or MacOS ADS
-
-This is a way to obtain **Alternate Data Streams in MacOS** machines. You can save content inside an extended attribute called **com.apple.ResourceFork** inside a file by saving it in **file/..namedfork/rsrc**.
-
-```bash
-echo "Hello" > a.txt
-echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
-
-xattr -l a.txt #Read extended attributes
-com.apple.ResourceFork: Hello Mac ADS
-
-ls -l a.txt #The file length is still q
--rw-r--r--@ 1 username  wheel  6 17 Jul 01:15 a.txt
-```
-
-You can **find all the files containing this extended attribute** with:
-
-{% code overflow="wrap" %}
-```bash
-find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
-```
-{% endcode %}
-
-### Risk Files Mac OS
-
-The files `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` contains the risk associated to files depending on the file extension.
-
-The possible categories include the following:
-
-* **LSRiskCategorySafe**: **Totally** **safe**; Safari will auto-open after download
-* **LSRiskCategoryNeutral**: No warning, but **not auto-opened**
-* **LSRiskCategoryUnsafeExecutable**: **Triggers** a **warning** “This file is an application...”
-* **LSRiskCategoryMayContainUnsafeExecutable**: This is for things like archives that contain an executable. It **triggers a warning unless Safari can determine all the contents are safe or neutral**.
-
-### Remote Access Services
-
-You can enable/disable these services in "System Preferences" --> Sharing
-
-* **VNC**, known as “Screen Sharing”
-* **SSH**, called “Remote Login”
-* **Apple Remote Desktop** (ARD), or “Remote Management”
-* **AppleEvent**, known as “Remote Apple Event”
-
-Check if any is enabled running:
-
-```bash
-rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
-scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
-flShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | egrep "\*.88|\*.445|\*.548" | wc -l);
-rLgn=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.22" | wc -l);
-rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
-bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
-printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
-```
-
-### MacOS Architecture
+* The **architecture** of the k**ernel**
 
 {% content-ref url="mac-os-architecture/" %}
 [mac-os-architecture](mac-os-architecture/)
 {% endcontent-ref %}
 
-### MacOS Serial Number
+* Common macOS n**etwork services & protocols**
 
-{% content-ref url="macos-serial-number.md" %}
-[macos-serial-number.md](macos-serial-number.md)
+{% content-ref url="macos-protocols.md" %}
+[macos-protocols.md](macos-protocols.md)
 {% endcontent-ref %}
 
 ### MacOS MDM
 
+In companies **macOS** systems are highly probably going to be **managed with a MDM**. Therefore, from the perspective of an attacker is interesting to know **how that works**:
+
 {% content-ref url="macos-mdm/" %}
 [macos-mdm](macos-mdm/)
-{% endcontent-ref %}
-
-### MacOS Protocols
-
-{% content-ref url="macos-protocols.md" %}
-[macos-protocols.md](macos-protocols.md)
 {% endcontent-ref %}
 
 ### MacOS - Inspecting, Debugging and Fuzzing
@@ -638,6 +432,15 @@ ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
 ```
 
 There you can find the regular **cron** **jobs**, the **at** **jobs** (not very used) and the **periodic** **jobs** (mainly used for cleaning temporary files). The daily periodic jobs can be executed for example with: `periodic daily`.
+
+The periodic scripts (**`/etc/periodic`**) are executed because of the **launch daemons** configured in `/System/Library/LaunchDaemons/com.apple.periodic*`. Note that if a script is stored in `/etc/periodic/` as a way to **escalate privilege**s, it will be **executed** as the **owner of the file**.
+
+```bash
+ls -l /System/Library/LaunchDaemons/com.apple.periodic*
+-rw-r--r--  1 root  wheel  887 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-daily.plist
+-rw-r--r--  1 root  wheel  895 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-monthly.plist
+-rw-r--r--  1 root  wheel  891 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-weekly.plist
+```
 
 ### kext
 
