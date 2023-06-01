@@ -12,6 +12,24 @@
 
 </details>
 
+## Objective-C
+
+{% hint style="danger" %}
+Note that programs written in Objective-C **retain** their class declarations **when** **compiled** into [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Such class declarations **include** the name and type of:
+{% endhint %}
+
+* The class
+* The class methods
+* The class instance variables
+
+You can get this information using [**class-dump**](https://github.com/nygard/class-dump):
+
+```bash
+class-dump Kindle.app
+```
+
+Note that this names could be obfuscated to make the reversing of the binary more difficult.
+
 ## Classes, Methods & Objects
 
 ### Interface, Properties & Methods

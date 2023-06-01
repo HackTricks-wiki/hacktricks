@@ -1,4 +1,4 @@
-# macOS Architecture
+# macOS Kernel
 
 <details>
 
@@ -12,32 +12,32 @@
 
 </details>
 
-## Kernel
+## XNU Kernel
 
-### XNU
+The **core of macOS is XNU**, which stands for "X is Not Unix". This kernel is fundamentally composed of the **Mach microkerne**l (to be discussed later), **and** elements from Berkeley Software Distribution (**BSD**). XNU also provides a platform for **kernel drivers via a system called the I/O Kit**. The XNU kernel is part of the Darwin open source project, which means **its source code is freely accessible**.
 
-The heart of Mac OS X is the **XNU kernel**. XNU is basically composed of a **Mach core** (covered in the next section) with supplementary features provided by Berkeley Software Distribution (**BSD**). Additionally, **XNU** is responsible for providing an **environment for kernel drivers called the I/O Kit**. **XNU is a Darwin package**, so all of the source **code** is **freely available**.
-
-From a security researcher’s perspective, **Mac OS X feels just like a FreeBSD box with a pretty windowing system** and a large number of custom applications. For the most part, applications written for BSD will compile and run without modification on Mac OS X. All the tools you are accustomed to using in BSD are available in Mac OS X. Nevertheless, the fact that the **XNU kernel contains all the Mach code** means that some day, when you have to dig deeper, you’ll find many differences that may cause you problems and some you may be able to leverage for your own purposes.
+From a perspective of a security researcher or a Unix developer, **macOS** can feel quite **similar** to a **FreeBSD** system with an elegant GUI and a host of custom applications. Most applications developed for BSD will compile and run on macOS without needing modifications, as the command-line tools familiar to Unix users are all present in macOS. However, because the XNU kernel incorporates Mach, there are some significant differences between a traditional Unix-like system and macOS, and these differences might cause potential issues or provide unique advantages.
 
 ### Mach
 
-Mach was originated as a UNIX-compatible **operating system** back in 1984. One of its primary design **goals** was to be a **microkernel**; that is, to **minimize** the amount of code running in the **kernel** and allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level** Mach tasks.
+Mach is a **microkernel** designed to be **UNIX-compatible**. One of its key design principles was to **minimize** the amount of **code** running in the **kernel** space and instead allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level tasks**.
 
-**In XNU, Mach is responsible for many of the low-level operations** you expect from a kernel, such as processor scheduling and multitasking and virtual- memory management.
+In XNU, Mach is **responsible for many of the critical low-level operations** a kernel typically handles, such as processor scheduling, multitasking, and virtual memory management.
 
 ### BSD
 
-The **kernel** also involves a large chunk of **code derived from the FreeBSD** code base. This code runs as part of the kernel along with Mach and uses the same address space. The F**reeBSD code within XNU may differ significantly from the original FreeBSD code**, as changes had to be made for it to coexist with Mach. FreeBSD provides many of the remaining operations the kernel needs, including:
+The XNU **kernel** also **incorporates** a significant amount of code derived from the **FreeBSD** project. This code **runs as part of the kernel along with Mach**, in the same address space. However, the FreeBSD code within XNU may differ substantially from the original FreeBSD code because modifications were required to ensure its compatibility with Mach. FreeBSD contributes to many kernel operations including:
 
-* Processes
-* Signals
-* Basic security, such as users and groups
+* Process management
+* Signal handling
+* Basic security mechanisms, including user and group management
 * System call infrastructure
 * TCP/IP stack and sockets
 * Firewall and packet filtering
 
-To get an idea of just how complicated the interaction between these two sets of code can be, consider the idea of the fundamental executing unit. **In BSD the fundamental unit is the process. In Mach it is a Mach thread**. The disparity is settled by each BSD-style process being associated with a Mach task consisting of exactly one Mach thread. When the BSD fork() system call is made, the BSD code in the kernel uses Mach calls to create a task and thread structure. Also, it is important to note that both the Mach and BSD layers have different security models. The **Mach security** model is **based** **on** **port** **rights**, and the **BSD** model is based on **process** **ownership**. Disparities between these two models have resulted in a **number of local privilege-escalation vulnerabilities**. Additionally, besides typical system cells, there are Mach traps that allow user-space programs to communicate with the kernel.
+Understanding the interaction between BSD and Mach can be complex, due to their different conceptual frameworks. For instance, BSD uses processes as its fundamental executing unit, while Mach operates based on threads. This discrepancy is reconciled in XNU by **associating each BSD process with a Mach task** that contains exactly one Mach thread. When BSD's fork() system call is used, the BSD code within the kernel uses Mach functions to create a task and a thread structure.
+
+Moreover, **Mach and BSD each maintain different security models**: **Mach's** security model is based on **port rights**, whereas BSD's security model operates based on **process ownership**. Disparities between these two models have occasionally resulted in local privilege-escalation vulnerabilities. Apart from typical system calls, there are also **Mach traps that allow user-space programs to interact with the kernel**. These different elements together form the multifaceted, hybrid architecture of the macOS kernel.
 
 ### I/O Kit - Drivers
 
@@ -87,70 +87,6 @@ kextunload com.apple.iokit.IOReportFamily
 {% content-ref url="macos-ipc-inter-process-communication/" %}
 [macos-ipc-inter-process-communication](macos-ipc-inter-process-communication/)
 {% endcontent-ref %}
-
-## Apple Propietary File System (APFS)
-
-APFS, or Apple File System, is a modern file system developed by Apple Inc. that was designed to replace the older Hierarchical File System Plus (HFS+) with an emphasis on **improved performance, security, and efficiency**.
-
-Some notable features of APFS include:
-
-1. **Space Sharing**: APFS allows multiple volumes to **share the same underlying free storage** on a single physical device. This enables more efficient space utilization as the volumes can dynamically grow and shrink without the need for manual resizing or repartitioning.
-   1. This means, compared with traditional partitions in file disks, t**hat in APFS different partitions (volumes) shares all the disk space**, while a regular partition usually had a fixed size.
-2. **Snapshots**: APFS supports **creating snapshots**, which are **read-only**, point-in-time instances of the file system. Snapshots enable efficient backups and easy system rollbacks, as they consume minimal additional storage and can be quickly created or reverted.
-3. **Clones**: APFS can **create file or directory clones that share the same storage** as the original until either the clone or the original file is modified. This feature provides an efficient way to create copies of files or directories without duplicating the storage space.
-4. **Encryption**: APFS **natively supports full-disk encryption** as well as per-file and per-directory encryption, enhancing data security across different use cases.
-5. **Crash Protection**: APFS uses a **copy-on-write metadata scheme that ensures file system consistency** even in cases of sudden power loss or system crashes, reducing the risk of data corruption.
-
-Overall, APFS offers a more modern, flexible, and efficient file system for Apple devices, with a focus on improved performance, reliability, and security.
-
-```bash
-diskutil list # Get overview of the APFS volumes
-```
-
-## Applications
-
-A kernel without applications isn’t very useful. **Darwin** is the non-Aqua, **open-source core of Mac OS X**. Basically it is all the parts of Mac OS X for which the **source code is available**. The code is made available in the form of a **package that is easy to install**. There are hundreds of **available Darwin packages**, such as X11, GCC, and other GNU tools. Darwin provides many of the applications you may already use in BSD or Linux for Mac OS X. Apple has spent significant time **integrating these packages into their operating system** so that everything behaves nicely and has a consistent look and feel when possible.
-
-On the **other** hand, many familiar pieces of Mac OS X are **not open source**. The main missing piece to someone running just the Darwin code will be **Aqua**, the **Mac OS X windowing and graphical-interface environment**. Additionally, most of the common **high-level applications**, such as Safari, Mail, QuickTime, iChat, etc., are not open source (although some of their components are open source). Interestingly, these closed-source applications often **rely on open- source software**, for example, Safari relies on the WebKit project for HTML and JavaScript rendering. **For perhaps this reason, you also typically have many more symbols in these applications when debugging than you would in a Windows environment.**
-
-### **Universal binaries &** Mach-o Format
-
-{% content-ref url="universal-binaries-and-mach-o-format.md" %}
-[universal-binaries-and-mach-o-format.md](universal-binaries-and-mach-o-format.md)
-{% endcontent-ref %}
-
-### Bundles
-
-{% content-ref url="macos-bundles.md" %}
-[macos-bundles.md](macos-bundles.md)
-{% endcontent-ref %}
-
-### Objective-C
-
-Programs written in Objective-C **retain** their class declarations **when** **compiled** into (Mach-O) binaries. Such class declarations **include** the name and type of:
-
-* The class
-* The class methods
-* The class instance variables
-
-You can get this information using [**class-dump**](https://github.com/nygard/class-dump):
-
-```bash
-class-dump Kindle.app
-```
-
-Note that this names can be obfuscated to make the reversing of the binary more difficult.
-
-### Native Packages
-
-There are some projects that allow to generate a binary executable by MacOS containing script code which will be executed. Some examples are:
-
-* **Platypus**: Generate MacOS binary executing shell scripts, Python, Perl, Ruby, PHP, Swift, Expect, Tcl, AWK, JavaScript, AppleScript or any other user-specified interpreter.
-  * **It saves the script in `Contents/Resources/script`. So finding this script is a good indicator that Platypus was used.**
-* **PyInstaller:** Python
-  * Ways to detect this is the use of the embedded string **“Py\_SetPythonHome”** or a a **call** into a function named **`pyi_main`.**
-* **Electron:** JavaScript, HTML, and CSS.
-  * These binaries will use **Electron Framework.framework**. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in `.asar` files. These binaries will use Electron Framework.framework. Moreover, the non-binary components (e.g. JavaScript files) maybe found in the application’s **`Contents/Resources/`** directory, achieved in **`.asar` files**. It's possible **unpack** such archives via the **asar** node module, or the **npx** **utility:** `npx asar extract StrongBox.app/Contents/Resources/app.asar appUnpacked`\\
 
 ## References
 

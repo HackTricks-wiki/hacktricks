@@ -1,4 +1,4 @@
-# macOS Kernel Extensions
+# macOS AppleFS
 
 <details>
 
@@ -12,40 +12,40 @@
 
 </details>
 
-## Basic Information
+## Apple Propietary File System (APFS)
 
-Kernel extensions (Kexts) are **bundles** using **`.kext` extension** that are **loaded directly into the kernel space** of macOS, providing additional functionality to the core operating system.
+APFS, or Apple File System, is a modern file system developed by Apple Inc. that was designed to replace the older Hierarchical File System Plus (HFS+) with an emphasis on **improved performance, security, and efficiency**.
 
-### Requirements
+Some notable features of APFS include:
 
-Obviously, this is so powerful, it's complicated to load a kernel extension. These are the requirements of a kernel extension to be loaded:
+1. **Space Sharing**: APFS allows multiple volumes to **share the same underlying free storage** on a single physical device. This enables more efficient space utilization as the volumes can dynamically grow and shrink without the need for manual resizing or repartitioning.
+   1. This means, compared with traditional partitions in file disks, t**hat in APFS different partitions (volumes) shares all the disk space**, while a regular partition usually had a fixed size.
+2. **Snapshots**: APFS supports **creating snapshots**, which are **read-only**, point-in-time instances of the file system. Snapshots enable efficient backups and easy system rollbacks, as they consume minimal additional storage and can be quickly created or reverted.
+3. **Clones**: APFS can **create file or directory clones that share the same storage** as the original until either the clone or the original file is modified. This feature provides an efficient way to create copies of files or directories without duplicating the storage space.
+4. **Encryption**: APFS **natively supports full-disk encryption** as well as per-file and per-directory encryption, enhancing data security across different use cases.
+5. **Crash Protection**: APFS uses a **copy-on-write metadata scheme that ensures file system consistency** even in cases of sudden power loss or system crashes, reducing the risk of data corruption.
 
-* Going into **recovery mode** Kexts need to be **allowed to be loaded**:
+Overall, APFS offers a more modern, flexible, and efficient file system for Apple devices, with a focus on improved performance, reliability, and security.
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+```bash
+diskutil list # Get overview of the APFS volumes
+```
 
-* The Kext must be **signed with a kernel code signing certificate**, which can only be granted by **Apple**. Who will be **reviewing** in detail the **company** and the **reasons** why this is needed.
-* The Kext also needs to be **notarized**, Apple will be able to check it for malware.
-* Then, the **root user** is the one that can load the Kext and the files inside the bundle must belong to root.
-* Finally, once trying to load it, the [**user will be prompted for confirmation**](https://developer.apple.com/library/archive/technotes/tn2459/\_index.html) and if accepted, the computer must **reboot** to load it.
+## Firmlinks
 
-### Loading Process
+The `Data` volume is mounted in **`/System/Volumes/Data`** (you can check this with `diskutil apfs list`).
 
-Back in Catalina it was like this: It's interesting to note that the **verification** process occurs on **userland**. However, only applications with the entitlement **`com.apple.private.security.kext-management`** can **ask the kernel** to **load an extension:** kextcache, kextload, kextutil, kextd, syspolicyd
+The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
 
-1. **`kextutil`** cli **starts** the verification process to load an extension
-   * It'll talk to **`kextd`** sending using a Mach service
-2. **`kextd`** will check several things, such as the signature
-   * It'll talk to **`syspolicyd`** to check if the extension can be loaded
-3. **`syspolicyd`** **asks** the **user** if the extension hasn't be loaded previously
-   * **`syspolicyd`** will indicate the result to **`kextd`**
-4. **`kextd`** will finally be able to indicate the **kernel to load the extension**
+```bash
+cat /usr/share/firmlinks
+/AppleInternal	AppleInternal
+/Applications	Applications
+/Library	Library
+[...]
+```
 
-If kextd is not available, kextutil can perform the same checks.
-
-## References
-
-* [https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/](https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/)
+On the **left**, there is the directory path on the **System volume**, and on the **right**, the directory path where it maps on the **Data volume**. So, `/library` --> `/system/Volumes/data/library`
 
 <details>
 
