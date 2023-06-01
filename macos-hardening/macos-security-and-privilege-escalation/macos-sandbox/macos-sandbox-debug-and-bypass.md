@@ -186,8 +186,8 @@ If from then sandbox process you are able to **compromise other processes** runn
 
 For more information about **Interposting** check:
 
-{% content-ref url="../macos-proces-abuse/macos-function-hooking.md" %}
-[macos-function-hooking.md](../macos-proces-abuse/macos-function-hooking.md)
+{% content-ref url="../mac-os-architecture/macos-function-hooking.md" %}
+[macos-function-hooking.md](../mac-os-architecture/macos-function-hooking.md)
 {% endcontent-ref %}
 
 #### Interpost `_libsecinit_initializer` to prevent the sandbox

@@ -92,7 +92,7 @@ Being able to **create a file** that is going to be **used by root**, allows a u
 
 ### Entitlements and Privileges abuse via process abuse
 
-If a process can **inject code in another process with better privileges or entitlements** or contact it to perform privileges actions, he could escalate privileges and bypass defensive meassures such as [Sandbox](macos-sandbox/) or [TCC](macos-tcc/).
+If a process can **inject code in another process with better privileges or entitlements** or contact it to perform privileges actions, he could escalate privileges and bypass defensive meassures such as [Sandbox](macos-sandbox/) or [TCC](macos-tcc.md).
 
 {% content-ref url="broken-reference" %}
 [Broken link](broken-reference)

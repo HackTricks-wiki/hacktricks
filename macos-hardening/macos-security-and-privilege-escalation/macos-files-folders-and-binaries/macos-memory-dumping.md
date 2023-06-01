@@ -1,4 +1,4 @@
-# macOS Proces Abuse
+# macOS Memory Dumping
 
 <details>
 
@@ -12,33 +12,50 @@
 
 </details>
 
-## MacOS Process Abuse
+## Memory Artifacts
 
-MacOS, like any other operating system, provides a variety of methods and mechanisms for **processes to interact, communicate, and share data**. While these techniques are essential for efficient system functioning, they can also be abused by threat actors to **perform malicious activities**.
+### Swap Files
 
-### Library Injection
+* **`/private/var/vm/swapfile0`**: This file is used as a **cache when physical memory fills up**. Data in physical memory will be pushed to the swapfile and then swapped back into physical memory if it’s needed again. More than one file can exist in here. For example, you might see swapfile0, swapfile1, and so on.
+*   **`/private/var/vm/sleepimage`**: When OS X goes into **hibernation**, **data stored in memory is put into the sleepimage file**. When the user comes back and wakes the computer, memory is restored from the sleepimage and the user can pick up where they left off.
 
-Library Injection is a technique wherein an attacker **forces a process to load a malicious library**. Once injected, the library runs in the context of the target process, providing the attacker with the same permissions and access as the process.
+    By default in modern MacOS systems this file will be encrypted, so it might be not recuperable.
 
-{% content-ref url="macos-library-injection/" %}
-[macos-library-injection](macos-library-injection/)
-{% endcontent-ref %}
+    * However, the encryption of this file might be disabled. Check the out of `sysctl vm.swapusage`.
 
-### Function Hooking
+### Dumping memory with osxpmem
 
-Function Hooking involves **intercepting function calls** or messages within a software code. By hooking functions, an attacker can **modify the behavior** of a process, observe sensitive data, or even gain control over the execution flow.
+In order to dump the memory in a MacOS machine you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
-{% content-ref url="../mac-os-architecture/macos-function-hooking.md" %}
-[macos-function-hooking.md](../mac-os-architecture/macos-function-hooking.md)
-{% endcontent-ref %}
+**Note**: The following instructions will only work for Macs with Intel architecture. This tool is now archived and the last release was in 2017. The binary downloaded using the instructions below targets Intel chips as Apple Silicon wasn't around in 2017. It may be possible to compile the binary for arm64 architecture but you'll have to try for yourself.
 
-### Inter Process Communication
+```bash
+#Dump raw format
+sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 
-Inter Process Communication (IPC) refers to different methods by which separate processes **share and exchange data**. While IPC is fundamental for many legitimate applications, it can also be misused to subvert process isolation, leak sensitive information, or perform unauthorized actions.
+#Dump aff4 format
+sudo osxpmem.app/osxpmem -o /tmp/dump_mem.aff4
+```
 
-{% content-ref url="../mac-os-architecture/macos-ipc-inter-process-communication/" %}
-[macos-ipc-inter-process-communication](../mac-os-architecture/macos-ipc-inter-process-communication/)
-{% endcontent-ref %}
+If you find this error: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` You can fix it doing:
+
+```bash
+sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
+sudo kextutil "/tmp/MacPmem.kext"
+#Allow the kext in "Security & Privacy --> General"
+sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
+```
+
+**Other errors** might be fixed by **allowing the load of the kext** in "Security & Privacy --> General", just **allow** it.
+
+You can also use this **oneliner** to download the application, load the kext and dump the memory:
+
+{% code overflow="wrap" %}
+```bash
+sudo su
+cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip; unzip osxpmem-2.1.post4.zip; chown -R root:wheel osxpmem.app/MacPmem.kext; kextload osxpmem.app/MacPmem.kext; osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
+```
+{% endcode %}
 
 <details>
 

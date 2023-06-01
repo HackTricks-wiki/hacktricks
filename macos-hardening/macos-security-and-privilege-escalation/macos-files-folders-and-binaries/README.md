@@ -1,4 +1,4 @@
-# macOS Files, Folders & Binaries
+# macOS Files, Folders, Binaries & Memory
 
 <details>
 
@@ -45,8 +45,8 @@
 
 MacOS stores information such as passwords in several places:
 
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
+{% content-ref url="macos-sensitive-locations.md" %}
+[macos-sensitive-locations.md](macos-sensitive-locations.md)
 {% endcontent-ref %}
 
 ## OS X Specific Extensions
@@ -152,8 +152,8 @@ Mac OS binaries usually are compiled as **universal binaries**. A **universal bi
 
 ## macOS memory dumping
 
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
+{% content-ref url="macos-memory-dumping.md" %}
+[macos-memory-dumping.md](macos-memory-dumping.md)
 {% endcontent-ref %}
 
 ## Risk Category Files Mac OS

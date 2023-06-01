@@ -46,8 +46,8 @@ You can check if a binary has **hardenend runtime** with `codesign --display --v
 
 Find a example on how to (ab)use this and check the restrictions in:
 
-{% content-ref url="macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
-[macos-dyld-hijacking-and-dyld\_insert\_libraries.md](macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
+{% content-ref url="../../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
+[macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
 {% endcontent-ref %}
 
 ## Dylib Hijacking
@@ -101,8 +101,8 @@ A nice **report with technical details** about this technique can be found [**he
 
 **Example**
 
-{% content-ref url="macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
-[macos-dyld-hijacking-and-dyld\_insert\_libraries.md](macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
+{% content-ref url="../../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
+[macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
 {% endcontent-ref %}
 
 ### Dlopen Hijacking

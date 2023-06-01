@@ -195,7 +195,7 @@ The **extended attribute `com.apple.macl`** is added to the new **file** to give
 
 By default an access via **SSH** will have **"Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):
 
-![](<../../../.gitbook/assets/image (569).png>)
+![](<../../.gitbook/assets/image (569).png>)
 
 Here you can find examples of how some **malwares have been able to bypass this protection**:
 
@@ -250,13 +250,13 @@ An app with the **`kTCCServiceAppleEvents`** permission will be able to **contro
 
 For more info about Apple Scripts check:
 
-{% content-ref url="macos-apple-scripts.md" %}
-[macos-apple-scripts.md](macos-apple-scripts.md)
+{% content-ref url="macos-tcc/macos-apple-scripts.md" %}
+[macos-apple-scripts.md](macos-tcc/macos-apple-scripts.md)
 {% endcontent-ref %}
 
 For example, if an App has **Automation permission over `iTerm`**, for example in this example **`Terminal`** has access over iTerm:
 
-<figure><img src="../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 #### Over iTerm
 
@@ -300,8 +300,8 @@ I you manage to **inject code in a process** you will be able to abuse the TCC p
 
 Check process abuse techniques in the following page:
 
-{% content-ref url="../macos-proces-abuse/" %}
-[macos-proces-abuse](../macos-proces-abuse/)
+{% content-ref url="macos-proces-abuse/" %}
+[macos-proces-abuse](macos-proces-abuse/)
 {% endcontent-ref %}
 
 See some examples in the following sections:

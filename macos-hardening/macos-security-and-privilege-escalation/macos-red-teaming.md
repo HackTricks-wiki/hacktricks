@@ -21,30 +21,30 @@ If you manage to **compromise admin credentials** to access the management platf
 
 For red teaming in MacOS environments it's highly recommended to have some understanding of how the MDMs work:
 
-{% content-ref url="macos-security-and-privilege-escalation/macos-mdm/" %}
-[macos-mdm](macos-security-and-privilege-escalation/macos-mdm/)
+{% content-ref url="macos-mdm/" %}
+[macos-mdm](macos-mdm/)
 {% endcontent-ref %}
 
 And also about **MacOS** "special" **network** **protocols**:
 
-{% content-ref url="macos-security-and-privilege-escalation/macos-protocols.md" %}
-[macos-protocols.md](macos-security-and-privilege-escalation/macos-protocols.md)
+{% content-ref url="macos-protocols.md" %}
+[macos-protocols.md](macos-protocols.md)
 {% endcontent-ref %}
 
 ## Active Directory
 
 In some occasions you will find that the **MacOS computer is connected to an AD**. In this scenario you should try to **enumerate** the active directory as you are use to it. Find some **help** in the following pages:
 
-{% content-ref url="../network-services-pentesting/pentesting-ldap.md" %}
-[pentesting-ldap.md](../network-services-pentesting/pentesting-ldap.md)
+{% content-ref url="../../network-services-pentesting/pentesting-ldap.md" %}
+[pentesting-ldap.md](../../network-services-pentesting/pentesting-ldap.md)
 {% endcontent-ref %}
 
-{% content-ref url="../windows-hardening/active-directory-methodology/" %}
-[active-directory-methodology](../windows-hardening/active-directory-methodology/)
+{% content-ref url="../../windows-hardening/active-directory-methodology/" %}
+[active-directory-methodology](../../windows-hardening/active-directory-methodology/)
 {% endcontent-ref %}
 
-{% content-ref url="../network-services-pentesting/pentesting-kerberos-88/" %}
-[pentesting-kerberos-88](../network-services-pentesting/pentesting-kerberos-88/)
+{% content-ref url="../../network-services-pentesting/pentesting-kerberos-88/" %}
+[pentesting-kerberos-88](../../network-services-pentesting/pentesting-kerberos-88/)
 {% endcontent-ref %}
 
 Some **local MacOS tool** that may also help you is `dscl`:
@@ -110,7 +110,7 @@ More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Dis
 
 MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** (like github, aws...) via OneLogin:
 
-![](<../.gitbook/assets/image (563).png>)
+![](<../../.gitbook/assets/image (563).png>)
 
 ###
 
