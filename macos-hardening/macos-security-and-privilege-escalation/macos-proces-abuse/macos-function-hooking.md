@@ -256,7 +256,7 @@ int main(int argc, const char * argv[]) {
 
 In this page different ways to hook functions were discussed. However, they involved **running code inside the process to attack**.
 
-In order to do that the easiest technique to use is to inject a [Dyld via environment variables or hijacking](../macos-dyld-hijacking-and-dyld\_insert\_libraries.md). However, I guess this could also be done via [Dylib process injection](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+In order to do that the easiest technique to use is to inject a [Dyld via environment variables or hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld\_insert\_libraries.md). However, I guess this could also be done via [Dylib process injection](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
 
 However, both options are **limited** to **unprotected** binaries/processes. Check each technique to learn more about the limitations.
 

@@ -84,8 +84,8 @@ kextunload com.apple.iokit.IOReportFamily
 
 ### IPC - Inter Process Communication
 
-{% content-ref url="macos-ipc-inter-process-communication/" %}
-[macos-ipc-inter-process-communication](macos-ipc-inter-process-communication/)
+{% content-ref url="../macos-proces-abuse/macos-ipc-inter-process-communication/" %}
+[macos-ipc-inter-process-communication](../macos-proces-abuse/macos-ipc-inter-process-communication/)
 {% endcontent-ref %}
 
 ## macOS Kernel Extensions
