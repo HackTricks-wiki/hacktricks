@@ -53,9 +53,7 @@ jobs:
           git checkout master
       
       - name: Run translation script on changed files
-        run: |
-          # Start a subshell with a timeout (5h)
-          
+        run: |          
           echo "Starting translations"
           echo "Commit: 0afe4e4475ddd0e31b7b8957df1e0e9bb275b731"
 
