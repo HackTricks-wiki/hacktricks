@@ -72,7 +72,7 @@ jobs:
             done
 
             echo "Translating $PATHS"
-            python scripts/translator.py --language "$LANGUAGE" --branch "$BRANCH" --api-key "$OPENAI_API_KEY" --file-paths "$PATHS"
+            python scripts/translator.py --language "$LANGUAGE" --branch "$BRANCH" --api-key "$OPENAI_API_KEY" -f "$PATHS"
           EOF
 
       - name: Commit and push changes
