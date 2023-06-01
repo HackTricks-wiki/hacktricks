@@ -32,8 +32,8 @@ jobs:
 
       - name: Update & install wget & translator.py
         run: |
-          apt-get update
-          apt-get install wget -y
+          sudo apt-get update
+          sudo apt-get install wget -y
           mkdir scripts
           cd scripts
           wget https://raw.githubusercontent.com/carlospolop/hacktricks-cloud/master/scripts/translator.py
