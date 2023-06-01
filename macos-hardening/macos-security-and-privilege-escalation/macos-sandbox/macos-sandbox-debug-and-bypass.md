@@ -174,6 +174,14 @@ Process 2517 exited with status = 0 (0x00000000)
 **Even with the Sandbox bypassed TCC** will ask the user if he wants to allow the process to read files from desktop
 {% endhint %}
 
+### Abusing other processes
+
+If from then sandbox process you are able to **compromise other processes** running in less restrictive sandboxes (or none), you will be able to escape to their sandboxes:
+
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
+{% endcontent-ref %}
+
 ### Interposting Bypass
 
 For more information about **Interposting** check:
@@ -272,11 +280,17 @@ ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
 
-### Abusing Write & Execute
+### Abusing Austo Start Locations
 
 If a sandboxed process can **write** in a place where **later an unsandboxed application is going to run the binary**, it will be able to **escape just by placing** there the binary. A good example of this kind of locations are `~/Library/LaunchAgents` or `/System/Library/LaunchDaemons`.
 
-For this you might even need **2 steps**: To make a process with a **more permissive sandbox** (`file-read*`, `file-write*`) to execute your code which will actually write in a place where it will be **executed unsandboxed**.
+For this you might even need **2 steps**: To make a process with a **more permissive sandbox** (`file-read*`, `file-write*`) execute your code which will actually write in a place where it will be **executed unsandboxed**.
+
+Check this page about **Auto Start locations**:
+
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
+{% endcontent-ref %}
 
 ## References
 

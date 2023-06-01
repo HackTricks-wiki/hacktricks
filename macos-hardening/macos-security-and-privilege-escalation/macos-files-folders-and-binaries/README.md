@@ -41,6 +41,14 @@
 * **Apple's kernel extensions** are located in `/System/Library/Extensions`
 * **Third-party kernel extensions** are stored in `/Library/Extensions`
 
+### Files with Sensitive Information
+
+MacOS stores information such as passwords in several places:
+
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
+{% endcontent-ref %}
+
 ## OS X Specific Extensions
 
 * **`.dmg`**: Apple Disk Image files are very frequent for installers.
@@ -134,18 +142,6 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 ```
 {% endcode %}
 
-### Privilege Escalation via File permissions
-
-If a **process running as root writes** a file that can be controlled by a user, the user could abuse this to **escalate privileges**.\
-This could occur in the following situations:
-
-* File used was already created by a user (owned by the user)
-* File used is writable by the user because of a group
-* File used is inside a directory owned by the user (the user could create the file)
-* File used is inside a directory owned by root but user has write access over it because of a group (the user could create the file)
-
-Being able to **create a file** that is going to be **used by root**, allows a user to **take advantage of its content** or even create **symlinks/hardlinks** to point it to another place.
-
 ## **Universal binaries &** Mach-o Format
 
 Mac OS binaries usually are compiled as **universal binaries**. A **universal binary** can **support multiple architectures in the same file**.
@@ -154,7 +150,13 @@ Mac OS binaries usually are compiled as **universal binaries**. A **universal bi
 [universal-binaries-and-mach-o-format.md](universal-binaries-and-mach-o-format.md)
 {% endcontent-ref %}
 
-## Risk Files Mac OS
+## macOS memory dumping
+
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
+{% endcontent-ref %}
+
+## Risk Category Files Mac OS
 
 The files `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` contains the risk associated to files depending on the file extension.
 

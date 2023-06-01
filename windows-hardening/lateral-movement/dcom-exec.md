@@ -24,7 +24,7 @@ You can read more on that method [here](https://msdn.microsoft.com/en-us/library
 
 Fortunately, as an admin, you can remotely interact with DCOM with PowerShell by using “`[activator]::CreateInstance([type]::GetTypeFromProgID`”. All you need to do is provide it a DCOM ProgID and an IP address. It will then provide you back an instance of that COM object remotely:
 
-![](<../../.gitbook/assets/image (2) (3) (1).png>)
+![](<../../.gitbook/assets/image (665).png>)
 
 It is then possible to invoke the `ExecuteShellCommand` method to start a process on the remote host:
 

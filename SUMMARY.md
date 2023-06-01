@@ -741,7 +741,7 @@
 * [Interesting HTTP](interesting-http.md)
 * [Emails Vulnerabilities](emails-vulns.md)
 * [Android Forensics](android-forensics.md)
-* [TR-069](tr-069.md)
+* [TR-069](todo/tr-069.md)
 * [6881/udp - Pentesting BitTorrent](6881-udp-pentesting-bittorrent.md)
 * [CTF Write-ups](ctf-write-ups/README.md)
   * [challenge-0521.intigriti.io](ctf-write-ups/challenge-0521.intigriti.io.md)

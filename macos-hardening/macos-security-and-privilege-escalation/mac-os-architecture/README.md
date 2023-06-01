@@ -88,6 +88,14 @@ kextunload com.apple.iokit.IOReportFamily
 [macos-ipc-inter-process-communication](macos-ipc-inter-process-communication/)
 {% endcontent-ref %}
 
+## macOS Kernel Extensions
+
+macOS is **super restrictive to load Kernel Extensions** (.kext) because of the high privileges that code will run with. Actually, by default is virtually impossible (unless a bypass is found).
+
+{% content-ref url="macos-kernel-extensions.md" %}
+[macos-kernel-extensions.md](macos-kernel-extensions.md)
+{% endcontent-ref %}
+
 ## References
 
 * [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt\_other?\_encoding=UTF8\&me=\&qid=)

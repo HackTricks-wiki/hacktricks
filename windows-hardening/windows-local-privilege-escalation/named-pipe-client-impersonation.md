@@ -103,19 +103,19 @@ int main()
 
 Below shows the named pipe server and named pipe client working as expected:
 
-![](<../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22 (2).png>)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22.png>)
 
 Worth nothing that the named pipes communication by default uses SMB protocol:
 
-![](../../.gitbook/assets/screenshot-from-2019-04-04-23-51-48.png)
+![](<../../.gitbook/assets/Screenshot from 2019-04-04 23-51-48.png>)
 
 Checking how the process maintains a handle to our named pipe `mantvydas-first-pipe`:
 
-![](<../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22 (1).png>)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (1).png>)
 
 Similary, we can see the client having an open handle to the named pipe:
 
-![](../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22.png)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (2).png>)
 
 We can even see our pipe with powershell:
 
@@ -123,7 +123,7 @@ We can even see our pipe with powershell:
 ((Get-ChildItem \\.\pipe\).name)[-1..-5]
 ```
 
-![](<../../.gitbook/assets/screenshot-from-2019-04-02-23-44-22 (3).png>)
+![](<../../.gitbook/assets/Screenshot from 2019-04-02 23-44-22 (3).png>)
 
 ## Token Impersonation
 
