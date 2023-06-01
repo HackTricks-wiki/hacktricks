@@ -26,28 +26,28 @@ jobs:
           fetch-depth: 0 #Needed to download everything to be able to access the master & language branches
 
       - name: Run translation script on changed files
-          run: |
-            # Start a subshell with a timeout (5h)
-            
-            echo "Starting translations"
-            echo "Commit: 0afe4e4475ddd0e31b7b8957df1e0e9bb275b731"
-  
-            # Export the OpenAI API key as an environment variable
-            export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-  
-            # Run the translation script on each changed file
-            git diff-tree --no-commit-id --name-only -r "0afe4e4475ddd0e31b7b8957df1e0e9bb275b731"
-            echo "==========="
-            git diff-tree --no-commit-id --name-only -r "0afe4e4475ddd0e31b7b8957df1e0e9bb275b731" | grep -v "SUMMARY.md" | while read -r file; do
-              if echo "$file" | grep -qE '\.md$'; then
-                echo $file
-                PATHS="$file , $PATHS"
-              else
-                echo "Skipping $file"
-              fi
-            done
-  
-            echo "Translating $PATHS"
+        run: |
+          # Start a subshell with a timeout (5h)
+          
+          echo "Starting translations"
+          echo "Commit: 0afe4e4475ddd0e31b7b8957df1e0e9bb275b731"
+
+          # Export the OpenAI API key as an environment variable
+          export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+
+          # Run the translation script on each changed file
+          git diff-tree --no-commit-id --name-only -r "0afe4e4475ddd0e31b7b8957df1e0e9bb275b731"
+          echo "==========="
+          git diff-tree --no-commit-id --name-only -r "0afe4e4475ddd0e31b7b8957df1e0e9bb275b731" | grep -v "SUMMARY.md" | while read -r file; do
+            if echo "$file" | grep -qE '\.md$'; then
+              echo $file
+              PATHS="$file , $PATHS"
+            else
+              echo "Skipping $file"
+            fi
+          done
+
+          echo "Translating $PATHS"
 
       - name: Set up Python
         uses: actions/setup-python@v2
