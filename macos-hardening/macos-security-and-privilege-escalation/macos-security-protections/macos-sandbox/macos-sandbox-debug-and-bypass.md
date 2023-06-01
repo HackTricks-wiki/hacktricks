@@ -14,7 +14,7 @@
 
 ## Sandbox loading process
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
 In the previous image it's possible to observe **how the sandbox will be loaded** when an application with the entitlement **`com.apple.security.app-sandbox`** is run.
 
@@ -178,16 +178,16 @@ Process 2517 exited with status = 0 (0x00000000)
 
 If from then sandbox process you are able to **compromise other processes** running in less restrictive sandboxes (or none), you will be able to escape to their sandboxes:
 
-{% content-ref url="../macos-proces-abuse/" %}
-[macos-proces-abuse](../macos-proces-abuse/)
+{% content-ref url="../../macos-proces-abuse/" %}
+[macos-proces-abuse](../../macos-proces-abuse/)
 {% endcontent-ref %}
 
 ### Interposting Bypass
 
 For more information about **Interposting** check:
 
-{% content-ref url="../mac-os-architecture/macos-function-hooking.md" %}
-[macos-function-hooking.md](../mac-os-architecture/macos-function-hooking.md)
+{% content-ref url="../../mac-os-architecture/macos-function-hooking.md" %}
+[macos-function-hooking.md](../../mac-os-architecture/macos-function-hooking.md)
 {% endcontent-ref %}
 
 #### Interpost `_libsecinit_initializer` to prevent the sandbox

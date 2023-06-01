@@ -72,8 +72,8 @@ In companies **macOS** systems are highly probably going to be **managed with a 
 
 ## MacOS Security Protections
 
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
+{% content-ref url="macos-security-protections/" %}
+[macos-security-protections](macos-security-protections/)
 {% endcontent-ref %}
 
 ## Attack Surface
@@ -92,18 +92,18 @@ Being able to **create a file** that is going to be **used by root**, allows a u
 
 ### Entitlements and Privileges abuse via process abuse
 
-If a process can **inject code in another process with better privileges or entitlements** or contact it to perform privileges actions, he could escalate privileges and bypass defensive meassures such as [Sandbox](macos-sandbox/) or [TCC](macos-tcc.md).
+If a process can **inject code in another process with better privileges or entitlements** or contact it to perform privileges actions, he could escalate privileges and bypass defensive meassures such as [Sandbox](macos-security-protections/macos-sandbox/) or [TCC](macos-security-protections/macos-tcc/).
 
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
+{% content-ref url="macos-proces-abuse/" %}
+[macos-proces-abuse](macos-proces-abuse/)
 {% endcontent-ref %}
 
 ### File Extension Apps
 
 Weird apps registered by file extensions could be abused:
 
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
+{% content-ref url="macos-file-extension-apps.md" %}
+[macos-file-extension-apps.md](macos-file-extension-apps.md)
 {% endcontent-ref %}
 
 ### URL handler applications
@@ -145,8 +145,8 @@ A more detailed explanation can be [**found in the original report**](https://th
 
 ### Sensitive Information
 
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
+{% content-ref url="macos-files-folders-and-binaries/macos-sensitive-locations.md" %}
+[macos-sensitive-locations.md](macos-files-folders-and-binaries/macos-sensitive-locations.md)
 {% endcontent-ref %}
 
 ### Linux Privesc
