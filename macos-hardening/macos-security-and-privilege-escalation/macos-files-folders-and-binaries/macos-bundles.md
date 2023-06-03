@@ -1,63 +1,49 @@
-# macOS Bundles
+# Bundles de macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Basic Information
+## Información básica
 
-Basically, a bundle is a **directory structure** within the file system. Interestingly, by default this directory **looks like a single object in Finder**.&#x20;
+Básicamente, un bundle es una **estructura de directorios** dentro del sistema de archivos. Curiosamente, por defecto este directorio **parece un objeto único en Finder**.
 
-The **common** frequent bundle we will encounter is the **`.app` bundle**, but many other executables are also packaged as bundles, such as **`.framework`** and **`.systemextension`** or **`.kext`**.
+El bundle más **común** que encontraremos es el **bundle `.app`**, pero muchos otros ejecutables también se empaquetan como bundles, como **`.framework`** y **`.systemextension`** o **`.kext`**.
 
-The types of resources contained within a bundle may consist of applications, libraries, images, documentation, header files, etc. All these files are inside `<application>.app/Contents/`
-
+Los tipos de recursos contenidos en un bundle pueden consistir en aplicaciones, bibliotecas, imágenes, documentación, archivos de encabezado, etc. Todos estos archivos están dentro de `<aplicación>.app/Contents/`.
 ```bash
 ls -lR /Applications/Safari.app/Contents
 ```
-
 *   `Contents/_CodeSignature`
 
-    Contains **code-signing information** about the application (i.e., hashes, etc.).
+    Contiene información de **firmado de código** sobre la aplicación (es decir, hashes, etc.).
 *   `Contents/MacOS`
 
-    Contains the **application’s binary** (which is executed when the user double-clicks the application icon in the UI).
+    Contiene el **binario de la aplicación** (que se ejecuta cuando el usuario hace doble clic en el icono de la aplicación en la interfaz de usuario).
 *   `Contents/Resources`
 
-    Contains **UI elements of the application**, such as images, documents, and nib/xib files (that describe various user interfaces).
+    Contiene **elementos de la interfaz de usuario de la aplicación**, como imágenes, documentos y archivos nib/xib (que describen varias interfaces de usuario).
 * `Contents/Info.plist`\
-  The application’s main “**configuration file.**” Apple notes that “the system relies on the presence of this file to identify relevant information about \[the] application and any related files”.
-  * **Plist** **files** contains configuration information. You can find find information about the meaning of they plist keys in [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
-  *   Pairs that may be of interest when analyzing an application include:\\
+  El "archivo de configuración principal" de la aplicación. Apple señala que "el sistema depende de la presencia de este archivo para identificar información relevante sobre la aplicación y cualquier archivo relacionado".
+  * Los **archivos Plist** contienen información de configuración. Puede encontrar información sobre el significado de las claves plist en [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
+  *   Las parejas que pueden ser de interés al analizar una aplicación incluyen:\\
 
       * **CFBundleExecutable**
 
-      Contains the **name of the application’s binary** (found in Contents/MacOS).
+      Contiene el **nombre del binario de la aplicación** (que se encuentra en Contents/MacOS).
 
       * **CFBundleIdentifier**
 
-      Contains the application’s bundle identifier (often used by the system to **globally** **identify** the application).
+      Contiene el identificador de paquete de la aplicación (a menudo utilizado por el sistema para **identificar globalmente** la aplicación).
 
       * **LSMinimumSystemVersion**
 
-      Contains the **oldest** **version** of **macOS** that the application is compatible with.
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
+      Contiene la **versión más antigua** de **macOS** con la que es compatible la aplicación.

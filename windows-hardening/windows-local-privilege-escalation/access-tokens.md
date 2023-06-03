@@ -1,23 +1,8 @@
-# Access Tokens
+## Tokens de Acceso
 
-<details>
+Cada **usuario que ha iniciado sesión** en el sistema **tiene un token de acceso con información de seguridad** para esa sesión de inicio de sesión. El sistema crea un token de acceso cuando el usuario inicia sesión. **Cada proceso ejecutado** en nombre del usuario **tiene una copia del token de acceso**. El token identifica al usuario, los grupos del usuario y los privilegios del usuario. Un token también contiene un SID de inicio de sesión (Identificador de Seguridad) que identifica la sesión de inicio de sesión actual.
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
-
-## Access Tokens
-
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
-
-You can see this information executing `whoami /all`
-
+Puedes ver esta información ejecutando `whoami /all`.
 ```
 whoami /all
 
@@ -61,73 +46,68 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+o utilizando _Process Explorer_ de Sysinternals (selecciona el proceso y accede a la pestaña "Seguridad"):
 
 ![](<../../.gitbook/assets/image (321).png>)
 
-### Local administrator
+### Administrador local
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs.md#uac)**.**
+Cuando un administrador local inicia sesión, **se crean dos tokens de acceso**: uno con derechos de administrador y otro con derechos normales. **Por defecto**, cuando este usuario ejecuta un proceso, se utiliza el que tiene **derechos regulares** (no de administrador). Cuando este usuario intenta **ejecutar** algo **como administrador** ("Ejecutar como administrador", por ejemplo), se utilizará el **UAC** para solicitar permiso.\
+Si quieres [**saber más sobre el UAC, lee esta página**](../authentication-credentials-uac-and-efs.md#uac)**.**
 
-### Credentials user impersonation
+### Suplantación de credenciales de usuario
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
-
+Si tienes las **credenciales válidas de cualquier otro usuario**, puedes **crear** una **nueva sesión de inicio de sesión** con esas credenciales:
 ```
 runas /user:domain\username cmd.exe
 ```
-
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
-You can launch a process that **uses different credentials for accessing network services** using:
-
+El **token de acceso** también tiene una **referencia** de las sesiones de inicio de sesión dentro del **LSASS**, lo cual es útil si el proceso necesita acceder a algunos objetos de la red.\
+Puedes lanzar un proceso que **utilice diferentes credenciales para acceder a servicios de red** usando:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+Esto es útil si tienes credenciales para acceder a objetos en la red, pero esas credenciales no son válidas dentro del host actual ya que solo se usarán en la red (en el host actual se usarán los privilegios de usuario actuales).
 
-This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
+### Tipos de tokens
 
-### Types of tokens
+Hay dos tipos de tokens disponibles:
 
-There are two types of tokens available:
+* **Token primario**: Los tokens primarios solo se pueden **asociar a procesos**, y representan el sujeto de seguridad de un proceso. La creación de tokens primarios y su asociación a procesos son operaciones privilegiadas, que requieren dos privilegios diferentes en nombre de la separación de privilegios: el escenario típico ve al servicio de autenticación creando el token, y un servicio de inicio de sesión asociándolo al shell del sistema operativo del usuario. Los procesos heredan inicialmente una copia del token primario del proceso padre.
+* **Token de suplantación**: La suplantación es un concepto de seguridad implementado en Windows NT que **permite** a una aplicación de servidor "**ser**" **temporalmente** "**el cliente**" en términos de acceso a objetos seguros. La suplantación tiene **cuatro posibles niveles**:
 
-* **Primary token**: Primary tokens can only be **associated to processes**, and they represent a process's security subject. The creation of primary tokens and their association to processes are both privileged operations, requiring two different privileges in the name of privilege separation - the typical scenario sees the authentication service creating the token, and a logon service associating it to the user's operating system shell. Processes initially inherit a copy of the parent process's primary token.
-*   **Impersonation token**: Impersonation is a security concept implemented in Windows NT that **allows** a server application to **temporarily** "**be**" **the client** in terms of access to secure objects. Impersonation has **four possible levels**:
+    * **anónimo**, dando al servidor el acceso de un usuario anónimo/no identificado
+    * **identificación**, permitiendo al servidor inspeccionar la identidad del cliente pero no usar esa identidad para acceder a objetos
+    * **suplantación**, permitiendo al servidor actuar en nombre del cliente
+    * **delegación**, igual que la suplantación pero extendida a sistemas remotos a los que se conecta el servidor (a través de la preservación de credenciales).
 
-    * **anonymous**, giving the server the access of an anonymous/unidentified user
-    * **identification**, letting the server inspect the client's identity but not use that identity to access objects
-    * **impersonation**, letting the server act on behalf of the client
-    * **delegation**, same as impersonation but extended to remote systems to which the server connects (through the preservation of credentials).
+    El cliente puede elegir el nivel máximo de suplantación (si lo hay) disponible para el servidor como parámetro de conexión. La delegación y la suplantación son operaciones privilegiadas (la suplantación inicialmente no lo era, pero la negligencia histórica en la implementación de las API de cliente al no restringir el nivel predeterminado a "identificación", permitiendo que un servidor no privilegiado suplante a un cliente privilegiado no dispuesto, lo requirió). **Los tokens de suplantación solo se pueden asociar a hilos**, y representan el sujeto de seguridad de un proceso de cliente. Los tokens de suplantación suelen crearse y asociarse al hilo actual implícitamente, mediante mecanismos IPC como DCE RPC, DDE y tuberías con nombre.
 
-    The client can choose the maximum impersonation level (if any) available to the server as a connection parameter. Delegation and impersonation are privileged operations (impersonation initially was not, but historical carelessness in the implementation of client APIs failing to restrict the default level to "identification", letting an unprivileged server impersonate an unwilling privileged client, called for it). **Impersonation tokens can only be associated to threads**, and they represent a client process's security subject. Impersonation tokens are usually created and associated to the current thread implicitly, by IPC mechanisms such as DCE RPC, DDE and named pipes.
+#### Suplantar Tokens
 
-#### Impersonate Tokens
+Usando el módulo _**incognito**_\*\* de Metasploit, si tienes suficientes privilegios, puedes **listar** y **suplantar** otros **tokens** fácilmente. Esto podría ser útil para realizar **acciones como si fueras el otro usuario**. También podrías **escalar privilegios** con esta técnica.
 
-Using the _**incognito**_\*\* module\*\* of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+### Privilegios de Token
 
-### Token Privileges
-
-Learn which **token privileges can be abused to escalate privileges:**
+Aprende qué **privilegios de token se pueden abusar para escalar privilegios:**
 
 {% content-ref url="privilege-escalation-abusing-tokens/" %}
 [privilege-escalation-abusing-tokens](privilege-escalation-abusing-tokens/)
 {% endcontent-ref %}
 
-Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
+Echa un vistazo a [**todos los posibles privilegios de token y algunas definiciones en esta página externa**](https://github.com/gtworek/Priv2Admin).
 
-## References
+## Referencias
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+Aprende más sobre tokens en estos tutoriales: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) y [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos.
+* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

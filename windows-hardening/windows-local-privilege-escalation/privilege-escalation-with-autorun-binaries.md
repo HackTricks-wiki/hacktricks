@@ -1,36 +1,33 @@
-# Privilege Escalation with Autoruns
+# Escalada de privilegios con Autoruns
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue la [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 <img src="../../.gitbook/assets/image (1) (1) (1) (1).png" alt="" data-size="original">
 
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+Si estás interesado en una **carrera de hacking** y en hackear lo imposible - ¡estamos contratando! (_se requiere fluidez en polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 ## WMIC
 
-**Wmic** can be used to run programs on **startup**. See which binaries are programmed to run is startup with:
-
+**Wmic** se puede utilizar para ejecutar programas en el **inicio**. Para ver qué binarios están programados para ejecutarse en el inicio, use:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
+## Tareas programadas
 
-## Scheduled Tasks
-
-**Tasks** can be schedules to run with **certain frequency**. See which binaries are scheduled to run with:
-
+Las **tareas** pueden ser programadas para ejecutarse con **cierta frecuencia**. Verifique qué binarios están programados para ejecutarse con:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -41,11 +38,9 @@ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,Tas
 #You can also write that content on a bat file that is being executed by a scheduled task
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
+## Carpetas
 
-## Folders
-
-All the binaries located in the **Startup folders are going to be executed on startup**. The common startup folders are the ones listed a continuation, but the startup folder is indicated in the registry. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
-
+Todos los binarios ubicados en las **carpetas de inicio se ejecutarán al inicio**. Las carpetas de inicio comunes se enumeran a continuación, pero la carpeta de inicio se indica en el registro. [Lee esto para saber dónde.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -54,16 +49,15 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-
-## Registry
+## Registro
 
 {% hint style="info" %}
-Note: The **Wow6432Node** registry entry indicates that you are running a 64-bit Windows version. The operating system uses this key to display a separate view of HKEY\_LOCAL\_MACHINE\SOFTWARE for 32-bit applications that run on 64-bit Windows versions.
+Nota: La entrada del registro **Wow6432Node** indica que estás ejecutando una versión de Windows de 64 bits. El sistema operativo utiliza esta clave para mostrar una vista separada de HKEY\_LOCAL\_MACHINE\SOFTWARE para aplicaciones de 32 bits que se ejecutan en versiones de Windows de 64 bits.
 {% endhint %}
 
-### Runs
+### Ejecuciones
 
-**Commonly known** AutoRun registry:
+Registro de AutoRun comúnmente conocido:
 
 * `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 * `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -77,9 +71,9 @@ Note: The **Wow6432Node** registry entry indicates that you are running a 64-bit
 * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 * `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Run and RunOnce registry keys cause programs to run each time that a user logs on. The data value for a key is a command line no longer than 260 characters.
+Las claves de registro Run y RunOnce hacen que los programas se ejecuten cada vez que un usuario inicia sesión. El valor de datos para una clave es una línea de comando no más larga de 260 caracteres.
 
-**Service runs** (can control automatic startup of services during boot):
+**Ejecuciones de servicios** (pueden controlar el inicio automático de servicios durante el arranque):
 
 * `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -95,16 +89,15 @@ Run and RunOnce registry keys cause programs to run each time that a user logs o
 * `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 * `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-It's not created by default on Windows Vista and newer. Registry run key entries can reference programs directly or list them as a dependency. For example, it is possible to load a DLL at logon using a "Depend" key with RunOnceEx: `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d "C:\temp\evil[.]dll"`
+No se crea por defecto en Windows Vista y versiones posteriores. Las entradas de la clave de ejecución del registro pueden hacer referencia a programas directamente o listarlos como una dependencia. Por ejemplo, es posible cargar una DLL en el inicio de sesión utilizando una clave "Depend" con RunOnceEx: `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx\0001\Depend /v 1 /d "C:\temp\evil[.]dll"`
 
 {% hint style="info" %}
-**Exploit 1**: If you can write inside any of the mentioned registry inside **HKLM** you can escalate privileges when a different user logs in.
+**Explotación 1**: Si puedes escribir dentro de cualquiera de los registros mencionados dentro de **HKLM**, puedes escalar privilegios cuando un usuario diferente inicie sesión.
 {% endhint %}
 
 {% hint style="info" %}
-**Exploit 2**: If you can overwrite any of the binaries indicated on any of the registry inside **HKLM** you can modify that binary with a backdoor when a different user logs in and escalate privileges.
+**Explotación 2**: Si puedes sobrescribir cualquiera de los binarios indicados en cualquiera de los registros dentro de **HKLM**, puedes modificar ese binario con una puerta trasera cuando un usuario diferente inicie sesión y escalar privilegios.
 {% endhint %}
-
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -160,20 +153,18 @@ Get-ItemProperty -Path 'Registry::HKLM\Software\Wow6432Node\Microsoft\Windows\Ru
 Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\RunOnceEx'
 Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\RunOnceEx'
 ```
-
-### Startup Path
+### Ruta de inicio
 
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Any shortcut created to the location pointed by subkey Startup will launch the service during logon/reboot. Start up location is specified both at Local Machine and Current User.
+Cualquier acceso directo creado en la ubicación indicada por la subclave de inicio lanzará el servicio durante el inicio o reinicio de sesión. La ubicación de inicio se especifica tanto en la máquina local como en el usuario actual.
 
 {% hint style="info" %}
-If you can overwrite any \[User] Shell Folder under **HKLM**, you will e able to point it to a folder controlled by you and place a backdoor that will be executed anytime a user logs in the system escalating privileges.
+Si puede sobrescribir cualquier carpeta de shell de usuario en **HKLM**, podrá apuntarla a una carpeta controlada por usted y colocar una puerta trasera que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
 {% endhint %}
-
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -185,167 +176,156 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders' -Name "Common Startup"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
-
-### Winlogon Keys
+### Claves de Winlogon
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Usually, **Userinit** key points to userinit.exe but if this key can be altered, then that exe will also launch by Winlogon.\
-**Shell** key should point to explorer.exe.
-
+Por lo general, la clave **Userinit** apunta a userinit.exe, pero si esta clave se puede modificar, entonces ese exe también se lanzará por Winlogon.\
+La clave **Shell** debe apuntar a explorer.exe.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Userinit"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
-
 {% hint style="info" %}
-If you can overwrite the registry value or the binary you will be able to escalate privileges.
+Si puedes sobrescribir el valor del registro o el binario, podrás escalar privilegios.
 {% endhint %}
 
-### Policy Settings
+### Configuraciones de Política
 
 * `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 * `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
-Check **Run** key.
-
+Revisa la clave **Run**.
 ```bash
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 Get-ItemProperty -Path 'Registry::HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name "Run"
 Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer' -Name "Run"
 ```
-
 ### AlternateShell
 
-Path: **`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`**
+Ruta: **`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`**
 
-Under the registry key `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot` is the value **AlternateShell**, which by default is set to `cmd.exe` (the command prompt). When you press F8 during startup and select "Safe Mode with Command Prompt," the system uses this alternate shell.\
-You can, however, create a boot option so that you don't have to press F8, then select "Safe Mode with Command Prompt."
+Bajo la clave del registro `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot` se encuentra el valor **AlternateShell**, que por defecto está establecido en `cmd.exe` (el símbolo del sistema). Cuando se presiona F8 durante el arranque y se selecciona "Modo seguro con símbolo del sistema", el sistema utiliza este shell alternativo.\
+Sin embargo, se puede crear una opción de arranque para no tener que presionar F8 y seleccionar "Modo seguro con símbolo del sistema".
 
-1. Edit the boot.ini (c:\boot.ini) file attributes to make the file nonread-only, nonsystem, and nonhidden (attrib c:\boot.ini -r -s -h).
-2. Open boot.ini.
-3. Add a line similar to the following: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
-4. Save the file.
-5. Reapply the correct permissions (attrib c:\boot.ini +r +s +h).
+1. Edite los atributos del archivo boot.ini (c:\boot.ini) para que el archivo no sea de solo lectura, no sea del sistema y no esté oculto (attrib c:\boot.ini -r -s -h).
+2. Abra boot.ini.
+3. Agregue una línea similar a la siguiente: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+4. Guarde el archivo.
+5. Vuelva a aplicar los permisos correctos (attrib c:\boot.ini +r +s +h).
 
-Info from [here](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell).
+Información de [aquí](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell).
 
 {% hint style="info" %}
-**Exploit 1:** If you can modify this registry key you can point your backdoor
+**Explotación 1:** Si puede modificar esta clave del registro, puede apuntar su puerta trasera.
 {% endhint %}
 
 {% hint style="info" %}
-**Exploit 2 (PATH write permissions)**: If you have write permission on any folder of the system **PATH** before _C:\Windows\system32_ (or if you can change it) you can create a cmd.exe file and if someone initiates the machine in Safe Mode your backdoor will be executed.
+**Explotación 2 (permisos de escritura en PATH)**: Si tiene permisos de escritura en cualquier carpeta del sistema **PATH** antes de _C:\Windows\system32_ (o si puede cambiarlo), puede crear un archivo cmd.exe y si alguien inicia la máquina en modo seguro, su puerta trasera se ejecutará.
 {% endhint %}
 
 {% hint style="info" %}
-**Exploit 3 (PATH write permissions and boot.ini write permissions)**: If you can write boot.ini, you can automate the startup in safe mode for the next reboot.
+**Explotación 3 (permisos de escritura en PATH y permisos de escritura en boot.ini)**: Si puede escribir en boot.ini, puede automatizar el inicio en modo seguro para el próximo reinicio.
 {% endhint %}
-
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
-
-### Installed Component
+### Componente Instalado
 
 * `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 * `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 * `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 * `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Active Setup runs before the Desktop appears. Commands started by Active Setup run synchronously, blocking the logon while they are executing. Active Setup is executed before any Run or RunOnce registry entries are evaluated.
+Active Setup se ejecuta antes de que aparezca el escritorio. Los comandos iniciados por Active Setup se ejecutan de forma sincrónica, bloqueando el inicio de sesión mientras se están ejecutando. Active Setup se ejecuta antes de que se evalúen las entradas de registro Run o RunOnce.
 
-Inside those keys you will find more keys and each for those will home some interesting key-values. The most interesting ones are:
+Dentro de esas claves encontrarás más claves y cada una de ellas contendrá algunos valores clave interesantes. Los más interesantes son:
 
 * **IsInstalled:**
-  * 0: The component’s command will not run.
-  * 1: The component’s command will be run once per user. This is the default (if the IsInstalled value does not exist).
+  * 0: El comando del componente no se ejecutará.
+  * 1: El comando del componente se ejecutará una vez por usuario. Este es el valor predeterminado (si el valor IsInstalled no existe).
 * **StubPath**
-  * Format: Any valid command line, e.g. “notepad”
-  * This is the command that is executed if Active Setup determines this component needs to run during logon.
+  * Formato: Cualquier línea de comando válida, por ejemplo, "notepad"
+  * Este es el comando que se ejecuta si Active Setup determina que este componente necesita ejecutarse durante el inicio de sesión.
 
 {% hint style="info" %}
-If you could write/overwrite on any Key with _**IsInstalled == "1"**_ the key **StubPath**, you could point it to a backdoor and escalate privileges. Also, if you could overwrite any **binary** pointed by any **StubPath** key you could be able to escalate privileges.
+Si pudieras escribir/sobrescribir cualquier clave con _**IsInstalled == "1"**_ y la clave **StubPath**, podrías apuntarla a una puerta trasera y escalar privilegios. Además, si pudieras sobrescribir cualquier **binario** apuntado por cualquier clave **StubPath**, podrías ser capaz de escalar privilegios.
 {% endhint %}
-
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 ```
-
-### Browser Helper Objects
+### Objetos de Ayuda del Navegador
 
 * `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 * `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-A **Browser Helper Object** (**BHO**) is a DLL module designed as a plugin for Microsoft's Internet Explorer web browser to provide added functionality. These modules are executed for each new instance of Internet Explorer and for each new instance of Windows Explorer. However, a BHO can be prevented to be executed by each instance of Explorer setting the key **NoExplorer** to 1.
+Un **Objeto de Ayuda del Navegador** (**BHO**) es un módulo DLL diseñado como un plugin para el navegador web Internet Explorer de Microsoft para proporcionar funcionalidad adicional. Estos módulos se ejecutan para cada nueva instancia de Internet Explorer y para cada nueva instancia de Windows Explorer. Sin embargo, se puede evitar que un BHO se ejecute en cada instancia de Explorer configurando la clave **NoExplorer** en 1.
 
-BHOs are still supported as of Windows 10, through Internet Explorer 11, while BHOs are not supported in the default web browser Microsoft Edge.
-
+Los BHO aún son compatibles a partir de Windows 10, a través de Internet Explorer 11, mientras que los BHO no son compatibles en el navegador web predeterminado Microsoft Edge.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
+Ten en cuenta que el registro contendrá 1 nuevo registro por cada dll y estará representado por el **CLSID**. Puedes encontrar la información del CLSID en `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
-Note that the registry will contain 1 new registry per each dll and it will be represented by the **CLSID**. You can find the CLSID info in `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
-
-### Internet Explorer Extensions
+### Extensiones de Internet Explorer
 
 * `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 * `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Note that the registry will contain 1 new registry per each dll and it will be represented by the **CLSID**. You can find the CLSID info in `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+Ten en cuenta que el registro contendrá 1 nuevo registro por cada dll y estará representado por el **CLSID**. Puedes encontrar la información del CLSID en `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
-### Font Drivers
+### Controladores de fuentes
 
 * `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers`
 * `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers`
-
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers"
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-
-### Open Command
+### Comando Abrir
 
 * `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 * `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
-
 ```bash
 reg query "HKLM\SOFTWARE\Classes\htmlfile\shell\open\command" /v ""
 reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
+### Opciones de Ejecución de Archivos de Imagen
 
-### Image File Execution Options
+Las Opciones de Ejecución de Archivos de Imagen (IFEO, por sus siglas en inglés) son una característica de Windows que permite a los desarrolladores depurar aplicaciones mediante la ejecución de un depurador automáticamente cuando se inicia una aplicación. Sin embargo, los atacantes pueden aprovechar esta característica para ejecutar su propio código malicioso en lugar del código legítimo de la aplicación.
 
+Para hacer esto, los atacantes pueden agregar una clave de registro en `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options` con el nombre de la aplicación que desean atacar. Luego, pueden agregar un valor de cadena llamado `Debugger` y establecer su propio código malicioso como el valor de este.
+
+Cuando se inicia la aplicación, Windows ejecutará el código malicioso en lugar del código legítimo de la aplicación. Esto puede permitir a los atacantes obtener privilegios elevados en el sistema y realizar acciones maliciosas.
+
+Para prevenir este tipo de ataque, se recomienda monitorear la clave de registro de IFEO en busca de entradas sospechosas y eliminarlas si se encuentran. También se puede restringir el acceso a la clave de registro de IFEO mediante la configuración de permisos adecuados.
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
 ```
-
 ## SysInternals
 
-Note that all the sites where you can find autoruns are **already searched by**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). However, for a **more comprehensive list of auto-executed** file you could use [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)from systinternals:
-
+Ten en cuenta que todos los sitios donde se pueden encontrar los autoruns ya han sido buscados por [winpeas.exe](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Sin embargo, para una lista más completa de archivos auto-ejecutados, puedes usar [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de SysInternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
+## Más
 
-## More
+Encuentra más Autoruns como registros en [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
 
-Find more Autoruns like registries in [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2)
-
-## References
+## Referencias
 
 * [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 * [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
@@ -353,7 +333,7 @@ Find more Autoruns like registries in [https://www.microsoftpressstore.com/artic
 
 <img src="../../.gitbook/assets/image (1) (1) (1) (1).png" alt="" data-size="original">
 
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+Si estás interesado en una **carrera de hacking** y en hackear lo imposible - ¡**estamos contratando!** (_se requiere fluidez en polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -361,10 +341,10 @@ If you are interested in **hacking career** and hack the unhackable - **we are h
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

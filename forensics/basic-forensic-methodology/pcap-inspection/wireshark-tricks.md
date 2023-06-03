@@ -1,141 +1,140 @@
-# Wireshark tricks
+# Trucos de Wireshark
 
-## Wireshark tricks
+## Trucos de Wireshark
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Improve your Wireshark skills
+## Mejora tus habilidades en Wireshark
 
-### Tutorials
+### Tutoriales
 
-The following tutorials are amazing to learn some cool basic tricks:
+Los siguientes tutoriales son excelentes para aprender algunos trucos básicos interesantes:
 
 * [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 * [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 * [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 * [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Analysed Information
+### Información analizada
 
-**Expert Information**
+**Información de expertos**
 
-Clicking on _**Analyze** --> **Expert Information**_ you will have an **overview** of what is happening in the packets **analyzed**:
+Al hacer clic en _**Analyze** --> **Expert Information**_ tendrás una **visión general** de lo que está sucediendo en los paquetes **analizados**:
 
 ![](<../../../.gitbook/assets/image (570).png>)
 
-**Resolved Addresses**
+**Direcciones resueltas**
 
-Under _**Statistics --> Resolved Addresses**_ you can find several **information** that was "**resolved**" by wireshark like port/transport to protocol, MAC to the manufacturer, etc. It is interesting to know what is implicated in the communication.
+En _**Statistics --> Resolved Addresses**_ puedes encontrar varias **informaciones** que fueron "**resueltas**" por Wireshark, como el puerto/transporte al protocolo, la MAC al fabricante, etc. Es interesante saber qué está implicado en la comunicación.
 
 ![](<../../../.gitbook/assets/image (571).png>)
 
-**Protocol Hierarchy**
+**Jerarquía de protocolos**
 
-Under _**Statistics --> Protocol Hierarchy**_ you can find the **protocols** **involved** in the communication and data about them.
+En _**Statistics --> Protocol Hierarchy**_ puedes encontrar los **protocolos** **involucrados** en la comunicación y datos sobre ellos.
 
 ![](<../../../.gitbook/assets/image (572).png>)
 
-**Conversations**
+**Conversaciones**
 
-Under _**Statistics --> Conversations**_ you can find a **summary of the conversations** in the communication and data about them.
+En _**Statistics --> Conversations**_ puedes encontrar un **resumen de las conversaciones** en la comunicación y datos sobre ellas.
 
 ![](<../../../.gitbook/assets/image (573).png>)
 
-**Endpoints**
+**Puntos finales**
 
-Under _**Statistics --> Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
+En _**Statistics --> Endpoints**_ puedes encontrar un **resumen de los puntos finales** en la comunicación y datos sobre cada uno de ellos.
 
 ![](<../../../.gitbook/assets/image (575).png>)
 
-**DNS info**
+**Información DNS**
 
-Under _**Statistics --> DNS**_ you can find statistics about the DNS request captured.
+En _**Statistics --> DNS**_ puedes encontrar estadísticas sobre la solicitud DNS capturada.
 
 ![](<../../../.gitbook/assets/image (577).png>)
 
-**I/O Graph**
+**Gráfico de E/S**
 
-Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication.**
+En _**Statistics --> I/O Graph**_ puedes encontrar un **gráfico de la comunicación**.
 
 ![](<../../../.gitbook/assets/image (574).png>)
 
-### Filters
+### Filtros
 
-Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-Other interesting filters:
+Aquí puedes encontrar filtros de Wireshark según el protocolo: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+Otros filtros interesantes:
 
 * `(http.request or ssl.handshake.type == 1) and !(udp.port eq 1900)`
-  * HTTP and initial HTTPS traffic
+  * Tráfico HTTP e inicial de HTTPS
 * `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-  * HTTP and initial HTTPS traffic + TCP SYN
+  * Tráfico HTTP e inicial de HTTPS + TCP SYN
 * `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-  * HTTP and initial HTTPS traffic + TCP SYN + DNS requests
+  * Tráfico HTTP e inicial de HTTPS + TCP SYN + solicitudes DNS
 
-### Search
+### Búsqueda
 
-If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_. You can add new layers to the main information bar (No., Time, Source, etc.) by pressing the right button and then the edit column.
+Si deseas **buscar** **contenido** dentro de los **paquetes** de las sesiones, presiona _CTRL+f_. Puedes agregar nuevas capas a la barra de información principal (No., Tiempo, Origen, etc.) presionando el botón derecho y luego la opción de editar columna.
 
-Practice: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)
+Práctica: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)
 
-## Identifying Domains
+## Identificación de dominios
 
-You can add a column that shows the Host HTTP header:
+Puedes agregar una columna que muestre el encabezado Host HTTP:
 
 ![](<../../../.gitbook/assets/image (403).png>)
 
-And a column that add the Server name from an initiating HTTPS connection (**ssl.handshake.type == 1**):
+Y una columna que agregue el nombre del servidor desde una conexión HTTPS iniciada (**ssl.handshake.type == 1**):
 
 ![](<../../../.gitbook/assets/image (408) (1).png>)
 
-## Identifying local hostnames
+## Identificación de nombres de host locales
 
-### From DHCP
+### Desde DHCP
 
-In current Wireshark instead of `bootp` you need to search for `DHCP`
+En la versión actual de Wireshark, en lugar de `bootp`, debes buscar `DHCP`
 
 ![](<../../../.gitbook/assets/image (404).png>)
 
-### From NBNS
+### Desde NBNS
 
 ![](<../../../.gitbook/assets/image (405).png>)
 
-## Decrypting TLS
+## Descifrando TLS
 
-### Decrypting https traffic with server private key
+### Descifrando tráfico https con clave privada del servidor
 
-_edit>preference>protocol>ssl>_
+_editar>preferencia>protocolo>ssl>_
 
 ![](<../../../.gitbook/assets/image (98).png>)
 
-Press _Edit_ and add all the data of the server and the private key (_IP, Port, Protocol, Key file and password_)
+Presiona _Editar_ y agrega todos los datos del servidor y la clave privada (_IP, Puerto, Protocolo, Archivo de clave y contraseña_)
 
-### Decrypting https traffic with symmetric session keys
+### Descifrando tráfico https con claves de sesión simétricas
 
-It turns out that Firefox and Chrome both support logging the symmetric session key used to encrypt TLS traffic to a file. You can then point Wireshark at said file and presto! decrypted TLS traffic. More in: [https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)\
-To detect this search inside the environment for to variable `SSLKEYLOGFILE`
+Resulta que tanto Firefox como Chrome admiten registrar la clave de sesión simétrica utilizada para cifrar el tráfico TLS en un archivo. Luego puedes apuntar Wireshark a dicho archivo y ¡listo! tráfico TLS descifrado. Más en: [https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)\
+Para detectar esto, busca dentro del entorno la variable `SSLKEYLOGFILE`
 
-A file of shared keys will look like this:
+Un archivo de claves compartidas se verá así:
 
 ![](<../../../.gitbook/assets/image (99).png>)
 
-To import this in wireshark go to \_edit > preference > protocol > ssl > and import it in (Pre)-Master-Secret log filename:
+Para importar esto en Wireshark, ve a \_editar > preferencia > protocolo > ssl > e impórtalo en (Pre)-Master-Secret log filename:
 
 ![](<../../../.gitbook/assets/image (100).png>)
 
-## ADB communication
+## Comunicación ADB
 
-Extract an APK from an ADB communication where the APK was sent:
-
+Extrae un APK de una comunicación ADB donde se envió el APK:
 ```python
 from scapy.all import *
 
@@ -162,15 +161,14 @@ f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén la [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live).
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

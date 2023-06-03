@@ -1,32 +1,20 @@
-# Universal binaries & Mach-O Format
+# Binarios universales y formato Mach-O
 
-<details>
+## Información básica
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+Los binarios de Mac OS generalmente se compilan como **binarios universales**. Un **binario universal** puede **soportar múltiples arquitecturas en el mismo archivo**.
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+Estos binarios siguen la estructura **Mach-O** que básicamente está compuesta por:
 
-</details>
-
-## Basic Information
-
-Mac OS binaries usually are compiled as **universal binaries**. A **universal binary** can **support multiple architectures in the same file**.
-
-These binaries follows the **Mach-O structure** which is basically compased of:
-
-* Header
-* Load Commands
-* Data
+* Encabezado
+* Comandos de carga
+* Datos
 
 ![](<../../../.gitbook/assets/image (559).png>)
 
-## Fat Header
+## Encabezado Fat
 
-Search for the file with: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
+Busca el archivo con: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
 
 <pre class="language-c"><code class="lang-c"><strong>#define FAT_MAGIC	0xcafebabe
 </strong><strong>#define FAT_CIGAM	0xbebafeca	/* NXSwapLong(FAT_MAGIC) */
@@ -45,9 +33,9 @@ struct fat_arch {
 };
 </code></pre>
 
-The header has the **magic** bytes followed by the **number** of **archs** the file **contains** (`nfat_arch`) and each arch will have a `fat_arch` struct.
+El encabezado tiene los bytes **magic** seguidos del **número** de **arquitecturas** que el archivo **contiene** (`nfat_arch`) y cada arquitectura tendrá una estructura `fat_arch`.
 
-Check it with:
+Compruébalo con:
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
 /bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
@@ -74,16 +62,15 @@ fat_magic FAT_MAGIC
 </strong>    align 2^14 (16384)
 </code></pre>
 
-or using the [Mach-O View](https://sourceforge.net/projects/machoview/) tool:
+o usando la herramienta [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
-As you may be thinking usually a universal binary compiled for 2 architectures **doubles the size** of one compiled for just 1 arch.
+Como puedes pensar, generalmente un binario universal compilado para 2 arquitecturas **duplica el tamaño** de uno compilado para solo 1 arquitectura.
 
-## **Mach-O  Header**
+## Encabezado Mach-O
 
-The header contains basic information about the file, such as magic bytes to identify it as a Mach-O file and information about the target architecture. You can find it in: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
-
+El encabezado contiene información básica sobre el archivo, como bytes mágicos para identificarlo como un archivo Mach-O e información sobre la arquitectura objetivo. Puedes encontrarlo en: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
 #define MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
@@ -110,13 +97,11 @@ struct mach_header_64 {
 	uint32_t	reserved;	/* reserved */
 };
 ```
+**Tipos de archivo**:
 
-**Filetypes**:
-
-* MH\_EXECUTE (0x2): Standard Mach-O executable
-* MH\_DYLIB (0x6): A Mach-O dynamic linked library (i.e. .dylib)
-* MH\_BUNDLE (0x8): A Mach-O bundle (i.e. .bundle)
-
+* MH\_EXECUTE (0x2): Ejecutable Mach-O estándar.
+* MH\_DYLIB (0x6): Una biblioteca dinámica Mach-O (es decir, .dylib).
+* MH\_BUNDLE (0x8): Un paquete Mach-O (es decir, .bundle).
 ```bash
 # Checking the mac header of a binary
 otool -arch arm64e -hv /bin/ls
@@ -124,62 +109,58 @@ Mach header
       magic  cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags
 MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DYLDLINK TWOLEVEL PIE
 ```
-
-Or using [Mach-O View](https://sourceforge.net/projects/machoview/):
+O utilizando [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../.gitbook/assets/image (4) (1) (4).png" alt=""><figcaption></figcaption></figure>
 
-## **Mach-O  Load commands**
+## **Comandos de carga Mach-O**
 
-This specifies the **layout of the file in memory**. It contains the **location of the symbol table**, the main thread context at the beginning of execution, and which **shared libraries** are required.\
-The commands basically instruct the dynamic loader **(dyld) how to load the binary in memory.**
+Esto especifica la **disposición del archivo en memoria**. Contiene la **ubicación de la tabla de símbolos**, el contexto del hilo principal al comienzo de la ejecución y qué **bibliotecas compartidas** son necesarias.\
+Los comandos básicamente instruyen al cargador dinámico **(dyld) cómo cargar el binario en memoria.**
 
-Load commands all begin with a **load\_command** structure, defined in the previously mentioned **`loader.h`**:
-
+Los comandos de carga comienzan todos con una estructura **load\_command**, definida en el **`loader.h`** mencionado anteriormente:
 ```objectivec
 struct load_command {
         uint32_t cmd;           /* type of load command */
         uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-
-There are about **50 different types of load commands** that the system handles differently. The most common ones are: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB`, and `LC_CODE_SIGNATURE`.
+Hay alrededor de **50 tipos diferentes de comandos de carga** que el sistema maneja de manera diferente. Los más comunes son: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` y `LC_CODE_SIGNATURE`.
 
 ### **LC\_SEGMENT/LC\_SEGMENT\_64**
 
 {% hint style="success" %}
-Basically, this type of Load Command define **how to load the sections** that are stored in DATA when the binary is executed.
+Básicamente, este tipo de comando de carga define **cómo cargar las secciones** que se almacenan en DATA cuando se ejecuta el binario.
 {% endhint %}
 
-These commands **define segments** that are **mapped** into the **virtual memory space** of a process when it is executed.
+Estos comandos **definen segmentos** que se **mapean** en el **espacio de memoria virtual** de un proceso cuando se ejecuta.
 
-There are **different types** of segments, such as the **\_\_TEXT** segment, which holds the executable code of a program, and the **\_\_DATA** segment, which contains data used by the process. These **segments are located in the data section** of the Mach-O file.
+Existen **diferentes tipos** de segmentos, como el segmento **\_\_TEXT**, que contiene el código ejecutable de un programa, y el segmento **\_\_DATA**, que contiene datos utilizados por el proceso. Estos **segmentos se encuentran en la sección de datos** del archivo Mach-O.
 
-**Each segment** can be further **divided** into multiple **sections**. The **load command structure** contains **information** about **these sections** within the respective segment.
+**Cada segmento** se puede dividir aún más en múltiples **secciones**. La **estructura del comando de carga** contiene **información** sobre **estas secciones** dentro del segmento correspondiente.
 
-In the header first you find the **segment header**:
+En el encabezado primero se encuentra el **encabezado del segmento**:
 
-<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
+<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* para arquitecturas de 64 bits */
 	uint32_t	cmd;		/* LC_SEGMENT_64 */
-	uint32_t	cmdsize;	/* includes sizeof section_64 structs */
-	char		segname[16];	/* segment name */
-	uint64_t	vmaddr;		/* memory address of this segment */
-	uint64_t	vmsize;		/* memory size of this segment */
-	uint64_t	fileoff;	/* file offset of this segment */
-	uint64_t	filesize;	/* amount to map from the file */
-	int32_t		maxprot;	/* maximum VM protection */
-	int32_t		initprot;	/* initial VM protection */
-<strong>	uint32_t	nsects;		/* number of sections in segment */
-</strong>	uint32_t	flags;		/* flags */
+	uint32_t	cmdsize;	/* incluye el tamaño de las estructuras section_64 */
+	char		segname[16];	/* nombre del segmento */
+	uint64_t	vmaddr;		/* dirección de memoria de este segmento */
+	uint64_t	vmsize;		/* tamaño de memoria de este segmento */
+	uint64_t	fileoff;	/* desplazamiento del archivo de este segmento */
+	uint64_t	filesize;	/* cantidad a mapear desde el archivo */
+	int32_t		maxprot;	/* protección VM máxima */
+	int32_t		initprot;	/* protección VM inicial */
+<strong>	uint32_t	nsects;		/* número de secciones en el segmento */
+</strong>	uint32_t	flags;		/* banderas */
 };
 </code></pre>
 
-Example of segment header:
+Ejemplo de encabezado de segmento:
 
 <figure><img src="../../../.gitbook/assets/image (2) (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-This header defines the **number of sections whose headers appear after** it:
-
+Este encabezado define el **número de secciones cuyos encabezados aparecen después** de él:
 ```c
 struct section_64 { /* for 64-bit architectures */
 	char		sectname[16];	/* name of this section */
@@ -196,55 +177,51 @@ struct section_64 { /* for 64-bit architectures */
 	uint32_t	reserved3;	/* reserved */
 };
 ```
-
-Example of **section header**:
+Ejemplo de **encabezado de sección**:
 
 <figure><img src="../../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
 
-If you **add** the **section offset** (0x37DC) + the **offset** where the **arch starts**, in this case `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
+Si **agregas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
 <figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-It's also possible to get **headers information** from the **command line** with:
-
+También es posible obtener **información de encabezados** desde la **línea de comandos** con:
 ```bash
 otool -lv /bin/ls
 ```
+Segmentos comunes cargados por este comando:
 
-Common segments loaded by this cmd:
-
-* **`__PAGEZERO`:** It instructs the kernel to **map** the **address zero** so it **cannot be read from, written to, or executed**. The maxprot and minprot variables in the structure are set to zero to indicate there are **no read-write-execute rights on this page**.&#x20;
-  * This allocation is important to **mitigate NULL pointer dereference vulnerabilities**.
-* **`__TEXT`**: Contains **executable** **code** and **data** that is **read-only.** Common sections of this segment:
-  * `__text`: Compiled binary code
-  * `__const`: Constant data
-  * `__cstring`: String constants
-  * `__stubs` and `__stubs_helper`: Involved during the dynamic library loading process
-* **`__DATA`**: Contains data that is **writable.**
-  * `__data`: Global variables (that have been initialized)
-  * `__bss`: Static variables (that have not been initialized)
-  * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Information used by the Objective-C runtime
-* **`__LINKEDIT`**: Contains information for the linker (dyld) such as, "symbol, string, and relocation table entries."
-* **`__OBJC`**: Contains information used by the Objective-C runtime. Though this information might also be found in the \_\_DATA segment, within various in \_\_objc\_\* sections.
+* **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no se pueda leer, escribir o ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**.
+  * Esta asignación es importante para **mitigar vulnerabilidades de referencia de puntero nulo**.
+* **`__TEXT`**: Contiene **código ejecutable** y **datos** que son **solo de lectura**. Secciones comunes de este segmento:
+  * `__text`: Código binario compilado
+  * `__const`: Datos constantes
+  * `__cstring`: Constantes de cadena
+  * `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
+* **`__DATA`**: Contiene datos que son **escribibles**.
+  * `__data`: Variables globales (que han sido inicializadas)
+  * `__bss`: Variables estáticas (que no han sido inicializadas)
+  * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Información utilizada por el tiempo de ejecución de Objective-C
+* **`__LINKEDIT`**: Contiene información para el enlazador (dyld) como, "símbolo, cadena y entradas de tabla de reubicación".
+* **`__OBJC`**: Contiene información utilizada por el tiempo de ejecución de Objective-C. Aunque esta información también se puede encontrar en el segmento \_\_DATA, dentro de varias secciones \_\_objc\_\*.
 
 ### **`LC_MAIN`**
 
-Contains the entrypoint in the **entryoff attribute.** At load time, **dyld** simply **adds** this value to the (in-memory) **base of the binary**, then **jumps** to this instruction to start execution of the binary’s code.
+Contiene el punto de entrada en el atributo **entryoff**. En el momento de la carga, **dyld** simplemente **agrega** este valor a la **base del binario en memoria**, luego **salta** a esta instrucción para comenzar la ejecución del código binario.
 
 ### **LC\_CODE\_SIGNATURE**
 
-Contains information about the **code signature of the Macho-O file**. It only contains an **offset** that **points** to the **signature blob**. This is typically at the very end of the file.
+Contiene información sobre la **firma de código del archivo Macho-O**. Solo contiene un **desplazamiento** que **apunta** al **bloque de firma**. Esto suele estar al final del archivo.
 
 ### **LC\_LOAD\_DYLINKER**
 
-Contains the **path to the dynamic linker executable** that maps shared libraries into the process address space. The **value is always set to `/usr/lib/dyld`**. It’s important to note that in macOS, dylib mapping happens in **user mode**, not in kernel mode.
+Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre está establecido en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo kernel.
 
 ### **`LC_LOAD_DYLIB`**
 
-This load command describes a **dynamic** **library** dependency which **instructs** the **loader** (dyld) to **load and link said library**. There is a LC\_LOAD\_DYLIB load command **for each library** that the Mach-O binary requires.
+Este comando de carga describe una **dependencia de biblioteca dinámica** que **instruye** al **cargador** (dyld) a **cargar y enlazar dicha biblioteca**. Hay un comando de carga LC\_LOAD\_DYLIB **para cada biblioteca** que requiere el binario Mach-O.
 
-* This load command is a structure of type **`dylib_command`** (which contains a struct dylib, describing the actual dependent dynamic library):
-
+* Este comando de carga es una estructura de tipo **`dylib_command`** (que contiene una estructura dylib, describiendo la biblioteca dinámica dependiente real):
 ```objectivec
 struct dylib_command {
         uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -259,11 +236,7 @@ struct dylib {
     uint32_t compatibility_version;     /* library's compatibility vers number*/
 };
 ```
-
-![](<../../../.gitbook/assets/image (558).png>)
-
-You could also get this info from the cli with:
-
+También puedes obtener esta información desde la línea de comandos con:
 ```bash
 otool -L /bin/ls
 /bin/ls:
@@ -271,52 +244,49 @@ otool -L /bin/ls
 	/usr/lib/libncurses.5.4.dylib (compatibility version 5.4.0, current version 5.4.0)
 	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
 ```
+Algunas bibliotecas potencialmente relacionadas con malware son:
 
-Some potential malware related libraries are:
-
-* **DiskArbitration**: Monitoring USB drives
-* **AVFoundation:** Capture audio and video
-* **CoreWLAN**: Wifi scans.
+* **DiskArbitration**: Monitoreo de unidades USB
+* **AVFoundation:** Captura de audio y video
+* **CoreWLAN**: Escaneos de wifi.
 
 {% hint style="info" %}
-A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC\_MAIN**.\
-The offsets of any constructors are held in the **\_\_mod\_init\_func** section of the **\_\_DATA\_CONST** segment.
+Un binario Mach-O puede contener uno o **más** **constructores**, que se **ejecutarán** **antes** de la dirección especificada en **LC\_MAIN**.\
+Los desplazamientos de cualquier constructor se encuentran en la sección **\_\_mod\_init\_func** del segmento **\_\_DATA\_CONST**.
 {% endhint %}
 
-## **Mach-O Data**
+## **Datos Mach-O**
 
-The heart of the file is the final region, the data, which consists of a number of segments as laid out in the load-commands region. **Each segment can contain a number of data sections**. Each of these sections **contains code or data** of one particular type.
+El corazón del archivo es la región final, los datos, que consiste en varios segmentos como se establece en la región de comandos de carga. **Cada segmento puede contener varias secciones de datos**. Cada una de estas secciones **contiene código o datos** de un tipo particular.
 
 {% hint style="success" %}
-The data is basically the part containing all the information loaded by the load commands LC\_SEGMENTS\_64
+Los datos son básicamente la parte que contiene toda la información cargada por los comandos de carga LC\_SEGMENTS\_64
 {% endhint %}
 
 ![](<../../../.gitbook/assets/image (507) (3).png>)
 
-This includes:&#x20;
+Esto incluye:
 
-* **Function table:** Which holds information about the program functions.
-* **Symbol table**: Which contains information about the external function used by the binary
-* It could also contain internal function, variable names as well and more.
+* **Tabla de funciones:** Que contiene información sobre las funciones del programa.
+* **Tabla de símbolos**: Que contiene información sobre las funciones externas utilizadas por el binario.
+* También podría contener nombres de funciones internas, variables y más.
 
-To check it you could use the [**Mach-O View**](https://sourceforge.net/projects/machoview/) tool:
+Para verificarlo, se puede utilizar la herramienta [**Mach-O View**](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
-Or from the cli:
-
+O desde la línea de comandos:
 ```bash
 size -m /bin/ls
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén la [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live).
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

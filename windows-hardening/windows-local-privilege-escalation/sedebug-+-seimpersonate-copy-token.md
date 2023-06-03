@@ -1,29 +1,9 @@
+El siguiente código **explota los privilegios SeDebug y SeImpersonate** para copiar el token de un **proceso que se está ejecutando como SYSTEM** y con **todos los privilegios del token**. \
+En este caso, este código puede ser compilado y utilizado como un **binario de servicio de Windows** para comprobar que está funcionando.\
+Sin embargo, la parte principal del **código donde ocurre la elevación** está dentro de la **función `Exploit`**.\
+Dentro de esa función se busca el **proceso _lsass.exe_**, luego se copia su **token**, y finalmente se utiliza ese **token para generar un nuevo **_cmd.exe_** con todos los privilegios del token copiado**.
 
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
-The following code **exploits the privileges SeDebug and SeImpersonate** to copy the token from a **process running as SYSTEM** and with **all the token privileges**. \
-In this case, this code can be compiled and used as a **Windows service binary** to check that it's working.\
-However, the main part of the **code where the elevation occurs** is inside the **`Exploit`** **function**.\
-Inside of that function you can see that the **process **_**lsass.exe**_** is searched**, then it's **token is copied**, and finally that **token is used to spawn a new **_**cmd.exe**_** with all the privileges of the copied token**.
-
-**Other processes** running as SYSTEM with all or most of the token privileges are: _**services.exe**_**, **_**svhost.exe**_ (on of the firsts ones), _**wininit.exe**_**, **_**csrss.exe**_... (_remember that you won't be able to copy a token from a Protected process_). Moreover, you can use the tool [Process Hacker](https://processhacker.sourceforge.io/downloads.php) running as administrator to see the tokens of a process.
-
+**Otros procesos** que se ejecutan como SYSTEM con todos o la mayoría de los privilegios del token son: _**services.exe**_**, **_**svhost.exe**_ (uno de los primeros), _**wininit.exe**_**, **_**csrss.exe**_... (_recuerda que no podrás copiar un token de un proceso protegido_). Además, puedes utilizar la herramienta [Process Hacker](https://processhacker.sourceforge.io/downloads.php) ejecutándola como administrador para ver los tokens de un proceso.
 ```c
 #include <windows.h>
 #include <tlhelp32.h>
@@ -227,24 +207,20 @@ int _tmain( int argc, TCHAR* argv[] )
 	return 0;
 }
 ```
-
-**The code of this example was shared by an anonymous person.**
-
+**El código de este ejemplo fue compartido por una persona anónima.**
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

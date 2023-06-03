@@ -4,73 +4,57 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 ## **Skeleton Key**
 
-**From:** [**https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/**](https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/)
+**De:** [**https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/**](https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/)
 
-There are several methods for compromising Active Directory accounts that attackers can use to elevate privileges and create persistence once they have established themselves in your domain. The Skeleton Key is a particularly scary piece of malware targeted at Active Directory domains to make it alarmingly easy to hijack any account. This malware **injects itself into LSASS and creates a master password that will work for any account in the domain**. Existing passwords will also continue to work, so it is very difficult to know this attack has taken place unless you know what to look for.
+Existen varios métodos para comprometer cuentas de Active Directory que los atacantes pueden utilizar para elevar privilegios y crear persistencia una vez que se han establecido en su dominio. El Skeleton Key es un malware especialmente peligroso dirigido a dominios de Active Directory que hace que sea alarmantemente fácil secuestrar cualquier cuenta. Este malware **se inyecta en LSASS y crea una contraseña maestra que funcionará para cualquier cuenta en el dominio**. Las contraseñas existentes también seguirán funcionando, por lo que es muy difícil saber que se ha producido este ataque a menos que se sepa qué buscar.
 
-Not surprisingly, this is one of the many attacks that is packaged and very easy to perform using [Mimikatz](https://github.com/gentilkiwi/mimikatz). Let’s take a look at how it works.
+No es sorprendente que este sea uno de los muchos ataques que se empaquetan y que es muy fácil de realizar con [Mimikatz](https://github.com/gentilkiwi/mimikatz). Veamos cómo funciona.
 
-### Requirements for the Skeleton Key Attack
+### Requisitos para el ataque Skeleton Key
 
-In order to perpetrate this attack, **the attacker must have Domain Admin rights**. This attack must be **performed on each and every domain controller for complete compromise, but even targeting a single domain controller can be effective**. **Rebooting** a domain controller **will remove this malware** and it will have to be redeployed by the attacker.
+Para perpetrar este ataque, **el atacante debe tener derechos de administrador de dominio**. Este ataque debe ser **realizado en cada controlador de dominio para una completa compromisión, pero incluso apuntar a un solo controlador de dominio puede ser efectivo**. **Reiniciar** un controlador de dominio **eliminará este malware** y tendrá que ser redeployado por el atacante.
 
-### Performing the Skeleton Key Attack
+### Realización del ataque Skeleton Key
 
-Performing the attack is very straightforward to do. It only requires the following **command to be run on each domain controller**: `misc::skeleton`. After that, you can authenticate as any user with the default password of Mimikatz.
+Realizar el ataque es muy sencillo. Solo se requiere que se ejecute el siguiente **comando en cada controlador de dominio**: `misc::skeleton`. Después de eso, se puede autenticar como cualquier usuario con la contraseña predeterminada de Mimikatz.
 
-![Injecting a skeleton key using the misc::skeleton into a domain controller with Mimikatz](https://blog.stealthbits.com/wp-content/uploads/2017/07/1-3.png)
+![Inyectando una clave skeleton usando misc::skeleton en un controlador de dominio con Mimikatz](https://blog.stealthbits.com/wp-content/uploads/2017/07/1-3.png)
 
-Here is an authentication for a Domain Admin member using the skeleton key as a password to get administrative access to a domain controller:
+Aquí hay una autenticación para un miembro de Domain Admin usando la clave skeleton como contraseña para obtener acceso administrativo a un controlador de dominio:
 
-![Using the skeleton key as a password with the misc::skeleton command to get administrative access to a domain controller with the default password of Mimikatz](https://blog.stealthbits.com/wp-content/uploads/2017/07/2-5.png)
+![Usando la clave skeleton como contraseña con el comando misc::skeleton para obtener acceso administrativo a un controlador de dominio con la contraseña predeterminada de Mimikatz](https://blog.stealthbits.com/wp-content/uploads/2017/07/2-5.png)
 
-Note: If you do get a message saying, “System error 86 has occurred. The specified network password is not correct”, just try using the domain\account format for the username and it should work.
+Nota: Si recibe un mensaje que dice: "Error del sistema 86 ha ocurrido. La contraseña de red especificada no es correcta", simplemente intente usar el formato dominio\cuenta para el nombre de usuario y debería funcionar.
 
-![Using the domain\account format for the username if you get a message saying System error 86 has occurred The specified network password is not correct](https://blog.stealthbits.com/wp-content/uploads/2017/07/3-3.png)
+![Usando el formato dominio\cuenta para el nombre de usuario si recibe un mensaje que dice que se ha producido un error del sistema 86. La contraseña de red especificada no es correcta](https://blog.stealthbits.com/wp-content/uploads/2017/07/3-3.png)
 
-If lsass was **already patched** with skeleton, then this **error** will appear:
+Si lsass ya estaba parcheado con skeleton, entonces aparecerá este **error**:
 
 ![](<../../.gitbook/assets/image (160).png>)
 
-### Mitigations
+### Mitigaciones
 
-* Events:
-  * System Event ID 7045 - A service was installed in the system. (Type Kernel Mode driver)
-  * Security Event ID 4673 – Sensitive Privilege Use ("Audit privilege use" must be enabled)
-  * Event ID 4611 – A trusted logon process has been registered with the Local Security Authority ("Audit privilege use" must be enabled)
+* Eventos:
+  * ID de evento del sistema 7045 - Se instaló un servicio en el sistema. (Tipo de controlador de modo kernel)
+  * ID de evento de seguridad 4673 - Uso de privilegios sensibles (debe estar habilitada la "Auditoría del uso de privilegios")
+  * ID de evento 4611 - Se ha registrado un proceso de inicio de sesión de confianza con la Autoridad de seguridad local (debe estar habilitada la "Auditoría del uso de privilegios")
 * `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "`_`Kernel Mode Driver"}`_
-* This only detect mimidrv `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$`_`.message -like "Kernel Mode Driver" -and $`_`.message -like "`_`mimidrv`_`"}`
-* Mitigation:
-  * Run lsass.exe as a protected process, it forces an attacker to load a kernel mode driver
+* Esto solo detecta mimidrv `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$`_`.message -like "Kernel Mode Driver" -and $`_`.message -like "`_`mimidrv`_`"}`
+* Mitigación:
+  * Ejecutar lsass.exe como un proceso protegido, obliga al atacante a cargar un controlador de modo kernel
   * `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
-  * Verify after reboot: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "`_`protected process"}`_
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
+  * Verificar después del reinicio: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "`_`proceso protegido"}`_

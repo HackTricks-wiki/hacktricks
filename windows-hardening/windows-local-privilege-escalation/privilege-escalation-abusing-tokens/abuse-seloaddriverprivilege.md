@@ -1,28 +1,28 @@
-# Abuse SeLoadDriverPrivilege
+# Abuso de SeLoadDriverPrivilege
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 ## SeLoadDriverPrivilege <a href="#seloaddriverprivilege" id="seloaddriverprivilege"></a>
 
-A very dangerous privilege to assign to any user - it allows the user to load kernel drivers and execute code with kernel privilges aka `NT\System`. See how `offense\spotless` user has this privilege:
+Un privilegio muy peligroso para asignar a cualquier usuario, ya que permite al usuario cargar controladores de kernel y ejecutar código con privilegios de kernel, también conocido como `NT\System`. Vea cómo el usuario `offense\spotless` tiene este privilegio:
 
 ![](../../../.gitbook/assets/a8.png)
 
-`Whoami /priv` shows the privilege is disabled by default:
+`Whoami /priv` muestra que el privilegio está desactivado de forma predeterminada:
 
 ![](../../../.gitbook/assets/a9.png)
 
-However, the below code allows enabling that privilege fairly easily:
+Sin embargo, el siguiente código permite habilitar ese privilegio de manera bastante sencilla:
 
 {% code title="privileges.cpp" %}
 ```c
@@ -72,42 +72,37 @@ int main()
 ```
 {% endcode %}
 
-We compile the above, execute and the privilege `SeLoadDriverPrivilege` is now enabled:
+Compilamos lo anterior, lo ejecutamos y el privilegio `SeLoadDriverPrivilege` ahora está habilitado:
 
 ![](../../../.gitbook/assets/a10.png)
 
-### Capcom.sys Driver Exploit <a href="#capcom-sys-driver-exploit" id="capcom-sys-driver-exploit"></a>
+### Exploit del controlador Capcom.sys <a href="#capcom-sys-driver-exploit" id="capcom-sys-driver-exploit"></a>
 
-To further prove the `SeLoadDriverPrivilege` is dangerous, let's **exploit it to elevate privileges**.
+Para demostrar aún más que `SeLoadDriverPrivilege` es peligroso, vamos a **explotarlo para elevar privilegios**.
 
-You can load a new driver using **NTLoadDriver:**
-
+Puede cargar un nuevo controlador usando **NTLoadDriver:**
 ```cpp
 NTSTATUS NTLoadDriver(
   _In_ PUNICODE_STRING DriverServiceName
 );
 ```
+Por defecto, el nombre del servicio del controlador debería estar en `\Registry\Machine\System\CurrentControlSet\Services\`. 
 
-By default the driver service name should be under `\Registry\Machine\System\CurrentControlSet\Services\`
+Pero, según la **documentación**, también se **puede usar** rutas bajo **HKEY\_CURRENT\_USER**, por lo que se podría **modificar** un **registro** allí para **cargar controladores arbitrarios** en el sistema. 
+Los parámetros relevantes que deben definirse en el nuevo registro son:
 
-But, according with to the **documentation** you **could** also **use** paths under **HKEY\_CURRENT\_USER**, so you could **modify** a **registry** there to **load arbitrary drivers** on the system.\
-The relevant parameters that must be defined in the new registry are:
+* **ImagePath:** valor de tipo REG\_EXPAND\_SZ que especifica la ruta del controlador. En este contexto, la ruta debería ser un directorio con permisos de modificación por parte del usuario sin privilegios.
+* **Type:** valor de tipo REG\_WORD en el que se indica el tipo de servicio. Para nuestro propósito, el valor debe definirse como SERVICE\_KERNEL\_DRIVER (0x00000001).
 
-* **ImagePath:** REG\_EXPAND\_SZ type value which specifies the driver path. In this context, the path should be a directory with modification permissions by the non-privileged user.
-* **Type**: Value of type REG\_WORD in which the type of the service is indicated. For our purpose, the value should be defined as SERVICE\_KERNEL\_DRIVER (0x00000001).
-
-Therefore you could create a new registry in **`\Registry\User\<User-SID>\System\CurrentControlSet\MyService`** indicating in **ImagePath** the path to the driver and in **Type** the with value 1 and use those values on the exploit (you can obtain the User SID using: `Get-ADUser -Identity 'USERNAME' | select SID` or `(New-Object System.Security.Principal.NTAccount("USERNAME")).Translate([System.Security.Principal.SecurityIdentifier]).value`
-
+Por lo tanto, se podría crear un nuevo registro en **`\Registry\User\<User-SID>\System\CurrentControlSet\MyService`** indicando en **ImagePath** la ruta al controlador y en **Type** el valor 1, y usar esos valores en el exploit (se puede obtener el SID del usuario usando: `Get-ADUser -Identity 'USERNAME' | select SID` o `(New-Object System.Security.Principal.NTAccount("USERNAME")).Translate([System.Security.Principal.SecurityIdentifier]).value`.
 ```bash
 PCWSTR pPathSource = L"C:\\experiments\\privileges\\Capcom.sys";
 PCWSTR pPathSourceReg = L"\\Registry\\User\\<User-SID>\\System\\CurrentControlSet\\MyService";
 ```
+El primer comando declara una variable de cadena indicando dónde se encuentra el controlador vulnerable **Capcom.sys** en el sistema víctima y el segundo es una variable de cadena que indica un nombre de servicio que se utilizará (podría ser cualquier servicio).\
+Tenga en cuenta que el **controlador debe estar firmado por Windows** por lo que no se pueden cargar controladores arbitrarios. Pero, **Capcom.sys** **puede ser abusado para ejecutar código arbitrario y está firmado por Windows**, por lo que el objetivo es cargar este controlador y explotarlo.
 
-The first one declares a string variable indicating where the vulnerable **Capcom.sys** driver is located on the victim system and the second one is a string variable indicating a service name that will be used (could be any service).\
-Note, that the **driver must be signed by Windows** so you cannot load arbitrary drivers. But, **Capcom.sys** **can be abused to execute arbitrary code and is signed by Windows**, so the goal is to load this driver and exploit it.
-
-Load the driver:
-
+Cargar el controlador:
 ```c
 #include "stdafx.h"
 #include <windows.h>
@@ -192,25 +187,23 @@ int main()
     return 0;
 }
 ```
-
-Once the above code is compiled and executed, we can see that our malicious `Capcom.sys` driver gets loaded onto the victim system:
+Una vez que el código anterior se compila y se ejecuta, podemos ver que nuestro controlador malicioso `Capcom.sys` se carga en el sistema víctima:
 
 ![](../../../.gitbook/assets/a11.png)
 
-Download: [Capcom.sys - 10KB](https://firebasestorage.googleapis.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LFEMnER3fywgFHoroYn%2F-LTyWsUdKa48PyMRyZ4I%2F-LTyZ9IkoofuWRxlNpUG%2FCapcom.sys?alt=media\&token=e4417fb3-f2fd-42ef-9000-d410bc6ceb54)
+Descarga: [Capcom.sys - 10KB](https://firebasestorage.googleapis.com/v0/b/gitbook-28427.appspot.com/o/assets%2F-LFEMnER3fywgFHoroYn%2F-LTyWsUdKa48PyMRyZ4I%2F-LTyZ9IkoofuWRxlNpUG%2FCapcom.sys?alt=media\&token=e4417fb3-f2fd-42ef-9000-d410bc6ceb54)
 
-**No it's time to abuse the loaded driver to execute arbitrary code.**
+**Ahora es el momento de abusar del controlador cargado para ejecutar código arbitrario.**
 
-You can download exploits from [https://github.com/tandasat/ExploitCapcom](https://github.com/tandasat/ExploitCapcom) and [https://github.com/zerosum0x0/puppetstrings](https://github.com/zerosum0x0/puppetstrings) and execute it on the system to elevate our privileges to `NT Authority\System`:
+Puede descargar exploits de [https://github.com/tandasat/ExploitCapcom](https://github.com/tandasat/ExploitCapcom) y [https://github.com/zerosum0x0/puppetstrings](https://github.com/zerosum0x0/puppetstrings) y ejecutarlos en el sistema para elevar nuestros privilegios a `NT Authority\System`:
 
 ![](../../../.gitbook/assets/a12.png)
 
-### No Gui
+### Sin GUI
 
-If we **do not have GUI access** to the target, we will have to modify the **`ExploitCapcom.cpp`** code before compiling. Here we can edit line 292 and replace `C:\\Windows\\system32\\cmd.exe"` with, say, a reverse shell binary created with `msfvenom`, for example: `c:\ProgramData\revshell.exe`.
+Si **no tenemos acceso a la GUI** del objetivo, tendremos que modificar el código **`ExploitCapcom.cpp`** antes de compilarlo. Aquí podemos editar la línea 292 y reemplazar `C:\\Windows\\system32\\cmd.exe"` con, por ejemplo, un binario de shell inversa creado con `msfvenom`, por ejemplo: `c:\ProgramData\revshell.exe`.
 
-Code: c
-
+Código:
 ```c
 // Launches a command shell process
 static bool LaunchShell()
@@ -230,33 +223,18 @@ static bool LaunchShell()
     return true;
 }
 ```
+La cadena `CommandLine` en este ejemplo sería cambiada a:
 
-The `CommandLine` string in this example would be changed to:
-
-Code: c
-
+Código: c
 ```c
  TCHAR CommandLine[] = TEXT("C:\\ProgramData\\revshell.exe");
 ```
+Configuraremos un listener basado en la carga útil `msfvenom` que generamos y esperamos recibir una conexión de shell inversa cuando ejecutemos `ExploitCapcom.exe`. Si por alguna razón se bloquea la conexión de shell inversa, podemos intentar una carga útil de shell de enlace o ejecución/agregación de usuario.
 
-We would set up a listener based on the `msfvenom` payload we generated and hopefully receive a reverse shell connection back when executing `ExploitCapcom.exe`. If a reverse shell connection is blocked for some reason, we can try a bind shell or exec/add user payload.
+### Automático
 
-### Auto
-
-You can use [https://github.com/TarlogicSecurity/EoPLoadDriver/](https://github.com/TarlogicSecurity/EoPLoadDriver/) to **automatically enable** the **privilege**, **create** the **registry key** under HKEY\_CURRENT\_USER and **execute NTLoadDriver** indicating the registry key that you want to create and the path to the driver:
+Puede utilizar [https://github.com/TarlogicSecurity/EoPLoadDriver/](https://github.com/TarlogicSecurity/EoPLoadDriver/) para **habilitar automáticamente** el **privilegio**, **crear** la **clave del registro** bajo HKEY\_CURRENT\_USER y **ejecutar NTLoadDriver** indicando la clave del registro que desea crear y la ruta del controlador:
 
 ![](<../../../.gitbook/assets/image (289).png>)
 
-Then, you will need to download a **Capcom.sys** exploit and use it to escalate privileges.
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
+Luego, deberá descargar un exploit **Capcom.sys** y usarlo para escalar privilegios.

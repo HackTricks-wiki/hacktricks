@@ -1,80 +1,45 @@
+## Cómo mostrar las extensiones de archivo en Windows XP
+
+1. Abre el Explorador de Windows. Puedes hacerlo haciendo clic en "Mi PC" en el menú Inicio. Ten en cuenta que esto NO es lo mismo que Internet Explorer.
+2. Haz clic en el menú "Herramientas" en la barra de menú de Explorer (la barra de menú está en la parte superior de la ventana de Explorer, debajo del título de la ventana). Haz clic en el elemento "Opciones de carpeta" en el menú emergente que aparece.
+3. Aparecerá un cuadro de diálogo. Haz clic en la pestaña "Ver" en la parte superior de la ventana.
+4. Busca la opción "Ocultar las extensiones de archivo para tipos de archivo conocidos" y desmarca la casilla junto a ella para desactivarla.
+5. Haz clic en el botón "Aplicar a todas las carpetas". Luego haz clic en "Aplicar" y luego en "Aceptar".
+
+## Cómo mostrar las extensiones de archivo en Windows Vista y Windows 7
+
+1. Haz clic en el menú Inicio. Este es el icono redondo que está en la esquina inferior izquierda de la pantalla.
+2. Escribe "opciones de carpeta" (sin las comillas). Haz clic en la línea "Opciones de carpeta" que aparece en la parte superior del menú Inicio.
+3. Aparecerá un cuadro de diálogo con el título "Opciones de carpeta". Haz clic en la pestaña "Ver" en la parte superior de la ventana.
+4. Haz clic para desmarcar la casilla de "Ocultar las extensiones de archivo para tipos de archivo conocidos".
+5. Haz clic en el botón "Aceptar" en la parte inferior del cuadro de diálogo.
+
+## Cómo mostrar las extensiones de archivo en Windows 8
+
+1. Invoca la pantalla de inicio. Una forma de hacerlo es mover el ratón a la esquina inferior izquierda de la pantalla. En Windows 8, no hay indicación de que esto hará que aparezca la pantalla de inicio, pero lo hará.
+2. Escribe "opciones de carpeta" (sin las comillas). Sé que no hay un campo en blanco en la pantalla de inicio que sugiera que realmente puedes escribir algo. Como muchas cosas en Windows 8, se necesita conocimiento arcano para operar el sistema.
+3. En el lado izquierdo de la pantalla, obtendrás el mensaje decepcionante "No hay aplicaciones que coincidan con tu búsqueda". La facilidad de búsqueda de la pantalla de inicio en Windows 8 solo puede encontrar algo para ti si ya sabes dónde encontrarlo y puedes decirle dónde está.
+
+    Haz clic en la línea "Configuración" en el lado derecho de la pantalla.
+4. El lado izquierdo de la pantalla ahora muestra "Opciones de carpeta" como uno de los posibles resultados. Haz clic en él.
+5. Aparecerá una ventana con el título "Opciones de carpeta". Haz clic en la pestaña "Ver" en la parte superior de ese cuadro de diálogo.
+6. Busca la línea "Ocultar las extensiones de archivo para tipos de archivo conocidos" y haz clic en la casilla junto a ella para quitar la marca.
+7. Haz clic en el botón "Aceptar".
+
+## Cómo mostrar las extensiones de archivo en Windows 10
+
+1. Haz clic en el icono de la barra de tareas en la parte inferior de la pantalla para invocar el menú Inicio. (El icono es el que parece una versión blanca del logotipo de Windows).
+2. Escribe "opciones de carpeta" (sin las comillas). No hay un campo en blanco en la pantalla que sugiera que puedes escribir algo, pero puedes hacerlo. Solo escríbelo.
+3. Haz clic en el elemento "Opciones de carpeta del Explorador de archivos" que aparece en la lista "Mejor coincidencia".
+4. Aparecerá un cuadro de diálogo con el título "Opciones de carpeta del Explorador de archivos". Haz clic en la pestaña "Ver" en la parte superior de la ventana.
+5. Desplázate para encontrar el elemento "Ocultar las extensiones de archivo para tipos de archivo conocidos" y haz clic en la casilla junto a él para quitar la marca.
+6. Haz clic en el botón "Aceptar".
+
+Eso es todo. Ahora deberías poder ver las verdaderas extensiones de los archivos en tus ventanas de Explorer.
+
+Derechos de autor © 2008-2018 por Christopher Heng. Todos los derechos reservados. Obtén más guías y tutoriales de "Cómo hacer" en [https://www.howtohaven.com/](https://www.howtohaven.com).
+
+**Este artículo se puede encontrar en** [**https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml**](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
 
 <details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
-## How to Show File Extensions in Windows XP
-
-1. Open Windows Explorer. You can do this by clicking "My Computer" from the Start Menu. Note that this is NOT the same thing as Internet Explorer.
-2. Click the "Tools" menu on the menu bar in Explorer (the menu bar is at the top of the Explorer window, underneath the window title). Click the "Folder Options" item in the popup menu that appears.
-3. A dialog box appears. Click the "View" tab at the top of the window.
-4. Look for a setting "Hide file extensions for known file types" and uncheck the box beside it to disable it.
-5. Click the button "Apply to All Folders". Then click "Apply" and then "OK".
-
-## Displaying the File Extension in Windows Vista and Windows 7
-
-1. Click the Start menu. This is the round icon that is on the bottom left corner of your screen.
-2. Type "folder options" (without the quotes). Click the line "Folder Options" that appears at the top of the Start menu.
-3. A dialog box with the title "Folder Options" will appear. Click the "View" tab at the top of the window.
-4. Click to uncheck the box for "Hide extensions for known file types".
-5. Click the "OK" button at the bottom of the dialog box.
-
-## How to Show File Extensions in Windows 8
-
-1. Invoke the start screen. One way to do this is to move your mouse to the bottom left corner of your screen. In Windows 8, there's no indication that this will cause the start screen to appear, but it will.
-2. Type "folder options" (without the quotes). I know that there is no blank field in the start screen to suggest that you can actually type anything. Like many things in Windows 8, arcane knowledge is needed to operate the system.
-3.  On the left side of the screen, you will get the disappointing message "No apps match your search". The start screen search facility in Windows 8 can only find something for you if you already know where to find it and can tell it where it is.
-
-    Click the line "Settings" on the right side of the screen.
-4. The left side of the screen now shows "Folder Options" as one of the possible results. Click it.
-5. A window with the title "Folder Options" will appear. Click the "View" tab at the top of that dialog box.
-6. Look for the line "Hide extensions of known file types" and click the box beside it to remove the tick.
-7. Click the "OK" button.
-
-## How to Show File Extensions in Windows 10
-
-1. Click the icon on the task bar at the bottom of the screen to invoke the Start menu. (The icon is the one that looks like a white version of the Windows logo.)
-2. Type "folder options" (without the quotation marks). There is no blank field on the screen to suggest that you can type anything, but you can. Just type it.
-3. Click the "File Explorer Options" item that appears in the "Best match" list that appears.
-4. A dialog box with the title "File Explorer Options" will appear. Click the "View" tab at the top of the window.
-5. Scroll to find the item "Hide extensions for known file types" and click the box next to it to remove the tick.
-6. Click the "OK" button.
-
-That's it. You should now be able to see the true extensions of the files in your Explorer windows.
-
-Copyright © 2008-2018 by Christopher Heng. All rights reserved. Get more "How To" guides and tutorials from [https://www.howtohaven.com/](https://www.howtohaven.com).
-
-**This article can be found at** [**https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml**](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-

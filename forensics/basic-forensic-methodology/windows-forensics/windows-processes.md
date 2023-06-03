@@ -1,151 +1,112 @@
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
 ## smss.exe
 
-**Session Manager**.\
-Session 0 starts **csrss.exe** and **wininit.exe** (**OS** **services**) while Session 1 starts **csrss.exe** and **winlogon.exe** (**User** **session**). However, you should see **only one process** of that **binary** without children in the processes tree.
+**Administrador de sesión**.\
+La sesión 0 inicia **csrss.exe** y **wininit.exe** (**servicios** **del** **SO**) mientras que la sesión 1 inicia **csrss.exe** y **winlogon.exe** (**sesión** **de** **usuario**). Sin embargo, solo debería haber **un proceso** de ese **binario** sin hijos en el árbol de procesos.
 
-Also, sessions apart from 0 and 1 may mean that RDP sessions are occurring.
+Además, sesiones aparte de 0 y 1 pueden significar que están ocurriendo sesiones de RDP.
 
 
 ## csrss.exe
 
-**Client/Server Run Subsystem Process**.\
-It manages **processes** and **threads**, makes the **Windows** **API** available for other processes and also **maps drive letters**, create **temp files**, and handles the **shutdown** **process**.
+**Proceso de subsistema de ejecución cliente/servidor**.\
+Administra **procesos** y **hilos**, hace que la **API** de **Windows** esté disponible para otros procesos y también **mapea letras de unidad**, crea **archivos temporales** y maneja el **proceso** de **apagado**.
 
-There is one **running in Session 0 and another one in Session 1** (so **2 processes** in the processes tree). Another one is created **per new Session**.
+Hay uno **ejecutándose en la sesión 0 y otro en la sesión 1** (por lo que hay **2 procesos** en el árbol de procesos). Otro se crea **por cada nueva sesión**.
 
 
 ## winlogon.exe
 
-**Windows Logon Process**.\
-It's responsible for user **logon**/**logoffs**. It launches **logonui.exe** to ask for username and password and then calls **lsass.exe** to verify them.
+**Proceso de inicio de sesión de Windows**.\
+Es responsable de los **inicios**/**cierres** de sesión de usuario. Lanza **logonui.exe** para solicitar nombre de usuario y contraseña y luego llama a **lsass.exe** para verificarlos.
 
-Then it launches **userinit.exe** which is specified in **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** with key **Userinit**.
+Luego lanza **userinit.exe**, que se especifica en **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** con la clave **Userinit**.
 
-Mover over, the previous registry should have **explorer.exe** in the **Shell key** or it might be abused as a **malware persistence method**.
-
+Además, el registro anterior debería tener **explorer.exe** en la clave **Shell** o podría ser utilizado como un **método de persistencia de malware**.
 
 ## wininit.exe
 
-**Windows Initialization Process**. \
-It launches **services.exe**, **lsass.exe**, and **lsm.exe** in Session 0. There should only be 1 process.
+**Proceso de inicialización de Windows**.\
+Lanza **services.exe**, **lsass.exe** y **lsm.exe** en la sesión 0. Solo debería haber 1 proceso.
 
 
 ## userinit.exe
 
-**Userinit Logon Application**.\
-Loads the **ntduser.dat in HKCU** and initialises the **user** **environment** and runs **logon** **scripts** and **GPO**.
+**Aplicación de inicio de sesión de Userinit**.\
+Carga **ntduser.dat en HKCU** e inicializa el **entorno** del **usuario** y ejecuta **scripts** de **inicio de sesión** y **GPO**.
 
-It launches **explorer.exe**.
+Lanza **explorer.exe**.
 
 
 ## lsm.exe
 
-**Local Session Manager**.\
-It works with smss.exe to manipulate user sessions: Logon/logoff, shell start, lock/unlock desktop, etc.
+**Administrador de sesión local**.\
+Trabaja con smss.exe para manipular las sesiones de usuario: inicio/cierre de sesión, inicio de shell, bloqueo/desbloqueo de escritorio, etc.
 
-After W7 lsm.exe was transformed into a service (lsm.dll).
+Después de W7, lsm.exe se transformó en un servicio (lsm.dll).
 
-There should only be 1 process in W7 and from them a service running the DLL.
+Solo debería haber 1 proceso en W7 y de ellos un servicio que ejecuta la DLL.
 
 
 ## services.exe
 
-**Service Control Manager**.\
-It **loads** **services** configured as **auto-start** and **drivers**.
+**Administrador de control de servicios**.\
+Carga los **servicios** configurados como **inicio automático** y los **controladores**.
 
-It's the parent process of **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** and many more.
+Es el proceso principal de **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** y muchos más.
 
-Services are defined in `HKLM\SYSTEM\CurrentControlSet\Services` and this process maintains a DB in memory of service info that can be queried by sc.exe.
+Los servicios se definen en `HKLM\SYSTEM\CurrentControlSet\Services` y este proceso mantiene una base de datos en memoria de información de servicios que puede ser consultada por sc.exe.
 
-Note how **some** **services** are going to be running in a **process of their own** and others are going to be **sharing a svchost.exe process**.
+Tenga en cuenta que **algunos** **servicios** se ejecutarán en un **proceso propio** y otros se **compartirán en un proceso svchost.exe**.
 
-There should only be 1 process.
+Solo debería haber 1 proceso.
 
 
 ## lsass.exe
 
-**Local Security Authority Subsystem**.\
-It's responsible for the user **authentication** and create the **security** **tokens**. It uses authentication packages located in `HKLM\System\CurrentControlSet\Control\Lsa`.
+**Subsistema de autoridad de seguridad local**.\
+Es responsable de la **autenticación** del usuario y crea los **tokens** de **seguridad**. Utiliza paquetes de autenticación ubicados en `HKLM\System\CurrentControlSet\Control\Lsa`.
 
-It writes to the **Security** **event** **log** and there should only be 1 process.
+Escribe en el **registro de eventos de seguridad** y solo debería haber 1 proceso.
 
-Keep in mind that this process is highly attacked to dump passwords.
+Tenga en cuenta que este proceso es altamente atacado para extraer contraseñas.
 
 
 ## svchost.exe
 
-**Generic Service Host Process**.\
-It hosts multiple DLL services in one shared process.
+**Proceso de host de servicio genérico**.\
+Hospeda múltiples servicios DLL en un solo proceso compartido.
 
-Usually, you will find that **svchost.exe** is launched with the `-k` flag. This will launch a query to the registry **HKEY\_LOCAL\_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** where there will be a key with the argument mentioned in -k that will contain the services to launch in the same process.
+Por lo general, encontrará que **svchost.exe** se lanza con la bandera `-k`. Esto lanzará una consulta al registro **HKEY\_LOCAL\_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** donde habrá una clave con el argumento mencionado en -k que contendrá los servicios para lanzar en el mismo proceso.
 
-For example: `-k UnistackSvcGroup` will launch: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
+Por ejemplo: `-k UnistackSvcGroup` lanzará: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
 
-If the **flag `-s`** is also used with an argument, then svchost is asked to **only launch the specified service** in this argument.
+Si también se usa la **bandera `-s`** con un argumento, entonces se le pide a svchost que **solo lance el servicio especificado** en este argumento.
 
-There will be several processes of `svchost.exe`. If any of them is **not using the `-k` flag**, then that's very suspicious. If you find that **services.exe is not the parent**, that's also very suspicious.
+Habrá varios procesos de `svchost.exe`. Si alguno de ellos **no está usando la bandera `-k`**, eso es muy sospechoso. Si encuentra que **services.exe no es el padre**, eso también es muy sospechoso.
 
 
 ## taskhost.exe
 
-This process act as a host for processes running from DLLs. It also loads the services that are running from DLLs.
+Este proceso actúa como anfitrión para procesos que se ejecutan desde DLL. También carga los servicios que se ejecutan desde DLL.
 
-In W8 this is called taskhostex.exe and in W10 taskhostw.exe.
+En W8 se llama taskhostex.exe y en W10 taskhostw.exe.
 
 
 ## explorer.exe
 
-This is the process responsible for the **user's desktop** and launching files via file extensions.
+Este es el proceso responsable del **escritorio del usuario** y de lanzar archivos a través de extensiones de archivo.
 
-**Only 1** process should be spawned **per logged on user.**
+Solo debería haber **1 proceso** generado **por usuario conectado**.
 
-This is run from **userinit.exe** which should be terminated, so **no parent** should appear for this process.
-
-
-# Catching Malicious Processes
-
-* Is it running from the expected path? (No Windows binaries run from temp location)
-* Is it communicating with weird IPs?
-* Check digital signatures (Microsoft artifacts should be signed)
-* Is it spelled correctly?
-* Is running under the expected SID?
-* Is the parent process the expected one (if any)?
-* Are the children processes the expecting ones? (no cmd.exe, wscript.exe, powershell.exe..?)
+Se ejecuta desde **userinit.exe**, que debería terminarse, por lo que **no debería aparecer ningún proceso padre** para este proceso.
 
 
-<details>
+# Detectando procesos maliciosos
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
+* ¿Se está ejecutando desde la ruta esperada? (Ningún binario de Windows se ejecuta desde una ubicación temporal)
+* ¿Se está comunicando con IPs extrañas?
+* Verifique las firmas digitales (los artefactos de Microsoft deberían estar firmados)
+* ¿Está escrito correctamente?
+* ¿Se está ejecutando bajo el SID esperado?
+* ¿Es el proceso padre el esperado (si lo hay)?
+* ¿Son los procesos secundarios los esperados? (¿no hay cmd.exe, wscript.exe, powershell.exe..?)

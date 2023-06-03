@@ -1,221 +1,199 @@
-# Kerberos Authentication
+# Autenticación Kerberos
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-**This information was extracted from the post:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+**Esta información fue extraída del post:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
-## Kerberos (I): How does Kerberos work? – Theory
+## Kerberos (I): ¿Cómo funciona Kerberos? - Teoría
 
 20 - MAR - 2019 - ELOY PÉREZ
 
-The objective of this series of posts is to clarify how Kerberos works, more than just introduce the attacks. This due to the fact that in many occasions it is not clear why some techniques works or not. Having this knowledge allows to know when to use any of those attacks in a pentest.
+El objetivo de esta serie de posts es aclarar cómo funciona Kerberos, más que simplemente presentar los ataques. Esto se debe a que en muchas ocasiones no está claro por qué algunas técnicas funcionan o no. Tener este conocimiento permite saber cuándo utilizar cualquiera de esos ataques en una prueba de penetración.
 
-Therefore, after a long journey of diving into the documentation and several posts about the topic, we’ve tried to write in this post all the important details which an auditor should know in order to understand how take advantage of Kerberos protocol.
+Por lo tanto, después de un largo viaje de inmersión en la documentación y varios posts sobre el tema, hemos intentado escribir en este post todos los detalles importantes que un auditor debería conocer para entender cómo aprovechar el protocolo Kerberos.
 
-In this first post only basic functionality will be discussed. In later posts it will see how perform the attacks and how the more complex aspects works, as delegation.
+En este primer post solo se discutirá la funcionalidad básica. En los próximos posts se verá cómo realizar los ataques y cómo funcionan los aspectos más complejos, como la delegación.
 
-If you have any doubt about the topic which it is not well explained, do not be afraid on leave a comment or question about it. Now, onto the topic.
+Si tienes alguna duda sobre el tema que no esté bien explicado, no dudes en dejar un comentario o pregunta al respecto. Ahora, sobre el tema.
 
-### What is Kerberos?
+### ¿Qué es Kerberos?
 
-Firstly, Kerberos is an authentication protocol, not authorization. In other words, it allows to identify each user, who provides a secret password, however, it does not validates to which resources or services can this user access.
+En primer lugar, Kerberos es un protocolo de autenticación, no de autorización. En otras palabras, permite identificar a cada usuario, que proporciona una contraseña secreta, sin embargo, no valida a qué recursos o servicios puede acceder este usuario.
 
-Kerberos is used in Active Directory. In this platform, Kerberos provides information about the privileges of each user, but it is the responsibility of each service to determine if the user has access to its resources.
+Kerberos se utiliza en Active Directory. En esta plataforma, Kerberos proporciona información sobre los privilegios de cada usuario, pero es responsabilidad de cada servicio determinar si el usuario tiene acceso a sus recursos.
 
-### Kerberos items
+### Elementos de Kerberos
 
-In this section several components of Kerberos environment will be studied.
+En esta sección se estudiarán varios componentes del entorno de Kerberos.
 
-**Transport layer**
+**Capa de transporte**
 
-Kerberos uses either UDP or TCP as transport protocol, which sends data in cleartext. Due to this Kerberos is responsible for providing encryption.
+Kerberos utiliza UDP o TCP como protocolo de transporte, que envía datos en texto claro. Debido a esto, Kerberos es responsable de proporcionar cifrado.
 
-Ports used by Kerberos are UDP/88 and TCP/88, which should be listen in KDC (explained in next section).
+Los puertos utilizados por Kerberos son UDP/88 y TCP/88, que deben escucharse en KDC (explicado en la siguiente sección).
 
-**Agents**
+**Agentes**
 
-Several agents work together to provide authentication in Kerberos. These are the following:
+Varios agentes trabajan juntos para proporcionar autenticación en Kerberos. Estos son los siguientes:
 
-* **Client or user** who wants to access to the service.
-* **AP** (Application Server) which offers the service required by the user.
-* **KDC** (Key Distribution Center), the main service of Kerberos, responsible of issuing the tickets, installed on the DC (Domain Controller). It is supported by the **AS** (Authentication Service), which issues the TGTs.
+* **Cliente o usuario** que desea acceder al servicio.
+* **AP** (Servidor de Aplicaciones) que ofrece el servicio requerido por el usuario.
+* **KDC** (Centro de Distribución de Claves), el servicio principal de Kerberos, responsable de emitir los tickets, instalado en el DC (Controlador de Dominio). Es compatible con el **AS** (Servicio de Autenticación), que emite los TGT.
 
-**Encryption keys**
+**Claves de cifrado**
 
-There are several structures handled by Kerberos, as tickets. Many of those structures are encrypted or signed in order to prevent being tampered by third parties. These keys are the following:
+Hay varias estructuras manejadas por Kerberos, como tickets. Muchas de esas estructuras están cifradas o firmadas para evitar que terceros las manipulen. Estas claves son las siguientes:
 
-* **KDC or krbtgt key** which is derivate from krbtgt account NTLM hash.
-* **User key** which is derivate from user NTLM hash.
-* **Service key** which is derivate from the NTLM hash of service owner, which can be a user or computer account.
-* **Session key** which is negotiated between the user and KDC.
-* **Service session key** to be use between user and service.
+* **Clave KDC o krbtgt** que se deriva del hash NTLM de la cuenta krbtgt.
+* **Clave de usuario** que se deriva del hash NTLM del usuario.
+* **Clave de servicio** que se deriva del hash NTLM del propietario del servicio, que puede ser una cuenta de usuario o de equipo.
+* **Clave de sesión** que se negocia entre el usuario y el KDC.
+* **Clave de sesión de servicio** para ser utilizada entre el usuario y el servicio.
 
 **Tickets**
 
-The main structures handled by Kerberos are the tickets. These tickets are delivered to the users in order to be used by them to perform several actions in the Kerberos realm. There are 2 types:
+Las principales estructuras manejadas por Kerberos son los tickets. Estos tickets se entregan a los usuarios para que los utilicen para realizar varias acciones en el reino de Kerberos. Hay 2 tipos:
 
-* The **TGS** (Ticket Granting Service) is the ticket which user can use to authenticate against a service. It is encrypted with the service key.
-* The **TGT** (Ticket Granting Ticket) is the ticket presented to the KDC to request for TGSs. It is encrypted with the KDC key.
+* El **TGS** (Servicio de Concesión de Tickets) es el ticket que el usuario puede usar para autenticarse contra un servicio. Está cifrado con la clave del servicio.
+* El **TGT** (Ticket de Concesión de Tickets) es el ticket presentado al KDC para solicitar TGS. Está cifrado con la clave KDC.
 
 **PAC**
 
-The **PAC** (Privilege Attribute Certificate) is a structure included in almost every ticket. This structure contains the privileges of the user and it is signed with the KDC key.
+El **PAC** (Certificado de Atributos de Privilegio) es una estructura incluida en casi todos los tickets. Esta estructura contiene los privilegios del usuario y está firmada con la clave KDC.
 
-It is possible to services to verify the PAC by communicating with the KDC, although this does not happen often. Nevertheless, the PAC verification consists of checking only its signature, without inspecting if privileges inside of PAC are correct.
+Es posible que los servicios verifiquen el PAC comunicándose con el KDC, aunque esto no sucede con frecuencia. Sin embargo, la verificación del PAC consiste en verificar solo su firma, sin inspeccionar si los privilegios dentro del PAC son correctos.
 
-Furthermore, a client can avoid the inclusion of the PAC inside the ticket by specifying it in _KERB-PA-PAC-REQUEST_ field of ticket request.
+Además, un cliente puede evitar la inclusión del PAC dentro del ticket especificándolo en el campo _KERB-PA-PAC-REQUEST_ de la solicitud de ticket.
 
-**Messages**
+**Mensajes**
 
-Kerberos uses differents kinds of messages. The most interesting are the following:
+Kerberos utiliza diferentes tipos de mensajes. Los más interesantes son los siguientes:
 
-* **KRB\_AS\_REQ**: Used to request the TGT to KDC.
-* **KRB\_AS\_REP**: Used to deliver the TGT by KDC.
-* **KRB\_TGS\_REQ**: Used to request the TGS to KDC, using the TGT.
-* **KRB\_TGS\_REP**: Used to deliver the TGS by KDC.
-* **KRB\_AP\_REQ**: Used to authenticate a user against a service, using the TGS.
-* **KRB\_AP\_REP**: (Optional) Used by service to identify itself against the user.
-* **KRB\_ERROR**: Message to communicate error conditions.
+* **KRB\_AS\_REQ**: Se utiliza para solicitar el TGT al KDC.
+* **KRB\_AS\_REP**: Se utiliza para entregar el TGT por el KDC.
+* **KRB\_TGS\_REQ**: Se utiliza para solicitar el TGS al KDC, utilizando el TGT.
+* **KRB\_TGS\_REP**: Se utiliza para entregar el TGS por el KDC.
+* **KRB\_AP\_REQ**: Se utiliza para autenticar a un usuario contra un servicio, utilizando el TGS.
+* **KRB\_AP\_REP**: (Opcional) Utilizado por el servicio para identificarse ante el usuario.
+* **KRB\_ERROR**: Mensaje para comunicar condiciones de error.
 
-Additionally, even if it is not part of Kerberos, but NRPC, the AP optionally could use the **KERB\_VERIFY\_PAC\_REQUEST** message to send to KDC the signature of PAC, and verify if it is correct.
+Además, aunque no forma parte de Kerberos, pero de NRPC, el AP opcionalmente podría utilizar el mensaje **KERB\_VERIFY\_PAC\_REQUEST** para enviar al KDC la firma de PAC y verificar si es correcta.
 
-Below is shown a summary of message sequency to perform authentication
+A continuación se muestra un resumen de la secuencia de mensajes para realizar la autenticación.
 
-![Kerberos messages summary](<../../.gitbook/assets/image (174) (1).png>)
+![Resumen de mensajes de Kerberos](<../../.gitbook/assets/image (174) (1).png>)
 
-### Authentication process
+### Proceso de autenticación
 
-In this section, the sequency of messages to perform authentication will be studied, starting from a user without tickets, up to being authenticated against the desired service.
+En esta sección, se estudiará la secuencia de mensajes para realizar la autenticación, comenzando desde un usuario sin tickets, hasta ser autenticado contra el servicio deseado.
 
 **KRB\_AS\_REQ**
 
-Firstly, user must get a TGT from KDC. To achieve this, a KRB\_AS\_REQ must be sent:
+En primer lugar, el usuario debe obtener un TGT de KDC. Para lograr esto, se debe enviar un KRB\_AS\_REQ:
 
-![KRB\_AS\_REQ schema message](<../../.gitbook/assets/image (175) (1).png>)
+![Esquema de mensaje KRB\_AS\_REQ](<../../.gitbook/assets/image (175) (1).png>)
 
-_KRB\_AS\_REQ_ has, among others, the following fields:
+_KRB\_AS\_REQ_ tiene, entre otros, los siguientes campos:
 
-* A encrypted **timestamp** with client key, to authenticate user and prevent replay attacks
-* **Username** of authenticated user
-* The service **SPN** asociated with **krbtgt** account
-* A **Nonce** generated by the user
+* Una **marca de tiempo** cifrada con la clave del cliente, para autenticar al usuario y evitar ataques de repetición.
+* **Nombre de usuario** del usuario autenticado.
+* El **SPN** del servicio asociado con la cuenta **krbtgt**.
+* Un **Nonce** generado por el usuario
 
-Note: the encrypted timestamp is only necessary if user requires preauthentication, which is common, except if [_DONT\_REQ\_PREAUTH_](https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro) \_\_ flag is set in user account.
+Nota: El timestamp encriptado solo es necesario si el usuario requiere preautenticación, lo cual es común, excepto si se establece la bandera [_DONT\_REQ\_PREAUTH_](https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro) en la cuenta de usuario.
 
 **KRB\_AS\_REP**
 
-After receiving the request, the KDC verifies the user identity by decrypting the timestamp. If the message is correct, then it must respond with a _KRB\_AS\_REP_:
+Después de recibir la solicitud, el KDC verifica la identidad del usuario descifrando el timestamp. Si el mensaje es correcto, entonces debe responder con un _KRB\_AS\_REP_:
 
-![KRB\_AS\_REP schema message](<../../.gitbook/assets/image (176) (1).png>)
+![Esquema del mensaje KRB\_AS\_REP](<../../.gitbook/assets/image (176) (1).png>)
 
-_KRB\_AS\_REP_ includes the next information:
+_KRB\_AS\_REP_ incluye la siguiente información:
 
-* **Username**
-* **TGT**, which includes:
-  * **Username**
-  * **Session key**
-  * **Expiration date** of TGT
-  * **PAC** with user privileges, signed by KDC
-* Some **encrypted data** with user key, which includes:
-  * **Session key**
-  * **Expiration date** of TGT
-  * User **nonce**, to prevent replay attacks
+* **Nombre de usuario**
+* **TGT**, que incluye:
+  * **Nombre de usuario**
+  * **Clave de sesión**
+  * **Fecha de vencimiento** de TGT
+  * **PAC** con los privilegios del usuario, firmado por KDC
+* Algunos **datos encriptados** con la clave del usuario, que incluyen:
+  * **Clave de sesión**
+  * **Fecha de vencimiento** de TGT
+  * **Nonce** del usuario, para evitar ataques de repetición
 
-Once finished, user already has the TGT, which can be used to request TGSs, and afterwards access to the services.
+Una vez finalizado, el usuario ya tiene el TGT, que se puede utilizar para solicitar TGS y, posteriormente, acceder a los servicios.
 
 **KRB\_TGS\_REQ**
 
-In order to request a TGS, a _KRB\_TGS\_REQ_ message must be sent to KDC:
+Para solicitar un TGS, se debe enviar un mensaje _KRB\_TGS\_REQ_ al KDC:
 
-![KRB\_TGS\_REQ schema message](<../../.gitbook/assets/image (177).png>)
+![Esquema del mensaje KRB\_TGS\_REQ](<../../.gitbook/assets/image (177).png>)
 
-_KRB\_TGS\_REQ_ includes:
+_KRB\_TGS\_REQ_ incluye:
 
-* **Encrypted data** with session key:
-  * **Username**
+* **Datos encriptados** con la clave de sesión:
+  * **Nombre de usuario**
   * **Timestamp**
 * **TGT**
-* **SPN** of requested service
-* **Nonce** generated by user
+* **SPN** del servicio solicitado
+* **Nonce** generado por el usuario
 
 **KRB\_TGS\_REP**
 
-After receiving the _KRB\_TGS\_REQ_ message, the KDC returns a TGS inside of _KRB\_TGS\_REP_:
+Después de recibir el mensaje _KRB\_TGS\_REQ_, el KDC devuelve un TGS dentro de _KRB\_TGS\_REP_:
 
-![KRB\_TGS\_REP schema message](<../../.gitbook/assets/image (178) (1).png>)
+![Esquema del mensaje KRB\_TGS\_REP](<../../.gitbook/assets/image (178) (1).png>)
 
-_KRB\_TGS\_REP_ includes:
+_KRB\_TGS\_REP_ incluye:
 
-* **Username**
-* **TGS**, which contains:
-  * **Service session key**
-  * **Username**
-  * **Expiration date** of TGS
-  * **PAC** with user privileges, signed by KDC
-* **Encrypted data** with session key:
-  * **Service session key**
-  * **Expiration date** of TGS
-  * User **nonce**, to prevent replay attacks
+* **Nombre de usuario**
+* **TGS**, que contiene:
+  * **Clave de sesión del servicio**
+  * **Nombre de usuario**
+  * **Fecha de vencimiento** de TGS
+  * **PAC** con los privilegios del usuario, firmado por KDC
+* **Datos encriptados** con la clave de sesión:
+  * **Clave de sesión del servicio**
+  * **Fecha de vencimiento** de TGS
+  * **Nonce** del usuario, para evitar ataques de repetición
 
 **KRB\_AP\_REQ**
 
-To finish, if everything went well, the user already has a valid TGS to interact with service. In order to use it, user must send to the AP a _KRB\_AP\_REQ_ message:
+Para finalizar, si todo ha ido bien, el usuario ya tiene un TGS válido para interactuar con el servicio. Para usarlo, el usuario debe enviar al AP un mensaje _KRB\_AP\_REQ_:
 
-![KRB\_AP\_REQ schema message](<../../.gitbook/assets/image (179) (1).png>)
+![Esquema del mensaje KRB\_AP\_REQ](<../../.gitbook/assets/image (179) (1).png>)
 
-_KRB\_AP\_REQ_ includes:
+_KRB\_AP\_REQ_ incluye:
 
 * **TGS**
-* **Encrypted data** with service session key:
-  * **Username**
-  * **Timestamp**, to avoid replay attacks
+* **Datos encriptados** con la clave de sesión del servicio:
+  * **Nombre de usuario**
+  * **Timestamp**, para evitar ataques de repetición
 
-After that, if user privileges are rigth, this can access to service. If is the case, which not usually happens, the AP will verify the PAC against the KDC. And also, if mutual authentication is needed it will respond to user with a _KRB\_AP\_REP_ message.
+Después de eso, si los privilegios del usuario son correctos, este puede acceder al servicio. Si es el caso, lo cual no suele suceder, el AP verificará el PAC contra el KDC. Y también, si se necesita autenticación mutua, responderá al usuario con un mensaje _KRB\_AP\_REP_.
 
-### References
+### Referencias
 
 * Kerberos v5 RFC: [https://tools.ietf.org/html/rfc4120](https://tools.ietf.org/html/rfc4120)
-* \[MS-KILE] – Kerberos extension: [https://msdn.microsoft.com/en-us/library/cc233855.aspx](https://msdn.microsoft.com/en-us/library/cc233855.aspx)
-* \[MS-APDS] – Authentication Protocol Domain Support: [https://msdn.microsoft.com/en-us/library/cc223948.aspx](https://msdn.microsoft.com/en-us/library/cc223948.aspx)
-* Mimikatz and Active Directory Kerberos Attacks: [https://adsecurity.org/?p=556](https://adsecurity.org/?p=556)
-* Explain like I’m 5: Kerberos: [https://www.roguelynn.com/words/explain-like-im-5-kerberos/](https://www.roguelynn.com/words/explain-like-im-5-kerberos/)
-* Kerberos & KRBTGT: [https://adsecurity.org/?p=483](https://adsecurity.org/?p=483)
-* Mastering Windows Network Forensics and Investigation, 2 Edition . Autores: S. Anson , S. Bunting, R. Johnson y S. Pearson. Editorial Sibex.
-* Active Directory , 5 Edition. Autores: B. Desmond, J. Richards, R. Allen y A.G. Lowe-Norris
-* Service Principal Names: [https://msdn.microsoft.com/en-us/library/ms677949(v=vs.85).aspx](https://msdn.microsoft.com/en-us/library/ms677949\(v=vs.85\).aspx)
+* \[MS-KILE\] – Extensión de Kerberos: [https://msdn.microsoft.com/en-us/library/cc233855.aspx](https://msdn.microsoft.com/en-us/library/cc233855.aspx)
+* \[MS-APDS\] – Soporte de protocolo de autenticación de dominio: [https://msdn.microsoft.com/en-us/library/cc223948.aspx](https://msdn.microsoft.com/en-us/library/cc223948.aspx)
+* Ataques de Kerberos Mimikatz y Active Directory: [https://adsecurity.org/?p=556](https://adsecurity.org/?p=556)
+* Explicado como si tuviera 5 años: Kerberos: [https://www.roguelynn.com/words/explain-like-im-5-kerberos/](https://www.roguelynn.com/words/explain-like-im-5-kerberos/)
+* Kerberos y KRBTGT: [https://adsecurity.org/?p=483](https://adsecurity.org/?p=483)
+* Mastering Windows Network Forensics and Investigation, 2nd Edition. Autores: S. Anson, S. Bunting, R. Johnson y S. Pearson. Editorial Sibex.
+* Active Directory, 5ª edición. Autores: B. Desmond, J. Richards, R. Allen y A.G. Lowe-Norris
+* Nombres principales de servicio: [https://msdn.microsoft.com/en-us/library/ms677949(v=vs.85).aspx](https://msdn.microsoft.com/en-us/library/ms677949\(v=vs.85\).aspx)
 * Niveles funcionales de Active Directory: [https://technet.microsoft.com/en-us/library/dbf0cdec-d72f-4ba3-bc7a-46410e02abb0](https://technet.microsoft.com/en-us/library/dbf0cdec-d72f-4ba3-bc7a-46410e02abb0)
-* OverPass The Hash – Gentilkiwi Blog: [https://blog.gentilkiwi.com/securite/mimikatz/overpass-the-hash](https://blog.gentilkiwi.com/securite/mimikatz/overpass-the-hash)
-* Pass The Ticket – Gentilkiwi Blog: [https://blog.gentilkiwi.com/securite/mimikatz/pass-the-ticket-kerberos](https://blog.gentilkiwi.com/securite/mimikatz/pass-the-ticket-kerberos)
-* Golden Ticket – Gentilkiwi Blog: [https://blog.gentilkiwi.com/securite/mimikatz/golden-ticket-kerberos](https://blog.gentilkiwi.com/securite/mimikatz/golden-ticket-kerberos)
-* Mimikatz Golden Ticket Walkthrough: [https://www.beneaththewaves.net/Projects/Mimikatz\_20\_-\_Golden\_Ticket\_Walkthrough.html](https://www.beneaththewaves.net/Projects/Mimikatz\_20\_-\_Golden\_Ticket\_Walkthrough.html)
-* Attacking Kerberos: Kicking the Guard Dog of Hades: [https://files.sans.org/summit/hackfest2014/PDFs/Kicking%20the%20Guard%20Dog%20of%20Hades%20-%20Attacking%20Microsoft%20Kerberos%20%20-%20Tim%20Medin(1).pdf](https://files.sans.org/summit/hackfest2014/PDFs/Kicking%20the%20Guard%20Dog%20of%20Hades%20-%20Attacking%20Microsoft%20Kerberos%20%20-%20Tim%20Medin\(1\).pdf)
-* Kerberoasting – Part 1: [https://room362.com/post/2016/kerberoast-pt1/](https://room362.com/post/2016/kerberoast-pt1/)
-* Kerberoasting – Part 2: [https://room362.com/post/2016/kerberoast-pt2/](https://room362.com/post/2016/kerberoast-pt2/)
-* Roasting AS-REPs: [https://www.harmj0y.net/blog/activedirectory/roasting-as-reps/](https://www.harmj0y.net/blog/activedirectory/roasting-as-reps/)
-* PAC Validation: [https://passing-the-hash.blogspot.com.es/2014/09/pac-validation-20-minute-rule-and.html](https://passing-the-hash.blogspot.com.es/2014/09/pac-validation-20-minute-rule-and.html)
-* Understanding PAC Validation: [https://blogs.msdn.microsoft.com/openspecification/2009/04/24/understanding-microsoft-kerberos-pac-validation/](https://blogs.msdn.microsoft.com/openspecification/2009/04/24/understanding-microsoft-kerberos-pac-validation/)
-* Reset the krbtgt acoount password/keys: [https://gallery.technet.microsoft.com/Reset-the-krbtgt-account-581a9e51](https://gallery.technet.microsoft.com/Reset-the-krbtgt-account-581a9e51)
-* Mitigating Pass-the-Hash (PtH) Attacks and Other Credential Theft: [https://www.microsoft.com/en-us/download/details.aspx?id=36036](https://www.microsoft.com/en-us/download/details.aspx?id=36036)
-* Fun with LDAP, Kerberos (and MSRPC) in AD Environments: [https://speakerdeck.com/ropnop/fun-with-ldap-kerberos-and-msrpc-in-ad-environments?slide=58](https://speakerdeck.com/ropnop/fun-with-ldap-kerberos-and-msrpc-in-ad-environments?slide=58)
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
+* OverPass The Hash – Blog de Gentilkiwi: [https://blog.gentilkiwi.com/securite/mimikatz/overpass-the-hash](https://blog.gentilkiwi.com/securite/mimikatz/overpass-the-hash)
+* Pass The Ticket – Blog de Gentilkiwi: [https://blog.gentilkiwi.com/securite/mimikatz/pass-the-ticket-kerberos](https://blog.gentilkiwi.com/securite/mimikatz/pass-the-ticket-kerberos)
+* Golden Ticket – Blog de Gent

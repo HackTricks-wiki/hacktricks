@@ -1,27 +1,26 @@
-# Suricata & Iptables cheatsheet
+# Cheatsheet de Suricata e Iptables
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 ## Iptables
 
-### Chains
+### Cadenas
 
-Iptables chains are just lists of rules, processed in order. You will always find the following 3, but others such as NAT might also be supported.
+Las cadenas de Iptables son simplemente listas de reglas, procesadas en orden. Siempre encontrarás las siguientes 3, pero otras como NAT también pueden ser compatibles.
 
-* **Input** – This chain is used to control the behavior of incoming connections.
-* **Forward** – This chain is used for incoming connections that aren’t being delivered locally. Think of a router – data is always being sent to it but rarely actually destined for the router itself; the data is just forwarded to its target. Unless you’re doing some kind of routing, NATing, or something else on your system that requires forwarding, you won’t even use this chain.
-* **Output** – This chain is used for outgoing connections.
-
+* **Input** - Esta cadena se utiliza para controlar el comportamiento de las conexiones entrantes.
+* **Forward** - Esta cadena se utiliza para conexiones entrantes que no se entregan localmente. Piensa en un enrutador: los datos siempre se envían a él, pero rara vez están destinados al enrutador en sí; los datos se reenvían a su destino. A menos que estés haciendo algún tipo de enrutamiento, NAT o algo más en tu sistema que requiera reenvío, ni siquiera usarás esta cadena.
+* **Output** - Esta cadena se utiliza para conexiones salientes.
 ```bash
 # Delete all rules
 iptables -F
@@ -58,11 +57,9 @@ iptables-save > /etc/sysconfig/iptables
 ip6tables-save > /etc/sysconfig/ip6tables
 iptables-restore < /etc/sysconfig/iptables
 ```
-
 ## Suricata
 
-### Install & Config
-
+### Instalación y Configuración
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -128,74 +125,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
+### Definiciones de Reglas
 
-### Rules Definitions
+Una regla/firma consiste en lo siguiente:
 
-A rule/signature consists of the following:
-
-* The **action**, determines what happens when the signature matches.
-* The **header**, defines the protocol, IP addresses, ports and direction of the rule.
-* The **rule options**, define the specifics of the rule.
+* La **acción**, determina lo que sucede cuando la firma coincide.
+* El **encabezado**, define el protocolo, las direcciones IP, los puertos y la dirección de la regla.
+* Las **opciones de la regla**, definen los detalles de la regla.
 
 ![](<../../../.gitbook/assets/image (642) (3).png>)
 
-#### **Valid actions are**
+#### **Las acciones válidas son**
 
-* alert - generate an alert
-* pass - stop further inspection of the packet
-* **drop** - drop packet and generate alert
-* **reject** - send RST/ICMP unreachable error to the sender of the matching packet.
-* rejectsrc - same as just _reject_
-* rejectdst - send RST/ICMP error packet to the receiver of the matching packet.
-* rejectboth - send RST/ICMP error packets to both sides of the conversation.
+* alerta - generar una alerta
+* pass - detener la inspección adicional del paquete
+* **drop** - descartar el paquete y generar una alerta
+* **reject** - enviar un error RST/ICMP inalcanzable al remitente del paquete coincidente.
+* rejectsrc - lo mismo que _reject_
+* rejectdst - enviar un paquete de error RST/ICMP al receptor del paquete coincidente.
+* rejectboth - enviar paquetes de error RST/ICMP a ambos lados de la conversación.
 
-#### **Protocols**
+#### **Protocolos**
 
-* tcp (for tcp-traffic)
+* tcp (para tráfico tcp)
 * udp
 * icmp
-* ip (ip stands for ‘all’ or ‘any’)
-* _layer7 protocols_: http, ftp, tls, smb, dns, ssh... (more in the [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+* ip (ip significa "todos" o "cualquier")
+* _protocolos de capa 7_: http, ftp, tls, smb, dns, ssh... (más en la [**documentación**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
-#### Source and Destination Addresses
+#### Direcciones de origen y destino
 
-It supports IP ranges, negations and a list of addresses:
+Admite rangos de direcciones IP, negaciones y una lista de direcciones:
 
-| Example                        | Meaning                                  |
+| Ejemplo                        | Significado                                  |
 | ------------------------------ | ---------------------------------------- |
-| ! 1.1.1.1                      | Every IP address but 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]           | Every IP address but 1.1.1.1 and 1.1.1.2 |
-| $HOME\_NET                     | Your setting of HOME\_NET in yaml        |
-| \[$EXTERNAL\_NET, !$HOME\_NET] | EXTERNAL\_NET and not HOME\_NET          |
-| \[10.0.0.0/24, !10.0.0.5]      | 10.0.0.0/24 except for 10.0.0.5          |
+| ! 1.1.1.1                      | Cualquier dirección IP excepto 1.1.1.1             |
+| !\[1.1.1.1, 1.1.1.2]           | Cualquier dirección IP excepto 1.1.1.1 y 1.1.1.2 |
+| $HOME\_NET                     | Su configuración de HOME\_NET en yaml        |
+| \[$EXTERNAL\_NET, !$HOME\_NET] | EXTERNAL\_NET y no HOME\_NET          |
+| \[10.0.0.0/24, !10.0.0.5]      | 10.0.0.0/24 excepto por 10.0.0.5          |
 
-#### Source and Destination Ports
+#### Puertos de origen y destino
 
-It supports port ranges, negations and lists of ports
+Admite rangos de puertos, negaciones y listas de puertos
 
-| Example         | Meaning                                |
+| Ejemplo         | Significado                                |
 | --------------- | -------------------------------------- |
-| any             | any address                            |
-| \[80, 81, 82]   | port 80, 81 and 82                     |
-| \[80: 82]       | Range from 80 till 82                  |
-| \[1024: ]       | From 1024 till the highest port-number |
-| !80             | Every port but 80                      |
-| \[80:100,!99]   | Range from 80 till 100 but 99 excluded |
-| \[1:80,!\[2,4]] | Range from 1-80, except ports 2 and 4  |
+| any             | cualquier dirección                            |
+| \[80, 81, 82]   | puerto 80, 81 y 82                     |
+| \[80: 82]       | Rango desde 80 hasta 82                  |
+| \[1024: ]       | Desde 1024 hasta el número de puerto más alto |
+| !80             | Cualquier puerto excepto 80                      |
+| \[80:100,!99]   | Rango de 80 a 100 pero excluyendo el 99 |
+| \[1:80,!\[2,4]] | Rango de 1 a 80, excepto los puertos 2 y 4  |
 
-#### Direction
+#### Dirección
 
-It's possible to indicate the direction of the communication rule being applied:
-
+Es posible indicar la dirección de la regla de comunicación que se está aplicando:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
+#### Palabras clave
 
-#### Keywords
-
-There are **hundreds of options** available in Suricata to search for the **specific packet** you are looking for, here it will be mentioned if something interesting is found. Check the [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)for more!
-
+Hay **cientos de opciones** disponibles en Suricata para buscar el **paquete específico** que estás buscando, aquí se mencionará si se encuentra algo interesante. ¡Consulta la [**documentación**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) para más información!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -236,15 +229,14 @@ drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 ## Drop by port
 drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén la [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

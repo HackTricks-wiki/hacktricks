@@ -1,102 +1,78 @@
-# Infrared
+# Infrarrojo
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## Cómo funciona el infrarrojo <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.
+**La luz infrarroja es invisible para los humanos**. La longitud de onda del infrarrojo es de **0,7 a 1000 micrones**. Los mandos a distancia utilizan una señal de infrarrojos para la transmisión de datos y operan en el rango de longitud de onda de 0,75 a 1,4 micrones. Un microcontrolador en el mando hace que un LED infrarrojo parpadee con una frecuencia específica, convirtiendo la señal digital en una señal de infrarrojos.
 
-To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.
+Para recibir señales de infrarrojos se utiliza un **fotoreceptor**. Este **convierte la luz infrarroja en pulsos de voltaje**, que ya son **señales digitales**. Por lo general, hay un **filtro de luz oscura dentro del receptor**, que permite pasar **sólo la longitud de onda deseada** y elimina el ruido.
 
-### Variety of IR Protocols <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### Variedad de protocolos de infrarrojos <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR protocols differ in 3 factors:
+Los protocolos de infrarrojos difieren en 3 factores:
 
-* bit encoding
-* data structure
-* carrier frequency — often in range 36..38 kHz
+* codificación de bits
+* estructura de datos
+* frecuencia portadora - a menudo en el rango de 36 a 38 kHz
 
-#### Bit encoding ways <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### Formas de codificación de bits <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. Pulse Distance Encoding**
+**1. Codificación de distancia de pulso**
 
-Bits are encoded by modulating the duration of the space between pulses. The width of the pulse itself is constant.
+Los bits se codifican mediante la modulación de la duración del espacio entre pulsos. El ancho del pulso en sí es constante.
 
 <figure><img src="../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
 
-**2. Pulse Width Encoding**
+**2. Codificación de ancho de pulso**
 
-Bits are encoded by modulation of the pulse width. The width of space after pulse burst is constant.
+Los bits se codifican mediante la modulación del ancho del pulso. El ancho del espacio después del estallido de pulso es constante.
 
 <figure><img src="../../.gitbook/assets/image (29) (1).png" alt=""><figcaption></figcaption></figure>
 
-**3. Phase Encoding**
+**3. Codificación de fase**
 
-It is also known as Manchester encoding. The logical value is defined by the polarity of the transition between pulse burst and space. "Space to pulse burst" denotes logic "0", "pulse burst to space" denotes logic "1".
+También se conoce como codificación de Manchester. El valor lógico se define por la polaridad de la transición entre el estallido de pulso y el espacio. "Espacio a estallido de pulso" denota la lógica "0", "estallido de pulso a espacio" denota la lógica "1".
 
 <figure><img src="../../.gitbook/assets/image (25).png" alt=""><figcaption></figcaption></figure>
 
-**4. Combination of previous ones and other exotics**
+**4. Combinación de los anteriores y otros exóticos**
 
 {% hint style="info" %}
-There are IR protocols that are **trying to become universal** for several types of devices. The most famous ones are RC5 and NEC. Unfortunately, the most famous **does not mean the most common**. In my environment, I met just two NEC remotes and no RC5 ones.
+Hay protocolos de infrarrojos que **intentan ser universales** para varios tipos de dispositivos. Los más famosos son RC5 y NEC. Desafortunadamente, lo más famoso **no significa lo más común**. En mi entorno, me encontré con sólo dos mandos NEC y ninguno de RC5.
 
-Manufacturers love to use their own unique IR protocols, even within the same range of devices (for example, TV-boxes). Therefore, remotes from different companies and sometimes from different models from the same company, are unable to work with other devices of the same type.
+A los fabricantes les encanta utilizar sus propios protocolos de infrarrojos únicos, incluso dentro del mismo rango de dispositivos (por ejemplo, cajas de TV). Por lo tanto, los mandos a distancia de diferentes empresas y, a veces, de diferentes modelos de la misma empresa, no pueden funcionar con otros dispositivos del mismo tipo.
 {% endhint %}
 
-### Exploring an IR signal
+### Explorando una señal de infrarrojos
 
-The most reliable way to see how the remote IR signal looks like is to use an oscilloscope. It does not demodulate or invert the received signal, it is just displayed "as is". This is useful for testing and debugging. I will show the expected signal on the example of the NEC IR protocol.
+La forma más fiable de ver cómo se ve la señal de infrarrojos del mando a distancia es utilizar un osciloscopio. No demodula ni invierte la señal recibida, sólo se muestra "tal cual". Esto es útil para pruebas y depuración. Mostraré la señal esperada en el ejemplo del protocolo NEC de infrarrojos.
 
 <figure><img src="../../.gitbook/assets/image (18) (2).png" alt=""><figcaption></figcaption></figure>
 
-Usually, there is a preamble at the beginning of an encoded packet. This allows the receiver to determine the level of gain and background. There are also protocols without preamble, for example, Sharp.
+Por lo general, hay un preámbulo al principio de un paquete codificado. Esto permite al receptor determinar el nivel de ganancia y el fondo. También hay protocolos sin preámbulo, por ejemplo, Sharp.
 
-Then data is transmitted. The structure, preamble, and bit encoding method are determined by the specific protocol.
+A continuación se transmite la información. La estructura, el preámbulo y el método de codificación de bits son determinados por el protocolo específico.
 
-**NEC IR protocol** contains a short command and a repeat code, which is sent while the button is pressed. Both the command and the repeat code have the same preamble at the beginning.
+El **protocolo NEC de infrarrojos** contiene un comando corto y un código de repetición, que se envía mientras se presiona el botón. Tanto el comando como el código de repetición tienen el mismo preámbulo al principio.
 
-NEC **command**, in addition to the preamble, consists of an address byte and a command-number byte, by which the device understands what needs to be performed. Address and command-number bytes are duplicated with inverse values, to check the integrity of the transmission. There is an additional stop bit at the end of the command.
+El **comando NEC**, además del preámbulo, consta de un byte de dirección y un byte de número de comando, por el cual el dispositivo entiende lo que debe hacerse. Los bytes de dirección y número de comando se duplican con valores inversos, para comprobar la integridad de la transmisión. Hay un bit de parada adicional al final del comando.
 
-The **repeat code** has a "1" after the preamble, which is a stop bit.
+El **código de repetición** tiene un "1" después del preámbulo, que es un bit de parada.
 
-For **logic "0" and "1"** NEC uses Pulse Distance Encoding: first, a pulse burst is transmitted after which there is a pause, its length sets the value of the bit.
+Para la lógica "0" y "1", NEC utiliza la codificación de distancia de pulso: primero se transmite un estallido de pulso, después del cual hay una pausa, cuya longitud establece el valor del bit.
 
-### Air Conditioners
+### Acondicionadores de aire
 
-Unlike other remotes, **air conditioners do not transmit just the code of the pressed button**. They also **transmit all the information** when a button is pressed to assure that the **air conditioned machine and the remote are synchronised**.\
-This will avoid that a machine set as 20ºC is increased to 21ºC with one remote, and then when another remote, which still has the temperature as 20ºC, is used to increase more the temperature, it will "increase" it to 21ºC (and not to 22ºC thinking it's in 21ºC).
-
-### Attacks
-
-You can attack Infrared with Flipper Zero:
-
-{% content-ref url="flipper-zero/fz-infrared.md" %}
-[fz-infrared.md](flipper-zero/fz-infrared.md)
-{% endcontent-ref %}
-
-## References
-
-* [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
+A diferencia de otros mandos a distancia, **los acondicionadores de aire no transmiten sólo el código del botón pulsado**. También **transmiten toda la información** cuando se pulsa un botón para asegurarse de que la **máquina de aire acondicionado y el mando a distancia estén sincronizados**.\
+Esto

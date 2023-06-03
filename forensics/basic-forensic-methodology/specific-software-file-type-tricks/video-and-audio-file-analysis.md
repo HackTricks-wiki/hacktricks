@@ -1,50 +1,9 @@
+Al igual que con los formatos de archivo de imagen, el truco de los archivos de audio y video es un tema común en los desafíos de forense CTF, no porque el hacking o la ocultación de datos sucedan de esta manera en el mundo real, sino simplemente porque el audio y el video son divertidos. Al igual que con los formatos de archivo de imagen, se puede utilizar la esteganografía para incrustar un mensaje secreto en los datos de contenido, y nuevamente debe verificar las áreas de metadatos del archivo en busca de pistas. Su primer paso debería ser echar un vistazo con la herramienta [mediainfo](https://mediaarea.net/en/MediaInfo) (o `exiftool`) e identificar el tipo de contenido y ver sus metadatos.
 
+[Audacity](http://www.audacityteam.org/) es la principal herramienta de visualización de archivos de audio de código abierto. A los autores de desafíos de CTF les encanta codificar texto en formas de onda de audio, que se pueden ver usando la vista de espectrograma (aunque una herramienta especializada llamada [Sonic Visualiser](http://www.sonicvisualiser.org/) es mejor para esta tarea en particular). Audacity también puede permitirle ralentizar, revertir y hacer otras manipulaciones que podrían revelar un mensaje oculto si sospecha que hay uno (si puede escuchar audio distorsionado, interferencia o estático). [Sox](http://sox.sourceforge.net/) es otra herramienta útil de línea de comandos para convertir y manipular archivos de audio.
 
-<details>
+También es común verificar los bits menos significativos (LSB) para un mensaje secreto. La mayoría de los formatos de medios de audio y video utilizan "trozos" discretos (de tamaño fijo) para que puedan transmitirse en secuencia; los LSB de esos trozos son un lugar común para contrabandear algunos datos sin afectar visiblemente el archivo.
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+Otras veces, un mensaje puede estar codificado en el audio como tonos DTMF o código morse. Para estos, intente trabajar con [multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng) para decodificarlos.
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
-From: [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
-
-Like image file formats, audio and video file trickery is a common theme in CTF forensics challenges not because hacking or data hiding ever happens this way in the real world, but just because audio and video are fun. As with image file formats, steganography might be used to embed a secret message in the content data, and again you should know to check the file metadata areas for clues. Your first step should be to take a look with the [mediainfo](https://mediaarea.net/en/MediaInfo) tool \(or `exiftool`\) and identify the content type and look at its metadata.
-
-[Audacity](http://www.audacityteam.org/) is the premier open-source audio file and waveform-viewing tool. CTF challenge authors love to encode text into audio waveforms, which you can see using the spectrogram view \(although a specialized tool called [Sonic Visualiser](http://www.sonicvisualiser.org/) is better for this task in particular\). Audacity can also enable you to slow down, reverse, and do other manipulations that might reveal a hidden message if you suspect there is one \(if you can hear garbled audio, interference, or static\). [Sox](http://sox.sourceforge.net/) is another useful command-line tool for converting and manipulating audio files.
-
-It's also common to check Least Significant Bits (LSB) for a secret message. Most audio and video media formats use discrete (fixed-size) "chunks" so that they can be streamed; the LSBs of those chunks are a common place to smuggle some data without visibly affecting the file.
-
-Other times, a message might be encoded into the audio as [DTMF tones](http://dialabc.com/sound/detect/index.html) or morse code. For these, try working with [multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng) to decode them.
-
-Video file formats are container formats, that contain separate streams of both audio and video that are multiplexed together for playback. For analyzing and manipulating video file formats, [FFmpeg](http://ffmpeg.org/) is recommended. `ffmpeg -i` gives an initial analysis of the file content. It can also de-multiplex or playback the content streams. The power of FFmpeg is exposed to Python using [ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html).
-
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
+Los formatos de archivo de video son formatos de contenedor que contienen flujos separados de audio y video que se multiplexan juntos para la reproducción. Para analizar y manipular formatos de archivo de video, se recomienda [FFmpeg](http://ffmpeg.org/). `ffmpeg -i` da un análisis inicial del contenido del archivo. También puede desmultiplexar o reproducir los flujos de contenido. El poder de FFmpeg se expone a Python usando [ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html).

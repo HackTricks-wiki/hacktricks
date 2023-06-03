@@ -1,24 +1,24 @@
-# macOS Function Hooking
+## Hooking de Funciones en macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue la [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Function Interposing
+## Interposición de Funciones
 
-Create a **dylib** with an **`__interpose`** section (or a section flagged with **`S_INTERPOSING`**) containing tuples of **function pointers** that refer to the **original** and the **replacement** functions.
+Crea una **dylib** con una sección **`__interpose`** (o una sección marcada con **`S_INTERPOSING`**) que contenga tuplas de **punteros a funciones** que se refieran a las funciones **originales** y a las funciones **de reemplazo**.
 
-Then, **inject** the dylib with **`DYLD_INSERT_LIBRARIES`** (the interposing needs occur before the main app lodas). Obviously this restriction has the **restrictions** applied to the use of DYLD\_INSERT\_LIBRARIES.&#x20;
+Luego, **inyecta** la dylib con **`DYLD_INSERT_LIBRARIES`** (la interposición debe ocurrir antes de que la aplicación principal se cargue). Obviamente, esta restricción tiene las **restricciones** aplicadas al uso de DYLD\_INSERT\_LIBRARIES.&#x20;
 
-### Interpose printf
+### Interponer printf
 
 {% tabs %}
 {% tab title="interpose.c" %}
@@ -45,6 +45,24 @@ __attribute__ ((section ("__DATA,__interpose"))) = { (const void *)(unsigned lon
 {% endtab %}
 
 {% tab title="hello.c" %}
+
+```c
+#include <stdio.h>
+
+void hello() {
+    printf("Hello, world!\n");
+}
+
+int main() {
+    hello();
+    return 0;
+}
+```
+
+{% endtab %}
+{% endtabs %}
+
+En este ejemplo, `hello()` es una función que imprime "Hello, world!" en la consola. La función `main()` llama a `hello()` y luego devuelve 0.
 ```c
 //gcc hello.c -o hello
 #include <stdio.h>
@@ -56,30 +74,27 @@ int main() {
 ```
 {% endtab %}
 {% endtabs %}
-
 ```bash
 DYLD_INSERT_LIBRARIES=./interpose.dylib ./hello
 [+] Hello from interpose
 ```
+## Método Swizzling
 
-## Method Swizzling
+En ObjectiveC así es como se llama a un método: `[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`
 
-In ObjectiveC this is how a method is called: `[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`
+Se necesita el **objeto**, el **método** y los **parámetros**. Y cuando se llama a un método, se envía un **mensaje** utilizando la función **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
-It's needed the **object**, the **method** and the **params**. And when a method is called a **msg is sent** using the function **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+El objeto es **`someObject`**, el método es **`@selector(method1p1:p2:)`** y los argumentos son **value1**, **value2**.
 
-The object is **`someObject`**, the method is **`@selector(method1p1:p2:)`** and the arguments are **value1**, **value2**.
-
-Following the object structures, it's possible to reach an **array of methods** where the **names** and **pointers** to the method code are **located**.
+Siguiendo las estructuras de objetos, es posible llegar a un **array de métodos** donde se encuentran **los nombres** y **punteros** al código del método.
 
 {% hint style="danger" %}
-Note that because methods and classes are accessed based on their names, this information is store in the binary, so it's possible to retrieve it with `otool -ov </path/bin>` or [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+Tenga en cuenta que debido a que los métodos y las clases se acceden en función de sus nombres, esta información se almacena en el binario, por lo que es posible recuperarla con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 {% endhint %}
 
-### Accessing the raw methods
+### Accediendo a los métodos en bruto
 
-It's possible to access the information of the methods such as name, number of params or address like in the following example:
-
+Es posible acceder a la información de los métodos, como el nombre, el número de parámetros o la dirección, como en el siguiente ejemplo:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -145,11 +160,9 @@ int main() {
     return 0;
 }
 ```
+### Swizzling de métodos con method\_exchangeImplementations
 
-### Method Swizzling with method\_exchangeImplementations
-
-The function method\_exchangeImplementations allows to change the address of one function for the other. So when a function is called what is executed is the other one.
-
+La función method\_exchangeImplementations permite cambiar la dirección de una función por la de otra. Por lo tanto, cuando se llama a una función, lo que se ejecuta es la otra.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -193,13 +206,11 @@ int main(int argc, const char * argv[]) {
     return 0;
 }
 ```
+### Cambio de método con method\_setImplementation
 
-### Method Swizzling with method\_setImplementation
+El formato anterior es extraño porque estás cambiando la implementación de 2 métodos uno por el otro. Usando la función **`method_setImplementation`** puedes **cambiar** la **implementación** de un **método por la de otro**.
 
-The previous format is weird because you are changing the implementation of 2 methods one from the other. Using the function **`method_setImplementation`** you can **change** the **implementation** of a **method for the other one**.
-
-Just remember to **store the address of the implementation of the original one** if you are going to to call it from the new implementation before overwriting it because later it will be much complicated to locate that address.
-
+Solo recuerda **almacenar la dirección de la implementación del original** si vas a llamarlo desde la nueva implementación antes de sobrescribirlo, porque después será mucho más complicado localizar esa dirección.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -251,19 +262,17 @@ int main(int argc, const char * argv[]) {
     }
 }
 ```
+## Metodología de Ataque de Hooking
 
-## Hooking Attack Methodology
+En esta página se discutieron diferentes formas de enganchar funciones. Sin embargo, todas implican **ejecutar código dentro del proceso para atacar**.
 
-In this page different ways to hook functions were discussed. However, they involved **running code inside the process to attack**.
+Para hacer esto, la técnica más fácil de usar es inyectar un [Dyld a través de variables de entorno o secuestro](../macos-dyld-hijacking-and-dyld\_insert\_libraries.md). Sin embargo, supongo que esto también se podría hacer a través de [inyección de proceso Dylib](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
 
-In order to do that the easiest technique to use is to inject a [Dyld via environment variables or hijacking](../macos-dyld-hijacking-and-dyld\_insert\_libraries.md). However, I guess this could also be done via [Dylib process injection](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Sin embargo, ambas opciones están **limitadas** a binarios/procesos **no protegidos**. Consulte cada técnica para obtener más información sobre las limitaciones.
 
-However, both options are **limited** to **unprotected** binaries/processes. Check each technique to learn more about the limitations.
+Sin embargo, un ataque de enganche de función es muy específico, un atacante hará esto para **robar información confidencial desde dentro de un proceso** (si no, simplemente haría un ataque de inyección de proceso). Y esta información confidencial podría estar ubicada en aplicaciones descargadas por el usuario, como MacPass.
 
-However, a function hooking attack is very specific, an attacker will do this to **steal sensitive information from inside a process** (if not you would just do a process injection attack). And this sensitive information might be located in user downloaded Apps such as MacPass.
-
-So the attacker vector would be to either find a vulnerability or strip the signature of the application, inject the **`DYLD_INSERT_LIBRARIES`** env variable through the Info.plist of the application adding something like:
-
+Por lo tanto, el vector de ataque del atacante sería encontrar una vulnerabilidad o eliminar la firma de la aplicación, inyectar la variable de entorno **`DYLD_INSERT_LIBRARIES`** a través del archivo Info.plist de la aplicación agregando algo como:
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -271,10 +280,9 @@ So the attacker vector would be to either find a vulnerability or strip the sign
     <string>/Applications/MacPass.app/Contents/malicious.dylib</string>
 </dict>
 ```
+Agregue en esa biblioteca el código de hooking para filtrar la información: contraseñas, mensajes...
 
-Add in that library the hooking code to exfiltrate the information: Passwords, messages...
-
-## References
+## Referencias
 
 * [https://nshipster.com/method-swizzling/](https://nshipster.com/method-swizzling/)
 
@@ -282,10 +290,10 @@ Add in that library the hooking code to exfiltrate the information: Passwords, m
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

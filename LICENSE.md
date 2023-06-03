@@ -1,208 +1,136 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 
-<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Copyright © Carlos Polop 2021.  Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> by Carlos Polop is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>.
+<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Licencia Creative Commons" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Derechos de autor © Carlos Polop 2021. Excepto donde se especifique lo contrario (la información externa copiada en el libro pertenece a los autores originales), el texto de <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> de Carlos Polop está bajo licencia de <a href="https://creativecommons.org/licenses/by-nc/4.0/">Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)</a>.
 
-License: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
-Human Readable License: https://creativecommons.org/licenses/by-nc/4.0/<br>
-Complete Legal Terms: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
-Formatting: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
+Licencia: Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)<br>
+Licencia legible por humanos: https://creativecommons.org/licenses/by-nc/4.0/<br>
+Términos legales completos: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
+Formato: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
 
 # creative commons
 
-# Attribution-NonCommercial 4.0 International
+# Atribución-NoComercial 4.0 Internacional
 
-Creative Commons Corporation (“Creative Commons”) is not a law firm and does not provide legal services or legal advice. Distribution of Creative Commons public licenses does not create a lawyer-client or other relationship. Creative Commons makes its licenses and related information available on an “as-is” basis. Creative Commons gives no warranties regarding its licenses, any material licensed under their terms and conditions, or any related information. Creative Commons disclaims all liability for damages resulting from their use to the fullest extent possible.
+Creative Commons Corporation ("Creative Commons") no es un bufete de abogados y no proporciona servicios legales ni asesoramiento legal. La distribución de licencias públicas de Creative Commons no crea una relación abogado-cliente u otra relación. Creative Commons pone sus licencias e información relacionada a disposición tal cual. Creative Commons no ofrece garantías con respecto a sus licencias, cualquier material con licencia bajo sus términos y condiciones, o cualquier información relacionada. Creative Commons renuncia a toda responsabilidad por daños resultantes de su uso en la medida máxima posible.
 
-## Using Creative Commons Public Licenses
+## Uso de las licencias públicas de Creative Commons
 
-Creative Commons public licenses provide a standard set of terms and conditions that creators and other rights holders may use to share original works of authorship and other material subject to copyright and certain other rights specified in the public license below. The following considerations are for informational purposes only, are not exhaustive, and do not form part of our licenses.
+Las licencias públicas de Creative Commons proporcionan un conjunto estándar de términos y condiciones que los creadores y otros titulares de derechos pueden utilizar para compartir obras originales de autoría y otros materiales sujetos a derechos de autor y ciertos otros derechos especificados en la licencia pública a continuación. Las siguientes consideraciones son solo para fines informativos, no son exhaustivas y no forman parte de nuestras licencias.
 
-* __Considerations for licensors:__ Our public licenses are intended for use by those authorized to give the public permission to use material in ways otherwise restricted by copyright and certain other rights. Our licenses are irrevocable. Licensors should read and understand the terms and conditions of the license they choose before applying it. Licensors should also secure all rights necessary before applying our licenses so that the public can reuse the material as expected. Licensors should clearly mark any material not subject to the license. This includes other CC-licensed material, or material used under an exception or limitation to copyright. [More considerations for licensors](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
+* __Consideraciones para los licenciantes:__ Nuestras licencias públicas están destinadas a ser utilizadas por aquellos autorizados para dar permiso público para utilizar materiales de formas que de otra manera estarían restringidas por derechos de autor y ciertos otros derechos. Nuestras licencias son irrevocables. Los licenciantes deben leer y comprender los términos y condiciones de la licencia que elijan antes de aplicarla. Los licenciantes también deben asegurarse de obtener todos los derechos necesarios antes de aplicar nuestras licencias para que el público pueda reutilizar el material como se espera. Los licenciantes deben marcar claramente cualquier material que no esté sujeto a la licencia. Esto incluye otro material con licencia CC, o material utilizado bajo una excepción o limitación al derecho de autor. [Más consideraciones para los licenciantes](http://wiki.creativecommons.org/Consider
+## Sección 3 - Condiciones de la Licencia.
 
-* __Considerations for the public:__ By using one of our public licenses, a licensor grants the public permission to use the licensed material under specified terms and conditions. If the licensor’s permission is not necessary for any reason–for example, because of any applicable exception or limitation to copyright–then that use is not regulated by the license. Our licenses grant only permissions under copyright and certain other rights that a licensor has authority to grant. Use of the licensed material may still be restricted for other reasons, including because others have copyright or other rights in the material. A licensor may make special requests, such as asking that all changes be marked or described. Although not required by our licenses, you are encouraged to respect those requests where reasonable. [More considerations for the public](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
+El ejercicio de los Derechos Licenciados está expresamente sujeto a las siguientes condiciones.
 
-# Creative Commons Attribution-NonCommercial 4.0 International Public License
+a. ___Atribución.___
 
-By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution-NonCommercial 4.0 International Public License ("Public License"). To the extent this Public License may be interpreted as a contract, You are granted the Licensed Rights in consideration of Your acceptance of these terms and conditions, and the Licensor grants You such rights in consideration of benefits the Licensor receives from making the Licensed Material available under these terms and conditions.
+ 1. Si Compartes el Material Licenciado (incluyendo en forma modificada), debes:
 
-## Section 1 – Definitions.
+  A. mantener lo siguiente si es suministrado por el Licenciante con el Material Licenciado:
 
-a. __Adapted Material__ means material subject to Copyright and Similar Rights that is derived from or based upon the Licensed Material and in which the Licensed Material is translated, altered, arranged, transformed, or otherwise modified in a manner requiring permission under the Copyright and Similar Rights held by the Licensor. For purposes of this Public License, where the Licensed Material is a musical work, performance, or sound recording, Adapted Material is always produced where the Licensed Material is synched in timed relation with a moving image.
+   i. identificación del creador(es) del Material Licenciado y cualquier otro designado para recibir atribución, de cualquier manera razonable solicitada por el Licenciante (incluyendo por seudónimo si es designado);
 
-b. __Adapter's License__ means the license You apply to Your Copyright and Similar Rights in Your contributions to Adapted Material in accordance with the terms and conditions of this Public License.
+   ii. un aviso de derechos de autor;
 
-c. __Copyright and Similar Rights__ means copyright and/or similar rights closely related to copyright including, without limitation, performance, broadcast, sound recording, and Sui Generis Database Rights, without regard to how the rights are labeled or categorized. For purposes of this Public License, the rights specified in Section 2(b)(1)-(2) are not Copyright and Similar Rights.
+   iii. un aviso que se refiere a esta Licencia Pública;
 
-d. __Effective Technological Measures__ means those measures that, in the absence of proper authority, may not be circumvented under laws fulfilling obligations under Article 11 of the WIPO Copyright Treaty adopted on December 20, 1996, and/or similar international agreements.
+   iv. un aviso que se refiere a la renuncia de garantías;
 
-e. __Exceptions and Limitations__ means fair use, fair dealing, and/or any other exception or limitation to Copyright and Similar Rights that applies to Your use of the Licensed Material.
+   v. un URI o hipervínculo al Material Licenciado en la medida en que sea razonablemente posible;
 
-f. __Licensed Material__ means the artistic or literary work, database, or other material to which the Licensor applied this Public License.
+  B. indicar si modificaste el Material Licenciado y mantener una indicación de cualquier modificación previa; y
 
-g. __Licensed Rights__ means the rights granted to You subject to the terms and conditions of this Public License, which are limited to all Copyright and Similar Rights that apply to Your use of the Licensed Material and that the Licensor has authority to license.
+  C. indicar que el Material Licenciado está licenciado bajo esta Licencia Pública, e incluir el texto de, o el URI o hipervínculo a, esta Licencia Pública.
 
-h. __Licensor__ means the individual(s) or entity(ies) granting rights under this Public License.
+ 2. Puedes cumplir las condiciones en la Sección 3(a)(1) de cualquier manera razonable basada en el medio, los medios y el contexto en el que Compartes el Material Licenciado. Por ejemplo, puede ser razonable cumplir las condiciones proporcionando un URI o hipervínculo a un recurso que incluya la información requerida.
 
-i. __NonCommercial__ means not primarily intended for or directed towards commercial advantage or monetary compensation. For purposes of this Public License, the exchange of the Licensed Material for other material subject to Copyright and Similar Rights by digital file-sharing or similar means is NonCommercial provided there is no payment of monetary compensation in connection with the exchange.
+ 3. Si el Licenciante lo solicita, debes eliminar cualquier información requerida por la Sección 3(a)(1)(A) en la medida en que sea razonablemente posible.
 
-j. __Share__ means to provide material to the public by any means or process that requires permission under the Licensed Rights, such as reproduction, public display, public performance, distribution, dissemination, communication, or importation, and to make material available to the public including in ways that members of the public may access the material from a place and at a time individually chosen by them.
+ 4. Si Compartes Material Adaptado que produjiste, la Licencia del Adaptador que apliques no debe impedir que los destinatarios del Material Adaptado cumplan con esta Licencia Pública.
 
-k. __Sui Generis Database Rights__ means rights other than copyright resulting from Directive 96/9/EC of the European Parliament and of the Council of 11 March 1996 on the legal protection of databases, as amended and/or succeeded, as well as other essentially equivalent rights anywhere in the world.
+## Sección 4 - Derechos de Base de Datos Sui Generis.
 
-l. __You__ means the individual or entity exercising the Licensed Rights under this Public License. Your has a corresponding meaning.
+Cuando los Derechos Licenciados incluyen Derechos de Base de Datos Sui Generis que se aplican a su uso del Material Licenciado:
 
-## Section 2 – Scope.
+a. para evitar dudas, la Sección 2(a)(1) te otorga el derecho de extraer, reutilizar, reproducir y Compartir todo o una parte sustancial del contenido de la base de datos solo para fines no comerciales;
 
-a. ___License grant.___
+b. si incluyes todo o una parte sustancial del contenido de la base de datos en una base de datos en la que tienes Derechos de Base de Datos Sui Generis, entonces la base de datos en la que tienes Derechos de Base de Datos Sui Generis (pero no sus contenidos individuales) es Material Adaptado; y
 
- 1. Subject to the terms and conditions of this Public License, the Licensor hereby grants You a worldwide, royalty-free, non-sublicensable, non-exclusive, irrevocable license to exercise the Licensed Rights in the Licensed Material to:
+c. debes cumplir con las condiciones en la Sección 3(a) si Compartes todo o una parte sustancial del contenido de la base de datos.
 
-  A. reproduce and Share the Licensed Material, in whole or in part, for NonCommercial purposes only; and
+Para evitar dudas, esta Sección 4 complementa y no reemplaza tus obligaciones bajo esta Licencia Pública cuando los Derechos Licenciados incluyen otros Derechos de Autor y Derechos Similares.
 
-  B. produce, reproduce, and Share Adapted Material for NonCommercial purposes only.
+## Sección 5 - Renuncia de Garantías y Limitación de Responsabilidad.
 
- 2. __Exceptions and Limitations.__ For the avoidance of doubt, where Exceptions and Limitations apply to Your use, this Public License does not apply, and You do not need to comply with its terms and conditions.
-     
- 3. __Term.__ The term of this Public License is specified in Section 6(a).
+a. __A menos que el Licenciante se comprometa por separado, en la medida de lo posible, el Licenciante ofrece el Material Licenciado tal cual y como está disponible, y no hace ninguna representación o garantía de ningún tipo con respecto al Material Licenciado, ya sea expresa, implícita, legal o de otro tipo. Esto incluye, sin limitación, garantías de título, comerciabilidad, idoneidad para un propósito particular, no infracción, ausencia de defectos latentes u otros, precisión o la presencia o ausencia de errores, ya sean conocidos o descubribles. Donde las renuncias de garantías no están permitidas en su totalidad o en parte, esta renuncia puede no aplicarse a ti.__
 
- 4. __Media and formats; technical modifications allowed.__ The Licensor authorizes You to exercise the Licensed Rights in all media and formats whether now known or hereafter created, and to make technical modifications necessary to do so. The Licensor waives and/or agrees not to assert any right or authority to forbid You from making technical modifications necessary to exercise the Licensed Rights, including technical modifications necessary to circumvent Effective Technological Measures. For purposes of this Public License, simply making modifications authorized by this Section 2(a)(4) never produces Adapted Material.
-    
- 5. __Downstream recipients.__
+b. __En la medida de lo posible, en ningún caso el Licenciante será responsable ante ti por cualquier teoría legal (incluyendo, sin limitación, negligencia) o de otro modo por cualquier pérdida directa, especial, indirecta, incidental, consecuente, punitiva, ejemplar u otras pérdidas, costos, gastos o daños que surjan de esta Licencia Pública o del uso del Material Licenciado, incluso si el Licenciante ha sido informado de la posibilidad de tales pérdidas, costos, gastos o daños. Donde una limitación de responsabilidad no está permitida en su totalidad o en parte, esta limitación puede no aplicarse a ti.__
 
-  A. __Offer from the Licensor – Licensed Material.__ Every recipient of the Licensed Material automatically receives an offer from the Licensor to exercise the Licensed Rights under the terms and conditions of this Public License.
+c. La renuncia de garantías y la limitación de responsabilidad proporcionadas anteriormente se interpretarán de manera que, en la medida de lo posible, se aproximen más a una renuncia y exención absolutas de toda responsabilidad.
 
-  B. __No downstream restrictions.__ You may not offer or impose any additional or different terms or conditions on, or apply any Effective Technological Measures to, the Licensed Material if doing so restricts exercise of the Licensed Rights by any recipient of the Licensed Material.
+## Sección 6 - Plazo y Terminación.
 
- 6. __No endorsement.__ Nothing in this Public License constitutes or may be construed as permission to assert or imply that You are, or that Your use of the Licensed Material is, connected with, or sponsored, endorsed, or granted official status by, the Licensor or others designated to receive attribution as provided in Section 3(a)(1)(A)(i).
-    
-b. ___Other rights.___
+a. Esta Licencia Pública se aplica durante el plazo de los Derechos de Autor y Derechos Similares licenciados aquí. Sin embargo, si no cumples con esta Licencia Pública, tus derechos bajo esta Licencia Pública terminan automáticamente.
 
- 1. Moral rights, such as the right of integrity, are not licensed under this Public License, nor are publicity, privacy, and/or other similar personality rights; however, to the extent possible, the Licensor waives and/or agrees not to assert any such rights held by the Licensor to the limited extent necessary to allow You to exercise the Licensed Rights, but not otherwise.
+b. Cuando tu derecho a usar el Material Licenciado haya terminado bajo la Sección 6(a), se restablecerá:
 
- 2. Patent and trademark rights are not licensed under this Public License.
+ 1. automáticamente a partir de la fecha en que se corrija la violación, siempre que se corrija dentro de los 30 días posteriores a tu descubrimiento de la violación; o
 
- 3. To the extent possible, the Licensor waives any right to collect royalties from You for the exercise of the Licensed Rights, whether directly or through a collecting society under any voluntary or waivable statutory or compulsory licensing scheme. In all other cases the Licensor expressly reserves any right to collect such royalties, including when the Licensed Material is used other than for NonCommercial purposes.
-    
-## Section 3 – License Conditions.
+ 2. mediante el restablecimiento expreso del Licenciante.
 
-Your exercise of the Licensed Rights is expressly made subject to the following conditions.
+ Para evitar dudas, esta Sección 6(b) no afecta ningún derecho que el Licenciante pueda tener para buscar remedios por tus violaciones de esta Licencia Pública.
 
-a. ___Attribution.___
+c. Para evitar dudas, el Licenciante también puede ofrecer el Material Licenciado bajo términos o condiciones separados o dejar de distribuir el Material Licenciado en cualquier momento; sin embargo, hacerlo no terminará esta Licencia Pública.
 
- 1. If You Share the Licensed Material (including in modified form), You must:
+d. Las Secciones 1, 5, 6, 7 y 8 sobreviven a la terminación de esta Licencia Pública.
 
-  A. retain the following if it is supplied by the Licensor with the Licensed Material:
+## Sección 7 - Otros Términos y Condiciones.
 
-   i. identification of the creator(s) of the Licensed Material and any others designated to receive attribution, in any reasonable manner requested by the Licensor (including by pseudonym if designated);
+a. El Licenciante no estará obligado por ningún término o condición adicional o diferente comunicado por ti a menos que se acuerde expresamente.
 
-   ii. a copyright notice;
+b. Cualquier acuerdo, entendimiento o acuerdo con respecto al Material Licenciado no establecido aquí es independiente de los términos y condiciones de esta Licencia Pública.
 
-   iii. a notice that refers to this Public License;
+## Sección 8 - Interpretación.
 
-   iv. a notice that refers to the disclaimer of warranties;
+a. Para evitar dudas, esta Licencia Pública no reduce, limita, restringe o impone condiciones sobre cualquier uso del Material Licenciado que pudiera hacerse legalmente sin permiso bajo esta Licencia Pública.
 
-   v. a URI or hyperlink to the Licensed Material to the extent reasonably practicable;
+b. En la medida de lo posible, si alguna disposición de esta Licencia Pública se considera inaplicable, se reformará automáticamente en la medida mínima necesaria para hacerla aplicable. Si la disposición no puede reformarse, se separará de esta Licencia Pública sin afectar la aplicabilidad de los términos y condiciones restantes.
 
-  B. indicate if You modified the Licensed Material and retain an indication of any previous modifications; and
+c. Ningún término o condición de esta Licencia Pública será renunciado y ninguna falta de cumplimiento será consentida a menos que se acuerde expresamente por el Licenciante.
 
-  C. indicate the Licensed Material is licensed under this Public License, and include the text of, or the URI or hyperlink to, this Public License.
-
- 2. You may satisfy the conditions in Section 3(a)(1) in any reasonable manner based on the medium, means, and context in which You Share the Licensed Material. For example, it may be reasonable to satisfy the conditions by providing a URI or hyperlink to a resource that includes the required information.
-
- 3. If requested by the Licensor, You must remove any of the information required by Section 3(a)(1)(A) to the extent reasonably practicable.
-
- 4. If You Share Adapted Material You produce, the Adapter's License You apply must not prevent recipients of the Adapted Material from complying with this Public License.
-
-## Section 4 – Sui Generis Database Rights.
-
-Where the Licensed Rights include Sui Generis Database Rights that apply to Your use of the Licensed Material:
-
-a. for the avoidance of doubt, Section 2(a)(1) grants You the right to extract, reuse, reproduce, and Share all or a substantial portion of the contents of the database for NonCommercial purposes only;
-
-b. if You include all or a substantial portion of the database contents in a database in which You have Sui Generis Database Rights, then the database in which You have Sui Generis Database Rights (but not its individual contents) is Adapted Material; and
-
-c. You must comply with the conditions in Section 3(a) if You Share all or a substantial portion of the contents of the database.
-
-For the avoidance of doubt, this Section 4 supplements and does not replace Your obligations under this Public License where the Licensed Rights include other Copyright and Similar Rights.
-
-## Section 5 – Disclaimer of Warranties and Limitation of Liability.
-
-a. __Unless otherwise separately undertaken by the Licensor, to the extent possible, the Licensor offers the Licensed Material as-is and as-available, and makes no representations or warranties of any kind concerning the Licensed Material, whether express, implied, statutory, or other. This includes, without limitation, warranties of title, merchantability, fitness for a particular purpose, non-infringement, absence of latent or other defects, accuracy, or the presence or absence of errors, whether or not known or discoverable. Where disclaimers of warranties are not allowed in full or in part, this disclaimer may not apply to You.__
-
-b. __To the extent possible, in no event will the Licensor be liable to You on any legal theory (including, without limitation, negligence) or otherwise for any direct, special, indirect, incidental, consequential, punitive, exemplary, or other losses, costs, expenses, or damages arising out of this Public License or use of the Licensed Material, even if the Licensor has been advised of the possibility of such losses, costs, expenses, or damages. Where a limitation of liability is not allowed in full or in part, this limitation may not apply to You.__
-
-c. The disclaimer of warranties and limitation of liability provided above shall be interpreted in a manner that, to the extent possible, most closely approximates an absolute disclaimer and waiver of all liability.
-
-## Section 6 – Term and Termination.
-
-a. This Public License applies for the term of the Copyright and Similar Rights licensed here. However, if You fail to comply with this Public License, then Your rights under this Public License terminate automatically.
-
-b. Where Your right to use the Licensed Material has terminated under Section 6(a), it reinstates:
-
- 1. automatically as of the date the violation is cured, provided it is cured within 30 days of Your discovery of the violation; or
-
- 2. upon express reinstatement by the Licensor.
-
- For the avoidance of doubt, this Section 6(b) does not affect any right the Licensor may have to seek remedies for Your violations of this Public License.
-
-c. For the avoidance of doubt, the Licensor may also offer the Licensed Material under separate terms or conditions or stop distributing the Licensed Material at any time; however, doing so will not terminate this Public License.
-
-d. Sections 1, 5, 6, 7, and 8 survive termination of this Public License.
-
-## Section 7 – Other Terms and Conditions.
-
-a. The Licensor shall not be bound by any additional or different terms or conditions communicated by You unless expressly agreed.
-
-b. Any arrangements, understandings, or agreements regarding the Licensed Material not stated herein are separate from and independent of the terms and conditions of this Public License.
-
-## Section 8 – Interpretation.
-
-a. For the avoidance of doubt, this Public License does not, and shall not be interpreted to, reduce, limit, restrict, or impose conditions on any use of the Licensed Material that could lawfully be made without permission under this Public License.
-
-b. To the extent possible, if any provision of this Public License is deemed unenforceable, it shall be automatically reformed to the minimum extent necessary to make it enforceable. If the provision cannot be reformed, it shall be severed from this Public License without affecting the enforceability of the remaining terms and conditions.
-
-c. No term or condition of this Public License will be waived and no failure to comply consented to unless expressly agreed to by the Licensor.
-
-d. Nothing in this Public License constitutes or may be interpreted as a limitation upon, or waiver of, any privileges and immunities that apply to the Licensor or You, including from the legal processes of any jurisdiction or authority.
-
+d. Nada en esta Licencia Pública constituye o puede interpretarse como una limitación o renuncia de cualquier privilegio e inmunidad que se aplique al Licenciante o a ti, incluyendo de los procesos legales de cualquier jurisdicción o autoridad.
 ```
 Creative Commons is not a party to its public licenses. Notwithstanding, Creative Commons may elect to apply one of its public licenses to material it publishes and in those instances will be considered the “Licensor.” Except for the limited purpose of indicating that material is shared under a Creative Commons public license or as otherwise permitted by the Creative Commons policies published at [creativecommons.org/policies](http://creativecommons.org/policies), Creative Commons does not authorize the use of the trademark “Creative Commons” or any other trademark or logo of Creative Commons without its prior written consent including, without limitation, in connection with any unauthorized modifications to any of its public licenses or any other arrangements, understandings, or agreements concerning use of licensed material. For the avoidance of doubt, this paragraph does not form part of the public licenses. 
 
 Creative Commons may be contacted at [creativecommons.org](http://creativecommons.org/).
 ```
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Comparte tus trucos de hacking enviando PRs al [repositorio de hacktricks](https://github.com/carlospolop/hacktricks) y al [repositorio de hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

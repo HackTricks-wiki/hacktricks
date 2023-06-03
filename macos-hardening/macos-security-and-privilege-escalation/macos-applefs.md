@@ -1,42 +1,25 @@
-# macOS AppleFS
+## Sistema de archivos propietario de Apple (APFS)
 
-<details>
+APFS, o Apple File System, es un sistema de archivos moderno desarrollado por Apple Inc. que fue diseñado para reemplazar el antiguo Hierarchical File System Plus (HFS+) con énfasis en **mejorar el rendimiento, la seguridad y la eficiencia**.
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+Algunas características destacadas de APFS incluyen:
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+1. **Compartición de espacio**: APFS permite que varios volúmenes **compartan el mismo almacenamiento libre subyacente** en un solo dispositivo físico. Esto permite una utilización de espacio más eficiente ya que los volúmenes pueden crecer y disminuir dinámicamente sin necesidad de redimensionamiento o reparticionamiento manual.
+   1. Esto significa, en comparación con las particiones tradicionales en discos de archivos, que en APFS diferentes particiones (volúmenes) comparten todo el espacio en disco, mientras que una partición regular generalmente tenía un tamaño fijo.
+2. **Instantáneas**: APFS admite la **creación de instantáneas**, que son instancias **de solo lectura** del sistema de archivos en un momento determinado. Las instantáneas permiten copias de seguridad eficientes y fácilmente reversibles, ya que consumen un almacenamiento adicional mínimo y se pueden crear o revertir rápidamente.
+3. **Clones**: APFS puede **crear clones de archivos o directorios que comparten el mismo almacenamiento** que el original hasta que se modifica el clon o el archivo original. Esta característica proporciona una forma eficiente de crear copias de archivos o directorios sin duplicar el espacio de almacenamiento.
+4. **Cifrado**: APFS **admite nativamente el cifrado de disco completo** así como el cifrado de archivo y directorio, mejorando la seguridad de los datos en diferentes casos de uso.
+5. **Protección contra fallos**: APFS utiliza un **esquema de metadatos de copia en escritura que garantiza la consistencia del sistema de archivos** incluso en casos de pérdida de energía repentina o fallos del sistema, reduciendo el riesgo de corrupción de datos.
 
-</details>
-
-## Apple Propietary File System (APFS)
-
-APFS, or Apple File System, is a modern file system developed by Apple Inc. that was designed to replace the older Hierarchical File System Plus (HFS+) with an emphasis on **improved performance, security, and efficiency**.
-
-Some notable features of APFS include:
-
-1. **Space Sharing**: APFS allows multiple volumes to **share the same underlying free storage** on a single physical device. This enables more efficient space utilization as the volumes can dynamically grow and shrink without the need for manual resizing or repartitioning.
-   1. This means, compared with traditional partitions in file disks, t**hat in APFS different partitions (volumes) shares all the disk space**, while a regular partition usually had a fixed size.
-2. **Snapshots**: APFS supports **creating snapshots**, which are **read-only**, point-in-time instances of the file system. Snapshots enable efficient backups and easy system rollbacks, as they consume minimal additional storage and can be quickly created or reverted.
-3. **Clones**: APFS can **create file or directory clones that share the same storage** as the original until either the clone or the original file is modified. This feature provides an efficient way to create copies of files or directories without duplicating the storage space.
-4. **Encryption**: APFS **natively supports full-disk encryption** as well as per-file and per-directory encryption, enhancing data security across different use cases.
-5. **Crash Protection**: APFS uses a **copy-on-write metadata scheme that ensures file system consistency** even in cases of sudden power loss or system crashes, reducing the risk of data corruption.
-
-Overall, APFS offers a more modern, flexible, and efficient file system for Apple devices, with a focus on improved performance, reliability, and security.
-
+En general, APFS ofrece un sistema de archivos más moderno, flexible y eficiente para dispositivos Apple, con un enfoque en mejorar el rendimiento, la confiabilidad y la seguridad.
 ```bash
 diskutil list # Get overview of the APFS volumes
 ```
-
 ## Firmlinks
 
-The `Data` volume is mounted in **`/System/Volumes/Data`** (you can check this with `diskutil apfs list`).
+El volumen `Data` se monta en **`/System/Volumes/Data`** (puedes comprobar esto con `diskutil apfs list`).
 
-The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
-
+La lista de firmlinks se puede encontrar en el archivo **`/usr/share/firmlinks`**.
 ```bash
 cat /usr/share/firmlinks
 /AppleInternal	AppleInternal
@@ -44,17 +27,4 @@ cat /usr/share/firmlinks
 /Library	Library
 [...]
 ```
-
-On the **left**, there is the directory path on the **System volume**, and on the **right**, the directory path where it maps on the **Data volume**. So, `/library` --> `/system/Volumes/data/library`
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
+En la **izquierda**, se encuentra la ruta del directorio en el **volumen del sistema**, y en la **derecha**, la ruta del directorio donde se mapea en el **volumen de datos**. Así, `/library` --> `/system/Volumes/data/library`.

@@ -1,37 +1,37 @@
-# macOS Sandbox Debug & Bypass
+# Depuración y Bypass del Sandbox de macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Sandbox loading process
+## Proceso de carga del Sandbox
 
-<figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption><p>Imagen de <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-In the previous image it's possible to observe **how the sandbox will be loaded** when an application with the entitlement **`com.apple.security.app-sandbox`** is run.
+En la imagen anterior se puede observar **cómo se cargará el sandbox** cuando se ejecute una aplicación con la concesión **`com.apple.security.app-sandbox`**.
 
-The compiler will link `/usr/lib/libSystem.B.dylib` to the binary.
+El compilador vinculará `/usr/lib/libSystem.B.dylib` al binario.
 
-Then, **`libSystem.B`** will be calling other several functions until the **`xpc_pipe_routine`** sends the entitlements of the app to **`securityd`**. Securityd checks if the process should be quarantine inside the Sandbox, and if so, it will be quarentine.\
-Finally, the sandbox will be activated will a call to **`__sandbox_ms`** which will call **`__mac_syscall`**.
+Luego, **`libSystem.B`** llamará a otras varias funciones hasta que **`xpc_pipe_routine`** envíe las concesiones de la aplicación a **`securityd`**. Securityd comprueba si el proceso debe ser puesto en cuarentena dentro del Sandbox, y si es así, se pondrá en cuarentena.\
+Finalmente, el sandbox se activará con una llamada a **`__sandbox_ms`** que llamará a **`__mac_syscall`**.
 
-## Possible Bypasses
+## Posibles Bypasses
 
-### Run binary without Sandbox
+### Ejecutar binarios sin Sandbox
 
-If you run a binary that won't be sandboxed from a sandboxed binary, it will **run within the sandbox of the parent process**.
+Si ejecutas un binario que no esté en el Sandbox desde un binario en el Sandbox, se **ejecutará dentro del Sandbox del proceso padre**.
 
-### Debug & bypass Sandbox with lldb
+### Depuración y bypass del Sandbox con lldb
 
-Let's compile an application that should be sandboxed:
+Compilaremos una aplicación que debería estar en el Sandbox:
 
 {% tabs %}
 {% tab title="sand.c" %}
@@ -44,6 +44,16 @@ int main() {
 {% endtab %}
 
 {% tab title="entitlements.xml" %}
+
+El archivo `entitlements.xml` es un archivo de configuración que se utiliza para especificar los permisos y capacidades que una aplicación tiene en el sistema. Estos permisos se denominan "entitlements" y se utilizan para restringir el acceso a ciertas funciones y recursos del sistema. 
+
+El archivo `entitlements.xml` se utiliza comúnmente en el contexto de la sandbox de macOS para especificar los permisos que una aplicación tiene dentro de la sandbox. Los permisos que se pueden especificar en el archivo `entitlements.xml` incluyen cosas como acceso a la red, acceso a archivos, acceso a la cámara y al micrófono, y más.
+
+Es importante tener en cuenta que los permisos especificados en el archivo `entitlements.xml` no son necesariamente exhaustivos y que una aplicación puede tener acceso a recursos adicionales a través de otros medios. Además, es posible que una aplicación tenga permisos que no se especifican en el archivo `entitlements.xml` si se ejecuta fuera de la sandbox.
+
+En general, el archivo `entitlements.xml` es una herramienta importante para garantizar que las aplicaciones se ejecuten de manera segura y limitada en la sandbox de macOS. Sin embargo, no es una solución completa y se deben tomar otras medidas de seguridad para garantizar que las aplicaciones no puedan escapar de la sandbox o acceder a recursos no autorizados. 
+
+{% endtab %}
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
@@ -55,6 +65,10 @@ int main() {
 {% endtab %}
 
 {% tab title="Info.plist" %}
+
+El archivo Info.plist es un archivo de configuración que se encuentra en la raíz de cada aplicación macOS. Este archivo contiene información sobre la aplicación, como su nombre, versión, desarrollador y permisos requeridos. También puede contener información sobre el sandbox de la aplicación, como los recursos a los que se le permite acceder.
+
+El archivo Info.plist se puede modificar para cambiar los permisos requeridos por la aplicación o para desactivar el sandbox por completo. Sin embargo, esto puede comprometer la seguridad del sistema y permitir que la aplicación acceda a recursos que normalmente estarían fuera de su alcance. Por lo tanto, es importante tener cuidado al modificar este archivo y solo hacerlo si es absolutamente necesario.
 ```xml
 <plist version="1.0">
 <dict>
@@ -68,7 +82,7 @@ int main() {
 {% endtab %}
 {% endtabs %}
 
-Then compile the app:
+Luego compila la aplicación:
 
 {% code overflow="wrap" %}
 ```bash
@@ -83,16 +97,14 @@ codesign -s <cert-name> --entitlements entitlements.xml sand
 {% endcode %}
 
 {% hint style="danger" %}
-The app will try to **read** the file **`~/Desktop/del.txt`**, which the **Sandbox won't allow**.\
-Create a file in there as once the Sandbox is bypassed, it will be able to read it:
-
+La aplicación intentará **leer** el archivo **`~/Desktop/del.txt`**, lo cual el **Sandbox no permitirá**.\
+Cree un archivo allí ya que una vez que se haya evadido el Sandbox, podrá leerlo:
 ```bash
 echo "Sandbox Bypassed" > ~/Desktop/del.txt
 ```
 {% endhint %}
 
-Let's debug the chess application to see when is the Sandbox loaded:
-
+Depuremos la aplicación de ajedrez para ver cuándo se carga el Sandbox:
 ```bash
 # Load app in debugging
 lldb ./sand
@@ -169,29 +181,27 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-
 {% hint style="warning" %}
-**Even with the Sandbox bypassed TCC** will ask the user if he wants to allow the process to read files from desktop
+Incluso si se ha evadido el Sandbox, TCC preguntará al usuario si desea permitir que el proceso lea archivos del escritorio.
 {% endhint %}
 
-### Abusing other processes
+### Abusando de otros procesos
 
-If from then sandbox process you are able to **compromise other processes** running in less restrictive sandboxes (or none), you will be able to escape to their sandboxes:
+Si desde el proceso del Sandbox se puede **comprometer otros procesos** que se ejecutan en Sandboxes menos restrictivos (o sin ellos), se podrá escapar a sus Sandboxes:
 
 {% content-ref url="../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../macos-proces-abuse/)
 {% endcontent-ref %}
 
-### Interposting Bypass
+### Bypass de Interposting
 
-For more information about **Interposting** check:
+Para obtener más información sobre **Interposting**, consulte:
 
 {% content-ref url="../../mac-os-architecture/macos-function-hooking.md" %}
 [macos-function-hooking.md](../../mac-os-architecture/macos-function-hooking.md)
 {% endcontent-ref %}
 
-#### Interpost `_libsecinit_initializer` to prevent the sandbox
-
+#### Interceptar `_libsecinit_initializer` para evitar el Sandbox
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -215,8 +225,7 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 _libsecinit_initializer called
 Sandbox Bypassed!
 ```
-
-#### Interpost `__mac_syscall` to prevent the Sandbox
+#### Interceptar `__mac_syscall` para evitar el Sandbox
 
 {% code title="interpose.c" %}
 ```c
@@ -250,8 +259,7 @@ __attribute__((used)) static const struct interpose_sym interposers[] __attribut
     { (const void *)my_mac_syscall, (const void *)__mac_syscall },
 };
 ```
-{% endcode %}
-
+{% endcode %} (This tag should not be translated)
 ```bash
 DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 
@@ -263,36 +271,33 @@ __mac_syscall invoked. Policy: Quarantine, Call: 87
 __mac_syscall invoked. Policy: Sandbox, Call: 4
 Sandbox Bypassed!
 ```
+### Compilación estática y vinculación dinámica
 
-### Static Compiling & Dynamically linking
+[**Esta investigación**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descubrió 2 formas de evitar el Sandbox. Debido a que el Sandbox se aplica desde el espacio de usuario cuando se carga la biblioteca **libSystem**. Si un binario pudiera evitar cargarla, nunca se sandboxearía:
 
-[**This research**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) discovered 2 ways to bypass the Sandbox. Because the sandbox is applied from userland when the **libSystem** library is loaded. If a binary could avoid loading it, it would never get sandboxed:
-
-* If the binary was **completely statically compiled**, it could avoid loading that library.
-* If the **binary wouldn't need to load any libraries** (because the linker is also in libSystem), it won't need to load libSystem.&#x20;
+* Si el binario estuviera **completamente compilado estáticamente**, podría evitar cargar esa biblioteca.
+* Si el **binario no necesitara cargar ninguna biblioteca** (porque el enlazador también está en libSystem), no necesitaría cargar libSystem.
 
 ### Shellcodes
 
-Note that **even shellcodes** in ARM64 needs to be linked in `libSystem.dylib`:
-
+Tenga en cuenta que **incluso los shellcodes** en ARM64 deben vincularse en `libSystem.dylib`:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
+### Abuso de ubicaciones de inicio automático
 
-### Abusing Austo Start Locations
+Si un proceso con sandbox puede **escribir** en un lugar donde **más tarde se ejecutará el binario una aplicación sin sandbox**, podrá **escapar simplemente colocando** allí el binario. Un buen ejemplo de este tipo de ubicaciones son `~/Library/LaunchAgents` o `/System/Library/LaunchDaemons`.
 
-If a sandboxed process can **write** in a place where **later an unsandboxed application is going to run the binary**, it will be able to **escape just by placing** there the binary. A good example of this kind of locations are `~/Library/LaunchAgents` or `/System/Library/LaunchDaemons`.
+Para esto, incluso puede necesitar **2 pasos**: hacer que un proceso con un sandbox **más permisivo** (`file-read*`, `file-write*`) ejecute su código, que en realidad escribirá en un lugar donde se ejecutará **sin sandbox**.
 
-For this you might even need **2 steps**: To make a process with a **more permissive sandbox** (`file-read*`, `file-write*`) execute your code which will actually write in a place where it will be **executed unsandboxed**.
-
-Check this page about **Auto Start locations**:
+Consulte esta página sobre **ubicaciones de inicio automático**:
 
 {% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
+[Enlace roto](broken-reference)
 {% endcontent-ref %}
 
-## References
+## Referencias
 
 * [http://newosxbook.com/files/HITSB.pdf](http://newosxbook.com/files/HITSB.pdf)
 * [https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)
@@ -302,10 +307,10 @@ Check this page about **Auto Start locations**:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
