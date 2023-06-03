@@ -77,6 +77,14 @@ Unfortunately, if an organization has not taken additional steps to **protect th
   * Additional trusted certificates for server URL (optional pinning)
   * Extra settings (e.g. which screens to skip in Setup Assistant)
 
+## Serial Number
+
+Apple devices manufactured after 2010 generally have **12-character alphanumeric** serial numbers, with the **first three digits representing the manufacturing location**, the following **two** indicating the **year** and **week** of manufacture, the next **three** digits providing a **unique** **identifier**, and the **last** **four** digits representing the **model number**.
+
+{% content-ref url="macos-serial-number.md" %}
+[macos-serial-number.md](macos-serial-number.md)
+{% endcontent-ref %}
+
 ## Steps for enrolment and management
 
 1. Device record creation (Reseller, Apple): The record for the new device is created
@@ -140,7 +148,7 @@ The response is a JSON dictionary with some important data like:
 * Signed using the **device identity certificate (from APNS)**
 * **Certificate chain** includes expired **Apple iPhone Device CA**
 
-![](<../../../.gitbook/assets/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2).png>)
+![](<../../../.gitbook/assets/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2).png>)
 
 ### Step 6: Profile Installation
 
