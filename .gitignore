@@ -1,3 +1,5 @@
 .dccache
 scripts/
 scripts/*
+.DS_store
+**/.DS_store
