@@ -70,6 +70,7 @@
   * [venv](generic-methodologies-and-resources/python/venv.md)
   * [Bypass Python sandboxes](generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md)
     * [LOAD\_NAME / LOAD\_CONST opcode OOB Read](generic-methodologies-and-resources/python/bypass-python-sandboxes/load\_name-load\_const-opcode-oob-read.md)
+    * [Output Searching Python internals](generic-methodologies-and-resources/python/bypass-python-sandboxes/output-searching-python-internals.md)
   * [Web Requests](generic-methodologies-and-resources/python/web-requests.md)
   * [Bruteforce hash (few chars)](generic-methodologies-and-resources/python/bruteforce-hash-few-chars.md)
 * [Exfiltration](generic-methodologies-and-resources/exfiltration.md)
