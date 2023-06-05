@@ -47,16 +47,11 @@
   * [Windows Artifacts](forensics/basic-forensic-methodology/windows-forensics/README.md)
     * [Windows Processes](forensics/basic-forensic-methodology/windows-forensics/windows-processes.md)
     * [Interesting Windows Registry Keys](forensics/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys.md)
-* [Python Sandbox Escape & Pyscript](generic-methodologies-and-resources/python/README.md)
-  * [Pyscript](generic-methodologies-and-resources/python/pyscript.md)
-  * [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
-  * [Class Pollution (Python's Prototype Pollution)](generic-methodologies-and-resources/python/class-pollution-pythons-prototype-pollution.md)
-  * [venv](generic-methodologies-and-resources/python/venv.md)
-  * [Bypass Python sandboxes](generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md)
-    * [LOAD\_NAME / LOAD\_CONST opcode OOB Read](generic-methodologies-and-resources/python/bypass-python-sandboxes/load\_name-load\_const-opcode-oob-read.md)
-    * [Output Searching Python internals](generic-methodologies-and-resources/python/bypass-python-sandboxes/output-searching-python-internals.md)
-  * [Web Requests](generic-methodologies-and-resources/python/web-requests.md)
-  * [Bruteforce hash (few chars)](generic-methodologies-and-resources/python/bruteforce-hash-few-chars.md)
+* [Brute Force - CheatSheet](generic-methodologies-and-resources/brute-force.md)
+* [Exfiltration](generic-methodologies-and-resources/exfiltration.md)
+* [Tunneling and Port Forwarding](generic-methodologies-and-resources/tunneling-and-port-forwarding.md)
+* [Search Exploits](generic-methodologies-and-resources/search-exploits.md)
+
 
 ## 🐧 Linux Hardening
 
