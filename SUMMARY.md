@@ -66,6 +66,7 @@
 * [Python Sandbox Escape & Pyscript](generic-methodologies-and-resources/python/README.md)
   * [Pyscript](generic-methodologies-and-resources/python/pyscript.md)
   * [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
+  * [Class Pollution (Python's Prototype Pollution)](generic-methodologies-and-resources/python/class-pollution-pythons-prototype-pollution.md)
   * [venv](generic-methodologies-and-resources/python/venv.md)
   * [Web Requests](generic-methodologies-and-resources/python/web-requests.md)
   * [Bruteforce hash (few chars)](generic-methodologies-and-resources/python/bruteforce-hash-few-chars.md)
