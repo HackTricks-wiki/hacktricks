@@ -9,6 +9,21 @@
 
 ## 🤩 Generic Methodologies & Resources
 
+* [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
+* [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
+  * [Wide Source Code Search](generic-methodologies-and-resources/external-recon-methodology/wide-source-code-search.md)
+  * [Github Dorks & Leaks](generic-methodologies-and-resources/external-recon-methodology/github-leaked-secrets.md)
+* [Pentesting Network](generic-methodologies-and-resources/pentesting-network/README.md)
+  * [DHCPv6](generic-methodologies-and-resources/pentesting-network/dhcpv6.md)
+  * [EIGRP Attacks](generic-methodologies-and-resources/pentesting-network/eigrp-attacks.md)
+  * [GLBP & HSRP Attacks](generic-methodologies-and-resources/pentesting-network/glbp-and-hsrp-attacks.md)
+  * [IDS and IPS Evasion](generic-methodologies-and-resources/pentesting-network/ids-evasion.md)
+  * [Lateral VLAN Segmentation Bypass](generic-methodologies-and-resources/pentesting-network/lateral-vlan-segmentation-bypass.md)
+  * [Network Protocols Explained (ESP)](generic-methodologies-and-resources/pentesting-network/network-protocols-explained-esp.md)
+  * [Nmap Summary (ESP)](generic-methodologies-and-resources/pentesting-network/nmap-summary-esp.md)
+  * [Pentesting IPv6](generic-methodologies-and-resources/pentesting-network/pentesting-ipv6.md)
+  * [Spoofing LLMNR, NBT-NS, mDNS/DNS and WPAD and Relay Attacks](generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
+  * [Spoofing SSDP and UPnP Devices with EvilSSDP](generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)
 * [Pentesting Wifi](generic-methodologies-and-resources/pentesting-wifi/README.md)
   * [Evil Twin EAP-TLS](generic-methodologies-and-resources/pentesting-wifi/evil-twin-eap-tls.md)
 * [Phishing Methodology](generic-methodologies-and-resources/phishing-methodology/README.md)
@@ -51,6 +66,11 @@
 * [Exfiltration](generic-methodologies-and-resources/exfiltration.md)
 * [Tunneling and Port Forwarding](generic-methodologies-and-resources/tunneling-and-port-forwarding.md)
 * [Search Exploits](generic-methodologies-and-resources/search-exploits.md)
+* [Shells (Linux, Windows, MSFVenom)](generic-methodologies-and-resources/shells/README.md)
+  * [MSFVenom - CheatSheet](generic-methodologies-and-resources/shells/msfvenom.md)
+  * [Shells - Windows](generic-methodologies-and-resources/shells/windows.md)
+  * [Shells - Linux](generic-methodologies-and-resources/shells/linux.md)
+  * [Full TTYs](generic-methodologies-and-resources/shells/full-ttys.md)
 
 
 ## 🐧 Linux Hardening
