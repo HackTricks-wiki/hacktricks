@@ -4,36 +4,35 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Introduction
+## Introdução
 
-If you found that you can **write in a System Path folder** (note that this won't work if you can write in a User Path folder) it's possible that you could **escalate privileges** in the system.
+Se você descobriu que pode **escrever em uma pasta do caminho do sistema** (observe que isso não funcionará se você puder escrever em uma pasta do caminho do usuário), é possível que você possa **elevar privilégios** no sistema.
 
-In order to do that you can abuse a **Dll Hijacking** where you are going to **hijack a library being loaded** by a service or process with **more privileges** than yours, and because that service is loading a Dll that probably doesn't even exist in the entire system, it's going to try to load it from the System Path where you can write.
+Para fazer isso, você pode abusar de um **Dll Hijacking** em que você vai **sequestrar uma biblioteca sendo carregada** por um serviço ou processo com **mais privilégios** do que os seus, e porque esse serviço está carregando uma Dll que provavelmente nem existe em todo o sistema, ele vai tentar carregá-la do Caminho do Sistema onde você pode escrever.
 
-For more info about **what is Dll Hijackig** check:
+Para obter mais informações sobre **o que é Dll Hijacking**, consulte:
 
 {% content-ref url="../dll-hijacking.md" %}
 [dll-hijacking.md](../dll-hijacking.md)
 {% endcontent-ref %}
 
-## Privesc with Dll Hijacking
+## Privesc com Dll Hijacking
 
-### Finding a missing Dll
+### Encontrando uma Dll ausente
 
-The first thing you need is to **identify a process** running with **more privileges** than you that is trying to **load a Dll from the System Path** you can write in.
+A primeira coisa que você precisa é **identificar um processo** em execução com **mais privilégios** do que você que está tentando **carregar uma Dll do Caminho do Sistema** em que você pode escrever.
 
-The problem in this cases is that probably thoses processes are already running. To find which Dlls are lacking the services you need to launch procmon as soon as possible (before processes are loaded). So, to find lacking .dlls do:
+O problema nesses casos é que provavelmente esses processos já estão em execução. Para encontrar quais Dlls estão faltando nos serviços que você precisa, inicie o procmon o mais rápido possível (antes que os processos sejam carregados). Então, para encontrar as .dlls ausentes, faça o seguinte:
 
-* **Create** the folder `C:\privesc_hijacking` and add the path `C:\privesc_hijacking` to **System Path env variable**. You can do this **manually** or with **PS**:
-
+* **Crie** a pasta `C:\privesc_hijacking` e adicione o caminho `C:\privesc_hijacking` à **variável de ambiente do Caminho do Sistema**. Você pode fazer isso **manualmente** ou com **PS**:
 ```powershell
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
@@ -50,56 +49,55 @@ if ($envPath -notlike "*$folderPath*") {
     [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-
-* Launch **`procmon`**  and go to **`Options`** --> **`Enable boot logging`** and press **`OK`** in the prompt.
-* Then, **reboot**. When the computer is restarted **`procmon`** will start **recording** events asap.
-* Once **Windows** is **started execute `procmon`** again, it'll tell you that it has been running and will **ask you if you want to store** the events in a file. Say **yes** and **store the events in a file**.
-* **After** the **file** is **generated**, **close** the opened **`procmon`** window and **open the events file**.
-* Add these **filters** and you will find all the Dlls that some **proccess tried to load** from the writable System Path folder:
+* Inicie o **`procmon`** e vá em **`Opções`** --> **`Habilitar log de inicialização`** e pressione **`OK`** na janela de prompt.
+* Em seguida, **reinicie** o computador. Quando o Windows for reiniciado, o **`procmon`** começará a **gravar** eventos imediatamente.
+* Assim que o Windows for iniciado, execute o **`procmon`** novamente. Ele informará que está em execução e perguntará se você deseja armazenar os eventos em um arquivo. Responda **sim** e **armazene os eventos em um arquivo**.
+* **Depois** que o **arquivo** for **gerado**, **feche** a janela do **`procmon`** aberta e **abra o arquivo de eventos**.
+* Adicione esses **filtros** e você encontrará todas as DLLs que algum **processo tentou carregar** da pasta do caminho do sistema gravável:
 
 <figure><img src="../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
 
-### Missed Dlls
+### DLLs Perdidas
 
-Running this in a free **virtual (vmware) Windows 11 machine** I got these results:
+Ao executar isso em uma **máquina virtual (vmware) Windows 11** gratuita, obtive esses resultados:
 
 <figure><img src="../../../.gitbook/assets/image (253).png" alt=""><figcaption></figcaption></figure>
 
-In this case the .exe are useless so ignore them, the missed DLLs where from:
+Neste caso, os arquivos .exe são inúteis, então ignore-os. As DLLs perdidas eram de:
 
-| Service                         | Dll                | CMD line                                                             |
-| ------------------------------- | ------------------ | -------------------------------------------------------------------- |
-| Task Scheduler (Schedule)       | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
-| Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
-| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
+| Serviço | DLL | Linha de comando |
+| --- | --- | --- |
+| Agendador de Tarefas (Schedule) | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule` |
+| Serviço de Política de Diagnóstico (DPS) | Unknown.DLL | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
+| ??? | SharedRes.dll | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup` |
 
-After finding this, I found this interesting blog post that also explains how to [**abuse WptsExtensions.dll for privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows\_10\_Phantom\_DLL\_Hijacking\_-\_WptsExtensionsdll). Which is what we **are going to do now**.
+Depois de encontrar isso, encontrei este interessante post de blog que também explica como [**abusar do WptsExtensions.dll para escalonamento de privilégios**](https://juggernaut-sec.com/dll-hijacking/#Windows\_10\_Phantom\_DLL\_Hijacking\_-\_WptsExtensionsdll). Que é o que vamos fazer agora.
 
-### Exploitation
+### Exploração
 
-So, to **escalate privileges** we are going to hijack the library **WptsExtensions.dll**. Having the **path** and the **name** we just need to **generate the malicious dll**.
+Portanto, para **escalar privilégios**, vamos sequestrar a biblioteca **WptsExtensions.dll**. Tendo o **caminho** e o **nome**, precisamos apenas **gerar a DLL maliciosa**.
 
-You can [**try to use any of these examples**](../dll-hijacking.md#creating-and-compiling-dlls). You could run payloads such as: get a rev shell, add a user, execute a beacon...
+Você pode [**tentar usar qualquer um desses exemplos**](../dll-hijacking.md#creating-and-compiling-dlls). Você pode executar payloads como: obter um shell reverso, adicionar um usuário, executar um beacon...
 
 {% hint style="warning" %}
-Note that **not all the service are run** with **`NT AUTHORITY\SYSTEM`** some are also run with **`NT AUTHORITY\LOCAL SERVICE`** which has **less privileges** and you **won't be able to create a new user** abuse its permissions.\
-However, that user has the **`seImpersonate`** privilege, so you can use the[ **potato suite to escalate privileges**](../roguepotato-and-printspoofer.md). So, in this case a rev shell is a better option that trying to create a user.
+Observe que **nem todos os serviços são executados** com **`NT AUTHORITY\SYSTEM`**, alguns também são executados com **`NT AUTHORITY\LOCAL SERVICE`**, que tem **menos privilégios** e você **não poderá criar um novo usuário** abusando de suas permissões.\
+No entanto, esse usuário tem o privilégio **`seImpersonate`**, então você pode usar o [**conjunto de ferramentas potato para escalar privilégios**](../roguepotato-and-printspoofer.md). Portanto, neste caso, um shell reverso é uma opção melhor do que tentar criar um usuário.
 {% endhint %}
 
-At the moment of writing the **Task Scheduler** service is run with **Nt AUTHORITY\SYSTEM**.
+No momento da escrita deste artigo, o serviço **Agendador de Tarefas** é executado com **Nt AUTHORITY\SYSTEM**.
 
-Having **generated the malicious Dll** (_in my case I used x64 rev shell and I got a shell back but defender killed it because it was from msfvenom_), save it in the writable System Path with the name **WptsExtensions.dll** and **restart** the computer (or restart the service or do whatever it takes to rerun the affected service/program).
+Tendo **gerado a DLL maliciosa** (_no meu caso, usei um shell reverso x64 e consegui um shell de volta, mas o defender o matou porque era do msfvenom_), salve-a no caminho do sistema gravável com o nome **WptsExtensions.dll** e **reinicie** o computador (ou reinicie o serviço ou faça o que for necessário para executar novamente o serviço/programa afetado).
 
-When the service is re-started, the **dll should be loaded and executed** (you can **reuse** the **procmon** trick to check if the **library was loaded as expected**).
+Quando o serviço for reiniciado, a **DLL deve ser carregada e executada** (você pode **reutilizar** o **truque do procmon** para verificar se a **biblioteca foi carregada conforme o esperado**).
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

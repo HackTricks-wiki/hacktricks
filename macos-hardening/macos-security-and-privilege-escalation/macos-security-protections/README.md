@@ -1,25 +1,24 @@
-# macOS Security Protections
+# Proteções de Segurança do macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Gatekeeper
 
-**Gatekeeper** is a security feature developed for Mac operating systems, designed to ensure that users **run only trusted software** on their systems. It functions by **validating software** that a user downloads and attempts to open from **sources outside the App Store**, such as an app, a plug-in, or an installer package.
+**Gatekeeper** é um recurso de segurança desenvolvido para sistemas operacionais Mac, projetado para garantir que os usuários **executem apenas software confiável** em seus sistemas. Ele funciona **validando o software** que um usuário baixa e tenta abrir de **fontes fora da App Store**, como um aplicativo, um plug-in ou um pacote de instalação.
 
-The key mechanism of Gatekeeper lies in its **verification** process. It checks if the downloaded software is **signed by a recognized developer**, ensuring the software's authenticity. Further, it ascertains whether the software is **notarised by Apple**, confirming that it is devoid of known malicious content and has not been tampered with after notarisation.
+O mecanismo chave do Gatekeeper reside em seu processo de **verificação**. Ele verifica se o software baixado é **assinado por um desenvolvedor reconhecido**, garantindo a autenticidade do software. Além disso, ele verifica se o software é **notarizado pela Apple**, confirmando que ele está livre de conteúdo malicioso conhecido e não foi adulterado após a notarização.
 
-Additionally, Gatekeeper reinforces user control and security by **prompting users to approve the opening** of downloaded software for the first time. This safeguard helps prevent users from inadvertently running potentially harmful executable code that they may have mistaken for a harmless data file.
-
+Além disso, o Gatekeeper reforça o controle e a segurança do usuário, **solicitando que os usuários aprovem a abertura** do software baixado pela primeira vez. Esse recurso de segurança ajuda a evitar que os usuários executem inadvertidamente código executável potencialmente prejudicial que possam ter confundido com um arquivo de dados inofensivo.
 ```bash
 # Check the status
 spctl --status
@@ -28,25 +27,23 @@ sudo spctl --master-enable
 # Disable Gatekeeper
 sudo spctl --master-disable
 ```
+### Assinaturas de Aplicativos
 
-### Application Signatures
+As assinaturas de aplicativos, também conhecidas como assinaturas de código, são um componente crítico da infraestrutura de segurança da Apple. Elas são usadas para **verificar a identidade do autor do software** (o desenvolvedor) e garantir que o código não tenha sido adulterado desde a última vez que foi assinado.
 
-Application signatures, also known as code signatures, are a critical component of Apple's security infrastructure. They're used to **verify the identity of the software author** (the developer) and to ensure that the code hasn't been tampered with since it was last signed.
+Veja como funciona:
 
-Here's how it works:
+1. **Assinando o Aplicativo:** Quando um desenvolvedor está pronto para distribuir seu aplicativo, ele **o assina usando uma chave privada**. Essa chave privada está associada a um **certificado que a Apple emite para o desenvolvedor** quando ele se inscreve no Programa de Desenvolvedores da Apple. O processo de assinatura envolve a criação de um hash criptográfico de todas as partes do aplicativo e a criptografia desse hash com a chave privada do desenvolvedor.
+2. **Distribuindo o Aplicativo:** O aplicativo assinado é então distribuído aos usuários juntamente com o certificado do desenvolvedor, que contém a chave pública correspondente.
+3. **Verificando o Aplicativo:** Quando um usuário faz o download e tenta executar o aplicativo, o sistema operacional Mac usa a chave pública do certificado do desenvolvedor para descriptografar o hash. Ele então recalcula o hash com base no estado atual do aplicativo e compara isso com o hash descriptografado. Se eles corresponderem, significa que **o aplicativo não foi modificado** desde que o desenvolvedor o assinou, e o sistema permite que o aplicativo seja executado.
 
-1. **Signing the Application:** When a developer is ready to distribute their application, they **sign the application using a private key**. This private key is associated with a **certificate that Apple issues to the developer** when they enroll in the Apple Developer Program. The signing process involves creating a cryptographic hash of all parts of the app and encrypting this hash with the developer's private key.
-2. **Distributing the Application:** The signed application is then distributed to users along with the developer's certificate, which contains the corresponding public key.
-3. **Verifying the Application:** When a user downloads and attempts to run the application, their Mac operating system uses the public key from the developer's certificate to decrypt the hash. It then recalculates the hash based on the current state of the application and compares this with the decrypted hash. If they match, it means **the application hasn't been modified** since the developer signed it, and the system permits the application to run.
+As assinaturas de aplicativos são uma parte essencial da tecnologia Gatekeeper da Apple. Quando um usuário tenta **abrir um aplicativo baixado da internet**, o Gatekeeper verifica a assinatura do aplicativo. Se ele for assinado com um certificado emitido pela Apple para um desenvolvedor conhecido e o código não tiver sido adulterado, o Gatekeeper permite que o aplicativo seja executado. Caso contrário, ele bloqueia o aplicativo e alerta o usuário.
 
-Application signatures are an essential part of Apple's Gatekeeper technology. When a user attempts to **open an application downloaded from the internet**, Gatekeeper verifies the application signature. If it's signed with a certificate issued by Apple to a known developer and the code hasn't been tampered with, Gatekeeper permits the application to run. Otherwise, it blocks the application and alerts the user.
+A partir do macOS Catalina, **o Gatekeeper também verifica se o aplicativo foi notarizado** pela Apple, adicionando uma camada extra de segurança. O processo de notarização verifica o aplicativo em busca de problemas de segurança conhecidos e código malicioso, e se essas verificações passarem, a Apple adiciona um ticket ao aplicativo que o Gatekeeper pode verificar.
 
-Starting from macOS Catalina, **Gatekeeper also checks whether the application has been notarized** by Apple, adding an extra layer of security. The notarization process checks the application for known security issues and malicious code, and if these checks pass, Apple adds a ticket to the application that Gatekeeper can verify.
+#### Verificando Assinaturas
 
-#### Check Signatures
-
-When checking some **malware sample** you should always **check the signature** of the binary as the **developer** that signed it may be already **related** with **malware.**
-
+Ao verificar alguma **amostra de malware**, você sempre deve **verificar a assinatura** do binário, pois o **desenvolvedor** que o assinou pode estar **relacionado** com **malware**.
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -63,35 +60,33 @@ spctl --assess --verbose /Applications/Safari.app
 # Sign a binary
 codesign -s <cert-name-keychain> toolsdemo
 ```
+### Notarização
 
-### Notarization
+O processo de notarização da Apple serve como uma salvaguarda adicional para proteger os usuários de softwares potencialmente prejudiciais. Ele envolve o **desenvolvedor submeter sua aplicação para exame** pelo **Serviço de Notarização da Apple**, que não deve ser confundido com a Revisão de Aplicativos. Este serviço é um **sistema automatizado** que examina o software enviado em busca de **conteúdo malicioso** e quaisquer problemas potenciais com a assinatura de código.
 
-Apple's notarization process serves as an additional safeguard to protect users from potentially harmful software. It involves the **developer submitting their application for examination** by **Apple's Notary Service**, which should not be confused with App Review. This service is an **automated system** that scrutinizes the submitted software for the presence of **malicious content** and any potential issues with code-signing.
+Se o software **passar** nesta inspeção sem levantar preocupações, o Serviço de Notarização gera um bilhete de notarização. O desenvolvedor é então obrigado a **anexar este bilhete ao seu software**, um processo conhecido como 'grampeamento'. Além disso, o bilhete de notarização também é publicado online onde o Gatekeeper, a tecnologia de segurança da Apple, pode acessá-lo.
 
-If the software **passes** this inspection without raising any concerns, the Notary Service generates a notarization ticket. The developer is then required to **attach this ticket to their software**, a process known as 'stapling.' Furthermore, the notarization ticket is also published online where Gatekeeper, Apple's security technology, can access it.
+Na primeira instalação ou execução do software pelo usuário, a existência do bilhete de notarização - seja grampeado ao executável ou encontrado online - **informa o Gatekeeper que o software foi notarizado pela Apple**. Como resultado, o Gatekeeper exibe uma mensagem descritiva no diálogo de lançamento inicial, indicando que o software passou por verificações de conteúdo malicioso pela Apple. Este processo, portanto, aumenta a confiança do usuário na segurança do software que eles instalam ou executam em seus sistemas.
 
-Upon the user's first installation or execution of the software, the existence of the notarization ticket - whether stapled to the executable or found online - **informs Gatekeeper that the software has been notarized by Apple**. As a result, Gatekeeper displays a descriptive message in the initial launch dialog, indicating that the software has undergone checks for malicious content by Apple. This process thereby enhances user confidence in the security of the software they install or run on their systems.
+### Arquivos em Quarentena
 
-### Quarentine Files
+Ao **baixar** um aplicativo ou arquivo, **aplicativos específicos do macOS** como navegadores da web ou clientes de e-mail **anexam um atributo de arquivo estendido**, comumente conhecido como "**sinalizador de quarentena**," ao arquivo baixado. Este atributo atua como uma medida de segurança para **marcar o arquivo** como proveniente de uma fonte não confiável (a internet) e potencialmente carregando riscos. No entanto, nem todos os aplicativos anexam este atributo, por exemplo, o software comum de cliente BitTorrent geralmente ignora este processo.
 
-Upon **downloading** an application or file, specific macOS **applications** such as web browsers or email clients **attach an extended file attribute**, commonly known as the "**quarantine flag**," to the downloaded file. This attribute acts as a security measure to **mark the file** as coming from an untrusted source (the internet), and potentially carrying risks. However, not all applications attach this attribute, for instance, common BitTorrent client software usually bypasses this process.
+**A presença de um sinalizador de quarentena sinaliza a funcionalidade de segurança do Gatekeeper do macOS quando um usuário tenta executar o arquivo**.
 
-**The presence of a quarantine flag signals macOS's Gatekeeper security feature when a user attempts to execute the file**.
-
-In the case where the **quarantine flag is not present** (as with files downloaded via some BitTorrent clients), Gatekeeper's **checks may not be performed**. Thus, users should exercise caution when opening files downloaded from less secure or unknown sources.
+No caso em que o **sinalizador de quarentena não está presente** (como em arquivos baixados via alguns clientes BitTorrent), as **verificações do Gatekeeper podem não ser realizadas**. Assim, os usuários devem ter cuidado ao abrir arquivos baixados de fontes menos seguras ou desconhecidas.
 
 {% hint style="info" %}
-**Checking** the **validity** of code signatures is a **resource-intensive** process that includes generating cryptographic **hashes** of the code and all its bundled resources. Furthermore, checking certificate validity involves doing an **online check** to Apple's servers to see if it has been revoked after it was issued. For these reasons, a full code signature and notarization check is **impractical to run every time an app is launched**.
+**Verificar** a **validade** das assinaturas de código é um processo **intensivo em recursos** que inclui a geração de **hashes criptográficos** do código e de todos os seus recursos agrupados. Além disso, verificar a validade do certificado envolve fazer uma **verificação online** nos servidores da Apple para ver se ele foi revogado após ter sido emitido. Por essas razões, uma verificação completa de assinatura de código e notarização é **impraticável de ser executada toda vez que um aplicativo é lançado**.
 
-Therefore, these checks are **only run when executing apps with the quarantined attribute.**
+Portanto, essas verificações são **executadas apenas ao executar aplicativos com o atributo de quarentena**.
 {% endhint %}
 
 {% hint style="warning" %}
-**Note that Safari and other web browsers and applications are the ones that need to mark the downloaded files**
+**Observe que o Safari e outros navegadores da web e aplicativos são os que precisam marcar os arquivos baixados**
 {% endhint %}
 
-It's possible to **check it's status and enable/disable** (root required) with:
-
+É possível **verificar seu status e habilitar/desabilitar** (necessário acesso root) com:
 ```bash
 spctl --status
 assessments enabled
@@ -100,17 +95,13 @@ spctl --enable
 spctl --disable
 #You can also allow nee identifies to execute code using the binary "spctl"
 ```
-
-You can also **find if a file has the quarantine extended attribute** with:
-
+Você também pode **verificar se um arquivo possui o atributo de quarentena estendida** com:
 ```bash
 xattr portada.png
 com.apple.macl
 com.apple.quarantine
 ```
-
-Check the **value** of the **extended** **attributes** with:
-
+Verifique o **valor** dos **atributos estendidos** com:
 ```bash
 xattr -l portada.png
 com.apple.macl:
@@ -122,69 +113,60 @@ com.apple.macl:
 00000048
 com.apple.quarantine: 0081;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
 ```
-
-And **remove** that attribute with:
-
+E **remova** esse atributo com:
 ```bash
 xattr -d com.apple.quarantine portada.png
 #You can also remove this attribute from every file with
 find . -iname '*' -print0 | xargs -0 xattr -d com.apple.quarantine
 ```
-
-And find all the quarantined files with:
+E encontre todos os arquivos em quarentena com:
 
 {% code overflow="wrap" %}
 ```bash
 find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
-{% endcode %}
-
 ## XProtect
 
-XProtect is a built-in **anti-malware** feature in macOS. It is part of Apple's security system that works silently in the background to keep your Mac safe from known malware and malicious plug-ins.
+XProtect é um recurso integrado de **anti-malware** no macOS. Ele faz parte do sistema de segurança da Apple que trabalha silenciosamente em segundo plano para manter seu Mac seguro contra malwares conhecidos e plug-ins maliciosos.
 
-XProtect functions by **checking any downloaded files against its database** of known malware and unsafe file types. When you download a file through certain apps, such as Safari, Mail, or Messages, XProtect automatically scans the file. If it matches any known malware in its database, XProtect will **prevent the file from running** and alert you to the threat.
+O XProtect funciona **verificando qualquer arquivo baixado em seu banco de dados** de malwares conhecidos e tipos de arquivos inseguros. Quando você baixa um arquivo por meio de determinados aplicativos, como Safari, Mail ou Mensagens, o XProtect verifica automaticamente o arquivo. Se ele corresponder a algum malware conhecido em seu banco de dados, o XProtect **impedirá que o arquivo seja executado** e o alertará sobre a ameaça.
 
-The XProtect database is **updated regularly** by Apple with new malware definitions, and these updates are automatically downloaded and installed on your Mac. This ensures that XProtect is always up-to-date with the latest known threats.
+O banco de dados do XProtect é **atualizado regularmente** pela Apple com novas definições de malware, e essas atualizações são baixadas e instaladas automaticamente em seu Mac. Isso garante que o XProtect esteja sempre atualizado com as últimas ameaças conhecidas.
 
-However, it's worth noting that **XProtect isn't a full-featured antivirus solution**. It only checks for a specific list of known threats and doesn't perform on-access scanning like most antivirus software. Therefore, while XProtect provides a layer of protection against known malware, it's still recommended to exercise caution when downloading files from the internet or opening email attachments.
+No entanto, vale ressaltar que o **XProtect não é uma solução antivírus completa**. Ele verifica apenas uma lista específica de ameaças conhecidas e não realiza a verificação de acesso como a maioria dos softwares antivírus. Portanto, embora o XProtect forneça uma camada de proteção contra malwares conhecidos, ainda é recomendável ter cuidado ao baixar arquivos da internet ou abrir anexos de e-mail.
 
-You can get information about the latest XProtect update running:
+Você pode obter informações sobre a última atualização do XProtect executando:
 
 {% code overflow="wrap" %}
 ```bash
 system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistConfigData" | tail -n 5
 ```
-{% endcode %}
+## MRT - Ferramenta de Remoção de Malware
 
-## MRT - Malware Removal Tool
+A Ferramenta de Remoção de Malware (MRT) é outra parte da infraestrutura de segurança do macOS. Como o nome sugere, a principal função do MRT é **remover malware conhecido de sistemas infectados**.
 
-The Malware Removal Tool (MRT) is another part of macOS's security infrastructure. As the name suggests, MRT's main function is to **remove known malware from infected systems**.
+Uma vez que o malware é detectado em um Mac (seja pelo XProtect ou por outros meios), o MRT pode ser usado para **remover automaticamente o malware**. O MRT opera silenciosamente em segundo plano e geralmente é executado sempre que o sistema é atualizado ou quando uma nova definição de malware é baixada.
 
-Once malware is detected on a Mac (either by XProtect or by some other means), MRT can be used to automatically **remove the malware**. MRT operates silently in the background and typically runs whenever the system is updated or when a new malware definition is downloaded.
+Embora tanto o XProtect quanto o MRT façam parte das medidas de segurança do macOS, eles desempenham funções diferentes:
 
-While both XProtect and MRT are part of macOS's security measures, they perform different functions:
+* **XProtect** é uma ferramenta preventiva. Ele **verifica arquivos conforme são baixados** (por meio de determinados aplicativos) e, se detectar algum tipo conhecido de malware, **impede que o arquivo seja aberto**, evitando assim que o malware infecte o sistema em primeiro lugar.
+* **MRT**, por outro lado, é uma **ferramenta reativa**. Ele opera depois que o malware foi detectado em um sistema, com o objetivo de remover o software ofensivo para limpar o sistema.
 
-* **XProtect** is a preventative tool. It **checks files as they're downloaded** (via certain applications), and if it detects any known types of malware, it **prevents the file from opening**, thereby preventing the malware from infecting your system in the first place.
-* **MRT**, on the other hand, is a **reactive tool**. It operates after malware has been detected on a system, with the goal of removing the offending software to clean up the system.
+## Limitações de Processos
 
-## Processes Limitants
-
-### SIP - System Integrity Protection
-
-
+### SIP - Proteção de Integridade do Sistema
 
 ### Sandbox
 
-MacOS Sandbox **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
+O Sandbox do macOS **limita as aplicações** que rodam dentro do sandbox às **ações permitidas especificadas no perfil do Sandbox** com o qual o aplicativo está sendo executado. Isso ajuda a garantir que **o aplicativo acesse apenas os recursos esperados**.
 
 {% content-ref url="macos-sandbox/" %}
 [macos-sandbox](macos-sandbox/)
 {% endcontent-ref %}
 
-### TCC - **Transparency, Consent, and Control**
+### TCC - Transparência, Consentimento e Controle
 
-**TCC (Transparency, Consent, and Control)** is a mechanism in macOS to **limit and control application access to certain features**, usually from a privacy perspective. This can include things such as location services, contacts, photos, microphone, camera, accessibility, full disk access, and a bunch more.
+**TCC (Transparência, Consentimento e Controle)** é um mecanismo no macOS para **limitar e controlar o acesso do aplicativo a determinados recursos**, geralmente do ponto de vista da privacidade. Isso pode incluir coisas como serviços de localização, contatos, fotos, microfone, câmera, acessibilidade, acesso total ao disco e muito mais.
 
 {% content-ref url="macos-tcc/" %}
 [macos-tcc](macos-tcc/)
@@ -194,10 +176,10 @@ MacOS Sandbox **limits applications** running inside the sandbox to the **allowe
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

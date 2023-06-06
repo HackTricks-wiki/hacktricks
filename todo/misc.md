@@ -1,97 +1,85 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 
-In a ping response TTL:\
+Em uma resposta de ping TTL:\
 127 = Windows\
 254 = Cisco\
-Lo demás,algunlinux
+O resto, algum Linux
 
 $1$- md5\
-$2$or $2a$ - Blowfish\
+$2$ou $2a$ - Blowfish\
 $5$- sha256\
 $6$- sha512
 
-If you do not know what is behind a service, try to make and HTTP GET request.
+Se você não sabe o que está por trás de um serviço, tente fazer uma solicitação HTTP GET.
 
-**UDP Scans**\
+**Scans UDP**\
 nc -nv -u -z -w 1 \<IP> 160-16
 
-An empty UDP packet is sent to a specific port. If the UDP port is open, no reply is sent back from the target machine. If the UDP port is closed, an ICMP port unreachable packet should be sent back from the target machine.\
+Um pacote UDP vazio é enviado para uma porta específica. Se a porta UDP estiver aberta, nenhuma resposta será enviada de volta da máquina de destino. Se a porta UDP estiver fechada, um pacote ICMP de porta inacessível deve ser enviado de volta da máquina de destino.
 
+A varredura de porta UDP geralmente é pouco confiável, pois firewalls e roteadores podem descartar pacotes ICMP. Isso pode levar a falsos positivos em sua varredura e você verá regularmente varreduras de porta UDP mostrando todas as portas UDP abertas em uma máquina escaneada. A maioria dos scanners de porta não verifica todas as portas disponíveis e geralmente tem uma lista pré-definida de "portas interessantes" que são verificadas.
 
-UDP port scanning is often unreliable, as firewalls and routers may drop ICMP\
- packets. This can lead to false positives in your scan, and you will regularly see\
- UDP port scans showing all UDP ports open on a scanned machine.\
- o Most port scanners do not scan all available ports, and usually have a preset list\
- of “interesting ports” that are scanned.
+# CTF - Truques
 
-# CTF - Tricks
-
-In **Windows** use **Winzip** to search for files.\
-**Alternate data Streams**: _dir /r | find ":$DATA"_\
-
-
+No **Windows**, use o **Winzip** para procurar arquivos.\
+**Streams de dados alternativos**: _dir /r | find ":$DATA"_\
 ```
 binwalk --dd=".*" <file> #Extract everything
 binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and continue extracing (depth of 10000)
 ```
-
-## Crypto
+## Criptografia
 
 **featherduster**\
 
 
-**Basae64**(6—>8) —> 0...9, a...z, A…Z,+,/\
+**Base64**(6—>8) —> 0...9, a...z, A…Z,+,/\
 **Base32**(5 —>8) —> A…Z, 2…7\
 **Base85** (Ascii85, 7—>8) —> 0...9, a...z, A...Z, ., -, :, +, =, ^, !, /, \*, ?, &, <, >, (, ), \[, ], {, }, @, %, $, #\
-**Uuencode** --> Start with "_begin \<mode> \<filename>_" and weird chars\
-**Xxencoding** --> Start with "_begin \<mode> \<filename>_" and B64\
+**Uuencode** --> Começa com "_begin \<mode> \<filename>_" e caracteres estranhos\
+**Xxencoding** --> Começa com "_begin \<mode> \<filename>_" e B64\
 \
-**Vigenere** (frequency analysis) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
-**Scytale** (offset of characters) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
+**Vigenere** (análise de frequência) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
+**Scytale** (deslocamento de caracteres) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
 
 **25x25 = QR**
 
 factordb.com\
 rsatool
 
-Snow --> Hide messages using spaces and tabs
+Snow --> Esconde mensagens usando espaços e tabulações
 
-# Characters
+# Caracteres
 
-%E2%80%AE => RTL Character (writes payloads backwards)
+%E2%80%AE => Caractere RTL (escreve payloads ao contrário)
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de cibersegurança**? Quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

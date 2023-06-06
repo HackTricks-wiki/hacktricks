@@ -1,256 +1,229 @@
+# Ext - Sistema de Arquivos Estendido
 
+O **Ext2** é o sistema de arquivos mais comum para partições **sem journaling** (**partições que não mudam muito**) como a partição de inicialização. O **Ext3/4** são **com journaling** e são usados geralmente para as **outras partições**.
 
-<details>
+Todos os grupos de blocos no sistema de arquivos têm o mesmo tamanho e são armazenados sequencialmente. Isso permite que o kernel derive facilmente a localização de um grupo de blocos em um disco a partir de seu índice inteiro.
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+Cada grupo de blocos contém as seguintes informações:
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
-# Ext - Extended Filesystem
-
-**Ext2** is the most common filesystem for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
-
-All block groups in the filesystem have the same size and are stored sequentially. This allows the kernel to easily derive the location of a block group in a disk from its integer index.
-
-Every block group contains the following pieces of information:
-
-* A copy of the filesystem’s superblock
-* A copy of the block group descriptors
-* A data block bitmap which is used to identify the free blocks inside the group
-* An inode bitmap, which is used to identify the free inodes inside the group
-* inode table: it consists of a series of consecutive blocks, each of which contains a predefined Figure 1 Ext2 inode number of inodes. All inodes have the same size: 128 bytes. A 1,024 byte block contains 8 inodes, while a 4,096-byte block contains 32 inodes. Note that in Ext2, there is no need to store on disk a mapping between an inode number and the corresponding block number because the latter value can be derived from the block group number and the relative position inside the inode table. For example, suppose that each block group contains 4,096 inodes and that we want to know the address on the disk of inode 13,021. In this case, the inode belongs to the third block group and its disk address is stored in the 733rd entry of the corresponding inode table. As you can see, the inode number is just a key used by the Ext2 routines to retrieve the proper inode descriptor on the disk quickly
-* data blocks, containing files. Any block which does not contain any meaningful information is said to be free.
+* Uma cópia do superbloco do sistema de arquivos
+* Uma cópia dos descritores do grupo de blocos
+* Um mapa de bits de bloco de dados que é usado para identificar os blocos livres dentro do grupo
+* Um mapa de bits de inode, que é usado para identificar os inodes livres dentro do grupo
+* tabela de inode: consiste em uma série de blocos consecutivos, cada um dos quais contém um número predefinido de inodes da Figura 1 do Ext2. Todos os inodes têm o mesmo tamanho: 128 bytes. Um bloco de 1.024 bytes contém 8 inodes, enquanto um bloco de 4.096 bytes contém 32 inodes. Observe que no Ext2, não é necessário armazenar em disco um mapeamento entre um número de inode e o número de bloco correspondente porque o último valor pode ser derivado do número de grupo de blocos e da posição relativa dentro da tabela de inode. Por exemplo, suponha que cada grupo de blocos contenha 4.096 inodes e que desejamos saber o endereço no disco do inode 13.021. Nesse caso, o inode pertence ao terceiro grupo de blocos e seu endereço no disco é armazenado na 733ª entrada da tabela de inode correspondente. Como você pode ver, o número de inode é apenas uma chave usada pelas rotinas do Ext2 para recuperar rapidamente o descritor de inode apropriado no disco
+* blocos de dados, contendo arquivos. Qualquer bloco que não contenha nenhuma informação significativa é dito ser livre.
 
 ![](<../../../.gitbook/assets/image (406).png>)
 
-## Ext Optional Features
+## Recursos Opcionais do Ext
 
-**Features affect where** the data is located, **how** the data is stored in inodes and some of them might supply **additional metadata** for analysis, therefore features are important in Ext.
+Os **recursos afetam onde** os dados estão localizados, **como** os dados são armazenados em inodes e alguns deles podem fornecer **metadados adicionais** para análise, portanto, os recursos são importantes no Ext.
 
-Ext has optional features that your OS may or may not support, there are 3 possibilities:
+O Ext tem recursos opcionais que seu sistema operacional pode ou não suportar, existem 3 possibilidades:
 
-* Compatible
-* Incompatible
-* Compatible Read Only: It can be mounted but not for writing
+* Compatível
+* Incompatível
+* Compatível somente leitura: pode ser montado, mas não para gravação
 
-If there are **incompatible** features you won't be able to mount the filesystem as the OS won't know how the access the data.
+Se houver **recursos incompatíveis**, você não poderá montar o sistema de arquivos, pois o sistema operacional não saberá como acessar os dados.
 
 {% hint style="info" %}
-A suspected attacker might have non-standard extensions
+Um atacante suspeito pode ter extensões não padrão
 {% endhint %}
 
-**Any utility** that reads the **superblock** will be able to indicate the **features** of an **Ext filesystem**, but you could also use `file -sL /dev/sd*`
+**Qualquer utilitário** que leia o **superbloco** poderá indicar os **recursos** de um **sistema de arquivos Ext**, mas você também pode usar `file -sL /dev/sd*`
 
-## Superblock
+## Superbloco
 
-The superblock is the first 1024 bytes from the start and it's repeated in the first block of each group and contains:
+O superbloco é os primeiros 1024 bytes do início e é repetido no primeiro bloco de cada grupo e contém:
 
-* Block size
-* Total blocks
-* Blocks per block group
-* Reserved blocks before the first block group
-* Total inodes
-* Inodes per block group
-* Volume name
-* Last write time
-* Last mount time
-* Path where the file system was last mounted
-* Filesystem status (clean?)
+* Tamanho do bloco
+* Total de blocos
+* Blocos por grupo de blocos
+* Blocos reservados antes do primeiro grupo de blocos
+* Total de inodes
+* Inodes por grupo de blocos
+* Nome do volume
+* Última hora de gravação
+* Última hora de montagem
+* Caminho onde o sistema de arquivos foi montado pela última vez
+* Status do sistema de arquivos (limpo?)
 
-It's possible to obtain this information from an Ext filesystem file using:
-
+É possível obter essas informações de um arquivo de sistema de arquivos Ext usando:
 ```bash
 fsstat -o <offsetstart> /pat/to/filesystem-file.ext
 #You can get the <offsetstart> with the "p" command inside fdisk
 ```
-
-You can also use the free GUI application: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
-Or you can also use **python** to obtain the superblock information: [https://pypi.org/project/superblock/](https://pypi.org/project/superblock/)
+Você também pode usar a aplicação GUI gratuita: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
+Ou você também pode usar **python** para obter informações do superbloco: [https://pypi.org/project/superblock/](https://pypi.org/project/superblock/)
 
 ## inodes
 
-The **inodes** contain the list of **blocks** that **contains** the actual **data** of a **file**.\
-If the file is big, and inode **may contain pointers** to **other inodes** that point to the blocks/more inodes containing the file data.
+Os **inodes** contêm a lista de **blocos** que **contêm** os dados reais de um **arquivo**.\
+Se o arquivo for grande, um inode **pode conter ponteiros** para **outros inodes** que apontam para os blocos/mais inodes que contêm os dados do arquivo.
 
 ![](<../../../.gitbook/assets/image (416).png>)
 
-In **Ext2** and **Ext3** inodes are of size **128B**, **Ext4** currently uses **156B** but allocates **256B** on disk to allow a future expansion.
+Nos sistemas de arquivos **Ext2** e **Ext3**, os inodes têm tamanho de **128B**, o **Ext4** atualmente usa **156B**, mas aloca **256B** no disco para permitir uma expansão futura.
 
-Inode structure:
+Estrutura do inode:
 
-| Offset | Size | Name              | DescriptionF                                     |
-| ------ | ---- | ----------------- | ------------------------------------------------ |
-| 0x0    | 2    | File Mode         | File mode and type                               |
-| 0x2    | 2    | UID               | Lower 16 bits of owner ID                        |
-| 0x4    | 4    | Size Il           | Lower 32 bits of file size                       |
-| 0x8    | 4    | Atime             | Access time in seconds since epoch               |
-| 0xC    | 4    | Ctime             | Change time in seconds since epoch               |
-| 0x10   | 4    | Mtime             | Modify time in seconds since epoch               |
-| 0x14   | 4    | Dtime             | Delete time in seconds since epoch               |
-| 0x18   | 2    | GID               | Lower 16 bits of group ID                        |
-| 0x1A   | 2    | Hlink count       | Hard link count                                  |
-| 0xC    | 4    | Blocks Io         | Lower 32 bits of block count                     |
-| 0x20   | 4    | Flags             | Flags                                            |
-| 0x24   | 4    | Union osd1        | Linux: I version                                 |
-| 0x28   | 69   | Block\[15]        | 15 points to data block                         |
-| 0x64   | 4    | Version           | File version for NFS                             |
-| 0x68   | 4    | File ACL low      | Lower 32 bits of extended attributes (ACL, etc)  |
-| 0x6C   | 4    | File size hi      | Upper 32 bits of file size (ext4 only)           |
-| 0x70   | 4    | Obsolete fragment | An obsoleted fragment address                    |
-| 0x74   | 12   | Osd 2             | Second operating system dependent union          |
-| 0x74   | 2    | Blocks hi         | Upper 16 bits of block count                     |
-| 0x76   | 2    | File ACL hi       | Upper 16 bits of extended attributes (ACL, etc.) |
-| 0x78   | 2    | UID hi            | Upper 16 bits of owner ID                        |
-| 0x7A   | 2    | GID hi            | Upper 16 bits of group ID                        |
-| 0x7C   | 2    | Checksum Io       | Lower 16 bits of inode checksum                  |
+| Offset | Tamanho | Nome              | Descrição                                       |
+| ------ | ------- | ----------------- | ----------------------------------------------- |
+| 0x0    | 2       | Modo do arquivo   | Modo e tipo de arquivo                          |
+| 0x2    | 2       | UID               | 16 bits inferiores do ID do proprietário         |
+| 0x4    | 4       | Tamanho Il        | 32 bits inferiores do tamanho do arquivo         |
+| 0x8    | 4       | Atime             | Hora de acesso em segundos desde a época         |
+| 0xC    | 4       | Ctime             | Hora de alteração em segundos desde a época      |
+| 0x10   | 4       | Mtime             | Hora de modificação em segundos desde a época    |
+| 0x14   | 4       | Dtime             | Hora de exclusão em segundos desde a época       |
+| 0x18   | 2       | GID               | 16 bits inferiores do ID do grupo                |
+| 0x1A   | 2       | Contagem de links | Contagem de links rígidos                        |
+| 0xC    | 4       | Blocos Io         | 32 bits inferiores da contagem de blocos         |
+| 0x20   | 4       | Flags             | Sinalizadores                                    |
+| 0x24   | 4       | União osd1        | Linux: versão I                                  |
+| 0x28   | 69      | Bloco\[15]        | 15 pontos para bloco de dados                    |
+| 0x64   | 4       | Versão            | Versão do arquivo para NFS                       |
+| 0x68   | 4       | Arquivo ACL baixo | 32 bits inferiores de atributos estendidos (ACL, etc.) |
+| 0x6C   | 4       | Tamanho do arquivo hi | 32 bits superiores do tamanho do arquivo (somente ext4) |
+| 0x70   | 4       | Fragmento obsoleto | Um endereço de fragmento obsoleto                |
+| 0x74   | 12      | Osd 2             | Segunda união dependente do sistema operacional  |
+| 0x74   | 2       | Blocos hi         | 16 bits superiores da contagem de blocos         |
+| 0x76   | 2       | Arquivo ACL hi    | 16 bits superiores de atributos estendidos (ACL, etc.) |
+| 0x78   | 2       | UID hi            | 16 bits superiores do ID do proprietário         |
+| 0x7A   | 2       | GID hi            | 16 bits superiores do ID do grupo                |
+| 0x7C   | 2       | Checksum Io       | 16 bits inferiores do checksum do inode          |
 
-"Modify" is the timestamp of the last time the file's _content_ has been modified. This is often called "_mtime_".\
-"Change" is the timestamp of the last time the file's _inode_ has been changed, like by changing permissions, ownership, file name, and the number of hard links. It's often called "_ctime_".
+"Modificar" é o carimbo de data/hora da última vez que o _conteúdo_ do arquivo foi modificado. Isso é frequentemente chamado de "_mtime_".\
+"Mudança" é o carimbo de data/hora da última vez que o _inode_ do arquivo foi alterado, como ao alterar permissões, propriedade, nome do arquivo e o número de links rígidos. É frequentemente chamado de "_ctime_".
 
-Inode structure extended (Ext4):
+Estrutura do inode estendido (Ext4):
 
-| Offset | Size | Name         | Description                                 |
-| ------ | ---- | ------------ | ------------------------------------------- |
-| 0x80   | 2    | Extra size   | How many bytes beyond standard 128 are used |
-| 0x82   | 2    | Checksum hi  | Upper 16 bits of inode checksum             |
-| 0x84   | 4    | Ctime extra  | Change time extra bits                      |
-| 0x88   | 4    | Mtime extra  | Modify time extra bits                      |
-| 0x8C   | 4    | Atime extra  | Access time extra bits                      |
-| 0x90   | 4    | Crtime       | File create time (seconds since epoch)      |
-| 0x94   | 4    | Crtime extra | File create time extra bits                 |
-| 0x98   | 4    | Version hi   | Upper 32 bits of version                    |
-| 0x9C   |      | Unused       | Reserved space for future expansions        |
+| Offset | Tamanho | Nome         | Descrição                                         |
+| ------ | ------- | ------------ | ------------------------------------------------- |
+| 0x80   | 2       | Tamanho extra | Quantos bytes além dos 128 padrão são usados      |
+| 0x82   | 2       | Checksum hi  | 16 bits superiores do checksum do inode           |
+| 0x84   | 4       | Ctime extra  | Bits extras de hora de alteração                  |
+| 0x88   | 4       | Mtime extra  | Bits extras de hora de modificação                |
+| 0x8C   | 4       | Atime extra  | Bits extras de hora de acesso                     |
+| 0x90   | 4       | Crtime       | Hora de criação do arquivo (segundos desde a época) |
+| 0x94   | 4       | Crtime extra | Bits extras de hora de criação                    |
+| 0x98   | 4       | Versão hi    | 32 bits superiores da versão                      |
+| 0x9C   |         | Não utilizado | Espaço reservado para futuras expansões           |
 
-Special inodes:
+Inodes especiais:
 
-| Inode | Special Purpose                                      |
+| Inode | Finalidade especial                                  |
 | ----- | ---------------------------------------------------- |
-| 0     | No such inode, numberings starts at 1                |
-| 1     | Defective block list                                 |
-| 2     | Root directory                                       |
-| 3     | User quotas                                          |
-| 4     | Group quotas                                         |
-| 5     | Boot loader                                          |
-| 6     | Undelete directory                                   |
-| 7     | Reserved group descriptors (for resizing filesystem) |
-| 8     | Journal                                              |
-| 9     | Exclude inode (for snapshots)                        |
-| 10    | Replica inode                                        |
-| 11    | First non-reserved inode (often lost + found)        |
+| 0     | Nenhum inode, a numeração começa em 1                |
+| 1     | Lista de blocos defeituosos                           |
+| 2     | Diretório raiz                                       |
+| 3     | Cotas de usuário                                     |
+| 4     | Cotas de grupo                                       |
+| 5     | Carregador de inicialização                          |
+| 6     | Diretório de recuperação excluído                     |
+| 7     | Descritores de grupo reservados (para redimensionar o sistema de arquivos) |
+| 8     | Diário                                               |
+| 9     | Excluir inode (para snapshots)                       |
+| 10    | Réplica de inode                                     |
+| 11    | Primeiro inode não reservado (geralmente lost + found) |
 
 {% hint style="info" %}
-Not that the creation time only appears in Ext4.
+Observe que o tempo de criação só aparece no Ext4.
 {% endhint %}
 
-By knowing the inode number you can easily find its index:
+Ao saber o número do inode, você pode facilmente encontrar seu índice:
 
-* **Block group** where an inode belongs: (Inode number - 1) / (Inodes per group)
-* **Index inside it's group**: (Inode number - 1) mod(Inodes/groups)
-* **Offset** into **inode table**: Inode number \* (Inode size)
-* The "-1" is because the inode 0 is undefined (not used)
-
+* **Grupo de blocos** onde um inode pertence: (Número do inode - 1) / (Inodes por grupo)
+* **Índice dentro do grupo**: (Número do inode - 1) mod (Inodes/grupos)
+* **Deslocamento** na **tabela de inodes**: Número do inode \* (Tamanho do inode)
+* O "-1" é porque o inode 0 é indefinido (não usado)
 ```bash
 ls -ali /bin | sort -n #Get all inode numbers and sort by them
 stat /bin/ls #Get the inode information of a file
 istat -o <start offset> /path/to/image.ext 657103 #Get information of that inode inside the given ext file
 icat -o <start offset> /path/to/image.ext 657103 #Cat the file
 ```
+Modo de Arquivo
 
-File Mode
-
-| Number | Description                                                                                         |
+| Número | Descrição                                                                                           |
 | ------ | --------------------------------------------------------------------------------------------------- |
 | **15** | **Reg/Slink-13/Socket-14**                                                                          |
-| **14** | **Directory/Block Bit 13**                                                                          |
-| **13** | **Char Device/Block Bit 14**                                                                        |
+| **14** | **Diretório/Bit de Bloco 13**                                                                       |
+| **13** | **Dispositivo de Caractere/Bit de Bloco 14**                                                       |
 | **12** | **FIFO**                                                                                            |
 | 11     | Set UID                                                                                             |
 | 10     | Set GID                                                                                             |
-| 9      | Sticky Bit (without it, anyone with Write & exec perms on a directory can delete and rename files)  |
-| 8      | Owner Read                                                                                          |
-| 7      | Owner Write                                                                                         |
-| 6      | Owner Exec                                                                                          |
-| 5      | Group Read                                                                                          |
-| 4      | Group Write                                                                                         |
-| 3      | Group Exec                                                                                          |
-| 2      | Others Read                                                                                         |
-| 1      | Others Write                                                                                        |
-| 0      | Others Exec                                                                                         |
+| 9      | Bit Pegajoso (sem ele, qualquer pessoa com permissões de escrita e execução em um diretório pode excluir e renomear arquivos) |
+| 8      | Leitura do Proprietário                                                                             |
+| 7      | Escrita do Proprietário                                                                             |
+| 6      | Execução do Proprietário                                                                            |
+| 5      | Leitura do Grupo                                                                                    |
+| 4      | Escrita do Grupo                                                                                    |
+| 3      | Execução do Grupo                                                                                   |
+| 2      | Leitura de Outros                                                                                    |
+| 1      | Escrita de Outros                                                                                    |
+| 0      | Execução de Outros                                                                                   |
 
-The bold bits (12, 13, 14, 15) indicate the type of file the file is (a directory, socket...) only one of the options in bold may exit.
+Os bits em negrito (12, 13, 14, 15) indicam o tipo de arquivo que o arquivo é (um diretório, um socket...) apenas uma das opções em negrito pode existir.
 
-Directories
+Diretórios
 
-| Offset | Size | Name      | Description                                                                                                                                                  |
-| ------ | ---- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 0x0    | 4    | Inode     |                                                                                                                                                              |
-| 0x4    | 2    | Rec len   | Record length                                                                                                                                                |
-| 0x6    | 1    | Name len  | Name length                                                                                                                                                  |
-| 0x7    | 1    | File type | <p>0x00 Unknown<br>0x01 Regular</p><p>0x02 Director</p><p>0x03 Char device</p><p>0x04 Block device</p><p>0x05 FIFO</p><p>0x06 Socket</p><p>0x07 Sym link</p> |
-| 0x8    |      | Name      | Name string (up to 255 characters)                                                                                                                           |
+| Offset | Tamanho | Nome      | Descrição                                                                                                                                                  |
+| ------ | ------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 0x0    | 4       | Inode     |                                                                                                                                                              |
+| 0x4    | 2       | Rec len   | Comprimento do registro                                                                                                                                                |
+| 0x6    | 1       | Name len  | Comprimento do nome                                                                                                                                                  |
+| 0x7    | 1       | Tipo de Arquivo | <p>0x00 Desconhecido<br>0x01 Regular</p><p>0x02 Diretório</p><p>0x03 Dispositivo de Caractere</p><p>0x04 Dispositivo de Bloco</p><p>0x05 FIFO</p><p>0x06 Socket</p><p>0x07 Link Simbólico</p> |
+| 0x8    |         | Nome      | String de nome (até 255 caracteres)                                                                                                                           |
 
-**To increase the performance, Root hash Directory blocks may be used.**
+**Para aumentar o desempenho, blocos de diretório de hash raiz podem ser usados.**
 
-**Extended Attributes**
+**Atributos Estendidos**
 
-Can be stored in
+Podem ser armazenados em
 
-* Extra space between inodes (256 - inode size, usually = 100)
-* A data block pointed to by file\_acl in inode
+* Espaço extra entre inodes (256 - tamanho do inode, geralmente = 100)
+* Um bloco de dados apontado por file\_acl no inode
 
-Can be used to store anything as a users attribute if the name starts with "user". So data can be hidden this way.
+Podem ser usados para armazenar qualquer coisa como um atributo do usuário se o nome começar com "user". Dessa forma, os dados podem ser ocultados.
 
-Extended Attributes Entries
+Entradas de Atributos Estendidos
 
-| Offset | Size | Name         | Description                                                                                                                                                                                                        |
-| ------ | ---- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 0x0    | 1    | Name len     | Length of attribute name                                                                                                                                                                                           |
-| 0x1    | 1    | Name index   | <p>0x0 = no prefix</p><p>0x1 = user. Prefix</p><p>0x2 = system.posix_acl_access</p><p>0x3 = system.posix_acl_default</p><p>0x4 = trusted.</p><p>0x6 = security.</p><p>0x7 = system.</p><p>0x8 = system.richacl</p> |
-| 0x2    | 2    | Value offs   | Offset from first inode entry or start of block                                                                                                                                                                    |
-| 0x4    | 4    | Value blocks | Disk block where value stored or zero for this block                                                                                                                                                               |
-| 0x8    | 4    | Value size   | Length of value                                                                                                                                                                                                    |
-| 0xC    | 4    | Hash         | Hash for attribs in block or zero if in inode                                                                                                                                                                      |
-| 0x10   |      | Name         | Attribute name w/o trailing NULL                                                                                                                                                                                   |
-
+| Offset | Tamanho | Nome         | Descrição                                                                                                                                                                                                        |
+| ------ | ------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 0x0    | 1       | Comprimento do Nome     | Comprimento do nome do atributo                                                                                                                                                                                           |
+| 0x1    | 1       | Índice do Nome   | <p>0x0 = sem prefixo</p><p>0x1 = prefixo user.</p><p>0x2 = system.posix_acl_access</p><p>0x3 = system.posix_acl_default</p><p>0x4 = trusted.</p><p>0x6 = security.</p><p>0x7 = system.</p><p>0x8 = system.richacl</p> |
+| 0x2    | 2       | Offset do Valor   | Deslocamento do primeiro inode ou início do bloco                                                                                                                                                                    |
+| 0x4    | 4       | Blocos de Valor | Bloco de disco onde o valor é armazenado ou zero para este bloco                                                                                                                                                               |
+| 0x8    | 4       | Tamanho do Valor   | Comprimento do valor                                                                                                                                                                                                    |
+| 0xC    | 4       | Hash         | Hash para atributos no bloco ou zero se no inode                                                                                                                                                                      |
+| 0x10   |         | Nome         | Nome do atributo sem NULL no final                                                                                                                                                                                   |
 ```bash
 setfattr -n 'user.secret' -v 'This is a secret' file.txt #Save a secret using extended attributes
 getfattr file.txt #Get extended attribute names of a file
 getdattr -n 'user.secret' file.txt #Get extended attribute called "user.secret"
 ```
+## Visualização do sistema de arquivos
 
-## Filesystem View
+Para ver o conteúdo do sistema de arquivos, você pode **usar a ferramenta gratuita**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
+Ou você pode montá-lo em seu linux usando o comando `mount`.
 
-To see the contents of the file system, you can **use the free tool**: [https://www.disk-editor.org/index.html](https://www.disk-editor.org/index.html)\
-Or you can mount it in your linux using `mount` command.
-
-[https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.](https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.)
+[https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=The%20Ext2%20file%20system%20divides,lower%20average%20disk%20seek%20time.](https://piazza.com/class\_profile/get\_resource/il71xfllx3l16f/inz4wsb2m0w2oz#:\~:text=O%20sistema%20de%20arquivos%20Ext2%20divide,o%20tempo%20médio%20de%20busca%20no%20disco.) 
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

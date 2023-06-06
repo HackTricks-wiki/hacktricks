@@ -1,41 +1,27 @@
-# ZIPs tricks
+# Truques com arquivos ZIP
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-There are a handful of command-line tools for zip files that will be useful to know about.
+Existem algumas ferramentas de linha de comando para arquivos zip que serão úteis de conhecer.
 
-* `unzip` will often output helpful information on why a zip will not decompress.
-* `zipdetails -v` will provide in-depth information on the values present in the various fields of the format.
-* `zipinfo` lists information about the zip file's contents, without extracting it.
-* `zip -F input.zip --out output.zip` and `zip -FF input.zip --out output.zip` attempt to repair a corrupted zip file.
-* [fcrackzip](https://github.com/hyc/fcrackzip) brute-force guesses a zip password (for passwords <7 characters or so).
+* `unzip` frequentemente fornece informações úteis sobre por que um arquivo zip não pode ser descompactado.
+* `zipdetails -v` fornecerá informações detalhadas sobre os valores presentes nos vários campos do formato.
+* `zipinfo` lista informações sobre o conteúdo do arquivo zip, sem extraí-lo.
+* `zip -F input.zip --out output.zip` e `zip -FF input.zip --out output.zip` tentam reparar um arquivo zip corrompido.
+* [fcrackzip](https://github.com/hyc/fcrackzip) faz uma tentativa de força bruta para adivinhar a senha de um arquivo zip (para senhas com menos de 7 caracteres, mais ou menos).
 
-[Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
+[Especificação do formato de arquivo zip](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
 
-One important security-related note about password-protected zip files is that they do not encrypt the filenames and original file sizes of the compressed files they contain, unlike password-protected RAR or 7z files.
+Uma nota importante relacionada à segurança sobre arquivos zip protegidos por senha é que eles não criptografam os nomes de arquivo e os tamanhos de arquivo originais dos arquivos compactados que contêm, ao contrário de arquivos RAR ou 7z protegidos por senha.
 
-Another note about zip cracking is that if you have an unencrypted/uncompressed copy of any one of the files that are compressed in the encrypted zip, you can perform a "plaintext attack" and crack the zip, as [detailed here](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files), and explained in [this paper](https://www.cs.auckland.ac.nz/\~mike/zipattacks.pdf). The newer scheme for password-protecting zip files (with AES-256, rather than "ZipCrypto") does not have this weakness.
-
-From: [https://app.gitbook.com/@cpol/s/hacktricks/\~/edit/drafts/-LlM5mCby8ex5pOeV4pJ/forensics/basic-forensics-esp/zips-tricks](http://localhost:5000/s/-L\_2uGJGU7AVNRcqRvEi/)
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
+Outra nota sobre a quebra de senhas de arquivos zip é que, se você tiver uma cópia não criptografada/não compactada de qualquer um dos arquivos que estão compactados no zip criptografado, você pode realizar um "ataque de texto simples" e quebrar o zip, como [detalhado aqui](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files), e explicado neste [artigo](https://www.cs.auckland.ac.nz/\~mike/zipattacks.pdf). O novo esquema para proteger arquivos zip com senha (com AES-256, em vez de "ZipCrypto") não tem essa fraqueza.

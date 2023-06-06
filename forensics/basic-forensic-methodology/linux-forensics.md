@@ -1,10 +1,8 @@
-# Linux Forensics
+# Forense Linux
 
 ![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
-\
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir e automatizar facilmente fluxos de trabalho com as ferramentas da comunidade mais avançadas do mundo. Obtenha acesso hoje:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -12,27 +10,24 @@ Get Access Today:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-## Initial Information Gathering
+## Coleta de Informações Inicial
 
-### Basic Information
+### Informação Básica
 
-First of all, it's recommended to have some **USB** with **good known binaries and libraries on it** (you can just get ubuntu and copy the folders _/bin_, _/sbin_, _/lib,_ and _/lib64_), then mount the USB, and modify the env variables to use those binaries:
-
+Antes de tudo, é recomendável ter um **USB** com **binários e bibliotecas bem conhecidos** (você pode simplesmente pegar o Ubuntu e copiar as pastas _/bin_, _/sbin_, _/lib_ e _/lib64_), em seguida, montar o USB e modificar as variáveis de ambiente para usar esses binários:
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-
-Once you have configured the system to use good and known binaries you can start **extracting some basic information**:
-
+Uma vez que você tenha configurado o sistema para usar binários bons e conhecidos, você pode começar a **extrair algumas informações básicas**:
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -50,51 +45,46 @@ cat /etc/passwd #Unexpected data?
 cat /etc/shadow #Unexpected data?
 find /directory -type f -mtime -1 -print #Find modified files during the last minute in the directory
 ```
+#### Informações suspeitas
 
-#### Suspicious information
+Ao obter as informações básicas, você deve verificar coisas estranhas como:
 
-While obtaining the basic information you should check for weird things like:
+* **Processos root** geralmente são executados com PIDs baixos, então se você encontrar um processo root com um PID grande, pode suspeitar
+* Verifique os **logins registrados** de usuários sem um shell dentro de `/etc/passwd`
+* Verifique os **hashes de senha** dentro de `/etc/shadow` para usuários sem um shell
 
-* **Root processes** usually run with low PIDS, so if you find a root process with a big PID you may suspect
-* Check **registered logins** of users without a shell inside `/etc/passwd`
-* Check for **password hashes** inside `/etc/shadow` for users without a shell
+### Despejo de memória
 
-### Memory Dump
-
-To obtain the memory of the running system, it's recommended to use [**LiME**](https://github.com/504ensicsLabs/LiME).\
-To **compile** it, you need to use the **same kernel** that the victim machine is using.
+Para obter a memória do sistema em execução, é recomendável usar o [**LiME**](https://github.com/504ensicsLabs/LiME).\
+Para **compilá-lo**, você precisa usar o **mesmo kernel** que a máquina vítima está usando.
 
 {% hint style="info" %}
-Remember that you **cannot install LiME or any other thing** in the victim machine as it will make several changes to it
+Lembre-se de que você **não pode instalar o LiME ou qualquer outra coisa** na máquina vítima, pois isso fará várias alterações nela.
 {% endhint %}
 
-So, if you have an identical version of Ubuntu you can use `apt-get install lime-forensics-dkms`\
-In other cases, you need to download [**LiME**](https://github.com/504ensicsLabs/LiME) from github and compile it with correct kernel headers. To **obtain the exact kernel headers** of the victim machine, you can just **copy the directory** `/lib/modules/<kernel version>` to your machine, and then **compile** LiME using them:
-
+Portanto, se você tiver uma versão idêntica do Ubuntu, poderá usar `apt-get install lime-forensics-dkms`\
+Em outros casos, você precisa baixar o [**LiME**](https://github.com/504ensicsLabs/LiME) do github e compilá-lo com os cabeçalhos do kernel corretos. Para **obter os cabeçalhos do kernel exatos** da máquina vítima, você pode simplesmente **copiar o diretório** `/lib/modules/<versão do kernel>` para sua máquina e, em seguida, **compilar** o LiME usando-os:
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
 ```
+LiME suporta 3 **formatos**:
 
-LiME supports 3 **formats**:
+* Raw (todos os segmentos concatenados)
+* Padded (igual ao Raw, mas com zeros nos bits à direita)
+* Lime (formato recomendado com metadados)
 
-* Raw (every segment concatenated together)
-* Padded (same as raw, but with zeroes in right bits)
-* Lime (recommended format with metadata
+LiME também pode ser usado para **enviar o dump via rede** em vez de armazená-lo no sistema usando algo como: `path=tcp:4444`
 
-LiME can also be used to **send the dump via network** instead of storing it on the system using something like: `path=tcp:4444`
+### Imagem de disco
 
-### Disk Imaging
+#### Desligando
 
-#### Shutting down
+Antes de tudo, você precisará **desligar o sistema**. Isso nem sempre é uma opção, pois às vezes o sistema será um servidor de produção que a empresa não pode se dar ao luxo de desligar. Existem **2 maneiras** de desligar o sistema, um **desligamento normal** e um **desligamento abrupto**. O primeiro permitirá que os **processos terminem como de costume** e o **sistema de arquivos** seja **sincronizado**, mas também permitirá que o possível **malware** **destrua evidências**. A abordagem "desligamento abrupto" pode causar **alguma perda de informação** (não muita informação será perdida, pois já tiramos uma imagem da memória) e o **malware não terá oportunidade** de fazer nada a respeito. Portanto, se você **suspeitar** que possa haver um **malware**, execute o **comando `sync`** no sistema e desligue abruptamente.
 
-First of all, you will need to **shut down the system**. This isn't always an option as some times system will be a production server that the company cannot afford to shut down.\
-There are **2 ways** of shutting down the system, a **normal shutdown** and a **"plug the plug" shutdown**. The first one will allow the **processes to terminate as usual** and the **filesystem** to be **synchronized**, but it will also allow the possible **malware** to **destroy evidence**. The "pull the plug" approach may carry **some information loss** (not much of the info is going to be lost as we already took an image of the memory ) and the **malware won't have any opportunity** to do anything about it. Therefore, if you **suspect** that there may be a **malware**, just execute the **`sync`** **command** on the system and pull the plug.
+#### Tirando uma imagem do disco
 
-#### Taking an image of the disk
-
-It's important to note that **before connecting your computer to anything related to the case**, you need to be sure that it's going to be **mounted as read only** to avoid modifying any information.
-
+É importante notar que **antes de conectar seu computador a qualquer coisa relacionada ao caso**, você precisa ter certeza de que ele será **montado como somente leitura** para evitar modificar qualquer informação.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -103,11 +93,9 @@ dd if=<subject device> of=<image file> bs=512
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
+### Pré-análise da imagem do disco
 
-### Disk Image pre-analysis
-
-Imaging a disk image with no more data.
-
+Criando uma imagem do disco sem mais dados.
 ```bash
 #Find out if it's a disk image using "file" command
 file disk.img 
@@ -160,21 +148,18 @@ r/r 16: secret.txt
 icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
-
 ![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
-\
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir e automatizar facilmente fluxos de trabalho com as ferramentas comunitárias mais avançadas do mundo.\
+Obtenha acesso hoje:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Search for known Malware
+## Busca por Malware conhecido
 
-### Modified System Files
+### Arquivos de Sistema Modificados
 
-Some Linux systems have a feature to **verify the integrity of many installed components**, providing an effective way to identify unusual or out of place files. For instance, `rpm -Va` on Linux is designed to verify all packages that were installed using RedHat Package Manager.
-
+Alguns sistemas Linux possuem um recurso para **verificar a integridade de muitos componentes instalados**, fornecendo uma maneira eficaz de identificar arquivos incomuns ou fora do lugar. Por exemplo, `rpm -Va` no Linux é projetado para verificar todos os pacotes que foram instalados usando o RedHat Package Manager.
 ```bash
 #RedHat
 rpm -Va
@@ -182,22 +167,20 @@ rpm -Va
 dpkg --verify
 debsums | grep -v "OK$" #apt-get install debsums
 ```
+### Detectores de Malware/Rootkit
 
-### Malware/Rootkit Detectors
-
-Read the following page to learn about tools that can be useful to find malware:
+Leia a seguinte página para aprender sobre ferramentas que podem ser úteis para encontrar malware:
 
 {% content-ref url="malware-analysis.md" %}
 [malware-analysis.md](malware-analysis.md)
 {% endcontent-ref %}
 
-## Search installed programs
+## Buscar programas instalados
 
-### Package Manager
+### Gerenciador de Pacotes
 
-On Debian-based systems, the _**/var/ lib/dpkg/status**_ file contains details about installed packages and the _**/var/log/dpkg.log**_ file records information when a package is installed.\
-On RedHat and related Linux distributions the **`rpm -qa --root=/ mntpath/var/lib/rpm`** command will list the contents of an RPM database on a system.
-
+Em sistemas baseados em Debian, o arquivo _**/var/lib/dpkg/status**_ contém detalhes sobre pacotes instalados e o arquivo _**/var/log/dpkg.log**_ registra informações quando um pacote é instalado.\
+Em distribuições Linux RedHat e relacionadas, o comando **`rpm -qa --root=/mntpath/var/lib/rpm`** listará o conteúdo de um banco de dados RPM em um sistema.
 ```bash
 #Debian
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -205,17 +188,13 @@ cat /var/log/dpkg.log | grep installed
 #RedHat
 rpm -qa --root=/ mntpath/var/lib/rpm
 ```
+### Outros
 
-### Other
-
-**Not all installed programs will be listed by the above commands** because some applications are not available as packages for certain systems and must be installed from the source. Therefore, a review of locations such as _**/usr/local**_ and _**/opt**_ may reveal other applications that have been compiled and installed from source code.
-
+** Nem todos os programas instalados serão listados pelos comandos acima ** porque algumas aplicações não estão disponíveis como pacotes para determinados sistemas e devem ser instaladas a partir do código-fonte. Portanto, uma revisão de locais como _**/usr/local**_ e _**/opt**_ pode revelar outras aplicações que foram compiladas e instaladas a partir do código-fonte.
 ```bash
 ls /opt /usr/local
 ```
-
-Another good idea is to **check** the **common folders** inside **$PATH** for **binaries not related** to **installed packages:**
-
+Outra boa ideia é **verificar** as **pastas comuns** dentro de **$PATH** para **binários não relacionados** a **pacotes instalados:**
 ```bash
 #Both lines are going to print the executables in /sbin non related to installed packages
 #Debian
@@ -223,23 +202,20 @@ find /sbin/ -exec dpkg -S {} \; | grep "no path found"
 #RedHat
 find /sbin/ –exec rpm -qf {} \; | grep "is not"
 ```
-
 ![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
-\
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir e automatizar facilmente fluxos de trabalho alimentados pelas ferramentas comunitárias mais avançadas do mundo.\
+Obtenha acesso hoje:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Recover Deleted Running Binaries
+## Recuperar Binários em Execução Deletados
 
 ![](<../../.gitbook/assets/image (641).png>)
 
-## Inspect Autostart locations
+## Inspeção de locais de inicialização automática
 
-### Scheduled Tasks
-
+### Tarefas Agendadas
 ```bash
 cat /var/spool/cron/crontabs/*  \
 /var/spool/cron/atjobs \
@@ -253,10 +229,9 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
+### Serviços
 
-### Services
-
-It is extremely common for malware to entrench itself as a new, unauthorized service. Linux has a number of scripts that are used to start services as the computer boots. The initialization startup script _**/etc/inittab**_ calls other scripts such as rc.sysinit and various startup scripts under the _**/etc/rc.d/**_ directory, or _**/etc/rc.boot/**_ in some older versions. On other versions of Linux, such as Debian, startup scripts are stored in the _**/etc/init.d/**_ directory. In addition, some common services are enabled in _**/etc/inetd.conf**_ or _**/etc/xinetd/**_ depending on the version of Linux. Digital investigators should inspect each of these startup scripts for anomalous entries.
+É extremamente comum que malwares se estabeleçam como um novo serviço não autorizado. O Linux possui vários scripts que são usados para iniciar serviços quando o computador é iniciado. O script de inicialização de inicialização _**/etc/inittab**_ chama outros scripts, como rc.sysinit e vários scripts de inicialização no diretório _**/etc/rc.d/**_, ou _**/etc/rc.boot/**_ em algumas versões mais antigas. Em outras versões do Linux, como o Debian, os scripts de inicialização são armazenados no diretório _**/etc/init.d/**_. Além disso, alguns serviços comuns são habilitados em _**/etc/inetd.conf**_ ou _**/etc/xinetd/**_ dependendo da versão do Linux. Investigadores digitais devem inspecionar cada um desses scripts de inicialização em busca de entradas anômalas.
 
 * _**/etc/inittab**_
 * _**/etc/rc.d/**_
@@ -267,52 +242,52 @@ It is extremely common for malware to entrench itself as a new, unauthorized ser
 * _**/etc/systemd/system**_
 * _**/etc/systemd/system/multi-user.target.wants/**_
 
-### Kernel Modules
+### Módulos do Kernel
 
-On Linux systems, kernel modules are commonly used as rootkit components for malware packages. Kernel modules are loaded when the system boots up based on the configuration information in the `/lib/modules/'uname -r'` and `/etc/modprobe.d` directories, and the `/etc/modprobe` or `/etc/modprobe.conf` file. These areas should be inspected for items that are related to malware.
+Em sistemas Linux, os módulos do kernel são comumente usados como componentes de rootkit para pacotes de malware. Os módulos do kernel são carregados quando o sistema é iniciado com base nas informações de configuração nos diretórios `/lib/modules/'uname -r'` e `/etc/modprobe.d`, e no arquivo `/etc/modprobe` ou `/etc/modprobe.conf`. Essas áreas devem ser inspecionadas em busca de itens relacionados a malwares.
 
-### Other Autostart Locations
+### Outros locais de inicialização automática
 
-There are several configuration files that Linux uses to automatically launch an executable when a user logs into the system that may contain traces of malware.
+Existem vários arquivos de configuração que o Linux usa para iniciar automaticamente um executável quando um usuário faz login no sistema que pode conter vestígios de malware.
 
-* _**/etc/profile.d/\***_ , _**/etc/profile**_ , _**/etc/bash.bashrc**_ are executed when any user account logs in.
-* _**∼/.bashrc**_ , _**∼/.bash\_profile**_ , _**\~/.profile**_ , _**∼/.config/autostart**_ are executed when the specific user logs in.
-* _**/etc/rc.local**_ It is traditionally executed after all the normal system services are started, at the end of the process of switching to a multiuser runlevel.
+* _**/etc/profile.d/\***_ , _**/etc/profile**_ , _**/etc/bash.bashrc**_ são executados quando qualquer conta de usuário faz login.
+* _**∼/.bashrc**_ , _**∼/.bash\_profile**_ , _**\~/.profile**_ , _**∼/.config/autostart**_ são executados quando o usuário específico faz login.
+* _**/etc/rc.local**_ É tradicionalmente executado depois que todos os serviços normais do sistema são iniciados, no final do processo de mudança para um nível de execução multiusuário.
 
 ## Examine Logs
 
-Look in all available log files on the compromised system for traces of malicious execution and associated activities such as the creation of a new service.
+Procure em todos os arquivos de log disponíveis no sistema comprometido por vestígios de execução maliciosa e atividades associadas, como a criação de um novo serviço.
 
-### Pure Logs
+### Logs puros
 
-**Login** events recorded in the system and security logs, including logins via the network, can reveal that **malware** or an **intruder gained access** to a compromised system via a given account at a specific time. Other events around the time of a malware infection can be captured in system logs, including the **creation** of a **new** **service** or new accounts around the time of an incident.\
-Interesting system logins:
+Eventos de **login** registrados nos logs do sistema e de segurança, incluindo logins via rede, podem revelar que **malware** ou um **intruso ganhou acesso** a um sistema comprometido por meio de uma conta específica em um momento específico. Outros eventos em torno do momento de uma infecção por malware podem ser capturados em logs do sistema, incluindo a **criação** de um **novo** **serviço** ou novas contas em torno do momento de um incidente.\
+Logins do sistema interessantes:
 
-* **/var/log/syslog** (debian) or **/var/log/messages** (Redhat)
-  * Shows general messages and info regarding the system. It is a data log of all activity throughout the global system.
-* **/var/log/auth.log** (debian) or **/var/log/secure** (Redhat)
-  * Keep authentication logs for both successful or failed logins, and authentication processes. Storage depends on the system type.
+* **/var/log/syslog** (Debian) ou **/var/log/messages** (Redhat)
+  * Mostra mensagens e informações gerais sobre o sistema. É um registro de dados de toda a atividade em todo o sistema global.
+* **/var/log/auth.log** (Debian) ou **/var/log/secure** (Redhat)
+  * Mantém logs de autenticação para logins bem-sucedidos ou falhos e processos de autenticação. O armazenamento depende do tipo de sistema.
   * `cat /var/log/auth.log | grep -iE "session opened for|accepted password|new session|not in sudoers"`
-* **/var/log/boot.log**: start-up messages and boot info.
-* **/var/log/maillog** or **var/log/mail.log:** is for mail server logs, handy for postfix, smtpd, or email-related services info running on your server.
-* **/var/log/kern.log**: keeps in Kernel logs and warning info. Kernel activity logs (e.g., dmesg, kern.log, klog) can show that a particular service crashed repeatedly, potentially indicating that an unstable trojanized version was installed.
-* **/var/log/dmesg**: a repository for device driver messages. Use **dmesg** to see messages in this file.
-* **/var/log/faillog:** records info on failed logins. Hence, handy for examining potential security breaches like login credential hacks and brute-force attacks.
-* **/var/log/cron**: keeps a record of Crond-related messages (cron jobs). Like when the cron daemon started a job.
-* **/var/log/daemon.log:** keeps track of running background services but doesn’t represent them graphically.
-* **/var/log/btmp**: keeps a note of all failed login attempts.
-* **/var/log/httpd/**: a directory containing error\_log and access\_log files of the Apache httpd daemon. Every error that httpd comes across is kept in the **error\_log** file. Think of memory problems and other system-related errors. **access\_log** logs all requests which come in via HTTP.
-* **/var/log/mysqld.log** or **/var/log/mysql.log**: MySQL log file that records every debug, failure and success message, including starting, stopping and restarting of MySQL daemon mysqld. The system decides on the directory. RedHat, CentOS, Fedora, and other RedHat-based systems use /var/log/mariadb/mariadb.log. However, Debian/Ubuntu use /var/log/mysql/error.log directory.
-* **/var/log/xferlog**: keeps FTP file transfer sessions. Includes info like file names and user-initiated FTP transfers.
-* **/var/log/\*** : You should always check for unexpected logs in this directory
+* **/var/log/boot.log**: mensagens de inicialização e informações de inicialização.
+* **/var/log/maillog** ou **var/log/mail.log:** é para logs do servidor de e-mail, útil para informações de serviços relacionados a postfix, smtpd ou e-mail em execução em seu servidor.
+* **/var/log/kern.log**: mantém logs e informações de aviso do Kernel. Logs de atividade do Kernel (por exemplo, dmesg, kern.log, klog) podem mostrar que um determinado serviço falhou repetidamente, indicando potencialmente que uma versão trojanizada instável foi instalada.
+* **/var/log/dmesg**: um repositório para mensagens do driver do dispositivo. Use **dmesg** para ver mensagens neste arquivo.
+* **/var/log/faillog:** registra informações sobre logins falhos. Portanto, útil para examinar possíveis violações de segurança, como hacks de credenciais de login e ataques de força bruta.
+* **/var/log/cron**: mantém um registro de mensagens relacionadas ao Crond (trabalhos cron). Como quando o daemon cron iniciou um trabalho.
+* **/var/log/daemon.log:** mantém o controle dos serviços em segundo plano em execução, mas não os representa graficamente.
+* **/var/log/btmp**: mantém uma nota de todas as tentativas de login falhas.
+* **/var/log/httpd/**: um diretório contendo arquivos error\_log e access\_log do daemon Apache httpd. Todos os erros que o httpd encontra são mantidos no arquivo **error\_log**. Pense em problemas de memória e outros erros relacionados ao sistema. **access\_log** registra todas as solicitações que chegam via HTTP.
+* **/var/log/mysqld.log** ou **/var/log/mysql.log**: arquivo de log do MySQL que registra todas as mensagens de depuração, falha e sucesso, incluindo a inicialização, parada e reinicialização do daemon MySQL mysqld. O sistema decide sobre o diretório. Sistemas baseados em RedHat, CentOS, Fedora e outros sistemas baseados em RedHat usam /var/log/mariadb/mariadb.log. No entanto, o Debian/Ubuntu usa o diretório /var/log/mysql/error.log.
+* **/var/log/xferlog**: mantém sessões de transferência de arquivos FTP. Inclui informações como nomes de arquivos e transferências FTP iniciadas pelo usuário.
+* **/var/log/\*** : Você sempre deve verificar logs inesperados neste diretório
 
 {% hint style="info" %}
-Linux system logs and audit subsystems may be disabled or deleted in an intrusion or malware incident. Because logs on Linux systems generally contain some of the most useful information about malicious activities, intruders routinely delete them. Therefore, when examining available log files, it is important to look for gaps or out of order entries that might be an indication of deletion or tampering.
+Os logs do sistema Linux e os subsistemas de auditoria podem ser desativados ou excluídos em um incidente de intrusão ou malware. Como os logs em sistemas Linux geralmente contêm algumas das informações mais úteis sobre atividades maliciosas, os invasores rotineiramente os excluem. Portanto, ao examinar os arquivos de log disponíveis, é importante procurar lacunas ou entradas fora de ordem que possam ser uma indicação de exclusão ou adulteração.
 {% endhint %}
 
-### Command History
+### Histórico de comandos
 
-Many Linux systems are configured to maintain a command history for each user account:
+Muitos sistemas Linux são configurados para manter um histórico de comandos para cada conta de usuário:
 
 * \~/.bash\_history
 * \~/.history
@@ -321,40 +296,33 @@ Many Linux systems are configured to maintain a command history for each user ac
 
 ### Logins
 
-Using the command `last -Faiwx` it's possible to get the list of users that have logged in.\
-It is recommended to check if those logins make sense:
+Usando o comando `last -Faiwx`, é possível obter a lista de usuários que fizeram login.\
+É recomendável verificar se esses logins fazem sentido:
 
-* Any unknown user?
-* Any user that shouldn't have a shell logged in?
+* Qualquer usuário desconhecido?
+* Qualquer usuário que não deveria ter um shell conectado?
 
-This is important as **attackers** some times may copy `/bin/bash` inside `/bin/false` so users like **lightdm** may be **able to login**.
+Isso é importante, pois **atacantes** às vezes podem copiar `/bin/bash` dentro de `/bin/false`, para que usuários como **lightdm** possam **fazer login**.
 
-Note that you can also **take a look at this information by reading the logs**.
+Observe que você também pode **dar uma olhada nessas informações lendo os logs**.
 
-### Application Traces
+### Rastros de aplicativos
 
-* **SSH**: Connections to systems made using SSH to and from a compromised system result in entries being made in files for each user account (_**∼/.ssh/authorized\_keys**_ and _**∼/.ssh/known\_keys**_). These entries can reveal the hostname or IP address of the remote hosts.
-* **Gnome Desktop**: User accounts may have a _**∼/.recently-used.xbel**_ file that contains information about files that were recently accessed using applications running on the Gnome desktop.
-* **VIM**: User accounts may have a _**∼/.viminfo**_ file that contains details about the use of VIM, including search string history and paths to files that were opened using vim.
-* **Open Office**: Recent files.
-* **MySQL**: User accounts may have a _**∼/.mysql\_history**_ file that contains queries executed using MySQL.
-* **Less**: User accounts may have a _**∼/.lesshst**_ file that contains details about the use of less, including search string history and shell commands executed via less.
+* **SSH**: Conexões a sistemas feitas usando SSH de e para um sistema comprometido resultam em entradas sendo feitas em arquivos para cada conta de usuário (_**∼/.ssh/authorized\_keys**_ e _**∼/.ssh/known\_keys**_). Essas entradas podem revelar o nome do host ou endereço IP dos hosts remotos.
+* **Desktop Gnome**: As contas de usuário podem ter um arquivo _**∼/.recently-used.xbel**_ que contém informações sobre arquivos que foram acessados recentemente usando aplicativos em execução no desktop Gnome.
+* **VIM**: As contas de usuário podem ter um arquivo _**∼/.viminfo**_ que contém detalhes sobre o uso do VIM, incluindo histórico de string de pesquisa e caminhos para arquivos que foram abertos usando o vim.
+* **Open Office**: Arquivos recentes.
+* **MySQL**: As contas de usuário podem ter um arquivo _**∼/.mysql\_history**_ que contém consultas executadas usando o MySQL.
+* **Less**: As contas de usuário podem ter um arquivo _**∼/.lesshst**_ que contém detalhes sobre o uso do less, incluindo histórico de string de pesquisa e comandos de shell executados via less.
 
-### USB Logs
+### Logs USB
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) is a small piece of software written in pure Python 3 which parses Linux log files (`/var/log/syslog*` or `/var/log/messages*` depending on the distro) for constructing USB event history tables.
-
-It is interesting to **know all the USBs that have been used** and it will be more useful if you have an authorized list of USBs to find "violation events" (the use of USBs that aren't inside that list).
-
-### Installation
-
+[**usbrip**](https://github.com/snovvcrash/usbrip) é um pequeno software escrito em Python 3 puro que analisa
 ```
 pip3 install usbrip
 usbrip ids download #Download USB ID database
 ```
-
-### Examples
-
+### Exemplos
 ```
 usbrip events history #Get USB history of your curent linux machine
 usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR user
@@ -362,77 +330,70 @@ usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR
 usbrip ids download #Downlaod database
 usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
-
-More examples and info inside the github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
+Mais exemplos e informações dentro do github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
 ![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Use [**Trickest**](https://trickest.io/) para construir e **automatizar fluxos de trabalho** com facilidade, alimentados pelas ferramentas comunitárias mais avançadas do mundo.\
+Obtenha acesso hoje:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Review User Accounts and Logon Activities
+## Revisar Contas de Usuário e Atividades de Login
 
-Examine the _**/etc/passwd**_, _**/etc/shadow**_ and **security logs** for unusual names or accounts created and or used in close proximity to known unauthorized events. Also, check possible sudo brute-force attacks.\
-Moreover, check files like _**/etc/sudoers**_ and _**/etc/groups**_ for unexpected privileges given to users.\
-Finally, look for accounts with **no passwords** or **easily guessed** passwords.
+Examine os arquivos _**/etc/passwd**_, _**/etc/shadow**_ e os **logs de segurança** em busca de nomes ou contas incomuns criadas e/ou usadas em proximidade com eventos não autorizados conhecidos. Além disso, verifique possíveis ataques de força bruta sudo.\
+Além disso, verifique arquivos como _**/etc/sudoers**_ e _**/etc/groups**_ para privilégios inesperados concedidos aos usuários.\
+Por fim, procure por contas sem senhas ou senhas **fáceis de adivinhar**.
 
-## Examine File System
+## Examinar o Sistema de Arquivos
 
-File system data structures can provide substantial amounts of **information** related to a **malware** incident, including the **timing** of events and the actual **content** of **malware**.\
-**Malware** is increasingly being designed to **thwart file system analysis**. Some malware alter date-time stamps on malicious files to make it more difficult to find them with timeline analysis. Other malicious codes are designed to only store certain information in memory to minimize the amount of data stored in the file system.\
-To deal with such anti-forensic techniques, it is necessary to pay **careful attention to timeline analysis** of file system date-time stamps and to files stored in common locations where malware might be found.
+As estruturas de dados do sistema de arquivos podem fornecer quantidades substanciais de **informações** relacionadas a um incidente de **malware**, incluindo o **tempo** dos eventos e o **conteúdo** real do **malware**.\
+O **malware** está sendo cada vez mais projetado para **dificultar a análise do sistema de arquivos**. Alguns malwares alteram os carimbos de data e hora em arquivos maliciosos para torná-los mais difíceis de serem encontrados com a análise de linha do tempo. Outros códigos maliciosos são projetados para armazenar apenas certas informações na memória para minimizar a quantidade de dados armazenados no sistema de arquivos.\
+Para lidar com essas técnicas anti-forenses, é necessário prestar **atenção cuidadosa à análise de linha do tempo** dos carimbos de data e hora do sistema de arquivos e aos arquivos armazenados em locais comuns onde o malware pode ser encontrado.
 
-* Using **autopsy** you can see the timeline of events that may be useful to discover suspicious activity. You can also use the `mactime` feature from **Sleuth Kit** directly.
-* Check for **unexpected scripts** inside **$PATH** (maybe some sh or php scripts?)
-* Files in `/dev` used to be special files, you may find non-special files here related to malware.
-* Look for unusual or **hidden files** and **directories**, such as “.. ” (dot dot space) or “..^G ” (dot dot control-G)
-* Setuid copies of /bin/bash on the system `find / -user root -perm -04000 –print`
-* Review date-time stamps of deleted **inodes for large numbers of files being deleted around the same time**, which might indicate malicious activity such as the installation of a rootkit or trojanized service.
-* Because inodes are allocated on a next available basis, **malicious files placed on the system at around the same time may be assigned consecutive inodes**. Therefore, after one component of malware is located, it can be productive to inspect neighbouring inodes.
-* Also check directories like _/bin_ or _/sbin_ as the **modified and or changed time** of new or modified files may be interesting.
-* It's interesting to see the files and folders of a directory **sorted by creation date** instead of alphabetically to see which files or folders are more recent (the last ones usually).
+* Usando o **autopsy**, você pode ver a linha do tempo de eventos que podem ser úteis para descobrir atividades suspeitas. Você também pode usar o recurso `mactime` do **Sleuth Kit** diretamente.
+* Verifique se há **scripts inesperados** dentro do **$PATH** (talvez alguns scripts sh ou php?)
+* Arquivos em `/dev` costumavam ser arquivos especiais, você pode encontrar arquivos não especiais aqui relacionados a malware.
+* Procure por arquivos e diretórios incomuns ou **ocultos**, como ".. " (ponto ponto espaço) ou "..^G " (ponto ponto control-G)
+* Cópias setuid de /bin/bash no sistema `find / -user root -perm -04000 –print`
+* Reveja os carimbos de data e hora dos **inodes excluídos para grandes números de arquivos sendo excluídos ao mesmo tempo**, o que pode indicar atividade maliciosa, como a instalação de um rootkit ou serviço trojanizado.
+* Como os inodes são alocados com base no próximo disponível, **arquivos maliciosos colocados no sistema aproximadamente ao mesmo tempo podem ser atribuídos a inodes consecutivos**. Portanto, depois que um componente de malware é localizado, pode ser produtivo inspecionar inodes vizinhos.
+* Também verifique diretórios como _/bin_ ou _/sbin_ como o **tempo modificado e/ou alterado** de novos arquivos ou arquivos modificados pode ser interessante.
+* É interessante ver os arquivos e pastas de um diretório **ordenados por data de criação** em vez de alfabeticamente para ver quais arquivos ou pastas são mais recentes (os últimos geralmente).
 
-You can check the most recent files of a folder using `ls -laR --sort=time /bin`\
-You can check the inodes of the files inside a folder using `ls -lai /bin |sort -n`
+Você pode verificar os arquivos mais recentes de uma pasta usando `ls -laR --sort=time /bin`\
+Você pode verificar os inodes dos arquivos dentro de uma pasta usando `ls -lai /bin |sort -n`
 
 {% hint style="info" %}
-Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modified at the **same time** as the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
+Observe que um **atacante** pode **modificar** o **tempo** para fazer com que os **arquivos pareçam** **legítimos**, mas ele **não pode** modificar o **inode**. Se você encontrar que um **arquivo** indica que foi criado e modificado ao **mesmo tempo** que o restante dos arquivos na mesma pasta, mas o **inode** é **inesperadamente maior**, então os **carimbos de data e hora desse arquivo foram modificados**.
 {% endhint %}
 
-## Compare files of different filesystem versions
+## Comparar arquivos de diferentes versões do sistema de arquivos
 
-#### Find added files
-
+#### Encontrar arquivos adicionados
 ```bash
 git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/
 ```
-
-#### Find Modified content
-
+#### Encontrar conteúdo modificado
 ```bash
 git diff --no-index --diff-filter=M _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/ | grep -E "^\+" | grep -v "Installed-Time"
 ```
-
-#### Find deleted files
-
+#### Encontrar arquivos deletados
 ```bash
 git diff --no-index --diff-filter=A _openwrt1.extracted/squashfs-root/ _openwrt2.extracted/squashfs-root/
 ```
-
-#### Other filters
+#### Outros filtros
 
 **`-diff-filter=[(A|C|D|M|R|T|U|X|B)…​[*]]`**
 
-Select only files that are Added (`A`), Copied (`C`), Deleted (`D`), Modified (`M`), Renamed (`R`), and have their type (i.e. regular file, symlink, submodule, …​) changed (`T`), are Unmerged (`U`), are Unknown (`X`), or have had their pairing Broken (`B`). Any combination of the filter characters (including none) can be used. When `*` (All-or-none) is added to the combination, all paths are selected if there is any file that matches other criteria in the comparison; if there is no file that matches other criteria, nothing is selected.
+Seleciona apenas arquivos que foram Adicionados (`A`), Copiados (`C`), Deletados (`D`), Modificados (`M`), Renomeados (`R`), e tiveram seu tipo (ou seja, arquivo regular, symlink, submodule, ...) alterado (`T`), estão Descombinados (`U`), são Desconhecidos (`X`), ou tiveram seu emparelhamento quebrado (`B`). Qualquer combinação dos caracteres de filtro (incluindo nenhum) pode ser usada. Quando `*` (Todos-ou-nenhum) é adicionado à combinação, todos os caminhos são selecionados se houver algum arquivo que corresponda a outros critérios na comparação; se não houver arquivo que corresponda a outros critérios, nada é selecionado.
 
-Also, **these upper-case letters can be downcased to exclude**. E.g. `--diff-filter=ad` excludes added and deleted paths.
+Além disso, **essas letras maiúsculas podem ser transformadas em minúsculas para excluir**. Por exemplo, `--diff-filter=ad` exclui caminhos adicionados e deletados.
 
-Note that not all diffs can feature all types. For instance, diffs from the index to the working tree can never have Added entries (because the set of paths included in the diff is limited by what is in the index). Similarly, copied and renamed entries cannot appear if detection for those types is disabled.
+Observe que nem todas as diferenças podem apresentar todos os tipos. Por exemplo, diferenças do índice para a árvore de trabalho nunca podem ter entradas Adicionadas (porque o conjunto de caminhos incluídos na diferença é limitado pelo que está no índice). Da mesma forma, entradas copiadas e renomeadas não podem aparecer se a detecção para esses tipos estiver desativada.
 
-## References
+## Referências
 
 * [https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems\_Ch3.pdf](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems\_Ch3.pdf)
 * [https://www.plesk.com/blog/featured/linux-logs-explained/](https://www.plesk.com/blog/featured/linux-logs-explained/)
@@ -441,20 +402,20 @@ Note that not all diffs can feature all types. For instance, diffs from the inde
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-**Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+**Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 ![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir e **automatizar fluxos de trabalho** facilmente com as ferramentas comunitárias mais avançadas do mundo.\
+Obtenha acesso hoje:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

@@ -1,40 +1,40 @@
-# Basic Forensic Methodology
+# Metodologia Básica de Forense
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-## Creating and Mounting an Image
+## Criando e Montando uma Imagem
 
 {% content-ref url="../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md" %}
 [image-acquisition-and-mount.md](../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md)
 {% endcontent-ref %}
 
-## Malware Analysis
+## Análise de Malware
 
-This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
+Isso **não é necessariamente o primeiro passo a ser realizado assim que você tiver a imagem**. Mas você pode usar essas técnicas de análise de malware independentemente se tiver um arquivo, uma imagem do sistema de arquivos, imagem de memória, pcap... então é bom **manter essas ações em mente**:
 
 {% content-ref url="malware-analysis.md" %}
 [malware-analysis.md](malware-analysis.md)
 {% endcontent-ref %}
 
-## Inspecting an Image
+## Inspeção de uma Imagem
 
-if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
+Se você recebeu uma **imagem forense** de um dispositivo, pode começar a **analisar as partições, o sistema de arquivos** usado e **recuperar** arquivos potencialmente **interessantes** (até mesmo os excluídos). Aprenda como em:
 
 {% content-ref url="partitions-file-systems-carving/" %}
 [partitions-file-systems-carving](partitions-file-systems-carving/)
 {% endcontent-ref %}
 
-Depending on the used OSs and even platform different interesting artifacts should be searched:
+Dependendo dos sistemas operacionais usados e até mesmo da plataforma, diferentes artefatos interessantes devem ser procurados:
 
 {% content-ref url="windows-forensics/" %}
 [windows-forensics](windows-forensics/)
@@ -48,42 +48,42 @@ Depending on the used OSs and even platform different interesting artifacts shou
 [docker-forensics.md](docker-forensics.md)
 {% endcontent-ref %}
 
-## Deep inspection of specific file-types and Software
+## Inspeção Profunda de Tipos de Arquivos e Software Específicos
 
-If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
-Read the following page to learn some interesting tricks:
+Se você tem um arquivo muito **suspeito**, então **dependendo do tipo de arquivo e do software** que o criou, vários **tricks** podem ser úteis.\
+Leia a seguinte página para aprender alguns truques interessantes:
 
 {% content-ref url="specific-software-file-type-tricks/" %}
 [specific-software-file-type-tricks](specific-software-file-type-tricks/)
 {% endcontent-ref %}
 
-I want to do a special mention to the page:
+Quero fazer uma menção especial à página:
 
 {% content-ref url="specific-software-file-type-tricks/browser-artifacts.md" %}
 [browser-artifacts.md](specific-software-file-type-tricks/browser-artifacts.md)
 {% endcontent-ref %}
 
-## Memory Dump Inspection
+## Inspeção de Dump de Memória
 
 {% content-ref url="memory-dump-analysis/" %}
 [memory-dump-analysis](memory-dump-analysis/)
 {% endcontent-ref %}
 
-## Pcap Inspection
+## Inspeção de Pcap
 
 {% content-ref url="pcap-inspection/" %}
 [pcap-inspection](pcap-inspection/)
 {% endcontent-ref %}
 
-## **Anti-Forensic Techniques**
+## **Técnicas Anti-Forense**
 
-Keep in mind the possible use of anti-forensic techniques:
+Tenha em mente o possível uso de técnicas anti-forense:
 
 {% content-ref url="anti-forensic-techniques.md" %}
 [anti-forensic-techniques.md](anti-forensic-techniques.md)
 {% endcontent-ref %}
 
-## Threat Hunting
+## Caça a Ameaças
 
 {% content-ref url="file-integrity-monitoring.md" %}
 [file-integrity-monitoring.md](file-integrity-monitoring.md)
@@ -93,10 +93,10 @@ Keep in mind the possible use of anti-forensic techniques:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

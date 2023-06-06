@@ -1,28 +1,27 @@
-# macOS Apps - Inspecting, debugging and Fuzzing
+# macOS Apps - Inspeção, depuração e fuzzing
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Static Analysis
+## Análise estática
 
 ### otool
-
 ```bash
 otool -L /bin/ls #List dynamically linked libraries
 otool -tv /bin/ps #Decompile application
 ```
-
 ### objdump
 
+O comando `objdump` é uma ferramenta de linha de comando que permite inspecionar o conteúdo de arquivos binários. Ele pode ser usado para visualizar informações sobre seções, símbolos, relocs, entre outros. O `objdump` é uma ferramenta útil para a análise de binários e pode ser usado para encontrar vulnerabilidades em aplicativos.
 ```bash
 objdump -m --dylibs-used /bin/ls #List dynamically linked libraries
 objdump -m -h /bin/ls # Get headers information
@@ -30,11 +29,9 @@ objdump -m --syms /bin/ls # Check if the symbol table exists to get function nam
 objdump -m --full-contents /bin/ls # Dump every section
 objdump -d /bin/ls # Dissasemble the binary
 ```
-
 ### jtool2
 
-The tool can be used as a **replacement** for **codesign**, **otool**, and **objdump**, and provides a few additional features.
-
+A ferramenta pode ser usada como um **substituto** para **codesign**, **otool** e **objdump**, e fornece algumas funcionalidades adicionais.
 ```bash
 # Install
 brew install --cask jtool2
@@ -49,9 +46,9 @@ jtool2 -D /bin/ls # Decompile binary
 ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Automator
 
 ```
-
 ### Codesign
 
+Codesign é uma ferramenta de linha de comando que permite assinar digitalmente arquivos binários no macOS. A assinatura digital é usada para verificar a integridade e autenticidade do arquivo. Isso é especialmente importante para aplicativos que são distribuídos fora da Mac App Store, pois a assinatura digital é necessária para que o macOS permita a execução do aplicativo. Além disso, a assinatura digital é usada para verificar se o aplicativo foi modificado ou corrompido.
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -68,105 +65,96 @@ spctl --assess --verbose /Applications/Safari.app
 # Sign a binary
 codesign -s <cert-name-keychain> toolsdemo
 ```
-
 ### SuspiciousPackage
 
-[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) is a tool useful to inspect **.pkg** files (installers) and see what is inside before installing it.\
-These installers have `preinstall` and `postinstall` bash scripts that malware authors usually abuse to **persist** **the** **malware**.
+[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) é uma ferramenta útil para inspecionar arquivos **.pkg** (instaladores) e ver o que está dentro antes de instalá-los. Esses instaladores possuem scripts bash `preinstall` e `postinstall` que os autores de malware geralmente abusam para **persistir** o **malware**.
 
 ### hdiutil
 
-This tool allows to **mount** Apple disk images (**.dmg**) files to inspect them before running anything:
-
+Esta ferramenta permite **montar** imagens de disco Apple (**.dmg**) para inspecioná-las antes de executar qualquer coisa:
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
-
-It will be mounted in `/Volumes`
+Será montado em `/Volumes`
 
 ### Objective-C
 
-When a function is called in a binary that uses objective-C, the compiled code instead of calling that function, it will call **`objc_msgSend`**. Which will be calling the final function:
+Quando uma função é chamada em um binário que usa Objective-C, o código compilado, em vez de chamar essa função, chamará **`objc_msgSend`**. Que chamará a função final:
 
 ![](<../../../.gitbook/assets/image (560).png>)
 
-The params this function expects are:
+Os parâmetros que essa função espera são:
 
-* The first parameter (**self**) is "a pointer that points to the **instance of the class that is to receive the message**". Or more simply put, it’s the object that the method is being invoked upon. If the method is a class method, this will be an instance of the class object (as a whole), whereas for an instance method, self will point to an instantiated instance of the class as an object.
-* The second parameter, (**op**), is "the selector of the method that handles the message". Again, more simply put, this is just the **name of the method.**
-* The remaining parameters are any **values that are required by the method** (op).
+* O primeiro parâmetro (**self**) é "um ponteiro que aponta para a **instância da classe que receberá a mensagem**". Ou, de forma mais simples, é o objeto no qual o método está sendo invocado. Se o método for um método de classe, isso será uma instância do objeto da classe (como um todo), enquanto para um método de instância, o self apontará para uma instância instanciada da classe como um objeto.
+* O segundo parâmetro, (**op**), é "o seletor do método que manipula a mensagem". Novamente, de forma mais simples, este é apenas o **nome do método**.
+* Os parâmetros restantes são quaisquer **valores necessários pelo método** (op).
 
-| **Argument**      | **Register**                                                    | **(for) objc\_msgSend**                                |
+| **Argumento**      | **Registro**                                                    | **(para) objc\_msgSend**                                |
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **1st argument**  | **rdi**                                                         | **self: object that the method is being invoked upon** |
-| **2nd argument**  | **rsi**                                                         | **op: name of the method**                             |
-| **3rd argument**  | **rdx**                                                         | **1st argument to the method**                         |
-| **4th argument**  | **rcx**                                                         | **2nd argument to the method**                         |
-| **5th argument**  | **r8**                                                          | **3rd argument to the method**                         |
-| **6th argument**  | **r9**                                                          | **4th argument to the method**                         |
-| **7th+ argument** | <p><strong>rsp+</strong><br><strong>(on the stack)</strong></p> | **5th+ argument to the method**                        |
+| **1º argumento**  | **rdi**                                                         | **self: objeto no qual o método está sendo invocado** |
+| **2º argumento**  | **rsi**                                                         | **op: nome do método**                                 |
+| **3º argumento**  | **rdx**                                                         | **1º argumento para o método**                         |
+| **4º argumento**  | **rcx**                                                         | **2º argumento para o método**                         |
+| **5º argumento**  | **r8**                                                          | **3º argumento para o método**                         |
+| **6º argumento**  | **r9**                                                          | **4º argumento para o método**                         |
+| **7º+ argumento** | <p><strong>rsp+</strong><br><strong>(na pilha)</strong></p> | **5º+ argumento para o método**                        |
 
-### Packed binaries
+### Binários compactados
 
-* Check for high entropy
-* Check the strings (is there is almost no understandable string, packed)
-* The UPX packer for MacOS generates a section called "\_\_XHDR"
+* Verifique a alta entropia
+* Verifique as strings (se houver quase nenhuma string compreensível, compactada)
+* O empacotador UPX para MacOS gera uma seção chamada "\_\_XHDR"
 
-## Dynamic Analysis
+## Análise dinâmica
 
 {% hint style="warning" %}
-Note that in order to debug binaries, **SIP needs to be disabled** (`csrutil disable` or `csrutil enable --without debug`) or to copy the binaries to a temporary folder and **remove the signature** with `codesign --remove-signature <binary-path>` or allow the debugging of the binary (you can use [this script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
+Observe que, para depurar binários, **o SIP precisa ser desativado** (`csrutil disable` ou `csrutil enable --without debug`) ou copiar os binários para uma pasta temporária e **remover a assinatura** com `codesign --remove-signature <binary-path>` ou permitir a depuração do binário (você pode usar [este script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
 {% endhint %}
 
 {% hint style="warning" %}
-Note that in order to **instrument system binaries**, (such as `cloudconfigurationd`) on macOS, **SIP must be disabled** (just removing the signature won't work).
+Observe que, para **instrumentar binários do sistema**, (como `cloudconfigurationd`) no macOS, **o SIP deve ser desativado** (apenas remover a assinatura não funcionará).
 {% endhint %}
 
 ### Hopper
 
-#### Left panel
+#### Painel esquerdo
 
-In the left panel of hopper it's possible to see the symbols (**Labels**) of the binary, the list of procedures and functions (**Proc**) and the strings (**Str**). Those aren't all the strings but the ones defined in several parts of the Mac-O file (like _cstring or_ `objc_methname`).
+No painel esquerdo do Hopper, é possível ver os símbolos (**Labels**) do binário, a lista de procedimentos e funções (**Proc**) e as strings (**Str**). Essas não são todas as strings, mas as definidas em várias partes do arquivo Mac-O (como _cstring ou_ `objc_methname`).
 
-#### Middle panel
+#### Painel central
 
-In the middle panel you can see the **dissasembled code**. And you can see it a **raw** disassemble, as **graph**, as **decompiled** and as **binary** by clicking on the respective icon:
+No painel central, você pode ver o **código desmontado**. E você pode vê-lo como um desmonte **bruto**, como **gráfico**, como **descompilado** e como **binário** clicando no ícone respectivo:
 
 <figure><img src="../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
 
-Right clicking in a code object you can see **references to/from that object** or even change its name (this doesn't work in decompiled pseudocode):
+Clicando com o botão direito em um objeto de código, você pode ver **referências para/de esse objeto** ou até mesmo mudar seu nome (isso não funciona no pseudocódigo descompilado):
 
 <figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-Moreover, in the **middle down you can write python commands**.
+Além disso, no **meio inferior, você pode escrever comandos python**.
 
-#### Right panel
+#### Painel direito
 
-In the right panel you can see interesting information such as the **navigation history** (so you know how you arrived at the current situation), the **call grap**h where you can see all the **functions that call this function** and all the functions that **this function calls**, and **local variables** information.
+No painel direito, você pode ver informações interessantes, como o **histórico de navegação** (para saber como você chegou à situação atual), o **gráfico de chamadas** onde você pode ver todas as **funções que chamam essa função** e todas as funções que **essa função chama**, e informações de **variáveis locais**.
 
 ### dtruss
-
 ```bash
 dtruss -c ls #Get syscalls of ls
 dtruss -c -p 1000 #get syscalls of PID 1000
 ```
-
 ### ktrace
 
-You can use this one even with **SIP activated**
-
+Você pode usar este mesmo com o **SIP ativado**.
 ```bash
 ktrace trace -s -S -t c -c ls | grep "ls("
 ```
-
 ### dtrace
 
-It allows users access to applications at an extremely **low level** and provides a way for users to **trace** **programs** and even change their execution flow. Dtrace uses **probes** which are **placed throughout the kernel** and are at locations such as the beginning and end of system calls.
+Ele permite que os usuários acessem aplicativos em um nível extremamente **baixo** e fornece uma maneira para os usuários **rastrearem** **programas** e até mesmo mudarem seu fluxo de execução. O Dtrace usa **sondas** que são **colocadas em todo o kernel** e estão em locais como o início e o fim das chamadas do sistema.
 
-DTrace uses the **`dtrace_probe_create`** function to create a probe for each system call. These probes can be fired in the **entry and exit point of each system call**. The interaction with DTrace occur through /dev/dtrace which is only available for the root user.
+O DTrace usa a função **`dtrace_probe_create`** para criar uma sonda para cada chamada do sistema. Essas sondas podem ser disparadas no **ponto de entrada e saída de cada chamada do sistema**. A interação com o DTrace ocorre por meio do /dev/dtrace, que está disponível apenas para o usuário root.
 
-The available probes of dtrace can be obtained with:
-
+As sondas disponíveis do dtrace podem ser obtidas com:
 ```bash
 dtrace -l | head
    ID   PROVIDER            MODULE                          FUNCTION NAME
@@ -176,26 +164,22 @@ dtrace -l | head
    43    profile                                                     profile-97
    44    profile                                                     profile-199
 ```
+O nome da sonda consiste em quatro partes: o provedor, o módulo, a função e o nome (`fbt:mach_kernel:ptrace:entry`). Se você não especificar alguma parte do nome, o Dtrace aplicará essa parte como um caractere curinga.
 
-The probe name consists of four parts: the provider, module, function, and name (`fbt:mach_kernel:ptrace:entry`). If you not specifies some part of the name, Dtrace will apply that part as a wildcard.
+Para configurar o DTrace para ativar sondas e especificar quais ações executar quando elas são acionadas, precisaremos usar a linguagem D.
 
-To configure DTrace to activate probes and to specify what actions to perform when they fire, we will need to use the D language.
+Uma explicação mais detalhada e mais exemplos podem ser encontrados em [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)
 
-A more detailed explanation and more examples can be found in [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)
+#### Exemplos
 
-#### Examples
+Execute `man -k dtrace` para listar os **scripts DTrace disponíveis**. Exemplo: `sudo dtruss -n binary`
 
-Run `man -k dtrace` to list the **DTrace scripts available**. Example: `sudo dtruss -n binary`
-
-* In line
-
+* Em linha
 ```bash
 #Count the number of syscalls of each running process
 sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
 ```
-
 * script
-
 ```bash
 syscall:::entry
 /pid == $1/
@@ -233,61 +217,56 @@ syscall:::return
 #Log sys calls with values
 sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 ```
-
 ### ProcessMonitor
 
-[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) is a very useful tool to check the process related actions a process is performing (for example, monitor which new processes a process is creating).
+[**ProcessMonitor**](https://objective-see.com/products/utilities.html#ProcessMonitor) é uma ferramenta muito útil para verificar as ações relacionadas a processos que um processo está executando (por exemplo, monitorar quais novos processos um processo está criando).
 
 ### FileMonitor
 
-[**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) allows to monitor file events (such as creation, modifications, and deletions) providing detailed information about such events.
+[**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) permite monitorar eventos de arquivos (como criação, modificações e exclusões), fornecendo informações detalhadas sobre esses eventos.
 
 ### fs\_usage
 
-Allows to follow actions performed by processes:
-
+Permite acompanhar as ações executadas pelos processos:
 ```bash
 fs_usage -w -f filesys ls #This tracks filesystem actions of proccess names containing ls
 fs_usage -w -f network curl #This tracks network actions
 ```
-
 ### TaskExplorer
 
-[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) is useful to see the **libraries** used by a binary, the **files** it's using and the **network** connections.\
-It also checks the binary processes against **virustotal** and show information about the binary.
+[**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) é útil para ver as **bibliotecas** usadas por um binário, os **arquivos** que ele está usando e as **conexões de rede**.\
+Ele também verifica os processos binários no **virustotal** e mostra informações sobre o binário.
 
 ### lldb
 
-**lldb** is the de **facto tool** for **macOS** binary **debugging**.
-
+**lldb** é a ferramenta **de facto** para **depuração** de binários **macOS**.
 ```bash
 lldb ./malware.bin
 lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
-
-| **(lldb) Command**            | **Description**                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **Comando (lldb)**            | **Descrição**                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **run (r)**                   | Starting execution, which will continue unabated until a breakpoint is hit or the process terminates.                                                                                                                                                                                                                                                                                                                     |
-| **continue (c)**              | Continue execution of the debugged process.                                                                                                                                                                                                                                                                                                                                                                               |
-| **nexti (n / ni)**            | Execute the next instruction. This command will skip over function calls.                                                                                                                                                                                                                                                                                                                                                 |
-| **stepi (s / si)**            | Execute the next instruction. Unlike the nexti command, this command will step into function calls.                                                                                                                                                                                                                                                                                                                       |
-| **finish (f)**                | Execute the rest of the instructions in the current function (“frame”) return and halt.                                                                                                                                                                                                                                                                                                                                   |
-| **control + c**               | Pause execution. If the process has been run (r) or continued (c), this will cause the process to halt ...wherever it is currently executing.                                                                                                                                                                                                                                                                             |
-| **breakpoint (b)**            | <p>b main</p><p>b -[NSDictionary objectForKey:]</p><p>b 0x0000000100004bd9</p><p>br l #Breakpoint list</p><p>br e/dis &#x3C;num> #Enable/Disable breakpoint</p><p>breakpoint delete &#x3C;num><br>b set -n main --shlib &#x3C;lib_name></p>                                                                                                                                                                               |
-| **help**                      | <p>help breakpoint #Get help of breakpoint command</p><p>help memory write #Get help to write into the memory</p>                                                                                                                                                                                                                                                                                                         |
+| **run (r)**                   | Inicia a execução, que continuará sem interrupção até que um ponto de interrupção seja atingido ou o processo seja encerrado.                                                                                                                                                                                                                                                                                                                     |
+| **continue (c)**              | Continua a execução do processo depurado.                                                                                                                                                                                                                                                                                                                                                                               |
+| **nexti (n / ni)**            | Executa a próxima instrução. Este comando irá pular chamadas de função.                                                                                                                                                                                                                                                                                                                                                 |
+| **stepi (s / si)**            | Executa a próxima instrução. Ao contrário do comando nexti, este comando irá entrar nas chamadas de função.                                                                                                                                                                                                                                                                                                                       |
+| **finish (f)**                | Executa o restante das instruções na função atual ("frame") e retorna.                                                                                                                                                                                                                                                                                                                                   |
+| **control + c**               | Pausa a execução. Se o processo foi executado (r) ou continuado (c), isso fará com que o processo pare... onde quer que esteja executando no momento.                                                                                                                                                                                                                                                                             |
+| **breakpoint (b)**            | <p>b main</p><p>b -[NSDictionary objectForKey:]</p><p>b 0x0000000100004bd9</p><p>br l #Lista de pontos de interrupção</p><p>br e/dis &#x3C;num> #Ativar/Desativar ponto de interrupção</p><p>breakpoint delete &#x3C;num><br>b set -n main --shlib &#x3C;lib_name></p>                                                                                                                                                                               |
+| **help**                      | <p>help breakpoint #Obter ajuda do comando breakpoint</p><p>help memory write #Obter ajuda para escrever na memória</p>                                                                                                                                                                                                                                                                                                         |
 | **reg**                       | <p>reg read</p><p>reg read $rax</p><p>reg write $rip 0x100035cc0</p>                                                                                                                                                                                                                                                                                                                                                      |
-| **x/s \<reg/memory address>** | Display the memory as a null-terminated string.                                                                                                                                                                                                                                                                                                                                                                           |
-| **x/i \<reg/memory address>** | Display the memory as assembly instruction.                                                                                                                                                                                                                                                                                                                                                                               |
-| **x/b \<reg/memory address>** | Display the memory as byte.                                                                                                                                                                                                                                                                                                                                                                                               |
-| **print object (po)**         | <p>This will print the object referenced by the param</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Note that most of Apple’s Objective-C APIs or methods return objects, and thus should be displayed via the “print object” (po) command. If po doesn't produce a meaningful output use <code>x/b</code></p> |
-| **memory**                    | <p>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Write AAAA in that address<br>memory write -f s $rip+0x11f+7 "AAAA" #Write AAAA in the addr</p>                                                                                                                                                                                                                            |
-| **disassembly**               | <p>dis #Disas current function<br>dis -c 6 #Disas 6 lines<br>dis -c 0x100003764 -e 0x100003768 # From one add until the other<br>dis -p -c 4 # Start in current address disassembling</p>                                                                                                                                                                                                                                 |
-| **parray**                    | parray 3 (char \*\*)$x1 # Check array of 3 components in x1 reg                                                                                                                                                                                                                                                                                                                                                           |
+| **x/s \<reg/memory address>** | Exibe a memória como uma string terminada em nulo.                                                                                                                                                                                                                                                                                                                                                                           |
+| **x/i \<reg/memory address>** | Exibe a memória como instrução de montagem.                                                                                                                                                                                                                                                                                                                                                                               |
+| **x/b \<reg/memory address>** | Exibe a memória como byte.                                                                                                                                                                                                                                                                                                                                                                                               |
+| **print object (po)**         | <p>Isso irá imprimir o objeto referenciado pelo parâmetro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Observe que a maioria das APIs ou métodos Objective-C da Apple retornam objetos e, portanto, devem ser exibidos por meio do comando "print object" (po). Se po não produzir uma saída significativa, use <code>x/b</code></p> |
+| **memory**                    | <p>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Escreve AAAA nesse endereço<br>memory write -f s $rip+0x11f+7 "AAAA" #Escreve AAAA no endereço</p>                                                                                                                                                                                                                            |
+| **disassembly**               | <p>dis #Desmonta a função atual<br>dis -c 6 #Desmonta 6 linhas<br>dis -c 0x100003764 -e 0x100003768 #De um endereço até o outro<br>dis -p -c 4 #Começa no endereço atual desmontando</p>                                                                                                                                                                                                                                 |
+| **parray**                    | parray 3 (char \*\*)$x1 #Verifica o array de 3 componentes no registro x1                                                                                                                                                                                                                                                                                                                                                           |
 
 {% hint style="info" %}
-When calling the **`objc_sendMsg`** function, the **rsi** register holds the **name of the method** as a null-terminated (“C”) string. To print the name via lldb do:
+Ao chamar a função **`objc_sendMsg`**, o registro **rsi** contém o **nome do método** como uma string terminada em nulo ("C"). Para imprimir o nome via lldb, faça:
 
 `(lldb) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 
@@ -297,30 +276,31 @@ When calling the **`objc_sendMsg`** function, the **rsi** register holds the **n
 `(lldb) reg read $rsi: rsi = 0x00000001000f1576 "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 {% endhint %}
 
-### Anti-Dynamic Analysis
+### Anti-Análise Dinâmica
 
-#### VM detection
+#### Detecção de VM
 
-* The command **`sysctl hw.model`** returns "Mac" when the **host is a MacOS** but something different when it's a VM.
-* Playing with the values of **`hw.logicalcpu`** and **`hw.physicalcpu`** some malwares try to detect if it's a VM.
-* Some malwares can also **detect** if the machine is **VMware** based on the MAC address (00:50:56).
-* It's also possible to find **if a process is being debugged** with a simple code such us:
-  * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
-* It can also invoke the **`ptrace`** system call with the **`PT_DENY_ATTACH`** flag. This **prevents** a deb**u**gger from attaching and tracing.
-  * You can check if the **`sysctl` \*\* or**`ptrace`\*\* function is being **imported** (but the malware could import it dynamically)
-  * As noted in this writeup, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-    “_The message Process # exited with **status = 45 (0x0000002d)** is usually a tell-tale sign that the debug target is using **PT\_DENY\_ATTACH**_”
+* O comando **`sysctl hw.model`** retorna "Mac" quando o **host é um MacOS**, mas algo diferente quando é uma VM.
+* Manipulando os valores de **`hw.logicalcpu`** e **`hw.physicalcpu`**, alguns malwares tentam detectar se é uma VM.
+* Alguns malwares também podem **detectar** se a máquina é baseada no VMware pelo endereço MAC (00:50:56).
+* Também é possível encontrar **se um processo está sendo depurado** com um código simples como:
+
+  * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //processo sendo depurado }`
+
+* Ele também pode invocar a chamada do sistema **`ptrace`** com a flag **`PT_DENY_ATTACH`**. Isso **impede** um depurador de anexar e rastrear.
+  * Você pode verificar se a função **`sysctl`** ou **`ptrace`** está sendo **importada** (mas o malware pode importá-la dinamicamente)
+  * Como observado neste artigo, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
+    "_A mensagem Process # exited with **status = 45 (0x0000002d)** é geralmente um sinal revelador de que o alvo de depuração está usando **PT\_DENY\_ATTACH**_"
 
 ## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
-ReportCrash **analyzes crashing processes and saves a crash report to disk**. A crash report contains information that can **help a developer diagnose** the cause of a crash.\
-For applications and other processes **running in the per-user launchd context**, ReportCrash runs as a LaunchAgent and saves crash reports in the user's `~/Library/Logs/DiagnosticReports/`\
-For daemons, other processes **running in the system launchd context** and other privileged processes, ReportCrash runs as a LaunchDaemon and saves crash reports in the system's `/Library/Logs/DiagnosticReports`
+ReportCrash **analisa processos que falharam e salva um relatório de falha no disco**. Um relatório de falha contém informações que podem **ajudar um desenvolvedor a diagnosticar** a causa de uma falha.\
+Para aplicativos e outros processos **executados no contexto do launchd por usuário**, o ReportCrash é executado como um LaunchAgent e salva relatórios de falhas em `~/Library/Logs/DiagnosticReports/` do usuário.\
+Para daemons, outros processos **executados no contexto do launchd do sistema** e outros processos privilegiados, o ReportCrash é executado como um LaunchDaemon e salva relatórios de falhas em `/Library/Logs/DiagnosticReports` do sistema.
 
-If you are worried about crash reports **being sent to Apple** you can disable them. If not, crash reports can be useful to **figure out how a server crashed**.
-
+Se você está preocupado com os relatórios de falhas **sendo enviados para a Apple**, você pode desativá-los. Caso contrário, os relatórios de falhas podem ser úteis para **descobrir como um servidor falhou**.
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -330,52 +310,45 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Roo
 launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 ```
-
 ### Sleep
 
-While fuzzing in a MacOS it's important to not allow the Mac to sleep:
+Durante a realização de fuzzing em um MacOS, é importante não permitir que o Mac entre em modo de suspensão:
 
 * systemsetup -setsleep Never
-* pmset, System Preferences
+* pmset, Preferências do Sistema
 * [KeepingYouAwake](https://github.com/newmarcel/KeepingYouAwake)
 
-#### SSH Disconnect
+#### Desconexão SSH
 
-If you are fuzzing via a SSH connection it's important to make sure the session isn't going to day. So change the sshd\_config file with:
+Se você estiver realizando fuzzing por meio de uma conexão SSH, é importante garantir que a sessão não seja encerrada. Portanto, altere o arquivo sshd\_config com:
 
 * TCPKeepAlive Yes
 * ClientAliveInterval 0
 * ClientAliveCountMax 0
-
 ```bash
 sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
+### Manipuladores Internos
 
-### Internal Handlers
+[**Confira esta seção**](../#file-extensions-apps) para descobrir como você pode encontrar qual aplicativo é responsável por **manipular o esquema ou protocolo especificado**.
 
-[**Checkout this section**](../#file-extensions-apps) to find out how you can find which app is responsible of **handling the specified scheme or protocol**.
+### Enumerando Processos de Rede
 
-### Enumerating Network Processes
-
-This interesting to find processes that are managing network data:
-
+Isso é interessante para encontrar processos que estão gerenciando dados de rede:
 ```bash
 dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >> recv.log
 #wait some time
 sort -u recv.log > procs.txt
 cat procs.txt
 ```
-
-Or use `netstat` or `lsof`
-
-### More Fuzzing MacOS Info
+### Mais informações sobre Fuzzing em MacOS
 
 * [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
 * [https://github.com/bnagy/francis/tree/master/exploitaben](https://github.com/bnagy/francis/tree/master/exploitaben)
 * [https://github.com/ant4g0nist/crashwrangler](https://github.com/ant4g0nist/crashwrangler)
 
-## References
+## Referências
 
 * [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 * [**https://www.youtube.com/watch?v=T5xfL9tEg44**](https://www.youtube.com/watch?v=T5xfL9tEg44)
@@ -385,10 +358,10 @@ Or use `netstat` or `lsof`
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

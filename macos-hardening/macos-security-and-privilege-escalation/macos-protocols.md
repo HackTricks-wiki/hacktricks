@@ -1,29 +1,28 @@
-# macOS Network Services & Protocols
+# Serviços e Protocolos de Rede do macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Remote Access Services
+## Serviços de Acesso Remoto
 
-These are the common macOS services to access them remotely.\
-You can enable/disable these services in `System Settings` --> `Sharing`
+Esses são os serviços comuns do macOS para acessá-los remotamente.\
+Você pode habilitar/desabilitar esses serviços em `Configurações do Sistema` --> `Compartilhamento`
 
-* **VNC**, known as “Screen Sharing”
-* **SSH**, called “Remote Login”
-* **Apple Remote Desktop** (ARD), or “Remote Management”
-* **AppleEvent**, known as “Remote Apple Event”
+* **VNC**, conhecido como "Compartilhamento de Tela"
+* **SSH**, chamado de "Login Remoto"
+* **Apple Remote Desktop** (ARD), ou "Gerenciamento Remoto"
+* **AppleEvent**, conhecido como "Evento Apple Remoto"
 
-Check if any is enabled running:
-
+Verifique se algum deles está habilitado executando:
 ```bash
 rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
 scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
@@ -33,27 +32,25 @@ rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
+## Protocolo Bonjour
 
-## Bonjour Protocol
+O **Bonjour** é uma tecnologia projetada pela Apple que permite que computadores e **dispositivos localizados na mesma rede aprendam sobre os serviços oferecidos** por outros computadores e dispositivos. Ele é projetado de tal forma que qualquer dispositivo compatível com Bonjour pode ser conectado a uma rede TCP/IP e ele **escolherá um endereço IP** e fará com que outros computadores nessa rede **conheçam os serviços que oferece**. O Bonjour às vezes é referido como Rendezvous, **Zero Configuration** ou Zeroconf.\
+A Rede de Configuração Zero, como a fornecida pelo Bonjour, oferece:
 
-**Bonjour** is an Apple-designed technology that enables computers and **devices located on the same network to learn about services offered** by other computers and devices. It is designed such that any Bonjour-aware device can be plugged into a TCP/IP network and it will **pick an IP address** and make other computers on that network **aware of the services it offers**. Bonjour is sometimes referred to as Rendezvous, **Zero Configuration**, or Zeroconf.\
-Zero Configuration Networking, such as Bonjour provides:
+* Deve ser capaz de **obter um endereço IP** (mesmo sem um servidor DHCP)
+* Deve ser capaz de fazer **tradução de nome para endereço** (mesmo sem um servidor DNS)
+* Deve ser capaz de **descobrir serviços na rede**
 
-* Must be able to **obtain an IP Address** (even without a DHCP server)
-* Must be able to do **name-to-address translation** (even without a DNS server)
-* Must be able to **discover services on the network**
+O dispositivo obterá um **endereço IP no intervalo 169.254/16** e verificará se algum outro dispositivo está usando esse endereço IP. Se não, ele manterá o endereço IP. Os Macs mantêm uma entrada em sua tabela de roteamento para essa sub-rede: `netstat -rn | grep 169`
 
-The device will get an **IP address in the range 169.254/16** and will check if any other device is using that IP address. If not, it will keep the IP address. Macs keeps an entry in their routing table for this subnet: `netstat -rn | grep 169`
+Para DNS, é usado o **protocolo Multicast DNS (mDNS)**. [**Serviços mDNS** ouvem na porta **5353/UDP**](../../network-services-pentesting/5353-udp-multicast-dns-mdns.md), usam **consultas DNS regulares** e usam o **endereço multicast 224.0.0.251** em vez de enviar a solicitação apenas para um endereço IP. Qualquer máquina que ouvir essas solicitações responderá, geralmente para um endereço multicast, para que todos os dispositivos possam atualizar suas tabelas.\
+Cada dispositivo **selecionará seu próprio nome** ao acessar a rede, o dispositivo escolherá um nome **terminado em .local** (pode ser baseado no nome do host ou um completamente aleatório).
 
-For DNS the **Multicast DNS (mDNS) protocol is used**. [**mDNS** **services** listen in port **5353/UDP**](../../network-services-pentesting/5353-udp-multicast-dns-mdns.md), use **regular DNS queries** and use the **multicast address 224.0.0.251** instead of sending the request just to an IP address. Any machine listening these request will respond, usually to a multicast address, so all the devices can update their tables.\
-Each device will **select its own name** when accessing the network, the device will choose a name **ended in .local** (might be based on the hostname or a completely random one).
+Para **descobrir serviços, é usado o DNS Service Discovery (DNS-SD)**.
 
-For **discovering services DNS Service Discovery (DNS-SD)** is used.
+O requisito final da Rede de Configuração Zero é atendido pelo **DNS Service Discovery (DNS-SD)**. O DNS Service Discovery usa a sintaxe dos registros DNS SRV, mas usa **registros DNS PTR para que vários resultados possam ser retornados** se mais de um host oferecer um serviço específico. Um cliente solicita a pesquisa PTR para o nome `<Serviço>.<Domínio>` e **recebe** uma lista de zero ou mais registros PTR no formato `<Instância>.<Serviço>.<Domínio>`.
 
-The final requirement of Zero Configuration Networking is met by **DNS Service Discovery (DNS-SD)**. DNS Service Discovery uses the syntax from DNS SRV records, but uses **DNS PTR records so that multiple results can be returned** if more than one host offers a particular service. A client requests the PTR lookup for the name `<Service>.<Domain>` and **receives** a list of zero or more PTR records of the form `<Instance>.<Service>.<Domain>`.
-
-The `dns-sd` binary can be used to **advertise services and perform lookups** for services:
-
+O binário `dns-sd` pode ser usado para **anunciar serviços e realizar pesquisas** de serviços:
 ```bash
 #Search ssh services
 dns-sd -B _ssh._tcp
@@ -74,12 +71,10 @@ dns-sd -R "Index" _http._tcp . 80 path=/index.html
 #Search HTTP services
 dns-sd -B _http._tcp
 ```
+Quando um novo serviço é iniciado, **o novo serviço transmite sua presença para todos** na sub-rede. O ouvinte não precisa perguntar; ele só precisa estar ouvindo.
 
-When a new service is started the **new service mulitcasts its presence to everyone** on the subnet. The listener didn’t have to ask; it just had to be listening.
-
-You ca use [**this tool**](https://apps.apple.com/us/app/discovery-dns-sd-browser/id1381004916?mt=12) to see the **offered services** in your current local network.\
-Or you can write your own scripts in python with [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf):
-
+Você pode usar [**esta ferramenta**](https://apps.apple.com/us/app/discovery-dns-sd-browser/id1381004916?mt=12) para ver os **serviços oferecidos** em sua rede local atual.\
+Ou você pode escrever seus próprios scripts em python com [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf):
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
@@ -102,14 +97,11 @@ try:
 finally:
     zeroconf.close()
 ```
-
-If you feel like Bonjour might be more secured **disabled**, you can do so with:
-
+Se você acha que o Bonjour pode ser mais seguro **desativado**, você pode fazê-lo com:
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
-
-## References
+## Referências
 
 * [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt\_other?\_encoding=UTF8\&me=\&qid=)
 * [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
@@ -118,10 +110,10 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

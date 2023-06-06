@@ -1,28 +1,25 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe seus truques de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
 
-Very basically, this tool will help us to find values for variables that need to satisfy some conditions and calculating them by hand will be so annoying. Therefore, you can indicate to Z3 the conditions the variables need to satisfy and it will find some values (if possible).
+Basicamente, esta ferramenta nos ajudará a encontrar valores para variáveis que precisam satisfazer algumas condições e calcular esses valores manualmente seria muito chato. Portanto, você pode indicar ao Z3 as condições que as variáveis precisam satisfazer e ele encontrará alguns valores (se possível).
 
-# Basic Operations
+# Operações Básicas
 
-## Booleans/And/Or/Not
-
+## Booleanos/E/OU/Não
 ```python
 #pip3 install z3-solver
 from z3 import *
@@ -37,9 +34,7 @@ s.add(And(Or(x,y,Not(z)),y))
 s.check() #If response is "sat" then the model is satifable, if "unsat" something is wrong
 print(s.model()) #Print valid values to satisfy the model
 ```
-
-## Ints/Simplify/Reals
-
+## Inteiros/Simplificar/Reais
 ```python
 from z3 import *
 
@@ -59,9 +54,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-
-## Printing Model
-
+## Imprimindo o Modelo
 ```python
 from z3 import *
 
@@ -75,11 +68,9 @@ print ("x = %s" % m[x])
 for d in m.decls():
     print("%s = %s" % (d.name(), m[d]))
 ```
+# Aritmética de Máquina
 
-# Machine Arithmetic
-
-Modern CPUs and main-stream programming languages use arithmetic over **fixed-size bit-vectors**. Machine arithmetic is available in Z3Py as **Bit-Vectors**.
-
+As CPUs modernas e linguagens de programação mainstream utilizam aritmética sobre **vetores de bits de tamanho fixo**. A aritmética de máquina está disponível no Z3Py como **Bit-Vectors**.
 ```python
 from z3 import *
 
@@ -94,11 +85,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
+## Números assinados/não assinados
 
-## Signed/Unsigned Numbers
-
-Z3 provides special signed versions of arithmetical operations where it makes a difference whether the **bit-vector is treated as signed or unsigned**. In Z3Py, the operators **<, <=, >, >=, /, % and >>** correspond to the **signed** versions. The corresponding **unsigned** operators are **ULT, ULE, UGT, UGE, UDiv, URem and LShR.**
-
+O Z3 fornece versões especiais assinadas de operações aritméticas onde faz diferença se o **vetor de bits é tratado como assinado ou não assinado**. Em Z3Py, os operadores **<, <=, >, >=, /, % e >>** correspondem às versões **assinadas**. Os operadores **não assinados** correspondentes são **ULT, ULE, UGT, UGE, UDiv, URem e LShR.**
 ```python
 from z3 import *
 
@@ -116,13 +105,11 @@ solve(x < 0)
 # using unsigned version of < 
 solve(ULT(x, 0))
 ```
+## Funções
 
-## Functions
+**Funções interpretadas** como aritmética, onde a **função +** tem uma **interpretação padrão fixa** (ela adiciona dois números). **Funções não interpretadas** e constantes são **maximamente flexíveis**; elas permitem **qualquer interpretação** que seja **consistente** com as **restrições** sobre a função ou constante.
 
-**Interpreted functio**ns such as arithmetic where the **function +** has a **fixed standard interpretation** (it adds two numbers). **Uninterpreted functions** and constants are **maximally flexible**; they allow **any interpretation** that is **consistent** with the **constraints** over the function or constant.
-
-Example: f applied twice to x results in x again, but f applied once to x is different from x.
-
+Exemplo: aplicar f duas vezes em x resulta em x novamente, mas aplicar f uma vez em x é diferente de x.
 ```python
 from z3 import *
 
@@ -141,11 +128,9 @@ s.add(f(x) == 4) #Find the value that generates 4 as response
 s.check()
 print(m.model())
 ```
+# Exemplos
 
-# Examples
-
-## Sudoku solver
-
+## Solucionador de Sudoku
 ```python
 # 9x9 matrix of integer variables
 X = [ [ Int("x_%s_%s" % (i+1, j+1)) for j in range(9) ]
@@ -195,8 +180,7 @@ if s.check() == sat:
 else:
     print "failed to solve"
 ```
-
-# References
+# Referências
 
 * [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 
@@ -205,16 +189,14 @@ else:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe seus truques de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [repositório hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

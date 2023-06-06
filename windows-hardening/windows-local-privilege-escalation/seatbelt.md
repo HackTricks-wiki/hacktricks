@@ -1,41 +1,17 @@
+# Início
 
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
-
-
-# Start
-
-[You need to compile it](https://github.com/GhostPack/Seatbelt) or [use precompiled binaries \(by me\)](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)
-
+[Você precisa compilá-lo](https://github.com/GhostPack/Seatbelt) ou [usar binários pré-compilados \(por mim\)](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)
 ```text
 SeatbeltNet3.5x64.exe all
 SeatbeltNet3.5x64.exe all full #Without filtering
 ```
+Eu realmente gostei da filtragem realizada.
 
-I really like the performed filtering.
+# Verificação
 
-# Check
+Esta ferramenta é mais orientada para coleta de informações do que para escalonamento de privilégios, mas possui algumas verificações muito boas e procura por algumas senhas.
 
-This tool is more gathering-info oriented than privesc, but it has some pretty nice checks and looks for some passwords.
-
-**SeatBelt.exe system** collects the following system data:
-
+**SeatBelt.exe system** coleta os seguintes dados do sistema:
 ```text
 BasicOSInfo           -   Basic OS info (i.e. architecture, OS version, etc.)
 RebootSchedule        -   Reboot schedule (last 15 days) based on event IDs 12 and 13
@@ -69,9 +45,7 @@ NonstandardProcesses  -   Running processeswith file info company names that don
   *  If the user is in high integrity, the following additional actions are run:
 SysmonConfig          -   Sysmon configuration from the registry
 ```
-
-**SeatBelt.exe user** collects the following user data:
-
+**SeatBelt.exe user** coleta os seguintes dados do usuário:
 ```text
 SavedRDPConnections   -   Saved RDP connections
 TriageIE              -   Internet Explorer bookmarks and history (last 7 days)
@@ -86,9 +60,7 @@ CredFiles             -   List Windows credential DPAPI blobs
 RDCManFiles           -   List Windows Remote Desktop Connection Manager settings files
   *  If the user is in high integrity, this data is collected for ALL users instead of just the current user
 ```
-
-Non-default collection options:
-
+Opções de coleção não padrão:
 ```text
 CurrentDomainGroups   -   The current user's local and domain groups
 Patches               -   Installed patches via WMI (takes a bit on some systems)
@@ -103,23 +75,18 @@ RecycleBin            -   Items in the Recycle Bin deleted in the last 30 days -
 4648Events            -   4648 explicit logon events from the security event log
 KerberosTickets       -   List Kerberos tickets. If elevated, grouped by all logon sessions.
 ```
-
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe seus truques de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

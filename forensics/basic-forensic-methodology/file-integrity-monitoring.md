@@ -1,44 +1,25 @@
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
 # Baseline
 
-A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.
+Uma linha de base consiste em tirar uma foto de certas partes de um sistema para **compará-la com um status futuro para destacar mudanças**.
 
-For example, you can calculate and store the hash of each file of the filesystem to be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all. 
+Por exemplo, você pode calcular e armazenar o hash de cada arquivo do sistema de arquivos para poder descobrir quais arquivos foram modificados.\
+Isso também pode ser feito com as contas de usuário criadas, processos em execução, serviços em execução e qualquer outra coisa que não deva mudar muito, ou nada.
 
-## File Integrity Monitoring
+## Monitoramento de Integridade de Arquivos
 
-File integrity monitoring is one of the most powerful techniques used to secure IT infrastructures and business data against a wide variety of both known and unknown threats.\
-The goal is to generate a **baseline of all the files** that you want to monitor and then **periodically** **check** those files for possible **changes** (in the content, attribute, metadata, etc.).
+O monitoramento de integridade de arquivos é uma das técnicas mais poderosas usadas para proteger infraestruturas de TI e dados empresariais contra uma ampla variedade de ameaças conhecidas e desconhecidas.\
+O objetivo é gerar uma **linha de base de todos os arquivos** que você deseja monitorar e, em seguida, **verificar periodicamente** esses arquivos em busca de possíveis **alterações** (no conteúdo, atributo, metadados, etc.).
 
-1\. **Baseline comparison,** wherein one or more file attributes will be captured or calculated and stored as a baseline that can be compared against in the future. This can be as simple as the time and date of the file, however, since this data can be easily spoofed, a more trustworthy approach is typically used. This may include periodically assessing the cryptographic checksum for a monitored file, (e.g. using the MD5 or SHA-2 hashing algorithm) and then comparing the result to the previously calculated checksum.
+1\. **Comparação de linha de base**, em que um ou mais atributos de arquivo serão capturados ou calculados e armazenados como uma linha de base que pode ser comparada no futuro. Isso pode ser tão simples quanto a hora e a data do arquivo, no entanto, como esses dados podem ser facilmente falsificados, uma abordagem mais confiável é geralmente usada. Isso pode incluir avaliar periodicamente o checksum criptográfico para um arquivo monitorado (por exemplo, usando o algoritmo de hash MD5 ou SHA-2) e, em seguida, comparar o resultado com o checksum calculado anteriormente.
 
-2\. **Real-time change notification**, which is typically implemented within or as an extension to the kernel of the operating system that will flag when a file is accessed or modified.
+2\. **Notificação de alteração em tempo real**, que é tipicamente implementada dentro ou como uma extensão do kernel do sistema operacional que sinalizará quando um arquivo for acessado ou modificado.
 
-## Tools
+## Ferramentas
 
 * [https://github.com/topics/file-integrity-monitoring](https://github.com/topics/file-integrity-monitoring)
 * [https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software](https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software)
 
-# References
+# Referências
 
 * [https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it](https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it)
 
@@ -47,16 +28,14 @@ The goal is to generate a **baseline of all the files** that you want to monitor
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

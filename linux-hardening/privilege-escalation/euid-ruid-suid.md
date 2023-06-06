@@ -4,90 +4,51 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-**This post was copied from** [**https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail**](https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail)
+**Este post foi copiado de** [**https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail**](https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail)
 
 ## **`*uid`**
 
-* **`ruid`**: This is the **real user ID** of the user that started the process.
-* **`euid`**: This is the **effective user ID**, is what the system looks to when deciding **what privileges the process should have**. In most cases, the `euid` will be the same as the `ruid`, but a SetUID binary is an example of a case where they differ. When a **SetUID** binary starts, the **`euid` is set to the owner of the file**, which allows these binaries to function.
-* `suid`: This is the **saved user ID,** it's used when a privileged process (most cases running as root) needs to **drop privileges** to do some behavior, but needs to then **come back** to the privileged state.
+* **`ruid`**: Este é o **ID de usuário real** do usuário que iniciou o processo.
+* **`euid`**: Este é o **ID de usuário efetivo**, é o que o sistema olha ao decidir **quais privilégios o processo deve ter**. Na maioria dos casos, o `euid` será o mesmo que o `ruid`, mas um binário SetUID é um exemplo de um caso em que eles diferem. Quando um binário **SetUID** é iniciado, o **`euid` é definido como o proprietário do arquivo**, o que permite que esses binários funcionem.
+* `suid`: Este é o **ID de usuário salvo**, é usado quando um processo privilegiado (na maioria dos casos, executando como root) precisa **abandonar privilégios** para executar algum comportamento, mas precisa então **voltar** ao estado privilegiado.
 
 {% hint style="info" %}
-If a **non-root process** wants to **change it’s `euid`**, it can only **set** it to the current values of **`ruid`**, **`euid`**, or **`suid`**.
+Se um **processo não-root** quiser **alterar seu `euid`**, ele só pode **definir** para os valores atuais de **`ruid`**, **`euid`** ou **`suid`**.
 {% endhint %}
 
 ## set\*uid
 
-On first look, it’s easy to think that the system calls **`setuid`** would set the `ruid`. In fact, when for a privileged process, it does. But in the general case, it actually **sets the `euid`**. From the [man page](https://man7.org/linux/man-pages/man2/setuid.2.html):
+À primeira vista, é fácil pensar que as chamadas do sistema **`setuid`** definiriam o `ruid`. Na verdade, quando para um processo privilegiado, isso acontece. Mas no caso geral, na verdade **define o `euid`**. Da [página do manual](https://man7.org/linux/man-pages/man2/setuid.2.html):
 
-> setuid() **sets the effective user ID of the calling process**. If the calling process is privileged (more precisely: if the process has the CAP\_SETUID capability in its user namespace), the real UID and saved set-user-ID are also set.
+> setuid() **define o ID de usuário efetivo do processo chamador**. Se o processo chamador tiver privilégios (mais precisamente: se o processo tiver a capacidade CAP\_SETUID em seu namespace de usuário), o UID real e o ID de usuário salvo também são definidos.
 
-So in the case where you’re running `setuid(0)` as root, this is sets all the ids to root, and basically locks them in (because `suid` is 0, it loses the knowledge or any previous user - of course, root processes can change to any user they want).
+Portanto, no caso em que você está executando `setuid(0)` como root, isso define todos os IDs como root e basicamente os trava (porque `suid` é 0, ele perde o conhecimento ou qualquer usuário anterior - é claro, processos root podem mudar para qualquer usuário que desejarem).
 
-Two less common syscalls, **`setreuid`** (`re` for real and effective) and **`setresuid`** (`res` includes saved) set the specific ids. Being in an unprivileged process limits these calls (from [man page](https://man7.org/linux/man-pages/man2/setresuid.2.html) for `setresuid`, though the [page](https://man7.org/linux/man-pages/man2/setreuid.2.html) for `setreuid` has similar language):
+Duas chamadas de sistema menos comuns, **`setreuid`** (`re` para real e efetivo) e **`setresuid`** (`res` inclui salvo) definem os IDs específicos. Estar em um processo não privilegiado limita essas chamadas (da [página do manual](https://man7.org/linux/man-pages/man2/setresuid.2.html) para `setresuid`, embora a [página](https://man7.org/linux/man-pages/man2/setreuid.2.html) para `setreuid` tenha linguagem semelhante):
 
-> An unprivileged process may change its **real UID, effective UID, and saved set-user-ID**, each to one of: the current real UID, the current effective UID, or the current saved set-user-ID.
+> Um processo não privilegiado pode alterar seu **UID real, UID efetivo e ID de usuário salvo**, cada um para um dos seguintes: o UID real atual, o UID efetivo atual ou o ID de usuário salvo atual.
 >
-> A privileged process (on Linux, one having the CAP\_SETUID capability) may set its real UID, effective UID, and saved set-user-ID to arbitrary values.
+> Um processo privilegiado (no Linux, aquele que possui a capacidade CAP\_SETUID) pode definir seu UID real, UID efetivo e ID de usuário salvo para valores arbitrários.
 
-It’s important to remember that these aren’t here as a security feature, but rather reflect the intended workflow. When a program wants to change to another user, it changes the effective userid so it can act as that user.
+É importante lembrar que eles não estão aqui como uma característica de segurança, mas sim refletem o fluxo de trabalho pretendido. Quando um programa deseja mudar para outro usuário, ele muda o ID de usuário efetivo para que possa agir como esse usuário.
 
-As an attacker, it’s easy to get in a bad habit of just calling `setuid` because the most common case is to go to root, and in that case, `setuid` is effectively the same as `setresuid`.
+Como atacante, é fácil adquirir o hábito ruim de apenas chamar `setuid` porque o caso mais comum é ir para root, e nesse caso, `setuid` é efetivamente o mesmo que `setresuid`.
 
-## Execution
+## Execução
 
-### **execve (and other execs)**
+### **execve (e outros execs)**
 
-The `execve` system call executes a program specified in the first argument. The second and third arguments are arrays, the arguments (`argv`) and the environment (`envp`). There are several other system calls that are based on `execve`, referred to as `exec` ([man page](https://man7.org/linux/man-pages/man3/exec.3.html)). They are each just wrappers on top of `execve` to provide different shorthands for calling `execve`.
+A chamada do sistema `execve` executa um programa especificado no primeiro argumento. O segundo e terceiro argumentos são matrizes, os argumentos (`argv`) e o ambiente (`envp`). Existem várias outras chamadas do sistema que são baseadas em `execve`, referidas como `exec` ([página do manual](https://man7.org/linux/man-pages/man3/exec.3.html)). Cada um deles é apenas um invólucro em cima de `execve` para fornecer diferentes abreviações para chamar `execve`.
 
-There’s a ton of detail on the [man page](https://man7.org/linux/man-pages/man2/execve.2.html), for how it works. In short, when **`execve` starts a program**, it uses the **same memory space as the calling program**, replacing that program, and newly initiating the stack, heap, and data segments. It wipes out the code for the program and writes the new program into that space.
-
-So what happens to `ruid`, `euid`, and `suid` on a call to `execve`? It does not change the metadata associated with the process. The man page explicitly states:
-
-> The process’s real UID and real GID, as well as its supplementary group IDs, are **unchanged** by a call to **execve**().
-
-There’s a bit more nuance to the `euid`, with a longer paragraph describing what happens. Still, it’s focused on if the new program has the SetUID bit set. Assuming that isn’t the case, then the `euid` is also unchanged by `execve`.
-
-The `suid` is copied from the `euid` when `execve` is called:
-
-> The effective user ID of the process is copied to the saved set-user-ID; similarly, the effective group ID is copied to the saved set-group-ID. This copying takes place after any effective ID changes that occur because of the set-user-ID and set-group-ID mode bits.
-
-### **system**
-
-`system` is a [completely different approach](https://man7.org/linux/man-pages/man3/system.3.html) to starting a new process. Where `execve` operates at the process level within the same process, **`system` uses `fork` to create a child process** and then executes in that child process using `execl`:
-
-> ```
-> execl("/bin/sh", "sh", "-c", command, (char *) NULL);
-> ```
-
-`execl` is just a wrapper around `execve` which converts string arguments into the `argv` array and calls `execve`. It’s important to note that **`system` uses `sh` to call the command**.
-
-### sh and bash SUID <a href="#sh-and-bash-suid" id="sh-and-bash-suid"></a>
-
-**`bash`** has a **`-p` option**, which the [man page](https://linux.die.net/man/1/bash) describes as:
-
-> Turn on _privileged_ mode. In this mode, the **$ENV** and **$BASH\_ENV** files are not processed, shell functions are not inherited from the environment, and the **SHELLOPTS**, **BASHOPTS**, **CDPATH**, and **GLOBIGNORE** variables, if they appear in the environment, are ignored. If the shell is started with the effective user (group) id not equal to the real user (group) id, and the **-p option is not supplied**, these actions are taken and the **effective user id is set to the real user id**. If the **-p** option **is supplied** at startup, the **effective user id is not reset**. Turning this option off causes the effective user and group ids to be set to the real user and group ids.
-
-In short, without `-p`, `euid` is set to `ruid` when Bash is run. **`-p` prevents this**.
-
-The **`sh`** shell **doesn’t have a feature like this**. The [man page](https://man7.org/linux/man-pages/man1/sh.1p.html) doesn’t mention “user ID”, other than with the `-i` option, which says:
-
-> \-i Specify that the shell is interactive; see below. An implementation may treat specifying the -i option as an error if the real user ID of the calling process does not equal the effective user ID or if the real group ID does not equal the effective group ID.
-
-## Testing
-
-### setuid / system <a href="#setuid--system" id="setuid--system"></a>
-
-With all of that background, I’ll take this code and walk through what happens on Jail (HTB):
-
+Há muitos detalhes na [página do manual](https://man7.org/linux/man-pages/man2/execve.2.html), sobre como funciona. Em resumo, quando **`execve` inicia um programa
 ```c
 #define _GNU_SOURCE
 #include <stdlib.h>
@@ -99,44 +60,34 @@ int main(void) {
     return 0;
 }
 ```
-
-This program is compiled and set as SetUID on Jail over NFS:
-
+Este programa é compilado e definido como SetUID em Jail sobre NFS:
 ```bash
 oxdf@hacky$ gcc a.c -o /mnt/nfsshare/a;
 ...[snip]...
 oxdf@hacky$ chmod 4755 /mnt/nfsshare/a
 ```
-
-As root, I can see this file:
-
+Como root, eu posso ver este arquivo:
 ```
 [root@localhost nfsshare]# ls -l a 
 -rwsr-xr-x. 1 frank frank 16736 May 30 04:58 a
 ```
-
-When I run this as nobody, `id` runs as nobody:
-
+Quando eu executo isso como ninguém, `id` é executado como ninguém:
 ```bash
 bash-4.2$ $ ./a
 uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
+O programa começa com um `ruid` de 99 (ninguém) e um `euid` de 1000 (frank). Quando chega à chamada `setuid`, esses mesmos valores são definidos.
 
-The program starts with a `ruid` of 99 (nobody) and an `euid` of 1000 (frank). When it reaches the `setuid` call, those same values are set.
-
-Then `system` is called, and I would expect to see `uid` of 99, but also an `euid` of 1000. Why isn’t there one? The issue is that **`sh` is symlinked to `bash`** in this distribution:
-
+Em seguida, é chamado o `system`, e eu esperaria ver um `uid` de 99, mas também um `euid` de 1000. Por que não há um? O problema é que **`sh` é um link simbólico para `bash`** nesta distribuição:
 ```
 $ ls -l /bin/sh
 lrwxrwxrwx. 1 root root 4 Jun 25  2017 /bin/sh -> bash
 ```
-
-So `system` calls `/bin/sh sh -c id`, which is effectively `/bin/bash bash -c id`. When `bash` is called, with no `-p`, then it sees `ruid` of 99 and `euid` of 1000, and sets `euid` to 99.
+Então, a chamada do `system` é `/bin/sh sh -c id`, que é efetivamente `/bin/bash bash -c id`. Quando o `bash` é chamado, sem o `-p`, ele vê o `ruid` de 99 e o `euid` de 1000, e define o `euid` para 99.
 
 ### setreuid / system <a href="#setreuid--system" id="setreuid--system"></a>
 
-To test that theory, I’ll try replacing `setuid` with `setreuid`:
-
+Para testar essa teoria, vou tentar substituir o `setuid` pelo `setreuid`:
 ```c
 #define _GNU_SOURCE
 #include <stdlib.h>
@@ -148,26 +99,20 @@ int main(void) {
     return 0;
 }
 ```
-
-Compile and permissions:
-
+Compilação e Permissões:
 ```
 oxdf@hacky$ gcc b.c -o /mnt/nfsshare/b; chmod 4755 /mnt/nfsshare/b
 ```
-
-Now on Jail, now `id` returns uid of 1000:
-
+Agora na prisão, agora `id` retorna uid de 1000:
 ```
 bash-4.2$ $ ./b
 uid=1000(frank) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
-
-The `setreuid` call set both `ruid` and `euid` to 1000, so when `system` called `bash`, they matched, and things continued as frank.
+A chamada `setreuid` define tanto `ruid` quanto `euid` como 1000, então quando `system` chamou `bash`, eles coincidiram e as coisas continuaram como frank.
 
 ### setuid / execve <a href="#setuid--execve" id="setuid--execve"></a>
 
-Calling `execve` If my understanding above is correct, I could also not worry about messing with the uids, and instead call `execve`, as that will carry though the existing IDs. That will work, but there are traps. For example, common code might look like this:
-
+Chamando `execve`, se minha compreensão acima estiver correta, eu também não precisaria me preocupar em mexer com os uids e, em vez disso, chamar `execve`, pois isso manterá os IDs existentes. Isso funcionará, mas há armadilhas. Por exemplo, o código comum pode parecer com isso:
 ```c
 #define _GNU_SOURCE
 #include <stdlib.h>
@@ -179,18 +124,14 @@ int main(void) {
     return 0;
 }
 ```
-
-Without the environment (I’m passing NULL for simplicity), I’ll need a full path on `id`. This works, returning what I expect:
-
+Sem o ambiente (estou passando NULL para simplificar), vou precisar de um caminho completo em `id`. Isso funciona, retornando o que eu espero:
 ```
 bash-4.2$ $ ./c
 uid=99(nobody) gid=99(nobody) euid=1000(frank) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
+O `[r]uid` é 99, mas o `euid` é 1000.
 
-The `[r]uid` is 99, but the `euid` is 1000.
-
-If I try to get a shell from this, I have to be careful. For example, just calling `bash`:
-
+Se eu tentar obter um shell a partir disso, tenho que ter cuidado. Por exemplo, apenas chamando `bash`:
 ```c
 #define _GNU_SOURCE
 #include <stdlib.h>
@@ -202,26 +143,20 @@ int main(void) {
     return 0;
 }
 ```
-
-I’ll compile that and set it SetUID:
-
+Eu vou compilar isso e definir o SetUID:
 ```
 oxdf@hacky$ gcc d.c -o /mnt/nfsshare/d
 oxdf@hacky$ chmod 4755 /mnt/nfsshare/d
 ```
-
-Still, this will return all nobody:
-
+Ainda assim, isso retornará todos os nobody:
 ```
 bash-4.2$ $ ./d
 bash-4.2$ $ id
 uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
+Se fosse `setuid(0)`, funcionaria bem (assumindo que o processo tinha permissão para isso), pois então mudaria todos os três ids para 0. Mas como um usuário não-root, isso apenas define o `euid` para 1000 (que já era), e então chama `sh`. Mas `sh` é `bash` no Jail. E quando `bash` começa com `ruid` de 99 e `euid` de 1000, ele irá rebaixar o `euid` de volta para 99.
 
-If it were `setuid(0)`, then it would work fine (assuming the process had permission to do that), as then it changes all three ids to 0. But as a non-root user, this just sets the `euid` to 1000 (which is already was), and then calls `sh`. But `sh` is `bash` on Jail. And when `bash` starts with `ruid` of 99 and `euid` of 1000, it will drop the `euid` back to 99.
-
-To fix this, I’ll call `bash -p`:
-
+Para corrigir isso, vou chamar `bash -p`:
 ```c
 #define _GNU_SOURCE
 #include <stdlib.h>
@@ -234,25 +169,10 @@ int main(void) {
     return 0;
 }
 ```
-
-This time the `euid` is there:
-
+Desta vez, o `euid` está presente:
 ```
 bash-4.2$ $ ./e
 bash-4.2$ $ id
 uid=99(nobody) gid=99(nobody) euid=1000(frank) groups=99(nobody) context=system_u:system_r:unconfined_service_t:s0
 ```
-
-Or I could call `setreuid` or `setresuid` instead of `setuid`.
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
+Ou eu poderia chamar `setreuid` ou `setresuid` em vez de `setuid`.

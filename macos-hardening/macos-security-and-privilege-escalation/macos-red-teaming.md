@@ -1,31 +1,31 @@
-# macOS Red Teaming
+# Red Teaming em macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Common management methods
+## Métodos comuns de gerenciamento
 
 * JAMF Pro: `jamf checkJSSConnection`
 * Kandji
 
-If you manage to **compromise admin credentials** to access the management platform, you can **potentially compromise all the computers** by distributing your malware in the machines.
+Se você conseguir **comprometer as credenciais de administrador** para acessar a plataforma de gerenciamento, poderá **potencialmente comprometer todos os computadores** distribuindo seu malware nas máquinas.
 
-For red teaming in MacOS environments it's highly recommended to have some understanding of how the MDMs work:
+Para o red teaming em ambientes macOS, é altamente recomendável ter algum entendimento de como os MDMs funcionam:
 
 {% content-ref url="macos-mdm/" %}
 [macos-mdm](macos-mdm/)
 {% endcontent-ref %}
 
-And also about **MacOS** "special" **network** **protocols**:
+E também sobre os **protocolos de rede** "especiais" do **MacOS**:
 
 {% content-ref url="macos-protocols.md" %}
 [macos-protocols.md](macos-protocols.md)
@@ -33,7 +33,7 @@ And also about **MacOS** "special" **network** **protocols**:
 
 ## Active Directory
 
-In some occasions you will find that the **MacOS computer is connected to an AD**. In this scenario you should try to **enumerate** the active directory as you are use to it. Find some **help** in the following pages:
+Em algumas ocasiões, você descobrirá que o **computador macOS está conectado a um AD**. Nesse cenário, você deve tentar **enumerar** o Active Directory como está acostumado. Encontre alguma **ajuda** nas seguintes páginas:
 
 {% content-ref url="../../network-services-pentesting/pentesting-ldap.md" %}
 [pentesting-ldap.md](../../network-services-pentesting/pentesting-ldap.md)
@@ -47,41 +47,34 @@ In some occasions you will find that the **MacOS computer is connected to an AD*
 [pentesting-kerberos-88](../../network-services-pentesting/pentesting-kerberos-88/)
 {% endcontent-ref %}
 
-Some **local MacOS tool** that may also help you is `dscl`:
-
+Algumas **ferramentas locais do MacOS** que também podem ajudá-lo são `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
+Também existem algumas ferramentas preparadas para MacOS para enumerar automaticamente o AD e brincar com o kerberos:
 
-Also there are some tools prepared for MacOS to automatically enumerate the AD and play with kerberos:
-
-* [**Machound**](https://github.com/XMCyber/MacHound): MacHound is an extension to the Bloodhound audting tool allowing collecting and ingesting of Active Directory relationships on MacOS hosts.
-* [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost is an Objective-C project designed to interact with the Heimdal krb5 APIs on macOS. The goal of the project is to enable better security testing around Kerberos on macOS devices using native APIs without requiring any other framework or packages on the target.
-* [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) tool to do Active Directory enumeration.
-
-### Domain Information
-
+* [**Machound**](https://github.com/XMCyber/MacHound): MacHound é uma extensão da ferramenta de auditoria Bloodhound que permite coletar e ingerir relacionamentos do Active Directory em hosts MacOS.
+* [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost é um projeto Objective-C projetado para interagir com as APIs Heimdal krb5 no macOS. O objetivo do projeto é permitir testes de segurança melhores em torno do Kerberos em dispositivos macOS usando APIs nativas sem exigir nenhum outro framework ou pacote no alvo.
+* [**Orchard**](https://github.com/its-a-feature/Orchard): Ferramenta JavaScript para Automação (JXA) para fazer enumeração do Active Directory.
 ```
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
+### Usuários
 
-### Users
+Existem três tipos de usuários do MacOS:
 
-The three types of MacOS users are:
+* **Usuários Locais** - Gerenciados pelo serviço local OpenDirectory, eles não estão conectados de nenhuma forma ao Active Directory.
+* **Usuários de Rede** - Usuários voláteis do Active Directory que requerem uma conexão com o servidor DC para autenticação.
+* **Usuários Móveis** - Usuários do Active Directory com um backup local para suas credenciais e arquivos.
 
-* **Local Users** — Managed by the local OpenDirectory service, they aren’t connected in any way to the Active Directory.
-* **Network Users** — Volatile Active Directory users who require a connection to the DC server to authenticate.
-* **Mobile Users** — Active Directory users with a local backup for their credentials and files.
+As informações locais sobre usuários e grupos são armazenadas na pasta _/var/db/dslocal/nodes/Default._\
+Por exemplo, as informações sobre o usuário chamado _mark_ são armazenadas em _/var/db/dslocal/nodes/Default/users/mark.plist_ e as informações sobre o grupo _admin_ estão em _/var/db/dslocal/nodes/Default/groups/admin.plist_.
 
-The local information about users and groups is stored in in the folder _/var/db/dslocal/nodes/Default._\
-For example, the info about user called _mark_ is stored in _/var/db/dslocal/nodes/Default/users/mark.plist_ and the info about the group _admin_ is in _/var/db/dslocal/nodes/Default/groups/admin.plist_.
+Além de usar as bordas HasSession e AdminTo, **MacHound adiciona três novas bordas** ao banco de dados Bloodhound:
 
-In addition to using the HasSession and AdminTo edges, **MacHound adds three new edges** to the Bloodhound database:
-
-* **CanSSH** - entity allowed to SSH to host
-* **CanVNC** - entity allowed to VNC to host
-* **CanAE** - entity allowed to execute AppleEvent scripts on host
-
+* **CanSSH** - entidade permitida a fazer SSH para o host
+* **CanVNC** - entidade permitida a fazer VNC para o host
+* **CanAE** - entidade permitida a executar scripts AppleEvent no host
 ```bash
 #User enumeration
 dscl . ls /Users
@@ -103,18 +96,17 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 #Domain Information
 dsconfigad -show
 ```
+Mais informações em [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
-More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
+## Serviços Externos
 
-## External Services
-
-MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** (like github, aws...) via OneLogin:
+O Red Teaming do MacOS é diferente do Red Teaming regular do Windows, pois geralmente o **MacOS é integrado diretamente com várias plataformas externas**. Uma configuração comum do MacOS é acessar o computador usando **credenciais sincronizadas do OneLogin e acessar vários serviços externos** (como github, aws...) via OneLogin:
 
 ![](<../../.gitbook/assets/image (563).png>)
 
 ###
 
-## References
+## Referências
 
 * [https://www.youtube.com/watch?v=IiMladUbL6E](https://www.youtube.com/watch?v=IiMladUbL6E)
 * [https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
@@ -124,10 +116,10 @@ MacOS Red Teaming is different from a regular Windows Red Teaming as usually **M
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

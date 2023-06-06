@@ -1,92 +1,82 @@
-# AD CS Account Persistence
+# Persistência de Conta AD CS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-## Active User Credential Theft via Certificates – PERSIST1
+## Roubo de Credenciais de Usuário Ativo via Certificados - PERSIST1
 
-If the user is allowed to request a certificate that allows domain authentication, an attacker could **request** and **steal** it to **maintain** **persistence**.
+Se o usuário tiver permissão para solicitar um certificado que permita autenticação de domínio, um invasor pode **solicitá-lo** e **roubá-lo** para **manter** a **persistência**.
 
-The **`User`** template allows that and comes by **default**. However, it might be disabled. So, [**Certify**](https://github.com/GhostPack/Certify) allows you to find valid certificates to persist:
-
+O modelo **`Usuário`** permite isso e vem por **padrão**. No entanto, ele pode estar desativado. Portanto, o [**Certify**](https://github.com/GhostPack/Certify) permite que você encontre certificados válidos para persistir:
 ```
 Certify.exe find /clientauth
 ```
+Observe que um **certificado pode ser usado para autenticação** como aquele usuário enquanto o certificado estiver **válido**, **mesmo** se o usuário **alterar** sua **senha**.
 
-Note that a **certificate can be used for authentication** as that user as long as the certificate is **valid**, **even** if the user **changes** their **password**.
+A partir da interface gráfica é possível solicitar um certificado com `certmgr.msc` ou via linha de comando com `certreq.exe`.
 
-From the **GUI** it's possible to request a certificate with `certmgr.msc` or via the command-line with `certreq.exe`.
-
-Using [**Certify**](https://github.com/GhostPack/Certify) you can run:
-
+Usando o [**Certify**](https://github.com/GhostPack/Certify), você pode executar:
 ```
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
 ```
-
-The result will be a **certificate** + **private key** `.pem` formatted block of text
-
+O resultado será um bloco de texto formatado em `.pem` contendo o **certificado** + **chave privada**.
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
-
-To **use that certificate**, one can then **upload** the `.pfx` to a target and **use it with** [**Rubeus**](https://github.com/GhostPack/Rubeus) to **request a TGT** for the enrolled user, for as long as the certificate is valid (default lifetime is 1 year):
-
+Para **usar esse certificado**, pode-se então **fazer o upload** do arquivo `.pfx` para um alvo e **usá-lo com** [**Rubeus**](https://github.com/GhostPack/Rubeus) para **solicitar um TGT** para o usuário inscrito, enquanto o certificado for válido (o tempo de vida padrão é de 1 ano):
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
-
 {% hint style="warning" %}
-Combined with the technique outlined in the [**THEFT5**](certificate-theft.md#ntlm-credential-theft-via-pkinit-theft5) section, an attacker can also persistently **obtain the account’s NTLM hash**, which the attacker could use to authenticate via **pass-the-hash** or **crack** to obtain the **plaintext** **password**. \
-This is an alternative method of **long-term credential theft** that does **not touch LSASS** and is possible from a **non-elevated context.**
+Combinado com a técnica descrita na seção [**THEFT5**](certificate-theft.md#ntlm-credential-theft-via-pkinit-theft5), um invasor também pode obter persistentemente o **hash NTLM da conta**, que o invasor poderia usar para autenticar via **pass-the-hash** ou **quebrar** para obter a **senha em texto plano**. \
+Este é um método alternativo de **roubo de credenciais de longo prazo** que não toca no LSASS e é possível a partir de um contexto **não elevado**.
 {% endhint %}
 
-## Machine Persistence via Certificates - PERSIST2
+## Persistência de Máquina via Certificados - PERSIST2
 
-If a certificate template allowed for **Domain Computers** as enrolment principals, an attacker could **enrol a compromised system’s machine account**. The default **`Machine`** template matches all those characteristics.
+Se um modelo de certificado permitir **Computadores de Domínio** como princípios de inscrição, um invasor pode **inscrever a conta de máquina de um sistema comprometido**. O modelo padrão **`Machine`** corresponde a todas essas características.
 
-If an **attacker elevates privileges** on compromised system, the attacker can use the **SYSTEM** account to enrol in certificate templates that grant enrolment privileges to machine accounts (more information in [**THEFT3**](certificate-theft.md#machine-certificate-theft-via-dpapi-theft3)).
+Se um **invasor elevar privilégios** em um sistema comprometido, o invasor pode usar a conta **SYSTEM** para se inscrever em modelos de certificado que concedem privilégios de inscrição a contas de máquina (mais informações em [**THEFT3**](certificate-theft.md#machine-certificate-theft-via-dpapi-theft3)).
 
-You can use [**Certify**](https://github.com/GhostPack/Certify)  to  gather a certificate for the machine account elevating automatically to SYSTEM with:
-
+Você pode usar o [**Certify**](https://github.com/GhostPack/Certify) para obter um certificado para a conta de máquina, elevando automaticamente para SYSTEM com:
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
+Observe que, com acesso a um certificado de conta de máquina, o invasor pode então **autenticar-se no Kerberos** como a conta da máquina. Usando **S4U2Self**, um invasor pode então obter um **ticket de serviço Kerberos para qualquer serviço no host** (por exemplo, CIFS, HTTP, RPCSS, etc.) como qualquer usuário.
 
-Note that with access to a machine account certificate, the attacker can then **authenticate to Kerberos** as the machine account. Using **S4U2Self**, an attacker can then obtain a **Kerberos service ticket to any service on the host** (e.g., CIFS, HTTP, RPCSS, etc.) as any user.
+Isso, em última análise, dá a um ataque um método de persistência de máquina.
 
-Ultimately, this gives an attack a machine persistence method.
+## Persistência de Conta via Renovação de Certificado - PERSIST3
 
-## Account Persistence via Certificate Renewal - PERSIST3
+Os modelos de certificado têm um **Período de Validade** que determina por quanto tempo um certificado emitido pode ser usado, bem como um **período de renovação** (geralmente 6 semanas). Este é um período de **tempo antes** do certificado **expirar** em que uma **conta pode renová-lo** a partir da autoridade de certificação emissora.
 
-Certificate templates have a **Validity Period** which determines how long an issued certificate can be used, as well as a **Renewal period** (usually 6 weeks). This is a window of **time before** the certificate **expires** where an **account can renew it** from the issuing certificate authority.
-
-If an attacker compromises a certificate capable of domain authentication through theft or malicious enrolment, the attacker can **authenticate to AD for the duration of the certificate’s validity period**. The attacker, however, can r**enew the certificate before expiration**. This can function as an **extended persistence** approach that **prevents additional ticket** enrolments from being requested, which **can leave artifacts** on the CA server itself.
+Se um invasor comprometer um certificado capaz de autenticação de domínio por meio de roubo ou inscrição maliciosa, o invasor pode **autenticar-se no AD durante o período de validade do certificado**. O invasor, no entanto, pode **renovar o certificado antes da expiração**. Isso pode funcionar como uma abordagem de **persistência estendida** que **impede a solicitação de inscrições de ticket adicionais**, o que **pode deixar artefatos** no próprio servidor CA. 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

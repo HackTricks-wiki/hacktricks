@@ -1,111 +1,99 @@
-# Windows Credentials Protections
+# Proteções de Credenciais do Windows
 
-## Credentials Protections
+## Proteções de Credenciais
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## WDigest
 
-[WDigest](https://technet.microsoft.com/pt-pt/library/cc778868\(v=ws.10\).aspx?f=255\&MSPPError=-2147217396) protocol was introduced in Windows XP and was designed to be used with HTTP Protocol for authentication. Microsoft has this protocol **enabled by default in multiple versions of Windows** (Windows XP — Windows 8.0 and Windows Server 2003 — Windows Server 2012) which means that **plain-text passwords are stored in the LSASS** (Local Security Authority Subsystem Service). **Mimikatz** can interact with the LSASS allowing an attacker to **retrieve these credentials** through the following command:
-
+O protocolo [WDigest](https://technet.microsoft.com/pt-pt/library/cc778868\(v=ws.10\).aspx?f=255\&MSPPError=-2147217396) foi introduzido no Windows XP e foi projetado para ser usado com o protocolo HTTP para autenticação. A Microsoft tem este protocolo **ativado por padrão em várias versões do Windows** (Windows XP - Windows 8.0 e Windows Server 2003 - Windows Server 2012), o que significa que **senhas em texto simples são armazenadas no LSASS** (Local Security Authority Subsystem Service). O **Mimikatz** pode interagir com o LSASS permitindo que um atacante **recupere essas credenciais** por meio do seguinte comando:
 ```
 sekurlsa::wdigest
 ```
-
-This behaviour can be **deactivated/activated setting to 1** the value of _**UseLogonCredential**_ and _**Negotiate**_ in _**HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_.\
-If these registry keys **don't exist** or the value is **"0"**, then WDigest will be **deactivated**.
-
+Este comportamento pode ser **desativado/ativado definindo o valor como 1** em _**UseLogonCredential**_ e _**Negotiate**_ em _**HKEY\_LOCAL\_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_.\
+Se essas chaves de registro **não existirem** ou o valor for **"0"**, então o WDigest será **desativado**.
 ```
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
+## Proteção LSA
 
-## LSA Protection
-
-Microsoft in **Windows 8.1 and later** has provided additional protection for the LSA to **prevent** untrusted processes from being able to **read its memory** or to inject code. This will prevent regular `mimikatz.exe sekurlsa:logonpasswords` for working properly.\
-To **activate this protection** you need to set the value _**RunAsPPL**_ in _**HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ to 1.
-
+A Microsoft em **Windows 8.1 e posteriores** forneceu proteção adicional para o LSA para **impedir** que processos não confiáveis possam **ler sua memória** ou injetar código. Isso impedirá que o `mimikatz.exe sekurlsa:logonpasswords` funcione corretamente.\
+Para **ativar essa proteção**, você precisa definir o valor _**RunAsPPL**_ em _**HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ como 1.
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
+### Bypassar
 
-### Bypass
-
-It is possible to bypass this protection using Mimikatz driver mimidrv.sys:
+É possível contornar essa proteção usando o driver Mimikatz mimidrv.sys:
 
 ![](../../.gitbook/assets/mimidrv.png)
 
 ## Credential Guard
 
-**Credential Guard** is a new feature in Windows 10 (Enterprise and Education edition) that helps to protect your credentials on a machine from threats such as pass the hash. This works through a technology called Virtual Secure Mode (VSM) which utilizes virtualization extensions of the CPU (but is not an actual virtual machine) to provide **protection to areas of memory** (you may hear this referred to as Virtualization Based Security or VBS). VSM creates a separate "bubble" for key **processes** that are **isolated** from the regular **operating system** processes, even the kernel and **only specific trusted processes may communicate to the processes** (known as **trustlets**) in VSM. This means a process in the main OS cannot read the memory from VSM, even kernel processes. The **Local Security Authority (LSA) is one of the trustlets** in VSM in addition to the standard **LSASS** process that still runs in the main OS to ensure support with existing processes but is really just acting as a proxy or stub to communicate with the version in VSM ensuring actual credentials run on the version in VSM and are therefore protected from attack. Credential Guard must be turned on and deployed in your organization as it is **not enabled by default.**\
-From [https://www.itprotoday.com/windows-10/what-credential-guard](https://www.itprotoday.com/windows-10/what-credential-guard)\
-More information and a PS1 script to enable Credential Guard [can be found here](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+**Credential Guard** é um novo recurso no Windows 10 (Enterprise e Education edition) que ajuda a proteger suas credenciais em uma máquina contra ameaças como pass the hash. Isso funciona por meio de uma tecnologia chamada Virtual Secure Mode (VSM), que utiliza extensões de virtualização da CPU (mas não é uma máquina virtual real) para fornecer **proteção a áreas de memória** (você pode ouvir isso referido como Segurança Baseada em Virtualização ou VBS). O VSM cria uma "bolha" separada para **processos** chave que estão **isolados** dos processos regulares do **sistema operacional**, até mesmo o kernel, e somente processos confiáveis específicos podem se comunicar com os processos (conhecidos como **trustlets**) no VSM. Isso significa que um processo no sistema operacional principal não pode ler a memória do VSM, nem mesmo processos do kernel. A **Autoridade de Segurança Local (LSA) é um dos trustlets** no VSM, além do processo padrão **LSASS** que ainda é executado no sistema operacional principal para garantir o suporte a processos existentes, mas está realmente atuando como um proxy ou stub para se comunicar com a versão no VSM, garantindo que as credenciais reais sejam executadas na versão no VSM e, portanto, estejam protegidas contra ataques. O Credential Guard deve ser ativado e implantado em sua organização, pois não é habilitado por padrão.\
+De [https://www.itprotoday.com/windows-10/what-credential-guard](https://www.itprotoday.com/windows-10/what-credential-guard)\
+Mais informações e um script PS1 para habilitar o Credential Guard [podem ser encontrados aqui](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
-In this case **Mimikatz cannot do much to bypass** this and extract the hashes from LSASS. But you could always add your **custom SSP** and **capture the credentials** when a user tries to login in **clear-text**.\
-More information about [**SSP and how to do this here**](../active-directory-methodology/custom-ssp.md).
+Nesse caso, **Mimikatz não pode fazer muito para contornar** isso e extrair os hashes do LSASS. Mas você sempre pode adicionar seu **SSP personalizado** e **capturar as credenciais** quando um usuário tenta fazer login em **texto claro**.\
+Mais informações sobre [**SSP e como fazer isso aqui**](../active-directory-methodology/custom-ssp.md).
 
-Credentials Guard could be **enable in different ways**. To check if it was enabled using the registry you could check the value of the key _**LsaCfgFlags**_ in _**HKLM\System\CurrentControlSet\Control\LSA**_. If the value is **"1"** the it is active with UEFI lock, if **"2"** is active without lock and if **"0"** it's not enabled.\
-This is **not enough to enable Credentials Guard** (but it's a strong indicator).\
-More information and a PS1 script to enable Credential Guard [can be found here](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
-
+O Credential Guard pode ser **ativado de diferentes maneiras**. Para verificar se ele foi habilitado usando o registro, você pode verificar o valor da chave _**LsaCfgFlags**_ em _**HKLM\System\CurrentControlSet\Control\LSA**_. Se o valor for **"1"**, ele está ativo com bloqueio UEFI, se **"2"** estiver ativo sem bloqueio e se **"0"** não estiver habilitado.\
+Isso **não é suficiente para habilitar o Credential Guard** (mas é um forte indicador).\
+Mais informações e um script PS1 para habilitar o Credential Guard [podem ser encontrados aqui](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 ```
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
+## Modo RestrictedAdmin do RDP
 
-## RDP RestrictedAdmin Mode
+Com o Windows 8.1 e o Windows Server 2012 R2, novos recursos de segurança foram introduzidos. Um desses recursos de segurança é o _modo Restricted Admin para RDP_. Este novo recurso de segurança é introduzido para mitigar o risco de ataques de [pass the hash](https://blog.ahasayen.com/pass-the-hash/).
 
-With Windows 8.1 and Windows Server 2012 R2, new security features were introduced. One of those security features is the _Restricted Admin mode for RDP_. This new security feature is introduced to mitigate the risk of [pass the hash](https://blog.ahasayen.com/pass-the-hash/) attacks.
+Quando você se conecta a um computador remoto usando o RDP, suas credenciais são armazenadas no computador remoto que você acessou via RDP. Geralmente, você está usando uma conta poderosa para se conectar a servidores remotos, e ter suas credenciais armazenadas em todos esses computadores é uma ameaça à segurança.
 
-When you connect to a remote computer using RDP, your credentials are stored on the remote computer that you RDP into. Usually you are using a powerful account to connect to remote servers, and having your credentials stored on all these computers is a security threat indeed.
+Usando o _modo Restricted Admin para RDP_, quando você se conecta a um computador remoto usando o comando **mstsc.exe /RestrictedAdmin**, você será autenticado no computador remoto, mas **suas credenciais não serão armazenadas nesse computador remoto**, como teriam sido no passado. Isso significa que se um malware ou até mesmo um usuário mal-intencionado estiver ativo nesse servidor remoto, suas credenciais não estarão disponíveis nesse servidor de desktop remoto para o malware atacar.
 
-Using _Restricted Admin mode for RDP_, when you connect to a remote computer using the command, **mstsc.exe /RestrictedAdmin**, you will be authenticated to the remote computer, but **your credentials will not be stored on that remote computer**, as they would have been in the past. This means that if a malware or even a malicious user is active on that remote server, your credentials will not be available on that remote desktop server for the malware to attack.
-
-Note that as your credentials are not being saved on the RDP session if **try to access network resources** your credentials won't be used. **The machine identity will be used instead**.
+Observe que, como suas credenciais não estão sendo salvas na sessão RDP, se **você tentar acessar recursos de rede**, suas credenciais não serão usadas. **A identidade da máquina será usada em vez disso**.
 
 ![](../../.gitbook/assets/ram.png)
 
-From [here](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+De [aqui](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
-## Cached Credentials
+## Credenciais em cache
 
-**Domain credentials** are used by operating system components and are **authenticated** by the **Local** **Security Authority** (LSA). Typically, domain credentials are established for a user when a registered security package authenticates the user's logon data. This registered security package may be the **Kerberos** protocol or **NTLM**.
+As **credenciais de domínio** são usadas pelos componentes do sistema operacional e são **autenticadas** pela **Autoridade de Segurança Local** (LSA). Normalmente, as credenciais de domínio são estabelecidas para um usuário quando um pacote de segurança registrado autentica os dados de logon do usuário. Esse pacote de segurança registrado pode ser o protocolo **Kerberos** ou **NTLM**.
 
-**Windows stores the last ten domain login credentials in the event that the domain controller goes offline**. If the domain controller goes offline, a user will **still be able to log into their computer**. This feature is mainly for laptop users that do not regularly log into their company’s domain. The number of credentials that the computer stores can be controlled by the following **registry key, or via group policy**:
-
+**O Windows armazena as últimas dez credenciais de login de domínio no caso de o controlador de domínio ficar offline**. Se o controlador de domínio ficar offline, um usuário ainda poderá fazer login em seu computador. Esse recurso é principalmente para usuários de laptops que não fazem login regularmente no domínio da empresa. O número de credenciais que o computador armazena pode ser controlado pela seguinte **chave do registro ou via política de grupo**:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-
-The credentials are hidden from normal users, even administrator accounts. The **SYSTEM** user is the only user that has **privileges** to **view** these **credentials**. In order for an administrator to view these credentials in the registry they must access the registry as a SYSTEM user.\
-The Cached credentials are stored in the registry at the following registry location:
-
+As credenciais são ocultadas dos usuários normais, inclusive das contas de administrador. O usuário **SYSTEM** é o único usuário que tem **privilégios** para **visualizar** essas **credenciais**. Para que um administrador possa visualizar essas credenciais no registro, ele deve acessar o registro como um usuário SYSTEM.\
+As credenciais em cache são armazenadas no registro no seguinte local do registro:
 ```
 HKEY_LOCAL_MACHINE\SECURITY\Cache
 ```
+## Extração do Mimikatz: `lsadump::cache`
+De [aqui](http://juggernaut.wikidot.com/cached-credentials).
 
-**Extracting from Mimikatz**: `lsadump::cache`\
-From [here](http://juggernaut.wikidot.com/cached-credentials).
+## Usuários Protegidos
 
-## Protected Users
+Quando o usuário logado é um membro do grupo de Usuários Protegidos, as seguintes proteções são aplicadas:
 
-When the signed in user is a member of the Protected Users group the following protections are applied:
+* A delegação de credenciais (CredSSP) não armazenará em cache as credenciais em texto simples do usuário, mesmo quando a configuração de política de grupo **Permitir a delegação de credenciais padrão** estiver habilitada.
+* A partir do Windows 8.1 e do Windows Server 2012 R2, o Windows Digest não armazenará em cache as credenciais em texto simples do usuário, mesmo quando o Windows Digest estiver habilitado.
+* O **NTLM** não armazenará em cache as **credenciais em texto simples** do usuário ou a **função unidirecional NT** (NTOWF).
+* O **Kerberos** não criará mais chaves **DES** ou **RC4**. Além disso, ele não armazenará em cache as credenciais em texto simples do usuário ou as chaves de longo prazo após a aquisição do TGT inicial.
+* Um **verificador em cache não é criado no login ou desbloqueio**, portanto, o login offline não é mais suportado.
 
-* Credential delegation (CredSSP) will not cache the user's plain text credentials even when the **Allow delegating default credentials** Group Policy setting is enabled.
-* Beginning with Windows 8.1 and Windows Server 2012 R2, Windows Digest will not cache the user's plain text credentials even when Windows Digest is enabled.
-* **NTLM** will **not cache** the user's **plain text credentials** or NT **one-way function** (NTOWF).
-* **Kerberos** will **no** longer create **DES** or **RC4 keys**. Also it will **not cache the user's plain text** credentials or long-term keys after the initial TGT is acquired.
-* A **cached verifier is not created at sign-in or unlock**, so offline sign-in is no longer supported.
-
-After the user account is added to the Protected Users group, protection will begin when the user signs in to the device. **From** [**here**](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)**.**
+Após a adição da conta do usuário ao grupo de Usuários Protegidos, a proteção começará quando o usuário fizer login no dispositivo. **De** [**aqui**](https://docs.microsoft.com/pt-br/windows-server/security/credentials-protection-and-management/protected-users-security-group)**.**
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
@@ -126,16 +114,4 @@ After the user account is added to the Protected Users group, protection will be
 | Schema Admins           | Schema Admins            | Schema Admins                                                                 | Schema Admins                |
 | Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
 
-**Table from** [**here**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
+**Tabela de** [**aqui**](https://docs.microsoft.com/pt-br/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**

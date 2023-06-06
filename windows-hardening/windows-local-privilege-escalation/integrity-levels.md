@@ -1,48 +1,28 @@
+# Níveis de Integridade
 
+A partir do Windows Vista, todos os **objetos protegidos são rotulados com um nível de integridade**. A maioria dos arquivos de usuário e do sistema e chaves do registro no sistema têm um rótulo padrão de integridade "média". A principal exceção é um conjunto de pastas e arquivos específicos graváveis pelo Internet Explorer 7 em baixa integridade. **A maioria dos processos** executados por **usuários padrão** são rotulados com **integridade média** (mesmo aqueles iniciados por um usuário dentro do grupo de administradores), e a maioria dos **serviços** são rotulados com **integridade do sistema**. O diretório raiz é protegido por um rótulo de alta integridade.\
+Observe que **um processo com um nível de integridade inferior não pode gravar em um objeto com um nível de integridade superior**.\
+Existem vários níveis de integridade:
 
-<details>
+* **Não confiável** - processos que fazem login anonimamente são automaticamente designados como Não confiáveis. _Exemplo: Chrome_
+* **Baixo** - O nível de integridade Baixo é o nível usado por padrão para interação com a Internet. Desde que o Internet Explorer seja executado em seu estado padrão, Modo Protegido, todos os arquivos e processos associados a ele são atribuídos ao nível de integridade Baixo. Algumas pastas, como a **Pasta de Internet Temporária**, também são atribuídas ao nível de integridade **Baixo** por padrão. No entanto, observe que um **processo de baixa integridade** é muito **restrito**, ele **não pode** gravar no **registro** e é limitado a gravar em **maioria das localizações** no perfil do usuário atual. _Exemplo: Internet Explorer ou Microsoft Edge_
+* **Médio** - Médio é o contexto em que **a maioria dos objetos será executada**. Os usuários padrão recebem o nível de integridade Médio, e qualquer objeto não explicitamente designado com um nível de integridade inferior ou superior é Médio por padrão. Observe que um usuário dentro do grupo Administradores por padrão usará níveis de integridade médios.
+* **Alto** - Os **administradores** recebem o nível de integridade Alto. Isso garante que os administradores sejam capazes de interagir e modificar objetos atribuídos aos níveis de integridade Médio ou Baixo, mas também podem agir em outros objetos com um nível de integridade Alto, o que os usuários padrão não podem fazer. _Exemplo: "Executar como Administrador"_
+* **Sistema** - Como o nome indica, o nível de integridade do Sistema é reservado para o sistema. O kernel do Windows e os serviços principais recebem o nível de integridade do Sistema. Sendo ainda mais alto do que o nível de integridade Alto dos Administradores, protege essas funções principais de serem afetadas ou comprometidas mesmo pelos Administradores. Exemplo: Serviços
+* **Instalador** - O nível de integridade do Instalador é um caso especial e é o mais alto de todos os níveis de integridade. Por ser igual ou superior a todos os outros níveis de integridade do WIC, os objetos atribuídos ao nível de integridade do Instalador também são capazes de desinstalar todos os outros objetos.
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
-# Integrity Levels
-
-From Windows Vista, all **protected objects are labeled with an integrity level**. Most user and system files and registry keys on the system have a default label of “medium” integrity. The primary exception is a set of specific folders and files writeable by Internet Explorer 7 at Low integrity. **Most processes** run by **standard users** are labeled with **medium integrity** (even the ones started by a user inside the administrators group), and most **services** are labeled with **System integrity**. The root directory is protected by a high-integrity label.\
-Note that **a process with a lower integrity level can’t write to an object with a higher integrity level.**\
-There are several levels of integrity:
-
-* **Untrusted** – processes that are logged on anonymously are automatically designated as Untrusted. _Example: Chrome_
-* **Low** – The Low integrity level is the level used by default for interaction with the Internet. As long as Internet Explorer is run in its default state, Protected Mode, all files and processes associated with it are assigned the Low integrity level. Some folders, such as the **Temporary Internet Folder**, are also assigned the **Low integrity** level by default. However,  note that a **low integrity process** is very **restricted**, it **cannot** write to the **registry** and it’s limited from writing to **most locations** in the current user’s profile.  _Example: Internet Explorer or Microsoft Edge_
-* **Medium** – Medium is the context that **most objects will run in**. Standard users receive the Medium integrity level, and any object not explicitly designated with a lower or higher integrity level is Medium by default. Not that a user inside the Administrators group by default will use medium integrity levels.
-* **High** – **Administrators** are granted the High integrity level. This ensures that Administrators are capable of interacting with and modifying objects assigned Medium or Low integrity levels, but can also act on other objects with a High integrity level, which standard users can not do. _Example: "Run as Administrator"_
-* **System** – As the name implies, the System integrity level is reserved for the system. The Windows kernel and core services are granted the System integrity level. Being even higher than the High integrity level of Administrators protects these core functions from being affected or compromised even by Administrators. Example: Services
-* **Installer** – The Installer integrity level is a special case and is the highest of all integrity levels. By virtue of being equal to or higher than all other WIC integrity levels, objects assigned the Installer integrity level are also able to uninstall all other objects.
-
-You can get the integrity level of a process using **Process Explorer** from **Sysinternals**, accessing the **properties** of the process and viewing the "**Security**" tab:
+Você pode obter o nível de integridade de um processo usando o **Process Explorer** da **Sysinternals**, acessando as **propriedades** do processo e visualizando a guia "**Segurança**":
 
 ![](<../../.gitbook/assets/image (318).png>)
 
-You can also get your **current integrity level** using `whoami /groups`
+Você também pode obter seu **nível de integridade atual** usando `whoami /groups`
 
 ![](<../../.gitbook/assets/image (319).png>)
 
-## Integrity Levels in File-system
+## Níveis de Integridade no Sistema de Arquivos
 
-A object inside the file-system may need an **minimum integrity level requirement** and if a process doesn't have this integrity process it won't be able to interact with it.\
-For example, lets **create a regular from a regular user console file and check the permissions**:
-
+Um objeto dentro do sistema de arquivos pode precisar de um **requisito mínimo de nível de integridade** e, se um processo não tiver esse nível de integridade, não poderá interagir com ele.\
+Por exemplo, vamos **criar um arquivo a partir do console de usuário regular e verificar as permissões**:
 ```
 echo asd >asd.txt
 icacls asd.txt
@@ -53,9 +33,7 @@ asd.txt BUILTIN\Administrators:(I)(F)
         NT AUTHORITY\SERVICE:(I)(M,DC)
         NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-
-Now, lets assign a minimum integrity level of **High** to the file. This **must be done from a console** running as **administrator** as a **regular console** will be running in Medium Integrity level and **won't be allowed** to assign High Integrity level to an object:
-
+Agora, vamos atribuir um nível mínimo de integridade **Alto** ao arquivo. Isso **deve ser feito a partir de um console** executado como **administrador**, pois um **console regular** será executado no nível de integridade Médio e **não terá permissão** para atribuir o nível de integridade Alto a um objeto:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -70,9 +48,7 @@ asd.txt BUILTIN\Administrators:(I)(F)
         NT AUTHORITY\BATCH:(I)(M,DC)
         Mandatory Label\High Mandatory Level:(NW)
 ```
-
-This is where things get interesting. You can see that the user `DESKTOP-IDJHTKP\user` has **FULL privileges** over the file (indeed this was the user that created the file), however, due to the minimum integrity level implemented he won't be able to modify the file anymore unless he is running inside a High Integrity Level (note that he will be able to read it):
-
+Aqui é onde as coisas ficam interessantes. Você pode ver que o usuário `DESKTOP-IDJHTKP\user` tem **privilégios COMPLETOS** sobre o arquivo (de fato, este foi o usuário que criou o arquivo), no entanto, devido ao nível mínimo de integridade implementado, ele não poderá mais modificar o arquivo, a menos que esteja sendo executado em um Nível de Integridade Alto (observe que ele poderá lê-lo):
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -81,15 +57,13 @@ del asd.txt
 C:\Users\Public\asd.txt
 Access is denied.
 ```
-
 {% hint style="info" %}
-**Therefore, when a file has a minimum integrity level, in order to modify it you need to be running at least in that integrity level.**
+Portanto, quando um arquivo tem um nível mínimo de integridade, para modificá-lo é necessário estar executando pelo menos nesse nível de integridade.
 {% endhint %}
 
-## Integrity Levels in Binaries
+## Níveis de Integridade em Binários
 
-I made a copy of `cmd.exe` in `C:\Windows\System32\cmd-low.exe` and set it an **integrity level of low from an administrator console:**
-
+Eu fiz uma cópia do `cmd.exe` em `C:\Windows\System32\cmd-low.exe` e defini um **nível de integridade baixo a partir de um console de administrador:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
@@ -99,34 +73,31 @@ C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
                                 APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
                                 Mandatory Label\Low Mandatory Level:(NW)
 ```
-
-Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instead of a medium one:
+Agora, quando eu executar `cmd-low.exe`, ele **será executado com um nível de integridade baixo** em vez de médio:
 
 ![](<../../.gitbook/assets/image (320).png>)
 
-For curious people, if you assign high integrity level to a binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) it won't run with high integrity level automatically (if you invoke it from a medium integrity level --by default-- it will run under a medium integrity level).
+Para pessoas curiosas, se você atribuir um nível de integridade alto a um binário (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), ele não será executado automaticamente com um nível de integridade alto (se você invocá-lo a partir de um nível de integridade médio - por padrão - ele será executado com um nível de integridade médio).
 
-## Integrity Levels in Processes
+## Níveis de Integridade em Processos
 
-Not all files and folders have a minimum integrity level, **but all processes are running under an integrity level**. And similar to what happened with the file-system, **if a process wants to write inside another process it must have at least the same integrity level**. This means that a process with low integrity level can’t open a handle with full access to a process with medium integrity level.
+Nem todos os arquivos e pastas têm um nível mínimo de integridade, **mas todos os processos são executados com um nível de integridade**. E, semelhante ao que aconteceu com o sistema de arquivos, **se um processo quiser escrever dentro de outro processo, ele deve ter pelo menos o mesmo nível de integridade**. Isso significa que um processo com um nível de integridade baixo não pode abrir um identificador com acesso total a um processo com um nível de integridade médio.
 
-Due to the restrictions commented in this and the previous section, from a security point of view, it's always **recommended to run a process in the lower level of integrity possible**.
+Devido às restrições comentadas nesta e na seção anterior, do ponto de vista da segurança, é sempre **recomendado executar um processo no nível mais baixo de integridade possível**.
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

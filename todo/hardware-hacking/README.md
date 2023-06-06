@@ -1,18 +1,16 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Trabalha em uma **empresa de segurança cibernética**? Quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
@@ -21,66 +19,47 @@
 
 # JTAG
 
-JTAG allows to perform a boundary scan. The boundary scan analyzes certain circuitry, including embedded boundary-scan cells and registers for each pin.
+JTAG permite realizar uma varredura de fronteira. A varredura de fronteira analisa certos circuitos, incluindo células e registradores de varredura de fronteira incorporados para cada pino.
 
-The JTAG standard defines **specific commands for conducting boundary scans**, including the following:
+O padrão JTAG define **comandos específicos para conduzir varreduras de fronteira**, incluindo os seguintes:
 
-* **BYPASS** allows you to test a specific chip without the overhead of passing through other chips.
-* **SAMPLE/PRELOAD** takes a sample of the data entering and leaving the device when it’s in its normal functioning mode.
-* **EXTEST** sets and reads pin states.
+* **BYPASS** permite testar um chip específico sem a sobrecarga de passar por outros chips.
+* **SAMPLE/PRELOAD** faz uma amostra dos dados que entram e saem do dispositivo quando ele está em seu modo de funcionamento normal.
+* **EXTEST** define e lê estados de pinos.
 
-It can also support other commands such as:
+Também pode suportar outros comandos, como:
 
-* **IDCODE** for identifying a device
-* **INTEST** for the internal testing of the device
+* **IDCODE** para identificar um dispositivo
+* **INTEST** para testes internos do dispositivo
 
-You might come across these instructions when you use a tool like the JTAGulator.
+Você pode encontrar essas instruções ao usar uma ferramenta como o JTAGulator.
 
-## The Test Access Port
+## A porta de acesso ao teste
 
-Boundary scans include tests of the four-wire **Test Access Port (TAP)**, a general-purpose port that provides **access to the JTAG test support** functions built into a component. TAP uses the following five signals:
+As varreduras de fronteira incluem testes dos quatro fios da **Porta de Acesso ao Teste (TAP)**, uma porta de propósito geral que fornece **acesso ao suporte de teste JTAG** incorporado em um componente. O TAP usa os seguintes cinco sinais:
 
-* Test clock input (**TCK**) The TCK is the **clock** that defines how often the TAP controller will take a single action (in other words, jump to the next state in the state machine).
-* Test mode select (**TMS**) input TMS controls the **finite state machine**. On each beat of the clock, the device’s JTAG TAP controller checks the voltage on the TMS pin. If the voltage is below a certain threshold, the signal is considered low and interpreted as 0, whereas if the voltage is above a certain threshold, the signal is considered high and interpreted as 1.
-* Test data input (**TDI**) TDI is the pin that sends **data into the chip through the scan cells**. Each vendor is responsible for defining the communication protocol over this pin, because JTAG doesn’t define this.
-* Test data output (**TDO**) TDO is the pin that sends **data out of the chip**.
-* Test reset (**TRST**) input The optional TRST resets the finite state machine **to a known good state**. Alternatively, if the TMS is held at 1 for five consecutive clock cycles, it invokes a reset, the same way the TRST pin would, which is why TRST is optional.
+* Entrada de relógio de teste (**TCK**) O TCK é o **relógio** que define com que frequência o controlador TAP tomará uma única ação (ou seja, saltar para o próximo estado na máquina de estados).
+* Seleção de modo de teste (**TMS**) A entrada TMS controla a **máquina de estados finita**. Em cada batida do relógio, o controlador TAP JTAG do dispositivo verifica a tensão no pino TMS. Se a tensão estiver abaixo de um determinado limite, o sinal é considerado baixo e interpretado como 0, enquanto se a tensão estiver acima de um determinado limite, o sinal é considerado alto e interpretado como 1.
+* Entrada de dados de teste (**TDI**) TDI é o pino que envia **dados para o chip por meio das células de varredura**. Cada fornecedor é responsável por definir o protocolo de comunicação sobre este pino, porque o JTAG não define isso.
+* Saída de dados de teste (**TDO**) TDO é o pino que envia **dados para fora do chip**.
+* Entrada de reset de teste (**TRST**) O reset TRST opcional redefine a máquina de estados finita **para um estado conhecido e bom**. Alternativamente, se o TMS for mantido em 1 por cinco ciclos de relógio consecutivos, ele invoca um reset, da mesma forma que o pino TRST faria, razão pela qual o TRST é opcional.
 
-Sometimes you will be able to find those pins marked in the PCB. In other occasions you might need to **find them**.
+Às vezes, você poderá encontrar esses pinos marcados na PCB. Em outras ocasiões, você pode precisar **encontrá-los**.
 
-## Identifying JTAG pins
+## Identificando pinos JTAG
 
-The fastest but most expensive way to detect JTAG ports is by using the **JTAGulator**, a device created specifically for this purpose (although it can **also detect UART pinouts**).
+A maneira mais rápida, mas mais cara, de detectar portas JTAG é usando o **JTAGulator**, um dispositivo criado especificamente para esse fim (embora também possa **detectar pinouts UART**).
 
-It has **24 channels** you can connect to the boards pins. Then it performs a **BF attack** of all the possible combinations sending **IDCODE** and **BYPASS** boundary scan commands. If it receives a response, it displays the channel corresponding to each JTAG signal
+Ele tem **24 canais** que você pode conectar aos pinos da placa. Em seguida, ele realiza um **ataque BF** de todas as combinações possíveis enviando comandos de varredura de fronteira **IDCODE** e **BYPASS**. Se receber uma resposta, ele exibe o canal correspondente a cada sinal JTAG.
 
-A cheaper but much slower way of identifying JTAG pinouts is by using the [**JTAGenum**](https://github.com/cyphunk/JTAGenum/)  loaded on an Arduino-compatible microcontroller.
+Uma maneira mais barata, mas muito mais lenta, de identificar pinouts JTAG é usando o [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) carregado em um microcontrolador compatível com Arduino.
 
-Using **JTAGenum**, you’d first **define the pins of the probing** device that you’ll use for the enumeration.You’d have to reference the device’s pinout diagram, and then connect these pins with the test points on your target device.
+Usando o **JTAGenum**, você primeiro **define os pinos da sonda** do dispositivo que você usará para a enumeração. Você terá que fazer referência ao diagrama de pinout do dispositivo e, em seguida, conectar esses pinos aos pontos de teste em seu dispositivo de destino.
 
-A **third way** to identify JTAG pins is by **inspecting the PCB** for one of the pinouts. In some cases, PCBs might conveniently provide the **Tag-Connect interface**, which is a clear indication that the board has a JTAG connector, too. You can see what that interface looks like at [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Additionally, inspecting the **datasheets of the chipsets on the PCB** might reveal pinout diagrams that point to JTAG interfaces.
+Uma **terceira maneira** de identificar pinos JTAG é **inspecionando a PCB** para um dos pinouts. Em alguns casos, as PCBs podem fornecer convenientemente a **interface Tag-Connect**, que é uma indicação clara de que a placa possui um conector JTAG. Você pode ver como essa interface se parece em [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Além disso, a inspeção dos **datasheets dos chipsets na PCB** pode revelar diagramas de pinout que apontam para interfaces JTAG.
 
 # SDW
 
-SWD is an ARM-specific protocol designed for debugging.
+O SWD é um protocolo específico da ARM projetado para depuração.
 
-The SWD interface requires **two pins**: a bidirectional **SWDIO** signal, which is the equivalent of JTAG’s **TDI and TDO pins and a clock**, and **SWCLK**, which is the equivalent of **TCK** in JTAG. Many devices support the **Serial Wire or JTAG Debug Port (SWJ-DP)**, a combined JTAG and SWD interface that enables you to connect either a SWD or JTAG probe to the target.
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
+A interface SWD requer **dois pinos**: um sinal bidirecional **SWDIO**, que é o equivalente aos pinos **TDI e TDO** do JTAG e um relógio, e **SWCLK**, que é o equivalente a **TCK** no JTAG. Muitos dispositivos suportam a **Porta de Depuração Serial ou JTAG (SWJ-DP)**, uma interface JTAG e SWD combinada que permite conectar uma sonda SWD ou JTAG ao alvo.

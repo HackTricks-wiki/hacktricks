@@ -1,34 +1,33 @@
-# macOS Memory Dumping
+# Despejo de Memória do macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Memory Artifacts
+## Artefatos de Memória
 
-### Swap Files
+### Arquivos de Swap
 
-* **`/private/var/vm/swapfile0`**: This file is used as a **cache when physical memory fills up**. Data in physical memory will be pushed to the swapfile and then swapped back into physical memory if it’s needed again. More than one file can exist in here. For example, you might see swapfile0, swapfile1, and so on.
-*   **`/private/var/vm/sleepimage`**: When OS X goes into **hibernation**, **data stored in memory is put into the sleepimage file**. When the user comes back and wakes the computer, memory is restored from the sleepimage and the user can pick up where they left off.
+* **`/private/var/vm/swapfile0`**: Este arquivo é usado como um **cache quando a memória física fica cheia**. Os dados na memória física serão empurrados para o swapfile e, em seguida, trocados de volta para a memória física se forem necessários novamente. Mais de um arquivo pode existir aqui. Por exemplo, você pode ver swapfile0, swapfile1 e assim por diante.
+*   **`/private/var/vm/sleepimage`**: Quando o OS X entra em **hibernação**, **os dados armazenados na memória são colocados no arquivo sleepimage**. Quando o usuário volta e acorda o computador, a memória é restaurada a partir do sleepimage e o usuário pode continuar de onde parou.
 
-    By default in modern MacOS systems this file will be encrypted, so it might be not recuperable.
+    Por padrão, nos sistemas modernos do MacOS, este arquivo será criptografado, então pode não ser recuperável.
 
-    * However, the encryption of this file might be disabled. Check the out of `sysctl vm.swapusage`.
+    * No entanto, a criptografia deste arquivo pode ser desativada. Verifique a saída de `sysctl vm.swapusage`.
 
-### Dumping memory with osxpmem
+### Despejando memória com osxpmem
 
-In order to dump the memory in a MacOS machine you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
+Para despejar a memória em uma máquina MacOS, você pode usar o [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
-**Note**: The following instructions will only work for Macs with Intel architecture. This tool is now archived and the last release was in 2017. The binary downloaded using the instructions below targets Intel chips as Apple Silicon wasn't around in 2017. It may be possible to compile the binary for arm64 architecture but you'll have to try for yourself.
-
+**Nota**: As seguintes instruções funcionarão apenas para Macs com arquitetura Intel. Esta ferramenta agora está arquivada e a última versão foi lançada em 2017. O binário baixado usando as instruções abaixo tem como alvo chips Intel, já que o Apple Silicon não existia em 2017. Pode ser possível compilar o binário para a arquitetura arm64, mas você terá que tentar por si mesmo.
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
@@ -36,19 +35,16 @@ sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 #Dump aff4 format
 sudo osxpmem.app/osxpmem -o /tmp/dump_mem.aff4
 ```
-
-If you find this error: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` You can fix it doing:
-
+Se você encontrar este erro: `osxpmem.app/MacPmem.kext falhou ao carregar - (libkern/kext) falha de autenticação (propriedade/arquivos de permissão); verifique os logs do sistema/kernel para erros ou tente kextutil(8)` Você pode corrigi-lo fazendo:
 ```bash
 sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
 sudo kextutil "/tmp/MacPmem.kext"
 #Allow the kext in "Security & Privacy --> General"
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
+Outros erros podem ser corrigidos permitindo o carregamento do kext em "Segurança e Privacidade -> Geral", apenas permita.
 
-**Other errors** might be fixed by **allowing the load of the kext** in "Security & Privacy --> General", just **allow** it.
-
-You can also use this **oneliner** to download the application, load the kext and dump the memory:
+Você também pode usar este **oneliner** para baixar o aplicativo, carregar o kext e despejar a memória:
 
 {% code overflow="wrap" %}
 ```bash
@@ -61,10 +57,10 @@ cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -4,114 +4,104 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)..
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)..
 
 </details>
 
 ## MMC20.Application
 
-**DCOM** (Distributed Component Object Model) objects are **interesting** due to the ability to **interact** with the objects **over the network**. Microsoft has some good documentation on DCOM [here](https://msdn.microsoft.com/en-us/library/cc226801.aspx) and on COM [here](https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363\(v=vs.85\).aspx). You can find a solid list of DCOM applications using PowerShell, by running `Get-CimInstance Win32_DCOMApplication`.
+Objetos **DCOM** (Distributed Component Object Model) são **interessantes** devido à capacidade de **interagir** com os objetos **pela rede**. A Microsoft tem uma boa documentação sobre DCOM [aqui](https://msdn.microsoft.com/en-us/library/cc226801.aspx) e sobre COM [aqui](https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363\(v=vs.85\).aspx). Você pode encontrar uma lista sólida de aplicativos DCOM usando o PowerShell, executando `Get-CimInstance Win32_DCOMApplication`.
 
-The [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx) COM object allows you to script components of MMC snap-in operations. While enumerating the different methods and properties within this COM object, I noticed that there is a method named `ExecuteShellCommand` under Document.ActiveView.
+O objeto COM [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx) permite que você crie componentes de operações de snap-in MMC. Ao enumerar os diferentes métodos e propriedades dentro deste objeto COM, notei que há um método chamado `ExecuteShellCommand` em Document.ActiveView.
 
 ![](<../../.gitbook/assets/image (4) (2) (1) (1).png>)
 
-You can read more on that method [here](https://msdn.microsoft.com/en-us/library/aa815396\(v=vs.85\).aspx). So far, we have a DCOM application that we can access over the network and can execute commands. The final piece is to leverage this DCOM application and the ExecuteShellCommand method to obtain code execution on a remote host.
+Você pode ler mais sobre esse método [aqui](https://msdn.microsoft.com/en-us/library/aa815396\(v=vs.85\).aspx). Até agora, temos um aplicativo DCOM ao qual podemos acessar pela rede e podemos executar comandos. A última peça é aproveitar esse aplicativo DCOM e o método ExecuteShellCommand para obter a execução de código em um host remoto.
 
-Fortunately, as an admin, you can remotely interact with DCOM with PowerShell by using “`[activator]::CreateInstance([type]::GetTypeFromProgID`”. All you need to do is provide it a DCOM ProgID and an IP address. It will then provide you back an instance of that COM object remotely:
+Felizmente, como administrador, você pode interagir remotamente com o DCOM com o PowerShell usando “[activator]::CreateInstance([type]::GetTypeFromProgID”. Tudo o que você precisa fazer é fornecer um ProgID DCOM e um endereço IP. Ele fornecerá de volta uma instância desse objeto COM remotamente:
 
 ![](<../../.gitbook/assets/image (665).png>)
 
-It is then possible to invoke the `ExecuteShellCommand` method to start a process on the remote host:
+É possível invocar o método `ExecuteShellCommand` para iniciar um processo no host remoto:
 
 ![](<../../.gitbook/assets/image (1) (4) (1).png>)
 
 ## ShellWindows & ShellBrowserWindow
 
-The **MMC20.Application** object lacked explicit “[LaunchPermissions](https://technet.microsoft.com/en-us/library/bb633148.aspx)”, resulting in the default permission set allowing Administrators access:
+O objeto **MMC20.Application** não tinha “LaunchPermissions” explícitas, resultando no conjunto de permissões padrão permitindo acesso de administradores:
 
 ![](<../../.gitbook/assets/image (4) (1) (2).png>)
 
-You can read more on that thread [here](https://twitter.com/tiraniddo/status/817532039771525120).\
-Viewing which other objects that have no explicit LaunchPermission set can be achieved using [@tiraniddo](https://twitter.com/tiraniddo)’s [OleView .NET](https://github.com/tyranid/oleviewdotnet), which has excellent Python filters (among other things). In this instance, we can filter down to all objects that have no explicit Launch Permission. When doing so, two objects stood out to me: `ShellBrowserWindow` and `ShellWindows`:
+Você pode ler mais sobre esse tópico [aqui](https://twitter.com/tiraniddo/status/817532039771525120).\
+Visualizar quais outros objetos que não têm conjunto de LaunchPermission explícito pode ser alcançado usando o [OleView .NET](https://github.com/tyranid/oleviewdotnet) de [@tiraniddo](https://twitter.com/tiraniddo), que tem excelentes filtros Python (entre outras coisas). Neste caso, podemos filtrar todos os objetos que não têm permissão de lançamento explícita. Ao fazer isso, dois objetos me chamaram a atenção: `ShellBrowserWindow` e `ShellWindows`:
 
 ![](<../../.gitbook/assets/image (3) (1) (1) (2).png>)
 
-Another way to identify potential target objects is to look for the value `LaunchPermission` missing from keys in `HKCR:\AppID\{guid}`. An object with Launch Permissions set will look like below, with data representing the ACL for the object in Binary format:
+Outra maneira de identificar objetos-alvo potenciais é procurar pelo valor `LaunchPermission` ausente nas chaves em `HKCR:\AppID\{guid}`. Um objeto com permissões de lançamento definidas parecerá abaixo, com dados representando a ACL para o objeto no formato binário:
 
 ![](https://enigma0x3.files.wordpress.com/2017/01/launch\_permissions\_registry.png?w=690\&h=169)
 
-Those with no explicit LaunchPermission set will be missing that specific registry entry.
+Aqueles sem conjunto explícito de LaunchPermission faltarão essa entrada específica no registro.
 
 ### ShellWindows
 
-The first object explored was [ShellWindows](https://msdn.microsoft.com/en-us/library/windows/desktop/bb773974\(v=vs.85\).aspx). Since there is no [ProgID](https://msdn.microsoft.com/en-us/library/windows/desktop/ms688254\(v=vs.85\).aspx) associated with this object, we can use the [Type.GetTypeFromCLSID](https://msdn.microsoft.com/en-us/library/system.type.gettypefromclsid\(v=vs.110\).aspx) .NET method paired with the[ Activator.CreateInstance](https://msdn.microsoft.com/en-us/library/system.activator.createinstance\(v=vs.110\).aspx) method to instantiate the object via its AppID on a remote host. In order to do this, we need to get the [CLSID](https://msdn.microsoft.com/en-us/library/windows/desktop/ms691424\(v=vs.85\).aspx) for the ShellWindows object, which can be accomplished using OleView .NET as well:
+O primeiro objeto explorado foi [ShellWindows](https://msdn.microsoft.com/en-us/library/windows/desktop/bb773974\(v=vs.85\).aspx). Como não há [ProgID](https://msdn.microsoft.com/en-us/library/windows/desktop/ms688254\(v=vs.85\).aspx) associado a este objeto, podemos usar o método .NET [Type.GetTypeFromCLSID](https://msdn.microsoft.com/en-us/library/system.type.gettypefromclsid\(v=vs.110\).aspx) emparelhado com o método [Activator.CreateInstance](https://msdn.microsoft.com/en-us/library/system.activator.createinstance\(v=vs.110\).aspx) para instanciar o objeto via seu AppID em um host remoto. Para fazer isso, precisamos obter o [CLSID](https://msdn.microsoft.com/en-us/library/windows/desktop/ms691424\(v=vs.85\).aspx) para o objeto ShellWindows, que pode ser realizado usando o OleView .NET também:
 
 ![shellwindow\_classid](https://enigma0x3.files.wordpress.com/2017/01/shellwindow\_classid.png?w=434\&h=424)
 
-As you can see below, the “Launch Permission” field is blank, meaning no explicit permissions are set.
+Como você pode ver abaixo, o campo “Launch Permission” está em branco, o que significa que nenhuma permissão explícita está definida.
 
 ![screen-shot-2017-01-23-at-4-12-24-pm](https://enigma0x3.files.wordpress.com/2017/01/screen-shot-2017-01-23-at-4-12-24-pm.png?w=455\&h=401)
 
-Now that we have the CLSID, we can instantiate the object on a remote target:
-
+Agora que temos o CLSID, podemos instanciar o objeto em um destino remoto:
 ```powershell
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>") #9BA05972-F6A8-11CF-A442-00A0C90A8F39
 $obj = [System.Activator]::CreateInstance($com)
 ```
-
-![](https://enigma0x3.files.wordpress.com/2017/01/remote\_instantiation\_shellwindows.png?w=690\&h=354)
-
-With the object instantiated on the remote host, we can interface with it and invoke any methods we want. The returned handle to the object reveals several methods and properties, none of which we can interact with. In order to achieve actual interaction with the remote host, we need to access the [WindowsShell.Item](https://msdn.microsoft.com/en-us/library/windows/desktop/bb773970\(v=vs.85\).aspx) method, which will give us back an object that represents the Windows shell window:
-
+Com o objeto instanciado no host remoto, podemos interagir com ele e invocar qualquer método que desejarmos. O identificador retornado para o objeto revela vários métodos e propriedades, com os quais não podemos interagir. Para conseguir interagir com o host remoto, precisamos acessar o método [WindowsShell.Item](https://msdn.microsoft.com/en-us/library/windows/desktop/bb773970\(v=vs.85\).aspx), que nos dará de volta um objeto que representa a janela do shell do Windows:
 ```
 $item = $obj.Item()
 ```
-
 ![](https://enigma0x3.files.wordpress.com/2017/01/item\_instantiation.png?w=416\&h=465)
 
-With a full handle on the Shell Window, we can now access all of the expected methods/properties that are exposed. After going through these methods, **`Document.Application.ShellExecute`** stood out. Be sure to follow the parameter requirements for the method, which are documented [here](https://msdn.microsoft.com/en-us/library/windows/desktop/gg537745\(v=vs.85\).aspx).
-
+Com um controle total da janela do Shell, agora podemos acessar todos os métodos/propriedades esperados que são expostos. Depois de passar por esses métodos, **`Document.Application.ShellExecute`** se destacou. Certifique-se de seguir os requisitos de parâmetros para o método, que estão documentados [aqui](https://msdn.microsoft.com/en-us/library/windows/desktop/gg537745\(v=vs.85\).aspx).
 ```powershell
 $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\system32", $null, 0)
 ```
-
 ![](https://enigma0x3.files.wordpress.com/2017/01/shellwindows\_command\_execution.png?w=690\&h=426)
 
-As you can see above, our command was executed on a remote host successfully.
+Como você pode ver acima, nosso comando foi executado com sucesso em um host remoto.
 
 ### ShellBrowserWindow
 
-This particular object does not exist on Windows 7, making its use for lateral movement a bit more limited than the “ShellWindows” object, which I tested on Win7-Win10 successfully.
+Este objeto em particular não existe no Windows 7, tornando seu uso para movimento lateral um pouco mais limitado do que o objeto "ShellWindows", que testei com sucesso no Win7-Win10.
 
-Based on my enumeration of this object, it appears to effectively provide an interface into the Explorer window just as the previous object does. To instantiate this object, we need to get its CLSID. Similar to above, we can use OleView .NET:
+Com base na minha enumeração deste objeto, parece fornecer efetivamente uma interface na janela do Explorer, assim como o objeto anterior. Para instanciar este objeto, precisamos obter seu CLSID. Semelhante ao acima, podemos usar o OleView .NET:
 
 ![shellbrowser\_classid](https://enigma0x3.files.wordpress.com/2017/01/shellbrowser\_classid.png?w=428\&h=414)
 
-Again, take note of the blank Launch Permission field:
+Novamente, observe o campo de Permissão de Lançamento em branco:
 
 ![screen-shot-2017-01-23-at-4-13-52-pm](https://enigma0x3.files.wordpress.com/2017/01/screen-shot-2017-01-23-at-4-13-52-pm.png?w=399\&h=340)
 
-With the CLSID, we can repeat the steps taken on the previous object to instantiate the object and call the same method:
-
+Com o CLSID, podemos repetir as etapas tomadas no objeto anterior para instanciar o objeto e chamar o mesmo método:
 ```powershell
 $com = [Type]::GetTypeFromCLSID("C08AFD90-F2A1-11D1-8455-00A0C91F3880", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)
 
 $obj.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "C:\Windows\system32", $null, 0)
 ```
-
 ![](https://enigma0x3.files.wordpress.com/2017/01/shellbrowserwindow\_command\_execution.png?w=690\&h=441)
 
-As you can see, the command successfully executed on the remote target.
+Como você pode ver, o comando foi executado com sucesso no alvo remoto.
 
-Since this object interfaces directly with the Windows shell, we don’t need to invoke the “ShellWindows.Item” method, as on the previous object.
+Uma vez que este objeto se comunica diretamente com o shell do Windows, não precisamos invocar o método "ShellWindows.Item", como no objeto anterior.
 
-While these two DCOM objects can be used to run shell commands on a remote host, there are plenty of other interesting methods that can be used to enumerate or tamper with a remote target. A few of these methods include:
+Embora esses dois objetos DCOM possam ser usados para executar comandos de shell em um host remoto, existem muitos outros métodos interessantes que podem ser usados para enumerar ou interferir em um alvo remoto. Alguns desses métodos incluem:
 
 * `Document.Application.ServiceStart()`
 * `Document.Application.ServiceStop()`
@@ -121,8 +111,7 @@ While these two DCOM objects can be used to run shell commands on a remote host,
 
 ## ExcelDDE & RegisterXLL
 
-In a similar way it's possible to move laterally abusing DCOM Excel objects, for more information read [https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
-
+De maneira semelhante, é possível mover lateralmente abusando de objetos DCOM do Excel. Para mais informações, leia [https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
 ```powershell
 # Chunk of code from https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1
 ## You can see here how to abuse excel for RCE
@@ -144,24 +133,23 @@ elseif ($Method -Match "ExcelDDE") {
     $Obj.DDEInitiate("cmd", "/c $Command")
 }
 ```
+## Ferramenta
 
-## Tool
+O script Powershell [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module\_source/lateral\_movement/Invoke-DCOM.ps1) permite invocar facilmente todas as maneiras comentadas de executar código em outras máquinas.
 
-The Powershell script [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module\_source/lateral\_movement/Invoke-DCOM.ps1) allows to easily invoke all the commented ways to execute code in other machines.
+## Referências
 
-## References
-
-* The first method was copied from [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/), for more info follow the link
-* The second section was copied from [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/), for more info follow the link
+* O primeiro método foi copiado de [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/), para mais informações siga o link.
+* A segunda seção foi copiada de [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/), para mais informações siga o link.
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

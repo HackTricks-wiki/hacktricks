@@ -1,45 +1,43 @@
-# macOS PID Reuse
+## Reutilização de PID do macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## PID Reuse
+## Reutilização de PID
 
-When a macOS **XPC service** is checking the called process based on the **PID** and not on the **audit token**, it's vulnerable to PID reuse attack. This attack is based on a **race condition** where an **exploit** is going to **send messages to the XPC** service **abusing** the functionality and just **after** that, executing **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** with the **allowed** binary.
+Quando um serviço **XPC do macOS** está verificando o processo chamado com base no **PID** e não no **token de auditoria**, ele é vulnerável a um ataque de reutilização de PID. Este ataque é baseado em uma **condição de corrida** em que um **exploit** vai **enviar mensagens para o XPC** abusando da funcionalidade e logo **após** isso, executando **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** com o binário **permitido**.
 
-This function will make the **allowed binary own the PID** but the **malicious XPC message would have been sent** just before. So, if the **XPC** service **use** the **PID** to **authenticate** the sender and checks it **AFTER** the execution of **`posix_spawn`**, it will think it comes from an **authorized** process.
+Esta função fará com que o binário **permitido possua o PID**, mas a **mensagem XPC maliciosa terá sido enviada** logo antes. Então, se o serviço **XPC** usar o **PID** para **autenticar** o remetente e verificar isso **DEPOIS** da execução do **`posix_spawn`**, ele pensará que vem de um processo **autorizado**.
 
-### Exploit example
+### Exemplo de exploit
 
-If you find the function **`shouldAcceptNewConnection`** or a function called by it **calling** **`processIdentifier`** and not calling **`auditToken`**. It highly probable means that it's v**erifying the process PID** and not the audit token.\
-Like for example in this image (taken from the reference):
+Se você encontrar a função **`shouldAcceptNewConnection`** ou uma função chamada por ela **chamando** **`processIdentifier`** e não chamando **`auditToken`**. É altamente provável que esteja verificando o **PID do processo** e não o token de auditoria.\
+Como por exemplo nesta imagem (tirada da referência):
 
 <figure><img src="../../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
-Check this example exploit (again, taken from the reference) to see the 2 parts of the exploit:
+Verifique este exemplo de exploit (novamente, retirado da referência) para ver as 2 partes do exploit:
 
-* One that **generates several forks**
-* **Each fork** will **send** the **payload** to the XPC service while executing **`posix_spawn`** just after sending the message.
+* Uma que **gera vários forks**
+* **Cada fork** irá **enviar** o **payload** para o serviço XPC enquanto executa **`posix_spawn`** logo após o envio da mensagem.
 
 {% hint style="danger" %}
-For the exploit to work it's important to export export OBJC\_DISABLE\_INITIALIZE\_FORK\_SAFETY=YES or to put in th exploit:
-
+Para que o exploit funcione, é importante exportar OBJC\_DISABLE\_INITIALIZE\_FORK\_SAFETY=YES ou colocar no exploit:
 ```objectivec
 asm(".section __DATA,__objc_fork_ok\n"
 "empty:\n"
 ".no_dead_strip empty\n");
 ```
 {% endhint %}
-
 ```objectivec
 // from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 
@@ -144,8 +142,7 @@ int main(int argc, const char * argv[]) {
     return 0;
 }obj
 ```
-
-## Refereces
+## Referências
 
 * [https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
 * [https://saelo.github.io/presentations/warcon18\_dont\_trust\_the\_pid.pdf](https://saelo.github.io/presentations/warcon18\_dont\_trust\_the\_pid.pdf)
@@ -154,10 +151,10 @@ int main(int argc, const char * argv[]) {
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

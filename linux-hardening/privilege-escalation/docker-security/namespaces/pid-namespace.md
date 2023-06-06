@@ -1,87 +1,83 @@
-# PID Namespace
+## Namespace de PID
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Basic Information
+## Informações básicas
 
-The PID (Process IDentifier) namespace is a feature in the Linux kernel that provides process isolation by enabling a group of processes to have their own set of unique PIDs, separate from the PIDs in other namespaces. This is particularly useful in containerization, where process isolation is essential for security and resource management.
+O namespace de PID (Process IDentifier) é um recurso no kernel do Linux que fornece isolamento de processos, permitindo que um grupo de processos tenha seu próprio conjunto de PIDs exclusivos, separados dos PIDs em outros namespaces. Isso é particularmente útil na containerização, onde o isolamento de processos é essencial para a segurança e gerenciamento de recursos.
 
-When a new PID namespace is created, the first process in that namespace is assigned PID 1. This process becomes the "init" process of the new namespace and is responsible for managing other processes within the namespace. Each subsequent process created within the namespace will have a unique PID within that namespace, and these PIDs will be independent of PIDs in other namespaces.
+Quando um novo namespace de PID é criado, o primeiro processo nesse namespace é atribuído ao PID 1. Esse processo se torna o processo "init" do novo namespace e é responsável por gerenciar outros processos dentro do namespace. Cada processo subsequente criado dentro do namespace terá um PID exclusivo dentro desse namespace, e esses PIDs serão independentes dos PIDs em outros namespaces.
 
-From the perspective of a process within a PID namespace, it can only see other processes in the same namespace. It is not aware of processes in other namespaces, and it cannot interact with them using traditional process management tools (e.g., `kill`, `wait`, etc.). This provides a level of isolation that helps prevent processes from interfering with one another.
+Do ponto de vista de um processo dentro de um namespace de PID, ele só pode ver outros processos no mesmo namespace. Ele não está ciente de processos em outros namespaces e não pode interagir com eles usando ferramentas tradicionais de gerenciamento de processos (por exemplo, `kill`, `wait`, etc.). Isso fornece um nível de isolamento que ajuda a evitar que processos interfiram uns com os outros.
 
-### How it works:
+### Como funciona:
 
-1. When a new process is created (e.g., by using the `clone()` system call), the process can be assigned to a new or existing PID namespace. **If a new namespace is created, the process becomes the "init" process of that namespace**.
-2. The **kernel** maintains a **mapping between the PIDs in the new namespace and the corresponding PIDs** in the parent namespace (i.e., the namespace from which the new namespace was created). This mapping **allows the kernel to translate PIDs when necessary**, such as when sending signals between processes in different namespaces.
-3. **Processes within a PID namespace can only see and interact with other processes in the same namespace**. They are not aware of processes in other namespaces, and their PIDs are unique within their namespace.
-4. When a **PID namespace is destroyed** (e.g., when the "init" process of the namespace exits), **all processes within that namespace are terminated**. This ensures that all resources associated with the namespace are properly cleaned up.
+1. Quando um novo processo é criado (por exemplo, usando a chamada de sistema `clone()`), o processo pode ser atribuído a um namespace de PID novo ou existente. **Se um novo namespace for criado, o processo se torna o processo "init" desse namespace**.
+2. O **kernel** mantém um **mapeamento entre os PIDs no novo namespace e os PIDs correspondentes** no namespace pai (ou seja, o namespace do qual o novo namespace foi criado). Esse mapeamento **permite que o kernel traduza PIDs quando necessário**, como ao enviar sinais entre processos em diferentes namespaces.
+3. **Processos dentro de um namespace de PID só podem ver e interagir com outros processos no mesmo namespace**. Eles não estão cientes de processos em outros namespaces e seus PIDs são exclusivos dentro de seu namespace.
+4. Quando um **namespace de PID é destruído** (por exemplo, quando o processo "init" do namespace sai), **todos os processos dentro desse namespace são encerrados**. Isso garante que todos os recursos associados ao namespace sejam limpos corretamente.
 
-## Lab:
+## Laboratório:
 
-### Create different Namespaces
+### Criar diferentes Namespaces
 
 #### CLI
-
 ```bash
 sudo unshare -pf --mount-proc /bin/bash
 ```
-
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>Erro: bash: fork: Não é possível alocar memória</summary>
 
-If you run the previous line without `-f` you will get that error.\
-The error is caused by the PID 1 process exits in the new namespace.
+Se você executar a linha anterior sem `-f`, você receberá esse erro.\
+O erro é causado pelo processo PID 1 sair no novo namespace.
 
-After bash start to run, bash will fork several new sub-processes to do somethings. If you run unshare without -f, bash will have the same pid as the current "unshare" process. The current "unshare" process call the unshare systemcall, create a new pid namespace, but the current "unshare" process is not in the new pid namespace. It is the desired behavior of linux kernel: process A creates a new namespace, the process A itself won't be put into the new namespace, only the sub-processes of process A will be put into the new namespace. So when you run:
-
+Depois que o bash começa a ser executado, ele bifurca vários novos sub-processos para fazer algumas coisas. Se você executar o unshare sem -f, o bash terá o mesmo pid que o processo "unshare" atual. O processo "unshare" atual chama o sistema unshare, cria um novo namespace de pid, mas o processo "unshare" atual não está no novo namespace de pid. É o comportamento desejado do kernel do Linux: o processo A cria um novo namespace, o próprio processo A não será colocado no novo namespace, apenas os sub-processos do processo A serão colocados no novo namespace. Então, quando você executa:
 ```
 unshare -p /bin/bash
 ```
+O processo unshare executará /bin/bash, e /bin/bash criará vários sub-processos. O primeiro sub-processo do bash se tornará o PID 1 do novo namespace e o subprocesso sairá após concluir seu trabalho. Portanto, o PID 1 do novo namespace sairá.
 
-The unshare process will exec /bin/bash, and /bin/bash forks several sub-processes, the first sub-process of bash will become PID 1 of the new namespace, and the subprocess will exit after it completes its job. So the PID 1 of the new namespace exits.
+O processo PID 1 tem uma função especial: ele deve se tornar o processo pai de todos os processos órfãos. Se o processo PID 1 no namespace raiz sair, o kernel entrará em pânico. Se o processo PID 1 em um sub-namespace sair, o kernel Linux chamará a função disable\_pid\_allocation, que limpará a flag PIDNS\_HASH\_ADDING nesse namespace. Quando o kernel Linux cria um novo processo, ele chama a função alloc\_pid para alocar um PID em um namespace e, se a flag PIDNS\_HASH\_ADDING não estiver definida, a função alloc\_pid retornará um erro -ENOMEM. É por isso que você recebeu o erro "Cannot allocate memory".
 
-The PID 1 process has a special function: it should become all the orphan processes' parent process. If PID 1 process in the root namespace exits, kernel will panic. If PID 1 process in a sub namespace exits, linux kernel will call the disable\_pid\_allocation function, which will clean the PIDNS\_HASH\_ADDING flag in that namespace. When linux kernel create a new process, kernel will call alloc\_pid function to allocate a PID in a namespace, and if the PIDNS\_HASH\_ADDING flag is not set, alloc\_pid function will return a -ENOMEM error. That's why you got the "Cannot allocate memory" error.
-
-You can resolve this issue by use the '-f' option:
-
+Você pode resolver esse problema usando a opção '-f':
 ```
 unshare -fp /bin/bash
 ```
+Se você executar o comando unshare com a opção '-f', o unshare irá criar um novo processo após criar o novo namespace pid. E executará /bin/bash no novo processo. O novo processo será o pid 1 do novo namespace pid. Em seguida, o bash também irá criar vários sub-processos para realizar algumas tarefas. Como o próprio bash é o pid 1 do novo namespace pid, seus sub-processos podem ser encerrados sem nenhum problema.
 
-If you run unshare with '-f' option, unshare will fork a new process after it create the new pid namespace. And run /bin/bash in the new process. The new process will be the pid 1 of the new pid namespace. Then bash will also fork several sub-processes to do some jobs. As bash itself is the pid 1 of the new pid namespace, its sub-processes can exit without any problem.
+Copiado de [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 
-Copied from [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
-
-</details>
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+Ao montar uma nova instância do sistema de arquivos `/proc`, se você usar o parâmetro `--mount-proc`, você garante que o novo namespace de montagem tenha uma **visão precisa e isolada das informações de processo específicas para aquele namespace**.
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
+### Verificar em qual namespace está o seu processo
 
-### &#x20;Check which namespace are your process in
+Para verificar em qual namespace está o seu processo, você pode executar o seguinte comando:
 
+```bash
+ls -l /proc/$$/ns
+```
+
+Onde `$$` é o PID do seu processo. Isso mostrará uma lista de namespaces e seus identificadores de inode. O namespace PID é o namespace de ID de processo.
 ```bash
 ls -l /proc/self/ns/pid
 lrwxrwxrwx 1 root root 0 Apr  3 18:45 /proc/self/ns/pid -> 'pid:[4026532412]'
 ```
-
-### Find all PID namespaces
+### Encontre todos os namespaces PID
 
 {% code overflow="wrap" %}
 ```bash
@@ -89,26 +85,12 @@ sudo find /proc -maxdepth 3 -type l -name pid -exec readlink {} \; 2>/dev/null |
 ```
 {% endcode %}
 
-Note that the root use from the initial (default) PID namespace can see all the processes, even the ones in new PID names paces, thats why we can see all the PID namespaces.
+Observe que o usuário root do namespace PID inicial (padrão) pode ver todos os processos, inclusive os que estão em novos namespaces PID, é por isso que podemos ver todos os namespaces PID.
 
-### Enter inside a PID namespace
-
+### Entrando em um namespace PID
 ```bash
 nsenter -t TARGET_PID --pid /bin/bash
 ```
+Quando você entra em um namespace PID a partir do namespace padrão, ainda é possível ver todos os processos. E o processo desse PID ns será capaz de ver o novo bash no PID ns.
 
-When you enter inside a PID namespace from the default namespace, you will still be able to see all the processes. And the process from that PID ns will be able to see the new bash on the PID ns.
-
-Also, you can only **enter in another process PID namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/pid`)
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
+Além disso, você só pode **entrar em outro namespace PID se você for root**. E você **não pode entrar** em outro namespace **sem um descritor** apontando para ele (como `/proc/self/ns/pid`).

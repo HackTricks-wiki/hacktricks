@@ -1,95 +1,61 @@
-# Active Directory Methodology
+# Metodologia do Active Directory
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Basic overview
+## Visão geral básica
 
-Active Directory allows network administrators to create and manage domains, users, and objects within a network. For example, an admin can create a group of users and give them specific access privileges to certain directories on the server. As a network grows, Active Directory provides a way to organize a large number of users into logical groups and subgroups, while providing access control at each level.
+O Active Directory permite que administradores de rede criem e gerenciem domínios, usuários e objetos dentro de uma rede. Por exemplo, um administrador pode criar um grupo de usuários e dar a eles privilégios de acesso específicos a determinados diretórios no servidor. À medida que uma rede cresce, o Active Directory fornece uma maneira de organizar um grande número de usuários em grupos e subgrupos lógicos, enquanto fornece controle de acesso em cada nível.
 
-The Active Directory structure includes three main tiers: 1) domains, 2) trees, and 3) forests. Several objects (users or devices) that all use the same database may be grouped in to a single domain. Multiple domains can be combined into a single group called a tree. Multiple trees may be grouped into a collection called a forest. Each one of these levels can be assigned specific access rights and communication privileges.
+A estrutura do Active Directory inclui três camadas principais: 1) domínios, 2) árvores e 3) florestas. Vários objetos (usuários ou dispositivos) que usam o mesmo banco de dados podem ser agrupados em um único domínio. Vários domínios podem ser combinados em um único grupo chamado árvore. Múltiplas árvores podem ser agrupadas em uma coleção chamada floresta. Cada um desses níveis pode ser atribuído a direitos de acesso específicos e privilégios de comunicação.
 
-Main concepts of an Active Directory:
+Principais conceitos de um Active Directory:
 
-1. **Directory** – Contains all the information about the objects of the Active directory
-2. **Object** – An object references almost anything inside the directory (a user, group, shared folder...)
-3. **Domain** – The objects of the directory are contained inside the domain. Inside a "forest" more than one domain can exist and each of them will have their own objects collection.
-4. **Tree** – Group of domains with the same root. Example: _dom.local, email.dom.local, www.dom.local_
-5. **Forest** – The forest is the highest level of the organization hierarchy and is composed by a group of trees. The trees are connected by trust relationships.
+1. **Diretório** - Contém todas as informações sobre os objetos do Active Directory
+2. **Objeto** - Um objeto faz referência a quase qualquer coisa dentro do diretório (um usuário, grupo, pasta compartilhada...)
+3. **Domínio** - Os objetos do diretório estão contidos dentro do domínio. Dentro de uma "floresta", mais de um domínio pode existir e cada um deles terá sua própria coleção de objetos.
+4. **Árvore** - Grupo de domínios com a mesma raiz. Exemplo: _dom.local, email.dom.local, www.dom.local_
+5. **Floresta** - A floresta é o nível mais alto da hierarquia da organização e é composta por um grupo de árvores. As árvores são conectadas por relacionamentos de confiança.
 
-Active Directory provides several different services, which fall under the umbrella of "Active Directory Domain Services," or AD DS. These services include:
+O Active Directory fornece vários serviços diferentes, que se enquadram no guarda-chuva de "Serviços de Domínio do Active Directory" ou AD DS. Esses serviços incluem:
 
-1. **Domain Services** – stores centralized data and manages communication between users and domains; includes login authentication and search functionality
-2. **Certificate Services** – creates, distributes, and manages secure certificates
-3. **Lightweight Directory Services** – supports directory-enabled applications using the open (LDAP) protocol
-4. **Directory Federation Services** – provides single-sign-on (SSO) to authenticate a user in multiple web applications in a single session
-5. **Rights Management** – protects copyrighted information by preventing unauthorized use and distribution of digital content
-6. **DNS Service** – Used to resolve domain names.
+1. **Serviços de Domínio** - armazena dados centralizados e gerencia a comunicação entre usuários e domínios; inclui autenticação de login e funcionalidade de pesquisa
+2. **Serviços de Certificado** - cria, distribui e gerencia certificados seguros
+3. **Serviços de Diretório Leve** - suporta aplicativos habilitados para diretório usando o protocolo aberto (LDAP)
+4. **Serviços de Federação de Diretório** - fornece logon único (SSO) para autenticar um usuário em vários aplicativos da web em uma única sessão
+5. **Gerenciamento de Direitos** - protege informações protegidas por direitos autorais, impedindo o uso e distribuição não autorizados de conteúdo digital
+6. **Serviço DNS** - Usado para resolver nomes de domínio.
 
-AD DS is included with Windows Server (including Windows Server 10) and is designed to manage client systems. While systems running the regular version of Windows do not have the administrative features of AD DS, they do support Active Directory. This means any Windows computer can connect to a Windows workgroup, provided the user has the correct login credentials.\
-**From:** [**https://techterms.com/definition/active\_directory**](https://techterms.com/definition/active\_directory)
+O AD DS está incluído no Windows Server (incluindo o Windows Server 10) e é projetado para gerenciar sistemas de clientes. Embora os sistemas que executam a versão regular do Windows não tenham os recursos administrativos do AD DS, eles suportam o Active Directory. Isso significa que qualquer computador com Windows pode se conectar a um grupo de trabalho do Windows, desde que o usuário tenha as credenciais de login corretas.\
+**De:** [**https://techterms.com/definition/active\_directory**](https://techterms.com/definition/active\_directory)
 
-### **Kerberos Authentication**
+### **Autenticação Kerberos**
 
-To learn how to **attack an AD** you need to **understand** really good the **Kerberos authentication process**.\
-[**Read this page if you still don't know how it works.**](kerberos-authentication.md)
+Para aprender como **atacar um AD**, você precisa **entender** muito bem o **processo de autenticação Kerberos**.\
+[**Leia esta página se você ainda não sabe como funciona.**](kerberos-authentication.md)
 
 ## Cheat Sheet
 
-You can take a lot to [https://wadcoms.github.io/](https://wadcoms.github.io) to have a quick view of which commands you can run to enumerate/exploit an AD.
+Você pode acessar [https://wadcoms.github.io/](https://wadcoms.github.io) para ter uma visão rápida dos comandos que você pode executar para enumerar/explorar um AD.
 
-## Recon Active Directory (No creds/sessions)
+## Reconhecimento do Active Directory (sem credenciais/sessões)
 
-If you just have access to an AD environment but you don't have any credentials/sessions you could:
+Se você só tem acesso a um ambiente AD, mas não tem credenciais/sessões, você pode:
 
-* **Pentest the network:**
-  * Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them (for example, [printers could be very interesting targets](ad-information-in-printers.md).
-  * Enumerating DNS could give information about key servers in the domain as web, printers, shares, vpn, media, etc.
+* **Testar a rede:**
+  * Escanear a rede, encontrar máquinas e portas abertas e tentar **explorar vulnerabilidades** ou **extrair credenciais** delas (por exemplo, [impressoras podem ser alvos muito interessantes](ad-information-in-printers.md).
+  * Enumerar DNS pode fornecer informações sobre servidores-chave no domínio, como web, impressoras, compartilhamentos, VPN, mídia, etc.
     * `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
-  * Take a look to the General [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md) to find more information about how to do this.
-* **Check for null and Guest access on smb services** (this won't work on modern Windows versions):
-  * `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
-  * `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
-  * `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-  * A more detailed guide on how to enumerate a SMB server can be found here:
-
-{% content-ref url="../../network-services-pentesting/pentesting-smb.md" %}
-[pentesting-smb.md](../../network-services-pentesting/pentesting-smb.md)
-{% endcontent-ref %}
-
-* **Enumerate Ldap**
-  * `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
-  * A more detailed guide on how to enumerate LDAP can be found here (pay **special attention to the anonymous access**):
-
-{% content-ref url="../../network-services-pentesting/pentesting-ldap.md" %}
-[pentesting-ldap.md](../../network-services-pentesting/pentesting-ldap.md)
-{% endcontent-ref %}
-
-* **Poison the network**
-  * Gather credentials [**impersonating services with Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
-  * Access host by [**abusing the relay attack**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
-  * Gather credentials **exposing** [**fake UPnP services with evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
-* [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
-  * Extract usernames/names from internal documents, social media, services (mainly web) inside the domain environments and also from the publicly available.
-  * If you find the complete names of company workers, you could try different AD **username conventions (**[**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/)). The most common conventions are: _NameSurname_, _Name.Surname_, _NamSur_ (3letters of each), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random letters and 3 random numbers_ (abc123).
-  * Tools:
-    * [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
-    * [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
-
-### User enumeration
-
-* **Anonymous SMB/LDAP enum:** Check the [**pentesting SMB**](../../network-services-pentesting/pentesting-smb.md) and [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) pages.
-* **Kerbrute enum**: When an **invalid username is requested** the server will respond using the **Kerberos error** code _KRB5KDC\_ERR\_C\_PRINCIPAL\_UNKNOWN_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response or the error _KRB5KDC\_ERR\_PREAUTH\_REQUIRED_, indicating that the user is required to perform pre-authentication.
-
+  * Dê uma olhada na [**Metodologia de Pentesting Genérica**](../../generic-methodologies-and-resources/pentesting-method
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -100,11 +66,9 @@ msf> use auxiliary/gather/kerberos_enumusers
 
 crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
 ```
+* **Servidor OWA (Outlook Web Access)**
 
-* **OWA (Outlook Web Access) Server**
-
-If you found one of these servers in the network you can also perform **user enumeration against it**. For example, you could use the tool [**MailSniper**](https://github.com/dafthack/MailSniper):
-
+Se você encontrou um desses servidores na rede, também pode realizar **enumeração de usuários** contra ele. Por exemplo, você pode usar a ferramenta [**MailSniper**](https://github.com/dafthack/MailSniper):
 ```bash
 ipmo C:\Tools\MailSniper\MailSniper.ps1
 # Get info about the domain
@@ -116,28 +80,27 @@ Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summe
 # Get addresses list from the compromised mail
 Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
 ```
-
 {% hint style="warning" %}
-You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* and this one ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
+Você pode encontrar listas de nomes de usuário neste [**repositório do Github**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) e neste outro ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
 
-However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) to generate potential valid usernames.
+No entanto, você deve ter o **nome das pessoas que trabalham na empresa** a partir da etapa de reconhecimento que você deve ter realizado antes disso. Com o nome e sobrenome, você pode usar o script [**namemash.py**](https://gist.github.com/superkojiman/11076951) para gerar possíveis nomes de usuário válidos.
 {% endhint %}
 
-### Knowing one or several usernames
+### Sabendo um ou vários nomes de usuário
 
-Ok, so you know you have already a valid username but no passwords... Then try:
+Ok, então você sabe que já tem um nome de usuário válido, mas não tem senhas... Então tente:
 
-* [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _DONT\_REQ\_PREAUTH_ you can **request a AS\_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
-* [**Password Spraying**](password-spraying.md): Let's try the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy!).
-  * Note that you can also **spray OWA servers** to try to get access to the users mail servers.
+* [**ASREPRoast**](asreproast.md): Se um usuário **não tem** o atributo _DONT\_REQ\_PREAUTH_, você pode **solicitar uma mensagem AS\_REP** para esse usuário que conterá alguns dados criptografados por uma derivação da senha do usuário.
+* [**Password Spraying**](password-spraying.md): Vamos tentar as senhas mais **comuns** com cada um dos usuários descobertos, talvez algum usuário esteja usando uma senha ruim (lembre-se da política de senhas!).
+  * Observe que você também pode **testar servidores OWA** para tentar acessar os servidores de e-mail dos usuários.
 
 {% content-ref url="password-spraying.md" %}
 [password-spraying.md](password-spraying.md)
 {% endcontent-ref %}
 
-### LLMNR/NBT-NS Poisoning
+### Envenenamento LLMNR/NBT-NS
 
-You might be able to **obtain** some challenge **hashes** to crack **poisoning** some protocols of the **network**:
+Você pode ser capaz de **obter** alguns **hashes** de desafio para quebrar **envenenando** alguns protocolos da **rede**:
 
 {% content-ref url="../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md" %}
 [spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
@@ -145,73 +108,62 @@ You might be able to **obtain** some challenge **hashes** to crack **poisoning**
 
 ### NTML Relay
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* to get access to the AD env.
+Se você conseguiu enumerar o Active Directory, terá **mais e-mails e uma melhor compreensão da rede**. Você pode ser capaz de forçar ataques de **retransmissão NTML** para obter acesso ao ambiente AD.
 
-### Steal NTLM Creds
+### Roubar credenciais NTLM
 
-If you can **access other PCs or shares** with the **null or guest user** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTML authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+Se você pode **acessar outros PCs ou compartilhamentos** com o usuário **null ou guest**, você pode **colocar arquivos** (como um arquivo SCF) que, se acessados de alguma forma, irão **disparar uma autenticação NTML contra você** para que você possa **roubar** o **desafio NTLM** para quebrá-lo:
 
 {% content-ref url="../ntlm/places-to-steal-ntlm-creds.md" %}
 [places-to-steal-ntlm-creds.md](../ntlm/places-to-steal-ntlm-creds.md)
 {% endcontent-ref %}
 
-## Enumerating Active Directory WITH credentials/session
+## Enumerando o Active Directory COM credenciais/sessão
 
-For this phase you need to have **compromised the credentials or a session of a valid domain account.** If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
+Para esta fase, você precisa ter **comprometido as credenciais ou uma sessão de uma conta de domínio válida**. Se você tiver algumas credenciais válidas ou um shell como um usuário de domínio, **lembre-se de que as opções dadas anteriormente ainda são opções para comprometer outros usuários**.
 
-Before start the authenticated enumeration you should know what is the **Kerberos double hop problem.**
+Antes de começar a enumeração autenticada, você deve saber o que é o **problema de duplo salto Kerberos**.
 
 {% content-ref url="kerberos-double-hop-problem.md" %}
 [kerberos-double-hop-problem.md](kerberos-double-hop-problem.md)
 {% endcontent-ref %}
 
-### Enumeration
+### Enumeração
 
-Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
+Ter comprometido uma conta é um **grande passo para começar a comprometer todo o domínio**, porque você vai ser capaz de começar a **Enumeração do Active Directory**:
 
-Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords.
+Com relação ao [**ASREPRoast**](asreproast.md), agora você pode encontrar todos os usuários vulneráveis possíveis, e com relação ao [**Password Spraying**](password-spraying.md), você pode obter uma **lista de todos os nomes de usuário** e tentar a senha da conta comprometida, senhas vazias e novas senhas promissoras.
 
-* You could use the [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
-* You can also use [**powershell for recon**](../basic-powershell-for-pentesters/) which will be stealthier
-* You ca also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
-* Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
-  * **Other automated AD enumeration tools are:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
-* \*\*\*\*[**DNS records of the AD**](ad-dns-records.md) \*\*\*\* as they might contain interesting information.
-* A **tool with GUI** that you can use to enumerate the directory is **AdExplorer.exe** from **SysInternal** Suite.
-* You can also search in the LDAP database with **ldapsearch** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
-* If you are using **Linux**, you could also enumerate the domain using [**pywerview**](https://github.com/the-useless-one/pywerview).
-* You could also try automated tools as:
+* Você pode usar o [**CMD para realizar uma recon básica**](../basic-cmd-for-pentesters.md#domain-info)
+* Você também pode usar o [**powershell para recon**](../basic-powershell-for-pentesters/) que será mais furtivo
+* Você também pode [**usar o powerview**](../basic-powershell-for-pentesters/powerview.md) para extrair informações mais detalhadas
+* Outra ferramenta incrível para recon em um Active Directory é o [**BloodHound**](bloodhound.md). Não é muito furtivo (dependendo dos métodos de coleta que você usa), mas **se você não se importa** com isso, você deve experimentá-lo. Encontre onde os usuários podem RDP, encontre o caminho para outros grupos, etc.
+  * **Outras ferramentas automatizadas de enumeração AD são:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
+* \*\*\*\*[**Registros DNS do AD**](ad-dns-records.md) \*\*\*\* pois podem conter informações interessantes.
+* Uma **ferramenta com GUI** que você pode usar para enumerar o diretório é o **AdExplorer.exe** da **SysInternal** Suite.
+* Você também pode pesquisar no banco de dados LDAP com **ldapsearch** para procurar credenciais nos campos _userPassword_ e _unixUserPassword_, ou mesmo em _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) para outros métodos.
+* Se você estiver usando o **Linux**, também pode enumerar o domínio usando [**pywerview**](https://github.com/the-useless-one/pywerview).
+* Você também pode tentar ferramentas automatizadas como:
   * [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
   * [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
-*   **Extracting all domain users**
+*   **Extraindo todos os usuários do domínio**
 
-    It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser` or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
+    É muito fácil obter todos os nomes de usuário do domínio no Windows (`net user /domain`, `Get-DomainUser` ou `wmic useraccount get name,sid`). No Linux, você pode usar: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` ou `enum4linux -a -u "user" -p "password" <DC IP>`
 
-> Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.
+> Mesmo que esta seção de Enumeração pareça pequena, ela é a parte mais importante de todas. Acesse os links (principalmente o de cmd, powershell, powerview e BloodHound), aprenda como enumerar um domínio e pratique até se sentir confortável. Durante uma avaliação, este será o momento chave para encontrar o caminho para DA ou decidir que nada pode ser feito.
 
 ### Kerberoast
 
-The goal of Kerberoasting is to harvest **TGS tickets for services that run on behalf of domain user accounts**. Part of these TGS tickets are **encrypted wit keys derived from user passwords**. As a consequence, their credentials could be **cracked offline**.\
-More about this in:
+O objetivo do Kerberoasting é coletar **tickets TGS para serviços que são executados em nome de contas de usuário de domínio**. Parte desses tickets TGS são **criptografados com chaves derivadas de senhas de usuário**. Como consequência, suas credenciais podem ser **quebradas offline**.\
+Mais sobre isso em:
 
 {% content-ref url="kerberoast.md" %}
 [kerberoast.md](kerberoast.md)
 {% endcontent-ref %}
 
-### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
+### Conexão remota (RDP, SSH, FTP, Win-RM, etc)
 
-Once you have obtained some credentials you could check if you have access to any **machine**. For that matter, you could use **CrackMapExec** to attempt connecting on several servers with different protocols, accordingly to your ports scans.
-
-### Local Privilege Escalation
-
-If you have compromised credentials or a session as a regular domain user and you have **access** with this user to **any machine in the domain** you should try to find your way to **escalate privileges locally and looting for credentials**. This is because only with local administrator privileges you will be able to **dump hashes of other users** in memory (LSASS) and locally (SAM).
-
-There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/) and a [**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to use [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
-
-### Current Session Tickets
-
-It's very **unlikely** that you will find **tickets** in the current user **giving you permission to access** unexpected resources, but you could check:
-
+Depois de obter algumas credenciais, você pode verificar se tem acesso a qualquer **máquina**. Para isso, você pode usar o **CrackMapExec** para tentar se conectar em vários servidores com diferentes protocolos, de acordo com suas varreduras de portas
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -219,20 +171,19 @@ It's very **unlikely** that you will find **tickets** in the current user **givi
 .\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 [IO.File]::WriteAllBytes("ticket.kirbi", [Convert]::FromBase64String("<BASE64_TICKET>"))
 ```
-
 ### NTML Relay
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
+Se você conseguiu enumerar o Active Directory, terá **mais e-mails e uma melhor compreensão da rede**. Você pode ser capaz de forçar ataques de [**relé NTML**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
 
-### **Looks for Creds in Computer Shares**
+### **Procurando Credenciais em Compartilhamentos de Computador**
 
-Now that you have some basic credentials you should check if you can **find** any **interesting files being shared inside the AD**. You could do that manually but it's a very boring repetitive task (and more if you find hundreds of docs you need to check).
+Agora que você tem algumas credenciais básicas, deve verificar se pode **encontrar** quaisquer **arquivos interessantes compartilhados dentro do AD**. Você poderia fazer isso manualmente, mas é uma tarefa muito chata e repetitiva (e mais ainda se você encontrar centenas de documentos que precisa verificar).
 
-[**Follow this link to learn about tools you could use.**](../../network-services-pentesting/pentesting-smb.md#domain-shared-folders-search)
+[**Siga este link para aprender sobre as ferramentas que você pode usar.**](../../network-services-pentesting/pentesting-smb.md#domain-shared-folders-search)
 
-### Steal NTLM Creds
+### Roubar Credenciais NTLM
 
-If you can **access other PCs or shares** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTML authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+Se você pode **acessar outros PCs ou compartilhamentos**, você pode **colocar arquivos** (como um arquivo SCF) que, se acessados de alguma forma, irão **disparar uma autenticação NTML contra você** para que você possa **roubar** o **desafio NTLM** para quebrá-lo:
 
 {% content-ref url="../ntlm/places-to-steal-ntlm-creds.md" %}
 [places-to-steal-ntlm-creds.md](../ntlm/places-to-steal-ntlm-creds.md)
@@ -240,31 +191,31 @@ If you can **access other PCs or shares** you could **place files** (like a SCF 
 
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
-This vulnerability allowed any authenticated user to **compromise the domain controller**.
+Essa vulnerabilidade permitiu que qualquer usuário autenticado **comprometesse o controlador de domínio**.
 
 {% content-ref url="printnightmare.md" %}
 [printnightmare.md](printnightmare.md)
 {% endcontent-ref %}
 
-## Privilege escalation on Active Directory WITH privileged credentials/session
+## Escalação de privilégios no Active Directory COM credenciais/sessão privilegiada
 
-**For the following techniques a regular domain user is not enough, you need some special privileges/credentials to perform these attacks.**
+**Para as seguintes técnicas, um usuário de domínio regular não é suficiente, você precisa de algumas credenciais/privilégios especiais para realizar esses ataques.**
 
-### Hash extraction
+### Extração de Hash
 
-Hopefully you have managed to **compromise some local admin** account using [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) including relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/).\
-Then, its time to dump all the hashes in memory and locally.\
-[**Read this page about different ways to obtain the hashes.**](broken-reference)
+Com sorte, você conseguiu **comprometer alguma conta de administrador local** usando [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) incluindo relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalando privilégios localmente](../windows-local-privilege-escalation/).\
+Então, é hora de despejar todos os hashes na memória e localmente.\
+[**Leia esta página sobre diferentes maneiras de obter os hashes.**](broken-reference)
 
 ### Pass the Hash
 
-**Once you have the hash of a user**, you can use it to **impersonate** it.\
-You need to use some **tool** that will **perform** the **NTLM authentication using** that **hash**, **or** you could create a new **sessionlogon** and **inject** that **hash** inside the **LSASS**, so when any **NTLM authentication is performed**, that **hash will be used.** The last option is what mimikatz does.\
-[**Read this page for more information.**](../ntlm/#pass-the-hash)
+**Depois de ter o hash de um usuário**, você pode usá-lo para **se passar por ele**.\
+Você precisa usar alguma **ferramenta** que irá **realizar** a **autenticação NTLM usando** esse **hash**, **ou** você poderia criar um novo **sessionlogon** e **injetar** esse **hash** dentro do **LSASS**, então quando qualquer **autenticação NTLM for realizada**, esse **hash será usado**. A última opção é o que o mimikatz faz.\
+[**Leia esta página para mais informações.**](../ntlm/#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
 
-This attack aims to **use the user NTLM hash to request Kerberos tickets**, as an alternative to the common Pass The Hash over NTLM protocol. Therefore, this could be especially **useful in networks where NTLM protocol is disabled** and only **Kerberos is allowed** as authentication protocol.
+Este ataque tem como objetivo **usar o hash NTLM do usuário para solicitar tickets Kerberos**, como uma alternativa ao comum Pass The Hash sobre o protocolo NTLM. Portanto, isso pode ser especialmente **útil em redes onde o protocolo NTLM é desativado** e apenas **Kerberos é permitido** como protocolo de autenticação.
 
 {% content-ref url="over-pass-the-hash-pass-the-key.md" %}
 [over-pass-the-hash-pass-the-key.md](over-pass-the-hash-pass-the-key.md)
@@ -272,296 +223,114 @@ This attack aims to **use the user NTLM hash to request Kerberos tickets**, as a
 
 ### Pass the Ticket
 
-This attack is similar to Pass the Key, but instead of using hashes to request a ticket, the **ticket itself is stolen** and used to authenticate as its owner.
+Este ataque é semelhante ao Pass the Key, mas em vez de usar hashes para solicitar um ticket, o **próprio ticket é roubado** e usado para autenticar como seu proprietário.
 
 {% content-ref url="pass-the-ticket.md" %}
 [pass-the-ticket.md](pass-the-ticket.md)
 {% endcontent-ref %}
 
-### Credentials Reuse
+### Reutilização de Credenciais
 
-If you have the **hash** or **password** of a **local administrato**r you should try to **login locally** to other **PCs** with it.
-
+Se você tem o **hash** ou **senha** de um **administrador local**, você deve tentar **fazer login localmente** em outros **PCs** com ele.
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-
 {% hint style="warning" %}
-Note that this is quite **noisy** and **LAPS** would **mitigate** it.
+Observe que isso é bastante **ruidoso** e o **LAPS** iria **mitigar** isso.
 {% endhint %}
 
 ### MSSQL Abuse & Trusted Links
 
-If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA), **steal** the NetNTLM **hash** or even perform a **relay** **attack**.\
-Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. These trusts can be chained and at some point the user might be able to find a misconfigured database where he can execute commands.\
-**The links between databases work even across forest trusts.**
+Se um usuário tem privilégios para **acessar instâncias MSSQL**, ele pode ser capaz de usá-lo para **executar comandos** no host MSSQL (se estiver em execução como SA), **roubar** o **hash** NetNTLM ou até mesmo realizar um **ataque de relé**.\
+Além disso, se uma instância MSSQL é confiável (link de banco de dados) por uma instância MSSQL diferente. Se o usuário tiver privilégios sobre o banco de dados confiável, ele poderá **usar o relacionamento de confiança para executar consultas também na outra instância**. Essas confianças podem ser encadeadas e, em algum momento, o usuário pode ser capaz de encontrar um banco de dados mal configurado onde pode executar comandos.\
+**Os links entre bancos de dados funcionam mesmo em confianças de floresta.**
 
 {% content-ref url="abusing-ad-mssql.md" %}
 [abusing-ad-mssql.md](abusing-ad-mssql.md)
 {% endcontent-ref %}
 
-### Unconstrained Delegation
+### Delegação não restrita
 
-If you find any Computer object with the attribute [ADS\_UF\_TRUSTED\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.\
-So, if a **Domain Admin logins onto the computer**, you will be able to dump his TGT and impersonate him using [Pass the Ticket](pass-the-ticket.md).\
-Thanks to constrained delegation you could even **automatically compromise a Print Server** (hopefully it will be a DC).
+Se você encontrar algum objeto de computador com o atributo [ADS\_UF\_TRUSTED\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx) e tiver privilégios de domínio no computador, poderá despejar TGTs da memória de todos os usuários que fazem login no computador.\
+Portanto, se um **Administrador de Domínio fizer login no computador**, você poderá despejar seu TGT e se passar por ele usando [Pass the Ticket](pass-the-ticket.md).\
+Graças à delegação restrita, você pode até mesmo **comprometer automaticamente um servidor de impressão** (esperançosamente será um DC).
 
 {% content-ref url="unconstrained-delegation.md" %}
 [unconstrained-delegation.md](unconstrained-delegation.md)
 {% endcontent-ref %}
 
-### Constrained Delegation
+### Delegação restrita
 
-If a user or computer is allowed for "Constrained Delegation" it will be able to **impersonate any user to access some services in a computer**.\
-Then, if you **compromise the hash** of this user/computer you will be able to **impersonate any user** (even domain admins) to access some services.
+Se um usuário ou computador tiver permissão para "Delegação restrita", ele poderá **se passar por qualquer usuário para acessar alguns serviços em um computador**.\
+Então, se você **comprometer o hash** deste usuário / computador, poderá **se passar por qualquer usuário** (até mesmo administradores de domínio) para acessar alguns serviços.
 
 {% content-ref url="constrained-delegation.md" %}
 [constrained-delegation.md](constrained-delegation.md)
 {% endcontent-ref %}
 
-### Resourced-based Constrain Delegation
+### Delegação baseada em recursos
 
-It's possible to gain code execution with **elevated privileges on a remote computer if you have WRITE privilege** on that computer's AD object.
+É possível obter a execução de código com **privilégios elevados em um computador remoto se você tiver privilégio de gravação** no objeto AD desse computador.
 
 {% content-ref url="resource-based-constrained-delegation.md" %}
 [resource-based-constrained-delegation.md](resource-based-constrained-delegation.md)
 {% endcontent-ref %}
 
-### ACLs Abuse
+### Abuso de ACLs
 
-The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.
+O usuário comprometido pode ter alguns **privilégios interessantes sobre alguns objetos de domínio** que podem permitir que você **se mova** lateralmente / **eleve** privilégios.
 
 {% content-ref url="acl-persistence-abuse/" %}
 [acl-persistence-abuse](acl-persistence-abuse/)
 {% endcontent-ref %}
 
-### Printer Spooler service abuse
+### Abuso do serviço de spooler de impressão
 
-If you can find any **Spool service listening** inside the domain, you may be able to **abuse** is to **obtain new credentials** and **escalate privileges**.\
-[**More information about how to abuse Spooler services here.**](printers-spooler-service-abuse.md)
+Se você puder encontrar algum **serviço de spooler ouvindo** dentro do domínio, poderá **abusar** dele para **obter novas credenciais** e **elevar privilégios**.\
+[**Mais informações sobre como abusar dos serviços de spooler aqui.**](printers-spooler-service-abuse.md)
 
-### Third party sessions abuse
+### Abuso de sessões de terceiros
 
-If **other users** **access** the **compromised** machine, it's possible to **gather credentials from memory** and even **inject beacons in their processes** to impersonate them.\
-Usually users will access the system via RDP, so here you have how to performa couple of attacks over third party RDP sessions:
+Se **outros usuários acessarem** a **máquina comprometida**, é possível **coletar credenciais da memória** e até mesmo **injetar beacons em seus processos** para se passar por eles.\
+Normalmente, os usuários acessarão o sistema via RDP, então aqui você tem como realizar alguns ataques em sessões RDP de terceiros:
 
 {% content-ref url="rdp-sessions-abuse.md" %}
 [rdp-sessions-abuse.md](rdp-sessions-abuse.md)
-{% endcontent-ref %}
+{%
+### Diferentes confianças
 
-### LAPS
+É importante notar que **uma confiança pode ser de uma via ou de duas vias**. Na opção de duas vias, ambos os domínios confiarão um no outro, mas na relação de confiança de **uma via**, um dos domínios será o **confiável** e o outro o domínio **confiante**. Neste último caso, **você só poderá acessar recursos dentro do domínio confiante a partir do confiável**.
 
-**LAPS** allows you to **manage the local Administrator password** (which is **randomised**, unique, and **changed regularly**) on domain-joined computers. These passwords are centrally stored in Active Directory and restricted to authorised users using ACLs. If you have **enough permission to read these passwords you could move to other computers**.
+Se o Domínio A confia no Domínio B, A é o domínio confiante e B é o domínio confiável. Além disso, no **Domínio A**, isso seria uma **confiança de saída**; e no **Domínio B**, isso seria uma **confiança de entrada**.
 
-{% content-ref url="laps.md" %}
-[laps.md](laps.md)
-{% endcontent-ref %}
+**Diferentes relacionamentos de confiança**
 
-### Certificate Theft
+* **Pai-Filho** - parte da mesma floresta - um domínio filho mantém uma confiança transitiva implícita de duas vias com seu pai. Este é provavelmente o tipo mais comum de confiança que você encontrará.
+* **Cross-link** - também conhecido como uma confiança "shortcut" entre domínios filhos para melhorar os tempos de referência. Normalmente, as referências em uma floresta complexa têm que filtrar até a raiz da floresta e depois voltar para o domínio de destino, então, para um cenário geograficamente disperso, os cross-links podem fazer sentido para reduzir os tempos de autenticação.
+* **Externo** - uma confiança implicitamente não transitiva criada entre domínios díspares. "[As confianças externas fornecem acesso a recursos em um domínio fora da floresta que ainda não foi unido por uma confiança de floresta.](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx)" As confianças externas aplicam a filtragem SID, uma proteção de segurança abordada posteriormente neste post.
+* **Raiz da árvore** - uma confiança transitiva implícita de duas vias entre o domínio raiz da floresta e a nova raiz da árvore que você está adicionando. Eu não encontrei confianças de raiz de árvore com muita frequência, mas a partir da [documentação da Microsoft](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx), elas são criadas quando você cria uma nova árvore de domínio em uma floresta. Estas são confianças intra-floresta e elas [preservam a transitividade de duas vias](https://technet.microsoft.com/en-us/library/cc757352\(v=ws.10\).aspx) permitindo que a árvore tenha um nome de domínio separado (em vez de filho.pai.com).
+* **Floresta** - uma confiança transitiva entre dois domínios raiz da floresta. As confianças de floresta também aplicam a filtragem SID.
+* **MIT** - uma confiança com um domínio Kerberos não-Windows [compatível com RFC4120](https://tools.ietf.org/html/rfc4120). Espero mergulhar mais nas confianças MIT no futuro.
 
-Gathering certificates from the compromised machine could be a way to escalate privileges inside the environment:
+#### Outras diferenças em **relacionamentos de confiança**
 
-{% content-ref url="ad-certificates/certificate-theft.md" %}
-[certificate-theft.md](ad-certificates/certificate-theft.md)
-{% endcontent-ref %}
+* Um relacionamento de confiança também pode ser **transitivo** (A confia em B, B confia em C, então A confia em C) ou **não transitivo**.
+* Um relacionamento de confiança pode ser configurado como **confiança bidirecional** (ambos confiam um no outro) ou como **confiança de uma via** (apenas um deles confia no outro).
 
-### Certificate Templates Abuse
+### Caminho de ataque
 
-If vulnerable templates are configured it's possible to abuse them to escalate privileges:
+1. **Enumerar** os relacionamentos de confiança
+2. Verifique se algum **principal de segurança** (usuário/grupo/computador) tem **acesso** a recursos do **outro domínio**, talvez por entradas ACE ou por estar em grupos do outro domínio. Procure por **relacionamentos entre domínios** (a confiança foi criada para isso, provavelmente).
+   1. Kerberoast, neste caso, pode ser outra opção.
+3. **Comprometer** as **contas** que podem **pivô** através dos domínios.
 
-{% content-ref url="ad-certificates/domain-escalation.md" %}
-[domain-escalation.md](ad-certificates/domain-escalation.md)
-{% endcontent-ref %}
+Existem três maneiras **principais** pelas quais os principais de segurança (usuários/grupos/computadores) de um domínio podem ter acesso a recursos em outro domínio confiável/estrangeiro:
 
-## Post-exploitation with high privilege account
-
-### Dumping Domain Credentials
-
-Once you get **Domain Admin** or even better **Enterprise Admin** privileges, you can **dump** the **domain database**: _ntds.dit_.
-
-[**More information about DCSync attack can be found here**](dcsync.md).
-
-[**More information about how to steal the NTDS.dit can be found here**](broken-reference)
-
-### Privesc as Persistence
-
-Some of the techniques discussed before can be used for persistence.\
-For example you could:
-
-*   Make users vulnerable to [**Kerberoast**](kerberoast.md)
-
-    ```powershell
-    Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
-    ```
-*   Make users vulnerable to [**ASREPRoast**](asreproast.md)
-
-    ```powershell
-    Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
-    ```
-*   Grant [**DCSync**](./#dcsync) privileges to a user
-
-    ```powershell
-    Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
-    ```
-
-### Silver Ticket
-
-The Silver ticket attack is based on **crafting a valid TGS for a service once the NTLM hash of service is owned** (like the **PC account hash**). Thus, it is possible to **gain access to that service** by forging a custom TGS **as any user** (like privileged access to a computer).
-
-{% content-ref url="silver-ticket.md" %}
-[silver-ticket.md](silver-ticket.md)
-{% endcontent-ref %}
-
-### Golden Ticket
-
-A valid **TGT as any user** can be created **using the NTLM hash of the krbtgt AD account**. The advantage of forging a TGT instead of TGS is being **able to access any service** (or machine) in the domain ad the impersonated user.
-
-{% content-ref url="golden-ticket.md" %}
-[golden-ticket.md](golden-ticket.md)
-{% endcontent-ref %}
-
-### Diamond Ticket
-
-These are like golden tickets forged in a way that **bypasses common golden tickets detection mechanisms.**
-
-{% content-ref url="diamond-ticket.md" %}
-[diamond-ticket.md](diamond-ticket.md)
-{% endcontent-ref %}
-
-### **Certificates Account Persistence**
-
-**Having certificates of an account or being able to request them** is a very good way to be able to persist in the users account (even if he changes the password):
-
-{% content-ref url="ad-certificates/account-persistence.md" %}
-[account-persistence.md](ad-certificates/account-persistence.md)
-{% endcontent-ref %}
-
-### **Certificates Domain Persistence**
-
-**Using certificates is also possible to persist with high privileges inside the domain:**
-
-{% content-ref url="ad-certificates/domain-persistence.md" %}
-[domain-persistence.md](ad-certificates/domain-persistence.md)
-{% endcontent-ref %}
-
-### AdminSDHolder Group
-
-The Access Control List (ACL) of the **AdminSDHolder** object is used as a template to **copy** **permissions** to **all “protected groups”** in Active Directory and their members. Protected groups include privileged groups such as Domain Admins, Administrators, Enterprise Admins, and Schema Admins, Backup Operators and krbtgt.\
-By default, the ACL of this group is copied inside all the "protected groups". This is done to avoid intentional or accidental changes to these critical groups. However, if an attacker **modifies the ACL** of the group **AdminSDHolder** for example, giving full permissions to a regular user, this user will have full permissions on all the groups inside the protected group (in an hour).\
-And if someone tries to delete this user from the Domain Admins (for example) in an hour or less, the user will be back in the group.\
-[**More information about AdminDSHolder Group here.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
-
-### DSRM Credentials
-
-There is a **local administrator** account inside each **DC**. Having admin privileges in this machine, you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password** so you can remotely access to this local Administrator user.
-
-{% content-ref url="dsrm-credentials.md" %}
-[dsrm-credentials.md](dsrm-credentials.md)
-{% endcontent-ref %}
-
-### ACL Persistence
-
-You could **give** some **special permissions** to a **user** over some specific domain objects that will let the user **escalate privileges in the future**.
-
-{% content-ref url="acl-persistence-abuse/" %}
-[acl-persistence-abuse](acl-persistence-abuse/)
-{% endcontent-ref %}
-
-### Security Descriptors
-
-The **security descriptors** are used to **store** the **permissions** an **object** have **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.
-
-{% content-ref url="security-descriptors.md" %}
-[security-descriptors.md](security-descriptors.md)
-{% endcontent-ref %}
-
-### Skeleton Key
-
-**Modify LSASS** in memory to create a **master password** that will work for any account in the domain.
-
-{% content-ref url="skeleton-key.md" %}
-[skeleton-key.md](skeleton-key.md)
-{% endcontent-ref %}
-
-### Custom SSP
-
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs.md#security-support-provider-interface-sspi)\
-You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.\\
-
-{% content-ref url="custom-ssp.md" %}
-[custom-ssp.md](custom-ssp.md)
-{% endcontent-ref %}
-
-### DCShadow
-
-It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.
-
-{% content-ref url="dcshadow.md" %}
-[dcshadow.md](dcshadow.md)
-{% endcontent-ref %}
-
-### LAPS Persistence
-
-Previously we have discussed about how to escalate privileges if you have **enough permission to read LAPS passwords**. However, these passwords can also be used to **maintain persistence**.\
-Check:
-
-{% content-ref url="laps.md" %}
-[laps.md](laps.md)
-{% endcontent-ref %}
-
-## Forest Privilege Escalation - Domain Trusts
-
-Microsoft considers that the **domain isn't a Security Boundary**, the **Forest is the security Boundary**. This means that **if you compromise a domain inside a Forest you might be able to compromise the entire Forest**.
-
-### Basic Information
-
-At a high level, a [**domain trust**](http://technet.microsoft.com/en-us/library/cc759554\(v=ws.10\).aspx) establishes the ability for **users in one domain to authenticate** to resources or act as a [security principal](https://technet.microsoft.com/en-us/library/cc780957\(v=ws.10\).aspx) **in another domain**.
-
-Essentially, all a trust does is **linking up the authentication systems of two domains** and allowing authentication traffic to flow between them through a system of referrals.\
-When **2 domains trust each other they exchange keys**, these **keys** are going to be **saved** in the **DCs** of **each domains** (**2 keys per trust direction, latest and previous**) and the keys will be the base of the trust.
-
-When a **user** tries to **access** a **service** on the **trusting domain** it will request an **inter-realm TGT** to the DC of its domain. The DC wills serve the client this **TGT** which would be **encrypted/signed** with the **inter-realm** **key** (the key both domains **exchanged**). Then, the **client** will **access** the **DC of the other domain** and will **request** a **TGS** for the service using the **inter-realm TGT**. The **DC** of the trusting domain will **check** the **key** used, if it's ok, it will **trust everything in that ticket** and will serve the TGS to the client.
-
-![](<../../.gitbook/assets/image (166) (1).png>)
-
-### Different trusts
-
-It's important to notice that **a trust can be 1 way or 2 ways**. In the 2 ways options, both domains will trust each other, but in the **1 way** trust relation one of the domains will be the **trusted** and the other the **trusting** domain. In the last case, **you will only be able to access resources inside the trusting domain from the trusted one**.
-
-If Domain A trusts Domain B, A is the trusting domain and B ins the trusted one. Moreover, in **Domain A**, this would be an **Outbound trust**; and in **Domain B**, this would be an **Inbound trust**.
-
-**Different trusting relationships**
-
-* **Parent-Child** – part of the same forest – a child domain retains an implicit two-way transitive trust with its parent. This is probably the most common type of trust that you’ll encounter.
-* **Cross-link** – aka a “shortcut trust” between child domains to improve referral times. Normally referrals in a complex forest have to filter up to the forest root and then back down to the target domain, so for a geographically spread out scenario, cross-links can make sense to cut down on authentication times.
-* **External** – an implicitly non-transitive trust created between disparate domains. “[External trusts provide access to resources in a domain outside of the forest that is not already joined by a forest trust.](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx)” External trusts enforce SID filtering, a security protection covered later in this post.
-* **Tree-root** – an implicit two-way transitive trust between the forest root domain and the new tree root you’re adding. I haven’t encountered tree-root trusts too often, but from the [Microsoft documentation](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx), they’re created when you create a new domain tree in a forest. These are intra-forest trusts, and they [preserve two-way transitivity](https://technet.microsoft.com/en-us/library/cc757352\(v=ws.10\).aspx) while allowing the tree to have a separate domain name (instead of child.parent.com).
-* **Forest** – a transitive trust between two forest root domain. Forest trusts also enforce SID filtering.
-* **MIT** – a trust with a non-Windows [RFC4120-compliant](https://tools.ietf.org/html/rfc4120) Kerberos domain. I hope to dive more into MIT trusts in the future.
-
-#### Other differences in **trusting relationships**
-
-* A trust relationship can also be **transitive** (A trust B, B trust C, then A trust C) or **non-transitive**.
-* A trust relationship can be set up as **bidirectional trust** (both trust each other) or as **one-way trust** (only one of them trust the other).
-
-### Attack Path
-
-1. **Enumerate** the trusting relationships
-2. Check if any **security principal** (user/group/computer) has **access** to resources of the **other domain**, maybe by ACE entries or by being in groups of the other domain. Look for **relationships across domains** (the trust was created for this probably).
-   1. kerberoast in this case could be another option.
-3. **Compromise** the **accounts** which can **pivot** through domains.
-
-There are three **main** ways that security principals (users/groups/computer) from one domain can have access into resources in another foreign/trusting domain:
-
-* They can be added to **local groups** on individual machines, i.e. the local “Administrators” group on a server.
-* They can be added to **groups in the foreign domain**. There are some caveats depending on trust type and group scope, described shortly.
-* They can be added as principals in an **access control list**, most interesting for us as principals in **ACEs** in a **DACL**. For more background on ACLs/DACLs/ACEs, check out the “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an\_ace\_up\_the\_sleeve.pdf)” whitepaper.
-
-### Child-to-Parent forest privilege escalation
-
+* Eles podem ser adicionados a **grupos locais** em máquinas individuais, ou seja, o grupo local "Administradores" em um servidor.
+* Eles podem ser adicionados a **grupos no domínio estrangeiro**. Existem algumas ressalvas dependendo do tipo de confiança e do escopo do grupo, descritos em breve.
+* Eles podem ser adicionados como principais em uma **lista de controle de acesso**, mais interessante para nós como principais em **ACEs** em um **DACL**. Para mais informações sobre ACLs/DACLs/ACEs, confira o whitepaper "[An ACE Up The Sleeve](https://specterops.io/assets/resources/an\_ace\_up\_the\_sleeve.pdf)".
 ```
 Get-DomainTrust
 
@@ -573,38 +342,35 @@ TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
 WhenCreated     : 2/19/2021 1:28:00 PM
 WhenChanged     : 2/19/2021 1:28:00 PM
 ```
-
 {% hint style="warning" %}
-There are **2 trusted keys**, one for _Child --> Parent_ and another one for _Parent_ --> _Child_.\
-You can the one used by the current domain them with:
-
+Existem **2 chaves confiáveis**, uma para _Filho --> Pai_ e outra para _Pai_ --> _Filho_.\
+Você pode verificar qual é a usada pelo domínio atual com:
 ```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\mcorp$"'
 ```
 {% endhint %}
 
-#### SID-History Injection
+#### Injeção de SID-History
 
-Escalate as Enterprise admin to the child/parent domain abusing the trust with SID-History injection:
+Escalando como administrador da empresa para o domínio filho/pai abusando da confiança com a injeção de SID-History:
 
 {% content-ref url="sid-history-injection.md" %}
 [sid-history-injection.md](sid-history-injection.md)
 {% endcontent-ref %}
 
-#### Exploit writeable Configuration NC
+#### Explorando a NC de Configuração gravável
 
-The Configuration NC is the primary repository for configuration information for a forest and is replicated to every DC in the forest. Additionally, every writable DC (not read-only DCs) in the forest holds a writable copy of the Configuration NC. Exploiting this require running as SYSTEM on a (child) DC.
+A NC de Configuração é o repositório primário de informações de configuração para uma floresta e é replicada para todos os DCs na floresta. Além disso, cada DC gravável (não DCs somente leitura) na floresta possui uma cópia gravável da NC de Configuração. Explorar isso requer a execução como SYSTEM em um DC (filho).
 
-It is possible to compromise the root domain in various ways. Examples:
+É possível comprometer o domínio raiz de várias maneiras. Exemplos:
 
-* [Link GPO to to root DC site](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research)
-* [Compromise gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
-* [Schema attack](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)
-* Exploit ADCS - Create/modify certificate template to allow authentication as any user (e.g. Enterprise Admins)
+* [Vincular GPO ao site do DC raiz](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research)
+* [Comprometer gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
+* [Ataque de esquema](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)
+* Explorar ADCS - Criar/modificar modelo de certificado para permitir autenticação como qualquer usuário (por exemplo, administradores da empresa)
 
-### External Forest Domain - One-Way (Inbound) or bidirectional
-
+### Domínio de Floresta Externa - Unidirecional (Entrada) ou bidirecional
 ```powershell
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -615,15 +381,13 @@ TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 ```
-
-In this scenario **your domain is trusted** by an external one giving you **undetermined permissions** over it. You will need to find **which principals of your domain have which access over the external domain** and then try to exploit it:
+Neste cenário, **seu domínio é confiável** por um externo, dando a você **permissões indeterminadas** sobre ele. Você precisará descobrir **quais princípios do seu domínio têm acesso ao domínio externo** e, em seguida, tentar explorá-lo:
 
 {% content-ref url="external-forest-domain-oneway-inbound.md" %}
 [external-forest-domain-oneway-inbound.md](external-forest-domain-oneway-inbound.md)
 {% endcontent-ref %}
 
-### External Forest Domain - One-Way (Outbound)
-
+### Domínio de Floresta Externa - Apenas um Sentido (Saída)
 ```powershell
 Get-DomainTrust -Domain current.local
 
@@ -635,100 +399,99 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
+Neste cenário, **seu domínio** está **confiando** alguns **privilégios** a um principal de um **domínio diferente**.
 
-In this scenario **your domain** is **trusting** some **privileges** to principal from a **different domains**.
-
-However, when a **domain is trusted** by the trusting domain, the trusted domain **creates a user** with a **predictable name** that uses as **password the trusted password**. Which means that it's possible to **access a user from the trusting domain to get inside the trusted one** to enumerate it and try to escalate more privileges:
+No entanto, quando um **domínio é confiável** pelo domínio confiante, o domínio confiável **cria um usuário** com um **nome previsível** que usa como **senha a senha confiável**. O que significa que é possível **acessar um usuário do domínio confiante para entrar no domínio confiável** para enumerá-lo e tentar escalar mais privilégios:
 
 {% content-ref url="external-forest-domain-one-way-outbound.md" %}
 [external-forest-domain-one-way-outbound.md](external-forest-domain-one-way-outbound.md)
 {% endcontent-ref %}
 
-Another way to compromise the trusted domain is to find a [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links) created in the **opposite direction** of the domain trust (which isn't very common).
+Outra maneira de comprometer o domínio confiável é encontrar um [**link confiável SQL**](abusing-ad-mssql.md#mssql-trusted-links) criado na **direção oposta** da confiança do domínio (o que não é muito comum).
 
-Another way to compromise the trusted domain is to wait in a machine where a **user from the trusted domain can access** to login via **RDP**. Then, the attacker could inject code in the RDP session process and **access the origin domain of the victim** from there.\
-Moreover, if the **victim mounted his hard drive**, from the **RDP session** process the attacker could store **backdoors** in the **startup folder of the hard drive**. This technique is called **RDPInception.**
+Outra maneira de comprometer o domínio confiável é esperar em uma máquina onde um **usuário do domínio confiável pode acessar** para fazer login via **RDP**. Então, o atacante poderia injetar código no processo da sessão RDP e **acessar o domínio de origem da vítima** a partir daí.\
+Além disso, se a **vítima montou seu disco rígido**, a partir do processo da sessão RDP, o atacante poderia armazenar **backdoors** na **pasta de inicialização do disco rígido**. Essa técnica é chamada de **RDPInception**.
 
 {% content-ref url="rdp-sessions-abuse.md" %}
 [rdp-sessions-abuse.md](rdp-sessions-abuse.md)
 {% endcontent-ref %}
 
-### Domain trust abuse mitigation
+### Mitigação de abuso de confiança de domínio
 
-**SID Filtering:**
+**Filtragem de SID:**
 
-* Avoid attacks which abuse SID history attribute across forest trust.
-* Enabled by default on all inter-forest trusts. Intra-forest trusts are assumed secured by default (MS considers forest and not the domain to be a security boundary).
-* But, since SID filtering has potential to break applications and user access, it is often disabled.
-* Selective Authentication
-  * In an inter-forest trust, if Selective Authentication is configured, users between the trusts will not be automatically authenticated. Individual access to domains and servers in the trusting domain/forest should be given.
-* Does not prevent writeable Configration NC exploitation and trust account attack.
+* Evite ataques que abusam do atributo de histórico de SID em confiança entre florestas.
+* Habilitado por padrão em todas as confianças inter-florestais. As confianças intra-florestais são consideradas seguras por padrão (a Microsoft considera a floresta e não o domínio como uma fronteira de segurança).
+* Mas, como a filtragem de SID tem o potencial de quebrar aplicativos e acesso do usuário, muitas vezes é desativada.
+* Autenticação seletiva
+  * Em uma confiança inter-florestal, se a Autenticação seletiva estiver configurada, os usuários entre as confianças não serão autenticados automaticamente. O acesso individual a domínios e servidores no domínio/floresta confiante deve ser concedido.
+* Não impede a exploração de NC de Configuração gravável e ataque de conta de confiança.
 
-[**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+[**Mais informações sobre confiança de domínio em ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
-## AD -> Cloud & Cloud -> AD
+## AD -> Nuvem e Nuvem -> AD
 
 {% embed url="https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/azure-ad-connect-hybrid-identity" %}
 
-## Some General Defenses
+## Algumas defesas gerais
 
-[**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)\
-**Please, find some migrations against each technique in the description of the technique.**
+[**Saiba mais sobre como proteger credenciais aqui.**](../stealing-credentials/credentials-protections.md)\
+**Por favor, encontre algumas migrações contra cada técnica na descrição da técnica.**
 
-* Not allow Domain Admins to login on any other hosts apart from Domain Controllers
-* Never run a service with DA privileges
-* If you need domain admin privileges, limit the time: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+* Não permita que os administradores de domínio façam login em nenhum outro host além dos controladores de domínio
+* Nunca execute um serviço com privilégios de DA
+* Se você precisar de privilégios de administrador de domínio, limite o tempo: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
-### Deception
+### Decepção
 
-* Password does not expire
-* Trusted for Delegation
-* Users with SPN
-* Password in description
-* Users who are members of high privilege groups
-* Users with ACL rights over other users, groups or containers
-* Computer objects
+* A senha não expira
+* Confiável para delegação
+* Usuários com SPN
+* Senha na descrição
+* Usuários que são membros de grupos de alta privilégio
+* Usuários com direitos de ACL sobre outros usuários, grupos ou contêineres
+* Objetos de computador
 * ...
 * [https://github.com/samratashok/Deploy-Deception](https://github.com/samratashok/Deploy-Deception)
   * `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
 
-## How to identify deception
+## Como identificar a decepção
 
-**For user objects:**
+**Para objetos de usuário:**
 
-* ObjectSID (different from the domain)
+* ObjectSID (diferente do domínio)
 * lastLogon, lastlogontimestamp
-* Logoncount (very low number is suspicious)
+* Logoncount (número muito baixo é suspeito)
 * whenCreated
-* Badpwdcount (very low number is suspicious)
+* Badpwdcount (número muito baixo é suspeito)
 
-**General:**
+**Geral:**
 
-* Some solutions fill with information in all the possible attributes. For example, compare the attributes of a computer object with the attribute of a 100% real computer object like DC. Or users against the RID 500 (default admin).
-* Check if something is too good to be true
+* Algumas soluções preenchem com informações em todos os atributos possíveis. Por exemplo, compare os atributos de um objeto de computador com o atributo de um objeto de computador 100% real como DC. Ou usuários contra o RID 500 (administrador padrão).
+* Verifique se algo é bom demais para ser verdade
 * [https://github.com/JavelinNetworks/HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster)
 
 ### Bypassing Microsoft ATA detection
 
-#### User enumeration
+#### Enumeração de usuário
 
-ATA only complains when you try to enumerate sessions in the DC, so if you don't look for sessions in the DC but in the rest of the hosts, you probably won't get detected.
+ATA só reclama quando você tenta enumerar sessões no DC, então se você não procurar sessões no DC, mas no resto dos hosts, provavelmente não será detectado.
 
-#### Tickets impersonation creation (Over pass the hash, golden ticket...)
+#### Criação de impersonação de tickets (Over pass the hash, golden ticket...)
 
-Always create the tickets using the **aes** keys also because what ATA identifies as malicious is the degradation to NTLM.
+Sempre crie os tickets usando as chaves **aes** também porque o que ATA identifica como malicioso é a degradação para NTLM.
 
 #### DCSync
 
-If you don't execute this from a Domain Controller, ATA is going to catch you, sorry.
+Se você não executar isso a partir de um Controlador de Domínio, o ATA vai pegar você, desculpe.
 
-## More Tools
+## Mais ferramentas
 
-* [Powershell script to do domain auditing automation](https://github.com/phillips321/adaudit)
-* [Python script to enumerate active directory](https://github.com/ropnop/windapsearch)
-* [Python script to enumerate active directory](https://github.com/CroweCybersecurity/ad-ldap-enum)
+* [Script do Powershell para automação de auditoria de domínio](https://github.com/phillips321/adaudit)
+* [Script Python para enumerar o Active Directory](https://github.com/ropnop/windapsearch)
+* [Script Python para enumerar o Active Directory](https://github.com/CroweCybersecurity/ad-ldap-enum)
 
-## References
+## Referências
 
 * [http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/](http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/)
 
@@ -736,10 +499,10 @@ If you don't execute this from a Domain Controller, ATA is going to catch you, s
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

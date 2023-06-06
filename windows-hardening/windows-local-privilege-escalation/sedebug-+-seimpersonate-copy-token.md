@@ -1,29 +1,4 @@
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
-The following code **exploits the privileges SeDebug and SeImpersonate** to copy the token from a **process running as SYSTEM** and with **all the token privileges**. \
-In this case, this code can be compiled and used as a **Windows service binary** to check that it's working.\
-However, the main part of the **code where the elevation occurs** is inside the **`Exploit`** **function**.\
-Inside of that function you can see that the **process **_**lsass.exe**_** is searched**, then it's **token is copied**, and finally that **token is used to spawn a new **_**cmd.exe**_** with all the privileges of the copied token**.
-
-**Other processes** running as SYSTEM with all or most of the token privileges are: _**services.exe**_**, **_**svhost.exe**_ (on of the firsts ones), _**wininit.exe**_**, **_**csrss.exe**_... (_remember that you won't be able to copy a token from a Protected process_). Moreover, you can use the tool [Process Hacker](https://processhacker.sourceforge.io/downloads.php) running as administrator to see the tokens of a process.
-
+O seguinte código explora os privilégios SeDebug e SeImpersonate para copiar o token de um processo em execução como SYSTEM e com todos os privilégios do token. Neste caso, este código pode ser compilado e usado como um binário de serviço do Windows para verificar se está funcionando. No entanto, a parte principal do código onde ocorre a elevação está dentro da função `Exploit`. Dentro dessa função, você pode ver que o processo `lsass.exe` é procurado, em seguida, seu token é copiado e, finalmente, esse token é usado para gerar um novo `cmd.exe` com todos os privilégios do token copiado. Outros processos em execução como SYSTEM com todos ou a maioria dos privilégios do token são: `services.exe`, `svhost.exe` (um dos primeiros), `wininit.exe`, `csrss.exe`... (lembre-se de que você não poderá copiar um token de um processo protegido). Além disso, você pode usar a ferramenta Process Hacker em execução como administrador para ver os tokens de um processo.
 ```c
 #include <windows.h>
 #include <tlhelp32.h>
@@ -227,24 +202,20 @@ int _tmain( int argc, TCHAR* argv[] )
 	return 0;
 }
 ```
-
-**The code of this example was shared by an anonymous person.**
-
+**O código deste exemplo foi compartilhado por uma pessoa anônima.**
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de cibersegurança**? Quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe seus truques de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

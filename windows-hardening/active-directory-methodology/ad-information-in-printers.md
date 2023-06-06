@@ -1,72 +1,49 @@
+Existem vários blogs na internet que destacam os perigos de deixar as impressoras configuradas com o LDAP com credenciais de login padrão/fracas. Isso ocorre porque um invasor pode enganar a impressora para autenticar-se contra um servidor LDAP falso (tipicamente um `nc -vv -l -p 444` é suficiente) e capturar as credenciais da impressora em texto claro.
 
+Além disso, várias impressoras contêm logs com nomes de usuários ou até mesmo podem ser capazes de baixar todos os nomes de usuários do Controlador de Domínio.
 
-<details>
+Todas essas informações sensíveis e a falta comum de segurança tornam as impressoras muito interessantes para os invasores.
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-
-There are several blogs in the Internet which **highlight the dangers of leaving printers configured with LDAP with default/weak** logon credentials.\
-This is because an attacker could **trick the printer to authenticate against a rouge LDAP server** (typically a `nc -vv -l -p 444` is enough) and to capture the printer **credentials on clear-text**.
-
-Also, several printers will contains **logs with usernames** or could even be able to **download all usernames** from the Domain Controller.
-
-All this **sensitive information** and the common **lack of security** makes printers very interesting for attackers.
-
-Some blogs about the topic:
+Alguns blogs sobre o assunto:
 
 * [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
 * [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
-**The following information was copied from** [**https://grimhacker.com/2018/03/09/just-a-printer/**](https://grimhacker.com/2018/03/09/just-a-printer/)
+**As seguintes informações foram copiadas de** [**https://grimhacker.com/2018/03/09/just-a-printer/**](https://grimhacker.com/2018/03/09/just-a-printer/)
 
-# LDAP settings
+# Configurações do LDAP
 
-On Konica Minolta printers it is possible to configure an LDAP server to connect to, along with credentials. In earlier versions of the firmware on these devices I have heard it is possible to recover the credentials simply by reading the html source of the page. Now, however the credentials are not returned in the interface so we have to work a little harder.
+Nas impressoras Konica Minolta, é possível configurar um servidor LDAP para se conectar, juntamente com as credenciais. Em versões anteriores do firmware desses dispositivos, ouvi dizer que é possível recuperar as credenciais simplesmente lendo a fonte html da página. Agora, no entanto, as credenciais não são retornadas na interface, então temos que trabalhar um pouco mais.
 
-The list of LDAP Servers is under: Network > LDAP Setting > Setting Up LDAP
+A lista de servidores LDAP está em: Rede > Configuração LDAP > Configurando o LDAP
 
-The interface allows the LDAP server to be modified without re-entering the credentials that will be used to connect. I presume this is for a simpler user experience, but it gives an opportunity for an attacker to escalate from master of a printer to a toe hold on the domain.
+A interface permite que o servidor LDAP seja modificado sem reentrar as credenciais que serão usadas para se conectar. Presumo que isso seja para uma experiência de usuário mais simples, mas dá uma oportunidade para um invasor escalar de mestre de uma impressora para um ponto de apoio no domínio.
 
-We can reconfigure the LDAP server address setting to a machine we control, and trigger a connection with the helpful “Test Connection” functionality.
+Podemos reconfigurar a configuração do endereço do servidor LDAP para uma máquina que controlamos e acionar uma conexão com a útil funcionalidade "Testar Conexão".
 
-# Listening for the goods
+# Ouvindo as informações
 
 ## netcat
 
-If you have better luck than me, you may be able to get away with a simple netcat listener:
-
+Se você tiver mais sorte do que eu, poderá se safar com um simples ouvinte netcat:
 ```
 sudo nc -k -v -l -p 386
 ```
-
-I am assured by [@\_castleinthesky](https://twitter.com/\_castleinthesky) that this works most of the time, however I have yet to be let off that easy.
+Sou assegurado por [@\_castleinthesky](https://twitter.com/\_castleinthesky) que isso funciona na maioria das vezes, no entanto, ainda não tive tanta sorte.
 
 ## Slapd
 
-I have found that a full LDAP server is required as the printer first attempts a null bind and then queries the available information, only if these operations are successful does it proceed to bind with the credentials.
+Descobri que um servidor LDAP completo é necessário, pois a impressora primeiro tenta uma ligação nula e, em seguida, consulta as informações disponíveis, somente se essas operações forem bem-sucedidas, ela prossegue para se ligar com as credenciais.
 
-I searched for a simple ldap server that met the requirements, however there seemed to be limited options. In the end I opted to setup an open ldap server and use the slapd debug server service to accept connections and print out the messages from the printer. (If you know of an easier alternative, I would be happy to hear about it)
+Procurei por um servidor LDAP simples que atendesse aos requisitos, no entanto, parecia haver opções limitadas. No final, optei por configurar um servidor LDAP aberto e usar o serviço de servidor de depuração slapd para aceitar conexões e imprimir as mensagens da impressora. (Se você conhece uma alternativa mais fácil, ficaria feliz em ouvir sobre ela)
 
-### Installation
+### Instalação
 
-(Note this section is a lightly adapted version of the guide here [https://www.server-world.info/en/note?os=Fedora\_26\&p=openldap](https://www.server-world.info/en/note?os=Fedora\_26\&p=openldap) )
+(Obs: esta seção é uma versão levemente adaptada do guia aqui [https://www.server-world.info/en/note?os=Fedora\_26\&p=openldap](https://www.server-world.info/en/note?os=Fedora\_26\&p=openldap) )
 
-From a root terminal:
+De um terminal de root:
 
-**Install OpenLDAP,**
-
+**Instale o OpenLDAP,**
 ```
 #> dnf install -y install openldap-servers openldap-clients
 
@@ -74,9 +51,7 @@ From a root terminal:
 
 #> chown ldap. /var/lib/ldap/DB_CONFIG
 ```
-
-**Set an OpenLDAP admin password (you will need this again shortly)**
-
+**Definir uma senha de administrador do OpenLDAP (você precisará dela novamente em breve)**
 ```
 #> slappasswd 
 New password:
@@ -100,9 +75,7 @@ SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
 SASL SSF: 0
 modifying entry "olcDatabase={0}config,cn=config"
 ```
-
-**Import basic Schemas**
-
+**Importar Esquemas Básicos**
 ```
 #> ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
 SASL/EXTERNAL authentication started
@@ -122,9 +95,7 @@ SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
 SASL SSF: 0
 adding new entry "cn=inetorgperson,cn=schema,cn=config"
 ```
-
-**Set your domain name on LDAP DB.**
-
+**Defina o nome do seu domínio no banco de dados LDAP.**
 ```
 # generate directory manager's password
 #> slappasswd 
@@ -208,11 +179,9 @@ adding new entry "ou=People,dc=foo,dc=bar"
 
 adding new entry "ou=Group,dc=foo,dc=bar"
 ```
+**Configurar o LDAP TLS**
 
-**Configure LDAP TLS**
-
-**Create and SSL Certificate**
-
+**Criar um Certificado SSL**
 ```
 #> cd /etc/pki/tls/certs 
 #> make server.key 
@@ -257,9 +226,15 @@ Signature ok
 subject=/C=/ST=/L=/O=/OU=Foo Bar/CN=dlp.foo.bar/emailAddress=xxx@roo.bar
 Getting Private key
 ```
+**Configurar o Slapd para SSL/TLS**
 
-**Configure Slapd for SSL /TLS**
+Para garantir a segurança das informações transmitidas entre o cliente e o servidor LDAP, é recomendado configurar o Slapd para usar SSL/TLS. Isso pode ser feito seguindo os seguintes passos:
 
+1. Gerar um certificado SSL/TLS válido para o servidor LDAP.
+2. Configurar o Slapd para usar o certificado SSL/TLS.
+3. Configurar o cliente LDAP para se conectar ao servidor usando SSL/TLS.
+
+Ao configurar o Slapd para usar SSL/TLS, é importante garantir que o certificado SSL/TLS seja válido e que o cliente LDAP esteja configurado corretamente para se conectar ao servidor usando SSL/TLS.
 ```
 #> cp /etc/pki/tls/certs/server.key \
 /etc/pki/tls/certs/server.crt \
@@ -289,50 +264,47 @@ SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
 SASL SSF: 0
 modifying entry "cn=config"
 ```
+**Permita o LDAP através do firewall local**
 
-**Allow LDAP through your local firewall**
-
+Para obter informações do Active Directory, é necessário permitir o tráfego LDAP através do firewall local. Isso pode ser feito abrindo a porta 389 para tráfego não seguro ou a porta 636 para tráfego seguro (usando SSL). Certifique-se de que apenas as máquinas necessárias tenham acesso a essas portas para evitar possíveis vazamentos de informações.
 ```
 firewall-cmd --add-service={ldap,ldaps}
 ```
+## O pagamento
 
-## The payoff
-
-Once you have installed and configured your LDAP service you can run it with the following command :
+Depois de instalar e configurar o serviço LDAP, você pode executá-lo com o seguinte comando:
 
 > ```
 > slapd -d 2
 > ```
 
-The screen shot below shows an example of the output when we run the connection test on the printer. As you can see the username and password are passed from the LDAP client to server.
+A captura de tela abaixo mostra um exemplo da saída quando executamos o teste de conexão na impressora. Como você pode ver, o nome de usuário e a senha são passados do cliente LDAP para o servidor.
 
-![slapd terminal output containing the username "MyUser" and password "MyPassword"](https://i1.wp.com/grimhacker.com/wp-content/uploads/2018/03/slapd\_output.png?resize=474%2C163\&ssl=1)
+![saída do terminal slapd contendo o nome de usuário "MyUser" e a senha "MyPassword"](https://i1.wp.com/grimhacker.com/wp-content/uploads/2018/03/slapd\_output.png?resize=474%2C163\&ssl=1)
 
-# How bad can it be?
+# Quão ruim pode ser?
 
-This very much depends on the credentials that have been configured.
+Isso depende muito das credenciais que foram configuradas.
 
-If the principle of least privilege is being followed, then you may only get read access to certain elements of active directory. This is often still valuable as you can use that information to formulate further more accurate attacks.
+Se o princípio do menor privilégio estiver sendo seguido, você poderá obter apenas acesso de leitura a determinados elementos do Active Directory. Isso ainda é frequentemente valioso, pois você pode usar essas informações para formular ataques mais precisos.
 
-Typically you are likely to get an account in the Domain Users group which may give access to sensitive information or form the prerequisite authentication for other attacks.
+Normalmente, você provavelmente obterá uma conta no grupo Domain Users, o que pode dar acesso a informações confidenciais ou formar a autenticação pré-requisito para outros ataques.
 
-Or, like me, you may be rewarded for setting up an LDAP server and be handed a Domain Admin account on a silver platter.
+Ou, como eu, você pode ser recompensado por configurar um servidor LDAP e receber uma conta de administrador de domínio em uma bandeja de prata.
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
-
-

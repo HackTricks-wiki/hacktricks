@@ -4,30 +4,29 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-## Context
+## Contexto
 
-In Linux in order to run a program it must exist as a file, it must be accessible in some way through the file system hierarchy (this is just how `execve()` works). This file may reside on disk or in ram (tmpfs, memfd) but you need a filepath. This has made very easy to control what is run on a Linux system, it makes easy to detect threats and attacker's tools or to prevent them from trying to execute anything of theirs at all (_e. g._ not allowing unprivileged users to place executable files anywhere).
+No Linux, para executar um programa, ele deve existir como um arquivo e deve ser acessível de alguma forma através da hierarquia do sistema de arquivos (é assim que `execve()` funciona). Este arquivo pode residir no disco ou na memória (tmpfs, memfd), mas você precisa de um caminho de arquivo. Isso tornou muito fácil controlar o que é executado em um sistema Linux, torna fácil detectar ameaças e ferramentas de atacantes ou impedi-los de tentar executar qualquer coisa deles (_por exemplo_, não permitindo que usuários não privilegiados coloquem arquivos executáveis em qualquer lugar).
 
-But this technique is here to change all of this. If you can not start the process you want... **then you hijack one already existing**.
+Mas esta técnica está aqui para mudar tudo isso. Se você não pode iniciar o processo que deseja... **então você sequestra um que já existe**.
 
-This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting...**
+Esta técnica permite que você **bypass técnicas de proteção comuns, como somente leitura, noexec, lista branca de nomes de arquivos, lista branca de hash...**
 
-## Dependencies
+## Dependências
 
-The final script depends on the following tools to work, they need to be accessible in the system you are attacking (by default you will find all of them everywhere):
-
+O script final depende das seguintes ferramentas para funcionar, elas precisam estar acessíveis no sistema que você está atacando (por padrão, você encontrará todas elas em todos os lugares):
 ```
 dd
 bash | zsh | ash (busybox)
@@ -41,54 +40,53 @@ wc
 tr
 base64
 ```
+## A técnica
 
-## The technique
+Se você é capaz de modificar arbitrariamente a memória de um processo, então você pode assumi-lo. Isso pode ser usado para sequestrar um processo já existente e substituí-lo por outro programa. Podemos alcançar isso usando a chamada do sistema `ptrace()` (que requer que você tenha a capacidade de executar chamadas do sistema ou ter o gdb disponível no sistema) ou, mais interessantemente, escrevendo em `/proc/$pid/mem`.
 
-If you are able to modify arbitrarily the memory of a process then you can take over it. This can be used to hijack an already existing process and replace it with another program. We can achieve this either by using the `ptrace()` syscall (which requires you to have the ability to execute syscalls or to have gdb available on the system) or, more interestingly, writing to `/proc/$pid/mem`.
+O arquivo `/proc/$pid/mem` é um mapeamento um-para-um de todo o espaço de endereço de um processo (por exemplo, de `0x0000000000000000` a `0x7ffffffffffff000` em x86-64). Isso significa que ler ou escrever neste arquivo em um deslocamento `x` é o mesmo que ler ou modificar o conteúdo no endereço virtual `x`.
 
-The file `/proc/$pid/mem` is a one-to-one mapping of the entire address space of a process (_e. g._ from `0x0000000000000000` to `0x7ffffffffffff000` in x86-64). This means that reading from or writing to this file at an offset `x` is the same as reading from or modifying the contents at the virtual address `x`.
+Agora, temos quatro problemas básicos a enfrentar:
 
-Now, we have four basic problems to face:
-
-* In general, only root and the program owner of the file may modify it.
+* Em geral, apenas o root e o proprietário do arquivo do programa podem modificá-lo.
 * ASLR.
-* If we try to read or write to an address not mapped in the address space of the program we will get an I/O error.
+* Se tentarmos ler ou escrever em um endereço não mapeado no espaço de endereço do programa, receberemos um erro de E/S.
 
-This problems have solutions that, although they are not perfect, are good:
+Esses problemas têm soluções que, embora não sejam perfeitas, são boas:
 
-* Most shell interpreters allow the creation of file descriptors that will then be inherited by child processes. We can create a fd pointing to the `mem` file of the sell with write permissions... so child processes that use that fd will be able to modify the shell's memory.
-* ASLR isn't even a problem, we can check the shell's `maps` file or any other from the procfs in order to gain information about the address space of the process.
-* So we need to `lseek()` over the file. From the shell this cannot be done unless using the infamous `dd`.
+* A maioria dos interpretadores de shell permite a criação de descritores de arquivo que serão herdados pelos processos filhos. Podemos criar um fd apontando para o arquivo `mem` do shell com permissões de gravação... então os processos filhos que usam esse fd poderão modificar a memória do shell.
+* O ASLR nem é um problema, podemos verificar o arquivo `maps` do shell ou qualquer outro do procfs para obter informações sobre o espaço de endereço do processo.
+* Então precisamos usar `lseek()` no arquivo. A partir do shell, isso não pode ser feito a menos que usemos o infame `dd`.
 
-### In more detail
+### Em mais detalhes
 
-The steps are relatively easy and do not require any kind of expertise to understand them:
+Os passos são relativamente fáceis e não exigem nenhum tipo de especialização para entendê-los:
 
-* Parse the binary we want to run and the loader to find out what mappings they need. Then craft a "shell"code that will perform, broadly speaking, the same steps that the kernel does upon each call to `execve()`:
-  * Create said mappings.
-  * Read the binaries into them.
-  * Set up permissions.
-  * Finally initialize the stack with the arguments for the program and place the auxiliary vector (needed by the loader).
-  * Jump into the loader and let it do the rest (load libraries needed by the program).
-* Obtain from the `syscall` file the address to which the process will return after the syscall it is executing.
-* Overwrite that place, which will be executable, with our shellcode (through `mem` we can modify unwritable pages).
-* Pass the program we want to run to the stdin of the process (will be `read()` by said "shell"code).
-* At this point it is up to the loader to load the necessary libraries for our program and jump into it.
+* Analise o binário que queremos executar e o carregador para descobrir quais mapeamentos eles precisam. Em seguida, crie um "shell"code que executará, em termos gerais, as mesmas etapas que o kernel faz em cada chamada para `execve()`:
+  * Crie os mapeamentos mencionados.
+  * Leia os binários neles.
+  * Configure as permissões.
+  * Finalmente, inicialize a pilha com os argumentos para o programa e coloque o vetor auxiliar (necessário pelo carregador).
+  * Pule para o carregador e deixe-o fazer o resto (carregar bibliotecas necessárias para o programa).
+* Obtenha do arquivo `syscall` o endereço para o qual o processo retornará após a chamada do sistema que está executando.
+* Sobrescreva aquele lugar, que será executável, com nosso shellcode (através de `mem` podemos modificar páginas não graváveis).
+* Passe o programa que queremos executar para o stdin do processo (será `lido()` pelo referido "shell"code).
+* Neste ponto, cabe ao carregador carregar as bibliotecas necessárias para nosso programa e pular para ele.
 
-**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
+**Confira a ferramenta em** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>

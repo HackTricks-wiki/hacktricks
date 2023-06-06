@@ -1,56 +1,56 @@
-# macOS Security & Privilege Escalation
+# Segurança e Escalada de Privilégios no macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga** me no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 <figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+[**Siga HackenProof**](https://bit.ly/3xrrDrL) **para aprender mais sobre bugs web3**
 
-🐞 Read web3 bug tutorials
+🐞 Leia tutoriais de bugs web3
 
-🔔 Get notified about new bug bounties
+🔔 Receba notificações sobre novos programas de recompensas por bugs
 
-💬 Participate in community discussions
+💬 Participe de discussões na comunidade
 
-## Basic MacOS
+## MacOS Básico
 
-If you are not familiar with macOS, you should start learning the basics of macOS:&#x20;
+Se você não está familiarizado com o macOS, você deve começar aprendendo o básico do macOS:
 
-* Special macOS **files & permissions:**
+* Arquivos e permissões especiais do macOS:
 
 {% content-ref url="macos-files-folders-and-binaries/" %}
 [macos-files-folders-and-binaries](macos-files-folders-and-binaries/)
 {% endcontent-ref %}
 
-* Common macOS **users**
+* Usuários comuns do macOS
 
 {% content-ref url="macos-users.md" %}
 [macos-users.md](macos-users.md)
 {% endcontent-ref %}
 
-* **AppleFS**
+* AppleFS
 
 {% content-ref url="macos-applefs.md" %}
 [macos-applefs.md](macos-applefs.md)
 {% endcontent-ref %}
 
-* The **architecture** of the k**ernel**
+* A arquitetura do kernel
 
 {% content-ref url="mac-os-architecture/" %}
 [mac-os-architecture](mac-os-architecture/)
 {% endcontent-ref %}
 
-* Common macOS n**etwork services & protocols**
+* Serviços e protocolos de rede comuns do macOS
 
 {% content-ref url="macos-protocols.md" %}
 [macos-protocols.md](macos-protocols.md)
@@ -58,66 +58,66 @@ If you are not familiar with macOS, you should start learning the basics of macO
 
 ### MacOS MDM
 
-In companies **macOS** systems are highly probably going to be **managed with a MDM**. Therefore, from the perspective of an attacker is interesting to know **how that works**:
+Em empresas, os sistemas **macOS** são altamente prováveis de serem **gerenciados com um MDM**. Portanto, do ponto de vista de um atacante, é interessante saber **como isso funciona**:
 
 {% content-ref url="macos-mdm/" %}
 [macos-mdm](macos-mdm/)
 {% endcontent-ref %}
 
-### MacOS - Inspecting, Debugging and Fuzzing
+### MacOS - Inspeção, Depuração e Fuzzing
 
 {% content-ref url="macos-apps-inspecting-debugging-and-fuzzing/" %}
 [macos-apps-inspecting-debugging-and-fuzzing](macos-apps-inspecting-debugging-and-fuzzing/)
 {% endcontent-ref %}
 
-## MacOS Security Protections
+## Proteções de Segurança do MacOS
 
 {% content-ref url="macos-security-protections/" %}
 [macos-security-protections](macos-security-protections/)
 {% endcontent-ref %}
 
-## Attack Surface
+## Superfície de Ataque
 
-### File Permissions
+### Permissões de Arquivo
 
-If a **process running as root writes** a file that can be controlled by a user, the user could abuse this to **escalate privileges**.\
-This could occur in the following situations:
+Se um **processo em execução como root escreve** um arquivo que pode ser controlado por um usuário, o usuário pode abusar disso para **escalar privilégios**.\
+Isso pode ocorrer nas seguintes situações:
 
-* File used was already created by a user (owned by the user)
-* File used is writable by the user because of a group
-* File used is inside a directory owned by the user (the user could create the file)
-* File used is inside a directory owned by root but user has write access over it because of a group (the user could create the file)
+* O arquivo usado já foi criado por um usuário (propriedade do usuário)
+* O arquivo usado é gravável pelo usuário por causa de um grupo
+* O arquivo usado está dentro de um diretório de propriedade do usuário (o usuário pode criar o arquivo)
+* O arquivo usado está dentro de um diretório de propriedade do root, mas o usuário tem acesso de gravação sobre ele por causa de um grupo (o usuário pode criar o arquivo)
 
-Being able to **create a file** that is going to be **used by root**, allows a user to **take advantage of its content** or even create **symlinks/hardlinks** to point it to another place.
+Ser capaz de **criar um arquivo** que será **usado pelo root**, permite que um usuário **aproveite seu conteúdo** ou até mesmo crie **symlinks/hardlinks** para apontá-lo para outro lugar.
 
-### Entitlements and Privileges abuse via process abuse
+### Abuso de Privilégios e Entitlements via Abuso de Processo
 
-If a process can **inject code in another process with better privileges or entitlements** or contact it to perform privileges actions, he could escalate privileges and bypass defensive meassures such as [Sandbox](macos-security-protections/macos-sandbox/) or [TCC](macos-security-protections/macos-tcc/).
+Se um processo pode **injetar código em outro processo com melhores privilégios ou entitlements** ou contatá-lo para realizar ações de privilégios, ele pode escalar privilégios e contornar medidas defensivas como [Sandbox](macos-security-protections/macos-sandbox/) ou [TCC](macos-security-protections/macos-tcc/).
 
 {% content-ref url="macos-proces-abuse/" %}
 [macos-proces-abuse](macos-proces-abuse/)
 {% endcontent-ref %}
 
-### File Extension Apps
+### Aplicativos de Extensão de Arquivo
 
-Weird apps registered by file extensions could be abused:
+Aplicativos estranhos registrados por extensões de arquivo podem ser abusados:
 
 {% content-ref url="macos-file-extension-apps.md" %}
 [macos-file-extension-apps.md](macos-file-extension-apps.md)
 {% endcontent-ref %}
 
-### URL handler applications
+### Aplicativos de Manipulação de URL
 
-Different applications can be resgiter to open specific protocols. They could be abused.
+Diferentes aplicativos podem ser registrados para abrir protocolos específicos. Eles podem ser abusados.
 
-TODO: Create a page about this
+TODO: Criar uma página sobre isso
 
-## MacOS Privilege Escalation
+## Escalada de Privilégios no MacOS
 
-### CVE-2020-9771 - mount\_apfs TCC bypass and privilege escalation
+### CVE-2020-9771 - mount\_apfs TCC bypass e escalada de privilégios
 
-**Any user** (even unprivileged ones) can create and mount a time machine snapshot an **access ALL the files** of that snapshot.\
-The **only privileged** needed is for the application used (like `Terminal`) to have **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) which need to be granted by an admin.
+**Qualquer usuário** (mesmo não privilegiado) pode criar e montar um snapshot do time machine e **acessar TODOS os arquivos** desse snapshot.\
+O **único privilégio** necessário é para o aplicativo usado (como o `Terminal`) ter **Acesso Total ao Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`) que precisa ser concedido por um administrador.
 
 {% code overflow="wrap" %}
 ```bash
@@ -141,23 +141,23 @@ ls /tmp/snap/Users/admin_user # This will work
 ```
 {% endcode %}
 
-A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve\_2020\_9771/)**.**
+Uma explicação mais detalhada pode ser [**encontrada no relatório original**](https://theevilbit.github.io/posts/cve\_2020\_9771/)**.**
 
-### Sensitive Information
+### Informações Sensíveis
 
 {% content-ref url="macos-files-folders-and-binaries/macos-sensitive-locations.md" %}
 [macos-sensitive-locations.md](macos-files-folders-and-binaries/macos-sensitive-locations.md)
 {% endcontent-ref %}
 
-### Linux Privesc
+### Privilégios Linux
 
-First of all, please note that **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** machines. So see:
+Em primeiro lugar, observe que **a maioria dos truques de escalonamento de privilégios que afetam o Linux/Unix também afetarão as máquinas MacOS**. Então veja:
 
 {% content-ref url="../../linux-hardening/privilege-escalation/" %}
 [privilege-escalation](../../linux-hardening/privilege-escalation/)
 {% endcontent-ref %}
 
-## References
+## Referências
 
 * [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 * [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
@@ -167,22 +167,22 @@ First of all, please note that **most of the tricks about privilege escalation a
 
 <figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+[**Siga HackenProof**](https://bit.ly/3xrrDrL) **para aprender mais sobre bugs web3**
 
-🐞 Read web3 bug tutorials
+🐞 Leia tutoriais de bugs web3
 
-🔔 Get notified about new bug bounties
+🔔 Receba notificações sobre novas recompensas por bugs
 
-💬 Participate in community discussions
+💬 Participe de discussões na comunidade
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

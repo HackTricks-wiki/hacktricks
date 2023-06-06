@@ -4,50 +4,50 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) **grupo do Discord** ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-## How do they work
+## Como eles funcionam
 
-1. Copy a service binary to the ADMIN$ share over SMB
-2. Create a service on the remote machine pointing to the binary
-3. Remotely start the service
-4. When exited, stop the service and delete the binary
+1. Copie um binário de serviço para o compartilhamento ADMIN$ via SMB
+2. Crie um serviço na máquina remota apontando para o binário
+3. Inicie o serviço remotamente
+4. Quando sair, pare o serviço e exclua o binário
 
-## **Manually PsExec'ing**
+## **Executando manualmente o PsExec**
 
-First let's assume we have a payload executable we generated with msfvenom and obfuscated with Veil (so AV doesn't flag it). In this case, I created a meterpreter reverse\_http payload and called it 'met8888.exe'
+Primeiro, vamos supor que temos um executável de payload que geramos com o msfvenom e obfuscamos com o Veil (para que o AV não o sinalize). Neste caso, criei um payload meterpreter reverse\_http e o chamei de 'met8888.exe'
 
-**Copy the binary**. From our "jarrieta" command prompt, simply copy the binary to the ADMIN$. Really though, it could be copied and hidden anywhere on the filesystem.
+**Copie o binário**. A partir do nosso prompt de comando "jarrieta", basta copiar o binário para o ADMIN$. Na verdade, ele poderia ser copiado e ocultado em qualquer lugar no sistema de arquivos.
 
 ![](../../.gitbook/assets/copy\_binary\_admin.png)
 
-**Create a service**. The Windows `sc` command is used to query, create, delete, etc Windows services and can be used remotely. Read more about it [here](https://technet.microsoft.com/en-us/library/bb490995.aspx). From our command prompt, we'll remotely create a service called "meterpreter" that points to our uploaded binary:
+**Crie um serviço**. O comando `sc` do Windows é usado para consultar, criar, excluir, etc. serviços do Windows e pode ser usado remotamente. Leia mais sobre isso [aqui](https://technet.microsoft.com/en-us/library/bb490995.aspx). A partir do nosso prompt de comando, criaremos remotamente um serviço chamado "meterpreter" que aponta para nosso binário carregado:
 
 ![](../../.gitbook/assets/sc\_create.png)
 
-**Start the service**. The last step is to start the service and execute the binary. _Note:_ when the service starts it will "time-out" and generate an error. That's because our meterpreter binary isn't an actual service binary and won't return the expected response code. That's fine because we just need it to execute once to fire:
+**Inicie o serviço**. O último passo é iniciar o serviço e executar o binário. _Nota:_ quando o serviço é iniciado, ele "expira" e gera um erro. Isso ocorre porque nosso binário meterpreter não é um binário de serviço real e não retornará o código de resposta esperado. Isso é bom porque só precisamos que ele execute uma vez para disparar:
 
 ![](../../.gitbook/assets/sc\_start\_error.png)
 
-If we look at our Metasploit listener, we'll see the session has been opened.
+Se olharmos para nosso ouvinte Metasploit, veremos que a sessão foi aberta.
 
-**Clean the service.**
+**Limpe o serviço.**
 
 ![](../../.gitbook/assets/sc\_delete.png)
 
-Extracted from here: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Extraído daqui: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**You could also use the Windows Sysinternals binary PsExec.exe:**
+**Você também pode usar o binário do Windows Sysinternals PsExec.exe:**
 
 ![](<../../.gitbook/assets/image (165).png>)
 
@@ -55,14 +55,14 @@ Extracted from here: [https://blog.ropnop.com/using-credentials-to-own-windows-b
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) **grupo do Discord** ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **Compartilhe suas técnicas de hacking enviando PRs para o [repositório hacktricks](https://github.com/carlospolop/hacktricks) e [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
