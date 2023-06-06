@@ -20,7 +20,7 @@ Active Directory objects such as users and groups are securable objects and DACL
 
 An example of ACEs for the "Domain Admins" securable object can be seen here:
 
-![](../../../.gitbook/assets/1.png)
+![](<../../../.gitbook/assets/1 (1).png>)
 
 Some of the Active Directory object permissions and types that we as attackers are interested in:
 
