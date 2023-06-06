@@ -35,7 +35,7 @@ mkdir -p $HOME/ContainerImages/alpine/
 cd $HOME/ContainerImages/alpine/
 wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 #Create the container
-sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.8
+sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
 ```
 
 Then, upload to the vulnerable server the files **lxd.tar.xz** and **rootfs.squashfs**
