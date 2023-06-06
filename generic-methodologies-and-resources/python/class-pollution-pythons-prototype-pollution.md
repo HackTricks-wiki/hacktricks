@@ -269,6 +269,12 @@ Use this payload to **change `app.secret_key`** (the name in your app might be d
 
 </details>
 
+Check also the following page for more read only gadgets:
+
+{% content-ref url="python-internal-read-gadgets.md" %}
+[python-internal-read-gadgets.md](python-internal-read-gadgets.md)
+{% endcontent-ref %}
+
 ## References
 
 * [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)

@@ -291,7 +291,7 @@ The heart of the file is the final region, the data, which consists of a number 
 The data is basically the part containing all the information loaded by the load commands LC\_SEGMENTS\_64
 {% endhint %}
 
-![](<../../../.gitbook/assets/image (555).png>)
+![](<../../../.gitbook/assets/image (507) (3).png>)
 
 This includes:&#x20;
 
