@@ -1,23 +1,23 @@
 ---
 descrição: >-
-  Bem-vindo à página onde você encontrará cada truque/técnica/hack que aprendi em CTFs, aplicativos da vida real, lendo pesquisas e notícias.
+  Bem-vindo ao wiki onde você encontrará cada truque/técnica/hack que aprendi em CTFs, aplicativos da vida real, pesquisas e notícias.
 ---
 
 # HackTricks
 
 <figure><img src=".gitbook/assets/hack tricks gif.gif" alt="" width="563"><figcaption></figcaption></figure>
 
-_Logotipos e design de movimento do Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Logos e design de movimento do Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 {% hint style="info" %}
-**Bem-vindo à página onde você encontrará cada truque/técnica/hack que aprendi em CTFs, aplicativos da vida real, lendo pesquisas e notícias.**
+**Bem-vindo ao wiki onde você encontrará cada truque/técnica/hack que aprendi em CTFs, aplicativos da vida real, pesquisas e notícias.**
 {% endhint %}
 
 Aqui você pode encontrar uma pequena **introdução:**
 
 ## [**Metodologia de Pentesting**](generic-methodologies-and-resources/pentesting-methodology.md)
 
-Aqui você encontrará o **fluxo típico** que **você deve seguir ao fazer pentesting** em uma ou mais **máquinas**.
+Aqui você encontrará o **fluxo típico** que **você deve seguir ao pentestar** uma ou mais **máquinas**.
 
 **Clique no título para começar!**
 
@@ -25,11 +25,11 @@ Aqui você encontrará o **fluxo típico** que **você deve seguir ao fazer pent
 
 ### [STM Cyber](https://www.stmcyber.com)
 
-![](<.gitbook/assets/image (642) (1) (1) (1).png>)
+![](<.gitbook/assets/image (638) (2) (1).png>)
 
 [**STM Cyber**](https://www.stmcyber.com) é uma ótima empresa de segurança cibernética cujo slogan é **HACK THE UNHACKABLE**. Eles realizam suas próprias pesquisas e desenvolvem suas próprias ferramentas de hacking para **oferecer vários serviços valiosos de segurança cibernética** como pentesting, equipes vermelhas e treinamento.
 
-Você pode conferir o **blog** deles em [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Você pode verificar o **blog** deles em [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
 **STM Cyber** também apoia projetos de código aberto de segurança cibernética como o HackTricks :)
 
@@ -45,7 +45,7 @@ Você pode conferir o **blog** deles em [**https://blog.stmcyber.com**](https://
 
 ![](.gitbook/assets/i3.png)
 
-**Intigriti** é a plataforma de **bug bounty nº 1 da Europa**.
+**Intigriti** é a plataforma de **bug bounty #1 da Europa**.
 
 Dica de bug bounty: **inscreva-se** no **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje e comece a ganhar recompensas de até **$100.000**!
 
@@ -55,6 +55,7 @@ Dica de bug bounty: **inscreva-se** no **Intigriti**, uma plataforma premium de 
 
 <figure><img src=".gitbook/assets/image (9) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
+\
 Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir e **automatizar fluxos de trabalho** com as ferramentas comunitárias mais avançadas do mundo.
 
 Obtenha acesso hoje:
@@ -79,4 +80,4 @@ Obtenha acesso hoje:
 
 <figure><img src=".gitbook/assets/logo.svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) é uma empresa profissional de segurança cibernética com sede em **Amsterdã** que ajuda a **proteger** empresas **em todo o mundo**
+[**WebSec**](https://websec.nl) é uma empresa profissional de segurança cibernética sediada em **Amsterdã** que ajuda a **proteger** empresas **em todo o mundo** contra as últimas ameaças de segurança cibernética, fornecendo serviços de **segurança
