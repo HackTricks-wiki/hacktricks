@@ -81,7 +81,6 @@
   * [Shells - Linux](generic-methodologies-and-resources/shells/linux.md)
   * [Full TTYs](generic-methodologies-and-resources/shells/full-ttys.md)
 
-
 ## 🐧 Linux Hardening
 
 * [Checklist - Linux Privilege Escalation](linux-hardening/linux-privilege-escalation-checklist.md)
@@ -763,4 +762,3 @@
 * [Stealing Sensitive Information Disclosure from a Web](stealing-sensitive-information-disclosure-from-a-web.md)
 * [Post Exploitation](post-exploitation.md)
 * [Cookies Policy](todo/cookies-policy.md)
-
