@@ -11,7 +11,7 @@ description: >-
 _Hacktricks logos & motion design by_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 {% hint style="info" %}
-**Welcome to the page where you will find each hacking trick/technique/whatever I have learnt from CTFs, real life apps, reading researches, and news.**
+**Welcome to the wiki where you will find each hacking trick/technique/whatever I have learnt from CTFs, real life apps, reading researches, and news.**
 {% endhint %}
 
 Here you can find a little **introduction:**
