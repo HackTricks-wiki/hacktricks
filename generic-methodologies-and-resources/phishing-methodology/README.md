@@ -8,7 +8,7 @@
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -90,7 +90,7 @@ Además, no olvides que si los usuarios usan **cualquier portal web para acceder
 
 ### Instalación
 
-Puedes descargarlo desde [https://
+Puedes descargarlo desde [https://github.com/gophish/gophish/releases/tag/v0
 ```bash
 ssh -L 3333:127.0.0.1:3333 <user>@<ip>
 ```
@@ -140,8 +140,8 @@ echo "This is the body of the email" | mail -s "This is the subject line" test@e
 ```
 **Configuración de Gophish**
 
-Detenga la ejecución de Gophish y configuremoslo.\
-Modifique `/opt/gophish/config.json` al siguiente (note el uso de https):
+Detenga la ejecución de Gophish y configuremos.\
+Modifique `/opt/gophish/config.json` al siguiente (tenga en cuenta el uso de https):
 ```bash
 {
         "admin_server": {
@@ -168,7 +168,7 @@ Modifique `/opt/gophish/config.json` al siguiente (note el uso de https):
 ```
 **Configurar el servicio de gophish**
 
-Para crear el servicio de gophish y que se pueda iniciar automáticamente y gestionar como un servicio, puedes crear el archivo `/etc/init.d/gophish` con el siguiente contenido:
+Para crear el servicio de gophish y que se pueda iniciar automáticamente y administrar como un servicio, puedes crear el archivo `/etc/init.d/gophish` con el siguiente contenido:
 ```bash
 #!/bin/bash
 # /etc/init.d/gophish
@@ -215,7 +215,7 @@ case $1 in
     start|stop|status) "$1" ;;
 esac
 ```
-Finaliza la configuración del servicio y comprueba que funciona haciendo:
+Termina de configurar el servicio y comprueba que funciona haciendo lo siguiente:
 ```bash
 mkdir /var/log/gophish
 chmod +x /etc/init.d/gophish
@@ -241,7 +241,7 @@ Establece un registro de rDNS (PTR) que resuelva la dirección IP del VPS al nom
 
 Debes **configurar un registro SPF para el nuevo dominio**. Si no sabes qué es un registro SPF, [**lee esta página**](../../network-services-pentesting/pentesting-smtp/#spf).
 
-Puedes utilizar [https://www.spfwizard.net/](https://www.spfwizard.net) para generar tu política SPF (utiliza la IP de la máquina VPS)
+Puedes usar [https://www.spfwizard.net/](https://www.spfwizard.net) para generar tu política SPF (usa la IP de la máquina VPS)
 
 ![](<../../.gitbook/assets/image (388).png>)
 
@@ -249,7 +249,7 @@ Este es el contenido que debe establecerse dentro de un registro TXT dentro del 
 ```bash
 v=spf1 mx a ip4:ip.ip.ip.ip ?all
 ```
-### Registro de Autenticación, Informes y Conformidad de Mensajes basados en Dominios (DMARC)
+### Registro de Autenticación, Informe y Conformidad de Mensajes basados en Dominios (DMARC)
 
 Debe **configurar un registro DMARC para el nuevo dominio**. Si no sabe qué es un registro DMARC, [**lea esta página**](../../network-services-pentesting/pentesting-smtp/#dmarc).
 
@@ -270,7 +270,7 @@ v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0wPibdqP
 ```
 {% endhint %}
 
-### Prueba la puntuación de configuración de tu correo electrónico
+### Prueba tu puntuación de configuración de correo electrónico
 
 Puedes hacerlo utilizando [https://www.mail-tester.com/](https://www.mail-tester.com)\
 Simplemente accede a la página y envía un correo electrónico a la dirección que te proporcionan:
@@ -278,7 +278,7 @@ Simplemente accede a la página y envía un correo electrónico a la dirección 
 echo "This is the body of the email" | mail -s "This is the subject line" test-iimosa79z@srv1.mail-tester.com
 ```
 También puedes **verificar la configuración de tu correo electrónico** enviando un correo electrónico a `check-auth@verifier.port25.com` y **leyendo la respuesta** (para esto necesitarás **abrir** el puerto **25** y ver la respuesta en el archivo _/var/mail/root_ si envías el correo como root).\
-Asegúrate de pasar todas las pruebas:
+Verifica que pasas todas las pruebas:
 ```bash
 ==========================================================
 Summary of Results
@@ -311,7 +311,7 @@ Puedes solicitar que se elimine tu dominio/IP en [https://sender.office.com/](ht
 * Decide desde qué cuenta vas a enviar los correos electrónicos de phishing. Sugerencias: _noreply, support, servicedesk, salesforce..._
 * Puedes dejar en blanco el nombre de usuario y la contraseña, pero asegúrate de marcar la opción Ignorar errores de certificado
 
-![](<../../.gitbook/assets/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (11).png>)
+![](<../../.gitbook/assets/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (17).png>)
 
 {% hint style="info" %}
 Se recomienda utilizar la funcionalidad "**Enviar correo electrónico de prueba**" para comprobar que todo funciona correctamente.\
@@ -377,7 +377,7 @@ Para la redirección, podría **redirigir a los usuarios a la página web princi
 ### Usuarios y grupos
 
 * Establecer un nombre
-* **Importar los datos** (tenga en cuenta que para usar la plantilla para el ejemplo, necesita el nombre, apellido y dirección de correo electrónico de cada usuario)
+* **Importar los datos** (tenga en cuenta que para usar la plantilla del ejemplo necesita el nombre, apellido y dirección de correo electrónico de cada usuario)
 
 ![](<../../.gitbook/assets/image (395).png>)
 
@@ -405,7 +405,7 @@ Si por alguna razón desea clonar el sitio web, consulte la siguiente página:
 
 ## Documentos y archivos con puerta trasera
 
-En algunas evaluaciones de phishing (principalmente para equipos rojos), también querrá **enviar archivos que contengan algún tipo de puerta trasera** (tal vez un C2 o tal vez algo que desencadene una autenticación).\
+En algunas evaluaciones de phishing (principalmente para equipos rojos) también querrá **enviar archivos que contengan algún tipo de puerta trasera** (tal vez un C2 o tal vez algo que active una autenticación).\
 Consulte la siguiente página para ver algunos ejemplos:
 
 {% content-ref url="phishing-documents.md" %}
@@ -418,7 +418,7 @@ Consulte la siguiente página para ver algunos ejemplos:
 
 El ataque anterior es bastante inteligente ya que está falsificando un sitio web real y recopilando la información establecida por el usuario. Desafortunadamente, si el usuario no puso la contraseña correcta o si la aplicación que falsificó está configurada con 2FA, **esta información no le permitirá suplantar al usuario engañado**.
 
-Es aquí donde herramientas como [**evilginx2**](https://github.com/kgretzky/evilginx2) o [**CredSniper**](https://github.com/ustayready/CredSniper) son útiles. Esta herramienta le permitirá generar un ataque similar a MitM. Básicamente, el ataque funciona de la siguiente manera:
+Aquí es donde son útiles herramientas como [**evilginx2**](https://github.com/kgretzky/evilginx2) o [**CredSniper**](https://github.com/ustayready/CredSniper). Esta herramienta le permitirá generar un ataque similar a MitM. Básicamente, los ataques funcionan de la siguiente manera:
 
 1. Usted **suplanta el formulario de inicio de sesión** de la página web real.
 2. El usuario **envía** sus **credenciales** a su página falsa y la herramienta las envía a la página web real, **comprobando si las credenciales funcionan**.
@@ -435,17 +435,17 @@ Puede hacer esto con [**EvilnVNC**](https://github.com/JoelGMSec/EvilnoVNC)
 Obviamente, una de las mejores formas de saber si ha sido descubierto es **buscar su dominio en listas negras**. Si aparece en la lista, de alguna manera se detectó su dominio como sospechoso.\
 Una forma sencilla de comprobar si su dominio aparece en alguna lista negra es utilizar [https://malwareworld.com/](https://malwareworld.com)
 
-Sin embargo, hay otras formas de saber si la víctima está **buscando activamente actividad de phishing sospechosa en la red** como se explica en:
+Sin embargo, hay otras formas de saber si la víctima está **buscando activamente actividad de phishing sospechosa en la naturaleza** como se explica en:
 
 {% content-ref url="detecting-phising.md" %}
 [detecting-phising.md](detecting-phising.md)
 {% endcontent-ref %}
 
-Puede **comprar un dominio con un nombre muy similar** al del dominio de la víctima y/o generar un certificado para un **subdominio** de un dominio controlado por usted **que contenga** la **palabra clave** del dominio de la víctima. Si la **víctima** realiza algún tipo de **interacción DNS o HTTP** con ellos, sabrá que **está buscando activamente** dominios sospechosos y deberá ser muy sigiloso.
+Puede **comprar un dominio con un nombre muy similar** al dominio de la víctima y/o generar un certificado para un **subdominio** de un dominio controlado por usted **que contenga** la **palabra clave** del dominio de la víctima. Si la **víctima** realiza algún tipo de **interacción DNS o HTTP** con ellos, sabrá que **está buscando activamente** dominios sospechosos y deberá ser muy sigiloso.
 
 ### Evaluar el phishing
 
-Use [**Phishious** ](https://github.com/Rices/Phishious)para evaluar si su correo electrónico terminará en la carpeta de spam o si será bloqueado o exitoso.
+Use [**Phishious** ](https://github.com/Rices/Phishious)para evaluar si su correo electrónico terminará en la carpeta de spam o si será bloqueado o tendrá éxito.
 
 ## Referencias
 
@@ -455,4 +455,4 @@ Use [**Phishious** ](https://github.com/Rices/Phishious)para evaluar si su corre
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙

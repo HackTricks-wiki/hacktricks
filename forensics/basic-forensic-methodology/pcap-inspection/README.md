@@ -5,10 +5,10 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -72,14 +72,14 @@ Esta herramienta también es útil para obtener **otra información analizada** 
 ### NetWitness Investigator
 
 Puede descargar [**NetWitness Investigator desde aquí**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Funciona en Windows)**.\
-Esta es otra herramienta útil que **analiza los paquetes** y ordena la información de una manera útil para **saber lo que está sucediendo dentro**.
+Esta es otra herramienta útil que **analiza los paquetes** y ordena la información de una manera útil para **saber lo que está sucediendo adentro**.
 
 ![](<../../../.gitbook/assets/image (567) (1).png>)
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
 * Extracción y codificación de nombres de usuario y contraseñas (HTTP, FTP, Telnet, IMAP, SMTP...)
-* Extraer hashes de autenticación y crackearlos usando Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+* Extraer hashes de autenticación y descifrarlos usando Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
 * Construir un diagrama de red visual (Nodos y usuarios de la red)
 * Extraer consultas DNS
 * Reconstruir todas las sesiones TCP y UDP
@@ -125,26 +125,16 @@ echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
 **Verificar pcap**
-
----
-
-**Description**
-
-A pcap file is a file format used to store network traffic captures. It is commonly used in network forensics to analyze and investigate network incidents. In this section, we will learn how to inspect a pcap file using Wireshark.
-
-**Descripción**
-
-Un archivo pcap es un formato de archivo utilizado para almacenar capturas de tráfico de red. Se utiliza comúnmente en la informática forense para analizar e investigar incidentes de red. En esta sección, aprenderemos cómo inspeccionar un archivo pcap utilizando Wireshark.
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) es una herramienta que:
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) es una herramienta que
 
-* Lee un archivo PCAP y extrae flujos HTTP.
+* Lee un archivo PCAP y extrae flujos Http.
 * Descomprime cualquier flujo comprimido con gzip.
-* Escanea cada archivo con Yara.
+* Escanea cada archivo con yara.
 * Escribe un reporte.txt.
 * Opcionalmente guarda los archivos coincidentes en un directorio.
 

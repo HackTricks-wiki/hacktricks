@@ -23,7 +23,7 @@ Otra diferencia importante de esta delegación restringida con respecto a las ot
 ### Nuevos conceptos
 
 En la delegación restringida se dijo que se necesitaba la marca **`TrustedToAuthForDelegation`** dentro del valor _userAccountControl_ del usuario para realizar un **S4U2Self**. Pero eso no es completamente cierto.\
-La realidad es que incluso sin ese valor, se puede realizar un **S4U2Self** contra cualquier usuario si se es un **servicio** (tiene un SPN), pero si se **tiene `TrustedToAuthForDelegation`**, el TGS devuelto será **Forwardable** y si no se tiene esa marca, el TGS devuelto **no** será **Forwardable**.
+La realidad es que incluso sin ese valor, se puede realizar un **S4U2Self** contra cualquier usuario si se es un **servicio** (tiene un SPN), pero si se **tiene `TrustedToAuthForDelegation`**, el TGS devuelto será **Forwardable** y si no se tiene esa marca, el TGS devuelto no será **Forwardable**.
 
 Sin embargo, si el **TGS** utilizado en **S4U2Proxy** **NO es Forwardable**, intentar abusar de una **delegación restringida básica** no funcionará. Pero si se intenta explotar una **delegación restringida basada en recursos, funcionará** (esto no es una vulnerabilidad, es una característica, aparentemente).
 
@@ -47,48 +47,38 @@ Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select Ma
 ```
 ## Ataque
 
-### Creando un objeto de equipo
+### Creando un objeto de computadora
 
-Puedes crear un objeto de equipo dentro del dominio usando [powermad](https://github.com/Kevin-Robertson/Powermad)**:**
+Puedes crear un objeto de computadora dentro del dominio usando [powermad](https://github.com/Kevin-Robertson/Powermad)**:**
 ```csharp
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
 ```
+![](../../.gitbook/assets/b1.png)
+
 # Delegación restringida basada en recursos
 
-La delegación restringida basada en recursos es una técnica que permite a un usuario delegar sus permisos a otro usuario o servicio para que pueda acceder a un recurso específico en su nombre. Esto se logra mediante la configuración de la propiedad `msDS-AllowedToActOnBehalfOfOtherIdentity` en el objeto de usuario o servicio que se va a delegar.
+La delegación restringida basada en recursos es una técnica que permite a un usuario delegar sus permisos a otro usuario o servicio para que pueda acceder a un recurso específico en su nombre. Esto se logra mediante la creación de un objeto de recurso en Active Directory y la asignación de permisos específicos a ese objeto. Luego, se configura la delegación restringida para permitir que un usuario o servicio acceda a ese objeto de recurso en particular.
 
-## Escenario
+La delegación restringida basada en recursos es útil en situaciones en las que se necesita permitir que un usuario o servicio acceda a un recurso específico sin otorgar permisos excesivos. Por ejemplo, si un usuario necesita acceder a un archivo en particular en un servidor de archivos, se puede crear un objeto de recurso para ese archivo y asignar permisos específicos a ese objeto. Luego, se puede configurar la delegación restringida para permitir que el usuario acceda a ese objeto de recurso en particular sin otorgarle permisos adicionales en el servidor de archivos.
 
-Supongamos que tenemos un usuario llamado `user1` que tiene permisos para leer el atributo `userPassword` de cualquier objeto de usuario en el dominio. También tenemos un usuario llamado `user2` que no tiene permisos para leer el atributo `userPassword`, pero que necesita acceder a este atributo para realizar una tarea específica.
+La delegación restringida basada en recursos también puede ayudar a mitigar el riesgo de ataques de Pass-the-Hash. Al limitar los permisos de delegación a un recurso específico, se reduce la superficie de ataque y se hace más difícil para un atacante utilizar credenciales robadas para moverse lateralmente en la red.
 
-## Configuración
+## Pasos para configurar la delegación restringida basada en recursos
 
-Para permitir que `user2` acceda al atributo `userPassword` de un usuario específico, podemos seguir los siguientes pasos:
+1. Crear un objeto de recurso en Active Directory para el recurso al que se va a delegar el acceso.
+2. Asignar permisos específicos al objeto de recurso para permitir el acceso al recurso.
+3. Configurar la delegación restringida para permitir que el usuario o servicio acceda al objeto de recurso en particular.
 
-1. Crear un usuario o servicio que represente la tarea que `user2` necesita realizar. Por ejemplo, podemos crear un usuario llamado `taskuser` que se utilizará para realizar la tarea.
+## Ejemplo de configuración de la delegación restringida basada en recursos
 
-2. Configurar la propiedad `msDS-AllowedToActOnBehalfOfOtherIdentity` en el objeto de `user1` para permitir que `taskuser` actúe en su nombre. Esto se puede hacer mediante el siguiente comando de PowerShell:
+Supongamos que tenemos un servidor de archivos que contiene un archivo confidencial que solo debe ser accesible por un usuario llamado "user1". Para configurar la delegación restringida basada en recursos para permitir que "user2" acceda a ese archivo en nombre de "user1", seguiríamos estos pasos:
 
-   ```
-   Set-ADUser user1 -Add @{msDS-AllowedToActOnBehalfOfOtherIdentity="taskuser"}
-   ```
+1. Crear un objeto de recurso en Active Directory para el archivo confidencial.
+2. Asignar permisos específicos al objeto de recurso para permitir que "user1" acceda al archivo.
+3. Configurar la delegación restringida para permitir que "user2" acceda al objeto de recurso del archivo confidencial en particular.
 
-3. Configurar la propiedad `msDS-AllowedToDelegateTo` en el objeto de `taskuser` para permitir que delegue los permisos de `user1` a otros objetos. Esto se puede hacer mediante el siguiente comando de PowerShell:
-
-   ```
-   Set-ADUser taskuser -Add @{msDS-AllowedToDelegateTo="user1"}
-   ```
-
-4. Configurar la propiedad `msDS-AllowedToActOnBehalfOfOtherIdentity` en el objeto de `user2` para permitir que `taskuser` actúe en su nombre. Esto se puede hacer mediante el siguiente comando de PowerShell:
-
-   ```
-   Set-ADUser user2 -Add @{msDS-AllowedToActOnBehalfOfOtherIdentity="taskuser"}
-   ```
-
-## Resultado
-
-Después de realizar la configuración anterior, `user2` podrá acceder al atributo `userPassword` del usuario específico en nombre de `user1` utilizando las credenciales de `taskuser`. Esto se logra mediante la delegación restringida basada en recursos, que permite a `taskuser` actuar en nombre de `user1` solo para acceder al recurso específico necesario para realizar la tarea.
+Una vez que se ha configurado la delegación restringida basada en recursos, "user2" podrá acceder al archivo confidencial en nombre de "user1" sin necesidad de otorgar permisos adicionales en el servidor de archivos.
 ```bash
 Get-DomainComputer SERVICEA #Check if created if you have powerview
 ```
@@ -153,7 +143,7 @@ Aprende sobre los [**tickets de servicio disponibles aquí**](silver-ticket.md#a
 * **`preauth_failed`**: Esto significa que el nombre de usuario + hashes dados no funcionan para iniciar sesión. Es posible que hayas olvidado poner el "$" dentro del nombre de usuario al generar los hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 * **`KDC_ERR_BADOPTION`**: Esto puede significar:
   * El usuario que estás intentando suplantar no puede acceder al servicio deseado (porque no puedes suplantarlo o porque no tiene suficientes privilegios)
-  * El servicio solicitado no existe (si solicitas un ticket para winrm pero winrm no está en ejecución)
+  * El servicio solicitado no existe (si solicitas un ticket para winrm pero winrm no se está ejecutando)
   * El equipo falso creado ha perdido sus privilegios sobre el servidor vulnerable y necesitas devolverlos.
 
 ## Referencias
@@ -169,7 +159,7 @@ Aprende sobre los [**tickets de servicio disponibles aquí**](silver-ticket.md#a
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

@@ -64,13 +64,13 @@ $obj = [System.Activator]::CreateInstance($com)
 ```
 ![](https://enigma0x3.files.wordpress.com/2017/01/remote\_instantiation\_shellwindows.png?w=690\&h=354)
 
-Una vez que el objeto se ha instanciado en el host remoto, podemos interactuar con él e invocar cualquier método que deseemos. El identificador devuelto por el objeto muestra varios métodos y propiedades, ninguno de los cuales podemos interactuar. Para lograr una interacción real con el host remoto, necesitamos acceder al método [WindowsShell.Item](https://msdn.microsoft.com/en-us/library/windows/desktop/bb773970\(v=vs.85\).aspx), que nos devolverá un objeto que representa la ventana de la shell de Windows:
+Una vez que el objeto se ha instanciado en el host remoto, podemos interactuar con él e invocar cualquier método que deseemos. El identificador devuelto por el objeto revela varios métodos y propiedades, ninguno de los cuales podemos interactuar. Para lograr una interacción real con el host remoto, necesitamos acceder al método [WindowsShell.Item](https://msdn.microsoft.com/en-us/library/windows/desktop/bb773970\(v=vs.85\).aspx), que nos devolverá un objeto que representa la ventana de la shell de Windows:
 ```
 $item = $obj.Item()
 ```
 ![](https://enigma0x3.files.wordpress.com/2017/01/item\_instantiation.png?w=416\&h=465)
 
-Con un control total sobre la ventana Shell, ahora podemos acceder a todos los métodos/propiedades esperados que están expuestos. Después de revisar estos métodos, **`Document.Application.ShellExecute`** destacó. Asegúrese de seguir los requisitos de parámetros para el método, los cuales están documentados [aquí](https://msdn.microsoft.com/en-us/library/windows/desktop/gg537745\(v=vs.85\).aspx).
+Con un control total de la ventana Shell, ahora podemos acceder a todos los métodos/propiedades esperados que están expuestos. Después de revisar estos métodos, **`Document.Application.ShellExecute`** destacó. Asegúrese de seguir los requisitos de parámetros para el método, los cuales están documentados [aquí](https://msdn.microsoft.com/en-us/library/windows/desktop/gg537745\(v=vs.85\).aspx).
 ```powershell
 $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\system32", $null, 0)
 ```
@@ -80,9 +80,9 @@ Como se puede ver arriba, nuestro comando se ejecutó en un host remoto con éxi
 
 ### ShellBrowserWindow
 
-Este objeto en particular no existe en Windows 7, lo que limita un poco más su uso para el movimiento lateral que el objeto "ShellWindows", que probé con éxito en Win7-Win10.
+Este objeto en particular no existe en Windows 7, lo que limita un poco su uso para el movimiento lateral en comparación con el objeto "ShellWindows", que probé con éxito en Win7-Win10.
 
-Según mi enumeración de este objeto, parece proporcionar efectivamente una interfaz en la ventana del Explorador, al igual que el objeto anterior. Para instanciar este objeto, necesitamos obtener su CLSID. Similar al anterior, podemos usar OleView .NET:
+Según mi enumeración de este objeto, parece proporcionar efectivamente una interfaz en la ventana del Explorador, al igual que el objeto anterior. Para instanciar este objeto, necesitamos obtener su CLSID. Similar a lo anterior, podemos usar OleView .NET:
 
 ![shellbrowser\_classid](https://enigma0x3.files.wordpress.com/2017/01/shellbrowser\_classid.png?w=428\&h=414)
 

@@ -18,7 +18,7 @@
 
 ### Notificaciones de Windows 10
 
-En la ruta `\Users\<nombre de usuario>\AppData\Local\Microsoft\Windows\Notifications` se puede encontrar la base de datos `appdb.dat` (antes del aniversario de Windows) o `wpndatabase.db` (después del aniversario de Windows).
+En la ruta `\Users\<username>\AppData\Local\Microsoft\Windows\Notifications` se puede encontrar la base de datos `appdb.dat` (antes del aniversario de Windows) o `wpndatabase.db` (después del aniversario de Windows).
 
 Dentro de esta base de datos SQLite, se puede encontrar la tabla `Notification` con todas las notificaciones (en formato XML) que pueden contener datos interesantes.
 
@@ -26,11 +26,11 @@ Dentro de esta base de datos SQLite, se puede encontrar la tabla `Notification` 
 
 La línea de tiempo es una característica de Windows que proporciona un **historial cronológico** de las páginas web visitadas, los documentos editados y las aplicaciones ejecutadas.
 
-La base de datos reside en la ruta `\Users\<nombre de usuario>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Esta base de datos se puede abrir con una herramienta SQLite o con la herramienta [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **que genera 2 archivos que se pueden abrir con la herramienta** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
+La base de datos reside en la ruta `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Esta base de datos se puede abrir con una herramienta SQLite o con la herramienta [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **que genera 2 archivos que se pueden abrir con la herramienta** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
 ### ADS (Flujos de datos alternativos)
 
-Los archivos descargados pueden contener la **Zona de identificación ADS** que indica **cómo** se descargó de la intranet, internet, etc. Algunos programas (como los navegadores) suelen poner incluso **más información** como la **URL** desde donde se descargó el archivo.
+Los archivos descargados pueden contener la **Zona de identificación ADS** que indica **cómo** se **descargó** de la intranet, internet, etc. Algunos programas (como los navegadores) suelen poner incluso **más** **información** como la **URL** desde donde se descargó el archivo.
 
 ## **Copias de seguridad de archivos**
 
@@ -44,7 +44,7 @@ Cuando se elimina un archivo en esta carpeta, se crean 2 archivos específicos:
 
 ![](<../../../.gitbook/assets/image (486).png>)
 
-Teniendo estos archivos, se puede utilizar la herramienta [**Rifiuti**](https://github.com/abelcheung/rifiuti2) para obtener la dirección original de los archivos eliminados y la fecha en que se eliminaron (usar `rifiuti-vista.exe` para Vista - Win10).
+Teniendo estos archivos, se puede usar la herramienta [**Rifiuti**](https://github.com/abelcheung/rifiuti2) para obtener la dirección original de los archivos eliminados y la fecha en que se eliminaron (usar `rifiuti-vista.exe` para Vista - Win10).
 ```
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
@@ -112,13 +112,13 @@ En este caso, la información se guardará en un archivo CSV.
 
 ### Jumplists
 
-Estas son las **listas de archivos recientes utilizados por una aplicación** que se pueden acceder en cada aplicación. Pueden ser creadas **automáticamente o personalizadas**.
+Estas son las listas de archivos recientes que se indican por aplicación. Es la lista de **archivos recientes utilizados por una aplicación** a la que se puede acceder en cada aplicación. Pueden ser creados **automáticamente o personalizados**.
 
-Las **jumplists** creadas automáticamente se almacenan en `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. Las jumplists se nombran siguiendo el formato `{id}.autmaticDestinations-ms` donde el ID inicial es el ID de la aplicación.
+Las **jumplists** creadas automáticamente se almacenan en `C:\Users\{nombre de usuario}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\`. Las jumplists se nombran siguiendo el formato `{id}.autmaticDestinations-ms` donde el ID inicial es el ID de la aplicación.
 
-Las jumplists personalizadas se almacenan en `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` y son creadas por la aplicación generalmente porque algo **importante** ha sucedido con el archivo (tal vez marcado como favorito).
+Las jumplists personalizadas se almacenan en `C:\Users\{nombre de usuario}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` y son creadas por la aplicación generalmente porque algo **importante** ha sucedido con el archivo (tal vez marcado como favorito).
 
-El **tiempo de creación** de cualquier jumplist indica **la primera vez que se accedió al archivo** y el **tiempo de modificación la última vez**.
+El **tiempo de creación** de cualquier jumplist indica **la primera vez que se accedió al archivo** y el **tiempo modificado la última vez**.
 
 Puede inspeccionar las jumplists usando [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
@@ -130,7 +130,7 @@ Puede inspeccionar las jumplists usando [**JumplistExplorer**](https://ericzimme
 
 [**Siga este enlace para aprender qué son las shellbags.**](interesting-windows-registry-keys.md#shellbags)
 
-## Uso de USB en Windows
+## Uso de USB de Windows
 
 Es posible identificar que se ha utilizado un dispositivo USB gracias a la creación de:
 
@@ -142,7 +142,7 @@ Tenga en cuenta que algunos archivos LNK en lugar de apuntar a la ruta original,
 
 ![](<../../../.gitbook/assets/image (476).png>)
 
-Los archivos en la carpeta WPDNSE son una copia de los originales, por lo que no sobrevivirán a un reinicio del PC y el GUID se toma de una shellbag.
+Los archivos en la carpeta WPDNSE son una copia de los originales, por lo que no sobrevivirán a un reinicio de la PC y el GUID se toma de una shellbag.
 
 ### Información del Registro
 
@@ -152,7 +152,7 @@ Los archivos en la carpeta WPDNSE son una copia de los originales, por lo que no
 
 Compruebe el archivo `C:\Windows\inf\setupapi.dev.log` para obtener las marcas de tiempo sobre cuándo se produjo la conexión USB (busque `Section start`).
 
-![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (6).png>)
+![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (14).png>)
 
 ### USB Detective
 
@@ -162,20 +162,20 @@ Compruebe el archivo `C:\Windows\inf\setupapi.dev.log` para obtener las marcas d
 
 ### Limpieza de Plug and Play
 
-La tarea programada 'Limpieza de Plug and Play' es responsable de **eliminar** las versiones antiguas de los controladores. Parecería (según los informes en línea) que también recoge **controladores que no se han utilizado en 30 días**, a pesar de que su descripción indica que "se mantendrá la versión más actual de cada paquete de controladores". Como tal, **los dispositivos extraíbles que no se hayan conectado durante 30 días pueden tener sus controladores eliminados**.
+La tarea programada 'Limpieza de Plug and Play' es responsable de **eliminar** las versiones heredadas de los controladores. Parecería (basado en informes en línea) que también recoge **controladores que no se han utilizado en 30 días**, a pesar de que su descripción indica que "se mantendrá la versión más actual de cada paquete de controladores". Como tal, **los dispositivos extraíbles que no se hayan conectado durante 30 días pueden tener sus controladores eliminados**.
 
 La tarea programada en sí se encuentra en ‘C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup’, y su contenido se muestra a continuación:
 
 ![](https://2.bp.blogspot.com/-wqYubtuR\_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
-La tarea hace referencia a 'pnpclean.dll', que es responsable de realizar la actividad de limpieza. Además, vemos que el campo ‘UseUnifiedSchedulingEngine’ está configurado en ‘TRUE’, lo que especifica que el motor de programación de tareas genérico se utiliza para administrar la tarea. Los valores de ‘Period’ y ‘Deadline’ de 'P1M' y 'P2M' dentro de ‘MaintenanceSettings’ indican al Programador de tareas que ej
+La tarea hace referencia a 'pnpclean.dll', que es responsable de realizar la actividad de limpieza. Además, vemos que el campo ‘UseUnifiedSchedulingEngine’ está configurado en ‘TRUE’, lo que especifica que el motor de programación de tareas genérico se utiliza para administrar la tarea. Los valores de ‘Period’ y ‘Deadline’ de 'P1M' y 'P2M' dentro
 ### BAM (Moderador de Actividad en Segundo Plano)
 
 Puedes abrir el archivo `SYSTEM` con un editor de registro y dentro de la ruta `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` puedes encontrar la información sobre las **aplicaciones ejecutadas por cada usuario** (nota el `{SID}` en la ruta) y a **qué hora** fueron ejecutadas (la hora está dentro del valor de datos del registro).
 
 ### Prefetch de Windows
 
-El prefetching es una técnica que permite a una computadora **buscar silenciosamente los recursos necesarios necesarios para mostrar contenido** que un usuario **podría acceder en un futuro cercano** para que los recursos puedan ser accedidos más rápido.
+El prefetching es una técnica que permite a una computadora **buscar silenciosamente los recursos necesarios necesarios para mostrar contenido** que un usuario **podría acceder en un futuro cercano** para que los recursos puedan ser accedidos más rápidamente.
 
 El prefetch de Windows consiste en crear **cachés de los programas ejecutados** para poder cargarlos más rápido. Estos cachés se crean como archivos `.pf` dentro de la ruta: `C:\Windows\Prefetch`. Hay un límite de 128 archivos en XP/VISTA/WIN7 y 1024 archivos en Win8/Win10.
 
@@ -252,7 +252,7 @@ Puede analizar esta información con la herramienta [**Amcacheparser**](https://
 ```bash
 AmcacheParser.exe -f C:\Users\student\Desktop\Amcache.hve --csv C:\Users\student\Desktop\srum
 ```
-El archivo CVS más interesante generado es el de `Entradas de archivos no asociadas de Amcache`.
+El archivo CVS más interesante generado es el de `Entradas de archivos no asociados de Amcache`.
 
 ### RecentFileCache
 
@@ -323,7 +323,7 @@ Dentro del EventID 4634/4647 hay subtipos interesantes:
 * **5 (servicio)**: Servicio iniciado por el Administrador de control de servicios
 * **6 (proxy):** Inicio de sesión de proxy
 * **7 (desbloqueo)**: Pantalla desbloqueada usando contraseña
-* **8 (texto claro de red)**: Usuario autenticado enviando contraseñas en texto claro. Este evento solía venir de IIS
+* **8 (texto sin formato de red)**: Usuario autenticado enviando contraseñas en texto sin formato. Este evento solía venir de IIS
 * **9 (nuevas credenciales)**: Se genera cuando se usa el comando `RunAs` o el usuario accede a un servicio de red con diferentes credenciales.
 * **10 (interactivo remoto)**: Autenticación a través de Terminal Services o RDP
 * **11 (caché interactivo)**: Acceso utilizando las últimas credenciales en caché porque no fue posible contactar al controlador de dominio

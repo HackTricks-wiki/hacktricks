@@ -14,7 +14,7 @@
 
 </details>
 
-## Mejora tus habilidades en Wireshark
+## Mejora tus habilidades de Wireshark
 
 ### Tutoriales
 
@@ -57,9 +57,9 @@ En _**Statistics --> Endpoints**_ puedes encontrar un **resumen de los puntos fi
 
 ![](<../../../.gitbook/assets/image (575).png>)
 
-**Información DNS**
+**Información de DNS**
 
-En _**Statistics --> DNS**_ puedes encontrar estadísticas sobre la solicitud DNS capturada.
+En _**Statistics --> DNS**_ puedes encontrar estadísticas sobre la solicitud de DNS capturada.
 
 ![](<../../../.gitbook/assets/image (577).png>)
 
@@ -83,7 +83,7 @@ Otros filtros interesantes:
 
 ### Búsqueda
 
-Si deseas **buscar** **contenido** dentro de los **paquetes** de las sesiones, presiona _CTRL+f_. Puedes agregar nuevas capas a la barra de información principal (No., Tiempo, Origen, etc.) presionando el botón derecho y luego la opción de editar columna.
+Si deseas **buscar** **contenido** dentro de los **paquetes** de las sesiones, presiona _CTRL+f_. Puedes agregar nuevas capas a la barra de información principal (No., Tiempo, Origen, etc.) presionando el botón derecho y luego el botón de editar columna.
 
 Práctica: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)
 
@@ -109,9 +109,9 @@ En la versión actual de Wireshark, en lugar de `bootp`, debes buscar `DHCP`
 
 ![](<../../../.gitbook/assets/image (405).png>)
 
-## Descifrando TLS
+## Descifrado de TLS
 
-### Descifrando tráfico https con clave privada del servidor
+### Descifrado de tráfico https con clave privada del servidor
 
 _editar>preferencia>protocolo>ssl>_
 
@@ -119,9 +119,9 @@ _editar>preferencia>protocolo>ssl>_
 
 Presiona _Editar_ y agrega todos los datos del servidor y la clave privada (_IP, Puerto, Protocolo, Archivo de clave y contraseña_)
 
-### Descifrando tráfico https con claves de sesión simétricas
+### Descifrado de tráfico https con claves de sesión simétricas
 
-Resulta que tanto Firefox como Chrome admiten registrar la clave de sesión simétrica utilizada para cifrar el tráfico TLS en un archivo. Luego puedes apuntar Wireshark a dicho archivo y ¡listo! tráfico TLS descifrado. Más en: [https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)\
+Resulta que tanto Firefox como Chrome admiten registrar la clave de sesión simétrica utilizada para cifrar el tráfico TLS en un archivo. Luego puedes apuntar Wireshark a dicho archivo y listo, tráfico TLS descifrado. Más en: [https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)\
 Para detectar esto, busca dentro del entorno la variable `SSLKEYLOGFILE`
 
 Un archivo de claves compartidas se verá así:

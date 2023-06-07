@@ -19,13 +19,13 @@ Aquí puedes encontrar una pequeña **introducción:**
 
 Aquí encontrarás el **flujo típico** que **deberías seguir al hacer pentesting** en una o más **máquinas**.
 
-**Haz clic en el título para empezar!**
+**¡Haz clic en el título para empezar!**
 
 ## Patrocinadores Corporativos
 
 ### [STM Cyber](https://www.stmcyber.com)
 
-![](<.gitbook/assets/image (638) (2) (1).png>)
+![](<.gitbook/assets/image (642) (1) (1) (1).png>)
 
 [**STM Cyber**](https://www.stmcyber.com) es una gran empresa de ciberseguridad cuyo lema es **HACK THE UNHACKABLE**. Realizan su propia investigación y desarrollan sus propias herramientas de hacking para **ofrecer varios servicios valiosos de ciberseguridad** como pentesting, equipos Red y entrenamiento.
 
@@ -45,9 +45,9 @@ Puedes revisar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcy
 
 ![](.gitbook/assets/i3.png)
 
-**Intigriti** es la plataforma de **bug bounty #1** de Europa y de **hacking ético.**
+**Intigriti** es la plataforma de **bug bounty #1 de Europa** y de **hacking ético.**
 
-Consejo de bug bounty: **regístrate** en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**! Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy mismo, ¡y comienza a ganar recompensas de hasta **$100,000**!
+Consejo de bug bounty: **regístrate** en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**. ¡Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy mismo y comienza a ganar recompensas de hasta **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -81,5 +81,3 @@ Obtén acceso hoy:
 <figure><img src=".gitbook/assets/logo.svg" alt=""><figcaption></figcaption></figure>
 
 [**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** a las empresas **de todo el mundo** contra las últimas amenazas de ciberseguridad proporcionando servicios de **seguridad ofensiva** con un enfoque **moderno**.
-
-Web

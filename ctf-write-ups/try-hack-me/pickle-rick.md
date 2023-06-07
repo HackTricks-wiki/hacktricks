@@ -16,7 +16,7 @@
 
 ![](../../.gitbook/assets/picklerick.gif)
 
-Esta máquina fue categorizada como fácil y fue bastante sencilla.
+Esta máquina fue categorizada como fácil y fue bastante fácil.
 
 ## Enumeración
 

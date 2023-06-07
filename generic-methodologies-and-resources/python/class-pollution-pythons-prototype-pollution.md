@@ -8,7 +8,7 @@
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -196,7 +196,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Sobrescribiendo <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** es un atributo especial de todas las funciones, según la [documentación](https://docs.python.org/3/library/inspect.html) de Python, es un "mapeo de cualquier valor predeterminado para parámetros **sólo de palabras clave**". La contaminación de este atributo nos permite controlar los valores predeterminados de los parámetros sólo de palabras clave de una función, estos son los parámetros de la función que vienen después de \* o \*args.
+**`__kwdefaults__`** es un atributo especial de todas las funciones, según la [documentación](https://docs.python.org/3/library/inspect.html) de Python, es un "mapeo de cualquier valor predeterminado para parámetros **solo de palabras clave**". Contaminar este atributo nos permite controlar los valores predeterminados de los parámetros solo de palabras clave de una función, estos son los parámetros de la función que vienen después de \* o \*args.
 ```python
 from os import system
 import json
@@ -245,7 +245,7 @@ Por lo tanto, **no se podrá acceder al objeto global de la aplicación Flask** 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-En este escenario necesitas un gadget para recorrer archivos y llegar al archivo principal para **acceder al objeto global `app.secret_key`** y cambiar la clave secreta de Flask para poder [**escalar privilegios** sabiendo esta clave](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+En este escenario necesitas un dispositivo para recorrer archivos y llegar al archivo principal para **acceder al objeto global `app.secret_key`** y cambiar la clave secreta de Flask para poder [**escalar privilegios** sabiendo esta clave](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
 Un payload como este [de este writeup](https://ctftime.org/writeup/36082):
 
@@ -255,9 +255,15 @@ __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.se
 ```
 {% endcode %}
 
-Utilice este payload para **cambiar `app.secret_key`** (el nombre en su aplicación puede ser diferente) para poder firmar cookies de flask con nuevos y más privilegios.
+Utilice esta carga útil para **cambiar `app.secret_key`** (el nombre en su aplicación puede ser diferente) para poder firmar cookies de flask con nuevos y más privilegios.
 
 </details>
+
+Consulte también la siguiente página para obtener más gadgets de solo lectura:
+
+{% content-ref url="python-internal-read-gadgets.md" %}
+[python-internal-read-gadgets.md](python-internal-read-gadgets.md)
+{% endcontent-ref %}
 
 ## Referencias
 

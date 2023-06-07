@@ -1,4 +1,4 @@
-# Herramientas de Reversing y Métodos Básicos
+# Herramientas y Métodos Básicos de Reversing
 
 <details>
 
@@ -22,9 +22,9 @@ Software:
 
 En línea:
 
-* Usa [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) para **descompilar** de wasm (binario) a wat (texto claro)
+* Usa [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) para **decompilar** de wasm (binario) a wat (texto claro)
 * Usa [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) para **compilar** de wat a wasm
-* También puedes probar a usar [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) para descompilar
+* También puedes intentar usar [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) para decompilar
 
 Software:
 
@@ -34,13 +34,13 @@ Software:
 ## Decompilador .Net
 
 [https://github.com/icsharpcode/ILSpy](https://github.com/icsharpcode/ILSpy)\
-[Plugin ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier SO (puedes instalarlo directamente desde VSCode, no es necesario descargar el git. Haz clic en **Extensiones** y **busca ILSpy**).\
-Si necesitas **descompilar**, **modificar** y **volver a compilar** puedes usar: [**https://github.com/0xd4d/dnSpy/releases**](https://github.com/0xd4d/dnSpy/releases) (**Clic derecho -> Modificar método** para cambiar algo dentro de una función).\
+[Plugin ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier sistema operativo (puedes instalarlo directamente desde VSCode, no es necesario descargar el git. Haz clic en **Extensiones** y **busca ILSpy**).\
+Si necesitas **decompilar**, **modificar** y **recompilar** de nuevo, puedes usar: [**https://github.com/0xd4d/dnSpy/releases**](https://github.com/0xd4d/dnSpy/releases) (**Clic derecho -> Modificar método** para cambiar algo dentro de una función).\
 También puedes probar [https://www.jetbrains.com/es-es/decompiler/](https://www.jetbrains.com/es-es/decompiler/)
 
 ### Registro de DNSpy
 
-Para hacer que **DNSpy registre información en un archivo**, puedes usar estas líneas de .Net:
+Para hacer que **DNSpy registre alguna información en un archivo**, puedes usar estas líneas de .Net:
 ```bash
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -48,7 +48,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```
 ### Depuración con DNSpy
 
-Para depurar código utilizando DNSpy, debes:
+Para depurar código usando DNSpy, necesitas:
 
 Primero, cambiar los **atributos de ensamblado** relacionados con la **depuración**:
 
@@ -58,7 +58,7 @@ De:
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-No especificaste a quién va dirigido el mensaje. ¿Podrías proporcionar más información?
+No se especifica a quién va dirigido el mensaje. Por favor, proporcione más información.
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -79,25 +79,25 @@ Luego, si tu aplicación .Net está siendo **ejecutada** por **IIS** puedes **re
 ```
 iisreset /noforce
 ```
-Para empezar a depurar, debes cerrar todos los archivos abiertos y dentro de la pestaña **Debug**, seleccionar **Attach to Process...**:
+Luego, para comenzar a depurar, debe cerrar todos los archivos abiertos y dentro de la pestaña **Depurar** seleccionar **Adjuntar proceso...**:
 
 ![](<../../.gitbook/assets/image (280).png>)
 
-Luego, selecciona **w3wp.exe** para adjuntarlo al **servidor IIS** y haz clic en **attach**:
+Luego seleccione **w3wp.exe** para adjuntarlo al **servidor IIS** y haga clic en **adjuntar**:
 
 ![](<../../.gitbook/assets/image (281).png>)
 
-Ahora que estamos depurando el proceso, es hora de detenerlo y cargar todos los módulos. Primero, haz clic en _Debug >> Break All_ y luego haz clic en _**Debug >> Windows >> Modules**_:
+Ahora que estamos depurando el proceso, es hora de detenerlo y cargar todos los módulos. Primero haga clic en _Depurar >> Detener todo_ y luego haga clic en _**Depurar >> Ventanas >> Módulos**_:
 
 ![](<../../.gitbook/assets/image (286).png>)
 
 ![](<../../.gitbook/assets/image (283).png>)
 
-Haz clic en cualquier módulo en **Modules** y selecciona **Open All Modules**:
+Haga clic en cualquier módulo en **Módulos** y seleccione **Abrir todos los módulos**:
 
 ![](<../../.gitbook/assets/image (284).png>)
 
-Haz clic derecho en cualquier módulo en **Assembly Explorer** y haz clic en **Sort Assemblies**:
+Haga clic con el botón derecho en cualquier módulo en **Explorador de ensamblados** y haga clic en **Ordenar ensamblados**:
 
 ![](<../../.gitbook/assets/image (285).png>)
 
@@ -110,32 +110,32 @@ Haz clic derecho en cualquier módulo en **Assembly Explorer** y haz clic en **S
 
 ### Usando IDA
 
-* **Carga rundll32** (64 bits en C:\Windows\System32\rundll32.exe y 32 bits en C:\Windows\SysWOW64\rundll32.exe)
-* Selecciona el depurador **Windbg**
-* Selecciona "**Suspend on library load/unload**"
+* **Cargar rundll32** (64 bits en C:\Windows\System32\rundll32.exe y 32 bits en C:\Windows\SysWOW64\rundll32.exe)
+* Seleccione el depurador **Windbg**
+* Seleccione "**Suspender en carga/descarga de biblioteca**"
 
 ![](<../../.gitbook/assets/image (135).png>)
 
-* Configura los **parámetros** de la ejecución poniendo la **ruta a la DLL** y la función que deseas llamar:
+* Configure los **parámetros** de la ejecución colocando la **ruta de la DLL** y la función que desea llamar:
 
 ![](<../../.gitbook/assets/image (136).png>)
 
-Luego, cuando comiences a depurar, **la ejecución se detendrá cuando se cargue cada DLL**, entonces, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
+Luego, cuando comience a depurar, **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue su DLL, la ejecución se detendrá.
 
-Pero, ¿cómo puedes llegar al código de la DLL que se cargó? Usando este método, no sé cómo.
+Pero, ¿cómo se puede llegar al código de la DLL que se cargó? Usando este método, no sé cómo.
 
 ### Usando x64dbg/x32dbg
 
-* **Carga rundll32** (64 bits en C:\Windows\System32\rundll32.exe y 32 bits en C:\Windows\SysWOW64\rundll32.exe)
-* **Cambia la línea de comandos** ( _File --> Change Command Line_ ) y establece la ruta de la DLL y la función que deseas llamar, por ejemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii\_2.dll",DLLMain
-* Cambia _Options --> Settings_ y selecciona "**DLL Entry**".
-* Luego, **inicia la ejecución**, el depurador se detendrá en cada dll principal, en algún momento te **detendrás en la entrada de la DLL de tu DLL**. Desde allí, solo busca los puntos donde deseas poner un punto de interrupción.
+* **Cargar rundll32** (64 bits en C:\Windows\System32\rundll32.exe y 32 bits en C:\Windows\SysWOW64\rundll32.exe)
+* **Cambiar la línea de comandos** ( _Archivo --> Cambiar línea de comandos_ ) y establecer la ruta de la dll y la función que desea llamar, por ejemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii\_2.dll",DLLMain
+* Cambiar _Opciones --> Configuración_ y seleccionar "**Entrada DLL**".
+* Luego **inicie la ejecución**, el depurador se detendrá en cada dll principal, en algún momento se detendrá en la **entrada DLL de su dll**. Desde allí, simplemente busque los puntos donde desea poner un punto de interrupción.
 
-Ten en cuenta que cuando la ejecución se detiene por cualquier motivo en win64dbg, puedes ver **en qué código estás** mirando en la **parte superior de la ventana de win64dbg**:
+Tenga en cuenta que cuando la ejecución se detiene por cualquier motivo en win64dbg, puede ver **en qué código se encuentra** mirando en la **parte superior de la ventana win64dbg**:
 
 ![](<../../.gitbook/assets/image (137).png>)
 
-Luego, mirando esto, puedes ver cuándo se detuvo la ejecución en la DLL que deseas depurar.
+Luego, mirando esto, puede ver cuándo se detuvo la ejecución en la dll que desea depurar.
 
 ## Aplicaciones GUI / Videojuegos
 
@@ -145,54 +145,54 @@ Luego, mirando esto, puedes ver cuándo se detuvo la ejecución en la DLL que de
 [cheat-engine.md](cheat-engine.md)
 {% endcontent-ref %}
 
-## ARM & MIPS
+## ARM y MIPS
 
 {% embed url="https://github.com/nongiach/arm_now" %}
 
 ## Shellcodes
 
-### Depurando un shellcode con blobrunner
+### Depuración de un shellcode con blobrunner
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) **asignará** el **shellcode** dentro de un espacio de memoria, te **indicará** la **dirección de memoria** donde se asignó el shellcode y **detendrá** la ejecución.\
-Luego, debes **adjuntar un depurador** (Ida o x64dbg) al proceso y poner un **punto de interrupción en la dirección de memoria indicada** y **reanudar** la ejecución. De esta manera, estarás depurando el shellcode.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) **asignará** el **shellcode** dentro de un espacio de memoria, le **indicará** la **dirección de memoria** donde se asignó el shellcode y **detendrá** la ejecución.\
+Luego, debe **adjuntar un depurador** (Ida o x64dbg) al proceso y poner un **punto de interrupción en la dirección de memoria indicada** y **reanudar** la ejecución. De esta manera, estará depurando el shellcode.
 
-La página de lanzamientos de Github contiene archivos zip que contienen las versiones compiladas: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **crea un proyecto C/C++ en Visual Studio Code, copia y pega el código y compílalo**.
+La página de lanzamientos de github contiene archivos zip que contienen los lanzamientos compilados: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Puede encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **cree un proyecto C/C++ en Visual Studio Code, copie y pegue el código y compílelo**.
 
 {% content-ref url="blobrunner.md" %}
 [blobrunner.md](blobrunner.md)
 {% endcontent-ref %}
 
-### Depurando un shellcode con jmp2it
+### Depuración de un shellcode con jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)es muy similar a blobrunner. **Asignará** el **shellcode** dentro de un espacio de memoria y comenzará un **bucle eterno**. Luego, debes **adjuntar el depurador** al proceso, **iniciar la ejecución, esperar 2-5 segundos y presionar stop** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno, ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)es muy similar a blobrunner. **Asignará** el **shellcode** dentro de un espacio de memoria y comenzará un **bucle eterno**. Luego, debe **adjuntar el depurador** al proceso, **iniciar la ejecución, esperar 2-5 segundos y presionar detener** y se encontrará dentro del **bucle eterno**. Salte a la siguiente instrucción del bucle eterno, ya que será una llamada al shellcode, y finalmente se encontrará ejecutando el shellcode.
 
 ![](<../../.gitbook/assets/image (397).png>)
 
-Puedes descargar una versión compilada de [jmp2it dentro de la página de lanzamientos](https://github.com/adamkramer/jmp2it/releases/).
+Puede descargar una versión compilada de [jmp2it dentro de la página de lanzamientos](https://github.com/adamkramer/jmp2it/releases/).
 
-### Depurando shellcode usando Cutter
+### Depuración de shellcode usando Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) es la GUI de radare. Usando Cutter, puedes emular el shellcode e inspeccionarlo dinámicamente.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) es la GUI de radare. Usando Cutter, puede emular el shellcode e inspeccionarlo dinámicamente.
 
-Ten en cuenta que Cutter te permite "Abrir archivo" y "Abrir shellcode". En mi caso, cuando abrí el shellcode como archivo, lo descompiló correctamente, pero cuando lo abrí como shellcode, no lo hizo:
+Tenga en cuenta que Cutter le permite "Abrir archivo" y "Abrir shellcode". En mi caso, cuando abrí el shellcode como archivo, lo descompiló correctamente, pero cuando lo abrí como shellcode, no lo hizo:
 
 ![](<../../.gitbook/assets/image (400).png>)
 
-Para comenzar la emulación en el lugar que deseas, establece un bp allí y aparentemente Cutter comenzará automáticamente la emulación desde allí:
+Para comenzar la emulación en el lugar que desee, establezca un bp allí y aparentemente cutter comenzará automáticamente la emulación desde allí:
 
 ![](<../../.gitbook/assets/image (399).png>)
 
 ![](<../../.gitbook/assets/image (401).png>)
 
-Puedes ver la pila, por ejemplo, dentro de un volcado hexadecimal:
+Puede ver la pila, por ejemplo, dentro de un volcado hexadecimal:
 
 ![](<../../.gitbook/assets/image (402).png>)
 
-### Desofuscando shellcode y obteniendo funciones ejecutadas
+### Desofuscación de shellcode y obtención de funciones ejecutadas
 
-Deberías probar [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7\&pid=152).\
-Te dirá cosas como **qué funciones** está utilizando el shellcode y si el shellcode se está **descodificando** a sí mismo en la memoria.
+Debe probar [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7\&pid=152).\
+Le dirá cosas como **qué funciones** está utilizando el shellcode y si el shellcode se está **descodificando** a sí mismo en la memoria.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -233,12 +233,12 @@ Para encontrar el **punto de entrada** busca las funciones por `::main` como en:
 
 ![](<../../.gitbook/assets/image (612).png>)
 
-En este caso el binario se llamaba authenticator, por lo que es bastante obvio que esta es la función principal interesante.\
+En este caso, el binario se llamaba authenticator, por lo que es bastante obvio que esta es la función principal interesante.\
 Teniendo el **nombre** de las **funciones** que se llaman, búscalas en **Internet** para aprender sobre sus **entradas** y **salidas**.
 
 ## **Delphi**
 
-Para binarios compilados en Delphi puedes usar [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
+Para los binarios compilados de Delphi, puedes usar [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
 Si tienes que revertir un binario de Delphi, te sugiero que uses el plugin de IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
@@ -266,7 +266,7 @@ En esta página puedes encontrar cómo obtener el código de Python de un binari
 
 ## GBA - Game Body Advance
 
-Si tienes el **binario** de un juego GBA, puedes usar diferentes herramientas para **emularlo** y **depurarlo**:
+Si obtienes el **binario** de un juego GBA, puedes usar diferentes herramientas para **emularlo** y **depurarlo**:
 
 * [**no$gba**](https://problemkaputt.de/gba.htm) (_Descarga la versión de depuración_) - Contiene un depurador con interfaz
 * [**mgba** ](https://mgba.io)- Contiene un depurador CLI
@@ -317,7 +317,7 @@ void FUN_080015a8(void)
   FUN_08000354(&DAT_030000dc,0x3c);
   uVar4 = DAT_030004d8;
 ```
-No code was provided. Please provide the code so I can translate it for you.
+Se ha encontrado este código:
 ```c
   do {
     DAT_030004da = uVar4; //This is the last key pressed
@@ -359,9 +359,9 @@ El último `if` está comprobando si **`uVar4`** está en las **últimas teclas*
 ```
 En el código anterior se puede ver que estamos comparando **uVar1** (el lugar donde se encuentra el **valor del botón presionado**) con algunos valores:
 
-* Primero, se compara con el **valor 4** (botón **SELECT**): En el desafío, este botón borra la pantalla.
-* Luego, se compara con el **valor 8** (botón **START**): En el desafío, esto verifica si el código es válido para obtener la bandera.
-  * En este caso, la variable **`DAT_030000d8`** se compara con 0xf3 y si el valor es el mismo, se ejecuta algún código.
+* Primero, se compara con el **valor 4** (botón **SELECT**): En el desafío este botón borra la pantalla.
+* Luego, se compara con el **valor 8** (botón **START**): En el desafío esto verifica si el código es válido para obtener la bandera.
+  * En este caso, la variable **`DAT_030000d8`** se compara con 0xf3 y si el valor es el mismo se ejecuta algún código.
 * En cualquier otro caso, se verifica una variable (`DAT_030000d4`). Es una variable porque se le suma 1 justo después de ingresar el código.\
   Si es menor que 8, se hace algo que implica **agregar** valores a \*\*`DAT_030000d8` \*\* (básicamente se están sumando los valores de las teclas presionadas en esta variable siempre y cuando la variable sea menor que 8).
 

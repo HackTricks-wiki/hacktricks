@@ -20,14 +20,14 @@
 
 * Una forma de lograr una **gestión centralizada de dispositivos**
 * Requiere un **servidor MDM** que implemente soporte para el protocolo MDM
-* El servidor MDM puede **enviar comandos MDM**, como borrado remoto o "instalar esta configuración"
+* El servidor MDM puede **enviar comandos MDM**, como borrar a distancia o "instalar esta configuración"
 
 ### ¿Qué es DEP (Device Enrolment Program)?
 
-El [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP\_Guide.pdf) (DEP) es un servicio ofrecido por Apple que **simplifica** la inscripción en la gestión de dispositivos móviles (MDM) al ofrecer una **config
+El [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP\_Guide.pdf) (DEP) es un servicio ofrecido por Apple que **simplifica** la inscripción en la gestión de dispositivos móviles (MDM) al ofrecer una configuración **
 ### **Paso 7: Escuchando comandos MDM**
 
-* Después de que se complete la verificación de MDM, el proveedor puede **emitir notificaciones push utilizando APNs**
+* Después de que se complete la comprobación de MDM, el proveedor puede **emitir notificaciones push utilizando APNs**
 * Al recibirlas, son manejadas por **`mdmclient`**
 * Para buscar comandos MDM, se envía una solicitud a ServerURL
 * Se hace uso de la carga útil MDM previamente instalada:
@@ -38,7 +38,7 @@ El [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP\_Gui
 
 ### Inscripción de dispositivos en otras organizaciones
 
-Como se comentó anteriormente, para intentar inscribir un dispositivo en una organización, **solo se necesita un número de serie que pertenezca a esa organización**. Una vez que el dispositivo está inscrito, varias organizaciones instalarán datos sensibles en el nuevo dispositivo: certificados, aplicaciones, contraseñas de WiFi, configuraciones de VPN [y así sucesivamente](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Como se comentó anteriormente, para intentar inscribir un dispositivo en una organización **solo se necesita un número de serie que pertenezca a esa organización**. Una vez que el dispositivo está inscrito, varias organizaciones instalarán datos sensibles en el nuevo dispositivo: certificados, aplicaciones, contraseñas de WiFi, configuraciones de VPN [y así sucesivamente](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
 Por lo tanto, esto podría ser un punto de entrada peligroso para los atacantes si el proceso de inscripción no está protegido correctamente:
 
 {% content-ref url="enrolling-devices-in-other-organisations.md" %}
@@ -56,7 +56,7 @@ Por lo tanto, esto podría ser un punto de entrada peligroso para los atacantes 
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Consigue el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

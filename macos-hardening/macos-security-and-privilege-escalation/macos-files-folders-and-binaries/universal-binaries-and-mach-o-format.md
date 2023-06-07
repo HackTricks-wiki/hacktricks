@@ -1,4 +1,4 @@
-# Binarios universales y formato Mach-O
+# Binarios universales de macOS y formato Mach-O
 
 ## Información básica
 
@@ -14,7 +14,7 @@ Estos binarios siguen la estructura **Mach-O** que básicamente está compuesta 
 
 ## Encabezado Fat
 
-Busca el archivo con: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
+Busque el archivo con: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
 
 <pre class="language-c"><code class="lang-c"><strong>#define FAT_MAGIC	0xcafebabe
 </strong><strong>#define FAT_CIGAM	0xbebafeca	/* NXSwapLong(FAT_MAGIC) */
@@ -33,9 +33,9 @@ struct fat_arch {
 };
 </code></pre>
 
-El encabezado tiene los bytes **magic** seguidos del **número** de **arquitecturas** que el archivo **contiene** (`nfat_arch`) y cada arquitectura tendrá una estructura `fat_arch`.
+El encabezado tiene los bytes **magic** seguidos del **número** de **archivos** que el archivo **contiene** (`nfat_arch`) y cada archivo tendrá una estructura `fat_arch`.
 
-Compruébalo con:
+Compruébelo con:
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
 /bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
@@ -66,11 +66,11 @@ o usando la herramienta [Mach-O View](https://sourceforge.net/projects/machoview
 
 <figure><img src="../../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
-Como puedes pensar, generalmente un binario universal compilado para 2 arquitecturas **duplica el tamaño** de uno compilado para solo 1 arquitectura.
+Como puede estar pensando, por lo general, un binario universal compilado para 2 arquitecturas **duplica el tamaño** de uno compilado para solo 1 arquitectura.
 
 ## Encabezado Mach-O
 
-El encabezado contiene información básica sobre el archivo, como bytes mágicos para identificarlo como un archivo Mach-O e información sobre la arquitectura objetivo. Puedes encontrarlo en: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+El encabezado contiene información básica sobre el archivo, como bytes mágicos para identificarlo como un archivo Mach-O e información sobre la arquitectura de destino. Puede encontrarlo en: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
 #define MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
@@ -99,9 +99,9 @@ struct mach_header_64 {
 ```
 **Tipos de archivo**:
 
-* MH\_EXECUTE (0x2): Ejecutable Mach-O estándar.
-* MH\_DYLIB (0x6): Una biblioteca dinámica Mach-O (es decir, .dylib).
-* MH\_BUNDLE (0x8): Un paquete Mach-O (es decir, .bundle).
+* MH\_EXECUTE (0x2): Ejecutable Mach-O estándar
+* MH\_DYLIB (0x6): Una biblioteca dinámica Mach-O (es decir, .dylib)
+* MH\_BUNDLE (0x8): Un paquete Mach-O (es decir, .bundle)
 ```bash
 # Checking the mac header of a binary
 otool -arch arm64e -hv /bin/ls
@@ -137,7 +137,7 @@ Estos comandos **definen segmentos** que se **mapean** en el **espacio de memori
 
 Existen **diferentes tipos** de segmentos, como el segmento **\_\_TEXT**, que contiene el código ejecutable de un programa, y el segmento **\_\_DATA**, que contiene datos utilizados por el proceso. Estos **segmentos se encuentran en la sección de datos** del archivo Mach-O.
 
-**Cada segmento** se puede dividir aún más en múltiples **secciones**. La **estructura del comando de carga** contiene **información** sobre **estas secciones** dentro del segmento correspondiente.
+**Cada segmento** se puede dividir aún más en múltiples **secciones**. La **estructura del comando de carga** contiene **información** sobre **estas secciones** dentro del segmento respectivo.
 
 En el encabezado primero se encuentra el **encabezado del segmento**:
 
@@ -185,25 +185,25 @@ Si **agregas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento*
 
 <figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-También es posible obtener **información de encabezados** desde la **línea de comandos** con:
+También es posible obtener **información de encabezado** desde la **línea de comandos** con:
 ```bash
 otool -lv /bin/ls
 ```
-Segmentos comunes cargados por este comando:
+Segmentos comunes cargados por este cmd:
 
-* **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no se pueda leer, escribir o ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**.
-  * Esta asignación es importante para **mitigar vulnerabilidades de referencia de puntero nulo**.
+* **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no se pueda leer, escribir o ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**. 
+  * Esta asignación es importante para **mitigar las vulnerabilidades de referencia de puntero nulo**.
 * **`__TEXT`**: Contiene **código ejecutable** y **datos** que son **solo de lectura**. Secciones comunes de este segmento:
   * `__text`: Código binario compilado
   * `__const`: Datos constantes
   * `__cstring`: Constantes de cadena
-  * `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
+  * `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de biblioteca dinámica
 * **`__DATA`**: Contiene datos que son **escribibles**.
   * `__data`: Variables globales (que han sido inicializadas)
   * `__bss`: Variables estáticas (que no han sido inicializadas)
   * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Información utilizada por el tiempo de ejecución de Objective-C
 * **`__LINKEDIT`**: Contiene información para el enlazador (dyld) como, "símbolo, cadena y entradas de tabla de reubicación".
-* **`__OBJC`**: Contiene información utilizada por el tiempo de ejecución de Objective-C. Aunque esta información también se puede encontrar en el segmento \_\_DATA, dentro de varias secciones \_\_objc\_\*.
+* **`__OBJC`**: Contiene información utilizada por el tiempo de ejecución de Objective-C. Aunque esta información también se puede encontrar en el segmento \_\_DATA, dentro de varias secciones en \_\_objc\_\*.
 
 ### **`LC_MAIN`**
 
@@ -215,7 +215,7 @@ Contiene información sobre la **firma de código del archivo Macho-O**. Solo co
 
 ### **LC\_LOAD\_DYLINKER**
 
-Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre está establecido en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo kernel.
+Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre se establece en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo kernel.
 
 ### **`LC_LOAD_DYLIB`**
 
@@ -248,7 +248,7 @@ Algunas bibliotecas potencialmente relacionadas con malware son:
 
 * **DiskArbitration**: Monitoreo de unidades USB
 * **AVFoundation:** Captura de audio y video
-* **CoreWLAN**: Escaneos de wifi.
+* **CoreWLAN**: Escaneos de Wifi.
 
 {% hint style="info" %}
 Un binario Mach-O puede contener uno o **más** **constructores**, que se **ejecutarán** **antes** de la dirección especificada en **LC\_MAIN**.\
@@ -257,7 +257,7 @@ Los desplazamientos de cualquier constructor se encuentran en la sección **\_\_
 
 ## **Datos Mach-O**
 
-El corazón del archivo es la región final, los datos, que consiste en varios segmentos como se establece en la región de comandos de carga. **Cada segmento puede contener varias secciones de datos**. Cada una de estas secciones **contiene código o datos** de un tipo particular.
+El corazón del archivo es la región final, los datos, que consta de varios segmentos como se describe en la región de comandos de carga. **Cada segmento puede contener varias secciones de datos**. Cada una de estas secciones **contiene código o datos** de un tipo particular.
 
 {% hint style="success" %}
 Los datos son básicamente la parte que contiene toda la información cargada por los comandos de carga LC\_SEGMENTS\_64

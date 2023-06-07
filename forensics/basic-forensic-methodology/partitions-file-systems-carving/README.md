@@ -47,7 +47,7 @@ Desde los **bytes 440 a 443** del MBR, se puede encontrar la **Firma de disco de
 
 Para montar un MBR en Linux, primero debe obtener el desplazamiento de inicio (puede usar `fdisk` y el comando `p`)
 
-![](<../../../.gitbook/assets/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10).png>)
+![](<../../../.gitbook/assets/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (12).png>)
 
 Y luego use el siguiente código
 ```bash
@@ -58,29 +58,29 @@ mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
 **LBA (Dirección lógica de bloques)**
 
-La **dirección lógica de bloques** (**LBA**) es un esquema común utilizado para **especificar la ubicación de bloques** de datos almacenados en dispositivos de almacenamiento de computadoras, generalmente sistemas de almacenamiento secundario como discos duros. LBA es un esquema de direccionamiento lineal particularmente simple; **los bloques se ubican por un índice entero**, siendo el primer bloque LBA 0, el segundo LBA 1, y así sucesivamente.
+La **dirección lógica de bloques** (**LBA**) es un esquema común utilizado para **especificar la ubicación de bloques** de datos almacenados en dispositivos de almacenamiento informático, generalmente sistemas de almacenamiento secundario como discos duros. LBA es un esquema de direccionamiento lineal particularmente simple; **los bloques se ubican mediante un índice entero**, siendo el primer bloque LBA 0, el segundo LBA 1, y así sucesivamente.
 
 ### GPT (Tabla de particiones GUID)
 
-Se llama Tabla de particiones GUID porque cada partición en su disco tiene un **identificador único global**.
+Se llama Tabla de Particiones GUID porque cada partición en su disco tiene un **identificador único global**.
 
-Al igual que MBR, comienza en el **sector 0**. El MBR ocupa 32 bits mientras que **GPT** usa **64 bits**.\
-GPT **permite hasta 128 particiones** en Windows y hasta **9.4ZB**.\
+Al igual que MBR, comienza en el **sector 0**. El MBR ocupa 32 bits mientras que **GPT** utiliza **64 bits**.\
+GPT **permite hasta 128 particiones** en Windows y hasta **9,4ZB**.\
 Además, las particiones pueden tener un nombre Unicode de 36 caracteres.
 
 En un disco MBR, la partición y los datos de arranque se almacenan en un solo lugar. Si estos datos se sobrescriben o se corrompen, estás en problemas. En contraste, **GPT almacena múltiples copias de estos datos en todo el disco**, por lo que es mucho más robusto y puede recuperarse si los datos están corruptos.
 
-GPT también almacena valores de **verificación de redundancia cíclica (CRC)** para verificar que sus datos estén intactos. Si los datos están corruptos, GPT puede detectar el problema e **intentar recuperar los datos dañados** desde otra ubicación en el disco.
+GPT también almacena valores de **verificación de redundancia cíclica (CRC)** para comprobar que sus datos están intactos. Si los datos están corruptos, GPT puede detectar el problema e **intentar recuperar los datos dañados** desde otra ubicación en el disco.
 
 **MBR protector (LBA0)**
 
-Para una compatibilidad limitada hacia atrás, el espacio del MBR heredado todavía se reserva en la especificación GPT, pero ahora se usa de una **manera que evita que las utilidades de disco basadas en MBR reconozcan y posiblemente sobrescriban discos GPT**. Esto se conoce como un MBR protector.
+Para una compatibilidad limitada hacia atrás, el espacio del MBR heredado todavía se reserva en la especificación GPT, pero ahora se usa de una **manera que evita que las utilidades de disco basadas en MBR reconozcan erróneamente y posiblemente sobrescriban los discos GPT**. Esto se conoce como un MBR protector.
 
 ![](<../../../.gitbook/assets/image (491).png>)
 
 **MBR híbrido (LBA 0 + GPT)**
 
-En los sistemas operativos que admiten el **arranque basado en GPT a través de servicios BIOS** en lugar de EFI, el primer sector también puede seguir utilizándose para almacenar la primera etapa del código del **cargador de arranque**, pero **modificado** para reconocer **particiones GPT**. El cargador de arranque en el MBR no debe asumir un tamaño de sector de 512 bytes.
+En los sistemas operativos que admiten el **arranque basado en GPT a través de los servicios BIOS** en lugar de EFI, el primer sector también puede seguir utilizándose para almacenar la primera etapa del código del **cargador de arranque**, pero **modificado** para reconocer **particiones GPT**. El cargador de arranque en el MBR no debe asumir un tamaño de sector de 512 bytes.
 
 **Encabezado de tabla de particiones (LBA 1)**
 
@@ -88,33 +88,34 @@ El encabezado de la tabla de particiones define los bloques utilizables en el di
 
 | Desplazamiento | Longitud | Contenido                                                                                                                                                                        |
 | -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 (0x00)       | 8 bytes  | Firma ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h o 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID\_Partition\_Table#cite\_note-8)en máquinas de ordenamiento pequeñas) |
+| 0 (0x00)       | 8 bytes  | Firma ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h o 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID\_Partition\_Table#cite\_note-8)en máquinas little-endian) |
 | 8 (0x08)       | 4 bytes  | Revisión 1.0 (00h 00h 01h 00h) para UEFI 2.8                                                                                                                                     |
-| 12 (0x0C)      | 4 bytes  | Tamaño del encabezado en little endian (en bytes, generalmente 5Ch 00h 00h 00h o 92 bytes)                                                                                       |
-| 16 (0x10)      | 4 bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) del encabezado (desplazamiento +0 hasta el tamaño del encabezado) en little endian, con este campo en cero durante el cálculo. |
+| 12 (0x0C)      | 4 bytes  | Tamaño del encabezado en little-endian (en bytes, generalmente 5Ch 00h 00h 00h o 92 bytes)                                                                                        |
+| 16 (0x10)      | 4 bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) del encabezado (desplazamiento +0 hasta el tamaño del encabezado) en little-endian, con este campo en cero durante el cálculo |
 | 20 (0x14)      | 4 bytes  | Reservado; debe ser cero                                                                                                                                                        |
 | 24 (0x18)      | 8 bytes  | LBA actual (ubicación de esta copia de encabezado)                                                                                                                               |
 | 32 (0x20)      | 8 bytes  | LBA de respaldo (ubicación de la otra copia de encabezado)                                                                                                                       |
 | 40 (0x28)      | 8 bytes  | Primer LBA utilizable para particiones (último LBA de la tabla de particiones primaria + 1)                                                                                        |
 | 48 (0x30)      | 8 bytes  | Último LBA utilizable (primer LBA de la tabla de particiones secundaria - 1)                                                                                                      |
-| 56 (0x38)      | 16 bytes | GUID de disco en endian mixto                                                                                                                                                   |
+| 56 (0x38)      | 16 bytes | GUID del disco en mixed-endian                                                                                                                                                  |
 | 72 (0x48)      | 8 bytes  | LBA de inicio de una matriz de entradas de partición (siempre 2 en la copia primaria)                                                                                             |
 | 80 (0x50)      | 4 bytes  | Número de entradas de partición en la matriz                                                                                                                                     |
-| 84 (0x54)      | 4 bytes  | Tamaño de una sola entrada de partición (generalmente 80h o 128)                                                                                                                 |
-| 88 (0x58)      | 4 bytes  | CRC32 de la matriz de entradas de partición en little endian                                                                                                                     |
-| 92 (0x5C)      | \*       | Reservado; debe ser cero para el resto del bloque (420 bytes para un tamaño de sector de 512 bytes; pero puede ser más con tamaños de sector más grandes)                    |
+| 84 (0x54)      | 4 bytes  | Tamaño de una sola entrada de partición (generalmente 80h o 128)                                                                                                                |
+| 88 (0x58)      | 4 bytes  | CRC32 de la matriz de entradas de partición en little-endian                                                                                                                     |
+| 92 (0x5C)      | \*       | Reservado; debe ser cero para el resto del bloque (420 bytes para un tamaño de sector de 512 bytes; pero puede ser más con tamaños de sector mayores)                         |
 
 **Entradas de partición (LBA 2-33)**
 
 | Formato de entrada de partición GUID |          |                                                                                                                   |
-| ----------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------
+| ----------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| Desplazamiento
 ### **Tallado de archivos**
 
-El **tallado de archivos** es una técnica que intenta **encontrar archivos en un gran volumen de datos**. Hay 3 formas principales en las que funcionan las herramientas de este tipo: **basadas en encabezados y pies de página de tipos de archivo**, basadas en **estructuras de tipos de archivo** y basadas en el **contenido** en sí.
+El **tallado de archivos** es una técnica que intenta **encontrar archivos en un gran volumen de datos**. Hay 3 formas principales en que funcionan las herramientas como esta: **basadas en encabezados y pies de página de tipos de archivo**, basadas en **estructuras de tipos de archivo** y basadas en el **contenido** en sí.
 
 Tenga en cuenta que esta técnica **no funciona para recuperar archivos fragmentados**. Si un archivo **no se almacena en sectores contiguos**, entonces esta técnica no podrá encontrarlo o al menos parte de él.
 
-Hay varias herramientas que se pueden utilizar para el tallado de archivos indicando los tipos de archivo que se desean buscar.
+Hay varias herramientas que puede utilizar para el tallado de archivos indicando los tipos de archivo que desea buscar.
 
 {% content-ref url="file-data-carving-recovery-tools.md" %}
 [file-data-carving-recovery-tools.md](file-data-carving-recovery-tools.md)
@@ -130,8 +131,8 @@ El tallado de flujos de datos es similar al tallado de archivos, pero **en lugar
 
 ### Eliminación segura
 
-Obviamente, hay formas de **eliminar "seguramente" archivos y parte de los registros sobre ellos**. Por ejemplo, es posible **sobrescribir el contenido** de un archivo con datos basura varias veces, y luego **eliminar** los **registros** del **$MFT** y **$LOGFILE** sobre el archivo, y **eliminar las copias de seguridad de instantáneas de volumen**.\
-Es posible que note que incluso al realizar esa acción, puede haber **otras partes donde todavía se registra la existencia del archivo**, y eso es cierto y parte del trabajo profesional de la informática forense es encontrarlos.
+Obviamente, hay formas de **eliminar "seguramente" archivos y parte de los registros sobre ellos**. Por ejemplo, es posible **sobrescribir el contenido** de un archivo con datos basura varias veces, y luego **eliminar** los **registros** del **$MFT** y **$LOGFILE** sobre el archivo, y **eliminar las copias de sombra del volumen**.\
+Puede notar que incluso al realizar esa acción, puede haber **otras partes donde todavía se registra la existencia del archivo**, y eso es cierto y parte del trabajo profesional de la informática forense es encontrarlos.
 
 ## Referencias
 
@@ -145,10 +146,10 @@ Es posible que note que incluso al realizar esa acción, puede haber **otras par
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabaja en una **empresa de ciberseguridad**? ¿Quiere ver su **empresa anunciada en HackTricks**? ¿O quiere tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos.
+* Obtenga el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únase al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígame** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparta sus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
