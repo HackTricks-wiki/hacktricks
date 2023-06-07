@@ -5,7 +5,7 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)..
@@ -22,7 +22,7 @@ O objeto COM [MMC Application Class (MMC20.Application)](https://technet.microso
 
 Você pode ler mais sobre esse método [aqui](https://msdn.microsoft.com/en-us/library/aa815396\(v=vs.85\).aspx). Até agora, temos um aplicativo DCOM ao qual podemos acessar pela rede e podemos executar comandos. A última peça é aproveitar esse aplicativo DCOM e o método ExecuteShellCommand para obter a execução de código em um host remoto.
 
-Felizmente, como administrador, você pode interagir remotamente com o DCOM com o PowerShell usando “[activator]::CreateInstance([type]::GetTypeFromProgID”. Tudo o que você precisa fazer é fornecer um ProgID DCOM e um endereço IP. Ele fornecerá de volta uma instância desse objeto COM remotamente:
+Felizmente, como administrador, você pode interagir remotamente com o DCOM com o PowerShell usando “[activator]::CreateInstance([type]::GetTypeFromProgID””. Tudo o que você precisa fazer é fornecer um ProgID DCOM e um endereço IP. Ele fornecerá de volta uma instância desse objeto COM remotamente:
 
 ![](<../../.gitbook/assets/image (665).png>)
 
@@ -41,7 +41,7 @@ Visualizar quais outros objetos que não têm conjunto de LaunchPermission expl�
 
 ![](<../../.gitbook/assets/image (3) (1) (1) (2).png>)
 
-Outra maneira de identificar objetos-alvo potenciais é procurar pelo valor `LaunchPermission` ausente nas chaves em `HKCR:\AppID\{guid}`. Um objeto com permissões de lançamento definidas parecerá abaixo, com dados representando a ACL para o objeto no formato binário:
+Outra maneira de identificar objetos-alvo potenciais é procurar o valor `LaunchPermission` ausente nas chaves em `HKCR:\AppID\{guid}`. Um objeto com permissões de lançamento definidas parecerá abaixo, com dados representando a ACL para o objeto no formato binário:
 
 ![](https://enigma0x3.files.wordpress.com/2017/01/launch\_permissions\_registry.png?w=690\&h=169)
 
@@ -62,7 +62,7 @@ Agora que temos o CLSID, podemos instanciar o objeto em um destino remoto:
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>") #9BA05972-F6A8-11CF-A442-00A0C90A8F39
 $obj = [System.Activator]::CreateInstance($com)
 ```
-Com o objeto instanciado no host remoto, podemos interagir com ele e invocar qualquer método que desejarmos. O identificador retornado para o objeto revela vários métodos e propriedades, com os quais não podemos interagir. Para conseguir interagir com o host remoto, precisamos acessar o método [WindowsShell.Item](https://msdn.microsoft.com/en-us/library/windows/desktop/bb773970\(v=vs.85\).aspx), que nos dará de volta um objeto que representa a janela do shell do Windows:
+Com o objeto instanciado no host remoto, podemos interagir com ele e invocar qualquer método que desejarmos. O identificador retornado para o objeto revela vários métodos e propriedades, com os quais não podemos interagir. Para alcançar a interação real com o host remoto, precisamos acessar o método [WindowsShell.Item](https://msdn.microsoft.com/en-us/library/windows/desktop/bb773970\(v=vs.85\).aspx), que nos dará de volta um objeto que representa a janela do shell do Windows:
 ```
 $item = $obj.Item()
 ```
@@ -111,7 +111,7 @@ Embora esses dois objetos DCOM possam ser usados para executar comandos de shell
 
 ## ExcelDDE & RegisterXLL
 
-De maneira semelhante, é possível mover lateralmente abusando de objetos DCOM do Excel. Para mais informações, leia [https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
+De maneira semelhante, é possível mover lateralmente abusando de objetos DCOM do Excel, para mais informações leia [https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
 ```powershell
 # Chunk of code from https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1
 ## You can see here how to abuse excel for RCE

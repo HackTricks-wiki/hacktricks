@@ -8,7 +8,7 @@
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -19,7 +19,7 @@
 {% embed url="https://www.rootedcon.com/" %}
 
 {% hint style="info" %}
-Uma nota sobre **PCAP** vs **PCAPNG**: existem duas versões do formato de arquivo PCAP; **PCAPNG é mais recente e não é suportado por todas as ferramentas**. Você pode precisar converter um arquivo de PCAPNG para PCAP usando o Wireshark ou outra ferramenta compatível, para trabalhar com ele em outras ferramentas.
+Uma observação sobre **PCAP** vs **PCAPNG**: existem duas versões do formato de arquivo PCAP; **PCAPNG é mais recente e não é suportado por todas as ferramentas**. Você pode precisar converter um arquivo de PCAPNG para PCAP usando o Wireshark ou outra ferramenta compatível, para trabalhar com ele em outras ferramentas.
 {% endhint %}
 
 ## Ferramentas online para pcaps
@@ -78,14 +78,12 @@ Esta é outra ferramenta útil que **analisa os pacotes** e classifica as inform
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-* Extrai e codifica nomes de usuário e senhas (HTTP, FTP, Telnet, IMAP, SMTP...)
-* Extrai hashes de autenticação e os quebra usando o Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-* Constrói um diagrama visual de rede (nós e usuários de rede)
-* Extrai consultas DNS
-* Reconstrói todas as sessões TCP e UDP
-* Esculpe arquivos
-
-### Capinfos
+* Extrair e codificar nomes de usuário e senhas (HTTP, FTP, Telnet, IMAP, SMTP...)
+* Extrair hashes de autenticação e quebrá-los usando o Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+* Construir um diagrama visual de rede (Nós e usuários de rede)
+* Extrair consultas DNS
+* Reconstruir todas as sessões TCP e UDP
+* Esculpir arquivos
 ```
 capinfos capture.pcap
 ```
@@ -95,9 +93,9 @@ Se você está procurando por algo dentro do pcap, pode usar o **ngrep**. Aqui e
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
-### Escultura
+### Carving
 
-Usar técnicas comuns de escultura pode ser útil para extrair arquivos e informações do pcap:
+Usar técnicas comuns de carving pode ser útil para extrair arquivos e informações do pcap:
 
 {% content-ref url="../partitions-file-systems-carving/file-data-carving-recovery-tools.md" %}
 [file-data-carving-recovery-tools.md](../partitions-file-systems-carving/file-data-carving-recovery-tools.md)
@@ -125,8 +123,6 @@ echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
 **Verificar pcap**
-
-O arquivo pcap é um arquivo de captura de pacotes que pode ser analisado para obter informações sobre o tráfego de rede. Para verificar um arquivo pcap, você pode usar ferramentas como Wireshark ou tcpdump. Essas ferramentas permitem visualizar o tráfego de rede em tempo real ou analisar um arquivo pcap existente. Ao verificar um arquivo pcap, você pode identificar possíveis ameaças de segurança, como ataques de negação de serviço (DoS), tentativas de invasão ou vazamentos de informações. É importante lembrar que a análise de um arquivo pcap pode ser um processo demorado e requer conhecimento técnico avançado.
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
@@ -134,7 +130,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 [**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) é uma ferramenta que
 
-* Lê um arquivo PCAP e extrai fluxos HTTP.
+* Lê um arquivo PCAP e extrai fluxos Http.
 * Descomprime qualquer fluxo comprimido com gzip
 * Analisa cada arquivo com yara
 * Escreve um relatório.txt

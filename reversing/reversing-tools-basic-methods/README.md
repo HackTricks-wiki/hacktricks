@@ -1,10 +1,10 @@
-# Ferramentas de reversão e métodos básicos
+# Ferramentas e Métodos Básicos de Reversão
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
@@ -12,7 +12,7 @@
 
 </details>
 
-## Ferramentas de reversão baseadas em ImGui
+## Ferramentas de Reversão Baseadas em ImGui
 
 Software:
 
@@ -46,9 +46,9 @@ using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
-### Depuração com DNSpy
+### Depuração do DNSpy
 
-Para depurar código usando o DNSpy, você precisa:
+Para depurar o código usando o DNSpy, você precisa:
 
 Primeiro, alterar os **atributos da Assembleia** relacionados à **depuração**:
 
@@ -120,7 +120,7 @@ Clique com o botão direito do mouse em qualquer módulo no **Explorador de Asse
 
 ![](<../../.gitbook/assets/image (136).png>)
 
-Então, quando você começa a depuração, **a execução será interrompida quando cada DLL for carregada**, então, quando o rundll32 carregar sua DLL, a execução será interrompida.
+Então, quando você começa a depuração, **a execução será interrompida quando cada DLL for carregada**, então, quando rundll32 carregar sua DLL, a execução será interrompida.
 
 Mas como você pode chegar ao código da DLL que foi carregada? Usando este método, eu não sei como.
 
@@ -131,7 +131,7 @@ Mas como você pode chegar ao código da DLL que foi carregada? Usando este mét
 * Altere _Opções --> Configurações_ e selecione "**Entrada de DLL**".
 * Em seguida, **inicie a execução**, o depurador irá parar em cada dll principal, em algum momento você irá **parar na Entrada da DLL da sua dll**. A partir daí, basta procurar os pontos onde você deseja colocar um ponto de interrupção.
 
-Observe que quando a execução é interrompida por qualquer motivo no win64dbg, você pode ver **em qual código você está** olhando na **parte superior da janela do win64dbg**:
+Observe que quando a execução é interrompida por qualquer motivo no win64dbg, você pode ver **em qual código você está** olhando na **parte superior da janela win64dbg**:
 
 ![](<../../.gitbook/assets/image (137).png>)
 
@@ -139,7 +139,7 @@ Então, olhando para isso, você pode ver quando a execução foi interrompida n
 
 ## Aplicativos GUI / Jogos de vídeo
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) é um programa útil para encontrar onde valores importantes são salvos na memória de um jogo em execução e alterá-los. Mais informações em:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) é um programa útil para encontrar onde valores importantes são salvos dentro da memória de um jogo em execução e alterá-los. Mais informações em:
 
 {% content-ref url="cheat-engine.md" %}
 [cheat-engine.md](cheat-engine.md)
@@ -165,11 +165,11 @@ Você pode encontrar uma versão ligeiramente modificada do Blobrunner no seguin
 
 ### Depurando um shellcode com jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)é muito semelhante ao blobrunner. Ele irá **alocar** o **shellcode** dentro de um espaço de memória e iniciar um **loop eterno**. Em seguida, você precisa **anexar o depurador** ao processo, **iniciar a execução, esperar 2-5 segundos e pressionar parar** e você se encontrará dentro do **loop eterno**. Pule para a próxima instrução do loop eterno, pois será uma chamada ao shellcode, e finalmente você se encontrará executando o shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)é muito semelhante ao blobrunner. Ele irá **alocar** o **shellcode** dentro de um espaço de memória e iniciar um **loop eterno**. Em seguida, você precisa **anexar o depurador** ao processo, **iniciar, esperar 2-5 segundos e pressionar parar** e você se encontrará dentro do **loop eterno**. Pule para a próxima instrução do loop eterno, pois será uma chamada ao shellcode e, finalmente, você se encontrará executando o shellcode.
 
 ![](<../../.gitbook/assets/image (397).png>)
 
-Você pode baixar uma versão compilada do [jmp2it na página de lançamentos](https://github.com/adamkramer/jmp2it/releases/).
+Você pode baixar uma versão compilada do [jmp2it dentro da página de lançamentos](https://github.com/adamkramer/jmp2it/releases/).
 
 ### Depurando shellcode usando Cutter
 
@@ -192,7 +192,7 @@ Você pode ver a pilha, por exemplo, dentro de um despejo hexadecimal:
 ### Desofuscando shellcode e obtendo funções executadas
 
 Você deve tentar [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7\&pid=152).\
-Ele irá informar coisas como **quais funções** o shellcode está usando e se o shellcode está **decodificando** a si mesmo na memória.
+Ele irá informá-lo sobre coisas como **quais funções** o shellcode está usando e se o shellcode está **decodificando** a si mesmo na memória.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -233,7 +233,7 @@ Para encontrar o **ponto de entrada**, procure as funções por `::main` como em
 
 ![](<../../.gitbook/assets/image (612).png>)
 
-Neste caso, o binário foi chamado de autenticador, então é bastante óbvio que esta é a função principal interessante.\
+Neste caso, o binário foi chamado de authenticator, então é bastante óbvio que esta é a função principal interessante.\
 Tendo o **nome** das **funções** que estão sendo chamadas, procure-as na **Internet** para aprender sobre suas **entradas** e **saídas**.
 
 ## **Delphi**
@@ -244,7 +244,7 @@ Se você tiver que reverter um binário Delphi, sugiro que use o plugin do IDA [
 
 Basta pressionar **ATL+f7** (importar plugin python no IDA) e selecionar o plugin python.
 
-Este plugin executará o binário e resolverá os nomes das funções dinamicamente no início da depuração. Depois de iniciar a depuração, pressione novamente o botão Iniciar (o verde ou f9) e um ponto de interrupção será atingido no início do código real.
+Este plugin executará o binário e resolverá os nomes das funções dinamicamente no início da depuração. Depois de iniciar a depuração, pressione novamente o botão Iniciar (o verde ou f9) e um ponto de interrupção atingirá no início do código real.
 
 Também é muito interessante porque se você pressionar um botão na aplicação gráfica, o depurador parará na função executada por esse botão.
 
@@ -365,7 +365,7 @@ No código anterior, você pode ver que estamos comparando **uVar1** (o local on
 * Em quaisquer outros casos, é verificado um contador (`DAT_030000d4`). É um contador porque ele adiciona 1 logo após entrar no código.\
   Se for menor que 8, algo que envolve **adicionar** valores a \*\*`DAT_030000d8` \*\* é feito (basicamente, está adicionando os valores das teclas pressionadas nesta variável, desde que o contador seja menor que 8).
 
-Portanto, neste desafio, sabendo os valores dos botões, você precisava **pressionar uma combinação com um comprimento menor que 8 para que a adição resultante seja 0xf3.**
+Portanto, neste desafio, sabendo os valores dos botões, você precisava **pressionar uma combinação com um comprimento menor que 8, cuja adição resultasse em 0xf3.**
 
 **Referência para este tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
@@ -376,14 +376,14 @@ Portanto, neste desafio, sabendo os valores dos botões, você precisava **press
 ## Cursos
 
 * [https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering)
-* [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
+* [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Desofuscação binária)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).

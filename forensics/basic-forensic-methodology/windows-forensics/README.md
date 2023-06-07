@@ -6,8 +6,8 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
@@ -28,9 +28,9 @@ A Linha do Tempo é uma característica do Windows que fornece um **histórico c
 
 O banco de dados reside no caminho `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db`. Este banco de dados pode ser aberto com uma ferramenta SQLite ou com a ferramenta [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) **que gera 2 arquivos que podem ser abertos com a ferramenta** [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md).
 
-### ADS (fluxos de dados alternativos)
+### Fluxos de Dados Alternativos (ADS)
 
-Os arquivos baixados podem conter a **Zona de ADS.Identifier** indicando **como** foi **baixado** da intranet, internet, etc. Alguns softwares (como navegadores) geralmente colocam ainda **mais** **informações** como a **URL** de onde o arquivo foi baixado.
+Arquivos baixados podem conter a **Zona de Fluxos de Dados Alternativos (ADS) Identifier** indicando **como** foi **baixado** da intranet, internet, etc. Alguns softwares (como navegadores) geralmente colocam ainda **mais** **informações** como a **URL** de onde o arquivo foi baixado.
 
 ## **Backups de Arquivos**
 
@@ -87,9 +87,9 @@ Quando uma pasta é criada, um link para a pasta, para a pasta pai e para a past
 
 Esses arquivos de link criados automaticamente **contêm informações sobre a origem** como se é um **arquivo** **ou** uma **pasta**, **tempos MAC** desse arquivo, **informações de volume** de onde o arquivo está armazenado e **pasta do arquivo de destino**. Essas informações podem ser úteis para recuperar esses arquivos caso eles tenham sido removidos.
 
-Além disso, a **data de criação do link** do arquivo é a primeira **vez** que o arquivo original foi **usado** e a **data modificada** do link do arquivo é a **última vez** que o arquivo de origem foi usado.
+Além disso, a **data de criação do arquivo de link** é a primeira **vez** que o arquivo original foi **usado** e a **data modificada** do arquivo de link é a **última vez** que o arquivo de origem foi usado.
 
-Para inspecionar esses arquivos, você pode usar o [**LinkParser**](http://4discovery.com/our-tools/).
+Para inspecionar esses arquivos, você pode usar [**LinkParser**](http://4discovery.com/our-tools/).
 
 Nessa ferramenta, você encontrará **2 conjuntos** de carimbos de data/hora:
 
@@ -118,7 +118,7 @@ Os **jumplists** criados automaticamente são armazenados em `C:\Users\{username
 
 As jumplists personalizadas são armazenadas em `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` e são criadas pelo aplicativo geralmente porque algo **importante** aconteceu com o arquivo (talvez marcado como favorito).
 
-O **tempo de criação** de qualquer jumplist indica **a primeira vez que o arquivo foi acessado** e o **tempo de modificação a última vez**.
+O **tempo de criação** de qualquer jumplist indica a **primeira vez que o arquivo foi acessado** e o **tempo de modificação a última vez**.
 
 Você pode inspecionar as jumplists usando o [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
@@ -152,7 +152,7 @@ Os arquivos na pasta WPDNSE são uma cópia dos originais, então não sobrevive
 
 Verifique o arquivo `C:\Windows\inf\setupapi.dev.log` para obter os carimbos de data e hora sobre quando a conexão USB foi produzida (procure por `Section start`).
 
-![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (6).png>)
+![](<../../../.gitbook/assets/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (14).png>)
 
 ### USB Detective
 
@@ -168,7 +168,7 @@ A própria tarefa agendada está localizada em ‘C:\Windows\System32\Tasks\Micr
 
 ![](https://2.bp.blogspot.com/-wqYubtuR\_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
-A tarefa faz referência a 'pnpclean.dll', que é responsável por realizar a atividade de limpeza. Além disso, vemos que o campo ‘UseUnifiedSchedulingEngine’ está definido como ‘TRUE’, o que especifica que o mecanismo genérico de agendamento de tarefas é usado para gerenciar a tarefa. Os valores ‘Period’ e ‘Deadline’ de 'P1M' e 'P2M' dentro de ‘
+A tarefa faz referência a 'pnpclean.dll', que é responsável por realizar a atividade de limpeza. Além disso, vemos que o campo ‘UseUnifiedSchedulingEngine’ está definido como ‘TRUE’, o que especifica que o mecanismo genérico de agendamento de tarefas é usado para gerenciar a tarefa. Os valores ‘Period’ e ‘Deadline’ de 'P1M' e 'P2M' dentro
 ### BAM (Moderador de Atividade em Segundo Plano)
 
 Você pode abrir o arquivo `SYSTEM` com um editor de registro e dentro do caminho `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` você pode encontrar informações sobre os **aplicativos executados por cada usuário** (observe o `{SID}` no caminho) e em **que horário** eles foram executados (o horário está dentro do valor de dados do registro).
@@ -179,7 +179,7 @@ O prefetching é uma técnica que permite que um computador silenciosamente **bu
 
 O prefetch do Windows consiste em criar **caches dos programas executados** para poder carregá-los mais rapidamente. Esses caches são criados como arquivos `.pf` dentro do caminho: `C:\Windows\Prefetch`. Há um limite de 128 arquivos no XP/VISTA/WIN7 e 1024 arquivos no Win8/Win10.
 
-O nome do arquivo é criado como `{nome_do_programa}-{hash}.pf` (o hash é baseado no caminho e nos argumentos do executável). No W10, esses arquivos são comprimidos. Observe que a simples presença do arquivo indica que **o programa foi executado** em algum momento.
+O nome do arquivo é criado como `{nome_do_programa}-{hash}.pf` (o hash é baseado no caminho e nos argumentos do executável). No W10, esses arquivos são compactados. Observe que a simples presença do arquivo indica que **o programa foi executado** em algum momento.
 
 O arquivo `C:\Windows\Prefetch\Layout.ini` contém os **nomes das pastas dos arquivos que são prefetchados**. Este arquivo contém **informações sobre o número de execuções**, **datas** da execução e **arquivos** **abertos** pelo programa.
 
@@ -191,7 +191,7 @@ Para inspecionar esses arquivos, você pode usar a ferramenta [**PEcmd.exe**](ht
 
 ### Superprefetch
 
-O **Superprefetch** tem o mesmo objetivo que o prefetch, **carregar programas mais rapidamente** prevendo o que será carregado em seguida. No entanto, ele não substitui o serviço de prefetch.\
+O **Superprefetch** tem o mesmo objetivo do prefetch, **carregar programas mais rapidamente** prevendo o que será carregado em seguida. No entanto, ele não substitui o serviço de prefetch.\
 Este serviço irá gerar arquivos de banco de dados em `C:\Windows\Prefetch\Ag*.db`.
 
 Nesses bancos de dados, você pode encontrar o **nome** do **programa**, **número** de **execuções**, **arquivos** **abertos**, **volume** **acessado**, **caminho** **completo**, **intervalos de tempo** e **carimbos de data/hora**.
@@ -200,11 +200,11 @@ Você pode acessar essas informações usando a ferramenta [**CrowdResponse**](h
 
 ### SRUM
 
-O **System Resource Usage Monitor** (SRUM) **monitora** os **recursos** **consumidos** **por um processo**. Ele apareceu no W8 e armazena os dados em um banco de dados ESE localizado em `C:\Windows\System32\sru\SRUDB.dat`.
+O **Monitor de Uso de Recursos do Sistema** (SRUM) **monitora** os **recursos** **consumidos** **por um processo**. Ele apareceu no W8 e armazena os dados em um banco de dados ESE localizado em `C:\Windows\System32\sru\SRUDB.dat`.
 
 Ele fornece as seguintes informações:
 
-* AppID e Path
+* ID do aplicativo e caminho
 * Usuário que executou o processo
 * Bytes enviados
 * Bytes recebidos
@@ -220,9 +220,9 @@ Você pode obter a data deste arquivo usando a ferramenta [**srum\_dump**](https
 ```
 ### AppCompatCache (ShimCache)
 
-**Shimcache**, também conhecido como **AppCompatCache**, é um componente do **Banco de Dados de Compatibilidade de Aplicativos**, criado pela **Microsoft** e usado pelo sistema operacional para identificar problemas de compatibilidade de aplicativos.
+**Shimcache**, também conhecido como **AppCompatCache**, é um componente do **Banco de Dados de Compatibilidade de Aplicativos**, que foi criado pela **Microsoft** e usado pelo sistema operacional para identificar problemas de compatibilidade de aplicativos.
 
-O cache armazena vários metadados de arquivos, dependendo do sistema operacional, como:
+O cache armazena vários metadados de arquivos dependendo do sistema operacional, como:
 
 * Caminho completo do arquivo
 * Tamanho do arquivo
@@ -331,7 +331,7 @@ Dentro do EventID 4634/4647, existem subtipos interessantes:
 * **12 (cache interativo remoto)**: Login remotamente com credenciais em cache (uma combinação de 10 e 11).
 * **13 (desbloqueio em cache)**: Desbloquear uma máquina bloqueada com credenciais em cache.
 
-Neste post, você pode encontrar como imitar todos esses tipos de login e em quais deles você poderá extrair credenciais da memória: [https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them)
+Neste post, você pode encontrar como imitar todos esses tipos de login e em quais deles você poderá despejar credenciais da memória: [https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them)
 
 As informações de status e substatus dos eventos podem indicar mais detalhes sobre as causas do evento. Por exemplo, dê uma olhada nos seguintes códigos de status e substatus do Evento ID 4625:
 
@@ -339,15 +339,15 @@ As informações de status e substatus dos eventos podem indicar mais detalhes s
 
 ### Recuperando Eventos do Windows
 
-É altamente recomendável desligar o PC suspeito **desconectando-o** para maximizar a probabilidade de recuperar os Eventos do Windows. Caso eles tenham sido excluídos, uma ferramenta que pode ser útil para tentar recuperá-los é o [**Bulk\_extractor**](../partitions-file-systems-carving/file-data-carving-recovery-tools.md#bulk-extractor) indicando a extensão **evtx**.
+É altamente recomendável desligar o PC suspeito **desconectando-o** para maximizar a probabilidade de recuperar os Eventos do Windows. Caso tenham sido excluídos, uma ferramenta que pode ser útil para tentar recuperá-los é o [**Bulk\_extractor**](../partitions-file-systems-carving/file-data-carving-recovery-tools.md#bulk-extractor) indicando a extensão **evtx**.
 
-## Identificando Ataques Comuns com Eventos do Windows
+## Identificando ataques comuns com Eventos do Windows
 
-### Ataque de Força Bruta
+### Ataque de força bruta
 
 Um ataque de força bruta pode ser facilmente identificável porque **vários EventIDs 4625 aparecerão**. Se o ataque foi **bem-sucedido**, após os EventIDs 4625, **um EventID 4624 aparecerá**.
 
-### Mudança de Hora
+### Mudança de horário
 
 Isso é terrível para a equipe de forense, pois todos os horários serão modificados. Este evento é registrado pelo EventID 4616 dentro do log de eventos de segurança.
 
@@ -362,8 +362,8 @@ O EventID 112 do DeviceSetupManager contém o timestamp de cada dispositivo USB 
 
 ### Desligar / Ligar
 
-O ID 6005 do serviço "Log de Eventos" indica que o PC foi ligado. O ID 6006 indica que foi desligado.
+O ID 6005 do serviço "Log de eventos" indica que o PC foi ligado. O ID 6006 indica que foi desligado.
 
-### Exclusão de Logs
+### Exclusão de logs
 
 O EventID 1102 de segurança indica que os logs foram excluídos.

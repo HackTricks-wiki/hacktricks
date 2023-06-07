@@ -1,4 +1,4 @@
-# Binários universais e Formato Mach-O
+# Binários universais do macOS e Formato Mach-O
 
 Os binários do Mac OS geralmente são compilados como **binários universais**. Um **binário universal** pode **suportar várias arquiteturas no mesmo arquivo**.
 
@@ -31,7 +31,7 @@ struct fat_arch {
 };
 </code></pre>
 
-O cabeçalho tem os bytes **magic** seguidos pelo **número** de **arquiteturas** que o arquivo **contém** (`nfat_arch`) e cada arquitetura terá uma estrutura `fat_arch`.
+O cabeçalho tem os bytes **magic** seguidos pelo **número** de **archs** que o arquivo **contém** (`nfat_arch`) e cada arch terá uma estrutura `fat_arch`.
 
 Verifique com:
 
@@ -64,7 +64,7 @@ ou usando a ferramenta [Mach-O View](https://sourceforge.net/projects/machoview/
 
 <figure><img src="../../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
-Como você pode estar pensando, geralmente um binário universal compilado para 2 arquiteturas **dobra o tamanho** de um compilado para apenas 1 arquitetura.
+Como você pode estar pensando, geralmente um binário universal compilado para 2 arquiteturas **dobra o tamanho** de um compilado para apenas 1 arch.
 
 ## **Cabeçalho Mach-O**
 
@@ -95,7 +95,7 @@ struct mach_header_64 {
 	uint32_t	reserved;	/* reserved */
 };
 ```
-**Tipos de arquivos**:
+**Tipos de Arquivos**:
 
 * MH\_EXECUTE (0x2): Executável Mach-O padrão
 * MH\_DYLIB (0x6): Uma biblioteca dinâmica Mach-O (ou seja, .dylib)
@@ -128,20 +128,20 @@ Existem cerca de **50 tipos diferentes de comandos de carga** que o sistema mani
 ### **LC\_SEGMENT/LC\_SEGMENT\_64**
 
 {% hint style="success" %}
-Basicamente, este tipo de Comando de Carga define **como carregar as seções** que são armazenadas em DATA quando o binário é executado.
+Basicamente, este tipo de comando de carga define **como carregar as seções** que são armazenadas em DATA quando o binário é executado.
 {% endhint %}
 
 Esses comandos **definem segmentos** que são **mapeados** no **espaço de memória virtual** de um processo quando ele é executado.
 
 Existem **diferentes tipos** de segmentos, como o segmento **\_\_TEXT**, que contém o código executável de um programa, e o segmento **\_\_DATA**, que contém dados usados pelo processo. Esses **segmentos estão localizados na seção de dados** do arquivo Mach-O.
 
-**Cada segmento** pode ser ainda **dividido** em várias **seções**. A **estrutura do comando de carga** contém **informações** sobre **essas seções** dentro do respectivo segmento.
+**Cada segmento** pode ser **dividido** em várias **seções**. A **estrutura do comando de carga** contém **informações** sobre **essas seções** dentro do respectivo segmento.
 
 No cabeçalho, primeiro você encontra o **cabeçalho do segmento**:
 
 <pre class="language-c"><code class="lang-c">struct segment_command_64 { /* para arquiteturas de 64 bits */
 	uint32_t	cmd;		/* LC_SEGMENT_64 */
-	uint32_t	cmdsize;	/* inclui o tamanho dos structs section_64 */
+	uint32_t	cmdsize;	/* inclui sizeof section_64 structs */
 	char		segname[16];	/* nome do segmento */
 	uint64_t	vmaddr;		/* endereço de memória deste segmento */
 	uint64_t	vmsize;		/* tamanho da memória deste segmento */
@@ -187,7 +187,7 @@ Também é possível obter **informações de cabeçalho** a partir da **linha d
 ```bash
 otool -lv /bin/ls
 ```
-Segmentos comuns carregados por este comando:
+Segmentos comuns carregados por este cmd:
 
 * **`__PAGEZERO`:** Instrui o kernel a **mapear** o **endereço zero** para que ele **não possa ser lido, escrito ou executado**. As variáveis maxprot e minprot na estrutura são definidas como zero para indicar que não há **direitos de leitura-escrita-execução nesta página**.
   * Esta alocação é importante para **mitigar vulnerabilidades de referência de ponteiro nulo**.
@@ -200,12 +200,12 @@ Segmentos comuns carregados por este comando:
   * `__data`: Variáveis globais (que foram inicializadas)
   * `__bss`: Variáveis estáticas (que não foram inicializadas)
   * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Informações usadas pelo tempo de execução do Objective-C
-* **`__LINKEDIT`**: Contém informações para o linker (dyld) como, "símbolo, string e entradas de tabela de realocação."
+* **`__LINKEDIT`**: Contém informações para o linker (dyld) como, "símbolo, string e entradas de tabela de realocação".
 * **`__OBJC`**: Contém informações usadas pelo tempo de execução do Objective-C. Embora essas informações também possam ser encontradas no segmento \_\_DATA, dentro de várias seções \_\_objc\_\*.
 
 ### **`LC_MAIN`**
 
-Contém o ponto de entrada no atributo **entryoff.** No momento do carregamento, **dyld** simplesmente **adiciona** esse valor à **base do binário na memória**, então **salta** para esta instrução para iniciar a execução do código binário.
+Contém o ponto de entrada no atributo **entryoff**. No momento do carregamento, o **dyld** simplesmente **adiciona** esse valor à **base do binário na memória**, então **salta** para esta instrução para iniciar a execução do código binário.
 
 ### **LC\_CODE\_SIGNATURE**
 
@@ -250,7 +250,7 @@ Algumas bibliotecas potencialmente relacionadas a malwares são:
 
 {% hint style="info" %}
 Um binário Mach-O pode conter um ou **mais** **construtores**, que serão **executados** **antes** do endereço especificado em **LC\_MAIN**.\
-Os offsets de quaisquer construtores são mantidos na seção **\_\_mod\_init\_func** do segmento **\_\_DATA\_CONST**.
+Os deslocamentos de quaisquer construtores são mantidos na seção **\_\_mod\_init\_func** do segmento **\_\_DATA\_CONST**.
 {% endhint %}
 
 ## **Dados Mach-O**
@@ -281,7 +281,7 @@ size -m /bin/ls
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**

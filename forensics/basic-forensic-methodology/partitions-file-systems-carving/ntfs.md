@@ -28,13 +28,13 @@ O cluster é a menor unidade de tamanho no NTFS e o tamanho do cluster depende d
 | 2049MB-4096MB (4GB)      | 8                   | 4KB          |
 | 4097MB-8192MB (8GB)      | 16                  | 8KB          |
 | 8193MB-16,384MB (16GB)   | 32                  | 16KB         |
-|
+| 16,385MB-32,768MB (
 ### Timestamps NTFS
 
 ![](<../../../.gitbook/assets/image (512).png>)
 
 Outra ferramenta útil para analisar o MFT é o [**MFT2csv**](https://github.com/jschicht/Mft2Csv) (selecione o arquivo MFT ou a imagem e pressione dump all e extract para extrair todos os objetos).\
-Este programa extrairá todos os dados do MFT e apresentará em formato CSV. Também pode ser usado para despejar arquivos.
+Este programa extrairá todos os dados do MFT e apresentará em formato CSV. Ele também pode ser usado para despejar arquivos.
 
 ![](<../../../.gitbook/assets/image (513).png>)
 
@@ -43,12 +43,12 @@ Este programa extrairá todos os dados do MFT e apresentará em formato CSV. Tam
 O arquivo **`$LOGFILE`** contém **logs** sobre as **ações** que foram **realizadas** **em** **arquivos**. Ele também **salva** a **ação** que precisaria ser executada em caso de um **refazer** e a ação necessária para **voltar** ao **estado** **anterior**.\
 Esses logs são úteis para o MFT reconstruir o sistema de arquivos caso ocorra algum tipo de erro. O tamanho máximo deste arquivo é de **65536KB**.
 
-Para inspecionar o `$LOGFILE`, é necessário extrair e inspecionar o `$MFT` anteriormente com o [**MFT2csv**](https://github.com/jschicht/Mft2Csv).\
+Para inspecionar o `$LOGFILE`, você precisa extrair e inspecionar o `$MFT` anteriormente com o [**MFT2csv**](https://github.com/jschicht/Mft2Csv).\
 Em seguida, execute o [**LogFileParser**](https://github.com/jschicht/LogFileParser) neste arquivo e selecione o arquivo `$LOGFILE` exportado e o CVS da inspeção do `$MFT`. Você obterá um arquivo CSV com os logs da atividade do sistema de arquivos registrados pelo log `$LOGFILE`.
 
 ![](<../../../.gitbook/assets/image (515).png>)
 
-Filtrando por nomes de arquivos, você pode ver **todas as ações realizadas em um arquivo**:
+Filtrando por nomes de arquivos, você pode ver **todas as ações realizadas em relação a um arquivo**:
 
 ![](<../../../.gitbook/assets/image (514).png>)
 
@@ -58,7 +58,7 @@ O arquivo `$EXTEND/$USNJnrl/$J` é um fluxo de dados alternativo do arquivo `$EX
 
 Para inspecionar este arquivo, você pode usar a ferramenta [**UsnJrnl2csv**](https://github.com/jschicht/UsnJrnl2Csv).
 
-Filtrando pelo nome do arquivo, é possível ver **todas as ações realizadas em um arquivo**. Além disso, você pode encontrar a `MFTReference` na pasta pai. Em seguida, olhando para essa `MFTReference`, você pode encontrar **informações da pasta pai**.
+Filtrando pelo nome do arquivo, é possível ver **todas as ações realizadas em relação a um arquivo**. Além disso, você pode encontrar a `MFTReference` na pasta pai. Em seguida, olhando para essa `MFTReference`, você pode encontrar **informações da pasta pai**.
 
 ![](<../../../.gitbook/assets/image (516).png>)
 
@@ -70,7 +70,7 @@ Você pode obter o arquivo `$I30` de um diretório do **FTK Imager** e inspecion
 
 ![](<../../../.gitbook/assets/image (519).png>)
 
-Com esses dados, você pode encontrar **informações sobre as alterações de arquivos realizadas dentro da pasta**, mas observe que o tempo de exclusão de um arquivo não é salvo dentro deste log. No entanto, você pode ver que a **última data modificada** do arquivo **`$I30`**, e se a **última ação realizada** na pasta é a **exclusão** de um arquivo, os tempos podem ser os mesmos.
+Com esses dados, você pode encontrar **informações sobre as alterações de arquivos realizadas dentro da pasta**, mas observe que o tempo de exclusão de um arquivo não é salvo dentro deste log. No entanto, você pode ver que a **última data modificada** do arquivo **`$I30`**, e se a **última ação realizada** sobre o diretório é a **exclusão** de um arquivo, os tempos podem ser os mesmos.
 
 ### $Bitmap
 
@@ -114,7 +114,7 @@ Além disso, diferentes softwares podem armazenar informações adicionais:
 
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
-* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtenha o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 

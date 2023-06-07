@@ -4,7 +4,7 @@
 
 ### Versão
 
-* **`Software\Microsoft\Windows NT\CurrentVersion`**: versão do Windows, Service Pack, hora da instalação e proprietário registrado.
+* **`Software\Microsoft\Windows NT\CurrentVersion`**: Versão do Windows, Service Pack, hora da instalação e proprietário registrado.
 
 ### Nome do Host
 
@@ -46,4 +46,6 @@
 * `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
 * `Software\Microsoft\Windows\CurrentVersion\Runonce`
 * `Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run`
-* `Software\
+* `Software\Microsoft\Windows\CurrentVersion\Run`
+
+### Pes

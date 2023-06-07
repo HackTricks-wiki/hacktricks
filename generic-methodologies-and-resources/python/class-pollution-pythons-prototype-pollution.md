@@ -8,7 +8,7 @@
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -126,28 +126,29 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Poluindo outras classes e variáveis globais através de <code>globals</code></summary>
+<summary>Poluindo outras classes e variáveis globais através de <code>globals</code></summary> 
 
-Podemos usar a função `globals()` para poluir outras classes e variáveis globais. O seguinte exemplo mostra como podemos adicionar um novo método à classe `str`:
+A técnica de poluição de classe também pode ser usada para poluir outras classes e variáveis globais. Para fazer isso, podemos usar a função <code>globals</code> do Python, que retorna um dicionário contendo as variáveis globais atuais. Podemos então modificar esse dicionário para adicionar novas variáveis ou modificar as existentes.
 
-```python
-def my_method(self):
-    return "hello world"
-
-globals()['str'].my_method = my_method
-
-print("".my_method())
-```
-
-Isso adicionará o método `my_method` à classe `str` e, em seguida, o método poderá ser chamado em qualquer instância da classe `str`. Da mesma forma, podemos poluir variáveis globais:
+Por exemplo, podemos poluir uma variável global chamada <code>SECRET_KEY</code> em um arquivo de configuração Django:
 
 ```python
-globals()['my_var'] = 123
-
-print(my_var)
+globals()['SECRET_KEY'] = 'my_new_secret_key'
 ```
 
-Isso adicionará a variável `my_var` ao escopo global e, em seguida, poderá ser acessada em qualquer lugar do código.
+Isso adicionará a variável <code>SECRET_KEY</code> ao dicionário global, tornando-a acessível em todo o código. Isso pode ser usado para substituir a chave secreta atual por uma nova, sem precisar modificar o arquivo de configuração original.
+
+Da mesma forma, podemos poluir outras classes adicionando novos atributos ou métodos a elas. Por exemplo, podemos adicionar um novo método <code>malicious_method</code> à classe <code>MyClass</code>:
+
+```python
+class MyClass:
+    def __init__(self):
+        self.my_attribute = 'original_value'
+
+globals()['MyClass'].malicious_method = lambda self: self.my_attribute
+```
+
+Isso adicionará o método <code>malicious_method</code> à classe <code>MyClass</code>, permitindo que um invasor acesse o atributo <code>my_attribute</code> de qualquer instância de <code>MyClass</code>.
 ```python
 def merge(src, dst):
     # Recursive merge function
@@ -256,15 +257,15 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Sobrescrevendo o segredo do Flask em diferentes arquivos</summary>
+<summary>Sobrescrevendo segredo do Flask em diferentes arquivos</summary>
 
-Assim, se você pode fazer uma poluição de classe em um objeto definido no arquivo principal em Python da web, mas **cuja classe é definida em um arquivo diferente** do principal. Porque, para acessar \_\_globals\_\_ nos payloads anteriores, você precisa acessar a classe do objeto ou métodos da classe, você será capaz de **acessar os globais naquele arquivo, mas não no principal**. \
+Então, se você pode fazer uma poluição de classe em um objeto definido no arquivo principal do Python da web, mas **cuja classe é definida em um arquivo diferente** do principal. Porque, para acessar \_\_globals\_\_ nos payloads anteriores, você precisa acessar a classe do objeto ou métodos da classe, você será capaz de **acessar os globais naquele arquivo, mas não no principal**. \
 Portanto, você **não poderá acessar o objeto global do aplicativo Flask** que definiu a **chave secreta** na página principal:
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Neste cenário, você precisa de um gadget para percorrer arquivos para chegar ao principal e **acessar o objeto global `app.secret_key`** para alterar a chave secreta do Flask e ser capaz de [**escalar privilégios** sabendo dessa chave](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Neste cenário, você precisa de um dispositivo para percorrer arquivos para chegar ao principal e **acessar o objeto global `app.secret_key`** para alterar a chave secreta do Flask e ser capaz de [**escalar privilégios** sabendo dessa chave](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
 Um payload como este [deste writeup](https://ctftime.org/writeup/36082):
 
@@ -274,9 +275,15 @@ __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.se
 ```
 {% endcode %}
 
-Use este payload para **alterar `app.secret_key`** (o nome em sua aplicação pode ser diferente) para ser capaz de assinar novos cookies flask com mais privilégios.
+Use este payload para **alterar `app.secret_key`** (o nome em seu aplicativo pode ser diferente) para ser capaz de assinar novos cookies flask com mais privilégios.
 
 </details>
+
+Confira também a seguinte página para mais gadgets somente de leitura:
+
+{% content-ref url="python-internal-read-gadgets.md" %}
+[python-internal-read-gadgets.md](python-internal-read-gadgets.md)
+{% endcontent-ref %}
 
 ## Referências
 
@@ -286,10 +293,10 @@ Use este payload para **alterar `app.secret_key`** (o nome em sua aplicação po
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

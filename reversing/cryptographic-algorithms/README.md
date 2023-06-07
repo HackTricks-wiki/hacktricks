@@ -16,7 +16,7 @@
 
 ## Identificando Algoritmos
 
-Se você se deparar com um código **usando deslocamentos de bits, XORs e várias operações aritméticas**, é altamente possível que seja a implementação de um **algoritmo criptográfico**. Aqui serão mostradas algumas maneiras de **identificar o algoritmo que está sendo usado sem precisar reverter cada etapa**.
+Se você encontrar um código **usando deslocamentos de bits, XORs e várias operações aritméticas**, é altamente possível que seja a implementação de um **algoritmo criptográfico**. Aqui serão mostradas algumas maneiras de **identificar o algoritmo que está sendo usado sem precisar reverter cada etapa**.
 
 ### Funções de API
 
@@ -54,4 +54,4 @@ Se você pesquisar a primeira constante no Google, é isso que você obtém:
 
 ![](<../../.gitbook/assets/image (371).png>)
 
-Portanto, você pode assum
+Portanto, você pode assumir que a função descompilada é um **calculador sha256**
