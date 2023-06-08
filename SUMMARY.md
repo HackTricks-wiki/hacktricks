@@ -151,7 +151,7 @@
   * [macOS File Extension Apps](macos-hardening/macos-security-and-privilege-escalation/macos-file-extension-apps.md)
   * [macOS Files, Folders, Binaries & Memory](macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/README.md)
     * [macOS Bundles](macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/macos-bundles.md)
-    * [macOS Installer Packages (pkg)](macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/macos-installer-packages-pkg.md)
+    * [macOS Installers Abuse](macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/macos-installers-abuse.md)
     * [macOS Memory Dumping](macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/macos-memory-dumping.md)
     * [macOS Sensitive Locations](macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/macos-sensitive-locations.md)
     * [macOS Universal binaries & Mach-O Format](macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)

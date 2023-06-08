@@ -51,8 +51,8 @@ O MacOS armazena informações como senhas em vários locais:
 
 ### Instaladores pkg vulneráveis
 
-{% content-ref url="macos-installer-packages-pkg.md" %}
-[macos-installer-packages-pkg.md](macos-installer-packages-pkg.md)
+{% content-ref url="macos-installers-abuse.md" %}
+[macos-installers-abuse.md](macos-installers-abuse.md)
 {% endcontent-ref %}
 
 ## Extensões Específicas do OS X
@@ -86,13 +86,13 @@ Basicamente, um pacote é uma **estrutura de diretório** dentro do sistema de a
 
 ### Permissões de pasta
 
-Em uma **pasta**, **ler** permite **listá-la**, **escrever** permite **excluir** e **escrever** arquivos nela, e **executar** permite **atravessar** o diretório. Portanto, por exemplo, um usuário com **permissão de leitura sobre um arquivo** dentro de um diretório onde ele **não tem permissão de execução** **não poderá ler** o arquivo.
+Em uma **pasta**, **leitura** permite **listá-la**, **escrita** permite **excluir** e **escrever** arquivos nela, e **executar** permite **atravessar** o diretório. Portanto, por exemplo, um usuário com **permissão de leitura sobre um arquivo** dentro de um diretório onde ele **não tem permissão de execução** **não poderá ler** o arquivo.
 
 ### Modificadores de sinalizador
 
 Existem alguns sinalizadores que podem ser definidos nos arquivos que farão com que o arquivo se comporte de maneira diferente. Você pode **verificar os sinalizadores** dos arquivos dentro de um diretório com `ls -lO /path/directory`
 
-* **`uchg`**: Conhecido como sinalizador **uchange** impedirá qualquer ação de alterar ou excluir o **arquivo**. Para defini
+* **`uchg`**: Conhecido como sinalizador **uchange** impedirá qualquer ação de alterar ou excluir o **arquivo**. Para defini-lo, faça: `
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
@@ -109,7 +109,7 @@ ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
 ### Garfos de Recursos | ADS do macOS
 
-Esta é uma maneira de obter **fluxos de dados alternativos em máquinas MacOS**. Você pode salvar conteúdo dentro de um atributo estendido chamado **com.apple.ResourceFork** dentro de um arquivo, salvando-o em **file/..namedfork/rsrc**.
+Esta é uma maneira de obter **fluxos de dados alternativos em máquinas MacOS**. Você pode salvar conteúdo dentro de um atributo estendido chamado **com.apple.ResourceFork** dentro de um arquivo salvando-o em **file/..namedfork/rsrc**.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -149,13 +149,13 @@ As possíveis categorias incluem as seguintes:
 * **LSRiskCategorySafe**: **Totalmente** **seguro**; Safari será aberto automaticamente após o download
 * **LSRiskCategoryNeutral**: Sem aviso, mas **não é aberto automaticamente**
 * **LSRiskCategoryUnsafeExecutable**: **Dispara** um **aviso** "Este arquivo é um aplicativo..."
-* **LSRiskCategoryMayContainUnsafeExecutable**: Isso é para coisas como arquivos que contêm um executável. Ele **dispara um aviso a menos que o Safari possa determinar que todo o conteúdo é seguro ou neutro**.
+* **LSRiskCategoryMayContainUnsafeExecutable**: Isso é para coisas como arquivos que contêm um executável. Ele **dispara um aviso, a menos que o Safari possa determinar que todo o conteúdo é seguro ou neutro**.
 
 ## Arquivos de log
 
 * **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contém informações sobre arquivos baixados, como a URL de onde foram baixados.
 * **`/var/log/system.log`**: Log principal dos sistemas OSX. com.apple.syslogd.plist é responsável pela execução do syslog (você pode verificar se está desativado procurando por "com.apple.syslogd" em `launchctl list`.
-* **`/private/var/log/asl/*.asl`**: Estes são os Registros do Sistema da Apple que podem conter informações interessantes.
+* **`/private/var/log/asl/*.asl`**: Estes são os Registros do Sistema Apple que podem conter informações interessantes.
 * **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Armazena arquivos e aplicativos acessados recentemente através do "Finder".
 * **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Armazena itens para iniciar no início do sistema
 * **`$HOME/Library/Logs/DiskUtility.log`**: Arquivo de log para o aplicativo DiskUtility (informações sobre unidades, incluindo USBs)

@@ -7,7 +7,7 @@
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga** me no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -92,8 +92,8 @@ Ser capaz de **criar um arquivo** que será **usado pelo root**, permite que um 
 
 Para esse tipo de vulnerabilidades, não se esqueça de **verificar instaladores `.pkg` vulneráveis**:
 
-{% content-ref url="macos-files-folders-and-binaries/macos-installer-packages-pkg.md" %}
-[macos-installer-packages-pkg.md](macos-files-folders-and-binaries/macos-installer-packages-pkg.md)
+{% content-ref url="macos-files-folders-and-binaries/macos-installers-abuse.md" %}
+[macos-installers-abuse.md](macos-files-folders-and-binaries/macos-installers-abuse.md)
 {% endcontent-ref %}
 
 ### Abuso de Privilégios e Entitlements via Abuso de Processo
@@ -112,7 +112,7 @@ Aplicativos estranhos registrados por extensões de arquivo podem ser abusados:
 [macos-file-extension-apps.md](macos-file-extension-apps.md)
 {% endcontent-ref %}
 
-### Aplicativos de Manipulador de URL
+### Aplicativos de Manipulação de URL
 
 Diferentes aplicativos podem ser registrados para abrir protocolos específicos. Eles podem ser abusados.
 
@@ -123,7 +123,7 @@ TODO: Criar uma página sobre isso
 ### CVE-2020-9771 - mount\_apfs TCC bypass e escalada de privilégios
 
 **Qualquer usuário** (mesmo não privilegiado) pode criar e montar um snapshot do time machine e **acessar TODOS os arquivos** desse snapshot.\
-O **único privilégio** necessário é para o aplicativo usado (como o `Terminal`) ter **Acesso Total ao Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`) que precisa ser concedido por um administrador.
+O **único privilégio** necessário é para o aplicativo usado (como o `Terminal`) ter **Acesso Total ao Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`) que precisa ser concedido por um administrador. 
 
 {% code overflow="wrap" %}
 ```bash
