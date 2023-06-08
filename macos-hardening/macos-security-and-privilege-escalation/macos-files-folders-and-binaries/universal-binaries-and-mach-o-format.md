@@ -192,7 +192,7 @@ otool -lv /bin/ls
 Segmentos comunes cargados por este cmd:
 
 * **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no se pueda leer, escribir o ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**. 
-  * Esta asignación es importante para **mitigar las vulnerabilidades de referencia de puntero nulo**.
+  * Esta asignación es importante para **mitigar vulnerabilidades de referencia de puntero nulo**.
 * **`__TEXT`**: Contiene **código ejecutable** y **datos** que son **solo de lectura**. Secciones comunes de este segmento:
   * `__text`: Código binario compilado
   * `__const`: Datos constantes
@@ -215,7 +215,7 @@ Contiene información sobre la **firma de código del archivo Macho-O**. Solo co
 
 ### **LC\_LOAD\_DYLINKER**
 
-Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre se establece en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo kernel.
+Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre está establecido en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo kernel.
 
 ### **`LC_LOAD_DYLIB`**
 
@@ -265,7 +265,7 @@ Los datos son básicamente la parte que contiene toda la información cargada po
 
 ![](<../../../.gitbook/assets/image (507) (3).png>)
 
-Esto incluye:
+Esto incluye:&#x20;
 
 * **Tabla de funciones:** Que contiene información sobre las funciones del programa.
 * **Tabla de símbolos**: Que contiene información sobre las funciones externas utilizadas por el binario.
@@ -273,7 +273,7 @@ Esto incluye:
 
 Para verificarlo, se puede utilizar la herramienta [**Mach-O View**](https://sourceforge.net/projects/machoview/):
 
-<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (4).png" alt=""><figcaption></figcaption></figure>
 
 O desde la línea de comandos:
 ```bash

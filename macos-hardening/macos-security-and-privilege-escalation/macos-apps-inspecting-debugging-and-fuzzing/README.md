@@ -1,4 +1,4 @@
-# macOS Apps - Inspección, depuración y Fuzzing
+# Aplicaciones de macOS - Inspección, depuración y Fuzzing
 
 <details>
 
@@ -21,7 +21,7 @@ otool -tv /bin/ps #Decompile application
 ```
 ### objdump
 
-objdump es una herramienta de línea de comandos que se utiliza para inspeccionar archivos binarios y objetos. Puede mostrar información detallada sobre los archivos ejecutables, bibliotecas compartidas, archivos objeto y otros formatos de archivo binario. También puede desensamblar el código de la máquina y mostrar la información de depuración. objdump es una herramienta útil para la ingeniería inversa y la depuración de aplicaciones.
+Objdump es una herramienta de línea de comandos que se utiliza para inspeccionar archivos binarios y de objeto. Puede mostrar información detallada sobre los archivos, como los encabezados de sección, los símbolos y las instrucciones de ensamblaje. También se puede utilizar para desensamblar archivos y analizar su contenido. Objdump es una herramienta útil para la depuración y el análisis de archivos binarios en macOS.
 ```bash
 objdump -m --dylibs-used /bin/ls #List dynamically linked libraries
 objdump -m -h /bin/ls # Get headers information
@@ -48,7 +48,7 @@ ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Autom
 ```
 ### Codesign
 
-Codesign es una herramienta de línea de comandos que se utiliza para firmar digitalmente archivos en macOS. La firma digital proporciona una forma de verificar la integridad y autenticidad de los archivos. Los desarrolladores pueden usar codesign para firmar sus aplicaciones antes de distribuirlas, lo que ayuda a prevenir la manipulación malintencionada de los archivos. Además, codesign también se utiliza para verificar la firma de los archivos existentes y para identificar cualquier problema de firma.
+Codesign
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -92,17 +92,17 @@ Los parámetros que esta función espera son:
 
 | **Argumento**      | **Registro**                                                    | **(para) objc\_msgSend**                                |
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **1er argumento**  | **rdi**                                                         | **self: objeto sobre el que se invoca el método**      |
-| **2º argumento**  | **rsi**                                                         | **op: nombre del método**                              |
-| **3er argumento**  | **rdx**                                                         | **1er argumento para el método**                        |
+| **1er argumento**  | **rdi**                                                         | **self: objeto sobre el que se invoca el método** |
+| **2º argumento**  | **rsi**                                                         | **op: nombre del método**                             |
+| **3er argumento**  | **rdx**                                                         | **1er argumento para el método**                         |
 | **4º argumento**  | **rcx**                                                         | **2º argumento para el método**                         |
-| **5º argumento**  | **r8**                                                          | **3er argumento para el método**                        |
+| **5º argumento**  | **r8**                                                          | **3er argumento para el método**                         |
 | **6º argumento**  | **r9**                                                          | **4º argumento para el método**                         |
-| **7º+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5º+ argumento para el método**                       |
+| **7º+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5º+ argumento para el método**                        |
 
 ### Binarios empaquetados
 
-* Comprobar la entropía alta
+* Comprobar la alta entropía
 * Comprobar las cadenas (si hay casi ninguna cadena comprensible, empaquetado)
 * El empaquetador UPX para MacOS genera una sección llamada "\_\_XHDR"
 
@@ -124,15 +124,15 @@ En el panel izquierdo de Hopper es posible ver los símbolos (**Etiquetas**) del
 
 #### Panel central
 
-En el panel central se puede ver el **código desensamblado**. Y se puede ver como **crudo**, como **gráfico**, como **descompilado** y como **binario** haciendo clic en el icono respectivo:
+En el panel central se puede ver el **código desensamblado**. Y se puede ver como **crudo** desensamblado, como **gráfico**, como **descompilado** y como **binario** haciendo clic en el icono respectivo:
 
 <figure><img src="../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
 
 Al hacer clic con el botón derecho en un objeto de código, se pueden ver las **referencias desde/hacia ese objeto** o incluso cambiar su nombre (esto no funciona en el pseudocódigo descompilado):
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-Además, en la **parte inferior central se pueden escribir comandos de Python**.
+Además, en la **parte inferior central se pueden escribir comandos python**.
 
 #### Panel derecho
 
@@ -151,7 +151,7 @@ ktrace trace -s -S -t c -c ls | grep "ls("
 ```
 ### dtrace
 
-Permite a los usuarios acceder a las aplicaciones a un nivel extremadamente **bajo nivel** y proporciona una forma para que los usuarios **rastreen** **programas** e incluso cambien su flujo de ejecución. Dtrace utiliza **sondas** que se **colocan en todo el kernel** y se encuentran en lugares como el inicio y el final de las llamadas al sistema.
+Permite a los usuarios acceder a las aplicaciones a un nivel extremadamente **bajo** y proporciona una forma para que los usuarios **rastreen** **programas** e incluso cambien su flujo de ejecución. Dtrace utiliza **sondas** que se **colocan en todo el kernel** y se encuentran en lugares como el inicio y el final de las llamadas al sistema.
 
 DTrace utiliza la función **`dtrace_probe_create`** para crear una sonda para cada llamada al sistema. Estas sondas se pueden activar en el **punto de entrada y salida de cada llamada al sistema**. La interacción con DTrace ocurre a través de /dev/dtrace, que solo está disponible para el usuario root.
 
@@ -282,8 +282,8 @@ Cuando se llama a la función **`objc_sendMsg`**, el registro **rsi** contiene e
 #### Detección de VM
 
 * El comando **`sysctl hw.model`** devuelve "Mac" cuando el **anfitrión es un MacOS**, pero algo diferente cuando es una VM.
-* Jugando con los valores de **`hw.logicalcpu`** y **`hw.physicalcpu`**, algunos malwares intentan detectar si es una VM.
-* Algunos malwares también pueden **detectar** si la máquina es **VMware** en función de la dirección MAC (00:50:56).
+* Jugando con los valores de **`hw.logicalcpu`** y **`hw.physicalcpu`** algunos malwares intentan detectar si es una VM.
+* Algunos malwares también pueden **detectar** si la máquina es **VMware** basándose en la dirección MAC (00:50:56).
 * También es posible encontrar **si un proceso está siendo depurado** con un código simple como:
 
   * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //proceso siendo depurado }`
@@ -311,17 +311,17 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Roo
 launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 ```
-### Sleep
+### Dormir
 
-Mientras se realiza fuzzing en MacOS, es importante evitar que el equipo entre en modo de suspensión:
+Mientras se realiza fuzzing en MacOS, es importante no permitir que la Mac se duerma:
 
 * systemsetup -setsleep Never
-* pmset, Preferencias del Sistema
+* pmset, Preferencias del sistema
 * [KeepingYouAwake](https://github.com/newmarcel/KeepingYouAwake)
 
 #### Desconexión SSH
 
-Si se está realizando fuzzing a través de una conexión SSH, es importante asegurarse de que la sesión no se desconecte. Para ello, se debe cambiar el archivo sshd\_config con:
+Si se está realizando fuzzing a través de una conexión SSH, es importante asegurarse de que la sesión no se desconecte. Para ello, cambie el archivo sshd\_config con:
 
 * TCPKeepAlive Yes
 * ClientAliveInterval 0
@@ -336,7 +336,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 
 ### Enumerando procesos de red
 
-Es interesante encontrar procesos que estén gestionando datos de red:
+Es interesante encontrar procesos que manejen datos de red:
 ```bash
 dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >> recv.log
 #wait some time
@@ -351,7 +351,7 @@ cat procs.txt
 
 ## Referencias
 
-* [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+* [**Respuesta a incidentes en OS X: Scripting y análisis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 * [**https://www.youtube.com/watch?v=T5xfL9tEg44**](https://www.youtube.com/watch?v=T5xfL9tEg44)
 * [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 
@@ -363,6 +363,6 @@ cat procs.txt
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

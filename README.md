@@ -1,6 +1,6 @@
 ---
 description: >-
-  Bienvenido a la wiki donde encontrarás cada truco/técnica/herramienta de hacking que he aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias.
+  Bienvenido a la wiki donde encontrarás cada truco/técnica/herramienta de hacking que he aprendido de CTFs, aplicaciones de la vida real, lectura de investigaciones y noticias.
 ---
 
 # HackTricks
@@ -10,7 +10,7 @@ description: >-
 _Logos y diseño de movimiento de Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 {% hint style="info" %}
-**Bienvenido a la wiki donde encontrarás cada truco/técnica/herramienta de hacking que he aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias.**
+**Bienvenido a la wiki donde encontrarás cada truco/técnica/herramienta de hacking que he aprendido de CTFs, aplicaciones de la vida real, lectura de investigaciones y noticias.**
 {% endhint %}
 
 Aquí puedes encontrar una pequeña **introducción:**
@@ -80,4 +80,4 @@ Obtén acceso hoy:
 
 <figure><img src=".gitbook/assets/logo.svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** a las empresas **de todo el mundo** contra las últimas amenazas de ciberseguridad proporcionando servicios de **seguridad ofensiva** con un enfoque **moderno**.
+[**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** a las empresas **de todo el mundo** contra las últimas amenazas de ciberseguridad proporcionando servicios de **seguridad ofensiva** con

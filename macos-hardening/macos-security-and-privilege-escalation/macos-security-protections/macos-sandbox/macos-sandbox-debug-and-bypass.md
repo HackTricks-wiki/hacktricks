@@ -14,7 +14,7 @@
 
 ## Proceso de carga del Sandbox
 
-<figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption><p>Imagen de <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (2).png" alt=""><figcaption><p>Imagen de <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
 En la imagen anterior se puede observar **cómo se cargará el sandbox** cuando se ejecute una aplicación con la concesión **`com.apple.security.app-sandbox`**.
 
@@ -43,17 +43,104 @@ int main() {
 ```
 {% endtab %}
 
-{% tab title="entitlements.xml" %}
+{% tab title="macOS Sandbox Debug and Bypass" %}
+# Depuración y Bypass del Sandbox de macOS
 
-El archivo `entitlements.xml` es un archivo de configuración que se utiliza para especificar los permisos y capacidades que una aplicación tiene en el sistema. Estos permisos se denominan "entitlements" y se utilizan para restringir el acceso a ciertas funciones y recursos del sistema. 
+El sandbox de macOS es una característica de seguridad importante que limita el acceso de las aplicaciones a los recursos del sistema. Sin embargo, como cualquier medida de seguridad, no es perfecto y puede ser vulnerado. En este artículo, exploraremos algunas técnicas para depurar y evitar el sandbox de macOS.
 
-El archivo `entitlements.xml` se utiliza comúnmente en el contexto de la sandbox de macOS para especificar los permisos que una aplicación tiene dentro de la sandbox. Los permisos que se pueden especificar en el archivo `entitlements.xml` incluyen cosas como acceso a la red, acceso a archivos, acceso a la cámara y al micrófono, y más.
+## Depuración del Sandbox de macOS
 
-Es importante tener en cuenta que los permisos especificados en el archivo `entitlements.xml` no son necesariamente exhaustivos y que una aplicación puede tener acceso a recursos adicionales a través de otros medios. Además, es posible que una aplicación tenga permisos que no se especifican en el archivo `entitlements.xml` si se ejecuta fuera de la sandbox.
+### Inyección de Biblioteca Dinámica
 
-En general, el archivo `entitlements.xml` es una herramienta importante para garantizar que las aplicaciones se ejecuten de manera segura y limitada en la sandbox de macOS. Sin embargo, no es una solución completa y se deben tomar otras medidas de seguridad para garantizar que las aplicaciones no puedan escapar de la sandbox o acceder a recursos no autorizados. 
+Una técnica común para depurar aplicaciones es la inyección de biblioteca dinámica (DLL) en el proceso de la aplicación. Esto se puede hacer utilizando herramientas como `DYLD_INSERT_LIBRARIES` o `DYLD_FORCE_FLAT_NAMESPACE`. Sin embargo, estas técnicas no funcionan en aplicaciones que se ejecutan en el sandbox de macOS.
 
-{% endtab %}
+Para superar esta limitación, podemos utilizar la herramienta `jtool2`. `jtool2` es una herramienta de línea de comandos que se puede utilizar para manipular archivos binarios de macOS. Una de las características de `jtool2` es la capacidad de inyectar bibliotecas dinámicas en procesos de aplicaciones que se ejecutan en el sandbox de macOS.
+
+Para inyectar una biblioteca dinámica en un proceso de aplicación, primero necesitamos encontrar el PID del proceso. Esto se puede hacer utilizando el comando `ps`:
+
+```bash
+$ ps aux | grep Calculator
+```
+
+Una vez que tenemos el PID del proceso, podemos utilizar `jtool2` para inyectar la biblioteca dinámica:
+
+```bash
+$ jtool2 --inject /path/to/library.dylib -p <PID>
+```
+
+### Depuración Remota
+
+Otra técnica para depurar aplicaciones que se ejecutan en el sandbox de macOS es la depuración remota. Esto implica la conexión a un depurador remoto desde la aplicación que se está depurando. Para hacer esto, necesitamos una herramienta de depuración remota como `lldb`.
+
+Primero, necesitamos iniciar `lldb` en modo servidor en el sistema remoto:
+
+```bash
+$ lldb-server platform --listen "*:1234" --server
+```
+
+Luego, en la máquina local, podemos iniciar la aplicación que queremos depurar y conectarla al servidor remoto:
+
+```bash
+$ lldb
+(lldb) process launch --stop-at-entry /path/to/application
+(lldb) platform select remote-gdb-server
+(lldb) platform connect connect://<remote-ip>:1234
+(lldb) continue
+```
+
+Una vez que la aplicación se conecta al servidor remoto, podemos depurarla utilizando `lldb`.
+
+## Bypass del Sandbox de macOS
+
+### Bypass de Entitlements
+
+Los entitlements son una forma en que el sandbox de macOS limita el acceso de las aplicaciones a los recursos del sistema. Sin embargo, es posible eludir estos límites mediante la modificación de los entitlements de la aplicación.
+
+Para hacer esto, necesitamos extraer los entitlements de la aplicación utilizando la herramienta `codesign`:
+
+```bash
+$ codesign -d --entitlements :- /path/to/application
+```
+
+Esto nos dará un archivo XML que contiene los entitlements de la aplicación. Podemos modificar este archivo para agregar o eliminar los entitlements que queremos.
+
+Una vez que hayamos modificado los entitlements, podemos volver a firmar la aplicación con los nuevos entitlements utilizando `codesign`:
+
+```bash
+$ codesign -f -s "Developer ID" --entitlements /path/to/new-entitlements.xml /path/to/application
+```
+
+### Bypass de Verificación de Firma
+
+Otra forma de eludir el sandbox de macOS es mediante la eliminación de la verificación de firma de la aplicación. Esto se puede hacer utilizando la herramienta `jtool2`.
+
+Primero, necesitamos encontrar el offset de la verificación de firma en el archivo binario de la aplicación:
+
+```bash
+$ jtool2 --sig /path/to/application
+```
+
+Esto nos dará el offset de la verificación de firma en el archivo binario. Podemos utilizar `jtool2` para eliminar la verificación de firma:
+
+```bash
+$ jtool2 --sign /path/to/application --inplace --remove-entitlements
+```
+
+### Bypass de Sandboxing de Red
+
+El sandbox de macOS también limita el acceso de las aplicaciones a la red. Sin embargo, es posible eludir estos límites mediante la creación de un túnel de red.
+
+Para hacer esto, podemos utilizar la herramienta `iproxy` para redirigir el tráfico de red de la aplicación a través de un túnel SSH:
+
+```bash
+$ iproxy <local-port> <remote-port> <remote-ip> <ssh-port>
+```
+
+Una vez que se ha establecido el túnel, podemos configurar la aplicación para utilizar el puerto local como puerto de escucha para la red. Esto permitirá que la aplicación acceda a la red a través del túnel SSH.
+
+## Conclusión
+
+El sandbox de macOS es una característica de seguridad importante que limita el acceso de las aplicaciones a los recursos del sistema. Sin embargo, como hemos visto, no es perfecto y puede ser vulnerado. Es importante tener en cuenta que la elusión del sandbox de macOS puede ser ilegal y puede tener consecuencias graves. Por lo tanto, es importante utilizar estas técnicas solo con fines educativos y éticos.
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
@@ -66,9 +153,27 @@ En general, el archivo `entitlements.xml` es una herramienta importante para gar
 
 {% tab title="Info.plist" %}
 
-El archivo Info.plist es un archivo de configuración que se encuentra en la raíz de cada aplicación macOS. Este archivo contiene información sobre la aplicación, como su nombre, versión, desarrollador y permisos requeridos. También puede contener información sobre el sandbox de la aplicación, como los recursos a los que se le permite acceder.
+## Depuración y bypass de macOS Sandbox
 
-El archivo Info.plist se puede modificar para cambiar los permisos requeridos por la aplicación o para desactivar el sandbox por completo. Sin embargo, esto puede comprometer la seguridad del sistema y permitir que la aplicación acceda a recursos que normalmente estarían fuera de su alcance. Por lo tanto, es importante tener cuidado al modificar este archivo y solo hacerlo si es absolutamente necesario.
+La depuración y el bypass de la sandbox de macOS son técnicas avanzadas que pueden permitir a un atacante evadir las restricciones de seguridad de la sandbox y ejecutar código malicioso en un sistema comprometido. A continuación, se describen algunas técnicas comunes de depuración y bypass de la sandbox de macOS:
+
+### Depuración de la sandbox de macOS
+
+La depuración de la sandbox de macOS implica la identificación y explotación de vulnerabilidades en el código de la sandbox para permitir la ejecución de código malicioso. Algunas técnicas comunes de depuración de la sandbox de macOS incluyen:
+
+- **Inyección de código**: la inyección de código implica la inserción de código malicioso en un proceso de la sandbox para permitir la ejecución de comandos maliciosos. Esto se puede lograr mediante la explotación de vulnerabilidades en el código de la sandbox o mediante la manipulación de los archivos binarios de la sandbox.
+
+- **Depuración remota**: la depuración remota implica la conexión a un proceso de la sandbox en ejecución y la manipulación de su memoria para permitir la ejecución de código malicioso. Esto se puede lograr mediante el uso de herramientas de depuración como GDB o LLDB.
+
+### Bypass de la sandbox de macOS
+
+El bypass de la sandbox de macOS implica la identificación y explotación de vulnerabilidades en el sistema operativo subyacente para permitir la ejecución de código malicioso fuera de la sandbox. Algunas técnicas comunes de bypass de la sandbox de macOS incluyen:
+
+- **Escalada de privilegios**: la escalada de privilegios implica la obtención de permisos de root en un sistema comprometido para permitir la ejecución de código malicioso fuera de la sandbox. Esto se puede lograr mediante la explotación de vulnerabilidades en el sistema operativo subyacente o mediante la manipulación de los archivos de configuración del sistema.
+
+- **Uso de bibliotecas no restringidas**: algunas bibliotecas en macOS no están restringidas por la sandbox y pueden ser utilizadas para ejecutar código malicioso fuera de la sandbox. Esto se puede lograr mediante la identificación de bibliotecas no restringidas y la explotación de vulnerabilidades en ellas.
+
+Es importante tener en cuenta que la depuración y el bypass de la sandbox de macOS son técnicas avanzadas que requieren un conocimiento profundo del sistema operativo y de las técnicas de hacking. Estas técnicas deben ser utilizadas únicamente con fines de investigación y pruebas de penetración autorizadas.
 ```xml
 <plist version="1.0">
 <dict>
@@ -182,12 +287,12 @@ Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
 {% hint style="warning" %}
-Incluso si se ha evadido el Sandbox, TCC preguntará al usuario si desea permitir que el proceso lea archivos del escritorio.
+**Incluso con el Sandbox evadido, TCC** preguntará al usuario si desea permitir que el proceso lea archivos del escritorio.
 {% endhint %}
 
 ### Abusando de otros procesos
 
-Si desde el proceso del Sandbox se puede **comprometer otros procesos** que se ejecutan en Sandboxes menos restrictivos (o sin ellos), se podrá escapar a sus Sandboxes:
+Si desde el proceso del Sandbox eres capaz de **comprometer otros procesos** que se ejecutan en Sandboxes menos restrictivos (o sin ellos), podrás escapar a sus Sandboxes:
 
 {% content-ref url="../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../macos-proces-abuse/)
@@ -195,13 +300,13 @@ Si desde el proceso del Sandbox se puede **comprometer otros procesos** que se e
 
 ### Bypass de Interposting
 
-Para obtener más información sobre **Interposting**, consulte:
+Para obtener más información sobre **Interposting**, consulta:
 
 {% content-ref url="../../mac-os-architecture/macos-function-hooking.md" %}
 [macos-function-hooking.md](../../mac-os-architecture/macos-function-hooking.md)
 {% endcontent-ref %}
 
-#### Interceptar `_libsecinit_initializer` para evitar el Sandbox
+#### Interponer `_libsecinit_initializer` para evitar el Sandbox
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -259,7 +364,7 @@ __attribute__((used)) static const struct interpose_sym interposers[] __attribut
     { (const void *)my_mac_syscall, (const void *)__mac_syscall },
 };
 ```
-{% endcode %} (This tag should not be translated)
+{% endcode %}
 ```bash
 DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 
@@ -273,10 +378,10 @@ Sandbox Bypassed!
 ```
 ### Compilación estática y vinculación dinámica
 
-[**Esta investigación**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descubrió 2 formas de evitar el Sandbox. Debido a que el Sandbox se aplica desde el espacio de usuario cuando se carga la biblioteca **libSystem**. Si un binario pudiera evitar cargarla, nunca se sandboxearía:
+[**Esta investigación**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descubrió 2 formas de eludir el Sandbox. Debido a que el sandbox se aplica desde el espacio de usuario cuando se carga la biblioteca **libSystem**. Si un binario pudiera evitar cargarlo, nunca se sandboxearía:
 
 * Si el binario estuviera **completamente compilado estáticamente**, podría evitar cargar esa biblioteca.
-* Si el **binario no necesitara cargar ninguna biblioteca** (porque el enlazador también está en libSystem), no necesitaría cargar libSystem.
+* Si el **binario no necesitara cargar ninguna biblioteca** (porque el enlazador también está en libSystem), no necesitaría cargar libSystem.&#x20;
 
 ### Shellcodes
 
@@ -287,7 +392,7 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 ```
 ### Abuso de ubicaciones de inicio automático
 
-Si un proceso con sandbox puede **escribir** en un lugar donde **más tarde se ejecutará el binario una aplicación sin sandbox**, podrá **escapar simplemente colocando** allí el binario. Un buen ejemplo de este tipo de ubicaciones son `~/Library/LaunchAgents` o `/System/Library/LaunchDaemons`.
+Si un proceso con sandbox puede **escribir** en un lugar donde **más tarde se ejecutará el binario de una aplicación sin sandbox**, podrá **escapar simplemente colocando** allí el binario. Un buen ejemplo de este tipo de ubicaciones son `~/Library/LaunchAgents` o `/System/Library/LaunchDaemons`.
 
 Para esto, incluso puede necesitar **2 pasos**: hacer que un proceso con un sandbox **más permisivo** (`file-read*`, `file-write*`) ejecute su código, que en realidad escribirá en un lugar donde se ejecutará **sin sandbox**.
 
@@ -308,8 +413,8 @@ Consulte esta página sobre **ubicaciones de inicio automático**:
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
