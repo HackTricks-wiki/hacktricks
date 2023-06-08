@@ -49,6 +49,12 @@ MacOS stores information such as passwords in several places:
 [macos-sensitive-locations.md](macos-sensitive-locations.md)
 {% endcontent-ref %}
 
+### Vulnerable pkg installers
+
+{% content-ref url="macos-installer-packages-pkg.md" %}
+[macos-installer-packages-pkg.md](macos-installer-packages-pkg.md)
+{% endcontent-ref %}
+
 ## OS X Specific Extensions
 
 * **`.dmg`**: Apple Disk Image files are very frequent for installers.

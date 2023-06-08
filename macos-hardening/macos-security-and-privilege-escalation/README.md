@@ -90,6 +90,12 @@ This could occur in the following situations:
 
 Being able to **create a file** that is going to be **used by root**, allows a user to **take advantage of its content** or even create **symlinks/hardlinks** to point it to another place.
 
+For this kind of vulnerabilities don't forget to **check vulnerable `.pkg` installers**:
+
+{% content-ref url="macos-files-folders-and-binaries/macos-installer-packages-pkg.md" %}
+[macos-installer-packages-pkg.md](macos-files-folders-and-binaries/macos-installer-packages-pkg.md)
+{% endcontent-ref %}
+
 ### Entitlements and Privileges abuse via process abuse
 
 If a process can **inject code in another process with better privileges or entitlements** or contact it to perform privileges actions, he could escalate privileges and bypass defensive meassures such as [Sandbox](macos-security-protections/macos-sandbox/) or [TCC](macos-security-protections/macos-tcc/).
