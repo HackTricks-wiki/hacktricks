@@ -70,7 +70,7 @@ jobs:
           done
 
           echo "Translating $(cat /tmp/file_paths.txt)"
-          python scripts/translator.py --language "$LANGUAGE" --branch "$BRANCH" --api-key "$OPENAI_API_KEY" -f "$(cat /tmp/file_paths.txt)"
+          python scripts/translator.py --language "$LANGUAGE" --branch "$BRANCH" --api-key "$OPENAI_API_KEY" -f "$(cat /tmp/file_paths.txt)" -t 3
 
       - name: Commit and push changes
         run: |
