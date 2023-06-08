@@ -10,20 +10,20 @@
 * **/Library**: Se pueden encontrar muchos subdirectorios y archivos relacionados con preferencias, cachés y registros. Existe una carpeta Library en la raíz y en el directorio de cada usuario.
 * **/private**: No documentado, pero muchos de los directorios mencionados son enlaces simbólicos al directorio privado.
 * **/sbin**: Binarios esenciales del sistema (relacionados con la administración)
-* **/System**: Archivo para hacer que OS X funcione. Aquí debería encontrar principalmente archivos específicos de Apple (no de terceros).
+* **/System**: Archivo para hacer que OS X funcione. Debería encontrar principalmente solo archivos específicos de Apple aquí (no de terceros).
 * **/tmp**: Los archivos se eliminan después de 3 días (es un enlace suave a /private/tmp)
 * **/Users**: Directorio de inicio para usuarios.
 * **/usr**: Configuración y binarios del sistema
 * **/var**: Archivos de registro
 * **/Volumes**: Las unidades montadas aparecerán aquí.
-* **/.vol**: Al ejecutar `stat a.txt`, obtendrá algo como `16777223 7545753 -rw-r--r-- 1 username wheel ...`, donde el primer número es el número de identificación del volumen donde se encuentra el archivo y el segundo es el número de inodo. Puede acceder al contenido de este archivo a través de /.vol/ con esa información ejecutando `cat /.vol/16777223/7545753`
+* **/.vol**: Al ejecutar `stat a.txt`, se obtiene algo como `16777223 7545753 -rw-r--r-- 1 username wheel ...`, donde el primer número es el número de identificación del volumen donde existe el archivo y el segundo es el número de inodo. Puede acceder al contenido de este archivo a través de /.vol/ con esa información ejecutando `cat /.vol/16777223/7545753`
 
 ### Carpetas de aplicaciones
 
 * Las **aplicaciones del sistema** se encuentran en `/System/Applications`
-* Las **aplicaciones instaladas** suelen instalarse en `/Applications` o en `~/Applications`
+* Las **aplicaciones instaladas** generalmente se instalan en `/Applications` o en `~/Applications`
 * Los **datos de la aplicación** se pueden encontrar en `/Library/Application Support` para las aplicaciones que se ejecutan como root y `~/Library/Application Support` para las aplicaciones que se ejecutan como el usuario.
-* Los **daemonios de aplicaciones de terceros** que **necesitan ejecutarse como root** se encuentran generalmente en `/Library/PrivilegedHelperTools/`
+* Los **daemonios de aplicaciones de terceros** que **necesitan ejecutarse como root** generalmente se encuentran en `/Library/PrivilegedHelperTools/`
 * Las aplicaciones **sandboxed** se asignan a la carpeta `~/Library/Containers`. Cada aplicación tiene una carpeta con el nombre del identificador de paquete de la aplicación (`com.apple.Safari`).
 * El **núcleo** se encuentra en `/System/Library/Kernels/kernel`
 * Las **extensiones de kernel de Apple** se encuentran en `/System/Library/Extensions`
@@ -39,8 +39,8 @@ macOS almacena información como contraseñas en varios lugares:
 
 ### Instaladores pkg vulnerables
 
-{% content-ref url="macos-installer-packages-pkg.md" %}
-[macos-installer-packages-pkg.md](macos-installer-packages-pkg.md)
+{% content-ref url="macos-installers-abuse.md" %}
+[macos-installers-abuse.md](macos-installers-abuse.md)
 {% endcontent-ref %}
 
 ## Extensiones específicas de OS X
@@ -74,7 +74,7 @@ Básicamente, un paquete es una **estructura de directorios** dentro del sistema
 
 ### Permisos de carpeta
 
-En una **carpeta**, **leer** permite **listarla**, **escribir** permite **eliminar** y **escribir** archivos en ella, y **ejecutar** permite **atravesar** el directorio. Por lo tanto, por ejemplo, un usuario con **permiso de lectura sobre un archivo** dentro de un directorio donde no tiene **permiso de ejecución** **no podrá leer** el archivo.
+En una **carpeta**, **leer** permite **listarla**, **escribir** permite **eliminar** y **escribir** archivos en ella, y **ejecutar** permite **atravesar** el directorio. Por lo tanto, por ejemplo, un usuario con **permiso de lectura sobre un archivo** dentro de un directorio donde no tiene permiso de **ejecución no podrá leer** el archivo.
 
 ### Modificadores de bandera
 
@@ -107,7 +107,7 @@ Puedes encontrar **todos los archivos con ACLs** con (esto es muuuy lento):
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
-### Recursos Fork | ADS de macOS
+### Horquillas de Recursos | ADS de macOS
 
 Esta es una forma de obtener **Flujos de Datos Alternativos en máquinas MacOS**. Puedes guardar contenido dentro de un atributo extendido llamado **com.apple.ResourceFork** dentro de un archivo al guardarlo en **file/..namedfork/rsrc**.
 ```bash

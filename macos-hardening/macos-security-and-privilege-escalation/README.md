@@ -22,7 +22,7 @@
 
 💬 Participa en discusiones comunitarias
 
-## Básicos de MacOS
+## Básicos de macOS
 
 Si no estás familiarizado con macOS, deberías empezar aprendiendo los conceptos básicos de macOS:
 
@@ -44,7 +44,7 @@ Si no estás familiarizado con macOS, deberías empezar aprendiendo los concepto
 [macos-applefs.md](macos-applefs.md)
 {% endcontent-ref %}
 
-* La arquitectura del kernel
+* Arquitectura del kernel
 
 {% content-ref url="mac-os-architecture/" %}
 [mac-os-architecture](mac-os-architecture/)
@@ -56,21 +56,21 @@ Si no estás familiarizado con macOS, deberías empezar aprendiendo los concepto
 [macos-protocols.md](macos-protocols.md)
 {% endcontent-ref %}
 
-### MacOS MDM
+### MDM de macOS
 
-En las empresas, los sistemas **macOS** probablemente van a estar **administrados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona**:
+En las empresas, los sistemas macOS probablemente estén altamente gestionados con un MDM. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona**:
 
 {% content-ref url="macos-mdm/" %}
 [macos-mdm](macos-mdm/)
 {% endcontent-ref %}
 
-### MacOS - Inspección, depuración y fuzzing
+### Inspección, depuración y fuzzing de aplicaciones de macOS
 
 {% content-ref url="macos-apps-inspecting-debugging-and-fuzzing/" %}
 [macos-apps-inspecting-debugging-and-fuzzing](macos-apps-inspecting-debugging-and-fuzzing/)
 {% endcontent-ref %}
 
-## Protecciones de seguridad de MacOS
+## Protecciones de seguridad de macOS
 
 {% content-ref url="macos-security-protections/" %}
 [macos-security-protections](macos-security-protections/)
@@ -88,12 +88,12 @@ Esto podría ocurrir en las siguientes situaciones:
 * El archivo utilizado está dentro de un directorio propiedad del usuario (el usuario podría crear el archivo)
 * El archivo utilizado está dentro de un directorio propiedad de root, pero el usuario tiene acceso de escritura sobre él debido a un grupo (el usuario podría crear el archivo)
 
-Poder **crear un archivo** que va a ser **utilizado por root**, permite a un usuario **aprovechar su contenido** o incluso crear **enlaces simbólicos/hardlinks** para apuntarlo a otro lugar.
+Poder **crear un archivo** que va a ser **utilizado por root**, permite a un usuario **aprovechar su contenido** o incluso crear **enlaces simbólicos/duros** para apuntarlo a otro lugar.
 
-Para este tipo de vulnerabilidades, no olvides **verificar los instaladores `.pkg` vulnerables**:
+Para este tipo de vulnerabilidades, no olvides **comprobar los instaladores `.pkg` vulnerables**:
 
-{% content-ref url="macos-files-folders-and-binaries/macos-installer-packages-pkg.md" %}
-[macos-installer-packages-pkg.md](macos-files-folders-and-binaries/macos-installer-packages-pkg.md)
+{% content-ref url="macos-files-folders-and-binaries/macos-installers-abuse.md" %}
+[macos-installers-abuse.md](macos-files-folders-and-binaries/macos-installers-abuse.md)
 {% endcontent-ref %}
 
 ### Abuso de privilegios y permisos mediante el abuso de procesos
@@ -118,9 +118,9 @@ Diferentes aplicaciones pueden registrarse para abrir protocolos específicos. P
 
 TODO: Crear una página sobre esto
 
-## Escalada de privilegios de MacOS
+## Escalada de privilegios de macOS
 
-### CVE-2020-9771 - Bypass de TCC y escalada de privilegios de mount\_apfs
+### CVE-2020-9771 - Bypass de TCC de mount\_apfs y escalada de privilegios
 
 **Cualquier usuario** (incluso los no privilegiados) puede crear y montar una instantánea de Time Machine y **acceder a TODOS los archivos** de esa instantánea.\
 El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Acceso completo al disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser otorgado por un administrador.
