@@ -1,4 +1,4 @@
-# Seguridad y Escalada de Privilegios en macOS
+# Seguridad y escalada de privilegios en macOS
 
 <details>
 
@@ -22,35 +22,35 @@
 
 💬 Participa en discusiones comunitarias
 
-## MacOS Básico
+## Básicos de MacOS
 
 Si no estás familiarizado con macOS, deberías empezar aprendiendo los conceptos básicos de macOS:
 
-* **Archivos y permisos especiales** de macOS:
+* Archivos y permisos especiales de macOS:
 
 {% content-ref url="macos-files-folders-and-binaries/" %}
 [macos-files-folders-and-binaries](macos-files-folders-and-binaries/)
 {% endcontent-ref %}
 
-* **Usuarios** comunes de macOS
+* Usuarios comunes de macOS
 
 {% content-ref url="macos-users.md" %}
 [macos-users.md](macos-users.md)
 {% endcontent-ref %}
 
-* **AppleFS**
+* AppleFS
 
 {% content-ref url="macos-applefs.md" %}
 [macos-applefs.md](macos-applefs.md)
 {% endcontent-ref %}
 
-* La **arquitectura** del **kernel**
+* La arquitectura del kernel
 
 {% content-ref url="mac-os-architecture/" %}
 [mac-os-architecture](mac-os-architecture/)
 {% endcontent-ref %}
 
-* **Servicios y protocolos de red** comunes de macOS
+* Servicios y protocolos de red comunes de macOS
 
 {% content-ref url="macos-protocols.md" %}
 [macos-protocols.md](macos-protocols.md)
@@ -58,27 +58,27 @@ Si no estás familiarizado con macOS, deberías empezar aprendiendo los concepto
 
 ### MacOS MDM
 
-En las empresas, los sistemas **macOS** probablemente van a ser **administrados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona**:
+En las empresas, los sistemas **macOS** probablemente van a estar **administrados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona**:
 
 {% content-ref url="macos-mdm/" %}
 [macos-mdm](macos-mdm/)
 {% endcontent-ref %}
 
-### MacOS - Inspección, Depuración y Fuzzing
+### MacOS - Inspección, depuración y fuzzing
 
 {% content-ref url="macos-apps-inspecting-debugging-and-fuzzing/" %}
 [macos-apps-inspecting-debugging-and-fuzzing](macos-apps-inspecting-debugging-and-fuzzing/)
 {% endcontent-ref %}
 
-## Protecciones de Seguridad de MacOS
+## Protecciones de seguridad de MacOS
 
 {% content-ref url="macos-security-protections/" %}
 [macos-security-protections](macos-security-protections/)
 {% endcontent-ref %}
 
-## Superficie de Ataque
+## Superficie de ataque
 
-### Permisos de Archivos
+### Permisos de archivo
 
 Si un **proceso que se ejecuta como root escribe** un archivo que puede ser controlado por un usuario, el usuario podría abusar de esto para **escalar privilegios**.\
 Esto podría ocurrir en las siguientes situaciones:
@@ -88,36 +88,42 @@ Esto podría ocurrir en las siguientes situaciones:
 * El archivo utilizado está dentro de un directorio propiedad del usuario (el usuario podría crear el archivo)
 * El archivo utilizado está dentro de un directorio propiedad de root, pero el usuario tiene acceso de escritura sobre él debido a un grupo (el usuario podría crear el archivo)
 
-Ser capaz de **crear un archivo** que va a ser **utilizado por root**, permite a un usuario **aprovechar su contenido** o incluso crear **enlaces simbólicos/duros** para apuntarlo a otro lugar.
+Poder **crear un archivo** que va a ser **utilizado por root**, permite a un usuario **aprovechar su contenido** o incluso crear **enlaces simbólicos/hardlinks** para apuntarlo a otro lugar.
 
-### Abuso de Privilegios y Entitlements a través del abuso de procesos
+Para este tipo de vulnerabilidades, no olvides **verificar los instaladores `.pkg` vulnerables**:
 
-Si un proceso puede **inyectar código en otro proceso con mejores privilegios o entitlements** o contactarlo para realizar acciones de privilegios, podría escalar privilegios y evitar medidas defensivas como [Sandbox](macos-security-protections/macos-sandbox/) o [TCC](macos-security-protections/macos-tcc/).
+{% content-ref url="macos-files-folders-and-binaries/macos-installer-packages-pkg.md" %}
+[macos-installer-packages-pkg.md](macos-files-folders-and-binaries/macos-installer-packages-pkg.md)
+{% endcontent-ref %}
+
+### Abuso de privilegios y permisos mediante el abuso de procesos
+
+Si un proceso puede **inyectar código en otro proceso con mejores privilegios o permisos** o contactarlo para realizar acciones de privilegios, podría escalar privilegios y evitar medidas defensivas como [Sandbox](macos-security-protections/macos-sandbox/) o [TCC](macos-security-protections/macos-tcc/).
 
 {% content-ref url="macos-proces-abuse/" %}
 [macos-proces-abuse](macos-proces-abuse/)
 {% endcontent-ref %}
 
-### Aplicaciones de Extensión de Archivos
+### Aplicaciones de extensión de archivo
 
-Las aplicaciones extrañas registradas por las extensiones de archivos podrían ser abusadas:
+Las aplicaciones extrañas registradas por las extensiones de archivo podrían ser abusadas:
 
 {% content-ref url="macos-file-extension-apps.md" %}
 [macos-file-extension-apps.md](macos-file-extension-apps.md)
 {% endcontent-ref %}
 
-### Aplicaciones de Manejadores de URL
+### Aplicaciones de controlador de URL
 
 Diferentes aplicaciones pueden registrarse para abrir protocolos específicos. Podrían ser abusadas.
 
 TODO: Crear una página sobre esto
 
-## Escalada de Privilegios en MacOS
+## Escalada de privilegios de MacOS
 
 ### CVE-2020-9771 - Bypass de TCC y escalada de privilegios de mount\_apfs
 
 **Cualquier usuario** (incluso los no privilegiados) puede crear y montar una instantánea de Time Machine y **acceder a TODOS los archivos** de esa instantánea.\
-El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser otorgado por un administrador.
+El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Acceso completo al disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser otorgado por un administrador.
 
 {% code overflow="wrap" %}
 ```bash
@@ -151,7 +157,7 @@ Una explicación más detallada se puede [**encontrar en el informe original**](
 
 ### Linux Privesc
 
-En primer lugar, tenga en cuenta que **la mayoría de los trucos sobre escalada de privilegios que afectan a Linux/Unix también afectarán a las máquinas MacOS**. Así que vea:
+En primer lugar, tenga en cuenta que **la mayoría de los trucos sobre la escalada de privilegios que afectan a Linux/Unix también afectarán a las máquinas MacOS**. Así que vea:
 
 {% content-ref url="../../linux-hardening/privilege-escalation/" %}
 [privilege-escalation](../../linux-hardening/privilege-escalation/)
