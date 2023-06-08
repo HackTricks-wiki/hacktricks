@@ -51,8 +51,8 @@ MacOS stores information such as passwords in several places:
 
 ### Vulnerable pkg installers
 
-{% content-ref url="macos-installer-packages-pkg.md" %}
-[macos-installer-packages-pkg.md](macos-installer-packages-pkg.md)
+{% content-ref url="macos-installers-abuse.md" %}
+[macos-installers-abuse.md](macos-installers-abuse.md)
 {% endcontent-ref %}
 
 ## OS X Specific Extensions

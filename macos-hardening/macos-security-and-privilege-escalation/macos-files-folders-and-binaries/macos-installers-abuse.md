@@ -1,4 +1,4 @@
-# macOS Installer Packages (pkg)
+# macOS Installers Abuse
 
 <details>
 
@@ -51,6 +51,18 @@ cpio -i < Scripts
 If a pre or post installation script is for example executing from **`/var/tmp/Installerutil`**, and attacker could control that script so he escalate privileges whenever it's executed. Or another similar example:
 
 <figure><img src="../../../.gitbook/assets/Pasted Graphic 5.png" alt=""><figcaption></figcaption></figure>
+
+### AuthorizationExecuteWithPrivileges
+
+This is a [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) that several installers and updaters will call to **execute something as root**. This function accepts the **path** of the **file** to **execute** as parameter, however, if an attacker could **modify** this file, he will be able to **abuse** its execution with root to **escalate privileges**.
+
+```bash
+# Breakpoint in the function to check wich file is loaded
+(lldb) b AuthorizationExecuteWithPrivileges
+# You could also check FS events to find this missconfig
+```
+
+For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
 ## References
 

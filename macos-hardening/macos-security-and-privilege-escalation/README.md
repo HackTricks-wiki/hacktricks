@@ -92,8 +92,8 @@ Being able to **create a file** that is going to be **used by root**, allows a u
 
 For this kind of vulnerabilities don't forget to **check vulnerable `.pkg` installers**:
 
-{% content-ref url="macos-files-folders-and-binaries/macos-installer-packages-pkg.md" %}
-[macos-installer-packages-pkg.md](macos-files-folders-and-binaries/macos-installer-packages-pkg.md)
+{% content-ref url="macos-files-folders-and-binaries/macos-installers-abuse.md" %}
+[macos-installers-abuse.md](macos-files-folders-and-binaries/macos-installers-abuse.md)
 {% endcontent-ref %}
 
 ### Entitlements and Privileges abuse via process abuse
