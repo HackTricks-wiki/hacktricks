@@ -61,7 +61,7 @@ jobs:
           export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
 
           # Run the translation script on each changed file
-          git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" | grep -v "SUMMARY.md" | while read -r file; do
+          git diff --name-only HEAD~1 | grep -v "SUMMARY.md" | while read -r file; do
             if echo "$file" | grep -qE '\.md$'; then
               echo -n "$file , " >> /tmp/file_paths.txt
             else
