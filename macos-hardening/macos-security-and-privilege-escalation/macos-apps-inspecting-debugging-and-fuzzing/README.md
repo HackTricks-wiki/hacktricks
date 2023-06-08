@@ -1,4 +1,4 @@
-# macOS Apps - Inspeção, depuração e fuzzing
+# macOS Apps - Inspeção, depuração e Fuzzing
 
 <details>
 
@@ -12,7 +12,7 @@
 
 </details>
 
-## Análise estática
+## Análise Estática
 
 ### otool
 ```bash
@@ -21,7 +21,7 @@ otool -tv /bin/ps #Decompile application
 ```
 ### objdump
 
-O comando `objdump` é uma ferramenta de linha de comando que permite inspecionar o conteúdo de arquivos binários. Ele pode ser usado para visualizar informações sobre seções, símbolos, relocs, entre outros. O `objdump` é uma ferramenta útil para a análise de binários e pode ser usado para encontrar vulnerabilidades em aplicativos.
+O comando `objdump` é uma ferramenta de linha de comando que permite inspecionar arquivos binários e executáveis. Ele pode ser usado para visualizar informações sobre seções, símbolos, relocs e outras informações úteis. O `objdump` é uma ferramenta útil para analisar binários e executáveis em busca de vulnerabilidades e outras informações importantes.
 ```bash
 objdump -m --dylibs-used /bin/ls #List dynamically linked libraries
 objdump -m -h /bin/ls # Get headers information
@@ -48,7 +48,7 @@ ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Autom
 ```
 ### Codesign
 
-Codesign é uma ferramenta de linha de comando que permite assinar digitalmente arquivos binários no macOS. A assinatura digital é usada para verificar a integridade e autenticidade do arquivo. Isso é especialmente importante para aplicativos que são distribuídos fora da Mac App Store, pois a assinatura digital é necessária para que o macOS permita a execução do aplicativo. Além disso, a assinatura digital é usada para verificar se o aplicativo foi modificado ou corrompido.
+Codesign é uma ferramenta de linha de comando que permite assinar digitalmente aplicativos e arquivos no macOS. A assinatura digital é usada para verificar a integridade e autenticidade do aplicativo ou arquivo. Isso é importante para garantir que o aplicativo ou arquivo não tenha sido modificado ou corrompido por terceiros mal-intencionados. A assinatura digital também é usada para permitir que o aplicativo ou arquivo seja executado em sistemas macOS com Gatekeeper habilitado.
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -67,7 +67,7 @@ codesign -s <cert-name-keychain> toolsdemo
 ```
 ### SuspiciousPackage
 
-[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) é uma ferramenta útil para inspecionar arquivos **.pkg** (instaladores) e ver o que está dentro antes de instalá-los. Esses instaladores possuem scripts bash `preinstall` e `postinstall` que os autores de malware geralmente abusam para **persistir** o **malware**.
+[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) é uma ferramenta útil para inspecionar arquivos **.pkg** (instaladores) e ver o que está dentro antes de instalá-los. Esses instaladores têm scripts bash `preinstall` e `postinstall` que os autores de malware geralmente abusam para **persistir** o **malware**.
 
 ### hdiutil
 
@@ -86,7 +86,7 @@ Quando uma função é chamada em um binário que usa Objective-C, o código com
 Os parâmetros que essa função espera são:
 
 * O primeiro parâmetro (**self**) é "um ponteiro que aponta para a **instância da classe que receberá a mensagem**". Ou, de forma mais simples, é o objeto no qual o método está sendo invocado. Se o método for um método de classe, isso será uma instância do objeto da classe (como um todo), enquanto para um método de instância, o self apontará para uma instância instanciada da classe como um objeto.
-* O segundo parâmetro, (**op**), é "o seletor do método que manipula a mensagem". Novamente, de forma mais simples, este é apenas o **nome do método**.
+* O segundo parâmetro (**op**) é "o seletor do método que manipula a mensagem". Novamente, de forma mais simples, este é apenas o **nome do método**.
 * Os parâmetros restantes são quaisquer **valores necessários pelo método** (op).
 
 | **Argumento**      | **Registro**                                                    | **(para) objc\_msgSend**                                |
@@ -129,7 +129,7 @@ No painel central, você pode ver o **código desmontado**. E você pode vê-lo 
 
 Clicando com o botão direito em um objeto de código, você pode ver **referências para/de esse objeto** ou até mesmo mudar seu nome (isso não funciona no pseudocódigo descompilado):
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Além disso, no **meio inferior, você pode escrever comandos python**.
 
@@ -252,10 +252,10 @@ lldb -n malware.bin --waitfor
 | **continue (c)**              | Continua a execução do processo depurado.                                                                                                                                                                                                                                                                                                                                                                               |
 | **nexti (n / ni)**            | Executa a próxima instrução. Este comando irá pular chamadas de função.                                                                                                                                                                                                                                                                                                                                                 |
 | **stepi (s / si)**            | Executa a próxima instrução. Ao contrário do comando nexti, este comando irá entrar nas chamadas de função.                                                                                                                                                                                                                                                                                                                       |
-| **finish (f)**                | Executa o restante das instruções na função atual ("frame") e retorna.                                                                                                                                                                                                                                                                                                                                   |
+| **finish (f)**                | Executa o restante das instruções na função atual ("frame"), retorna e para.                                                                                                                                                                                                                                                                                                                                   |
 | **control + c**               | Pausa a execução. Se o processo foi executado (r) ou continuado (c), isso fará com que o processo pare... onde quer que esteja executando no momento.                                                                                                                                                                                                                                                                             |
 | **breakpoint (b)**            | <p>b main</p><p>b -[NSDictionary objectForKey:]</p><p>b 0x0000000100004bd9</p><p>br l #Lista de pontos de interrupção</p><p>br e/dis &#x3C;num> #Ativar/Desativar ponto de interrupção</p><p>breakpoint delete &#x3C;num><br>b set -n main --shlib &#x3C;lib_name></p>                                                                                                                                                                               |
-| **help**                      | <p>help breakpoint #Obter ajuda do comando breakpoint</p><p>help memory write #Obter ajuda para escrever na memória</p>                                                                                                                                                                                                                                                                                                         |
+| **help**                      | <p>help breakpoint #Obter ajuda do comando de ponto de interrupção</p><p>help memory write #Obter ajuda para escrever na memória</p>                                                                                                                                                                                                                                                                                                         |
 | **reg**                       | <p>reg read</p><p>reg read $rax</p><p>reg write $rip 0x100035cc0</p>                                                                                                                                                                                                                                                                                                                                                      |
 | **x/s \<reg/memory address>** | Exibe a memória como uma string terminada em nulo.                                                                                                                                                                                                                                                                                                                                                                           |
 | **x/i \<reg/memory address>** | Exibe a memória como instrução de montagem.                                                                                                                                                                                                                                                                                                                                                                               |
@@ -281,16 +281,14 @@ Ao chamar a função **`objc_sendMsg`**, o registro **rsi** contém o **nome do 
 #### Detecção de VM
 
 * O comando **`sysctl hw.model`** retorna "Mac" quando o **host é um MacOS**, mas algo diferente quando é uma VM.
-* Manipulando os valores de **`hw.logicalcpu`** e **`hw.physicalcpu`**, alguns malwares tentam detectar se é uma VM.
-* Alguns malwares também podem **detectar** se a máquina é baseada no VMware pelo endereço MAC (00:50:56).
+* Brincando com os valores de **`hw.logicalcpu`** e **`hw.physicalcpu`**, alguns malwares tentam detectar se é uma VM.
+* Alguns malwares também podem **detectar** se a máquina é baseada em **VMware** pelo endereço MAC (00:50:56).
 * Também é possível encontrar **se um processo está sendo depurado** com um código simples como:
-
   * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //processo sendo depurado }`
-
 * Ele também pode invocar a chamada do sistema **`ptrace`** com a flag **`PT_DENY_ATTACH`**. Isso **impede** um depurador de anexar e rastrear.
   * Você pode verificar se a função **`sysctl`** ou **`ptrace`** está sendo **importada** (mas o malware pode importá-la dinamicamente)
   * Como observado neste artigo, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-    "_A mensagem Process # exited with **status = 45 (0x0000002d)** é geralmente um sinal revelador de que o alvo de depuração está usando **PT\_DENY\_ATTACH**_"
+    “_A mensagem Process # exited with **status = 45 (0x0000002d)** é geralmente um sinal revelador de que o alvo de depuração está usando **PT\_DENY\_ATTACH**_”
 
 ## Fuzzing
 
@@ -310,9 +308,9 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Roo
 launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 ```
-### Sleep
+### Dormir
 
-Durante a realização de fuzzing em um MacOS, é importante não permitir que o Mac entre em modo de suspensão:
+Ao fazer fuzzing em um MacOS, é importante não permitir que o Mac durma:
 
 * systemsetup -setsleep Never
 * pmset, Preferências do Sistema
@@ -320,7 +318,7 @@ Durante a realização de fuzzing em um MacOS, é importante não permitir que o
 
 #### Desconexão SSH
 
-Se você estiver realizando fuzzing por meio de uma conexão SSH, é importante garantir que a sessão não seja encerrada. Portanto, altere o arquivo sshd\_config com:
+Se você estiver fazendo fuzzing por meio de uma conexão SSH, é importante garantir que a sessão não vá expirar. Portanto, altere o arquivo sshd\_config com:
 
 * TCPKeepAlive Yes
 * ClientAliveInterval 0
@@ -342,7 +340,7 @@ dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >>
 sort -u recv.log > procs.txt
 cat procs.txt
 ```
-### Mais informações sobre Fuzzing em MacOS
+### Mais informações sobre Fuzzing no MacOS
 
 * [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
 * [https://github.com/bnagy/francis/tree/master/exploitaben](https://github.com/bnagy/francis/tree/master/exploitaben)

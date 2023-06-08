@@ -1,6 +1,6 @@
 # Binários universais do macOS e Formato Mach-O
 
-Os binários do Mac OS geralmente são compilados como **binários universais**. Um **binário universal** pode **suportar várias arquiteturas no mesmo arquivo**.
+As binários do Mac OS geralmente são compilados como **binários universais**. Um **binário universal** pode **suportar várias arquiteturas no mesmo arquivo**.
 
 Esses binários seguem a **estrutura Mach-O** que é basicamente composta por:
 
@@ -31,7 +31,7 @@ struct fat_arch {
 };
 </code></pre>
 
-O cabeçalho tem os bytes **magic** seguidos pelo **número** de **archs** que o arquivo **contém** (`nfat_arch`) e cada arch terá uma estrutura `fat_arch`.
+O cabeçalho tem os bytes **mágicos** seguidos pelo **número** de **arquiteturas** que o arquivo **contém** (`nfat_arch`) e cada arquitetura terá uma estrutura `fat_arch`.
 
 Verifique com:
 
@@ -64,7 +64,7 @@ ou usando a ferramenta [Mach-O View](https://sourceforge.net/projects/machoview/
 
 <figure><img src="../../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
-Como você pode estar pensando, geralmente um binário universal compilado para 2 arquiteturas **dobra o tamanho** de um compilado para apenas 1 arch.
+Como você pode estar pensando, geralmente um binário universal compilado para 2 arquiteturas **dobra o tamanho** de um compilado para apenas 1 arquitetura.
 
 ## **Cabeçalho Mach-O**
 
@@ -141,7 +141,7 @@ No cabeçalho, primeiro você encontra o **cabeçalho do segmento**:
 
 <pre class="language-c"><code class="lang-c">struct segment_command_64 { /* para arquiteturas de 64 bits */
 	uint32_t	cmd;		/* LC_SEGMENT_64 */
-	uint32_t	cmdsize;	/* inclui sizeof section_64 structs */
+	uint32_t	cmdsize;	/* inclui o tamanho dos structs section_64 */
 	char		segname[16];	/* nome do segmento */
 	uint64_t	vmaddr;		/* endereço de memória deste segmento */
 	uint64_t	vmsize;		/* tamanho da memória deste segmento */
@@ -200,12 +200,12 @@ Segmentos comuns carregados por este cmd:
   * `__data`: Variáveis globais (que foram inicializadas)
   * `__bss`: Variáveis estáticas (que não foram inicializadas)
   * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Informações usadas pelo tempo de execução do Objective-C
-* **`__LINKEDIT`**: Contém informações para o linker (dyld) como, "símbolo, string e entradas de tabela de realocação".
+* **`__LINKEDIT`**: Contém informações para o linker (dyld) como, "símbolo, string e entradas de tabela de realocação."
 * **`__OBJC`**: Contém informações usadas pelo tempo de execução do Objective-C. Embora essas informações também possam ser encontradas no segmento \_\_DATA, dentro de várias seções \_\_objc\_\*.
 
 ### **`LC_MAIN`**
 
-Contém o ponto de entrada no atributo **entryoff**. No momento do carregamento, o **dyld** simplesmente **adiciona** esse valor à **base do binário na memória**, então **salta** para esta instrução para iniciar a execução do código binário.
+Contém o ponto de entrada no atributo **entryoff.** No momento do carregamento, **dyld** simplesmente **adiciona** esse valor à **base do binário na memória**, então **salta** para esta instrução para iniciar a execução do código binário.
 
 ### **LC\_CODE\_SIGNATURE**
 
@@ -263,15 +263,15 @@ Os dados são basicamente a parte que contém todas as informações carregadas 
 
 ![](<../../../.gitbook/assets/image (507) (3).png>)
 
-Isso inclui:&#x20;
+Isso inclui:
 
-* **Tabela de funções:** Que contém informações sobre as funções do programa.
-* **Tabela de símbolos**: Que contém informações sobre as funções externas usadas pelo binário
-* Também pode conter nomes de funções internas, variáveis e mais.
+* **Tabela de funções:** que contém informações sobre as funções do programa.
+* **Tabela de símbolos**: que contém informações sobre as funções externas usadas pelo binário.
+* Também pode conter nomes de funções internas, variáveis e muito mais.
 
 Para verificar, você pode usar a ferramenta [**Mach-O View**](https://sourceforge.net/projects/machoview/):
 
-<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (4).png" alt=""><figcaption></figcaption></figure>
 
 Ou pelo cli:
 ```bash

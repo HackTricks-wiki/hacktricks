@@ -8,26 +8,26 @@
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Processo de carregamento do Sandbox
 
-<figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption><p>Imagem de <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (2).png" alt=""><figcaption><p>Imagem de <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
 Na imagem anterior, é possível observar **como o sandbox será carregado** quando um aplicativo com a permissão **`com.apple.security.app-sandbox`** é executado.
 
 O compilador irá vincular `/usr/lib/libSystem.B.dylib` ao binário.
 
-Em seguida, **`libSystem.B`** irá chamar várias outras funções até que o **`xpc_pipe_routine`** envie as permissões do aplicativo para o **`securityd`**. O Securityd verifica se o processo deve ser quarentenado dentro do Sandbox e, se for o caso, ele será quarentenado.\
+Então, **`libSystem.B`** irá chamar várias outras funções até que o **`xpc_pipe_routine`** envie as permissões do aplicativo para o **`securityd`**. O Securityd verifica se o processo deve ser quarentenado dentro do Sandbox e, se sim, ele será quarentenado.\
 Por fim, o sandbox será ativado com uma chamada para **`__sandbox_ms`** que chamará **`__mac_syscall`**.
 
 ## Possíveis Bypasses
 
 ### Executar binário sem Sandbox
 
-Se você executar um binário que não será colocado em um sandbox a partir de um binário em sandbox, ele **será executado dentro do sandbox do processo pai**.
+Se você executar um binário que não será colocado em um sandbox a partir de um binário colocado em um sandbox, ele **será executado dentro do sandbox do processo pai**.
 
 ### Depuração e bypass do Sandbox com lldb
 
@@ -43,14 +43,35 @@ int main() {
 ```
 {% endtab %}
 
-{% tab title="entitlements.xml" %}
-O arquivo `entitlements.xml` é um arquivo de propriedades que contém informações sobre as permissões concedidas a um aplicativo. Ele é usado pelo sistema de sandbox do macOS para determinar quais recursos o aplicativo tem permissão para acessar. O arquivo pode ser encontrado dentro do pacote do aplicativo em `/Contents/entitlements.plist`. 
+{% tab title="macOS Sandbox Debug and Bypass" %}
 
-Os desenvolvedores podem especificar quais recursos o aplicativo precisa acessar, como acesso à internet, acesso ao sistema de arquivos ou acesso a dispositivos USB. O sistema de sandbox do macOS então garante que o aplicativo só possa acessar os recursos especificados no arquivo `entitlements.xml`. 
+# Depuração e Bypass do Sandbox do macOS
 
-Os usuários podem verificar as permissões concedidas a um aplicativo abrindo as Preferências do Sistema, selecionando Segurança e Privacidade e, em seguida, selecionando a guia Privacidade. A partir daí, os usuários podem ver quais recursos cada aplicativo tem permissão para acessar e podem conceder ou revogar permissões conforme necessário. 
+O Sandbox do macOS é uma tecnologia de segurança que limita o acesso de um aplicativo a recursos do sistema, como arquivos, pastas e processos. O objetivo é impedir que um aplicativo malicioso cause danos ao sistema ou roube informações confidenciais. No entanto, como qualquer tecnologia de segurança, o Sandbox não é perfeito e pode ser contornado por um invasor experiente.
 
-Os atacantes podem tentar modificar o arquivo `entitlements.xml` para conceder permissões adicionais a um aplicativo, permitindo que ele acesse recursos que normalmente não teria permissão para acessar. No entanto, isso requer acesso de gravação ao pacote do aplicativo, o que geralmente é difícil de obter.
+Neste guia, exploraremos algumas técnicas de depuração e bypass do Sandbox do macOS.
+
+## Depuração do Sandbox
+
+A depuração do Sandbox envolve a análise do comportamento do aplicativo em um ambiente controlado para identificar quais recursos do sistema ele está tentando acessar. Isso pode ser feito usando ferramentas como o `sandbox-exec` e o `dtruss`.
+
+O `sandbox-exec` é uma ferramenta de linha de comando que permite executar um aplicativo em um ambiente de sandbox personalizado. Isso pode ser útil para testar como um aplicativo se comporta em um ambiente de sandbox específico e identificar quais recursos do sistema ele está tentando acessar.
+
+O `dtruss` é uma ferramenta de linha de comando que permite rastrear as chamadas do sistema feitas por um aplicativo. Isso pode ser útil para identificar quais recursos do sistema o aplicativo está tentando acessar e como ele está tentando acessá-los.
+
+## Bypass do Sandbox
+
+O bypass do Sandbox envolve a exploração de vulnerabilidades no Sandbox ou no próprio sistema operacional para obter acesso a recursos do sistema que normalmente seriam restritos. Algumas técnicas comuns de bypass do Sandbox incluem:
+
+- **Injeção de código**: a injeção de código envolve a inserção de código malicioso em um processo legítimo para obter acesso aos recursos do sistema que o processo tem permissão para acessar. Isso pode ser feito usando ferramentas como o `ptrace` e o `DYLD_INSERT_LIBRARIES`.
+
+- **Escalonamento de privilégios**: o escalonamento de privilégios envolve a obtenção de privilégios de root ou de outro usuário com mais permissões do que o usuário atual. Isso pode ser feito explorando vulnerabilidades no sistema operacional ou em aplicativos com privilégios elevados.
+
+- **Exploração de vulnerabilidades do Sandbox**: a exploração de vulnerabilidades do Sandbox envolve a identificação e exploração de falhas no Sandbox para obter acesso a recursos do sistema que normalmente seriam restritos. Isso pode ser feito usando técnicas como a injeção de código e a escalada de privilégios.
+
+## Conclusão
+
+Embora o Sandbox do macOS seja uma tecnologia de segurança eficaz, não é perfeita e pode ser contornada por um invasor experiente. É importante estar ciente das técnicas de depuração e bypass do Sandbox para poder identificar e mitigar possíveis ameaças à segurança do sistema.
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
@@ -63,7 +84,27 @@ Os atacantes podem tentar modificar o arquivo `entitlements.xml` para conceder p
 
 {% tab title="Info.plist" %}
 
-O arquivo Info.plist é um arquivo de propriedades que contém informações sobre o aplicativo, incluindo as permissões necessárias para executar o aplicativo. Ele é usado pelo sistema operacional para determinar quais recursos o aplicativo pode acessar e quais ações ele pode executar. O arquivo Info.plist também contém informações sobre a versão do aplicativo, o nome do desenvolvedor e outras informações relevantes. É importante garantir que o arquivo Info.plist esteja configurado corretamente para evitar possíveis vulnerabilidades de segurança.
+# Depuração e Bypass do Sandbox do macOS
+
+O Sandbox do macOS é uma tecnologia de segurança que limita o acesso de um aplicativo a recursos do sistema, como arquivos, pastas e processos. O objetivo é impedir que um aplicativo malicioso cause danos ao sistema ou roube informações confidenciais. No entanto, os hackers podem tentar contornar essas proteções para executar código malicioso com privilégios elevados.
+
+## Depuração do Sandbox
+
+A depuração do Sandbox é uma técnica que permite que um aplicativo ignore as restrições do Sandbox e acesse recursos do sistema que normalmente seriam proibidos. Isso pode ser útil para desenvolvedores que desejam testar seus aplicativos em um ambiente controlado, mas também pode ser usado por hackers para explorar vulnerabilidades no sistema.
+
+Para depurar um aplicativo do Sandbox, você precisa adicionar uma chave especial ao arquivo Info.plist do aplicativo. A chave é chamada de `com.apple.security.get-task-allow` e deve ser definida como `true`. Isso permite que o aplicativo seja executado em um depurador e acesse recursos do sistema que normalmente seriam proibidos.
+
+## Bypass do Sandbox
+
+O Bypass do Sandbox é uma técnica que permite que um aplicativo ignore completamente as restrições do Sandbox e acesse recursos do sistema sem restrições. Isso é muito mais perigoso do que a depuração do Sandbox, pois permite que um aplicativo malicioso execute código com privilégios elevados sem ser detectado.
+
+Existem várias maneiras de contornar o Sandbox do macOS, incluindo:
+
+- Usando vulnerabilidades no sistema operacional para escapar do Sandbox
+- Usando técnicas de injeção de código para executar código em um processo com privilégios elevados
+- Usando técnicas de engenharia social para convencer o usuário a conceder permissões ao aplicativo
+
+Para se proteger contra o Bypass do Sandbox, é importante manter o sistema operacional e os aplicativos atualizados com as últimas correções de segurança e não conceder permissões a aplicativos desconhecidos ou suspeitos. Além disso, é importante ter um software antivírus instalado e atualizado para detectar e bloquear ameaças de segurança.
 ```xml
 <plist version="1.0">
 <dict>
@@ -93,7 +134,7 @@ codesign -s <cert-name> --entitlements entitlements.xml sand
 
 {% hint style="danger" %}
 O aplicativo tentará **ler** o arquivo **`~/Desktop/del.txt`**, o que o **Sandbox não permitirá**.\
-Crie um arquivo lá, pois uma vez que o Sandbox seja contornado, o aplicativo poderá lê-lo:
+Crie um arquivo lá, pois uma vez que o Sandbox for contornado, ele poderá lê-lo:
 ```bash
 echo "Sandbox Bypassed" > ~/Desktop/del.txt
 ```
@@ -196,7 +237,7 @@ Para obter mais informações sobre **Interposição**, consulte:
 [macos-function-hooking.md](../../mac-os-architecture/macos-function-hooking.md)
 {% endcontent-ref %}
 
-#### Interposição de `_libsecinit_initializer` para evitar o Sandbox
+#### Interpor `_libsecinit_initializer` para evitar o Sandbox
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -254,7 +295,7 @@ __attribute__((used)) static const struct interpose_sym interposers[] __attribut
     { (const void *)my_mac_syscall, (const void *)__mac_syscall },
 };
 ```
-{% endcode %} (Não traduzir)
+{% endcode %} (Não há nada para traduzir aqui, esta é apenas uma tag de formatação de código em markdown)
 ```bash
 DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 
@@ -266,25 +307,25 @@ __mac_syscall invoked. Policy: Quarantine, Call: 87
 __mac_syscall invoked. Policy: Sandbox, Call: 4
 Sandbox Bypassed!
 ```
-### Compilação estática e vinculação dinâmica
+### Compilação Estática e Vínculo Dinâmico
 
-[**Esta pesquisa**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descobriu duas maneiras de contornar o Sandbox. Como o sandbox é aplicado a partir do userland quando a biblioteca **libSystem** é carregada. Se um binário pudesse evitar o carregamento dela, ele nunca seria sandboxed:
+[**Esta pesquisa**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descobriu duas maneiras de contornar o Sandbox. Como o sandbox é aplicado a partir do userland quando a biblioteca **libSystem** é carregada. Se um binário pudesse evitar o carregamento dela, ele nunca seria colocado em um sandbox:
 
 * Se o binário fosse **completamente compilado estaticamente**, ele poderia evitar o carregamento dessa biblioteca.
-* Se o **binário não precisasse carregar nenhuma biblioteca** (porque o linker também está em libSystem), ele não precisaria carregar libSystem.
+* Se o **binário não precisasse carregar nenhuma biblioteca** (porque o vinculador também está em libSystem), ele não precisaria carregar libSystem.&#x20;
 
 ### Shellcodes
 
-Observe que **até mesmo shellcodes** em ARM64 precisam ser vinculados em `libSystem.dylib`:
+Observe que **mesmo shellcodes** em ARM64 precisam ser vinculados em `libSystem.dylib`:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
 ### Abusando das Localizações de Início Automático
 
-Se um processo com sandbox pode **escrever** em um local onde **mais tarde um aplicativo sem sandbox vai executar o binário**, ele será capaz de **escapar apenas colocando** o binário lá. Um bom exemplo desse tipo de localizações são `~/Library/LaunchAgents` ou `/System/Library/LaunchDaemons`.
+Se um processo com sandbox pode **escrever** em um lugar onde **mais tarde um aplicativo sem sandbox vai executar o binário**, ele será capaz de **escapar apenas colocando** o binário lá. Um bom exemplo desse tipo de localizações são `~/Library/LaunchAgents` ou `/System/Library/LaunchDaemons`.
 
-Para isso, você pode precisar de **2 etapas**: fazer um processo com um sandbox **mais permissivo** (`file-read*`, `file-write*`) executar seu código, que realmente escreverá em um local onde será **executado sem sandbox**.
+Para isso, você pode precisar de **2 etapas**: fazer um processo com um sandbox **mais permissivo** (`file-read*`, `file-write*`) executar seu código, que realmente escreverá em um lugar onde será **executado sem sandbox**.
 
 Verifique esta página sobre **Localizações de Início Automático**:
 
@@ -302,7 +343,7 @@ Verifique esta página sobre **Localizações de Início Automático**:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**

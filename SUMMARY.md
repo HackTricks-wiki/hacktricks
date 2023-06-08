@@ -148,6 +148,7 @@
     * [Enrolling Devices in Other Organisations](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/enrolling-devices-in-other-organisations.md)
     * [macOS Serial Number](macos-hardening/macos-security-and-privilege-escalation/macos-mdm/macos-serial-number.md)
   * [macOS Network Services & Protocols](macos-hardening/macos-security-and-privilege-escalation/macos-protocols.md)
+  * [macOS Bypassing Firewalls](macos-hardening/macos-security-and-privilege-escalation/macos-bypassing-firewalls.md)
   * [macOS File Extension Apps](macos-hardening/macos-security-and-privilege-escalation/macos-file-extension-apps.md)
   * [macOS Files, Folders, Binaries & Memory](macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/README.md)
     * [macOS Bundles](macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/macos-bundles.md)
