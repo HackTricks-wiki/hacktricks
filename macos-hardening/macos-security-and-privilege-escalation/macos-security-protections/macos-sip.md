@@ -78,6 +78,15 @@ SIP also imposes several other restrictions. For instance, it disallows the **lo
 
 ## SIP Bypasses
 
+### Prices
+
+If an attacker manages to bypass SIP this is what he will earn:
+
+* Read mail, messages, Safari history... of all users
+* Grant permissions for webcam, microphone or anything (by directly writing over the SIP protected TCC database)
+* Persistence: He could save a malware in a SIP protected location and not even toot will be able to delete it. Also he could tamper with MRT.
+* Easiness to load kernel extensions (still other hardcore protections in place for this).
+
 ### Installer Packages
 
 **Installer packages signed with Apple's certificate** can bypass its protections. This means that even packages signed by standard developers will be blocked if they attempt to modify SIP-protected directories.
