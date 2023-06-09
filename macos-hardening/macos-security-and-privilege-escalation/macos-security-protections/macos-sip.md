@@ -30,7 +30,7 @@ Por outro lado:
 ls -lOd /usr/libexec
 drwxr-xr-x  338 root  wheel  restricted 10816 May 13 00:29 /usr/libexec
 ```
-Aqui, a flag **`restricted`** indica que o diretório `/usr/libexec` é protegido pelo SIP. Em um diretório protegido pelo SIP, arquivos não podem ser criados, modificados ou deletados.
+Aqui, a flag **`restricted`** indica que o diretório `/usr/libexec` é protegido pelo SIP. Em um diretório protegido pelo SIP, arquivos não podem ser criados, modificados ou excluídos.
 
 ### Estado do SIP
 
@@ -52,13 +52,22 @@ O SIP também impõe várias outras restrições. Por exemplo, ele impede o **ca
 
 ## Bypasses do SIP
 
+### Preços
+
+Se um invasor conseguir contornar o SIP, isso é o que ele ganhará:
+
+* Ler e-mails, mensagens, histórico do Safari... de todos os usuários
+* Conceder permissões para webcam, microfone ou qualquer coisa (escrevendo diretamente sobre o banco de dados TCC protegido pelo SIP)
+* Persistência: ele poderia salvar um malware em um local protegido pelo SIP e nem mesmo o toot seria capaz de excluí-lo. Além disso, ele poderia adulterar o MRT.
+* Facilidade para carregar extensões de kernel (ainda há outras proteções hardcore em vigor para isso).
+
 ### Pacotes de Instalador
 
 **Pacotes de instalador assinados com o certificado da Apple** podem contornar suas proteções. Isso significa que mesmo pacotes assinados por desenvolvedores padrão serão bloqueados se tentarem modificar diretórios protegidos pelo SIP.
 
 ### Arquivo SIP inexistente
 
-Uma possível brecha é que, se um arquivo for especificado em **`rootless.conf` mas não existir atualmente**, ele pode ser criado. Malwares podem explorar isso para **estabelecer persistência** no sistema. Por exemplo, um programa malicioso poderia criar um arquivo .plist em `/System/Library/LaunchDaemons` se ele estiver listado em `rootless.conf` mas não estiver presente.
+Uma possível brecha é que, se um arquivo for especificado em **`rootless.conf` mas não existir atualmente**, ele pode ser criado. O malware pode explorar isso para **estabelecer persistência** no sistema. Por exemplo, um programa malicioso poderia criar um arquivo .plist em `/System/Library/LaunchDaemons` se estiver listado em `rootless.conf` mas não estiver presente.
 
 ### com.apple.rootless.install.heritable
 
@@ -68,9 +77,9 @@ A permissão **`com.apple.rootless.install.heritable`** permite contornar o SIP
 
 [**Pesquisadores deste post de blog**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) descobriram uma vulnerabilidade no mecanismo de Proteção da Integridade do Sistema (SIP) do macOS, chamada de vulnerabilidade 'Shrootless'. Essa vulnerabilidade se concentra no daemon `system_installd`, que tem uma permissão, **`com.apple.rootless.install.heritable`**, que permite que qualquer um de seus processos filhos contorne as restrições do sistema de arquivos do SIP.
 
-Os pesquisadores descobriram que, durante a instalação de um pacote assinado pela Apple (.pkg), o `system_installd` **executa** quaisquer scripts **pós-instalação** incluídos no pacote. Esses scripts são executados pelo shell padrão, **`zsh`**, que automaticamente **executa** comandos do arquivo **`/etc/zshenv`**, se ele existir, mesmo em modo não interativo. Esse comportamento pode ser explorado por atacantes: criando um arquivo malicioso `/etc/zshenv` e esperando que o `system_installd` invoque o `zsh`, eles podem executar operações arbitrárias no dispositivo.
+Os pesquisadores descobriram que, durante a instalação de um pacote assinado pela Apple (.pkg), o `system_installd` **executa** quaisquer scripts **pós-instalação** incluídos no pacote. Esses scripts são executados pelo shell padrão, **`zsh`**, que automaticamente **executa** comandos do arquivo **`/etc/zshenv`**, se ele existir, mesmo no modo não interativo. Esse comportamento pode ser explorado por invasores: criando um arquivo malicioso `/etc/zshenv` e esperando que o `system_installd` invoque o `zsh`, eles podem executar operações arbitrárias no dispositivo.
 
-Além disso, foi descoberto que **`/etc/zshenv` pode ser usado como uma técnica de ataque geral**, não apenas para contornar o SIP. Cada perfil de usuário tem um arquivo `~/.zshenv`, que se comporta da mesma maneira que o `/etc/zshenv`, mas não requer permissões de root. Esse arquivo pode ser usado como um mecanismo de persistência, disparando toda vez que o `zsh` é iniciado, ou como um mecanismo de elevação de privilégios. Se um usuário admin se eleva para root usando `sudo -s` ou `sudo <comando>`, o arquivo `~/.zshenv` seria acionado, efetivamente elevando para root.
+Além disso, descobriu-se que **`/etc/zshenv` poderia ser usado como uma técnica de ataque geral**, não apenas para contornar o SIP. Cada perfil de usuário tem um arquivo `~/.zshenv`, que se comporta da mesma maneira que o `/etc/zshenv`, mas não requer permissões de root. Esse arquivo pode ser usado como um mecanismo de persistência, disparando toda vez que o `zsh` é iniciado, ou como um mecanismo de elevação de privilégios. Se um usuário admin eleva para root usando `sudo -s` ou `sudo <command>`, o arquivo `~/.zshenv` seria acionado, efetivamente elevando para root.
 
 ### **com.apple.rootless.install**
 
@@ -78,7 +87,7 @@ Além disso, foi descoberto que **`/etc/zshenv` pode ser usado como uma técnica
 A permissão **`com.apple.rootless.install`** permite contornar o SIP
 {% endhint %}
 
-De [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/) O serviço XPC do sistema `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` tem a permissão **`com.apple.rootless.install`**, que concede ao processo permissão para contornar as restrições do SIP. Ele também **expõe um método para mover arquivos sem nenhuma verificação de segurança.**
+De [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/) O serviço XPC do sistema `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` tem a permissão **`com.apple.rootless.install`**, que concede ao processo permissão para contornar as restrições do SIP. Ele também **expõe um método para mover arquivos sem qualquer verificação de segurança.**
 
 ## Snapshots do Sistema Selados
 
@@ -110,22 +119,22 @@ O comando **`diskutil apfs list`** lista os **detalhes dos volumes APFS** e sua 
 |   |
 |   +-> Volume disk3s1 7A27E734-880F-4D91-A703-FB55861D49B7
 |   |   ---------------------------------------------------
-|   |   APFS Volume Disk (Role):   disk3s1 (Sistema)
-|   |   Nome:                      Macintosh HD (Sem diferenciação de maiúsculas e minúsculas)
-|   |   Ponto de Montagem:          /System/Volumes/Update/mnt1
-|   |   Capacidade Consumida:         12819210240 B (12.8 GB)
-|   |   Selado:                    Quebrado
-|   |   FileVault:                 Sim (Desbloqueado)
-|   |   Criptografado:                 Não
+|   |   APFS Volume Disk (Role):   disk3s1 (System)
+|   |   Name:                      Macintosh HD (Case-insensitive)
+|   |   Mount Point:               /System/Volumes/Update/mnt1
+|   |   Capacity Consumed:         12819210240 B (12.8 GB)
+|   |   Sealed:                    Broken
+|   |   FileVault:                 Yes (Unlocked)
+|   |   Encrypted:                 No
 |   |   |
 |   |   Snapshot:                  FAA23E0C-791C-43FF-B0E7-0E1C0810AC61
 |   |   Snapshot Disk:             disk3s1s1
-|   |   Ponto de Montagem do Snapshot:      /
-<strong>|   |   Snapshot Selado:           Sim
+|   |   Snapshot Mount Point:      /
+<strong>|   |   Snapshot Sealed:           Yes
 </strong>[...]
 </code></pre>
 
-Na saída anterior, é possível ver que o **snapshot do volume do sistema macOS está selado** (assinado criptograficamente pelo sistema operacional). Portanto, se o SIP for contornado e modificado, o **sistema operacional não inicializará mais**.
+Na saída anterior, é possível ver que o **snapshot do volume do sistema macOS está selado** (criptograficamente assinado pelo sistema operacional). Portanto, se o SIP for contornado e modificado, o **sistema operacional não inicializará mais**.
 
 Também é possível verificar se o selo está habilitado executando:
 ```
@@ -141,10 +150,10 @@ mount
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) **grupo do Discord** ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live).
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
