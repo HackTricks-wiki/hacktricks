@@ -93,17 +93,17 @@ Los parámetros que esta función espera son:
 | **Argumento**      | **Registro**                                                    | **(para) objc\_msgSend**                                |
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
 | **1er argumento**  | **rdi**                                                         | **self: objeto sobre el que se invoca el método** |
-| **2º argumento**  | **rsi**                                                         | **op: nombre del método**                             |
+| **2do argumento**  | **rsi**                                                         | **op: nombre del método**                             |
 | **3er argumento**  | **rdx**                                                         | **1er argumento para el método**                         |
-| **4º argumento**  | **rcx**                                                         | **2º argumento para el método**                         |
-| **5º argumento**  | **r8**                                                          | **3er argumento para el método**                         |
-| **6º argumento**  | **r9**                                                          | **4º argumento para el método**                         |
-| **7º+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5º+ argumento para el método**                        |
+| **4to argumento**  | **rcx**                                                         | **2do argumento para el método**                         |
+| **5to argumento**  | **r8**                                                          | **3er argumento para el método**                         |
+| **6to argumento**  | **r9**                                                          | **4to argumento para el método**                         |
+| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento para el método**                        |
 
 ### Binarios empaquetados
 
-* Comprobar la alta entropía
-* Comprobar las cadenas (si hay casi ninguna cadena comprensible, empaquetado)
+* Verificar la alta entropía
+* Verificar las cadenas (si hay casi ninguna cadena comprensible, empaquetado)
 * El empaquetador UPX para MacOS genera una sección llamada "\_\_XHDR"
 
 ## Análisis dinámico
@@ -132,7 +132,7 @@ Al hacer clic con el botón derecho en un objeto de código, se pueden ver las *
 
 <figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-Además, en la **parte inferior central se pueden escribir comandos python**.
+Además, en la **parte inferior central se pueden escribir comandos de python**.
 
 #### Panel derecho
 
@@ -253,7 +253,7 @@ lldb -n malware.bin --waitfor
 | **continue (c)**              | Continúa la ejecución del proceso depurado.                                                                                                                                                                                                                                                                                                                                                                               |
 | **nexti (n / ni)**            | Ejecuta la siguiente instrucción. Este comando omitirá las llamadas a funciones.                                                                                                                                                                                                                                                                                                                                                 |
 | **stepi (s / si)**            | Ejecuta la siguiente instrucción. A diferencia del comando nexti, este comando entrará en las llamadas a funciones.                                                                                                                                                                                                                                                                                                                       |
-| **finish (f)**                | Ejecuta el resto de las instrucciones en la función actual ("frame"), devuelve y detiene.                                                                                                                                                                                                                                                                                                                                   |
+| **finish (f)**                | Ejecuta el resto de las instrucciones en la función actual ("marco") y se detiene.                                                                                                                                                                                                                                                                                                                                   |
 | **control + c**               | Pausa la ejecución. Si el proceso se ha ejecutado (r) o continuado (c), esto hará que el proceso se detenga ... dondequiera que se esté ejecutando actualmente.                                                                                                                                                                                                                                                                             |
 | **breakpoint (b)**            | <p>b main</p><p>b -[NSDictionary objectForKey:]</p><p>b 0x0000000100004bd9</p><p>br l #Lista de puntos de interrupción</p><p>br e/dis &#x3C;num> #Habilitar/Deshabilitar punto de interrupción</p><p>breakpoint delete &#x3C;num><br>b set -n main --shlib &#x3C;lib_name></p>                                                                                                                                                                               |
 | **help**                      | <p>help breakpoint #Obtener ayuda del comando breakpoint</p><p>help memory write #Obtener ayuda para escribir en la memoria</p>                                                                                                                                                                                                                                                                                                         |
@@ -284,10 +284,8 @@ Cuando se llama a la función **`objc_sendMsg`**, el registro **rsi** contiene e
 * El comando **`sysctl hw.model`** devuelve "Mac" cuando el **anfitrión es un MacOS**, pero algo diferente cuando es una VM.
 * Jugando con los valores de **`hw.logicalcpu`** y **`hw.physicalcpu`**, algunos malwares intentan detectar si es una VM.
 * Algunos malwares también pueden **detectar** si la máquina es **VMware** en función de la dirección MAC (00:50:56).
-* También es posible encontrar **si un proceso está siendo depurado** con un código simple como:
-
+* También es posible encontrar **si un proceso está siendo depurado** con un código simple como este:
   * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //proceso siendo depurado }`
-
 * También puede invocar la llamada al sistema **`ptrace`** con la bandera **`PT_DENY_ATTACH`**. Esto **impide** que un depurador se adjunte y rastree.
   * Puede verificar si la función **`sysctl`** o **`ptrace`** está siendo **importada** (pero el malware podría importarla dinámicamente)
   * Como se señala en este artículo, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
@@ -347,15 +345,54 @@ dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >>
 sort -u recv.log > procs.txt
 cat procs.txt
 ```
+O utiliza `netstat` o `lsof`
+
+### Fuzzers
+
+#### [AFL++](https://github.com/AFLplusplus/AFLplusplus)
+
+Funciona para herramientas CLI
+
+#### [Litefuzz](https://github.com/sec-tools/litefuzz)
+
+Funciona con herramientas GUI de macOS. Ten en cuenta que algunas aplicaciones de macOS tienen requisitos específicos como nombres de archivo únicos, la extensión correcta, necesitan leer los archivos desde el sandbox (`~/Library/Containers/com.apple.Safari/Data`)...
+
+Algunos ejemplos:
+
+{% code overflow="wrap" %}
+```bash
+# iBooks
+litefuzz -l -c "/System/Applications/Books.app/Contents/MacOS/Books FUZZ" -i files/epub -o crashes/ibooks -t /Users/test/Library/Containers/com.apple.iBooksX/Data/tmp -x 10 -n 100000 -ez
+
+# -l : Local
+# -c : cmdline with FUZZ word (if not stdin is used)
+# -i : input directory or file
+# -o : Dir to output crashes
+# -t : Dir to output runtime fuzzing artifacts
+# -x : Tmeout for the run (default is 1)
+# -n : Num of fuzzing iterations (default is 1)
+# -e : enable second round fuzzing where any crashes found are reused as inputs
+# -z : enable malloc debug helpers
+
+# Font Book
+litefuzz -l -c "/System/Applications/Font Book.app/Contents/MacOS/Font Book FUZZ" -i input/fonts -o crashes/font-book -x 2 -n 500000 -ez
+
+# smbutil (using pcap capture)
+litefuzz -lk -c "smbutil view smb://localhost:4455" -a tcp://localhost:4455 -i input/mac-smb-resp -p -n 100000 -z
+
+# screensharingd (using pcap capture)
+litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash screensharingd -p -n 100000
+```
 ### Más información sobre Fuzzing en MacOS
 
+* [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
 * [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
 * [https://github.com/bnagy/francis/tree/master/exploitaben](https://github.com/bnagy/francis/tree/master/exploitaben)
 * [https://github.com/ant4g0nist/crashwrangler](https://github.com/ant4g0nist/crashwrangler)
 
 ## Referencias
 
-* [**Respuesta a incidentes en OS X: Scripting y análisis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+* [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 * [**https://www.youtube.com/watch?v=T5xfL9tEg44**](https://www.youtube.com/watch?v=T5xfL9tEg44)
 * [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 
