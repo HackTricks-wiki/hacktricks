@@ -136,7 +136,7 @@ In the middle panel you can see the **dissasembled code**. And you can see it a 
 
 Right clicking in a code object you can see **references to/from that object** or even change its name (this doesn't work in decompiled pseudocode):
 
-<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
 Moreover, in the **middle down you can write python commands**.
 

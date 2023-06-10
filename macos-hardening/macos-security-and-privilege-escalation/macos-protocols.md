@@ -17,10 +17,10 @@
 These are the common macOS services to access them remotely.\
 You can enable/disable these services in `System Settings` --> `Sharing`
 
-* **VNC**, known as “Screen Sharing”
-* **SSH**, called “Remote Login”
-* **Apple Remote Desktop** (ARD), or “Remote Management”
-* **AppleEvent**, known as “Remote Apple Event”
+* **VNC**, known as “Screen Sharing” (tcp:5900)
+* **SSH**, called “Remote Login” (tcp:22)
+* **Apple Remote Desktop** (ARD), or “Remote Management” (tcp:3283, tcp:5900)
+* **AppleEvent**, known as “Remote Apple Event” (tcp:3031)
 
 Check if any is enabled running:
 
@@ -33,6 +33,28 @@ rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
+
+### Pentesting ARD
+
+(This part was [**taken from this blog post**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html))
+
+It's essentially a bastardized [VNC](https://en.wikipedia.org/wiki/Virtual\_Network\_Computing) with some **extra macOS specific features**.\
+However, the **Screen Sharing option** is just a **basic VNC** server. There is also an advanced ARD or Remote Management option to **set a control screen password** which will make ARD backwards **compatible for VNC clients**. However there is a weakness to this authentication method that **limits** this **password** to an **8 character auth buffer**, making it very easy to **brute force** with a tool like [Hydra](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) or [GoRedShell](https://github.com/ahhh/GoRedShell/) (there are also **no rate limits by default**).\
+You can identify **vulnerable instances of Screen Sharing** or Remote Management with **nmap**, using the script `vnc-info`, and if the service supports `VNC Authentication (2)` then they are likely **vulnerable to brute force**. The service will truncate all passwords sent on the wire down to 8 characters, such that if you set the VNC auth to "password", both "passwords" and "password123" will authenticate.
+
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+If you want to enable it to escalate privileges (accept TCC prompts), access with a GUI or spy the user, it's possible to enable it with:
+
+{% code overflow="wrap" %}
+```bash
+sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
+```
+{% endcode %}
+
+You can switch between **observation** mode, **shared control**, and **full control**, going from spying on a user to taking over their desktop at the click of a button. Moreover, If you do get access to an ARD session, that session will remain open until the session is terminated, even if the user's password is changed during the session.
+
+You can also **send unix commands directly** over ARD and you can specify the root user to execute things as root if your an administrative user. You can even use this unix command method to schedule remote tasks to run at a specific time, however this occurs as a network connection at the specified time (vs being stored and executing on the target server). Finally, remote Spotlight is one of my favorite features. It's really neat because you can run a low impact, indexed search quickly and remotely. This is gold for searching for sensitive files because it's quick, lets you run searches concurrently across multiple machines, and won't spike the CPU.
 
 ## Bonjour Protocol
 
@@ -113,6 +135,7 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 
 * [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt\_other?\_encoding=UTF8\&me=\&qid=)
 * [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
+* [**https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
 
 <details>
 
