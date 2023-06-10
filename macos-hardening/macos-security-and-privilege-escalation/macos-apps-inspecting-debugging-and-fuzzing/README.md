@@ -373,8 +373,47 @@ cat procs.txt
 
 Or use `netstat` or `lsof`
 
+### Fuzzers
+
+#### [AFL++](https://github.com/AFLplusplus/AFLplusplus)
+
+Works for CLI tools
+
+#### [Litefuzz](https://github.com/sec-tools/litefuzz)
+
+It "**just works"** with macOS GUI tools. Note some some macOS apps have some specific requirements like unique filenames, the right extension, need to read the files from the sandbox (`~/Library/Containers/com.apple.Safari/Data`)...
+
+Some examples:
+
+{% code overflow="wrap" %}
+```bash
+# iBooks
+litefuzz -l -c "/System/Applications/Books.app/Contents/MacOS/Books FUZZ" -i files/epub -o crashes/ibooks -t /Users/test/Library/Containers/com.apple.iBooksX/Data/tmp -x 10 -n 100000 -ez
+
+# -l : Local
+# -c : cmdline with FUZZ word (if not stdin is used)
+# -i : input directory or file
+# -o : Dir to output crashes
+# -t : Dir to output runtime fuzzing artifacts
+# -x : Tmeout for the run (default is 1)
+# -n : Num of fuzzing iterations (default is 1)
+# -e : enable second round fuzzing where any crashes found are reused as inputs
+# -z : enable malloc debug helpers
+
+# Font Book
+litefuzz -l -c "/System/Applications/Font Book.app/Contents/MacOS/Font Book FUZZ" -i input/fonts -o crashes/font-book -x 2 -n 500000 -ez
+
+# smbutil (using pcap capture)
+litefuzz -lk -c "smbutil view smb://localhost:4455" -a tcp://localhost:4455 -i input/mac-smb-resp -p -n 100000 -z
+
+# screensharingd (using pcap capture)
+litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash screensharingd -p -n 100000
+```
+{% endcode %}
+
 ### More Fuzzing MacOS Info
 
+* [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
 * [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
 * [https://github.com/bnagy/francis/tree/master/exploitaben](https://github.com/bnagy/francis/tree/master/exploitaben)
 * [https://github.com/ant4g0nist/crashwrangler](https://github.com/ant4g0nist/crashwrangler)
