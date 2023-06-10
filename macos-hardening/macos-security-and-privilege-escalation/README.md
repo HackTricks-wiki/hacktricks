@@ -104,26 +104,20 @@ Se um processo pode **injetar código em outro processo com melhores privilégio
 [macos-proces-abuse](macos-proces-abuse/)
 {% endcontent-ref %}
 
-### Aplicativos de Extensão de Arquivo
+### Manipuladores de aplicativos de extensão de arquivo e URL scheme
 
-Aplicativos estranhos registrados por extensões de arquivo podem ser abusados:
+Aplicativos estranhos registrados por extensões de arquivo podem ser abusados e diferentes aplicativos podem ser registrados para abrir protocolos específicos.
 
 {% content-ref url="macos-file-extension-apps.md" %}
 [macos-file-extension-apps.md](macos-file-extension-apps.md)
 {% endcontent-ref %}
 
-### Aplicativos de Manipulação de URL
+## Escalada de Privilégios do MacOS
 
-Diferentes aplicativos podem ser registrados para abrir protocolos específicos. Eles podem ser abusados.
-
-TODO: Criar uma página sobre isso
-
-## Escalada de Privilégios no MacOS
-
-### CVE-2020-9771 - mount\_apfs TCC bypass e escalada de privilégios
+### CVE-2020-9771 - Bypass do TCC mount\_apfs e escalada de privilégios
 
 **Qualquer usuário** (mesmo não privilegiado) pode criar e montar um snapshot do time machine e **acessar TODOS os arquivos** desse snapshot.\
-O **único privilégio** necessário é para o aplicativo usado (como o `Terminal`) ter **Acesso Total ao Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`) que precisa ser concedido por um administrador. 
+O **único privilégio** necessário é para o aplicativo usado (como o `Terminal`) ter **Acesso Total ao Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que precisa ser concedido por um administrador. 
 
 {% code overflow="wrap" %}
 ```bash

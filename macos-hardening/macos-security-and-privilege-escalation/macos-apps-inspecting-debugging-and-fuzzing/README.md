@@ -67,7 +67,7 @@ codesign -s <cert-name-keychain> toolsdemo
 ```
 ### SuspiciousPackage
 
-[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) é uma ferramenta útil para inspecionar arquivos **.pkg** (instaladores) e ver o que está dentro antes de instalá-los. Esses instaladores têm scripts bash `preinstall` e `postinstall` que os autores de malware geralmente abusam para **persistir** o **malware**.
+[**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) é uma ferramenta útil para inspecionar arquivos **.pkg** (instaladores) e ver o que está dentro antes de instalá-los. Esses instaladores possuem scripts bash `preinstall` e `postinstall` que os autores de malware geralmente abusam para **persistir** o **malware**.
 
 ### hdiutil
 
@@ -166,7 +166,7 @@ dtrace -l | head
 ```
 O nome da sonda consiste em quatro partes: o provedor, o módulo, a função e o nome (`fbt:mach_kernel:ptrace:entry`). Se você não especificar alguma parte do nome, o Dtrace aplicará essa parte como um caractere curinga.
 
-Para configurar o DTrace para ativar sondas e especificar quais ações executar quando elas são acionadas, precisaremos usar a linguagem D.
+Para configurar o DTrace para ativar sondas e especificar quais ações executar quando elas dispararem, precisaremos usar a linguagem D.
 
 Uma explicação mais detalhada e mais exemplos podem ser encontrados em [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)
 
@@ -281,14 +281,16 @@ Ao chamar a função **`objc_sendMsg`**, o registro **rsi** contém o **nome do 
 #### Detecção de VM
 
 * O comando **`sysctl hw.model`** retorna "Mac" quando o **host é um MacOS**, mas algo diferente quando é uma VM.
-* Brincando com os valores de **`hw.logicalcpu`** e **`hw.physicalcpu`**, alguns malwares tentam detectar se é uma VM.
-* Alguns malwares também podem **detectar** se a máquina é baseada em **VMware** pelo endereço MAC (00:50:56).
+* Manipulando os valores de **`hw.logicalcpu`** e **`hw.physicalcpu`**, alguns malwares tentam detectar se é uma VM.
+* Alguns malwares também podem **detectar** se a máquina é baseada no VMware pelo endereço MAC (00:50:56).
 * Também é possível encontrar **se um processo está sendo depurado** com um código simples como:
+
   * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //processo sendo depurado }`
+
 * Ele também pode invocar a chamada do sistema **`ptrace`** com a flag **`PT_DENY_ATTACH`**. Isso **impede** um depurador de anexar e rastrear.
   * Você pode verificar se a função **`sysctl`** ou **`ptrace`** está sendo **importada** (mas o malware pode importá-la dinamicamente)
   * Como observado neste artigo, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-    “_A mensagem Process # exited with **status = 45 (0x0000002d)** é geralmente um sinal revelador de que o alvo de depuração está usando **PT\_DENY\_ATTACH**_”
+    "_A mensagem Process # exited with **status = 45 (0x0000002d)** é geralmente um sinal revelador de que o alvo de depuração está usando **PT\_DENY\_ATTACH**_"
 
 ## Fuzzing
 
@@ -329,7 +331,11 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
 ### Manipuladores Internos
 
-[**Confira esta seção**](../#file-extensions-apps) para descobrir como você pode encontrar qual aplicativo é responsável por **manipular o esquema ou protocolo especificado**.
+**Confira a seguinte página** para descobrir como você pode encontrar qual aplicativo é responsável por **manipular o esquema ou protocolo especificado:**
+
+{% content-ref url="../macos-file-extension-apps.md" %}
+[macos-file-extension-apps.md](../macos-file-extension-apps.md)
+{% endcontent-ref %}
 
 ### Enumerando Processos de Rede
 
