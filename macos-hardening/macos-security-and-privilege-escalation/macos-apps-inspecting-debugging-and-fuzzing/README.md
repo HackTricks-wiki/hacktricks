@@ -307,7 +307,7 @@ When calling the **`objc_sendMsg`** function, the **rsi** register holds the **n
 * It's also possible to find **if a process is being debugged** with a simple code such us:
   * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
 * It can also invoke the **`ptrace`** system call with the **`PT_DENY_ATTACH`** flag. This **prevents** a deb**u**gger from attaching and tracing.
-  * You can check if the **`sysctl` \*\* or**`ptrace`\*\* function is being **imported** (but the malware could import it dynamically)
+  * You can check if the **`sysctl`** or **`ptrace`** function is being **imported** (but the malware could import it dynamically)
   * As noted in this writeup, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
     “_The message Process # exited with **status = 45 (0x0000002d)** is usually a tell-tale sign that the debug target is using **PT\_DENY\_ATTACH**_”
 
@@ -354,7 +354,11 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 
 ### Internal Handlers
 
-[**Checkout this section**](../#file-extensions-apps) to find out how you can find which app is responsible of **handling the specified scheme or protocol**.
+**Checkout the following page** to find out how you can find which app is responsible of **handling the specified scheme or protocol:**
+
+{% content-ref url="../macos-file-extension-apps.md" %}
+[macos-file-extension-apps.md](../macos-file-extension-apps.md)
+{% endcontent-ref %}
 
 ### Enumerating Network Processes
 

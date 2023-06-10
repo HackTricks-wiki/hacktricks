@@ -104,19 +104,13 @@ If a process can **inject code in another process with better privileges or enti
 [macos-proces-abuse](macos-proces-abuse/)
 {% endcontent-ref %}
 
-### File Extension Apps
+### File Extension & URL scheme app handlers
 
-Weird apps registered by file extensions could be abused:
+Weird apps registered by file extensions could be abused and different applications can be register to open specific protocols
 
 {% content-ref url="macos-file-extension-apps.md" %}
 [macos-file-extension-apps.md](macos-file-extension-apps.md)
 {% endcontent-ref %}
-
-### URL handler applications
-
-Different applications can be resgiter to open specific protocols. They could be abused.
-
-TODO: Create a page about this
 
 ## MacOS Privilege Escalation
 
