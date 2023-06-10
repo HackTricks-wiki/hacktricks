@@ -1,4 +1,4 @@
-# Seguridad y escalada de privilegios en macOS
+# Seguridad y Escalada de Privilegios en macOS
 
 <details>
 
@@ -26,7 +26,7 @@
 
 Si no estás familiarizado con macOS, deberías empezar aprendiendo los conceptos básicos de macOS:
 
-* Archivos y permisos especiales de macOS:
+* **Archivos y permisos especiales** de macOS:
 
 {% content-ref url="macos-files-folders-and-binaries/" %}
 [macos-files-folders-and-binaries](macos-files-folders-and-binaries/)
@@ -38,13 +38,13 @@ Si no estás familiarizado con macOS, deberías empezar aprendiendo los concepto
 [macos-users.md](macos-users.md)
 {% endcontent-ref %}
 
-* AppleFS
+* **AppleFS**
 
 {% content-ref url="macos-applefs.md" %}
 [macos-applefs.md](macos-applefs.md)
 {% endcontent-ref %}
 
-* Arquitectura del kernel
+* La **arquitectura** del **kernel**
 
 {% content-ref url="mac-os-architecture/" %}
 [mac-os-architecture](mac-os-architecture/)
@@ -58,7 +58,7 @@ Si no estás familiarizado con macOS, deberías empezar aprendiendo los concepto
 
 ### MDM de macOS
 
-En las empresas, los sistemas macOS probablemente estén altamente gestionados con un MDM. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona**:
+En las empresas, los sistemas **macOS** probablemente van a estar **administrados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona**:
 
 {% content-ref url="macos-mdm/" %}
 [macos-mdm](macos-mdm/)
@@ -88,15 +88,15 @@ Esto podría ocurrir en las siguientes situaciones:
 * El archivo utilizado está dentro de un directorio propiedad del usuario (el usuario podría crear el archivo)
 * El archivo utilizado está dentro de un directorio propiedad de root, pero el usuario tiene acceso de escritura sobre él debido a un grupo (el usuario podría crear el archivo)
 
-Poder **crear un archivo** que va a ser **utilizado por root**, permite a un usuario **aprovechar su contenido** o incluso crear **enlaces simbólicos/duros** para apuntarlo a otro lugar.
+Ser capaz de **crear un archivo** que va a ser **utilizado por root**, permite a un usuario **aprovechar su contenido** o incluso crear **enlaces simbólicos/duros** para apuntarlo a otro lugar.
 
-Para este tipo de vulnerabilidades, no olvides **comprobar los instaladores `.pkg` vulnerables**:
+Para este tipo de vulnerabilidades, no olvides **verificar los instaladores `.pkg` vulnerables**:
 
 {% content-ref url="macos-files-folders-and-binaries/macos-installers-abuse.md" %}
 [macos-installers-abuse.md](macos-files-folders-and-binaries/macos-installers-abuse.md)
 {% endcontent-ref %}
 
-### Abuso de privilegios y permisos mediante el abuso de procesos
+### Abuso de privilegios y permisos a través del abuso de procesos
 
 Si un proceso puede **inyectar código en otro proceso con mejores privilegios o permisos** o contactarlo para realizar acciones de privilegios, podría escalar privilegios y evitar medidas defensivas como [Sandbox](macos-security-protections/macos-sandbox/) o [TCC](macos-security-protections/macos-tcc/).
 
@@ -104,26 +104,20 @@ Si un proceso puede **inyectar código en otro proceso con mejores privilegios o
 [macos-proces-abuse](macos-proces-abuse/)
 {% endcontent-ref %}
 
-### Aplicaciones de extensión de archivo
+### Manejadores de aplicaciones de extensión de archivo y URL
 
-Las aplicaciones extrañas registradas por las extensiones de archivo podrían ser abusadas:
+Las aplicaciones extrañas registradas por extensiones de archivo podrían ser abusadas y diferentes aplicaciones pueden registrarse para abrir protocolos específicos.
 
 {% content-ref url="macos-file-extension-apps.md" %}
 [macos-file-extension-apps.md](macos-file-extension-apps.md)
 {% endcontent-ref %}
-
-### Aplicaciones de controlador de URL
-
-Diferentes aplicaciones pueden registrarse para abrir protocolos específicos. Podrían ser abusadas.
-
-TODO: Crear una página sobre esto
 
 ## Escalada de privilegios de macOS
 
 ### CVE-2020-9771 - Bypass de TCC de mount\_apfs y escalada de privilegios
 
 **Cualquier usuario** (incluso los no privilegiados) puede crear y montar una instantánea de Time Machine y **acceder a TODOS los archivos** de esa instantánea.\
-El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Acceso completo al disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser otorgado por un administrador.
+El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser otorgado por un administrador.
 
 {% code overflow="wrap" %}
 ```bash

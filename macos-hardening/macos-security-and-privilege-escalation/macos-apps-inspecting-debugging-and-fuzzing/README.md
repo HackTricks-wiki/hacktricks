@@ -282,8 +282,8 @@ Cuando se llama a la función **`objc_sendMsg`**, el registro **rsi** contiene e
 #### Detección de VM
 
 * El comando **`sysctl hw.model`** devuelve "Mac" cuando el **anfitrión es un MacOS**, pero algo diferente cuando es una VM.
-* Jugando con los valores de **`hw.logicalcpu`** y **`hw.physicalcpu`** algunos malwares intentan detectar si es una VM.
-* Algunos malwares también pueden **detectar** si la máquina es **VMware** basándose en la dirección MAC (00:50:56).
+* Jugando con los valores de **`hw.logicalcpu`** y **`hw.physicalcpu`**, algunos malwares intentan detectar si es una VM.
+* Algunos malwares también pueden **detectar** si la máquina es **VMware** en función de la dirección MAC (00:50:56).
 * También es posible encontrar **si un proceso está siendo depurado** con un código simple como:
 
   * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //proceso siendo depurado }`
@@ -291,7 +291,7 @@ Cuando se llama a la función **`objc_sendMsg`**, el registro **rsi** contiene e
 * También puede invocar la llamada al sistema **`ptrace`** con la bandera **`PT_DENY_ATTACH`**. Esto **impide** que un depurador se adjunte y rastree.
   * Puede verificar si la función **`sysctl`** o **`ptrace`** está siendo **importada** (pero el malware podría importarla dinámicamente)
   * Como se señala en este artículo, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-    "_El mensaje Process # exited with **status = 45 (0x0000002d)** es generalmente una señal reveladora de que el objetivo de depuración está usando **PT\_DENY\_ATTACH**_"
+    “_El mensaje Process # exited with **status = 45 (0x0000002d)** es generalmente una señal reveladora de que el objetivo de depuración está usando **PT\_DENY\_ATTACH**_”
 
 ## Fuzzing
 
@@ -332,11 +332,15 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
 ### Manejadores internos
 
-[**Revisa esta sección**](../#file-extensions-apps) para descubrir cómo puedes encontrar qué aplicación es responsable de **manejar el esquema o protocolo especificado**.
+**Echa un vistazo a la siguiente página** para descubrir cómo puedes encontrar qué aplicación es responsable de **manejar el esquema o protocolo especificado:**
+
+{% content-ref url="../macos-file-extension-apps.md" %}
+[macos-file-extension-apps.md](../macos-file-extension-apps.md)
+{% endcontent-ref %}
 
 ### Enumerando procesos de red
 
-Es interesante encontrar procesos que manejen datos de red:
+Es interesante encontrar procesos que estén gestionando datos de red:
 ```bash
 dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >> recv.log
 #wait some time
