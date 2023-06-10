@@ -46,7 +46,7 @@ lsof -i TCP -sTCP:ESTABLISHED
 
 As resoluções de DNS são feitas através do aplicativo assinado **`mdnsreponder`**, que provavelmente será permitido a entrar em contato com servidores DNS.
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Via aplicativos do navegador
 
