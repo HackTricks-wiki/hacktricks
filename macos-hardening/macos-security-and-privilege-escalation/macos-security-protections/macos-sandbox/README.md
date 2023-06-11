@@ -7,7 +7,7 @@
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -24,7 +24,7 @@ Alguns componentes importantes do Sandbox são:
 
 * A **extensão do kernel** `/System/Library/Extensions/Sandbox.kext`
 * O **framework privado** `/System/Library/PrivateFrameworks/AppSandbox.framework`
-* Um **daemon** em execução no userland `/usr/libexec/sandboxd`
+* Um **daemon** em execução no espaço do usuário `/usr/libexec/sandboxd`
 * Os **containers** `~/Library/Containers`
 
 Dentro da pasta containers, você pode encontrar **uma pasta para cada aplicativo executado no sandbox** com o nome do bundle id:
@@ -101,7 +101,7 @@ plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 ```
 ### Perfis de Sandbox
 
-Os perfis de Sandbox são arquivos de configuração que indicam o que será **permitido/proibido** nessa **Sandbox**. Eles usam a **Linguagem de Perfil de Sandbox (SBPL)**, que utiliza a linguagem de programação [**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\)).
+Os perfis de Sandbox são arquivos de configuração que indicam o que será **permitido/proibido** nessa **Sandbox**. Ele usa a **Linguagem de Perfil de Sandbox (SBPL)**, que usa a linguagem de programação [**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\)).
 
 Aqui você pode encontrar um exemplo:
 ```scheme
@@ -142,51 +142,228 @@ Para iniciar um aplicativo com um **perfil de sandbox específico**, você pode 
 sandbox-exec -f example.sb /Path/To/The/Application
 ```
 {% code title="touch.sb" %}
-;; touch.sb - Sandbox profile for the touch command
+# Sandboxed touch utility
 
 (version 1)
 
 (deny default)
 
-(allow file-write-data
-    (literal "/dev/null")
-    (regex #"^/tmp/.*"))
+(import "system.sb")
 
-(allow file-read-data
-    (regex #"^/usr/share/locale/.*"))
+;; Allow reading and writing to the user's home directory
+(allow file-read* file-write*
+    (regex #"^/Users/[^/]+/$")
+    (regex #"^/Users/[^/]+/Desktop/$")
+    (regex #"^/Users/[^/]+/Documents/$")
+    (regex #"^/Users/[^/]+/Downloads/$")
+    (regex #"^/Users/[^/]+/Pictures/$")
+    (regex #"^/Users/[^/]+/Music/$")
+    (regex #"^/Users/[^/]+/Movies/$")
+    (regex #"^/Users/[^/]+/Public/$")
+)
 
-(allow process-exec
-    (regex #"^/bin/.*"))
+;; Allow reading and writing to /tmp
+(allow file-read* file-write* (regex #"^/tmp/"))
 
-(allow sysctl-write
-    (regex #"^kern\.securelevel$"))
+;; Allow reading and writing to /var/folders
+(allow file-read* file-write* (regex #"^/var/folders/"))
 
-(allow signal
-    (target self))
+;; Allow reading and writing to /Library/Preferences
+(allow file-read* file-write* (regex #"^/Library/Preferences/"))
 
-(allow mach-lookup
-    (global-name "com.apple.system.notification_center"))
+;; Allow reading and writing to /Library/Caches
+(allow file-read* file-write* (regex #"^/Library/Caches/"))
 
-(allow network-outbound
-    (regex #"^https?://.*"))
+;; Allow reading and writing to /usr/share
+(allow file-read* file-write* (regex #"^/usr/share/"))
 
-(allow network-inbound
-    (local tcp))
-{% endcode %}
-{% endtab %}
-{% endtabs %}
+;; Allow reading and writing to /usr/local/share
+(allow file-read* file-write* (regex #"^/usr/local/share/"))
 
-## macOS Sandbox
+;; Allow reading and writing to /Applications
+(allow file-read* file-write* (regex #"^/Applications/"))
 
-O macOS Sandbox é um mecanismo de segurança que restringe o acesso de um processo a recursos do sistema, como arquivos, diretórios, rede e outros processos. Ele é usado para limitar o impacto de vulnerabilidades de segurança em aplicativos e para proteger o sistema contra malware.
+;; Allow reading and writing to /System/Library
+(allow file-read* file-write* (regex #"^/System/Library/"))
 
-O arquivo `touch.sb` é um exemplo de um perfil de sandbox para o comando `touch`. Ele permite que o comando `touch` escreva em `/dev/null` e em qualquer arquivo que comece com `/tmp/`. Ele também permite que o comando leia arquivos em `/usr/share/locale/` e execute processos em `/bin/`. Além disso, ele permite que o comando escreva em `kern.securelevel`, envie sinais para si mesmo, acesse o centro de notificação do sistema e faça conexões de rede HTTPS e TCP local.
+;; Allow reading and writing to /private/var/folders
+(allow file-read* file-write* (regex #"^/private/var/folders/"))
+
+;; Allow reading and writing to /private/tmp
+(allow file-read* file-write* (regex #"^/private/tmp/"))
+
+;; Allow reading and writing to /private/var/tmp
+(allow file-read* file-write* (regex #"^/private/var/tmp/"))
+
+;; Allow reading and writing to /private/var/db
+(allow file-read* file-write* (regex #"^/private/var/db/"))
+
+;; Allow reading and writing to /private/var/db/uuidtext
+(allow file-read* file-write* (regex #"^/private/var/db/uuidtext/"))
+
+;; Allow reading and writing to /private/var/db/diagnostics
+(allow file-read* file-write* (regex #"^/private/var/db/diagnostics/"))
+
+;; Allow reading and writing to /private/var/db/displaypolicyd
+(allow file-read* file-write* (regex #"^/private/var/db/displaypolicyd/"))
+
+;; Allow reading and writing to /private/var/db/fseventsd
+(allow file-read* file-write* (regex #"^/private/var/db/fseventsd/"))
+
+;; Allow reading and writing to /private/var/db/mds
+(allow file-read* file-write* (regex #"^/private/var/db/mds/"))
+
+;; Allow reading and writing to /private/var/db/Spotlight
+(allow file-read* file-write* (regex #"^/private/var/db/Spotlight/"))
+
+;; Allow reading and writing to /private/var/db/TimeMachineResults
+(allow file-read* file-write* (regex #"^/private/var/db/TimeMachineResults/"))
+
+;; Allow reading and writing to /private/var/db/lockdown
+(allow file-read* file-write* (regex #"^/private/var/db/lockdown/"))
+
+;; Allow reading and writing to /private/var/db/locationd
+(allow file-read* file-write* (regex #"^/private/var/db/locationd/"))
+
+;; Allow reading and writing to /private/var/db/ConfigurationProfiles
+(allow file-read* file-write* (regex #"^/private/var/db/ConfigurationProfiles/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/DuetKnowledge
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/DuetKnowledge/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/Contacts
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/Contacts/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/Events
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/Events/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/Places
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/Places/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/Topics
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/Topics/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/Addresses
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/Addresses/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/EmailAddresses
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/EmailAddresses/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/PhoneNumbers
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/PhoneNumbers/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/Photos
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/Photos/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/Relationships
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/Relationships/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/JobTitles
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/JobTitles/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/Addresses
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/Addresses/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/EmailAddresses
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/EmailAddresses/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/PhoneNumbers
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/PhoneNumbers/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/Photos
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/Photos/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/Relationships
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/Relationships/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/JobTitles
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/JobTitles/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/Addresses
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/Addresses/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/EmailAddresses
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/EmailAddresses/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/PhoneNumbers
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/PhoneNumbers/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/Photos
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/Photos/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/Relationships
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/Relationships/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/JobTitles
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/JobTitles/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/Addresses
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/Addresses/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/EmailAddresses
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/EmailAddresses/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/PhoneNumbers
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/PhoneNumbers/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/Photos
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/Photos/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/Relationships
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/Relationships/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/JobTitles
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/JobTitles/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/Addresses
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/Addresses/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/EmailAddresses
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/EmailAddresses/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/PhoneNumbers
+(allow file-read* file-write* (regex #"^/private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/WorkHistory/Workplaces/PhoneNumbers/"))
+
+;; Allow reading and writing to /private/var/db/CoreDuet/PeopleSuggester/People/WorkHistory
 ```scheme
 (version 1)
 (deny default)
 (allow file* (literal "/tmp/hacktricks.txt"))
 ```
-{% endcode %} (This is not a text to be translated, it is a markdown tag)
+{% endcode %} (This is not a text to be translated, it's a markdown tag)
 ```bash
 # This will fail because default is denied, so it cannot execute touch
 sandbox-exec -f touch.sb touch /tmp/hacktricks.txt
@@ -204,17 +381,258 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 (version 1)
 (deny default)
 (allow file-write*
-    (regex #"^/Users/[^/]+/Desktop/[^/]+$")
-    (regex #"^/Users/[^/]+/Documents/[^/]+$")
-    (regex #"^/Users/[^/]+/Downloads/[^/]+$")
-    (regex #"^/Users/[^/]+/Movies/[^/]+$")
-    (regex #"^/Users/[^/]+/Music/[^/]+$")
-    (regex #"^/Users/[^/]+/Pictures/[^/]+$")
-    (regex #"^/Users/[^/]+/Public/[^/]+$")
-    (regex #"^/Users/[^/]+/Sites/[^/]+$")
-)
-```
-{% endcode %}
+    (regex #"^/private/var/tmp/.*")
+    (regex #"^/Users/[^/]+/Library/.*")
+    (regex #"^/Users/[^/]+/Downloads/.*")
+    (regex #"^/Users/[^/]+/Desktop/.*")
+    (regex #"^/Users/[^/]+/Documents/.*")
+    (regex #"^/Users/[^/]+/Movies/.*")
+    (regex #"^/Users/[^/]+/Music/.*")
+    (regex #"^/Users/[^/]+/Pictures/.*")
+    (regex #"^/Users/[^/]+/Public/.*")
+    (regex #"^/Users/[^/]+/Sites/.*")
+    (regex #"^/Applications/.*")
+    (regex #"^/usr/share/.*")
+    (regex #"^/usr/lib/.*")
+    (regex #"^/Library/.*")
+    (regex #"^/System/.*")
+    (regex #"^/bin/.*")
+    (regex #"^/sbin/.*")
+    (regex #"^/usr/bin/.*")
+    (regex #"^/usr/sbin/.*")
+    (regex #"^/usr/libexec/.*")
+    (regex #"^/usr/local/.*")
+    (regex #"^/var/db/.*")
+    (regex #"^/var/root/.*")
+    (regex #"^/var/tmp/.*")
+    (regex #"^/var/folders/.*")
+    (regex #"^/dev/.*")
+    (regex #"^/etc/.*")
+    (regex #"^/tmp/.*")
+    (regex #"^/var/run/.*")
+    (regex #"^/var/spool/postfix/.*")
+    (regex #"^/var/spool/cups/.*")
+    (regex #"^/var/spool/fax/.*")
+    (regex #"^/var/spool/uucp/.*")
+    (regex #"^/var/spool/squid/.*")
+    (regex #"^/var/spool/at/.*")
+    (regex #"^/var/spool/cron/.*")
+    (regex #"^/var/spool/opendirectory/.*")
+    (regex #"^/var/spool/postgresql/.*")
+    (regex #"^/var/spool/imap/.*")
+    (regex #"^/var/spool/lpd/.*")
+    (regex #"^/var/spool/mqueue/.*")
+    (regex #"^/var/spool/samba/.*")
+    (regex #"^/var/spool/ssh/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/.*")
+    (regex #"^/var/spool/uucppublic/
 ```scheme
 (version 1)
 (deny default)
@@ -232,46 +650,13 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 ```
 (version 1)
 (deny default)
-(import "bsd.sb")
-(import "mach.sb")
-(import "iokit.sb")
-
-;; Allow reading of system files
-(allow file-read* (regex #"^/usr/share/"))
-(allow file-read* (regex #"^/usr/lib/"))
-(allow file-read* (regex #"^/usr/lib/dtrace/"))
-(allow file-read* (regex #"^/usr/lib/system/"))
-(allow file-read* (regex #"^/usr/libexec/"))
-(allow file-read* (regex #"^/usr/bin/"))
-(allow file-read* (regex #"^/bin/"))
-(allow file-read* (regex #"^/private/var/db/dyld/"))
-
-;; Allow writing to user's home directory
-(allow file-write* (subpath (user-home-dir) ))
-
-;; Allow network access
-(allow network*)
-
-;; Allow access to system services
-(allow mach*)
-(allow iokit*)
-
-;; Allow execution of touch command
-(allow process-exec (regex #"^/usr/bin/touch$"))
-
-;; Allow access to standard input/output/error
-(allow file-read-data file-write-data
-    (literal "/dev/null")
-    (regex #"^/dev/fd/[0-9]+$")
-    (regex #"^/dev/tty[0-9]*$"))
-
-;; Allow access to temporary files
-(allow file-read* file-write*
-    (regex #"^/private/var/tmp/"))
-(allow file-read* file-write*
-    (regex #"^/private/tmp/"))
-(allow file-read* file-write*
-    (regex #"^/tmp/"))
+(allow file-write*
+    (regex #"^/private/var/tmp/Touch3\.\d+\.tmp$")
+    (regex #"^/private/var/tmp/Touch3\.\d+\.tmp\.lock$"))
+(allow file-read*
+    (regex #"^/private/var/tmp/Touch3\.\d+\.tmp$"))
+(allow file-read-metadata file-write-metadata
+    (regex #"^/private/var/tmp/Touch3\.\d+\.tmp$"))
 ```
 {% endcode %}
 ```scheme
@@ -290,7 +675,7 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 Observe que o **software** **desenvolvido pela Apple** que roda no **Windows** **não possui precauções de segurança adicionais**, como o sandboxing de aplicativos.
 {% endhint %}
 
-Exemplos de bypass:
+Exemplos de bypasses:
 
 * [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
 * [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (eles conseguem escrever arquivos fora do sandbox cujo nome começa com `~$`).
@@ -301,8 +686,8 @@ Exemplos de bypass:
 
 Os processos são automaticamente sandboxed a partir do userland quando iniciam se tiverem a entitlement: `com.apple.security.app-sandbox`. Para uma explicação detalhada desse processo, verifique:
 
-{% content-ref url="macos-sandbox-debug-and-bypass.md" %}
-[macos-sandbox-debug-and-bypass.md](macos-sandbox-debug-and-bypass.md)
+{% content-ref url="macos-sandbox-debug-and-bypass/" %}
+[macos-sandbox-debug-and-bypass](macos-sandbox-debug-and-bypass/)
 {% endcontent-ref %}
 
 ### **Verificar Privilégios PID**
@@ -318,9 +703,9 @@ sbtool <pid> all
 ```
 ### SBPL personalizado em aplicativos da App Store
 
-É possível para empresas fazerem seus aplicativos rodarem com **perfis de Sandbox personalizados** (em vez do padrão). Eles precisam usar a permissão **`com.apple.security.temporary-exception.sbpl`** que precisa ser autorizada pela Apple.
+Pode ser possível para empresas fazer seus aplicativos rodarem com **perfis de Sandbox personalizados** (em vez do padrão). Eles precisam usar o direito **`com.apple.security.temporary-exception.sbpl`** que precisa ser autorizado pela Apple.
 
-É possível verificar a definição dessa permissão em **`/System/Library/Sandbox/Profiles/application.sb:`**.
+É possível verificar a definição desse direito em **`/System/Library/Sandbox/Profiles/application.sb:`**.
 ```scheme
 (sandbox-array-entitlement
   "com.apple.security.temporary-exception.sbpl"

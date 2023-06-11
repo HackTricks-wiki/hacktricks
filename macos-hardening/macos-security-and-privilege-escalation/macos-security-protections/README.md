@@ -1,24 +1,10 @@
-# Proteções de Segurança do macOS
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
-
 ## Gatekeeper
 
-**Gatekeeper** é um recurso de segurança desenvolvido para sistemas operacionais Mac, projetado para garantir que os usuários **executem apenas software confiável** em seus sistemas. Ele funciona **validando o software** que um usuário baixa e tenta abrir de **fontes fora da App Store**, como um aplicativo, um plug-in ou um pacote de instalação.
+**Gatekeeper** é um recurso de segurança desenvolvido para sistemas operacionais Mac, projetado para garantir que os usuários executem apenas software confiável em seus sistemas. Ele funciona **validando o software** que um usuário baixa e tenta abrir de **fontes fora da App Store**, como um aplicativo, um plug-in ou um pacote de instalação.
 
 O mecanismo chave do Gatekeeper reside em seu processo de **verificação**. Ele verifica se o software baixado é **assinado por um desenvolvedor reconhecido**, garantindo a autenticidade do software. Além disso, ele verifica se o software é **notarizado pela Apple**, confirmando que ele está livre de conteúdo malicioso conhecido e não foi adulterado após a notarização.
 
-Além disso, o Gatekeeper reforça o controle e a segurança do usuário, **solicitando que os usuários aprovem a abertura** do software baixado pela primeira vez. Esse recurso de segurança ajuda a evitar que os usuários executem inadvertidamente código executável potencialmente prejudicial que possam ter confundido com um arquivo de dados inofensivo.
+Além disso, o Gatekeeper reforça o controle e a segurança do usuário, **solicitando que os usuários aprovem a abertura** do software baixado pela primeira vez. Esse recurso ajuda a evitar que os usuários executem inadvertidamente código executável potencialmente prejudicial que possam ter confundido com um arquivo de dados inofensivo.
 ```bash
 # Check the status
 spctl --status
@@ -41,7 +27,7 @@ As assinaturas de aplicativos são uma parte essencial da tecnologia Gatekeeper 
 
 A partir do macOS Catalina, **o Gatekeeper também verifica se o aplicativo foi notarizado** pela Apple, adicionando uma camada extra de segurança. O processo de notarização verifica o aplicativo em busca de problemas de segurança conhecidos e código malicioso, e se essas verificações passarem, a Apple adiciona um ticket ao aplicativo que o Gatekeeper pode verificar.
 
-#### Verificando Assinaturas
+#### Verificar Assinaturas
 
 Ao verificar alguma **amostra de malware**, você sempre deve **verificar a assinatura** do binário, pois o **desenvolvedor** que o assinou pode estar **relacionado** com **malware**.
 ```bash
@@ -70,11 +56,11 @@ Na primeira instalação ou execução do software pelo usuário, a existência 
 
 ### Arquivos em Quarentena
 
-Ao **baixar** um aplicativo ou arquivo, **aplicativos específicos do macOS** como navegadores da web ou clientes de e-mail **anexam um atributo de arquivo estendido**, comumente conhecido como "**sinalizador de quarentena**," ao arquivo baixado. Este atributo atua como uma medida de segurança para **marcar o arquivo** como proveniente de uma fonte não confiável (a internet) e potencialmente carregando riscos. No entanto, nem todos os aplicativos anexam este atributo, por exemplo, o software comum de cliente BitTorrent geralmente ignora este processo.
+Ao **baixar** um aplicativo ou arquivo, aplicativos específicos do macOS, como navegadores da web ou clientes de e-mail, **anexam um atributo de arquivo estendido**, comumente conhecido como "**sinalizador de quarentena**", ao arquivo baixado. Este atributo atua como uma medida de segurança para **marcar o arquivo** como proveniente de uma fonte não confiável (a internet) e potencialmente carregando riscos. No entanto, nem todos os aplicativos anexam este atributo, por exemplo, o software cliente BitTorrent comum geralmente ignora este processo.
 
 **A presença de um sinalizador de quarentena sinaliza a funcionalidade de segurança do Gatekeeper do macOS quando um usuário tenta executar o arquivo**.
 
-No caso em que o **sinalizador de quarentena não está presente** (como em arquivos baixados via alguns clientes BitTorrent), as **verificações do Gatekeeper podem não ser realizadas**. Assim, os usuários devem ter cuidado ao abrir arquivos baixados de fontes menos seguras ou desconhecidas.
+No caso em que o **sinalizador de quarentena não está presente** (como em arquivos baixados via alguns clientes BitTorrent), as verificações do Gatekeeper **podem não ser realizadas**. Assim, os usuários devem ter cuidado ao abrir arquivos baixados de fontes menos seguras ou desconhecidas.
 
 {% hint style="info" %}
 **Verificar** a **validade** das assinaturas de código é um processo **intensivo em recursos** que inclui a geração de **hashes criptográficos** do código e de todos os seus recursos agrupados. Além disso, verificar a validade do certificado envolve fazer uma **verificação online** nos servidores da Apple para ver se ele foi revogado após ter sido emitido. Por essas razões, uma verificação completa de assinatura de código e notarização é **impraticável de ser executada toda vez que um aplicativo é lançado**.
@@ -84,6 +70,8 @@ Portanto, essas verificações são **executadas apenas ao executar aplicativos 
 
 {% hint style="warning" %}
 **Observe que o Safari e outros navegadores da web e aplicativos são os que precisam marcar os arquivos baixados**
+
+Além disso, **os arquivos criados por processos em sandbox** também recebem este atributo para evitar a fuga da sandbox.
 {% endhint %}
 
 É possível **verificar seu status e habilitar/desabilitar** (necessário acesso root) com:
@@ -95,7 +83,7 @@ spctl --enable
 spctl --disable
 #You can also allow nee identifies to execute code using the binary "spctl"
 ```
-Você também pode **verificar se um arquivo possui o atributo de quarentena estendida** com:
+Você também pode **encontrar se um arquivo tem o atributo de quarentena estendido** com:
 ```bash
 xattr portada.png
 com.apple.macl
@@ -127,7 +115,7 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 ```
 ## XProtect
 
-XProtect é um recurso integrado de **anti-malware** no macOS. Ele faz parte do sistema de segurança da Apple que trabalha silenciosamente em segundo plano para manter seu Mac seguro contra malwares conhecidos e plug-ins maliciosos.
+XProtect é um recurso **anti-malware** integrado no macOS. Ele faz parte do sistema de segurança da Apple que trabalha silenciosamente em segundo plano para manter seu Mac seguro contra malwares conhecidos e plug-ins maliciosos.
 
 O XProtect funciona **verificando qualquer arquivo baixado em seu banco de dados** de malwares conhecidos e tipos de arquivos inseguros. Quando você baixa um arquivo por meio de determinados aplicativos, como Safari, Mail ou Mensagens, o XProtect verifica automaticamente o arquivo. Se ele corresponder a algum malware conhecido em seu banco de dados, o XProtect **impedirá que o arquivo seja executado** e o alertará sobre a ameaça.
 
@@ -135,7 +123,7 @@ O banco de dados do XProtect é **atualizado regularmente** pela Apple com novas
 
 No entanto, vale ressaltar que o **XProtect não é uma solução antivírus completa**. Ele verifica apenas uma lista específica de ameaças conhecidas e não realiza a verificação de acesso como a maioria dos softwares antivírus. Portanto, embora o XProtect forneça uma camada de proteção contra malwares conhecidos, ainda é recomendável ter cuidado ao baixar arquivos da internet ou abrir anexos de e-mail.
 
-Você pode obter informações sobre a última atualização do XProtect executando:
+Você pode obter informações sobre a última atualização do XProtect em execução:
 
 {% code overflow="wrap" %}
 ```bash
