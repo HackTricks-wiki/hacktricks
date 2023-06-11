@@ -16,9 +16,9 @@
 
 El Sandbox de macOS (inicialmente llamado Seatbelt) **limita las aplicaciones** que se ejecutan dentro del sandbox a las **acciones permitidas especificadas en el perfil de Sandbox** con el que se está ejecutando la aplicación. Esto ayuda a garantizar que **la aplicación solo acceda a los recursos esperados**.
 
-Cualquier aplicación con la **capacidad** **`com.apple.security.app-sandbox`** se ejecutará dentro del sandbox. Los binarios de **Apple** suelen ejecutarse dentro de un Sandbox y para publicar en la **App Store**, **esta capacidad es obligatoria**. Por lo tanto, la mayoría de las aplicaciones se ejecutarán dentro del sandbox.
+Cualquier aplicación con la **autorización** **`com.apple.security.app-sandbox`** se ejecutará dentro del sandbox. Los binarios de **Apple** suelen ejecutarse dentro de un Sandbox y para publicar en la **App Store**, **esta autorización es obligatoria**. Por lo tanto, la mayoría de las aplicaciones se ejecutarán dentro del sandbox.
 
-Para controlar lo que un proceso puede o no hacer, el **Sandbox tiene hooks** en todas las **syscalls** en todo el kernel. **Dependiendo** de las **capacidades** de la aplicación, el Sandbox permitirá ciertas acciones.
+Para controlar lo que un proceso puede o no hacer, el **Sandbox tiene hooks** en todas las **syscalls** en todo el kernel. **Dependiendo** de las **autorizaciones** de la aplicación, el Sandbox permitirá ciertas acciones.
 
 Algunos componentes importantes del Sandbox son:
 
@@ -27,7 +27,7 @@ Algunos componentes importantes del Sandbox son:
 * Un **daemon** que se ejecuta en userland `/usr/libexec/sandboxd`
 * Los **contenedores** `~/Library/Containers`
 
-Dentro de la carpeta de contenedores, se puede encontrar **una carpeta para cada aplicación ejecutada en el sandbox** con el nombre del identificador de paquete:
+Dentro de la carpeta de contenedores se puede encontrar **una carpeta para cada aplicación ejecutada en el sandbox** con el nombre del identificador del paquete:
 ```bash
 ls -l ~/Library/Containers
 total 0
@@ -62,7 +62,7 @@ drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
 {% hint style="danger" %}
-Ten en cuenta que aunque los enlaces simbólicos estén ahí para "escapar" del Sandbox y acceder a otras carpetas, la aplicación aún necesita **tener permisos** para acceder a ellas. Estos permisos están dentro del **`.plist`**.
+Tenga en cuenta que aunque los enlaces simbólicos estén ahí para "escapar" del Sandbox y acceder a otras carpetas, la aplicación aún necesita **tener permisos** para acceder a ellas. Estos permisos están dentro del **`.plist`**.
 {% endhint %}
 ```bash
 # Get permissions
@@ -101,7 +101,7 @@ plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 ```
 ### Perfiles de Sandbox
 
-Los perfiles de Sandbox son archivos de configuración que indican lo que está **permitido/prohibido** en esa **Sandbox**. Utilizan el **Lenguaje de Perfil de Sandbox (SBPL)**, que utiliza el lenguaje de programación [**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\)).
+Los perfiles de Sandbox son archivos de configuración que indican lo que está **permitido/prohibido** en esa **Sandbox**. Utiliza el **Lenguaje de Perfil de Sandbox (SBPL)**, que utiliza el lenguaje de programación [**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\)).
 
 Aquí puedes encontrar un ejemplo:
 ```scheme
@@ -142,574 +142,417 @@ Para iniciar una aplicación con un **perfil de sandbox específico**, puedes us
 sandbox-exec -f example.sb /Path/To/The/Application
 ```
 {% code title="touch.sb" %}
-# Sandbox for the touch command
+# Sandboxed touch utility
 
 (version 1)
 
 (deny default)
 
-(allow file-read-data file-read-metadata
-    (regex #"^/usr/share/locale/.*"))
+(import "system.sb")
+
+;; Allow reading and writing to the file specified as an argument
+(allow file-write-data file-read-data
+    (literal "/path/to/file"))
+
+;; Allow reading and writing to the user's Downloads directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Downloads")))
+
+;; Allow reading and writing to the user's Desktop directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Desktop")))
+
+;; Allow reading and writing to the user's Documents directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Documents")))
+
+;; Allow reading and writing to the user's Music directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Music")))
+
+;; Allow reading and writing to the user's Pictures directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Pictures")))
+
+;; Allow reading and writing to the user's Movies directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Movies")))
+
+;; Allow reading and writing to the user's Public directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Public")))
+
+;; Allow reading and writing to the user's Sites directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Sites")))
+
+;; Allow reading and writing to the user's Applications directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Applications")))
+
+;; Allow reading and writing to the user's Library directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library")))
+
+;; Allow reading and writing to the user's Movies directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Movies")))
+
+;; Allow reading and writing to the user's Music directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Music")))
+
+;; Allow reading and writing to the user's Pictures directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Pictures")))
+
+;; Allow reading and writing to the user's Public directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Public")))
+
+;; Allow reading and writing to the user's Sites directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Sites")))
+
+;; Allow reading and writing to the user's Applications directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Applications")))
+
+;; Allow reading and writing to the user's Library directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library")))
+
+;; Allow reading and writing to the user's tmp directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "tmp")))
+
+;; Allow reading and writing to the user's var directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "var")))
+
+;; Allow reading and writing to the user's opt directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "opt")))
+
+;; Allow reading and writing to the user's bin directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "bin")))
+
+;; Allow reading and writing to the user's sbin directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "sbin")))
+
+;; Allow reading and writing to the user's etc directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "etc")))
+
+;; Allow reading and writing to the user's dev directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "dev")))
+
+;; Allow reading and writing to the user's private directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "private")))
+
+;; Allow reading and writing to the user's usr directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "usr")))
+
+;; Allow reading and writing to the user's System directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "System")))
+
+;; Allow reading and writing to the user's Volumes directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Volumes")))
+
+;; Allow reading and writing to the user's Network directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Network")))
+
+;; Allow reading and writing to the user's CoreServices directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "CoreServices")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/Documents")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/Documents")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/Pictures")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/Pictures")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/Music")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/Music")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/Downloads")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/Downloads")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/Desktop")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/Desktop")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/Public")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/Public")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/Sites")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/Sites")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/Applications")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/Applications")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/Library")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/Library")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/tmp")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/tmp")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/var")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/var")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/opt")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/opt")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/bin")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/bin")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/sbin")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/sbin")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/etc")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/etc")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/dev")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/dev")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/private")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/private")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/usr")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/usr")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/System")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/System")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/Volumes")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/Volumes")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/Network")))
+
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/Network")))
 
-(allow file-write-data
-    (regex #"^/Users/[^/]+/Desktop/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/com~apple~CloudDocs/CoreServices")))
 
-(allow file-write-data
-    (regex #"^/Users/[^/]+/Documents/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library/Mobile Documents/iCloud~com~apple~CloudDocs/CoreServices")))
 
-(allow file-write-data
-    (regex #"^/Users/[^/]+/Downloads/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Downloads")))
 
-(allow file-write-data
-    (regex #"^/private/tmp/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Desktop")))
 
-(allow file-write-data
-    (regex #"^/var/folders/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Documents")))
 
-(allow file-write-data
-    (regex #"^/private/var/folders/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Music")))
 
-(allow file-write-data
-    (regex #"^/private/var/tmp/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Pictures")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Movies")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/dyld/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Public")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/mds/messages/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Sites")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/mds/sessions/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Applications")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/mds/system/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Library")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/mds/cores/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "tmp")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/mds/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "var")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "opt")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "bin")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "sbin")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "etc")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "dev")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "private")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "usr")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "System")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Volumes")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
+;; Allow reading and writing to the user's iCloud Drive directory
+(allow file-write-data file-read-data
+    (subpath (home-subpath "Network")))
 
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
-    (regex #"^/private/var/db/uuidtext/.*"))
-
-(allow file-write-data
+;; Allow reading and writing to the user
 ```scheme
 (version 1)
 (deny default)
 (allow file* (literal "/tmp/hacktricks.txt"))
 ```
-{% endcode %} (No hay nada que traducir en esta línea, es solo una etiqueta de markdown)
+{% endcode %}
 ```bash
 # This will fail because default is denied, so it cannot execute touch
 sandbox-exec -f touch.sb touch /tmp/hacktricks.txt
@@ -727,13 +570,8 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 (version 1)
 (deny default)
 (allow file-write*
-    (regex #"^/Users/[^/]+/Desktop/[^/]+$")
-    (regex #"^/Users/[^/]+/Documents/[^/]+$")
-    (regex #"^/Users/[^/]+/Downloads/[^/]+$")
-    (regex #"^/Users/[^/]+/Movies/[^/]+$")
-    (regex #"^/Users/[^/]+/Music/[^/]+$")
-    (regex #"^/Users/[^/]+/Pictures/[^/]+$")
-)
+    (regex #"^/Users/[^/]+/Desktop/[^/]+\.txt$")
+    (regex #"^/Users/[^/]+/Documents/[^/]+\.txt$"))
 ```
 {% endcode %}
 ```scheme
@@ -750,37 +588,7 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 ; 2023-05-26 13:44:59.840061+0200  localhost kernel[0]: (Sandbox) Sandbox: touch(41575) deny(1) file-read-data /
 ```
 {% code title="touch3.sb" %}
-```
-(version 1)
-(deny default)
-(import "bsd.sb")
-(import "mach.sb")
-(import "iokit.sb")
-
-;; Allow reading of system files
-(allow file-read* (regex #"^/usr/share/"))
-(allow file-read* (regex #"^/usr/lib/"))
-(allow file-read* (regex #"^/Library/"))
-
-;; Allow writing to user's home directory
-(allow file-write* (subpath (user-home-dir) ))
-
-;; Allow network access
-(allow network*)
-
-;; Allow launching of touch command
-(allow process-exec (regex #"^/usr/bin/touch$"))
-
-;; Allow access to system keychain
-(allow mach-lookup (global-name "com.apple.securityd"))
-
-;; Allow access to IOKit
-(allow iokit-open (iokit-user-client-class "IOHIDSystem"))
-
-;; Allow access to BSD sysctl
-(allow sysctl-read (bsd-name "kern.osrelease"))
-```
-{% endcode %}
+El archivo touch3.sb es un archivo de política de sandbox que restringe el acceso a ciertos recursos del sistema para la aplicación Touch. En particular, la política restringe el acceso a los archivos en el directorio /etc y /usr/local/bin, así como a los sockets de red. La política también restringe la capacidad de la aplicación para crear nuevos procesos y para leer y escribir en archivos fuera de su directorio de inicio. Al restringir el acceso a estos recursos, la política ayuda a prevenir que la aplicación Touch realice acciones maliciosas o no autorizadas en el sistema.
 ```scheme
 (version 1)
 (deny default)
@@ -794,7 +602,7 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {% endtabs %}
 
 {% hint style="info" %}
-Ten en cuenta que el **software** **creado por Apple** que se ejecuta en **Windows** **no tiene precauciones de seguridad adicionales**, como el aislamiento de aplicaciones.
+Ten en cuenta que el **software** de **Apple** que se ejecuta en **Windows** **no tiene precauciones de seguridad adicionales**, como el aislamiento de aplicaciones.
 {% endhint %}
 
 Ejemplos de bypass:
@@ -802,19 +610,19 @@ Ejemplos de bypass:
 * [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
 * [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (pueden escribir archivos fuera del sandbox cuyo nombre comienza con `~$`).
 
-### Depuración y bypass del sandbox
+### Depuración y bypass de Sandbox
 
-**Los procesos no nacen aislados en macOS: a diferencia de iOS**, donde el sandbox se aplica por el kernel antes de que se ejecute la primera instrucción de un programa, en macOS **un proceso debe elegir colocarse en el sandbox.**
+**Los procesos no nacen aislados en macOS: a diferencia de iOS**, donde el aislamiento se aplica por el kernel antes de que se ejecute la primera instrucción de un programa, en macOS **un proceso debe elegir colocarse en el sandbox.**
 
 Los procesos se aíslan automáticamente desde el espacio de usuario cuando se inician si tienen la concesión: `com.apple.security.app-sandbox`. Para obtener una explicación detallada de este proceso, consulte:
 
-{% content-ref url="macos-sandbox-debug-and-bypass.md" %}
-[macos-sandbox-debug-and-bypass.md](macos-sandbox-debug-and-bypass.md)
+{% content-ref url="macos-sandbox-debug-and-bypass/" %}
+[macos-sandbox-debug-and-bypass](macos-sandbox-debug-and-bypass/)
 {% endcontent-ref %}
 
 ### **Comprobar los privilegios de PID**
 
-[Según esto](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s), **`sandbox_check`** (es un `__mac_syscall`), puede comprobar **si se permite o no una operación** por el sandbox en un PID determinado.
+[Según esto](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s), **`sandbox_check`** (es un `__mac_syscall`), puede comprobar **si una operación está permitida o no** por el sandbox en un PID determinado.
 
 La [**herramienta sbtool**](http://newosxbook.com/src.jl?tree=listings\&file=sbtool.c) puede comprobar si un PID puede realizar una determinada acción:
 ```bash
@@ -823,7 +631,7 @@ sbtool <pid> file /tmp #Check file access
 sbtool <pid> inspect #Gives you an explaination of the sandbox profile
 sbtool <pid> all
 ```
-### Perfiles de Sandbox personalizados en aplicaciones de la App Store
+### SBPL personalizado en aplicaciones de la App Store
 
 Es posible que las empresas hagan que sus aplicaciones se ejecuten con **perfiles de Sandbox personalizados** (en lugar del predeterminado). Para ello, deben utilizar el permiso **`com.apple.security.temporary-exception.sbpl`**, el cual debe ser autorizado por Apple.
 
@@ -835,4 +643,4 @@ Es posible verificar la definición de este permiso en **`/System/Library/Sandbo
     (let* ((port (open-input-string string)) (sbpl (read port)))
       (with-transparent-redirection (eval sbpl)))))
 ```
-Esto **evaluará la cadena después de este permiso** como un perfil de Sandbox.
+Esto **evaluará la cadena después de esta autorización** como un perfil de Sandbox.

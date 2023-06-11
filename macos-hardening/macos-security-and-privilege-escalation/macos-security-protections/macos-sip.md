@@ -23,7 +23,7 @@ Para verificar si un directorio o archivo está protegido por SIP, puede usar el
 ls -lOd /usr/libexec/cups
 drwxr-xr-x  11 root  wheel  sunlnk 352 May 13 00:29 /usr/libexec/cups
 ```
-En este caso, la bandera **`sunlnk`** significa que el directorio `/usr/libexec/cups` en sí no puede ser eliminado, aunque se pueden crear, modificar o eliminar archivos dentro de él.
+En este caso, la bandera **`sunlnk`** significa que el directorio `/usr/libexec/cups` en sí mismo no puede ser eliminado, aunque los archivos dentro de él pueden ser creados, modificados o eliminados.
 
 Por otro lado:
 ```bash
@@ -81,6 +81,8 @@ Los investigadores descubrieron que durante la instalación de un paquete firmad
 
 Además, se descubrió que **`/etc/zshenv` podría ser utilizado como una técnica de ataque general**, no solo para eludir SIP. Cada perfil de usuario tiene un archivo `~/.zshenv`, que se comporta de la misma manera que `/etc/zshenv` pero no requiere permisos de root. Este archivo podría ser utilizado como un mecanismo de persistencia, activándose cada vez que `zsh` se inicia, o como un mecanismo de elevación de privilegios. Si un usuario administrador se eleva a root usando `sudo -s` o `sudo <comando>`, el archivo `~/.zshenv` se activaría, elevando efectivamente a root.
 
+En [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) se descubrió que el mismo proceso **`system_installd`** todavía podía ser abusado porque estaba colocando el **script post-instalación dentro de una carpeta con nombre aleatorio protegida por SIP dentro de `/tmp`**. La cosa es que **`/tmp` en sí no está protegido por SIP**, por lo que era posible **montar** una **imagen virtual en él**, luego el **instalador** pondría allí el **script post-instalación**, **desmontaría** la imagen virtual, **recrearía** todas las **carpetas** y **agregaría** el **script de post-instalación** con la **carga útil** a ejecutar.
+
 ### **com.apple.rootless.install**
 
 {% hint style="danger" %}
@@ -89,15 +91,15 @@ El permiso **`com.apple.rootless.install`** permite eludir SIP
 
 Desde [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/) El servicio XPC del sistema `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` tiene el permiso **`com.apple.rootless.install`**, que otorga al proceso permiso para eludir las restricciones de SIP. También **expone un método para mover archivos sin ninguna verificación de seguridad.**
 
-## Instantáneas selladas del sistema
+## Instantáneas de sistema selladas
 
-Las Instantáneas selladas del sistema son una función introducida por Apple en **macOS Big Sur (macOS 11)** como parte de su mecanismo de **Protección de Integridad del Sistema (SIP)** para proporcionar una capa adicional de seguridad y estabilidad del sistema. Son esencialmente versiones de solo lectura del volumen del sistema.
+Las instantáneas de sistema selladas son una función introducida por Apple en **macOS Big Sur (macOS 11)** como parte de su mecanismo de **Protección de Integridad del Sistema (SIP)** para proporcionar una capa adicional de seguridad y estabilidad del sistema. Son esencialmente versiones de solo lectura del volumen del sistema.
 
 Aquí hay una mirada más detallada:
 
-1. **Sistema inmutable**: Las Instantáneas selladas del sistema hacen que el volumen del sistema macOS sea "inmutable", lo que significa que no se puede modificar. Esto evita cualquier cambio no autorizado o accidental en el sistema que pueda comprometer la seguridad o la estabilidad del sistema.
-2. **Actualizaciones de software del sistema**: Cuando se instalan actualizaciones o mejoras de macOS, macOS crea una nueva instantánea del sistema. El volumen de arranque de macOS utiliza **APFS (Sistema de archivos de Apple)** para cambiar a esta nueva instantánea. Todo el proceso de aplicación de actualizaciones se vuelve más seguro y confiable, ya que el sistema siempre puede volver a la instantánea anterior si algo sale mal durante la actualización.
-3. **Separación de datos**: En conjunto con el concepto de separación de volumen de datos y sistema introducido en macOS Catalina, la función de Instantáneas selladas del sistema se asegura de que todos sus datos y configuraciones se almacenen en un volumen "**Datos**" separado. Esta separación hace que sus datos sean independientes del sistema, lo que simplifica el proceso de actualización del sistema y mejora la seguridad del sistema.
+1. **Sistema inmutable**: las instantáneas de sistema selladas hacen que el volumen del sistema macOS sea "inmutable", lo que significa que no se puede modificar. Esto evita cualquier cambio no autorizado o accidental en el sistema que pueda comprometer la seguridad o la estabilidad del sistema.
+2. **Actualizaciones de software del sistema**: cuando se instalan actualizaciones o mejoras de macOS, macOS crea una nueva instantánea del sistema. El volumen de arranque de macOS utiliza **APFS (Sistema de archivos de Apple)** para cambiar a esta nueva instantánea. Todo el proceso de aplicación de actualizaciones se vuelve más seguro y confiable, ya que el sistema siempre puede volver a la instantánea anterior si algo sale mal durante la actualización.
+3. **Separación de datos**: en conjunto con el concepto de separación de volumen de datos y sistema introducido en macOS Catalina, la función de instantáneas de sistema selladas se asegura de que todos sus datos y configuraciones se almacenen en un volumen "**Datos**" separado. Esta separación hace que sus datos sean independientes del sistema, lo que simplifica el proceso de actualización del sistema y mejora la seguridad del sistema.
 
 Recuerde que estas instantáneas son administradas automáticamente por macOS y no ocupan espacio adicional en su disco, gracias a las capacidades de uso compartido de espacio de APFS. También es importante tener en cuenta que estas instantáneas son diferentes de las **instantáneas de Time Machine**, que son copias de seguridad accesibles por el usuario de todo el sistema.
 
@@ -119,24 +121,15 @@ El comando **`diskutil apfs list`** lista los **detalles de los volúmenes APFS*
 |   |
 |   +-> Volume disk3s1 7A27E734-880F-4D91-A703-FB55861D49B7
 |   |   ---------------------------------------------------
-|   |   APFS Volume Disk (Role):   disk3s1 (Sistema)
-|   |   Nombre:                    Macintosh HD (sin distinción entre mayúsculas y minúsculas)
-|   |   Punto de montaje:           /System/Volumes/Update/mnt1
-|   |   Capacidad consumida:        12819210240 B (12.8 GB)
-|   |   Sellado:                   Roto
-|   |   FileVault:                 Sí (Desbloqueado)
-|   |   Encriptado:                No
+|   |   APFS Volume Disk (Role):   disk3s1 (System)
+|   |   Name:                      Macintosh HD (Case-insensitive)
+|   |   Mount Point:               /System/Volumes/Update/mnt1
+|   |   Capacity Consumed:         12819210240 B (12.8 GB)
+|   |   Sealed:                    Broken
+|   |   FileVault:                 Yes (Unlocked)
+|   |   Encrypted:                 No
 |   |   |
-|   |   Instantánea:               FAA23E0C-791C-43FF-B0E7-0E1C0810AC61
-|   |   Disco de instantánea:      disk3s1s1
-|   |   Punto de montaje de instantánea:      /
-<strong>|   |   Instantánea sellada:           Sí
-</strong>[...]
-</code></pre>
-
-En la salida anterior es posible ver que **la instantánea del volumen del sistema de macOS está sellada** (firmada criptográficamente por el sistema operativo). Por lo tanto, si se elude SIP y se modifica, el **sistema operativo no se iniciará más**.
-
-También es posible verificar que el sellado está habilitado ejecutando:
+|   |   Snapshot
 ```
 csrutil authenticated-root status
 Authenticated Root status: enabled

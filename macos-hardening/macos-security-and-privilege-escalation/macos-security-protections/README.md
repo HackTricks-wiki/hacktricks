@@ -1,20 +1,6 @@
-# Protecciones de seguridad de macOS
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
-
 ## Gatekeeper
 
-**Gatekeeper** es una función de seguridad desarrollada para los sistemas operativos Mac, diseñada para garantizar que los usuarios **ejecuten solo software de confianza** en sus sistemas. Funciona mediante la **validación** del software que un usuario descarga e intenta abrir desde **fuentes fuera de la App Store**, como una aplicación, un complemento o un paquete de instalación.
+**Gatekeeper** es una función de seguridad desarrollada para sistemas operativos Mac, diseñada para garantizar que los usuarios **ejecuten solo software confiable** en sus sistemas. Funciona mediante la **validación del software** que un usuario descarga e intenta abrir desde **fuentes fuera de la App Store**, como una aplicación, un complemento o un paquete de instalación.
 
 El mecanismo clave de Gatekeeper radica en su proceso de **verificación**. Verifica si el software descargado está **firmado por un desarrollador reconocido**, asegurando la autenticidad del software. Además, verifica si el software está **notarizado por Apple**, confirmando que está libre de contenido malicioso conocido y que no ha sido manipulado después de la notarización.
 
@@ -66,7 +52,7 @@ El proceso de notarización de Apple sirve como una salvaguarda adicional para p
 
 Si el software **supera** esta inspección sin plantear ninguna preocupación, el Servicio de Notarización genera un ticket de notarización. Luego, se requiere que el desarrollador **adjunte este ticket a su software**, un proceso conocido como "grapado". Además, el ticket de notarización también se publica en línea donde Gatekeeper, la tecnología de seguridad de Apple, puede acceder a él.
 
-En la primera instalación o ejecución del software por parte del usuario, la existencia del ticket de notarización, ya sea grapado al ejecutable o encontrado en línea, **informa a Gatekeeper que el software ha sido notarizado por Apple**. Como resultado, Gatekeeper muestra un mensaje descriptivo en el diálogo de lanzamiento inicial, indicando que el software ha sido sometido a controles de contenido malicioso por parte de Apple. Este proceso mejora la confianza del usuario en la seguridad del software que instala o ejecuta en sus sistemas.
+En la primera instalación o ejecución del software por parte del usuario, la existencia del ticket de notarización, ya sea grapado al ejecutable o encontrado en línea, **informa a Gatekeeper que el software ha sido notarizado por Apple**. Como resultado, Gatekeeper muestra un mensaje descriptivo en el cuadro de diálogo de inicio inicial, indicando que el software ha sido sometido a controles de contenido malicioso por parte de Apple. Este proceso mejora la confianza del usuario en la seguridad del software que instala o ejecuta en sus sistemas.
 
 ### Archivos en cuarentena
 
@@ -77,13 +63,15 @@ Al **descargar** una aplicación o archivo, ciertas **aplicaciones** de macOS co
 En el caso de que **no esté presente la bandera de cuarentena** (como con los archivos descargados a través de algunos clientes BitTorrent), **es posible que no se realicen las comprobaciones de Gatekeeper**. Por lo tanto, los usuarios deben tener precaución al abrir archivos descargados de fuentes menos seguras o desconocidas.
 
 {% hint style="info" %}
-**Comprobar** la **validez** de las firmas de código es un proceso **intensivo en recursos** que incluye la generación de **hashes** criptográficos del código y todos sus recursos empaquetados. Además, comprobar la validez del certificado implica hacer una **comprobación en línea** a los servidores de Apple para ver si ha sido revocado después de emitido. Por estas razones, una comprobación completa de firma de código y notarización es **impráctica para ejecutar cada vez que se lanza una aplicación**.
+**Comprobar** la **validez** de las firmas de código es un proceso **intensivo en recursos** que incluye la generación de **hashes** criptográficos del código y todos sus recursos empaquetados. Además, comprobar la validez del certificado implica hacer una **comprobación en línea** a los servidores de Apple para ver si se ha revocado después de emitirse. Por estas razones, una comprobación completa de firma de código y notarización es **impráctica para ejecutar cada vez que se inicia una aplicación**.
 
 Por lo tanto, estas comprobaciones se **ejecutan solo al ejecutar aplicaciones con el atributo en cuarentena**.
 {% endhint %}
 
 {% hint style="warning" %}
 **Tenga en cuenta que Safari y otros navegadores web y aplicaciones son los que necesitan marcar los archivos descargados**
+
+Además, **los archivos creados por procesos en sandbox** también se les agrega este atributo para evitar que se escapen del sandbox.
 {% endhint %}
 
 Es posible **verificar su estado y habilitar/deshabilitar** (se requiere root) con:
@@ -101,7 +89,7 @@ xattr portada.png
 com.apple.macl
 com.apple.quarantine
 ```
-Verifica el **valor** de los **atributos extendidos** con:
+Verifique el **valor** de los **atributos extendidos** con:
 ```bash
 xattr -l portada.png
 com.apple.macl:
@@ -129,15 +117,15 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 
 ## XProtect
 
-XProtect es una función integrada de **anti-malware** en macOS. Es parte del sistema de seguridad de Apple que trabaja silenciosamente en segundo plano para mantener tu Mac seguro de malware conocido y plug-ins maliciosos.
+XProtect es una función integrada de **anti-malware** en macOS. Es parte del sistema de seguridad de Apple que trabaja silenciosamente en segundo plano para mantener su Mac seguro de malware conocido y complementos maliciosos.
 
-XProtect funciona **verificando cualquier archivo descargado contra su base de datos** de malware conocido y tipos de archivo inseguros. Cuando descargas un archivo a través de ciertas aplicaciones, como Safari, Mail o Mensajes, XProtect escanea automáticamente el archivo. Si coincide con algún malware conocido en su base de datos, XProtect **impedirá que el archivo se ejecute** y te alertará sobre la amenaza.
+XProtect funciona **verificando cualquier archivo descargado contra su base de datos** de malware conocido y tipos de archivo inseguros. Cuando descarga un archivo a través de ciertas aplicaciones, como Safari, Mail o Mensajes, XProtect escanea automáticamente el archivo. Si coincide con algún malware conocido en su base de datos, XProtect **impedirá que el archivo se ejecute** y le alertará sobre la amenaza.
 
-La base de datos de XProtect se **actualiza regularmente** por Apple con nuevas definiciones de malware, y estas actualizaciones se descargan e instalan automáticamente en tu Mac. Esto asegura que XProtect siempre esté actualizado con las últimas amenazas conocidas.
+La base de datos de XProtect se **actualiza regularmente** por Apple con nuevas definiciones de malware, y estas actualizaciones se descargan e instalan automáticamente en su Mac. Esto asegura que XProtect siempre esté actualizado con las últimas amenazas conocidas.
 
-Sin embargo, es importante tener en cuenta que **XProtect no es una solución antivirus completa**. Solo verifica una lista específica de amenazas conocidas y no realiza escaneos de acceso como la mayoría del software antivirus. Por lo tanto, aunque XProtect proporciona una capa de protección contra malware conocido, todavía se recomienda tener precaución al descargar archivos de internet o abrir archivos adjuntos de correo electrónico.
+Sin embargo, vale la pena señalar que **XProtect no es una solución antivirus completa**. Solo verifica una lista específica de amenazas conocidas y no realiza un escaneo de acceso como la mayoría del software antivirus. Por lo tanto, aunque XProtect proporciona una capa de protección contra el malware conocido, todavía se recomienda tener precaución al descargar archivos de Internet o abrir archivos adjuntos de correo electrónico.
 
-Puedes obtener información sobre la última actualización de XProtect ejecutando:
+Puede obtener información sobre la última actualización de XProtect en ejecución:
 
 {% code overflow="wrap" %}
 ```bash
@@ -145,7 +133,7 @@ system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistC
 ```
 ## MRT - Herramienta de eliminación de malware
 
-La Herramienta de eliminación de malware (MRT) es otra parte de la infraestructura de seguridad de macOS. Como su nombre indica, la función principal de MRT es **eliminar malware conocido de sistemas infectados**.
+La Herramienta de eliminación de malware (MRT) es otra parte de la infraestructura de seguridad de macOS. Como su nombre indica, la función principal de MRT es **eliminar el malware conocido de los sistemas infectados**.
 
 Una vez que se detecta malware en un Mac (ya sea por XProtect o por algún otro medio), MRT se puede utilizar para **eliminar automáticamente el malware**. MRT opera en segundo plano y se ejecuta típicamente cuando el sistema se actualiza o cuando se descarga una nueva definición de malware.
 
@@ -154,7 +142,7 @@ Si bien tanto XProtect como MRT son parte de las medidas de seguridad de macOS, 
 * **XProtect** es una herramienta preventiva. **Verifica los archivos mientras se descargan** (a través de ciertas aplicaciones), y si detecta algún tipo de malware conocido, **impide que el archivo se abra**, evitando así que el malware infecte su sistema en primer lugar.
 * **MRT**, por otro lado, es una **herramienta reactiva**. Opera después de que se ha detectado malware en un sistema, con el objetivo de eliminar el software ofensivo para limpiar el sistema.
 
-## Limitaciones de procesos
+## Limitantes de procesos
 
 ### SIP - Protección de la integridad del sistema
 
@@ -179,9 +167,9 @@ El Sandbox de MacOS **limita las aplicaciones** que se ejecutan dentro del sandb
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos.
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com).
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live).
-* **Comparte tus trucos de hacking enviando PR a** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **y** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

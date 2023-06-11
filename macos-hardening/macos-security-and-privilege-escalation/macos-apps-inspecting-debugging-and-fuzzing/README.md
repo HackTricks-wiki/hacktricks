@@ -93,42 +93,48 @@ Los parámetros que esta función espera son:
 | **Argumento**      | **Registro**                                                    | **(para) objc\_msgSend**                                |
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
 | **1er argumento**  | **rdi**                                                         | **self: objeto sobre el que se invoca el método** |
-| **2do argumento**  | **rsi**                                                         | **op: nombre del método**                             |
+| **2º argumento**  | **rsi**                                                         | **op: nombre del método**                             |
 | **3er argumento**  | **rdx**                                                         | **1er argumento para el método**                         |
-| **4to argumento**  | **rcx**                                                         | **2do argumento para el método**                         |
-| **5to argumento**  | **r8**                                                          | **3er argumento para el método**                         |
-| **6to argumento**  | **r9**                                                          | **4to argumento para el método**                         |
-| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento para el método**                        |
+| **4º argumento**  | **rcx**                                                         | **2º argumento para el método**                         |
+| **5º argumento**  | **r8**                                                          | **3er argumento para el método**                         |
+| **6º argumento**  | **r9**                                                          | **4º argumento para el método**                         |
+| **7º+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5º+ argumento para el método**                        |
 
 ### Binarios empaquetados
 
-* Verificar la alta entropía
-* Verificar las cadenas (si hay casi ninguna cadena comprensible, empaquetado)
+* Comprobar la alta entropía
+* Comprobar las cadenas (si hay casi ninguna cadena comprensible, empaquetado)
 * El empaquetador UPX para MacOS genera una sección llamada "\_\_XHDR"
 
 ## Análisis dinámico
 
 {% hint style="warning" %}
-Tenga en cuenta que para depurar binarios, **SIP debe estar deshabilitado** (`csrutil disable` o `csrutil enable --without debug`) o copiar los binarios a una carpeta temporal y **eliminar la firma** con `codesign --remove-signature <ruta-del-binario>` o permitir la depuración del binario (puede usar [este script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
+Tenga en cuenta que para depurar binarios, **SIP debe estar desactivado** (`csrutil disable` o `csrutil enable --without debug`) o copiar los binarios a una carpeta temporal y **eliminar la firma** con `codesign --remove-signature <ruta-del-binario>` o permitir la depuración del binario (puede usar [este script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
 {% endhint %}
 
 {% hint style="warning" %}
-Tenga en cuenta que para **instrumentar binarios del sistema**, (como `cloudconfigurationd`) en macOS, **SIP debe estar deshabilitado** (simplemente eliminar la firma no funcionará).
+Tenga en cuenta que para **instrumentar binarios del sistema**, (como `cloudconfigurationd`) en macOS, **SIP debe estar desactivado** (simplemente eliminar la firma no funcionará).
 {% endhint %}
+
+### Registros unificados
+
+MacOS genera muchos registros que pueden ser muy útiles al ejecutar una aplicación tratando de entender **qué está haciendo**.
+
+Además, hay algunos registros que contendrán la etiqueta `<private>` para **ocultar** alguna información **identificable** del **usuario** o del **ordenador**. Sin embargo, es posible **instalar un certificado para revelar esta información**. Siga las explicaciones de [**aquí**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
 
 ### Hopper
 
 #### Panel izquierdo
 
-En el panel izquierdo de Hopper es posible ver los símbolos (**Etiquetas**) del binario, la lista de procedimientos y funciones (**Proc**) y las cadenas (**Str**). Estas no son todas las cadenas, sino las definidas en varias partes del archivo Mac-O (como _cstring o_ `objc_methname`).
+En el panel izquierdo de Hopper se pueden ver los símbolos (**Etiquetas**) del binario, la lista de procedimientos y funciones (**Proc**) y las cadenas (**Str**). Estas no son todas las cadenas, sino las definidas en varias partes del archivo Mac-O (como _cstring o_ `objc_methname`).
 
 #### Panel central
 
-En el panel central se puede ver el **código desensamblado**. Y se puede ver como **crudo** desensamblado, como **gráfico**, como **descompilado** y como **binario** haciendo clic en el icono respectivo:
+En el panel central se puede ver el **código desensamblado**. Y se puede ver como **código fuente** desensamblado, como **gráfico**, como **descompilado** y como **binario** haciendo clic en el icono respectivo:
 
 <figure><img src="../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
 
-Al hacer clic con el botón derecho en un objeto de código, se pueden ver las **referencias desde/hacia ese objeto** o incluso cambiar su nombre (esto no funciona en el pseudocódigo descompilado):
+Al hacer clic con el botón derecho en un objeto de código, se pueden ver las **referencias a/desde ese objeto** o incluso cambiar su nombre (esto no funciona en el pseudocódigo descompilado):
 
 <figure><img src="../../../.gitbook/assets/image (1) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -136,9 +142,7 @@ Además, en la **parte inferior central se pueden escribir comandos python**.
 
 #### Panel derecho
 
-En el panel derecho se pueden ver información interesante como el **historial de navegación** (para saber cómo llegó a la situación actual), el **gráfico de llamadas** donde se pueden ver todas las **funciones que llaman a esta función** y todas las funciones que **esta función llama**, e información de **variables locales**.
-
-### dtruss
+En el panel derecho se pueden ver información interesante como el **historial de navegación** (para saber cómo llegó a la situación actual), el **gráfico de llamadas** donde se pueden ver todas las **funciones que llaman a esta función** y todas las funciones que **esta función llama**, e información sobre las **variables locales**.
 ```bash
 dtruss -c ls #Get syscalls of ls
 dtruss -c -p 1000 #get syscalls of PID 1000
