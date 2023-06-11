@@ -122,6 +122,12 @@ Note that in order to debug binaries, **SIP needs to be disabled** (`csrutil dis
 Note that in order to **instrument system binaries**, (such as `cloudconfigurationd`) on macOS, **SIP must be disabled** (just removing the signature won't work).
 {% endhint %}
 
+### Unified Logs
+
+MacOS generates a lot of logs that can be very useful when running an application trying to understand **what is it doing**.
+
+Moreover, the are some logs that will contain the tag `<private>` to **hide** some **user** or **computer** **identifiable** information. However, it's possible to **install a certificate to disclose this information**. Follow the explanations from [**here**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
+
 ### Hopper
 
 #### Left panel

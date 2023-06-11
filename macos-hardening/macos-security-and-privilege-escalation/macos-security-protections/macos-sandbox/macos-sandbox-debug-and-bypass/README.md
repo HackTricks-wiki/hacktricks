@@ -14,7 +14,7 @@
 
 ## Sandbox loading process
 
-<figure><img src="../../../../.gitbook/assets/image (2).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
 In the previous image it's possible to observe **how the sandbox will be loaded** when an application with the entitlement **`com.apple.security.app-sandbox`** is run.
 
@@ -24,6 +24,10 @@ Then, **`libSystem.B`** will be calling other several functions until the **`xpc
 Finally, the sandbox will be activated will a call to **`__sandbox_ms`** which will call **`__mac_syscall`**.
 
 ## Possible Bypasses
+
+{% hint style="warning" %}
+Note that **files created by sandboxed processes** are appended the **quarentine attribute** to prevent sandbox escaped.
+{% endhint %}
 
 ### Run binary without Sandbox
 
@@ -178,16 +182,16 @@ Process 2517 exited with status = 0 (0x00000000)
 
 If from then sandbox process you are able to **compromise other processes** running in less restrictive sandboxes (or none), you will be able to escape to their sandboxes:
 
-{% content-ref url="../../macos-proces-abuse/" %}
-[macos-proces-abuse](../../macos-proces-abuse/)
+{% content-ref url="../../../macos-proces-abuse/" %}
+[macos-proces-abuse](../../../macos-proces-abuse/)
 {% endcontent-ref %}
 
 ### Interposting Bypass
 
 For more information about **Interposting** check:
 
-{% content-ref url="../../mac-os-architecture/macos-function-hooking.md" %}
-[macos-function-hooking.md](../../mac-os-architecture/macos-function-hooking.md)
+{% content-ref url="../../../mac-os-architecture/macos-function-hooking.md" %}
+[macos-function-hooking.md](../../../mac-os-architecture/macos-function-hooking.md)
 {% endcontent-ref %}
 
 #### Interpost `_libsecinit_initializer` to prevent the sandbox
@@ -280,7 +284,7 @@ ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
 
-### Abusing Austo Start Locations
+### Abusing Auto Start Locations
 
 If a sandboxed process can **write** in a place where **later an unsandboxed application is going to run the binary**, it will be able to **escape just by placing** there the binary. A good example of this kind of locations are `~/Library/LaunchAgents` or `/System/Library/LaunchDaemons`.
 
@@ -288,8 +292,8 @@ For this you might even need **2 steps**: To make a process with a **more permis
 
 Check this page about **Auto Start locations**:
 
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
+{% content-ref url="../../../../macos-auto-start-locations.md" %}
+[macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
 {% endcontent-ref %}
 
 ## References

@@ -218,8 +218,8 @@ Bypasses examples:
 
 Processes are automatically Sandboxed from userland when they start if they have the entitlement: `com.apple.security.app-sandbox`. For a detailed explanation of this process check:
 
-{% content-ref url="macos-sandbox-debug-and-bypass.md" %}
-[macos-sandbox-debug-and-bypass.md](macos-sandbox-debug-and-bypass.md)
+{% content-ref url="macos-sandbox-debug-and-bypass/" %}
+[macos-sandbox-debug-and-bypass](macos-sandbox-debug-and-bypass/)
 {% endcontent-ref %}
 
 ### **Check PID Privileges**

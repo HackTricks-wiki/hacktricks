@@ -88,6 +88,8 @@ Therefore, these checks are **only run when executing apps with the quarantined 
 
 {% hint style="warning" %}
 **Note that Safari and other web browsers and applications are the ones that need to mark the downloaded files**
+
+Moreover, **files created by sandboxed processes** are also appended this attribute to prevent sandbox escaped.
 {% endhint %}
 
 It's possible to **check it's status and enable/disable** (root required) with:
