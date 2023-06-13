@@ -1,6 +1,6 @@
 # Binários universais do macOS e Formato Mach-O
 
-As binários do Mac OS geralmente são compilados como **binários universais**. Um **binário universal** pode **suportar várias arquiteturas no mesmo arquivo**.
+Os binários do Mac OS geralmente são compilados como **binários universais**. Um **binário universal** pode **suportar várias arquiteturas no mesmo arquivo**.
 
 Esses binários seguem a **estrutura Mach-O** que é basicamente composta por:
 
@@ -181,7 +181,7 @@ Exemplo de **cabeçalho de seção**:
 
 Se você **adicionar** o **deslocamento da seção** (0x37DC) + o **deslocamento** onde o **arquitetura começa**, neste caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Também é possível obter **informações de cabeçalho** a partir da **linha de comando** com:
 ```bash
@@ -200,12 +200,12 @@ Segmentos comuns carregados por este cmd:
   * `__data`: Variáveis globais (que foram inicializadas)
   * `__bss`: Variáveis estáticas (que não foram inicializadas)
   * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Informações usadas pelo tempo de execução do Objective-C
-* **`__LINKEDIT`**: Contém informações para o linker (dyld) como, "símbolo, string e entradas de tabela de realocação."
+* **`__LINKEDIT`**: Contém informações para o linker (dyld) como, "símbolo, string e entradas de tabela de realocação".
 * **`__OBJC`**: Contém informações usadas pelo tempo de execução do Objective-C. Embora essas informações também possam ser encontradas no segmento \_\_DATA, dentro de várias seções \_\_objc\_\*.
 
 ### **`LC_MAIN`**
 
-Contém o ponto de entrada no atributo **entryoff.** No momento do carregamento, **dyld** simplesmente **adiciona** esse valor à **base do binário na memória**, então **salta** para esta instrução para iniciar a execução do código binário.
+Contém o ponto de entrada no atributo **entryoff**. No momento do carregamento, o **dyld** simplesmente **adiciona** esse valor à **base do binário na memória**, então **salta** para esta instrução para iniciar a execução do código binário.
 
 ### **LC\_CODE\_SIGNATURE**
 
@@ -266,7 +266,7 @@ Os dados são basicamente a parte que contém todas as informações carregadas 
 Isso inclui:
 
 * **Tabela de funções:** que contém informações sobre as funções do programa.
-* **Tabela de símbolos**: que contém informações sobre as funções externas usadas pelo binário.
+* **Tabela de símbolos**: que contém informações sobre as funções externas usadas pelo binário
 * Também pode conter nomes de funções internas, variáveis e muito mais.
 
 Para verificar, você pode usar a ferramenta [**Mach-O View**](https://sourceforge.net/projects/machoview/):

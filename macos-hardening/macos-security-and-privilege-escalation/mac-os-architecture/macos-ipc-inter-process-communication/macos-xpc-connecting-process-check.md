@@ -4,7 +4,7 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
@@ -23,8 +23,8 @@ Quando uma conexão é estabelecida com um serviço XPC, o servidor verificará 
 3. Verificar se o processo de conexão **contém um ID de pacote apropriado**.
 4. Verificar se o processo de conexão tem um **número de versão de software apropriado**.
    * Se isso **não for verificado**, clientes antigos e inseguros, vulneráveis à injeção de processo, podem ser usados para se conectar ao serviço XPC, mesmo com as outras verificações em vigor.
-5. Verificar se o processo de conexão tem uma **autorização** que permite se conectar ao serviço. Isso é aplicável para binários da Apple.
-6. A **verificação** deve ser **baseada** no **token de auditoria do cliente de conexão** em vez de seu **ID de processo (PID)**, pois o primeiro impede ataques de reutilização de PID.
+5. Verificar se o processo de conexão tem uma **autorização** que permite que ele se conecte ao serviço. Isso é aplicável para binários da Apple.
+6. A **verificação** deve ser **baseada** no **token de auditoria do cliente conectado** em vez de seu **PID** (ID do processo), pois o primeiro impede ataques de reutilização de PID.
    * Os desenvolvedores raramente usam a chamada de API de token de auditoria, pois ela é **privada**, então a Apple pode **alterá-la** a qualquer momento. Além disso, o uso de API privada não é permitido em aplicativos da Mac App Store.
 
 Para obter mais informações sobre a verificação de ataque de reutilização de PID:
@@ -33,9 +33,13 @@ Para obter mais informações sobre a verificação de ataque de reutilização 
 [macos-pid-reuse.md](macos-pid-reuse.md)
 {% endcontent-ref %}
 
+### Trustcache - Prevenção de Ataques de Downgrade
+
+Trustcache é um método defensivo introduzido em máquinas Apple Silicon que armazena um banco de dados de CDHSAH de binários da Apple, para que apenas binários não modificados permitidos possam ser executados. Isso impede a execução de versões de downgrade.
+
 ### Exemplos de Código
 
-O servidor implementará essa **verificação** em uma função chamada **`shouldAcceptNewConnection`**.
+O servidor implementará esta **verificação** em uma função chamada **`shouldAcceptNewConnection`**.
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
     //Check connection
@@ -46,7 +50,7 @@ O servidor implementará essa **verificação** em uma função chamada **`shoul
 
 O objeto NSXPCConnection tem uma propriedade **privada** chamada **`auditToken`** (a que deve ser usada, mas pode mudar) e uma propriedade **pública** chamada **`processIdentifier`** (a que não deve ser usada).
 
-O processo de conexão pode ser verificado com algo como:
+O processo de conexão pode ser verificado com algo como: 
 
 {% code overflow="wrap" %}
 ```objectivec
@@ -64,7 +68,7 @@ NSString requirementString = @"anchor apple generic and identifier \"xyz.hacktri
 SecRequirementCreateWithString(requirementString, kSecCSDefaultFlags, &requirementRef);
 SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 ```
-Se um desenvolvedor não quiser verificar a versão do cliente, ele poderia verificar se o cliente não é vulnerável à injeção de processo pelo menos:
+Se um desenvolvedor não quiser verificar a versão do cliente, ele poderia verificar que o cliente não é vulnerável à injeção de processo pelo menos: 
 
 {% code overflow="wrap" %}
 ```objectivec

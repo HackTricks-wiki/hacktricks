@@ -56,7 +56,7 @@ Na primeira instalação ou execução do software pelo usuário, a existência 
 
 ### Arquivos em Quarentena
 
-Ao **baixar** um aplicativo ou arquivo, aplicativos específicos do macOS, como navegadores da web ou clientes de e-mail, **anexam um atributo de arquivo estendido**, comumente conhecido como "**sinalizador de quarentena**", ao arquivo baixado. Este atributo atua como uma medida de segurança para **marcar o arquivo** como proveniente de uma fonte não confiável (a internet) e potencialmente carregando riscos. No entanto, nem todos os aplicativos anexam este atributo, por exemplo, o software comum de cliente BitTorrent geralmente ignora este processo.
+Ao **baixar** um aplicativo ou arquivo, aplicativos específicos do macOS, como navegadores da web ou clientes de e-mail, **anexam um atributo de arquivo estendido**, comumente conhecido como "**sinalizador de quarentena**", ao arquivo baixado. Este atributo atua como uma medida de segurança para **marcar o arquivo** como proveniente de uma fonte não confiável (a internet) e potencialmente carregando riscos. No entanto, nem todos os aplicativos anexam este atributo, por exemplo, o software cliente BitTorrent comum geralmente ignora este processo.
 
 **A presença de um sinalizador de quarentena sinaliza a funcionalidade de segurança do Gatekeeper do macOS quando um usuário tenta executar o arquivo**.
 
@@ -115,13 +115,13 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 ```
 ## XProtect
 
-XProtect é um recurso **anti-malware** integrado no macOS. Ele faz parte do sistema de segurança da Apple que trabalha silenciosamente em segundo plano para manter seu Mac seguro contra malware conhecido e plug-ins maliciosos.
+XProtect é um recurso **anti-malware** integrado no macOS. Ele faz parte do sistema de segurança da Apple que trabalha silenciosamente em segundo plano para manter seu Mac seguro contra malwares conhecidos e plug-ins maliciosos.
 
-O XProtect funciona **verificando qualquer arquivo baixado em seu banco de dados** de malware conhecido e tipos de arquivo inseguros. Quando você baixa um arquivo por meio de determinados aplicativos, como Safari, Mail ou Mensagens, o XProtect verifica automaticamente o arquivo. Se ele corresponder a algum malware conhecido em seu banco de dados, o XProtect **impedirá que o arquivo seja executado** e o alertará sobre a ameaça.
+O XProtect funciona **verificando qualquer arquivo baixado em seu banco de dados** de malwares conhecidos e tipos de arquivos inseguros. Quando você baixa um arquivo por meio de determinados aplicativos, como Safari, Mail ou Mensagens, o XProtect verifica automaticamente o arquivo. Se ele corresponder a algum malware conhecido em seu banco de dados, o XProtect **impedirá que o arquivo seja executado** e o alertará sobre a ameaça.
 
 O banco de dados do XProtect é **atualizado regularmente** pela Apple com novas definições de malware, e essas atualizações são baixadas e instaladas automaticamente em seu Mac. Isso garante que o XProtect esteja sempre atualizado com as últimas ameaças conhecidas.
 
-No entanto, vale ressaltar que o **XProtect não é uma solução antivírus completa**. Ele verifica apenas uma lista específica de ameaças conhecidas e não realiza a verificação de acesso como a maioria dos softwares antivírus. Portanto, embora o XProtect forneça uma camada de proteção contra malware conhecido, ainda é recomendável ter cuidado ao baixar arquivos da internet ou abrir anexos de e-mail.
+No entanto, vale ressaltar que o **XProtect não é uma solução antivírus completa**. Ele verifica apenas uma lista específica de ameaças conhecidas e não realiza a verificação de acesso como a maioria dos softwares antivírus. Portanto, embora o XProtect forneça uma camada de proteção contra malwares conhecidos, ainda é recomendável ter cuidado ao baixar arquivos da internet ou abrir anexos de e-mail.
 
 Você pode obter informações sobre a última atualização do XProtect em execução:
 
@@ -140,7 +140,7 @@ Embora tanto o XProtect quanto o MRT façam parte das medidas de segurança do m
 * **XProtect** é uma ferramenta preventiva. Ele **verifica arquivos conforme são baixados** (por meio de determinados aplicativos) e, se detectar algum tipo conhecido de malware, **impede que o arquivo seja aberto**, evitando assim que o malware infecte o sistema em primeiro lugar.
 * **MRT**, por outro lado, é uma **ferramenta reativa**. Ele opera depois que o malware foi detectado em um sistema, com o objetivo de remover o software ofensivo para limpar o sistema.
 
-## Limitantes de Processos
+## Limitações de Processos
 
 ### SIP - Proteção de Integridade do Sistema
 
@@ -150,7 +150,7 @@ Embora tanto o XProtect quanto o MRT façam parte das medidas de segurança do m
 
 ### Sandbox
 
-O Sandbox do macOS **limita as aplicações** que rodam dentro do sandbox às **ações permitidas especificadas no perfil do Sandbox** com o qual o aplicativo está sendo executado. Isso ajuda a garantir que **a aplicação acesse apenas os recursos esperados**.
+O Sandbox do macOS **limita as aplicações** que rodam dentro do sandbox às **ações permitidas especificadas no perfil do Sandbox** com o qual o aplicativo está sendo executado. Isso ajuda a garantir que **o aplicativo acesse apenas os recursos esperados**.
 
 {% content-ref url="macos-sandbox/" %}
 [macos-sandbox](macos-sandbox/)
@@ -164,14 +164,15 @@ O Sandbox do macOS **limita as aplicações** que rodam dentro do sandbox às **
 [macos-tcc](macos-tcc/)
 {% endcontent-ref %}
 
-<details>
+## Cache de Confiança
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+O cache de confiança do macOS da Apple, às vezes também referido como cache AMFI (Integridade de Arquivo Móvel da Apple), é um mecanismo de segurança no macOS projetado para **impedir que software não autorizado ou malicioso seja executado**. Essencialmente, é uma lista de hashes criptográficos que o sistema operacional usa para **verificar a integridade e autenticidade do software**.
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+Quando um aplicativo ou arquivo executável tenta ser executado no macOS, o sistema operacional verifica o cache de confiança AMFI. Se o **hash do arquivo for encontrado no cache de confiança**, o sistema **permite** que o programa seja executado porque o reconhece como confiável.
 
-</details>
+## Restrições de Lançamento
+
+Ele controla de onde e o que pode lançar um binário assinado pela Apple:
+
+* Você não pode lançar um aplicativo diretamente se ele deve ser executado pelo launchd
+* Você não pode executar um aplicativo fora do local confiável (como /System/)

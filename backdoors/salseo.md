@@ -69,7 +69,7 @@ sc create MalwareService binPath= "C:\malware.exe" start= auto DisplayName= "Mal
 
 O Agendador de Tarefas do Windows é uma ferramenta que permite agendar a execução de programas em horários específicos ou em resposta a eventos específicos. Uma técnica comum de backdoor é criar uma tarefa agendada que execute um programa malicioso sempre que o sistema é iniciado ou em horários específicos.
 
-Para criar uma tarefa agendada, use o comando `schtasks.exe` no prompt de comando. Por exemplo, o seguinte comando cria uma tarefa agendada chamada `MalwareTask` que executa um programa chamado `malware.exe` sempre que o sistema é iniciado:
+Para criar uma tarefa agendada, use o comando `schtasks /create` no prompt de comando. Por exemplo, o seguinte comando cria uma tarefa agendada chamada `MalwareTask` que executa um programa chamado `malware.exe` sempre que o sistema é iniciado:
 
 ```
 schtasks /create /tn "MalwareTask" /tr "C:\malware.exe" /sc onstart /ru SYSTEM
@@ -131,7 +131,7 @@ Abra o projeto SalseoLoader usando o Visual Studio.
 
 #### **Ferramentas** --> **Gerenciador de Pacotes NuGet** --> **Gerenciar Pacotes NuGet para a Solução...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1) (1).png>)
 
 #### **Procure pelo pacote DllExport (usando a guia Procurar), e pressione Instalar (e aceite o popup)**
 
@@ -151,7 +151,7 @@ Apenas **saia** do Visual Studio
 
 Em seguida, vá para a sua pasta **SalseoLoader** e **execute DllExport\_Configure.bat**
 
-Selecione **x64** (se você for usá-lo dentro de uma caixa x64, que foi o meu caso), selecione **System.Runtime.InteropServices** (dentro de **Namespace para DllExport**) e pressione **Aplicar**
+Selecione **x64** (se você for usá-lo dentro de uma caixa x64, esse foi o meu caso), selecione **System.Runtime.InteropServices** (dentro de **Namespace para DllExport**) e pressione **Aplicar**
 
 ![](<../.gitbook/assets/image (7) (1) (1) (1).png>)
 
@@ -163,7 +163,7 @@ Selecione **x64** (se você for usá-lo dentro de uma caixa x64, que foi o meu c
 
 ### Compile a solução
 
-Selecione **Tipo de Saída = Biblioteca de Classes** (Projeto --> Propriedades do SalseoLoader --> Aplicativo --> Tipo de saída = Biblioteca de Classes)
+Selecione **Tipo de Saída = Biblioteca de Classes** (Projeto --> Propriedades do SalseoLoader --> Aplicativo --> Tipo de Saída = Biblioteca de Classes)
 
 ![](<../.gitbook/assets/image (10) (1).png>)
 
