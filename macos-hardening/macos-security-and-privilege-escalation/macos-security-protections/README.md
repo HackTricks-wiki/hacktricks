@@ -1,6 +1,6 @@
 ## Gatekeeper
 
-**Gatekeeper** es una función de seguridad desarrollada para sistemas operativos Mac, diseñada para garantizar que los usuarios **ejecuten solo software confiable** en sus sistemas. Funciona mediante la **validación del software** que un usuario descarga e intenta abrir desde **fuentes fuera de la App Store**, como una aplicación, un complemento o un paquete de instalación.
+**Gatekeeper** es una función de seguridad desarrollada para los sistemas operativos Mac, diseñada para garantizar que los usuarios **ejecuten solo software confiable** en sus sistemas. Funciona mediante la **validación del software** que un usuario descarga e intenta abrir desde **fuentes fuera de la App Store**, como una aplicación, un complemento o un paquete de instalación.
 
 El mecanismo clave de Gatekeeper radica en su proceso de **verificación**. Verifica si el software descargado está **firmado por un desarrollador reconocido**, asegurando la autenticidad del software. Además, verifica si el software está **notarizado por Apple**, confirmando que está libre de contenido malicioso conocido y que no ha sido manipulado después de la notarización.
 
@@ -63,7 +63,7 @@ Al **descargar** una aplicación o archivo, ciertas **aplicaciones** de macOS co
 En el caso de que **no esté presente la bandera de cuarentena** (como con los archivos descargados a través de algunos clientes BitTorrent), **es posible que no se realicen las comprobaciones de Gatekeeper**. Por lo tanto, los usuarios deben tener precaución al abrir archivos descargados de fuentes menos seguras o desconocidas.
 
 {% hint style="info" %}
-**Comprobar** la **validez** de las firmas de código es un proceso **intensivo en recursos** que incluye la generación de **hashes** criptográficos del código y todos sus recursos empaquetados. Además, comprobar la validez del certificado implica hacer una **comprobación en línea** a los servidores de Apple para ver si se ha revocado después de emitirse. Por estas razones, una comprobación completa de firma de código y notarización es **impráctica para ejecutar cada vez que se inicia una aplicación**.
+La **comprobación** de la **validez** de las firmas de código es un proceso **intensivo en recursos** que incluye la generación de **hashes criptográficos** del código y todos sus recursos empaquetados. Además, la comprobación de la validez del certificado implica hacer una **comprobación en línea** a los servidores de Apple para ver si ha sido revocado después de emitido. Por estas razones, una comprobación completa de firma de código y notarización es **impráctica para ejecutar cada vez que se inicia una aplicación**.
 
 Por lo tanto, estas comprobaciones se **ejecutan solo al ejecutar aplicaciones con el atributo en cuarentena**.
 {% endhint %}
@@ -135,7 +135,7 @@ system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistC
 
 La Herramienta de eliminación de malware (MRT) es otra parte de la infraestructura de seguridad de macOS. Como su nombre indica, la función principal de MRT es **eliminar el malware conocido de los sistemas infectados**.
 
-Una vez que se detecta malware en un Mac (ya sea por XProtect o por algún otro medio), MRT se puede utilizar para **eliminar automáticamente el malware**. MRT opera en segundo plano y se ejecuta típicamente cuando el sistema se actualiza o cuando se descarga una nueva definición de malware.
+Una vez que se detecta malware en un Mac (ya sea por XProtect o por algún otro medio), MRT se puede utilizar para **eliminar automáticamente el malware**. MRT opera en segundo plano y se ejecuta típicamente cuando el sistema se actualiza o cuando se descarga una nueva definición de malware (parece que las reglas que MRT tiene para detectar malware están dentro del binario).
 
 Si bien tanto XProtect como MRT son parte de las medidas de seguridad de macOS, realizan funciones diferentes:
 
@@ -144,11 +144,15 @@ Si bien tanto XProtect como MRT son parte de las medidas de seguridad de macOS, 
 
 ## Limitantes de procesos
 
-### SIP - Protección de la integridad del sistema
+### SIP - Protección de integridad del sistema
+
+{% content-ref url="macos-sip.md" %}
+[macos-sip.md](macos-sip.md)
+{% endcontent-ref %}
 
 ### Sandbox
 
-El Sandbox de MacOS **limita las aplicaciones** que se ejecutan dentro del sandbox a las **acciones permitidas especificadas en el perfil de Sandbox** con el que se está ejecutando la aplicación. Esto ayuda a garantizar que **la aplicación solo acceda a los recursos esperados**.
+El Sandbox de macOS **limita las aplicaciones** que se ejecutan dentro del sandbox a las **acciones permitidas especificadas en el perfil de Sandbox** con el que se está ejecutando la aplicación. Esto ayuda a garantizar que **la aplicación solo acceda a los recursos esperados**.
 
 {% content-ref url="macos-sandbox/" %}
 [macos-sandbox](macos-sandbox/)
@@ -167,7 +171,7 @@ El Sandbox de MacOS **limita las aplicaciones** que se ejecutan dentro del sandb
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
