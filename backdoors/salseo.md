@@ -133,7 +133,7 @@ Select **x64** (if you are going to use it inside a x64 box, that was my case), 
 
 **\[DllExport]** should not be longer marked as error
 
-![](<../.gitbook/assets/image (8) (1).png>)
+![](<../.gitbook/assets/image (8) (1) (1).png>)
 
 ### Build the solution
 
