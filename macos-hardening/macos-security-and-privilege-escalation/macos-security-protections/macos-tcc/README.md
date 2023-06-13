@@ -378,7 +378,7 @@ $> ls ~/Documents
 
 Notes had access to TCC protected locations but when a note is created this is **created in a non-protected location**. So, you could ask notes to copy a protected file in a noe (so in a non-protected location) and then access the file:
 
-<figure><img src="../../../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2023-26818 - Telegram
 

