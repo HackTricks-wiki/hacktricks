@@ -54,24 +54,56 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {% tab title="macOS TCC" %}
 # Proteções de segurança do macOS: Controle de Acesso ao TCC
 
-O Controle de Acesso ao TCC (TCC, na sigla em inglês) é um recurso de segurança do macOS que controla o acesso de aplicativos a recursos protegidos, como a câmera, o microfone, a localização e os contatos. O TCC é implementado pelo `tccd`, um daemon do sistema que é executado em segundo plano e gerencia as solicitações de acesso do aplicativo.
+O Controle de Acesso ao TCC (TCC, na sigla em inglês) é um recurso de segurança do macOS que controla o acesso de aplicativos a recursos protegidos, como a câmera, o microfone, a localização e os contatos. O TCC é implementado pelo daemon `tccd` e é gerenciado pelo `System Preferences`.
 
-O TCC é uma parte importante do modelo de segurança do macOS, pois ajuda a proteger a privacidade do usuário e a impedir que aplicativos mal-intencionados acessem informações confidenciais. No entanto, o TCC não é infalível e pode ser contornado por aplicativos mal-intencionados que exploram vulnerabilidades no sistema ou usam técnicas de engenharia social para enganar o usuário.
+O TCC é uma parte importante do modelo de segurança do macOS, pois ajuda a proteger a privacidade do usuário e a impedir que aplicativos mal-intencionados acessem informações confidenciais. No entanto, o TCC não é perfeito e pode ser contornado por aplicativos mal-intencionados que exploram vulnerabilidades no sistema ou usam técnicas de engenharia social para enganar o usuário.
 
 Este diretório contém informações e ferramentas relacionadas ao TCC, incluindo:
 
-- **tccutil.py**: uma ferramenta Python que permite visualizar e modificar as configurações do TCC.
-- **tcc.db**: um arquivo SQLite que contém as configurações do TCC para cada usuário do sistema.
-- **tcc_profiles**: um diretório que contém perfis de configuração do TCC para aplicativos comuns.
-- **tcc_bypass**: um diretório que contém exemplos de técnicas de bypass do TCC.
+- Uma visão geral do TCC e como ele funciona
+- Uma lista de recursos protegidos pelo TCC
+- Técnicas de escalonamento de privilégios que podem ser usadas para contornar o TCC
+- Ferramentas para testar e explorar vulnerabilidades no TCC
+
+## Recursos protegidos pelo TCC
+
+O TCC protege o acesso a vários recursos do sistema, incluindo:
+
+- Câmera
+- Microfone
+- Localização
+- Contatos
+- Calendário
+- Lembretes
+- Fotos
+- Acesso completo ao disco
+- Acesso a arquivos específicos do usuário
+- Acesso a pastas específicas do usuário
+- Acesso a APIs do AppleEvents
+
+## Técnicas de escalonamento de privilégios
+
+Embora o TCC seja uma proteção importante, ele não é perfeito e pode ser contornado por aplicativos mal-intencionados que exploram vulnerabilidades no sistema ou usam técnicas de engenharia social para enganar o usuário. Algumas técnicas de escalonamento de privilégios que podem ser usadas para contornar o TCC incluem:
+
+- Explorando vulnerabilidades no sistema operacional
+- Usando um aplicativo com permissões já concedidas
+- Usando um aplicativo com um nome semelhante a um aplicativo confiável
+- Usando um aplicativo que solicita permissões para um recurso diferente do que realmente precisa
+- Usando um aplicativo que solicita permissões para um recurso que o usuário não percebe que está sendo usado
+
+## Ferramentas para testar e explorar vulnerabilidades no TCC
+
+Este diretório contém várias ferramentas que podem ser usadas para testar e explorar vulnerabilidades no TCC, incluindo:
+
+- `tccutil.py`: uma ferramenta Python para gerenciar as permissões do TCC
+- `tcc-extractor.py`: uma ferramenta Python para extrair informações do TCC
+- `tcc-logger.py`: uma ferramenta Python para registrar eventos do TCC
+- `tcc-sim.py`: uma ferramenta Python para simular eventos do TCC
 
 ## Referências
 
 - [Controle de Acesso ao TCC](https://developer.apple.com/documentation/security/tcc)
-- [Proteções de segurança do macOS](https://support.apple.com/pt-br/guide/mac-help/mh40596/mac)
-- [Explorando o TCC para obter acesso a recursos protegidos no macOS](https://objective-see.com/blog/blog_0x4D.html) (em inglês)
-- [Bypassing macOS TCC User Approval](https://www.sentinelone.com/blog/bypassing-macos-tcc-user-approval/) (em inglês)
-- [macOS TCC Roundup](https://www.sentinelone.com/blog/macos-tcc-roundup/) (em inglês)
+- [Proteções de segurança do macOS](https://support.apple.com/pt-br/guide/mac-help/secb602b9868/mac)
 ```bash
 sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -127,9 +159,9 @@ csreq -t -r /tmp/telegram_csreq.bin
 ### Entitlements
 
 Os aplicativos **não apenas precisam** solicitar e ter sido **concedido acesso** a alguns recursos, eles também precisam **ter as permissões relevantes**.\
-Por exemplo, o **Telegram** tem a permissão `com.apple.security.device.camera` para solicitar **acesso à câmera**. Um **aplicativo** que **não tenha** essa **permissão não poderá** acessar a câmera (e o usuário nem mesmo será solicitado a conceder as permissões).
+Por exemplo, o **Telegram** tem a permissão `com.apple.security.device.camera` para solicitar **acesso à câmera**. Um **aplicativo** que **não tem** essa **permissão não poderá** acessar a câmera (e o usuário nem mesmo será solicitado a conceder as permissões).
 
-No entanto, para que os aplicativos tenham **acesso** a **certas pastas do usuário**, como `~/Desktop`, `~/Downloads` e `~/Documents`, eles **não precisam** ter nenhuma **permissão específica**. O sistema lidará com o acesso de forma transparente e **solicitará permissão ao usuário** conforme necessário.
+No entanto, para que os aplicativos tenham **acesso a determinadas pastas do usuário**, como `~/Desktop`, `~/Downloads` e `~/Documents`, eles **não precisam** ter nenhuma **permissão específica**. O sistema lidará com o acesso de forma transparente e **solicitará permissão ao usuário** conforme necessário.
 
 Os aplicativos da Apple **não gerarão prompts**. Eles contêm **direitos pré-concedidos** em sua lista de **permissões**, o que significa que eles **nunca gerarão um pop-up**, **nem** aparecerão em nenhum dos **bancos de dados do TCC**. Por exemplo:
 ```bash
@@ -201,7 +233,7 @@ Aqui você pode encontrar exemplos de como alguns **malwares conseguiram burlar 
 
 ### Bypass Electron
 
-O código JS de um aplicativo Electron não é assinado, então um invasor poderia mover o aplicativo para um local gravável, injetar código JS malicioso e lançar esse aplicativo e abusar das permissões do TCC.
+O código JS de um aplicativo Electron não é assinado, então um invasor poderia mover o aplicativo para um local gravável, injetar código JS malicioso e lançar esse aplicativo e abusar das permissões TCC.
 
 O Electron está trabalhando na chave **`ElectronAsarIntegrity`** em Info.plist que conterá um hash do arquivo app.asar para verificar a integridade do código JS antes de executá-lo.
 
@@ -268,7 +300,7 @@ tell application "iTerm"
     end tell
 end tell
 ```
-{% endcode %} (This is not a text to be translated, it's a markdown tag)
+{% endcode %}
 ```bash
 osascript iterm.script
 ```
@@ -329,7 +361,7 @@ __attribute__((constructor)) static void constructor(int argc, const char **argv
 ```
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-O daemon **tccd** do usuário estava usando a variável de ambiente **`HOME`** para acessar o banco de dados de usuários do TCC em: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+O daemon **tccd** do usuário está usando a variável de ambiente **`HOME`** para acessar o banco de dados de usuários do TCC em: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
 De acordo com [esta postagem do Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) e porque o daemon TCC está sendo executado via `launchd` dentro do domínio do usuário atual, é possível **controlar todas as variáveis de ambiente** passadas para ele.\
 Assim, um **atacante poderia definir a variável de ambiente `$HOME`** em **`launchctl`** para apontar para um **diretório controlado**, **reiniciar** o **daemon TCC**, e então **modificar diretamente o banco de dados do TCC** para dar a si mesmo **todas as permissões do TCC disponíveis** sem nunca solicitar ao usuário final.\
@@ -364,7 +396,7 @@ $> ls ~/Documents
 
 As notas tinham acesso a locais protegidos pelo TCC, mas quando uma nota é criada, ela é **criada em um local não protegido**. Portanto, é possível pedir para as notas copiarem um arquivo protegido em uma nota (ou seja, em um local não protegido) e, em seguida, acessar o arquivo:
 
-<figure><img src="../../../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2023-26818 - Telegram
 

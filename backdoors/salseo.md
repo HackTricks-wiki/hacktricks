@@ -49,7 +49,7 @@ O Windows é o sistema operacional mais utilizado no mundo, o que o torna um alv
 
 O Registro do Windows é um banco de dados que armazena configurações e opções para o sistema operacional e para os aplicativos instalados. Uma técnica comum de backdoor é adicionar uma entrada ao Registro que execute um programa malicioso sempre que o sistema é iniciado.
 
-Para adicionar uma entrada de Registro, use o comando `reg add` no prompt de comando. Por exemplo, o seguinte comando adiciona uma entrada de Registro que executa o arquivo `malware.exe` sempre que o sistema é iniciado:
+Para adicionar uma entrada de Registro, use o comando `reg add` no prompt de comando. Por exemplo, o seguinte comando adiciona uma entrada de Registro que executa um programa chamado `malware.exe` sempre que o sistema é iniciado:
 
 ```
 reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v "Malware" /t REG_SZ /d "C:\malware.exe" /f
@@ -57,19 +57,19 @@ reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v "Malware" /t REG_S
 
 #### Porta dos Fundos do Serviço
 
-Os serviços do Windows são programas que são executados em segundo plano e fornecem funcionalidades para o sistema operacional e para os aplicativos instalados. Uma técnica comum de backdoor é criar um serviço que execute um programa malicioso.
+Os serviços do Windows são programas que são executados em segundo plano e fornecem funcionalidade para o sistema operacional e para os aplicativos instalados. Uma técnica comum de backdoor é criar um serviço que execute um programa malicioso sempre que o sistema é iniciado.
 
-Para criar um serviço, use o comando `sc create` no prompt de comando. Por exemplo, o seguinte comando cria um serviço chamado `MalwareService` que executa o arquivo `malware.exe`:
+Para criar um serviço, use o comando `sc create` no prompt de comando. Por exemplo, o seguinte comando cria um serviço chamado `MalwareService` que executa um programa chamado `malware.exe` sempre que o sistema é iniciado:
 
 ```
-sc create MalwareService binPath= "C:\malware.exe" start= auto
+sc create MalwareService binPath= "C:\malware.exe" start= auto DisplayName= "Malware Service"
 ```
 
 #### Porta dos Fundos do Agendador de Tarefas
 
-O Agendador de Tarefas do Windows é uma ferramenta que permite agendar a execução de programas em horários específicos ou em eventos específicos, como o início do sistema ou o login de um usuário. Uma técnica comum de backdoor é criar uma tarefa agendada que execute um programa malicioso.
+O Agendador de Tarefas do Windows é uma ferramenta que permite agendar a execução de programas em horários específicos ou em resposta a eventos específicos. Uma técnica comum de backdoor é criar uma tarefa agendada que execute um programa malicioso sempre que o sistema é iniciado ou em horários específicos.
 
-Para criar uma tarefa agendada, use o comando `schtasks` no prompt de comando. Por exemplo, o seguinte comando cria uma tarefa agendada chamada `MalwareTask` que executa o arquivo `malware.exe` sempre que o sistema é iniciado:
+Para criar uma tarefa agendada, use o comando `schtasks.exe` no prompt de comando. Por exemplo, o seguinte comando cria uma tarefa agendada chamada `MalwareTask` que executa um programa chamado `malware.exe` sempre que o sistema é iniciado:
 
 ```
 schtasks /create /tn "MalwareTask" /tr "C:\malware.exe" /sc onstart /ru SYSTEM
@@ -125,7 +125,7 @@ Abra o projeto SalseoLoader usando o Visual Studio.
 
 ### Adicione antes da função principal: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1).png>)
 
 ### Instale o DllExport para este projeto
 
@@ -133,7 +133,7 @@ Abra o projeto SalseoLoader usando o Visual Studio.
 
 ![](<../.gitbook/assets/image (3) (1) (1) (1).png>)
 
-#### **Procure pelo pacote DllExport (usando a guia Procurar) e pressione Instalar (e aceite o popup)**
+#### **Procure pelo pacote DllExport (usando a guia Procurar), e pressione Instalar (e aceite o popup)**
 
 ![](<../.gitbook/assets/image (4) (1) (1) (1).png>)
 
@@ -151,7 +151,7 @@ Apenas **saia** do Visual Studio
 
 Em seguida, vá para a sua pasta **SalseoLoader** e **execute DllExport\_Configure.bat**
 
-Selecione **x64** (se você for usá-lo dentro de uma caixa x64, esse foi o meu caso), selecione **System.Runtime.InteropServices** (dentro do **Namespace para DllExport**) e pressione **Aplicar**
+Selecione **x64** (se você for usá-lo dentro de uma caixa x64, que foi o meu caso), selecione **System.Runtime.InteropServices** (dentro de **Namespace para DllExport**) e pressione **Aplicar**
 
 ![](<../.gitbook/assets/image (7) (1) (1) (1).png>)
 
@@ -163,7 +163,7 @@ Selecione **x64** (se você for usá-lo dentro de uma caixa x64, esse foi o meu 
 
 ### Compile a solução
 
-Selecione **Tipo de Saída = Biblioteca de Classes** (Projeto --> Propriedades do SalseoLoader --> Aplicativo --> Tipo de Saída = Biblioteca de Classes)
+Selecione **Tipo de Saída = Biblioteca de Classes** (Projeto --> Propriedades do SalseoLoader --> Aplicativo --> Tipo de saída = Biblioteca de Classes)
 
 ![](<../.gitbook/assets/image (10) (1).png>)
 

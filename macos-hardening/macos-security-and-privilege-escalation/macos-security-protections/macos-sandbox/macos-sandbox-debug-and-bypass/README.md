@@ -14,7 +14,7 @@
 
 ## Processo de carregamento do Sandbox
 
-<figure><img src="../../../../../.gitbook/assets/image (2).png" alt=""><figcaption><p>Imagem de <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption><p>Imagem de <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
 Na imagem anterior, é possível observar **como o sandbox será carregado** quando um aplicativo com a permissão **`com.apple.security.app-sandbox`** é executado.
 
@@ -51,34 +51,40 @@ int main() {
 
 # Depuração e bypass do sandbox do macOS
 
-O sandbox do macOS é um mecanismo de segurança que restringe o acesso de um aplicativo a recursos do sistema, como arquivos, pastas e processos. O objetivo é limitar o impacto de um possível ataque ou exploração de vulnerabilidades em um aplicativo.
+O sandbox do macOS é uma tecnologia de segurança que limita o acesso de um aplicativo a recursos do sistema, como arquivos, pastas e processos. Isso ajuda a prevenir ataques maliciosos e a proteger a privacidade do usuário. No entanto, em alguns casos, pode ser necessário depurar ou contornar o sandbox para fins de teste ou desenvolvimento.
 
-No entanto, o sandbox não é perfeito e pode ser contornado por meio de técnicas de depuração e bypass. Este diretório contém exemplos de como depurar e contornar o sandbox do macOS.
+Este diretório contém exemplos de como depurar e contornar o sandbox do macOS. Os exemplos incluem:
 
-## Depuração do sandbox
+- **debug_entitlements.xml**: um arquivo de entitlements que permite a depuração de um aplicativo sandboxed.
+- **bypass_entitlements.xml**: um arquivo de entitlements que permite que um aplicativo sandboxed acesse recursos do sistema que normalmente seriam restritos pelo sandbox.
 
-Para depurar um aplicativo que está sendo executado no sandbox, é necessário conceder a ele a permissão de depuração. Isso pode ser feito adicionando a seguinte entrada ao arquivo `entitlements.xml` do aplicativo:
+## Uso
+
+Para usar esses exemplos, você precisará ter um aplicativo sandboxed que deseja depurar ou contornar. Você também precisará ter acesso ao arquivo de entitlements do aplicativo.
+
+Para depurar o aplicativo, adicione o seguinte código ao arquivo de entitlements:
 
 ```xml
 <key>com.apple.security.get-task-allow</key>
 <true/>
 ```
 
-Isso permite que o aplicativo seja depurado com o `lldb` ou outro depurador.
+Isso permitirá que o aplicativo seja depurado usando um depurador, como o LLDB.
 
-## Bypass do sandbox
+Para contornar o sandbox, adicione o seguinte código ao arquivo de entitlements:
 
-Existem várias técnicas para contornar o sandbox do macOS, incluindo:
+```xml
+<key>com.apple.security.temporary-exception.files.absolute-path.read-only</key>
+<array>
+    <string>/path/to/file</string>
+</array>
+```
 
-- Injeção de código em um processo não restrito
-- Uso de APIs não restritas
-- Exploração de vulnerabilidades no kernel do macOS
+Substitua `/path/to/file` pelo caminho absoluto do arquivo que você deseja acessar. Isso permitirá que o aplicativo acesse o arquivo especificado, mesmo que ele esteja restrito pelo sandbox.
 
-Essas técnicas são avançadas e requerem conhecimento especializado em hacking e programação. Elas também podem ser ilegais e devem ser usadas apenas para fins de teste de penetração em sistemas autorizados.
+## Aviso
 
-## Conclusão
-
-O sandbox do macOS é uma camada importante de segurança que ajuda a proteger o sistema contra ataques e explorações de vulnerabilidades em aplicativos. No entanto, ele não é perfeito e pode ser contornado por meio de técnicas avançadas de hacking. É importante estar ciente dessas técnicas para poder proteger melhor o sistema e os aplicativos.
+Depurar ou contornar o sandbox do macOS pode comprometer a segurança do sistema e a privacidade do usuário. Use esses exemplos com cuidado e apenas para fins legítimos, como teste ou desenvolvimento. Nunca use esses exemplos para fins maliciosos ou ilegais.
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
@@ -117,13 +123,13 @@ Embora o Sandbox do macOS seja projetado para ser resistente a ataques, ele não
 
 - **Escalada de privilégios**: o Sandbox é executado com privilégios limitados, o que significa que não pode acessar todos os recursos do sistema. No entanto, se um atacante conseguir executar código com privilégios mais elevados, ele poderá contornar o Sandbox.
 
-- **Engenharia reversa**: o Sandbox é implementado usando uma série de políticas de segurança que são definidas em um arquivo de configuração chamado Info.plist. Se um atacante conseguir engenharia reversa nesse arquivo, ele poderá modificar as políticas de segurança para contornar o Sandbox.
+- **Engenharia reversa**: o Sandbox é implementado usando uma série de políticas e restrições que são definidas em um arquivo de configuração chamado Info.plist. Se um atacante conseguir engenharia reversa nesse arquivo, ele poderá modificar as políticas e restrições para contornar o Sandbox.
 
-- **Injeção de código**: é possível injetar código em um aplicativo no Sandbox usando técnicas como a injeção de código dinâmico (Dyld Injection). Isso pode ser usado para contornar o Sandbox, pois o código injetado não está restrito pelo Sandbox.
+- **Injeção de código**: é possível injetar código em um aplicativo no Sandbox usando técnicas como a injeção de código dinâmico (Dyld Injection). Isso pode ser usado para contornar o Sandbox e executar código malicioso no contexto do aplicativo.
 
 ## Conclusão
 
-O Sandbox do macOS é um mecanismo de segurança importante que ajuda a proteger o sistema contra ataques e explorações de vulnerabilidades em aplicativos. No entanto, como vimos, o Sandbox não é perfeito e pode ser contornado por um atacante experiente. É importante estar ciente dessas técnicas de depuração e bypass do Sandbox para poder proteger melhor o sistema.
+O Sandbox do macOS é um mecanismo de segurança importante que ajuda a limitar o impacto de um possível ataque ou exploração de vulnerabilidades em um aplicativo. No entanto, ele não é perfeito e pode ser contornado por um atacante experiente. É importante estar ciente dessas técnicas de depuração e bypass do Sandbox para poder proteger melhor seus aplicativos e sistemas.
 ```xml
 <plist version="1.0">
 <dict>
@@ -344,9 +350,9 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 
 Se um processo com sandbox pode **escrever** em um local onde **mais tarde um aplicativo sem sandbox vai executar o binário**, ele será capaz de **escapar apenas colocando** o binário lá. Um bom exemplo desse tipo de localizações são `~/Library/LaunchAgents` ou `/System/Library/LaunchDaemons`.
 
-Para isso, você pode precisar de **2 etapas**: fazer um processo com um sandbox **mais permissivo** (`file-read*`, `file-write*`) executar seu código que realmente escreverá em um local onde será **executado sem sandbox**.
+Para isso, você pode precisar de **2 etapas**: fazer um processo com um sandbox **mais permissivo** (`file-read*`, `file-write*`) executar seu código, que realmente escreverá em um local onde será **executado sem sandbox**.
 
-Verifique esta página sobre **Localizações de Início Automático**:
+Confira esta página sobre **Localizações de Início Automático**:
 
 {% content-ref url="../../../../macos-auto-start-locations.md" %}
 [macos-auto-start-locations.md](../../../../macos-auto-start-locations.md)
@@ -362,10 +368,10 @@ Verifique esta página sobre **Localizações de Início Automático**:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de cibersegurança**? Quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
