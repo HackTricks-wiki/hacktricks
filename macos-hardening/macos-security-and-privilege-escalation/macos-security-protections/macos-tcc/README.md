@@ -16,7 +16,7 @@
 
 **TCC (Transparency, Consent, and Control)** es un mecanismo en macOS para **limitar y controlar el acceso de las aplicaciones a ciertas características**, generalmente desde una perspectiva de privacidad. Esto puede incluir cosas como servicios de ubicación, contactos, fotos, micrófono, cámara, accesibilidad, acceso completo al disco y mucho más.
 
-Desde la perspectiva del usuario, se ve a TCC en acción **cuando una aplicación quiere acceder a una de las características protegidas por TCC**. Cuando esto sucede, el **usuario recibe un diálogo** que le pregunta si desea permitir el acceso o no.
+Desde la perspectiva del usuario, ven TCC en acción **cuando una aplicación quiere acceder a una de las características protegidas por TCC**. Cuando esto sucede, el **usuario recibe una ventana emergente** preguntándole si desea permitir el acceso o no.
 
 También es posible **conceder acceso a las aplicaciones** a archivos mediante **intenciones explícitas** de los usuarios, por ejemplo, cuando un usuario **arrastra y suelta un archivo en un programa** (obviamente, el programa debe tener acceso a él).
 
@@ -24,9 +24,9 @@ También es posible **conceder acceso a las aplicaciones** a archivos mediante *
 
 **TCC** es manejado por el **daemon** ubicado en `/System/Library/PrivateFrameworks/TCC.framework/Resources/tccd` configurado en `/System/Library/LaunchDaemons/com.apple.tccd.system.plist` (registrando el servicio mach `com.apple.tccd.system`).
 
-Hay un **tccd de modo de usuario** en ejecución por usuario conectado definido en `/System/Library/LaunchAgents/com.apple.tccd.plist` registrando los servicios mach `com.apple.tccd` y `com.apple.usernotifications.delegate.com.apple.tccd`.
+Hay un **tccd de modo de usuario** ejecutándose por usuario registrado en `/System/Library/LaunchAgents/com.apple.tccd.plist` registrando los servicios mach `com.apple.tccd` y `com.apple.usernotifications.delegate.com.apple.tccd`.
 
-Los permisos son **heredados del padre** de la aplicación y los **permisos** son **rastreados** en función del **ID de paquete** y del **ID de desarrollador**.
+Los permisos son **heredados del padre** de la aplicación y los **permisos** son **rastreados** en función del **ID de paquete** y el **ID de desarrollador**.
 
 ### Base de datos de TCC
 
@@ -42,13 +42,20 @@ codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/S
 com.apple.private.tcc.manager
 com.apple.rootless.storage.TCC
 ```
-{% endcode %}
+Sin embargo, los usuarios pueden **eliminar o consultar reglas** con la utilidad de línea de comandos **`tccutil`**. 
+{% endtab %}
+{% tab title="kernel DB" %}
+Sin embargo, los usuarios pueden **eliminar o consultar reglas** con la utilidad de línea de comandos **`tccutil`**. 
+{% endtab %}
+{% endtabs %}
 
-Sin embargo, los usuarios pueden **eliminar o consultar reglas** con la utilidad de línea de comandos **`tccutil`**.
+{% hint style="info" %}
+Note that the **`tccutil`** utility requires **root privileges** to modify the TCC database.
+{% endhint %} 
+
+{% hint style="warning" %}
+**Leak** of TCC database can lead to **privilege escalation**.
 {% endhint %}
-
-{% tabs %}
-{% tab title="user DB" %}
 ```bash
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -67,7 +74,45 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 ```
 {% endtab %}
 
-{% tab title="DB del sistema" %}
+{% tab title="macOS TCC" %}
+# Protecciones de seguridad de macOS: TCC
+
+El Centro de control de transparencia (TCC) es un marco de seguridad de macOS que controla el acceso a ciertos servicios y datos del sistema. TCC se introdujo en OS X Mavericks (10.9) y se ha mejorado en cada versión posterior de macOS.
+
+TCC se utiliza para controlar el acceso a los siguientes servicios y datos del sistema:
+
+- Acceso a la cámara
+- Acceso al micrófono
+- Acceso a los contactos
+- Acceso a los eventos del calendario
+- Acceso a los recordatorios
+- Acceso a los mensajes
+- Acceso a los datos de ubicación
+- Acceso a los datos de automatización de Apple
+
+TCC se basa en una lista blanca de aplicaciones que tienen permiso para acceder a estos servicios y datos. Si una aplicación no está en la lista blanca, se le pedirá al usuario que otorgue permiso antes de que la aplicación pueda acceder a los servicios o datos.
+
+TCC se almacena en la base de datos de seguridad del sistema, que se encuentra en `/Library/Application Support/com.apple.TCC/TCC.db`. La base de datos TCC contiene una tabla llamada `access`, que enumera las aplicaciones y los servicios a los que tienen acceso.
+
+## Escalada de privilegios de TCC
+
+La escalada de privilegios de TCC es un método para obtener acceso a los servicios y datos controlados por TCC sin el permiso del usuario. Esto se logra mediante la modificación de la base de datos TCC para agregar una entrada que permita el acceso a un servicio o dato específico.
+
+La escalada de privilegios de TCC se puede lograr de varias maneras, incluyendo:
+
+- Aprovechando una vulnerabilidad en una aplicación que ya tiene permiso para acceder a un servicio o dato controlado por TCC.
+- Aprovechando una vulnerabilidad en una aplicación que no tiene permiso para acceder a un servicio o dato controlado por TCC y luego agregando manualmente una entrada a la base de datos TCC.
+- Engañando al usuario para que otorgue permiso a una aplicación maliciosa para acceder a un servicio o dato controlado por TCC.
+
+## Protección de TCC
+
+Para protegerse contra la escalada de privilegios de TCC, se recomienda lo siguiente:
+
+- Mantener el sistema operativo y las aplicaciones actualizadas con las últimas correcciones de seguridad.
+- No otorgar permiso a una aplicación para acceder a un servicio o dato controlado por TCC a menos que sea absolutamente necesario.
+- No descargar ni instalar aplicaciones de fuentes no confiables.
+- Utilizar una solución de seguridad de confianza que pueda detectar y bloquear aplicaciones maliciosas.
+- Monitorear la base de datos TCC en busca de entradas sospechosas o no autorizadas.
 ```bash
 sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -88,18 +133,18 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {% endtabs %}
 
 {% hint style="success" %}
-Al revisar ambas bases de datos, se pueden verificar los permisos que una aplicación ha permitido, ha prohibido o no tiene (solicitará permiso).
+Al verificar ambas bases de datos, puede verificar los permisos que una aplicación ha permitido, ha prohibido o no tiene (solicitará permiso).
 {% endhint %}
 
 * El **`auth_value`** puede tener diferentes valores: denegado(0), desconocido(1), permitido(2) o limitado(3).
-* El **`auth_reason`** puede tomar los siguientes valores: Error(1), Consentimiento del usuario(2), Establecido por el usuario(3), Establecido por el sistema(4), Política de servicio(5), Política de MDM(6), Política de anulación(7), Cadena de uso faltante(8), Tiempo de espera de la solicitud(9), Desconocido de pre-vuelo(10), Con derecho(11), Política de tipo de aplicación(12).
+* El **`auth_reason`** puede tomar los siguientes valores: Error(1), Consentimiento del usuario(2), Configuración del usuario(3), Configuración del sistema(4), Política de servicio(5), Política de MDM(6), Política de anulación(7), Cadena de uso faltante(8), Tiempo de espera de la solicitud(9), Preflight desconocido(10), Con derecho(11), Política de tipo de aplicación(12).
 * Para obtener más información sobre los **otros campos** de la tabla, [**consulte esta publicación de blog**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive).
 
 {% hint style="info" %}
 Algunos permisos de TCC son: kTCCServiceAppleEvents, kTCCServiceCalendar, kTCCServicePhotos... No hay una lista pública que defina todos ellos, pero puede consultar esta [**lista de los conocidos**](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive#service).
 {% endhint %}
 
-También se pueden verificar los **permisos ya otorgados** a las aplicaciones en `Preferencias del sistema --> Seguridad y privacidad --> Privacidad --> Archivos y carpetas`.
+También puede verificar los **permisos ya otorgados** a las aplicaciones en `Preferencias del sistema --> Seguridad y privacidad --> Privacidad --> Archivos y carpetas`.
 
 ### Verificación de firmas de TCC
 
@@ -137,7 +182,7 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
 ```
 Esto evitará que Calendar solicite al usuario acceso a recordatorios, calendario y la libreta de direcciones.
 
-### Lugares sensibles sin protección
+### Lugares sensibles no protegidos
 
 * $HOME (en sí mismo)
 * $HOME/.ssh, $HOME/.aws, etc
@@ -161,7 +206,7 @@ otool -l /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal| gr
     uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 ```
 {% hint style="info" %}
-Es curioso que el atributo **`com.apple.macl`** sea gestionado por el **Sandbox**, no por tccd.
+Es curioso que el atributo **`com.apple.macl`** sea gestionado por el **Sandbox**, no por tccd
 {% endhint %}
 
 El atributo extendido `com.apple.macl` **no se puede borrar** como otros atributos extendidos porque está **protegido por SIP**. Sin embargo, como [**se explica en esta publicación**](https://www.brunerd.com/blog/2020/01/07/track-and-tackle-com-apple-macl/), es posible desactivarlo **comprimiendo** el archivo, **borrándolo** y **descomprimiéndolo**.
@@ -170,7 +215,7 @@ El atributo extendido `com.apple.macl` **no se puede borrar** como otros atribut
 
 ### Salto de escritura
 
-Esto no es un salto, es simplemente cómo funciona TCC: **no protege de la escritura**. Si Terminal **no tiene acceso para leer el Escritorio de un usuario, aún puede escribir en él**:
+Esto no es un salto, es simplemente cómo funciona TCC: **No protege de la escritura**. Si Terminal **no tiene acceso para leer el Escritorio de un usuario, aún puede escribir en él**:
 ```shell-session
 username@hostname ~ % ls Desktop 
 ls: Desktop: Operation not permitted
@@ -188,13 +233,13 @@ Por defecto, un acceso a través de **SSH** tendrá **"Acceso completo al disco"
 
 ![](<../../../../.gitbook/assets/image (569).png>)
 
-Aquí puedes encontrar ejemplos de cómo algunos **malwares han logrado evadir esta protección**:
+Aquí puedes encontrar ejemplos de cómo algunos **malwares han podido evadir esta protección**:
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
 ### Bypass de Electron
 
-El código JS de una aplicación de Electron no está firmado, por lo que un atacante podría mover la aplicación a una ubicación escribible, inyectar código JS malicioso y lanzar esa aplicación y abusar de los permisos de TCC.
+El código JS de una aplicación Electron no está firmado, por lo que un atacante podría mover la aplicación a una ubicación escribible, inyectar código JS malicioso y lanzar esa aplicación y abusar de los permisos de TCC.
 
 Electron está trabajando en la clave **`ElectronAsarIntegrity`** en Info.plist que contendrá un hash del archivo app.asar para verificar la integridad del código JS antes de ejecutarlo.
 
@@ -261,7 +306,7 @@ tell application "iTerm"
     end tell
 end tell
 ```
-{% endcode %} (No hay nada que traducir en esta línea, es solo una etiqueta de markdown)
+{% endcode %}
 ```bash
 osascript iterm.script
 ```
@@ -279,9 +324,9 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 ```
 ### Abuso de Proceso
 
-Si logras **inyectar código en un proceso**, podrás abusar de los permisos de TCC de ese proceso.
+Si logras **inyectar código en un proceso**, podrás abusar de los permisos de TCC de ese proceso. 
 
-Revisa las técnicas de abuso de proceso en la siguiente página:
+Verifica las técnicas de abuso de proceso en la siguiente página:
 
 {% content-ref url="../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../macos-proces-abuse/)
@@ -291,7 +336,7 @@ Mira algunos ejemplos en las siguientes secciones:
 
 ### CVE-2020-29621 - Coreaudiod
 
-El binario **`/usr/sbin/coreaudiod`** tenía los permisos `com.apple.security.cs.disable-library-validation` y `com.apple.private.tcc.manager`. El primero **permite la inyección de código** y el segundo le da acceso para **administrar TCC**.
+El binario **`/usr/sbin/coreaudiod`** tenía los permisos `com.apple.security.cs.disable-library-validation` y `com.apple.private.tcc.manager`. El primero **permite la inyección de código** y el segundo le da acceso a **administrar TCC**.
 
 Este binario permitía cargar **plug-ins de terceros** desde la carpeta `/Library/Audio/Plug-Ins/HAL`. Por lo tanto, era posible **cargar un plugin y abusar de los permisos de TCC** con este PoC:
 ```objectivec
@@ -353,9 +398,15 @@ X'fade0c000000003000000001000000060000000200000012636f6d2e6170706c652e5465726d69
 # list Documents directory without prompting the end user
 $> ls ~/Documents
 ```
+### CVE-2021-30761
+
+Notas tenía acceso a ubicaciones protegidas por TCC, pero cuando se crea una nota, esta se **crea en una ubicación no protegida**. Por lo tanto, se podría pedir a Notas que copie un archivo protegido en una nota (en una ubicación no protegida) y luego acceder al archivo:
+
+<figure><img src="../../../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+
 ### CVE-2023-26818 - Telegram
 
-Telegram tenía los permisos `com.apple.security.cs.allow-dyld-environment-variables` y `com.apple.security.cs.disable-library-validation`, por lo que era posible abusar de ellos para **obtener acceso a sus permisos**, como grabar con la cámara. Puedes [**encontrar el payload en el writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+Telegram tenía los permisos `com.apple.security.cs.allow-dyld-environment-variables` y `com.apple.security.cs.disable-library-validation`, por lo que era posible abusar de ellos para **obtener acceso a sus permisos**, como grabar con la cámara. Puedes [**encontrar el payload en el informe**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
 
 ## Referencias
 
@@ -363,6 +414,7 @@ Telegram tenía los permisos `com.apple.security.cs.allow-dyld-environment-varia
 * [**https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
 * [**https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8**](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
 * [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
+* [**https://www.youtube.com/watch?v=W9GxnP8c8FU**](https://www.youtube.com/watch?v=W9GxnP8c8FU)
 
 <details>
 
@@ -370,8 +422,8 @@ Telegram tenía los permisos `com.apple.security.cs.allow-dyld-environment-varia
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
