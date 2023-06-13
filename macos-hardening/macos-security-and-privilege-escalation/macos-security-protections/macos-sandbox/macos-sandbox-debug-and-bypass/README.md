@@ -1,4 +1,4 @@
-# Depuración y Bypass del Sandbox de macOS
+# Depuración y Bypass de Sandbox en macOS
 
 <details>
 
@@ -12,30 +12,30 @@
 
 </details>
 
-## Proceso de carga del Sandbox
+## Proceso de carga de Sandbox
 
-<figure><img src="../../../../../.gitbook/assets/image (2).png" alt=""><figcaption><p>Imagen de <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption><p>Imagen de <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-En la imagen anterior se puede observar **cómo se cargará el sandbox** cuando se ejecute una aplicación con la concesión **`com.apple.security.app-sandbox`**.
+En la imagen anterior se puede observar **cómo se cargará la sandbox** cuando se ejecute una aplicación con la concesión **`com.apple.security.app-sandbox`**.
 
 El compilador vinculará `/usr/lib/libSystem.B.dylib` al binario.
 
-Luego, **`libSystem.B`** llamará a otras varias funciones hasta que **`xpc_pipe_routine`** envíe las concesiones de la aplicación a **`securityd`**. Securityd comprueba si el proceso debe ser puesto en cuarentena dentro del Sandbox, y si es así, se pondrá en cuarentena.\
-Finalmente, el sandbox se activará con una llamada a **`__sandbox_ms`** que llamará a **`__mac_syscall`**.
+Luego, **`libSystem.B`** llamará a otras varias funciones hasta que **`xpc_pipe_routine`** envíe las concesiones de la aplicación a **`securityd`**. Securityd comprueba si el proceso debe ser puesto en cuarentena dentro de la Sandbox, y si es así, se pondrá en cuarentena.\
+Finalmente, la sandbox se activará con una llamada a **`__sandbox_ms`** que llamará a **`__mac_syscall`**.
 
 ## Posibles Bypasses
 
 {% hint style="warning" %}
-Ten en cuenta que los **archivos creados por procesos en el sandbox** se les añade el **atributo de cuarentena** para evitar que se escape del sandbox.
+Ten en cuenta que los **archivos creados por procesos en sandbox** se les añade el **atributo de cuarentena** para evitar que se escape de la sandbox.
 {% endhint %}
 
 ### Ejecutar binarios sin Sandbox
 
-Si ejecutas un binario que no esté en el sandbox desde un binario en el sandbox, se **ejecutará dentro del sandbox del proceso padre**.
+Si ejecutas un binario que no esté en la sandbox desde un binario en sandbox, se **ejecutará dentro de la sandbox del proceso padre**.
 
-### Depuración y bypass del Sandbox con lldb
+### Depuración y bypass de Sandbox con lldb
 
-Compilaremos una aplicación que debería estar en el sandbox:
+Compilaremos una aplicación que debería estar en la sandbox:
 
 {% tabs %}
 {% tab title="sand.c" %}
@@ -47,37 +47,22 @@ int main() {
 ```
 {% endtab %}
 
-{% tab title="entitlements.xml" %}
-
+{% tab title="README.md" %}
 # Depuración y bypass de macOS Sandbox
 
-La sandbox de macOS es una característica de seguridad que limita el acceso de las aplicaciones a los recursos del sistema. Sin embargo, como cualquier medida de seguridad, no es infalible y puede ser vulnerada. En este archivo se describen algunas técnicas para depurar y evitar la sandbox de macOS.
+La depuración y el bypass de la sandbox de macOS son técnicas avanzadas que pueden ser utilizadas por atacantes para evadir las protecciones de seguridad de macOS. En este documento, se describen algunas técnicas comunes de depuración y bypass de la sandbox de macOS.
 
-## Depuración de la sandbox
+## Depuración de la sandbox de macOS
 
-Para depurar la sandbox de macOS, se puede utilizar el depurador `lldb`. Primero, se debe obtener el PID del proceso que se desea depurar. Esto se puede hacer con el comando `ps` o con la herramienta `Activity Monitor`. Una vez que se tiene el PID, se puede iniciar `lldb` con el siguiente comando:
+La depuración de la sandbox de macOS se puede realizar utilizando herramientas de depuración como LLDB o GDB. Estas herramientas permiten a los atacantes analizar el comportamiento de los programas que se ejecutan en la sandbox de macOS y encontrar vulnerabilidades que puedan ser explotadas para evadir las protecciones de seguridad.
 
-```
-sudo lldb -p <PID>
-```
+## Bypass de la sandbox de macOS
 
-Una vez que se ha iniciado `lldb`, se puede utilizar el comando `process continue` para continuar la ejecución del proceso. En este punto, se puede establecer un punto de interrupción en el código que se desea depurar con el comando `breakpoint set`. Por ejemplo, para establecer un punto de interrupción en la función `open` de la biblioteca `libc.dylib`, se puede utilizar el siguiente comando:
+El bypass de la sandbox de macOS se puede lograr mediante la explotación de vulnerabilidades en el kernel de macOS o en los programas que se ejecutan en la sandbox de macOS. Los atacantes pueden utilizar técnicas como la inyección de código, la escalada de privilegios y la manipulación de la memoria para evadir las protecciones de seguridad de la sandbox de macOS.
 
-```
-breakpoint set -n open -s libc.dylib
-```
+## Conclusiones
 
-Una vez que se ha establecido el punto de interrupción, se puede continuar la ejecución del proceso con el comando `process continue`. Cuando se alcance el punto de interrupción, `lldb` detendrá la ejecución del proceso y se podrá examinar el estado del mismo con los comandos de `lldb`.
-
-## Bypass de la sandbox
-
-Para evitar la sandbox de macOS, se pueden utilizar varias técnicas. Una de ellas es la inyección de código en un proceso que ya tiene permisos para acceder a los recursos del sistema. Por ejemplo, se puede inyectar código en el proceso `Dock` para obtener permisos de root. Para hacer esto, se puede utilizar la herramienta `osxinj` de `libinject`.
-
-Otra técnica es la explotación de vulnerabilidades en la sandbox de macOS. Por ejemplo, se puede explotar una vulnerabilidad en el kernel de macOS para obtener permisos de root. Para hacer esto, se puede utilizar una herramienta como `checkra1n`.
-
-Es importante tener en cuenta que estas técnicas son ilegales y solo deben ser utilizadas con fines educativos o en entornos controlados y autorizados. El uso indebido de estas técnicas puede tener consecuencias legales graves.
-
-{% endtab %}
+La sandbox de macOS es una característica importante de seguridad que ayuda a proteger los sistemas macOS de los ataques. Sin embargo, los atacantes pueden utilizar técnicas avanzadas de depuración y bypass para evadir estas protecciones de seguridad. Por lo tanto, es importante que los administradores de sistemas y los usuarios de macOS estén al tanto de estas técnicas y tomen medidas para proteger sus sistemas de los ataques.
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
@@ -92,31 +77,41 @@ Es importante tener en cuenta que estas técnicas son ilegales y solo deben ser 
 
 ## macOS Sandbox Debug and Bypass
 
-The macOS sandbox is a powerful security feature that restricts the actions that a process can perform on a system. However, it is not perfect and can be bypassed or debugged in certain circumstances. In this section, we will explore some techniques for debugging and bypassing the macOS sandbox.
+The macOS sandbox is a powerful security feature that restricts the actions that a process can perform on a system. However, it is not perfect and can be bypassed or debugged in certain circumstances. This guide will cover some techniques for debugging and bypassing the macOS sandbox.
 
 ### Debugging the macOS Sandbox
 
-Debugging the macOS sandbox can be useful for understanding how it works and identifying potential vulnerabilities. There are several tools that can be used for debugging the sandbox, including:
+Debugging the macOS sandbox can be useful for understanding how it works and identifying potential vulnerabilities. There are several tools and techniques that can be used to debug the sandbox, including:
 
-- **sandbox-exec**: This is a command-line tool that allows you to run a process in a sandbox and specify the sandbox profile to use. You can use the `-n` option to run the process in a new session, which makes it easier to debug.
+- **lldb**: The LLDB debugger can be used to attach to a sandboxed process and inspect its state. This can be useful for understanding how the sandbox is enforced and identifying potential weaknesses.
 
-- **lldb**: This is a powerful debugger that can be used to debug processes running in the sandbox. You can attach lldb to a process running in the sandbox and set breakpoints to pause the execution of the process and inspect its state.
+- **dtrace**: DTrace can be used to trace system calls made by a sandboxed process. This can be useful for understanding how the sandbox is enforced and identifying potential weaknesses.
 
-- **dtrace**: This is a dynamic tracing tool that can be used to trace system calls and other events in the sandbox. You can use dtrace to monitor the behavior of a process running in the sandbox and identify any suspicious activity.
+- **sysdiagnose**: The sysdiagnose tool can be used to collect diagnostic information about a sandboxed process. This can be useful for understanding how the sandbox is enforced and identifying potential weaknesses.
 
 ### Bypassing the macOS Sandbox
 
-Bypassing the macOS sandbox can be useful for performing actions that are not allowed by the sandbox. There are several techniques that can be used to bypass the sandbox, including:
+Bypassing the macOS sandbox can be useful for performing actions that are restricted by the sandbox. There are several techniques that can be used to bypass the sandbox, including:
 
-- **Exploiting vulnerabilities**: If there are vulnerabilities in the sandbox or in the application running in the sandbox, it may be possible to exploit them to bypass the sandbox.
+- **Exploiting a vulnerability**: If a vulnerability exists in the sandbox or in a process running within the sandbox, it may be possible to exploit this vulnerability to bypass the sandbox.
 
-- **Using entitlements**: Entitlements are permissions that are granted to an application by the system. If an application has the right entitlements, it may be able to bypass the sandbox.
+- **Abusing entitlements**: Entitlements are permissions granted to a process by the system. If a process has overly permissive entitlements, it may be possible to abuse these entitlements to bypass the sandbox.
 
-- **Using dyld environment variables**: The dyld dynamic linker can be used to set environment variables that affect the behavior of the sandbox. By setting certain environment variables, it may be possible to bypass the sandbox.
+- **Abusing interprocess communication**: Interprocess communication (IPC) can be used to communicate between processes running within the sandbox and processes running outside of the sandbox. If a process running within the sandbox can communicate with a process running outside of the sandbox, it may be possible to bypass the sandbox.
 
-- **Using interprocess communication**: If there are multiple processes running in the sandbox, it may be possible to use interprocess communication to bypass the sandbox. For example, one process may be able to send a message to another process that performs an action that is not allowed by the sandbox.
+- **Abusing shared memory**: Shared memory can be used to share data between processes running within the sandbox and processes running outside of the sandbox. If a process running within the sandbox can access shared memory that is also accessible by a process running outside of the sandbox, it may be possible to bypass the sandbox.
 
-It is important to note that bypassing the macOS sandbox is not a trivial task and should only be attempted by experienced security researchers or penetration testers.
+- **Abusing file system permissions**: If a process running within the sandbox has overly permissive file system permissions, it may be possible to abuse these permissions to bypass the sandbox.
+
+- **Abusing environment variables**: Environment variables can be used to pass information between processes. If a process running within the sandbox can set an environment variable that is read by a process running outside of the sandbox, it may be possible to bypass the sandbox.
+
+- **Abusing dynamic libraries**: If a process running within the sandbox loads a dynamic library that is also loaded by a process running outside of the sandbox, it may be possible to bypass the sandbox.
+
+- **Abusing code signing**: If a process running within the sandbox can load a code-signed binary that is also loaded by a process running outside of the sandbox, it may be possible to bypass the sandbox.
+
+- **Abusing kernel extensions**: If a process running within the sandbox can load a kernel extension that is also loaded by a process running outside of the sandbox, it may be possible to bypass the sandbox.
+
+It is important to note that bypassing the macOS sandbox can be difficult and may require a significant amount of expertise. Additionally, bypassing the sandbox can be illegal and may result in legal consequences. It is important to only attempt to bypass the sandbox for legitimate purposes and with appropriate legal authorization.
 ```xml
 <plist version="1.0">
 <dict>

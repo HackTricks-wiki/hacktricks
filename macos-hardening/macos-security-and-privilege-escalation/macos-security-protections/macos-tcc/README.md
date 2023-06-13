@@ -45,12 +45,12 @@ com.apple.rootless.storage.TCC
 Sin embargo, los usuarios pueden **eliminar o consultar reglas** con la utilidad de línea de comandos **`tccutil`**. 
 {% endtab %}
 {% tab title="kernel DB" %}
+Sin embargo, los usuarios pueden **eliminar o consultar reglas** con la utilidad de línea de comandos **`tccutil`**. 
 {% endtab %}
 {% endtabs %}
 
 {% hint style="info" %}
-The TCC database is stored in **`/Library/Application Support/com.apple.TCC/TCC.db`**.
-{% endhint %}
+Note that the **`tccutil`** command requires **root privileges** to modify the **kernel database**.
 ```bash
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -106,7 +106,8 @@ Para protegerse contra la escalada de privilegios de TCC, se recomienda lo sigui
 - Mantener el sistema operativo y las aplicaciones actualizadas con las últimas correcciones de seguridad.
 - No otorgar permiso a aplicaciones desconocidas o sospechosas para acceder a servicios o datos controlados por TCC.
 - No descargar aplicaciones de fuentes no confiables.
-- Utilizar una solución de seguridad de confianza que pueda detectar y bloquear aplicaciones maliciosas que intenten acceder a servicios o datos controlados por TCC.
+- No hacer clic en enlaces sospechosos o descargar archivos adjuntos de correos electrónicos sospechosos.
+- Utilizar una solución de seguridad confiable que pueda detectar y bloquear aplicaciones maliciosas.
 ```bash
 sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -318,7 +319,7 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 ```
 ### Abuso de Proceso
 
-Si logras **inyectar código en un proceso**, podrás abusar de los permisos de TCC de ese proceso. 
+Si logras **inyectar código en un proceso**, podrás abusar de los permisos de TCC de ese proceso.
 
 Consulta las técnicas de abuso de proceso en la siguiente página:
 
@@ -330,7 +331,7 @@ Mira algunos ejemplos en las siguientes secciones:
 
 ### CVE-2020-29621 - Coreaudiod
 
-El binario **`/usr/sbin/coreaudiod`** tenía los permisos `com.apple.security.cs.disable-library-validation` y `com.apple.private.tcc.manager`. El primero **permite la inyección de código** y el segundo le da acceso para **administrar TCC**.
+El binario **`/usr/sbin/coreaudiod`** tenía los permisos `com.apple.security.cs.disable-library-validation` y `com.apple.private.tcc.manager`. El primero **permite la inyección de código** y el segundo le da acceso a **administrar TCC**.
 
 Este binario permitía cargar **plug-ins de terceros** desde la carpeta `/Library/Audio/Plug-Ins/HAL`. Por lo tanto, era posible **cargar un plugin y abusar de los permisos de TCC** con este PoC:
 ```objectivec
@@ -396,11 +397,11 @@ $> ls ~/Documents
 
 Notas tenía acceso a ubicaciones protegidas por TCC, pero cuando se crea una nota, esta se **crea en una ubicación no protegida**. Por lo tanto, se podría pedir a Notas que copie un archivo protegido en una nota (en una ubicación no protegida) y luego acceder al archivo:
 
-<figure><img src="../../../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2023-26818 - Telegram
 
-Telegram tenía los permisos `com.apple.security.cs.allow-dyld-environment-variables` y `com.apple.security.cs.disable-library-validation`, por lo que era posible abusar de ellos para **obtener acceso a sus permisos**, como grabar con la cámara. Puedes [**encontrar el payload en el informe**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+Telegram tenía los permisos `com.apple.security.cs.allow-dyld-environment-variables` y `com.apple.security.cs.disable-library-validation`, por lo que era posible abusar de ellos para **obtener acceso a sus permisos**, como grabar con la cámara. Puedes [**encontrar el payload en el writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
 
 ## Referencias
 
@@ -418,6 +419,6 @@ Telegram tenía los permisos `com.apple.security.cs.allow-dyld-environment-varia
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR a** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **y** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
