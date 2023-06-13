@@ -5,10 +5,10 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga** me no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtenha o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga** me no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe suas dicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -22,9 +22,9 @@
 
 💬 Participe de discussões na comunidade
 
-## MacOS Básico
+## Básico do macOS
 
-Se você não está familiarizado com o macOS, você deve começar aprendendo os conceitos básicos do macOS:&#x20;
+Se você não está familiarizado com o macOS, você deve começar aprendendo o básico do macOS:&#x20;
 
 * Arquivos e permissões especiais do macOS:
 
@@ -60,8 +60,8 @@ Se você não está familiarizado com o macOS, você deve começar aprendendo os
 
 Em empresas, os sistemas **macOS** são altamente prováveis de serem **gerenciados com um MDM**. Portanto, do ponto de vista de um atacante, é interessante saber **como isso funciona**:
 
-{% content-ref url="macos-mdm/" %}
-[macos-mdm](macos-mdm/)
+{% content-ref url="../macos-red-teaming/macos-mdm/" %}
+[macos-mdm](../macos-red-teaming/macos-mdm/)
 {% endcontent-ref %}
 
 ### MacOS - Inspeção, Depuração e Fuzzing
@@ -98,15 +98,15 @@ Para esse tipo de vulnerabilidades, não se esqueça de **verificar instaladores
 
 ### Abuso de Privilégios e Entitlements via Abuso de Processo
 
-Se um processo pode **injetar código em outro processo com melhores privilégios ou entitlements** ou contatá-lo para realizar ações de privilégios, ele pode escalar privilégios e contornar medidas defensivas como [Sandbox](macos-security-protections/macos-sandbox/) ou [TCC](macos-security-protections/macos-tcc/).
+Se um processo pode **injetar código em outro processo com melhores privilégios ou entitlements** ou contatá-lo para executar ações de privilégios, ele pode escalar privilégios e contornar medidas defensivas como [Sandbox](macos-security-protections/macos-sandbox/) ou [TCC](macos-security-protections/macos-tcc/).
 
 {% content-ref url="macos-proces-abuse/" %}
 [macos-proces-abuse](macos-proces-abuse/)
 {% endcontent-ref %}
 
-### Manipuladores de aplicativos de extensão de arquivo e URL scheme
+### Manipuladores de aplicativos de esquema de URL e extensão de arquivo
 
-Aplicativos estranhos registrados por extensões de arquivo podem ser abusados e diferentes aplicativos podem ser registrados para abrir protocolos específicos.
+Aplicativos estranhos registrados por extensões de arquivo podem ser abusados e diferentes aplicativos podem ser registrados para abrir protocolos específicos
 
 {% content-ref url="macos-file-extension-apps.md" %}
 [macos-file-extension-apps.md](macos-file-extension-apps.md)
@@ -114,10 +114,10 @@ Aplicativos estranhos registrados por extensões de arquivo podem ser abusados e
 
 ## Escalada de Privilégios do MacOS
 
-### CVE-2020-9771 - Bypass do TCC mount\_apfs e escalada de privilégios
+### CVE-2020-9771 - bypass do TCC mount\_apfs e escalada de privilégios
 
 **Qualquer usuário** (mesmo não privilegiado) pode criar e montar um snapshot do time machine e **acessar TODOS os arquivos** desse snapshot.\
-O **único privilégio** necessário é para o aplicativo usado (como o `Terminal`) ter **Acesso Total ao Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que precisa ser concedido por um administrador. 
+O **único privilégio** necessário é para o aplicativo usado (como o `Terminal`) ter **Acesso Total ao Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`) que precisa ser concedido por um administrador. 
 
 {% code overflow="wrap" %}
 ```bash

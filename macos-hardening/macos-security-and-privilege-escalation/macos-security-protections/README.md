@@ -23,7 +23,7 @@ Veja como funciona:
 2. **Distribuindo o Aplicativo:** O aplicativo assinado é então distribuído aos usuários juntamente com o certificado do desenvolvedor, que contém a chave pública correspondente.
 3. **Verificando o Aplicativo:** Quando um usuário faz o download e tenta executar o aplicativo, o sistema operacional Mac usa a chave pública do certificado do desenvolvedor para descriptografar o hash. Ele então recalcula o hash com base no estado atual do aplicativo e compara isso com o hash descriptografado. Se eles corresponderem, significa que **o aplicativo não foi modificado** desde que o desenvolvedor o assinou, e o sistema permite que o aplicativo seja executado.
 
-As assinaturas de aplicativos são uma parte essencial da tecnologia Gatekeeper da Apple. Quando um usuário tenta **abrir um aplicativo baixado da internet**, o Gatekeeper verifica a assinatura do aplicativo. Se ele for assinado com um certificado emitido pela Apple para um desenvolvedor conhecido e o código não tiver sido adulterado, o Gatekeeper permite que o aplicativo seja executado. Caso contrário, ele bloqueia o aplicativo e alerta o usuário.
+As assinaturas de aplicativos são uma parte essencial da tecnologia Gatekeeper da Apple. Quando um usuário tenta **abrir um aplicativo baixado da internet**, o Gatekeeper verifica a assinatura do aplicativo. Se ele for assinado com um certificado emitido pela Apple para um desenvolvedor conhecido e o código não foi adulterado, o Gatekeeper permite que o aplicativo seja executado. Caso contrário, ele bloqueia o aplicativo e alerta o usuário.
 
 A partir do macOS Catalina, **o Gatekeeper também verifica se o aplicativo foi notarizado** pela Apple, adicionando uma camada extra de segurança. O processo de notarização verifica o aplicativo em busca de problemas de segurança conhecidos e código malicioso, e se essas verificações passarem, a Apple adiciona um ticket ao aplicativo que o Gatekeeper pode verificar.
 
@@ -56,7 +56,7 @@ Na primeira instalação ou execução do software pelo usuário, a existência 
 
 ### Arquivos em Quarentena
 
-Ao **baixar** um aplicativo ou arquivo, aplicativos específicos do macOS, como navegadores da web ou clientes de e-mail, **anexam um atributo de arquivo estendido**, comumente conhecido como "**sinalizador de quarentena**", ao arquivo baixado. Este atributo atua como uma medida de segurança para **marcar o arquivo** como proveniente de uma fonte não confiável (a internet) e potencialmente carregando riscos. No entanto, nem todos os aplicativos anexam este atributo, por exemplo, o software cliente BitTorrent comum geralmente ignora este processo.
+Ao **baixar** um aplicativo ou arquivo, aplicativos específicos do macOS, como navegadores da web ou clientes de e-mail, **anexam um atributo de arquivo estendido**, comumente conhecido como "**sinalizador de quarentena**", ao arquivo baixado. Este atributo atua como uma medida de segurança para **marcar o arquivo** como proveniente de uma fonte não confiável (a internet) e potencialmente carregando riscos. No entanto, nem todos os aplicativos anexam este atributo, por exemplo, o software comum de cliente BitTorrent geralmente ignora este processo.
 
 **A presença de um sinalizador de quarentena sinaliza a funcionalidade de segurança do Gatekeeper do macOS quando um usuário tenta executar o arquivo**.
 
@@ -115,13 +115,13 @@ find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; pri
 ```
 ## XProtect
 
-XProtect é um recurso **anti-malware** integrado no macOS. Ele faz parte do sistema de segurança da Apple que trabalha silenciosamente em segundo plano para manter seu Mac seguro contra malwares conhecidos e plug-ins maliciosos.
+XProtect é um recurso **anti-malware** integrado no macOS. Ele faz parte do sistema de segurança da Apple que trabalha silenciosamente em segundo plano para manter seu Mac seguro contra malware conhecido e plug-ins maliciosos.
 
-O XProtect funciona **verificando qualquer arquivo baixado em seu banco de dados** de malwares conhecidos e tipos de arquivos inseguros. Quando você baixa um arquivo por meio de determinados aplicativos, como Safari, Mail ou Mensagens, o XProtect verifica automaticamente o arquivo. Se ele corresponder a algum malware conhecido em seu banco de dados, o XProtect **impedirá que o arquivo seja executado** e o alertará sobre a ameaça.
+O XProtect funciona **verificando qualquer arquivo baixado em seu banco de dados** de malware conhecido e tipos de arquivo inseguros. Quando você baixa um arquivo por meio de determinados aplicativos, como Safari, Mail ou Mensagens, o XProtect verifica automaticamente o arquivo. Se ele corresponder a algum malware conhecido em seu banco de dados, o XProtect **impedirá que o arquivo seja executado** e o alertará sobre a ameaça.
 
 O banco de dados do XProtect é **atualizado regularmente** pela Apple com novas definições de malware, e essas atualizações são baixadas e instaladas automaticamente em seu Mac. Isso garante que o XProtect esteja sempre atualizado com as últimas ameaças conhecidas.
 
-No entanto, vale ressaltar que o **XProtect não é uma solução antivírus completa**. Ele verifica apenas uma lista específica de ameaças conhecidas e não realiza a verificação de acesso como a maioria dos softwares antivírus. Portanto, embora o XProtect forneça uma camada de proteção contra malwares conhecidos, ainda é recomendável ter cuidado ao baixar arquivos da internet ou abrir anexos de e-mail.
+No entanto, vale ressaltar que o **XProtect não é uma solução antivírus completa**. Ele verifica apenas uma lista específica de ameaças conhecidas e não realiza a verificação de acesso como a maioria dos softwares antivírus. Portanto, embora o XProtect forneça uma camada de proteção contra malware conhecido, ainda é recomendável ter cuidado ao baixar arquivos da internet ou abrir anexos de e-mail.
 
 Você pode obter informações sobre a última atualização do XProtect em execução:
 
@@ -133,20 +133,24 @@ system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistC
 
 A Ferramenta de Remoção de Malware (MRT) é outra parte da infraestrutura de segurança do macOS. Como o nome sugere, a principal função do MRT é **remover malware conhecido de sistemas infectados**.
 
-Uma vez que o malware é detectado em um Mac (seja pelo XProtect ou por outros meios), o MRT pode ser usado para **remover automaticamente o malware**. O MRT opera silenciosamente em segundo plano e geralmente é executado sempre que o sistema é atualizado ou quando uma nova definição de malware é baixada.
+Uma vez que o malware é detectado em um Mac (seja pelo XProtect ou por outros meios), o MRT pode ser usado para **remover automaticamente o malware**. O MRT opera silenciosamente em segundo plano e geralmente é executado sempre que o sistema é atualizado ou quando uma nova definição de malware é baixada (parece que as regras que o MRT tem para detectar malware estão dentro do binário).
 
 Embora tanto o XProtect quanto o MRT façam parte das medidas de segurança do macOS, eles desempenham funções diferentes:
 
 * **XProtect** é uma ferramenta preventiva. Ele **verifica arquivos conforme são baixados** (por meio de determinados aplicativos) e, se detectar algum tipo conhecido de malware, **impede que o arquivo seja aberto**, evitando assim que o malware infecte o sistema em primeiro lugar.
 * **MRT**, por outro lado, é uma **ferramenta reativa**. Ele opera depois que o malware foi detectado em um sistema, com o objetivo de remover o software ofensivo para limpar o sistema.
 
-## Limitações de Processos
+## Limitantes de Processos
 
 ### SIP - Proteção de Integridade do Sistema
 
+{% content-ref url="macos-sip.md" %}
+[macos-sip.md](macos-sip.md)
+{% endcontent-ref %}
+
 ### Sandbox
 
-O Sandbox do macOS **limita as aplicações** que rodam dentro do sandbox às **ações permitidas especificadas no perfil do Sandbox** com o qual o aplicativo está sendo executado. Isso ajuda a garantir que **o aplicativo acesse apenas os recursos esperados**.
+O Sandbox do macOS **limita as aplicações** que rodam dentro do sandbox às **ações permitidas especificadas no perfil do Sandbox** com o qual o aplicativo está sendo executado. Isso ajuda a garantir que **a aplicação acesse apenas os recursos esperados**.
 
 {% content-ref url="macos-sandbox/" %}
 [macos-sandbox](macos-sandbox/)
