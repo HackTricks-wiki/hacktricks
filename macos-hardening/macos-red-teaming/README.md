@@ -27,8 +27,8 @@ For red teaming in MacOS environments it's highly recommended to have some under
 
 And also about **MacOS** "special" **network** **protocols**:
 
-{% content-ref url="macos-protocols.md" %}
-[macos-protocols.md](macos-protocols.md)
+{% content-ref url="../macos-security-and-privilege-escalation/macos-protocols.md" %}
+[macos-protocols.md](../macos-security-and-privilege-escalation/macos-protocols.md)
 {% endcontent-ref %}
 
 ## Active Directory

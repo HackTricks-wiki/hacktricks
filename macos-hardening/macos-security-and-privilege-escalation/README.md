@@ -60,8 +60,8 @@ If you are not familiar with macOS, you should start learning the basics of macO
 
 In companies **macOS** systems are highly probably going to be **managed with a MDM**. Therefore, from the perspective of an attacker is interesting to know **how that works**:
 
-{% content-ref url="macos-mdm/" %}
-[macos-mdm](macos-mdm/)
+{% content-ref url="../macos-red-teaming/macos-mdm/" %}
+[macos-mdm](../macos-red-teaming/macos-mdm/)
 {% endcontent-ref %}
 
 ### MacOS - Inspecting, Debugging and Fuzzing

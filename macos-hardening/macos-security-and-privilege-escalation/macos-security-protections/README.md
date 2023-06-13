@@ -163,7 +163,7 @@ system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistC
 
 The Malware Removal Tool (MRT) is another part of macOS's security infrastructure. As the name suggests, MRT's main function is to **remove known malware from infected systems**.
 
-Once malware is detected on a Mac (either by XProtect or by some other means), MRT can be used to automatically **remove the malware**. MRT operates silently in the background and typically runs whenever the system is updated or when a new malware definition is downloaded.
+Once malware is detected on a Mac (either by XProtect or by some other means), MRT can be used to automatically **remove the malware**. MRT operates silently in the background and typically runs whenever the system is updated or when a new malware definition is downloaded (it looks like the rules MRT has to detect malware are inside the binary).
 
 While both XProtect and MRT are part of macOS's security measures, they perform different functions:
 
@@ -174,7 +174,9 @@ While both XProtect and MRT are part of macOS's security measures, they perform 
 
 ### SIP - System Integrity Protection
 
-
+{% content-ref url="macos-sip.md" %}
+[macos-sip.md](macos-sip.md)
+{% endcontent-ref %}
 
 ### Sandbox
 
