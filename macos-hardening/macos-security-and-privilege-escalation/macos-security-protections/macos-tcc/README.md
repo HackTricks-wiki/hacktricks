@@ -26,7 +26,7 @@ También es posible **conceder acceso a las aplicaciones** a archivos mediante *
 
 Hay un **tccd de modo de usuario** ejecutándose por usuario registrado en `/System/Library/LaunchAgents/com.apple.tccd.plist` registrando los servicios mach `com.apple.tccd` y `com.apple.usernotifications.delegate.com.apple.tccd`.
 
-Los permisos son **heredados del padre** de la aplicación y los **permisos** son **rastreados** en función del **ID de paquete** y el **ID de desarrollador**.
+Los permisos son **heredados del padre** de la aplicación y los **permisos** son **rastreados** en función del **ID de paquete** y del **ID de desarrollador**.
 
 ### Base de datos de TCC
 
@@ -45,16 +45,11 @@ com.apple.rootless.storage.TCC
 Sin embargo, los usuarios pueden **eliminar o consultar reglas** con la utilidad de línea de comandos **`tccutil`**. 
 {% endtab %}
 {% tab title="kernel DB" %}
-Sin embargo, los usuarios pueden **eliminar o consultar reglas** con la utilidad de línea de comandos **`tccutil`**. 
 {% endtab %}
 {% endtabs %}
 
 {% hint style="info" %}
-Note that the **`tccutil`** utility requires **root privileges** to modify the TCC database.
-{% endhint %} 
-
-{% hint style="warning" %}
-**Leak** of TCC database can lead to **privilege escalation**.
+The TCC database is stored in **`/Library/Application Support/com.apple.TCC/TCC.db`**.
 {% endhint %}
 ```bash
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db
@@ -109,10 +104,9 @@ La escalada de privilegios de TCC se puede lograr de varias maneras, incluyendo:
 Para protegerse contra la escalada de privilegios de TCC, se recomienda lo siguiente:
 
 - Mantener el sistema operativo y las aplicaciones actualizadas con las últimas correcciones de seguridad.
-- No otorgar permiso a una aplicación para acceder a un servicio o dato controlado por TCC a menos que sea absolutamente necesario.
-- No descargar ni instalar aplicaciones de fuentes no confiables.
-- Utilizar una solución de seguridad de confianza que pueda detectar y bloquear aplicaciones maliciosas.
-- Monitorear la base de datos TCC en busca de entradas sospechosas o no autorizadas.
+- No otorgar permiso a aplicaciones desconocidas o sospechosas para acceder a servicios o datos controlados por TCC.
+- No descargar aplicaciones de fuentes no confiables.
+- Utilizar una solución de seguridad de confianza que pueda detectar y bloquear aplicaciones maliciosas que intenten acceder a servicios o datos controlados por TCC.
 ```bash
 sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -326,7 +320,7 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 
 Si logras **inyectar código en un proceso**, podrás abusar de los permisos de TCC de ese proceso. 
 
-Verifica las técnicas de abuso de proceso en la siguiente página:
+Consulta las técnicas de abuso de proceso en la siguiente página:
 
 {% content-ref url="../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../macos-proces-abuse/)
@@ -336,7 +330,7 @@ Mira algunos ejemplos en las siguientes secciones:
 
 ### CVE-2020-29621 - Coreaudiod
 
-El binario **`/usr/sbin/coreaudiod`** tenía los permisos `com.apple.security.cs.disable-library-validation` y `com.apple.private.tcc.manager`. El primero **permite la inyección de código** y el segundo le da acceso a **administrar TCC**.
+El binario **`/usr/sbin/coreaudiod`** tenía los permisos `com.apple.security.cs.disable-library-validation` y `com.apple.private.tcc.manager`. El primero **permite la inyección de código** y el segundo le da acceso para **administrar TCC**.
 
 Este binario permitía cargar **plug-ins de terceros** desde la carpeta `/Library/Audio/Plug-Ins/HAL`. Por lo tanto, era posible **cargar un plugin y abusar de los permisos de TCC** con este PoC:
 ```objectivec
@@ -402,7 +396,7 @@ $> ls ~/Documents
 
 Notas tenía acceso a ubicaciones protegidas por TCC, pero cuando se crea una nota, esta se **crea en una ubicación no protegida**. Por lo tanto, se podría pedir a Notas que copie un archivo protegido en una nota (en una ubicación no protegida) y luego acceder al archivo:
 
-<figure><img src="../../../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2023-26818 - Telegram
 

