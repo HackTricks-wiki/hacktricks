@@ -170,6 +170,7 @@
         * [macOS Office Sandbox Bypasses](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-sandbox/macos-sandbox-debug-and-bypass/macos-office-sandbox-bypasses.md)
     * [macOS TCC](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/README.md)
       * [macOS Apple Scripts](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-apple-scripts.md)
+      * [macOS TCC Bypasses](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-tcc/macos-tcc-bypasses.md)
   * [macOS Users](macos-hardening/macos-security-and-privilege-escalation/macos-users.md)
 * [macOS Red Teaming](macos-hardening/macos-red-teaming/README.md)
   * [macOS MDM](macos-hardening/macos-red-teaming/macos-mdm/README.md)

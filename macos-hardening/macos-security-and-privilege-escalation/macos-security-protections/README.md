@@ -194,6 +194,19 @@ MacOS Sandbox **limits applications** running inside the sandbox to the **allowe
 [macos-tcc](macos-tcc/)
 {% endcontent-ref %}
 
+## Trust Cache
+
+The Apple macOS trust cache, sometimes also referred to as the AMFI (Apple Mobile File Integrity) cache, is a security mechanism in macOS designed to **prevent unauthorized or malicious software from running**. Essentially, it is a list of cryptographic hashes that the operating system uses to v**erify the integrity and authenticity of the software**.
+
+When an application or executable file tries to run on macOS, the operating system checks the AMFI trust cache. If the **hash of the file is found in the trust cache**, the system **allows** the program to run because it recognises it as trusted.
+
+## Launch Constraints
+
+It controls from where and what can launch an Apple signed binary:
+
+* You can't launch an app directly if should be run by launchd
+* You can't run an app outside of the trusted location (like /System/)
+
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>

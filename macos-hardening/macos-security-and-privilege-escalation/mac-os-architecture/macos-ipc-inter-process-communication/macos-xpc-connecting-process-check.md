@@ -33,6 +33,10 @@ For more information about the PID reuse attack check:
 [macos-pid-reuse.md](macos-pid-reuse.md)
 {% endcontent-ref %}
 
+### Trustcache - Downgrade Attacks Prevention
+
+Trustcache is a defensive method introduced in Apple Silicon machines that stores a database of CDHSAH of Apple binaries so only allowed non modified binaries can be executed. Which prevent the execution of downgrade versions.
+
 ### Code Examples
 
 The server will implement this **verification** in a function called **`shouldAcceptNewConnection`**.
