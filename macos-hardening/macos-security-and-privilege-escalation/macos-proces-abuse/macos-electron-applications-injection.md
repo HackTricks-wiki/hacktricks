@@ -18,15 +18,15 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-Observe que agora as aplicações Electron **fortalecidas** ignorarão os parâmetros do node (como --inspect) quando iniciadas, a menos que a variável de ambiente **`ELECTRON_RUN_AS_NODE`** seja definida.
+Observe que agora as aplicações Electron **fortalecidas** com **RunAsNode** desativado irão **ignorar os parâmetros do node** (como --inspect) quando iniciadas, a menos que a variável de ambiente **`ELECTRON_RUN_AS_NODE`** seja definida.
 
-No entanto, ainda é possível usar o parâmetro electron `--remote-debugging-port=9229`, mas a carga útil anterior não funcionará para executar outros processos.
+No entanto, ainda é possível usar o parâmetro do electron `--remote-debugging-port=9229`, mas a carga útil anterior não funcionará para executar outros processos.
 {% endhint %}
 
 ## `NODE_OPTIONS`
 
 {% hint style="warning" %}
-Esta variável de ambiente só funcionará se a aplicação Electron não tiver sido devidamente fortalecida e estiver permitindo isso. Se fortalecida, você também precisará usar a **variável de ambiente `ELECTRON_RUN_AS_NODE`**.
+Essa variável de ambiente só funcionará se a aplicação Electron não tiver sido adequadamente fortalecida e estiver permitindo isso. Se fortalecida, você também precisará usar a **variável de ambiente `ELECTRON_RUN_AS_NODE`**.
 {% endhint %}
 
 Com essa combinação, você pode armazenar a carga útil em um arquivo diferente e executar esse arquivo:

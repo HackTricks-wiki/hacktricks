@@ -32,7 +32,7 @@ Os protocolos de infravermelho diferem em 3 fatores:
 
 Os bits são codificados pela modulação da duração do espaço entre os pulsos. A largura do próprio pulso é constante.
 
-<figure><img src="../../.gitbook/assets/image (16) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
 
 **2. Codificação de Largura de Pulso**
 
@@ -74,4 +74,4 @@ Para a lógica "0" e "1", a NEC usa a Codificação de Distância de Pulso: prim
 
 ### Condicionadores de Ar
 
-Ao contrário de outros controles remotos, **os condicionadores de ar não transmitem apenas o código do botão pressionado**. Eles também **transmitem todas as informações** quando um botão
+Ao contrário de outros controles remotos, **os condicionadores de ar não transmitem apenas o código do botão pressionado**. Eles também **transmitem todas as informações** quando um botão é pressionado para garant

@@ -20,18 +20,18 @@ Esta função fará com que o binário **permitido possua o PID**, mas a **mensa
 
 ### Exemplo de exploit
 
-Se você encontrar a função **`shouldAcceptNewConnection`** ou uma função chamada por ela **chamando** **`processIdentifier`** e não chamando **`auditToken`**. É altamente provável que esteja verificando o **PID do processo** e não o token de auditoria.\
+Se você encontrar a função **`shouldAcceptNewConnection`** ou uma função chamada por ela **chamando** **`processIdentifier`** e não chamando **`auditToken`**. É altamente provável que esteja verificando o PID do processo e não o token de auditoria.\
 Como por exemplo nesta imagem (tirada da referência):
 
-<figure><img src="../../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 Verifique este exemplo de exploit (novamente, retirado da referência) para ver as 2 partes do exploit:
 
 * Uma que **gera vários forks**
-* **Cada fork** irá **enviar** o **payload** para o serviço XPC enquanto executa **`posix_spawn`** logo após o envio da mensagem.
+* **Cada fork** irá **enviar** a **carga útil** para o serviço XPC enquanto executa **`posix_spawn`** logo após o envio da mensagem.
 
 {% hint style="danger" %}
-Para que o exploit funcione, é importante exportar OBJC\_DISABLE\_INITIALIZE\_FORK\_SAFETY=YES ou colocar no exploit:
+Para que o exploit funcione, é importante exportar OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES ou colocar no exploit:
 ```objectivec
 asm(".section __DATA,__objc_fork_ok\n"
 "empty:\n"
@@ -155,6 +155,6 @@ int main(int argc, const char * argv[]) {
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

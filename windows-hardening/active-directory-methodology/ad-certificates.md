@@ -1,6 +1,6 @@
 # Certificados AD
 
-## Informação Básica
+## Informações Básicas
 
 ### Partes de um certificado
 
@@ -29,9 +29,9 @@ Por padrão, durante a autenticação baseada em certificado, o AD mapeia os cer
 
 ### CAs
 
-O AD CS define certificados de CA em quatro locais em que a floresta AD confia sob o contêiner `CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>`, cada um diferindo por seu propósito:
+AD CS define certificados de CA em quatro locais em que a floresta AD confia sob o contêiner `CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>`, cada um diferindo por seu propósito:
 
-* O contêiner **Certification Authorities** define **certificados de CA raiz confiáveis**. Essas CAs estão no **topo da hierarquia da árvore PKI** e são a base da confiança em ambientes AD CS. Cada CA é representada como um objeto AD dentro do contêiner onde a **objectClass** é definida como **`certificationAuthority`** e a propriedade **`cACertificate`** contém os **bytes do certificado da CA**. O Windows propaga esses certificados de CA para o armazenamento de certificados de Autoridades de Certificação Raiz Confiáveis em **cada máquina Windows**. Para que o AD considere um certificado como **confiável**, a cadeia de confiança do certificado deve eventualmente **terminar com um dos CA raiz** definidos neste contêiner.
+* O contêiner **Certification Authorities** define **certificados de CA raiz confiáveis**. Essas CAs estão no **topo da hierarquia da árvore PKI** e são a base da confiança em ambientes AD CS. Cada CA é representada como um objeto AD dentro do contêiner onde o **objectClass** é definido como **`certificationAuthority`** e a propriedade **`cACertificate`** contém os **bytes do certificado da CA**. O Windows propaga esses certificados de CA para o armazenamento de certificados de Autoridades de Certificação Raiz Confiáveis em **cada máquina Windows**. Para que o AD considere um certificado como **confiável**, a cadeia de confiança do certificado deve eventualmente **terminar com um dos CAs raiz** definidos neste contêiner.
 * O contêiner **Enrolment Services** define cada **CA empresarial** (ou seja, CAs criadas no AD CS com a função de CA empresarial habilitada). Cada CA empresarial tem um objeto AD com os seguintes atributos:
   * Um atributo **objectClass** para **`pKIEnrollmentService`**
   * Um atributo **`cACertificate`** contendo os **bytes do certificado da CA**
@@ -39,12 +39,12 @@ O AD CS define certificados de CA em quatro locais em que a floresta AD confia s
   * Um campo **certificateTemplates** definindo os **modelos de certificado habilitados**. Os modelos de certificado são um "modelo" de configurações que a CA usa ao criar um certificado e incluem coisas como os EKUs, permissões de inscrição, a expiração do certificado, requisitos de emissão e configurações de criptografia. Discutiremos os modelos de certificado com mais detalhes posteriormente.
 
 {% hint style="info" %}
-Em ambientes AD, **os clientes interagem com as CAs empresariais para solicitar um certificado** com base nas configurações definidas em
+Em ambientes AD, **os clientes interagem com as CAs empresariais para solicitar um certificado** com base nas configurações definidas em um modelo de certificado. Os certificados
 ### Direitos de Inscrição de Modelos de Certificado
 
 * **O ACE concede a um principal o direito estendido de inscrição de certificado**. O ACE bruto concede ao principal o direito de acesso `RIGHT_DS_CONTROL_ACCESS45` onde o **ObjectType** é definido como `0e10c968-78fb-11d2-90d4-00c04f79dc5547`. Este GUID corresponde ao direito estendido de **Inscrição de Certificado**.
 * **O ACE concede a um principal o direito estendido de Autoinscrição de Certificado**. O ACE bruto concede ao principal o direito de acesso `RIGHT_DS_CONTROL_ACCESS48` onde o **ObjectType** é definido como `a05b8cc2-17bc-4802-a710-e7c15ab866a249`. Este GUID corresponde ao direito estendido de **Autoinscrição de Certificado**.
-* **Um ACE concede a um principal todos os ExtendedRights**. O ACE bruto habilita o direito de acesso `RIGHT_DS_CONTROL_ACCESS` onde o **ObjectType** é definido como `00000000-0000-0000-0000-000000000000`. Este GUID corresponde a **todos os direitos estendidos**.
+* **Um ACE concede a um principal todos os Direitos Estendidos**. O ACE bruto habilita o direito de acesso `RIGHT_DS_CONTROL_ACCESS` onde o **ObjectType** é definido como `00000000-0000-0000-0000-000000000000`. Este GUID corresponde a **todos os direitos estendidos**.
 * **Um ACE concede a um principal Controle Total/GenericAll**. O ACE bruto habilita o direito de acesso Controle Total/GenericAll.
 
 ### Direitos de Inscrição de CA Empresarial
@@ -55,9 +55,9 @@ O **descritor de segurança** configurado no **CA Empresarial** define esses dir
 
 Isso acaba definindo o valor do registro de segurança na chave **`HKLM\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration<NOME DO CA>`** no servidor CA. Encontramos vários servidores AD CS que concedem a usuários com baixo privilégio acesso remoto a essa chave via registro remoto:
 
-<figure><img src="../../.gitbook/assets/image (6) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (6) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
-Usuários com baixo privilégio também podem **enumerar isso via DCOM** usando o método `GetCASecurity` da interface COM `ICertAdminD2`. No entanto, os clientes Windows normais precisam instalar as Ferramentas de Administração do Servidor Remoto (RSAT) para usá-lo, já que a interface COM e quaisquer objetos COM que a implementem não estão presentes no Windows por padrão.
+Usuários com baixo privilégio também podem **enumerar isso via DCOM** usando o método `GetCASecurity` da interface COM `ICertAdminD2`. No entanto, os clientes normais do Windows precisam instalar as Ferramentas de Administração do Servidor Remoto (RSAT) para usá-lo, já que a interface COM e quaisquer objetos COM que a implementem não estão presentes no Windows por padrão.
 
 ### Requisitos de Emissão
 
@@ -78,18 +78,18 @@ Um uso comum para essas configurações é para **agentes de inscrição**. Um a
 * O usuário do Windows que se autentica no CA tem direitos de inscrição no modelo de certificado de destino.
 * Se a versão do esquema do modelo de certificado for 1, o CA exigirá que os certificados de assinatura tenham o OID do Agente de Solicitação de Certificado antes de emitir o certificado. A versão do esquema do modelo é especificada na propriedade msPKI-Template-Schema-Version do objeto AD do modelo.
 * Se a versão do esquema do modelo de certificado for 2:
-  * O modelo deve definir a configuração "Este número de assinaturas autorizadas" e o número especificado de agentes de inscrição deve assinar o CSR (o atributo mspkira-signature do AD do modelo define essa configuração). Em outras palavras, essa configuração especifica quantos agentes de inscrição devem assinar um CSR antes que o CA considere emitir um certificado.
-  * A restrição de emissão "Política de Aplicação" do modelo deve ser definida
+  * O modelo deve definir a configuração "Este número de assinaturas autorizadas" e o número especificado de agentes de inscrição deve assinar o CSR (o atributo mspkira-signature do modelo define essa configuração). Em outras palavras, essa configuração especifica quantos agentes de inscrição devem assinar um CSR antes que o CA considere emitir um certificado.
+  * A restrição de emissão da "Política de Aplicação" do modelo deve ser definida como
 ## Enumeração do AD CS
 
-Assim como na maioria do AD, todas as informações abordadas até agora estão disponíveis consultando o LDAP como um usuário autenticado no domínio, mas sem privilégios adicionais.
+Assim como para a maioria do AD, todas as informações abordadas até agora estão disponíveis consultando o LDAP como um usuário autenticado no domínio, mas sem privilégios.
 
-Se quisermos **enumerar os CAs empresariais** e suas configurações, podemos consultar o LDAP usando o filtro LDAP `(objectCategory=pKIEnrollmentService)` no local de pesquisa `CN=Configuration,DC=<domínio>,DC=<com>` (este local de pesquisa corresponde ao contexto de nomeação de Configuração da floresta AD). Os resultados identificarão o nome do host DNS do servidor CA, o próprio nome do CA, as datas de início e término do certificado, várias flags, modelos de certificado publicados e muito mais.
+Se quisermos **enumerar os CAs empresariais** e suas configurações, podemos consultar o LDAP usando o filtro LDAP `(objectCategory=pKIEnrollmentService)` na base de pesquisa `CN=Configuration,DC=<domínio>,DC=<com>` (esta base de pesquisa corresponde ao contexto de nomeação de Configuração da floresta AD). Os resultados identificarão o nome do host DNS do servidor CA, o próprio nome do CA, as datas de início e término do certificado, várias flags, modelos de certificado publicados e muito mais.
 
 **Ferramentas para enumerar certificados vulneráveis:**
 
 * [**Certify**](https://github.com/GhostPack/Certify) é uma ferramenta em C# que pode **enumerar informações úteis de configuração e infraestrutura sobre ambientes AD CS** e pode solicitar certificados de várias maneiras diferentes.
-* [**Certipy**](https://github.com/ly4k/Certipy) é uma ferramenta em **python** que pode **enumerar e abusar** dos Serviços de Certificado do Active Directory (**AD CS**) **de qualquer sistema** (com acesso ao DC) que pode gerar saída para o BloodHound criado por [**Lyak**](https://twitter.com/ly4k\_) (boa pessoa, melhor hacker).
+* [**Certipy**](https://github.com/ly4k/Certipy) é uma ferramenta em **python** para poder **enumerar e abusar** dos Serviços de Certificado do Active Directory (**AD CS**) **de qualquer sistema** (com acesso ao DC) que pode gerar saída para o BloodHound criado por [**Lyak**](https://twitter.com/ly4k\_) (boa pessoa, melhor hacker).
 ```bash
 # https://github.com/GhostPack/Certify
 Certify.exe cas #enumerate trusted root CA certificates, certificates defined by the NTAuthCertificates object, and various information about Enterprise CAs
@@ -115,7 +115,7 @@ certutil -v -dstemplate #enumerate certificate templates
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -24,11 +24,11 @@ Para obter mais informações sobre o que é um iButton, consulte:
 
 A parte **azul** da imagem a seguir é onde você precisa **colocar o iButton real** para que o Flipper possa **lê-lo**. A parte **verde** é onde você precisa **tocar o leitor** com o Flipper zero para **emular corretamente um iButton**.
 
-<figure><img src="../../../.gitbook/assets/image (20) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (20).png" alt=""><figcaption></figcaption></figure>
 
 ## Ações
 
-### Leitura
+### Ler
 
 No modo de leitura, o Flipper está esperando a chave iButton tocar e é capaz de digerir qualquer um dos três tipos de chaves: **Dallas, Cyfral e Metakom**. O Flipper **descobrirá o tipo de chave sozinho**. O nome do protocolo da chave será exibido na tela acima do número de ID.
 

@@ -45,39 +45,21 @@ O Windows é o sistema operacional mais utilizado no mundo, o que o torna um alv
 
 ### Backdoors
 
-#### Porta dos Fundos do Registro
+#### Backdoor de Registro
 
-O Registro do Windows é um banco de dados que armazena configurações e opções para o sistema operacional e para os aplicativos instalados. Uma técnica comum de backdoor é adicionar uma entrada ao Registro que execute um programa malicioso sempre que o sistema é iniciado.
+O registro do Windows é um banco de dados que armazena configurações e opções para o sistema operacional e para os programas instalados. Um backdoor pode ser adicionado ao registro para permitir que um invasor acesse o sistema sem ser detectado. Isso pode ser feito adicionando uma chave de registro que executa um comando ou script malicioso.
 
-Para adicionar uma entrada de Registro, use o comando `reg add` no prompt de comando. Por exemplo, o seguinte comando adiciona uma entrada de Registro que executa um programa chamado `malware.exe` sempre que o sistema é iniciado:
+#### Backdoor de Serviço
 
-```
-reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v "Malware" /t REG_SZ /d "C:\malware.exe" /f
-```
+Os serviços do Windows são programas que são executados em segundo plano e fornecem funcionalidades para o sistema operacional e para os programas instalados. Um backdoor pode ser adicionado como um serviço para permitir que um invasor acesse o sistema sem ser detectado. Isso pode ser feito criando um serviço que executa um comando ou script malicioso.
 
-#### Porta dos Fundos do Serviço
+#### Backdoor de Arquivo
 
-Os serviços do Windows são programas que são executados em segundo plano e fornecem funcionalidades para o sistema operacional e para os aplicativos instalados. Uma técnica comum de backdoor é criar um serviço que execute um programa malicioso sempre que o sistema é iniciado.
-
-Para criar um serviço, use o comando `sc create` no prompt de comando. Por exemplo, o seguinte comando cria um serviço chamado `MalwareService` que executa um programa chamado `malware.exe` sempre que o sistema é iniciado:
-
-```
-sc create MalwareService binPath= "C:\malware.exe" start= auto DisplayName= "Malware Service"
-```
-
-#### Porta dos Fundos do Agendador de Tarefas
-
-O Agendador de Tarefas do Windows é uma ferramenta que permite agendar a execução de programas em horários específicos ou em eventos específicos, como o início do sistema ou o login de um usuário. Uma técnica comum de backdoor é criar uma tarefa agendada que execute um programa malicioso sempre que o sistema é iniciado ou quando um usuário faz login.
-
-Para criar uma tarefa agendada, use o comando `schtasks.exe` no prompt de comando. Por exemplo, o seguinte comando cria uma tarefa agendada chamada `MalwareTask` que executa um programa chamado `malware.exe` sempre que o sistema é iniciado:
-
-```
-schtasks /create /tn "MalwareTask" /tr "C:\malware.exe" /sc onstart /ru SYSTEM
-```
+Um backdoor pode ser adicionado a um arquivo executável do Windows para permitir que um invasor acesse o sistema sem ser detectado. Isso pode ser feito injetando código malicioso no arquivo executável ou anexando um arquivo executável malicioso a um arquivo legítimo.
 
 ### Conclusão
 
-Existem muitas técnicas de backdoor que podem ser usadas em sistemas Windows. É importante que os administradores de sistemas estejam cientes dessas técnicas e tomem medidas para proteger seus sistemas contra elas.
+Existem várias técnicas de backdoor que podem ser usadas em sistemas Windows. É importante que os administradores de sistemas estejam cientes dessas técnicas e tomem medidas para proteger seus sistemas contra elas.
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
@@ -131,11 +113,11 @@ Abra o projeto SalseoLoader usando o Visual Studio.
 
 #### **Ferramentas** --> **Gerenciador de Pacotes NuGet** --> **Gerenciar Pacotes NuGet para a Solução...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1) (1).png>)
 
-#### **Procure pelo pacote DllExport (usando a guia Procurar) e pressione Instalar (e aceite o popup)**
+#### **Procure pelo pacote DllExport (usando a guia Procurar), e pressione Instalar (e aceite o popup)**
 
-![](<../.gitbook/assets/image (4) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (4) (1) (1) (1) (1).png>)
 
 Na pasta do seu projeto aparecerão os arquivos: **DllExport.bat** e **DllExport\_Configure.bat**
 
@@ -143,7 +125,7 @@ Na pasta do seu projeto aparecerão os arquivos: **DllExport.bat** e **DllExport
 
 Pressione **Desinstalar** (sim, é estranho, mas confie em mim, é necessário)
 
-![](<../.gitbook/assets/image (5) (1) (1) (2).png>)
+![](<../.gitbook/assets/image (5) (1) (1) (2) (1).png>)
 
 ### **Saia do Visual Studio e execute DllExport\_configure**
 
