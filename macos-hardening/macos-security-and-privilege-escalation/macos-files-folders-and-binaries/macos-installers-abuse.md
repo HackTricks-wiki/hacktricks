@@ -1,6 +1,6 @@
-## Información Básica
+## Información básica de Pkg
 
-Un paquete de instalación de macOS (también conocido como archivo `.pkg`) es un formato de archivo utilizado por macOS para **distribuir software**. Estos archivos son como una **caja que contiene todo lo que un software necesita para instalarse y ejecutarse correctamente**.
+Un paquete de instalación de macOS (también conocido como archivo `.pkg`) es un formato de archivo utilizado por macOS para **distribuir software**. Estos archivos son como una **caja que contiene todo lo que un software** necesita para instalarse y ejecutarse correctamente.
 
 El archivo del paquete en sí es un archivo que contiene una **jerarquía de archivos y directorios que se instalarán en el equipo de destino**. También puede incluir **scripts** para realizar tareas antes y después de la instalación, como configurar archivos de configuración o limpiar versiones antiguas del software.
 
@@ -28,11 +28,25 @@ xar -xf "/path/to/package.pkg"
 cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
-## Privesc a través del abuso de paquetes
+## Información básica de DMG
+
+Los archivos DMG, o imágenes de disco de Apple, son un formato de archivo utilizado por el sistema operativo macOS de Apple para imágenes de disco. Un archivo DMG es esencialmente una **imagen de disco montable** (contiene su propio sistema de archivos) que contiene datos de bloque sin procesar, generalmente comprimidos y a veces cifrados. Cuando abres un archivo DMG, macOS lo **monta como si fuera un disco físico**, lo que te permite acceder a su contenido.
+
+### Jerarquía
+
+<figure><img src="../../../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+
+La jerarquía de un archivo DMG puede ser diferente según el contenido. Sin embargo, para los DMG de aplicaciones, generalmente sigue esta estructura:
+
+* Nivel superior: este es la raíz de la imagen del disco. A menudo contiene la aplicación y posiblemente un enlace a la carpeta de Aplicaciones.
+  * Aplicación (.app): esta es la aplicación real. En macOS, una aplicación es típicamente un paquete que contiene muchos archivos y carpetas individuales que conforman la aplicación.
+  * Enlace de Aplicaciones: este es un acceso directo a la carpeta de Aplicaciones en macOS. El propósito de esto es hacer que sea fácil para ti instalar la aplicación. Puedes arrastrar el archivo .app a este acceso directo para instalar la aplicación.
+
+## Escalada de privilegios a través del abuso de pkg
 
 ### Ejecución desde directorios públicos
 
-Si un script de pre o post instalación se está ejecutando desde **`/var/tmp/Installerutil`**, un atacante podría controlar ese script para escalar privilegios cada vez que se ejecute. Otro ejemplo similar:
+Si un script de pre o post instalación se está ejecutando, por ejemplo, desde **`/var/tmp/Installerutil`**, un atacante podría controlar ese script para escalar privilegios cada vez que se ejecute. Otro ejemplo similar:
 
 <figure><img src="../../../.gitbook/assets/Pasted Graphic 5.png" alt=""><figcaption></figcaption></figure>
 
@@ -52,18 +66,31 @@ Si un instalador escribe en `/tmp/fixedname/bla/bla`, es posible **crear un mont
 
 Un ejemplo de esto es **CVE-2021-26089** que logró **sobrescribir un script periódico** para obtener la ejecución como root. Para obtener más información, consulte la charla: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
+## pkg como malware
+
+### Carga útil vacía
+
+Es posible generar un archivo **`.pkg`** con **scripts de pre y post-instalación** sin ninguna carga útil.
+
+### JS en xml de distribución
+
+Es posible agregar etiquetas **`<script>`** en el archivo **xml de distribución** del paquete y ese código se ejecutará y puede **ejecutar comandos** usando **`system.run`**:
+
+<figure><img src="../../../.gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
+
 ## Referencias
 
 * [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0\_zobQ)
+* [**OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* ¿Trabaja en una **empresa de ciberseguridad**? ¿Quiere ver su **empresa anunciada en HackTricks**? ¿O quiere tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFT exclusivos**](https://opensea.io/collection/the-peass-family)
+* Obtenga el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únase al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegramas**](https://t.me/peass) o **sígame** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparta sus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

