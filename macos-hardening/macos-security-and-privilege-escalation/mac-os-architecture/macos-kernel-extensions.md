@@ -8,7 +8,7 @@
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live).
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR a** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **y** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -22,19 +22,19 @@ Obviamente, esto es tan poderoso que es complicado cargar una extensión de kern
 
 * Al entrar en **modo de recuperación**, las extensiones de kernel deben estar **permitidas para ser cargadas**:
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 * La extensión de kernel debe estar **firmada con un certificado de firma de código de kernel**, que solo puede ser otorgado por **Apple**. Quien revisará en detalle la **empresa** y las **razones** por las que se necesita.
 * La extensión de kernel también debe estar **notarizada**, Apple podrá verificarla en busca de malware.
-* Luego, el **usuario root** es el que puede cargar la extensión y los archivos dentro del paquete deben pertenecer a root.
-* Finalmente, al intentar cargarla, el [**usuario recibirá una solicitud de confirmación**](https://developer.apple.com/library/archive/technotes/tn2459/\_index.html) y, si se acepta, la computadora debe **reiniciarse** para cargarla.
+* Luego, el **usuario root** es el que puede cargar la extensión de kernel y los archivos dentro del paquete deben pertenecer a root.
+* Finalmente, al intentar cargarla, el [**usuario recibirá una solicitud de confirmación**](https://developer.apple.com/library/archive/technotes/tn2459/\_index.html) y si se acepta, la computadora debe **reiniciarse** para cargarla.
 
 ### Proceso de carga
 
 En Catalina era así: Es interesante destacar que el proceso de **verificación** ocurre en **userland**. Sin embargo, solo las aplicaciones con la concesión **`com.apple.private.security.kext-management`** pueden **solicitar al kernel** que **cargue una extensión:** kextcache, kextload, kextutil, kextd, syspolicyd
 
 1. **`kextutil`** cli **inicia** el proceso de verificación para cargar una extensión
-   * Se comunicará con **`kextd`** enviando un servicio Mach
+   * Se comunicará con **`kextd`** enviando usando un servicio Mach
 2. **`kextd`** verificará varias cosas, como la firma
    * Se comunicará con **`syspolicyd`** para verificar si se puede cargar la extensión
 3. **`syspolicyd`** **preguntará** al **usuario** si la extensión no se ha cargado previamente

@@ -35,7 +35,7 @@ struct fat_arch {
 
 El encabezado tiene los bytes **magic** seguidos del **número** de **archivos** que el archivo **contiene** (`nfat_arch`) y cada archivo tendrá una estructura `fat_arch`.
 
-Verifíquelo con:
+Compruébelo con:
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
 /bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
@@ -183,7 +183,7 @@ Ejemplo de **encabezado de sección**:
 
 Si **agregas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 También es posible obtener **información de encabezado** desde la **línea de comandos** con:
 ```bash
@@ -197,7 +197,7 @@ Segmentos comunes cargados por este cmd:
   * `__text`: Código binario compilado
   * `__const`: Datos constantes
   * `__cstring`: Constantes de cadena
-  * `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
+  * `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de biblioteca dinámica
 * **`__DATA`**: Contiene datos que son **escribibles**.
   * `__data`: Variables globales (que han sido inicializadas)
   * `__bss`: Variables estáticas (que no han sido inicializadas)
@@ -215,7 +215,7 @@ Contiene información sobre la **firma de código del archivo Macho-O**. Solo co
 
 ### **LC\_LOAD\_DYLINKER**
 
-Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre se establece en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo kernel.
+Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre está establecido en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo kernel.
 
 ### **`LC_LOAD_DYLIB`**
 

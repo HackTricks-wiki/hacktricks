@@ -14,7 +14,7 @@
 
 ## Técnicas encontradas
 
-Se encontraron las siguientes técnicas que funcionan en algunas aplicaciones de firewall de macOS.
+Las siguientes técnicas funcionan en algunas aplicaciones de firewall de macOS.
 
 ### Abuso de nombres de lista blanca
 
@@ -34,19 +34,19 @@ El firewall podría permitir conexiones a dominios de Apple conocidos como **`ap
 
 ### Bypass genérico
 
-Algunas ideas para intentar eludir los firewalls
+Algunas ideas para intentar eludir los firewalls.
 
 ### Verificar el tráfico permitido
 
-Conocer el tráfico permitido te ayudará a identificar dominios potencialmente en lista blanca o qué aplicaciones tienen permiso para acceder a ellos.
+Conocer el tráfico permitido te ayudará a identificar los dominios potencialmente en lista blanca o qué aplicaciones tienen permiso para acceder a ellos.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
 ### Abusando de DNS
 
-Las resoluciones de DNS se realizan a través de la aplicación firmada **`mdnsreponder`**, la cual probablemente estará permitida para contactar con los servidores DNS.
+Las resoluciones de DNS se realizan a través de la aplicación firmada **`mdnsreponder`**, la cual probablemente estará permitida para contactar servidores DNS.
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### A través de aplicaciones de navegador
 

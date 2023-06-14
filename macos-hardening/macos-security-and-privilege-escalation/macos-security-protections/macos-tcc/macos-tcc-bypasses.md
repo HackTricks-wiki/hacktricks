@@ -12,11 +12,11 @@ ls: Desktop: Operation not permitted
 username@hostname ~ % cat Desktop/lalala
 asd
 ```
-El **atributo extendido `com.apple.macl`** se agrega al nuevo **archivo** para dar acceso a la **aplicación creadora** a leerlo.
+El **atributo extendido `com.apple.macl`** se agrega al nuevo **archivo** para dar acceso a la **aplicación creadora** para leerlo.
 
 ### Bypass de SSH
 
-Por defecto, el acceso a través de **SSH** tendrá **"Acceso completo al disco"**. Para desactivarlo, debe estar en la lista pero desactivado (eliminarlo de la lista no eliminará esos privilegios):
+Por defecto, un acceso a través de **SSH** tendrá **"Acceso completo al disco"**. Para desactivarlo, debe estar en la lista pero desactivado (eliminarlo de la lista no eliminará esos privilegios):
 
 ![](<../../../../.gitbook/assets/image (569).png>)
 
@@ -26,7 +26,7 @@ Aquí puede encontrar ejemplos de cómo algunos **malwares han podido evitar est
 
 ### Manejar extensiones - CVE-2022-26767
 
-El atributo **`com.apple.macl`** se otorga a los archivos para dar a una **aplicación específica permisos para leerlo**. Este atributo se establece cuando se **arrastra y suelta** un archivo sobre una aplicación, o cuando un usuario **hace doble clic** en un archivo para abrirlo con la **aplicación predeterminada**.
+El atributo **`com.apple.macl`** se otorga a los archivos para darle a una **aplicación específica permisos para leerlo**. Este atributo se establece cuando se **arrastra y suelta** un archivo sobre una aplicación, o cuando un usuario **hace doble clic** en un archivo para abrirlo con la **aplicación predeterminada**.
 
 Por lo tanto, un usuario podría **registrar una aplicación maliciosa** para manejar todas las extensiones y llamar a Launch Services para **abrir** cualquier archivo (por lo que el archivo malicioso obtendrá acceso para leerlo).
 
@@ -35,12 +35,6 @@ Por lo tanto, un usuario podría **registrar una aplicación maliciosa** para ma
 Con el permiso **`com.apple.private.icloud-account-access`** es posible comunicarse con el servicio XPC **`com.apple.iCloudHelper`** que **proporcionará tokens de iCloud**.
 
 **iMovie** y **Garageband** tenían este permiso y otros que lo permitían.
-
-### Bypass de Electron
-
-El código JS de una aplicación Electron no está firmado, por lo que un atacante podría mover la aplicación a una ubicación escribible, inyectar código JS malicioso y lanzar esa aplicación y abusar de los permisos TCC.
-
-Electron está trabajando en la clave **`ElectronAsarIntegrity`** en Info.plist que contendrá un hash del archivo app.asar para verificar la integridad del código JS antes de ejecutarlo.
 
 ### kTCCServiceAppleEvents / Automatización
 
@@ -52,7 +46,7 @@ Para obtener más información sobre Apple Scripts, consulte:
 [macos-apple-scripts.md](macos-apple-scripts.md)
 {% endcontent-ref %}
 
-Por ejemplo, si una aplicación tiene **permiso de automatización sobre `iTerm`**, en este ejemplo **`Terminal`** tiene acceso sobre iTerm:
+Por ejemplo, si una aplicación tiene **permiso de Automatización sobre `iTerm`**, como en este ejemplo **`Terminal`** tiene acceso sobre iTerm:
 
 <figure><img src="../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -127,7 +121,7 @@ $> ls ~/Documents
 
 Notas tenía acceso a ubicaciones protegidas por TCC, pero cuando se crea una nota, esta se **crea en una ubicación no protegida**. Por lo tanto, se podría pedir a Notas que copie un archivo protegido en una nota (en una ubicación no protegida) y luego acceder al archivo:
 
-<figure><img src="../../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2021-XXXX - Translocación
 
@@ -193,7 +187,7 @@ __attribute__((constructor)) static void constructor(int argc, const char **argv
 ```
 Para obtener más información, consulte el [**informe original**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/).
 
-### Complementos de la capa de abstracción del dispositivo (DAL)
+### Plug-ins de la capa de abstracción del dispositivo (DAL)
 
 Las aplicaciones del sistema que abren el flujo de la cámara a través de Core Media I/O (aplicaciones con **`kTCCServiceCamera`**) cargan **en el proceso estos complementos** ubicados en `/Library/CoreMediaIO/Plug-Ins/DAL` (no restringidos por SIP).
 
@@ -211,7 +205,7 @@ Existen diferentes técnicas para inyectar código dentro de un proceso y abusar
 
 ### Firefox
 
-La aplicación Firefox sigue siendo vulnerable al tener la concesión `com.apple.security.cs.disable-library-validation`:
+La aplicación Firefox sigue siendo vulnerable teniendo la concesión `com.apple.security.cs.disable-library-validation`:
 ```xml
 codesign -d --entitlements :- /Applications/Firefox.app
 Executable=/Applications/Firefox.app/Contents/MacOS/firefox
@@ -359,7 +353,7 @@ La carpeta **`/var/db/locationd/` no estaba protegida de la montura de DMG**, po
 
 En varias ocasiones, los archivos almacenarán información sensible como correos electrónicos, números de teléfono, mensajes... en ubicaciones no protegidas (lo que cuenta como una vulnerabilidad en Apple).
 
-<figure><img src="../../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
 
 ## Referencia
 

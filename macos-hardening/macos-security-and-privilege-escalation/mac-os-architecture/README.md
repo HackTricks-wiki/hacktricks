@@ -41,7 +41,7 @@ Además, **Mach y BSD mantienen modelos de seguridad diferentes**: el modelo de 
 
 ### I/O Kit - Controladores
 
-I/O Kit es el marco de **controladores de dispositivos orientado a objetos** de código abierto en el kernel XNU y es responsable de la adición y gestión de **controladores de dispositivos cargados dinámicamente**. Estos controladores permiten que se agregue código modular al kernel de forma dinámica para su uso con diferentes hardware, por ejemplo. Se encuentran en:
+I/O Kit es el marco de **controlador de dispositivo orientado a objetos** de código abierto en el kernel XNU y es responsable de la adición y gestión de **controladores de dispositivo cargados dinámicamente**. Estos controladores permiten que se agregue código modular al kernel dinámicamente para su uso con diferentes hardware, por ejemplo. Se encuentran en:
 
 * `/System/Library/Extensions`
   * Archivos KEXT integrados en el sistema operativo OS X.
@@ -71,7 +71,7 @@ Para encontrar extensiones específicas, puedes usar:
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
 ```
-Para cargar y descargar extensiones de kernel, haz lo siguiente:
+Para cargar y descargar extensiones de kernel, haga lo siguiente:
 ```bash
 kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
@@ -88,6 +88,14 @@ macOS es **muy restrictivo para cargar Extensiones de Kernel** (.kext) debido a 
 
 {% content-ref url="macos-kernel-extensions.md" %}
 [macos-kernel-extensions.md](macos-kernel-extensions.md)
+{% endcontent-ref %}
+
+### Extensiones de Sistema de macOS
+
+En lugar de utilizar Extensiones de Kernel, macOS creó las Extensiones de Sistema, que ofrecen APIs de nivel de usuario para interactuar con el kernel. De esta manera, los desarrolladores pueden evitar el uso de extensiones de kernel.
+
+{% content-ref url="macos-system-extensions.md" %}
+[macos-system-extensions.md](macos-system-extensions.md)
 {% endcontent-ref %}
 
 ## Referencias
