@@ -64,9 +64,15 @@ This is a [public function](https://developer.apple.com/documentation/security/1
 
 For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
+### Execution by mounting
+
+If an installer writes to `/tmp/fixedname/bla/bla`, it's possible to **create a mount** over `/tmp/fixedname` with noowners so you could **modify any file during the installation** to abuse the installation process.
+
+An example of this is **CVE-2021-26089** which managed to **overwrite a periodic script** to get execution as root. For more information take a look to the talk: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+
 ## References
 
-* [https://www.youtube.com/watch?v=iASSG0\_zobQ](https://www.youtube.com/watch?v=iASSG0\_zobQ)
+* [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0\_zobQ)
 
 <details>
 

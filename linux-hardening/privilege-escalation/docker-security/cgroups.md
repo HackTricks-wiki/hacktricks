@@ -53,7 +53,7 @@ Don’t be alarmed if the **output is significantly shorter** on your system; th
 Cgroups are typically **accessed through the filesystem**. This is in contrast to the traditional Unix system call interface for interacting with the kernel.\
 To explore the cgroup setup of a shell, you can look in the `/proc/self/cgroup` file to find the shell's cgroup, and then navigate to the `/sys/fs/cgroup` (or `/sys/fs/cgroup/unified`) directory and look for a **directory with the same name as the cgroup**. Changing to this directory and looking around will allow you to see the various **settings and resource usage information for the cgroup**.
 
-<figure><img src="../../../.gitbook/assets/image (10).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (10) (2).png" alt=""><figcaption></figcaption></figure>
 
 Among the many files that can be here, **the primary cgroup interface files begin with `cgroup`**. Start by looking at `cgroup.procs` (using cat is fine), which lists the processes in the cgroup. A similar file, `cgroup.threads`, also includes threads.
 

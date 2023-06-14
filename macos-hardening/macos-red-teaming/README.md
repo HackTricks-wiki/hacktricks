@@ -49,7 +49,7 @@ You could use the script [**JamfSniper.py**](https://github.com/WithSecureLabs/J
 
 Moreover, after finding proper credentials you could be able to brute-force other usernames with the next form:
 
-![](<../../.gitbook/assets/image (13).png>)
+![](<../../.gitbook/assets/image (6).png>)
 
 #### JAMF device Authentication
 
