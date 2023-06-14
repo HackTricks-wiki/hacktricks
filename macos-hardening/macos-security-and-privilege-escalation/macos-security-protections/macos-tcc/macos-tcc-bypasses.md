@@ -26,7 +26,7 @@ ls: Desktop: Operation not permitted
 username@hostname ~ % cat Desktop/lalala
 asd
 ```
-El **atributo extendido `com.apple.macl`** se agrega al nuevo **archivo** para dar acceso a la **aplicación creadora** a leerlo.
+El **atributo extendido `com.apple.macl`** se agrega al nuevo **archivo** para dar acceso a la **aplicación creadora** para leerlo.
 
 ### Bypass de SSH
 
@@ -243,7 +243,7 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Para obtener más información sobre cómo explotar esto, consulte el [**informe original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Para obtener más información sobre cómo explotar esto fácilmente, consulte el [**informe original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
@@ -292,7 +292,7 @@ exploit_location]; task.standardOutput = pipe;
 ```
 ## Mediante montaje
 
-### CVE-2020-9771 - Bypass de TCC de montaje_apfs y escalada de privilegios
+### CVE-2020-9771 - Bypass de TCC y escalada de privilegios de mount\_apfs
 
 **Cualquier usuario** (incluso los no privilegiados) puede crear y montar una instantánea de Time Machine y **acceder a TODOS los archivos** de esa instantánea.\
 El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Acceso completo al disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser otorgado por un administrador. 
@@ -367,7 +367,7 @@ La carpeta **`/var/db/locationd/` no estaba protegida de la montura de DMG**, po
 
 En varias ocasiones, los archivos almacenarán información sensible como correos electrónicos, números de teléfono, mensajes... en ubicaciones no protegidas (lo que cuenta como una vulnerabilidad en Apple).
 
-<figure><img src="../../../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
 
 ## Referencia
 
