@@ -140,7 +140,7 @@ launchtl list #Services
 
 ### User Processes
 
-```
+```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
 
@@ -150,6 +150,12 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
+
+### Create a user
+
+Without prompts
+
+<figure><img src="../.gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
 
 <details>
 

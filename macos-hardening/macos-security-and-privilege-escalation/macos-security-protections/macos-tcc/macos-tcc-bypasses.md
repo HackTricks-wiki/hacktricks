@@ -40,6 +40,10 @@ Here you can find examples of how some **malwares have been able to bypass this 
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
+{% hint style="danger" %}
+Note that now, in order to be able to enable SSH you need **Full Disk Access**
+{% endhint %}
+
 ### Handle extensions - CVE-2022-26767
 
 The attribute **`com.apple.macl`** is given to files to give a **certain application permissions to read it.** This attribute is set when **drag\&drop** a file over an app, or when a user **double-clicks** a file to open it with the **default application**.
