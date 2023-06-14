@@ -8,22 +8,22 @@
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Reutilización de PID
 
-Cuando un servicio **XPC** de macOS está comprobando el proceso llamado basándose en el **PID** y no en el **token de auditoría**, es vulnerable a un ataque de reutilización de PID. Este ataque se basa en una **condición de carrera** en la que un **exploit** va a **enviar mensajes al servicio XPC** abusando de la funcionalidad y justo **después** de eso, ejecutando **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** con el binario permitido.
+Cuando un servicio **XPC** de macOS está verificando el proceso llamado basándose en el **PID** y no en el **token de auditoría**, es vulnerable a un ataque de reutilización de PID. Este ataque se basa en una **condición de carrera** en la que un **exploit** va a **enviar mensajes al servicio XPC** abusando de la funcionalidad y justo **después** de eso, ejecutando **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** con el binario permitido.
 
-Esta función hará que el **binario permitido posea el PID** pero el **mensaje XPC malicioso se habría enviado** justo antes. Por lo tanto, si el servicio **XPC** utiliza el **PID** para **autenticar** al remitente y lo comprueba **DESPUÉS** de la ejecución de **`posix_spawn`**, pensará que proviene de un proceso **autorizado**.
+Esta función hará que el **binario permitido posea el PID** pero el **mensaje XPC malicioso ya habría sido enviado** justo antes. Por lo tanto, si el servicio **XPC** utiliza el **PID** para **autenticar** al remitente y lo verifica **DESPUÉS** de la ejecución de **`posix_spawn`**, pensará que proviene de un proceso **autorizado**.
 
 ### Ejemplo de exploit
 
-Si encuentras la función **`shouldAcceptNewConnection`** o una función llamada por ella que **llame** a **`processIdentifier`** y no llame a **`auditToken`**. Es muy probable que esté verificando el PID del proceso y no el token de auditoría.\
+Si encuentras la función **`shouldAcceptNewConnection`** o una función llamada por ella que **llame** a **`processIdentifier`** y no llame a **`auditToken`**, es muy probable que esté verificando el PID del proceso y no el token de auditoría.\
 Como por ejemplo en esta imagen (tomada de la referencia):
 
-<figure><img src="../../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 Comprueba este ejemplo de exploit (de nuevo, tomado de la referencia) para ver las 2 partes del exploit:
 
@@ -31,7 +31,7 @@ Comprueba este ejemplo de exploit (de nuevo, tomado de la referencia) para ver l
 * **Cada fork** enviará el **payload** al servicio XPC mientras ejecuta **`posix_spawn`** justo después de enviar el mensaje.
 
 {% hint style="danger" %}
-Para que el exploit funcione es importante exportar export OBJC\_DISABLE\_INITIALIZE\_FORK\_SAFETY=YES o ponerlo en el exploit:
+Para que el exploit funcione, es importante exportar export OBJC\_DISABLE\_INITIALIZE\_FORK\_SAFETY=YES o ponerlo en el exploit:
 ```objectivec
 asm(".section __DATA,__objc_fork_ok\n"
 "empty:\n"
@@ -155,6 +155,6 @@ int main(int argc, const char * argv[]) {
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

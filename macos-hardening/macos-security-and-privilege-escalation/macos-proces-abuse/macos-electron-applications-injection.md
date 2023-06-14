@@ -6,7 +6,7 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -32,7 +32,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-Tenga en cuenta que ahora las aplicaciones de Electron **fortificadas** ignorarán los parámetros de nodo (como --inspect) cuando se inicien a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté establecida.
+Tenga en cuenta que ahora las aplicaciones de Electron **fortificadas** con **RunAsNode** deshabilitado **ignorarán los parámetros de node** (como --inspect) cuando se inicien a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté establecida.
 
 Sin embargo, aún podría usar el parámetro de electron `--remote-debugging-port=9229`, pero la carga útil anterior no funcionará para ejecutar otros procesos.
 {% endhint %}

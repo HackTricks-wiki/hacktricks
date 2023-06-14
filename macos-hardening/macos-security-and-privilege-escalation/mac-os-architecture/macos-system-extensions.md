@@ -5,10 +5,10 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -16,7 +16,7 @@
 
 A diferencia de las extensiones del kernel, las **extensiones del sistema se ejecutan en el espacio de usuario** en lugar del espacio del kernel, lo que reduce el riesgo de un fallo del sistema debido al mal funcionamiento de la extensión.
 
-<figure><img src="../../../.gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
 Existen tres tipos de extensiones del sistema: extensiones de **DriverKit**, extensiones de **red** y extensiones de **seguridad de punto final**.
 
@@ -56,20 +56,20 @@ Los eventos que el marco de seguridad de punto final puede monitorear se clasifi
 
 ### Arquitectura del marco de seguridad de punto final
 
-<figure><img src="../../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
 
 La **comunicación del espacio de usuario** con el marco de seguridad de punto final se realiza a través de la clase IOUserClient. Se utilizan dos subclases diferentes, según el tipo de llamante:
 
-* **EndpointSecurityDriverClient**: esto requiere el permiso `com.apple.private.endpoint-security.manager`, que solo tiene el proceso del sistema `endpointsecurityd`.
-* **EndpointSecurityExternalClient**: esto requiere el permiso `com.apple.developer.endpoint-security.client`. Esto lo utilizaría típicamente el software de seguridad de terceros que necesita interactuar con el marco de seguridad de punto final.
+* **EndpointSecurityDriverClient**: requiere el permiso `com.apple.private.endpoint-security.manager`, que solo tiene el proceso del sistema `endpointsecurityd`.
+* **EndpointSecurityExternalClient**: requiere el permiso `com.apple.developer.endpoint-security.client`. Esto lo utilizaría típicamente el software de seguridad de terceros que necesita interactuar con el marco de seguridad de punto final.
 
-Las extensiones de seguridad de punto final: **`libEndpointSecurity.dylib`** es la biblioteca C que utilizan las extensiones del sistema para comunicarse con el kernel. Esta biblioteca utiliza el I/O Kit (`IOKit`) para comunicarse con la extensión del kernel de seguridad de punto final.
+Las extensiones del sistema de seguridad de punto final: **`libEndpointSecurity.dylib`** es la biblioteca C que utilizan las extensiones del sistema para comunicarse con el kernel. Esta biblioteca utiliza el I/O Kit (`IOKit`) para comunicarse con la extensión del kernel de seguridad de punto final.
 
 **`endpointsecurityd`** es un demonio del sistema clave que participa en la gestión y el lanzamiento de extensiones del sistema de seguridad de punto final, especialmente durante el proceso de arranque temprano. Solo las extensiones del sistema marcadas con **`NSEndpointSecurityEarlyBoot`** en su archivo `Info.plist` reciben este tratamiento de arranque temprano.
 
-Otro demonio del sistema, **`sysextd`**, **valida las extensiones del sistema** y las mueve a las ubicaciones del sistema adecuadas. Luego solicita al demonio relevante que cargue la extensión. El **`SystemExtensions.framework`** es responsable de activar y desactivar las extensiones del sistema.
+Otro demonio del sistema, **`sysextd`**, **valida las extensiones del sistema de seguridad** y las mueve a las ubicaciones del sistema adecuadas. Luego solicita al demonio relevante que cargue la extensión. El **`SystemExtensions.framework`** es responsable de activar y desactivar las extensiones del sistema. 
 
-## Saltándose ESF
+## Saltando ESF
 
 ESF es utilizado por herramientas de seguridad que intentarán detectar a un equipo rojo, por lo que cualquier información sobre cómo evitarlo suena interesante.
 

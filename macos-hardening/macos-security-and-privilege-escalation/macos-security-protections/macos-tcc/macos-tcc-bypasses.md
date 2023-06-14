@@ -1,8 +1,22 @@
+## Bypasses de TCC en macOS
+
+<details>
+
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue la [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+
+</details>
+
 ## Por funcionalidad
 
 ### Bypass de escritura
 
-Esto no es un bypass, es simplemente cómo funciona TCC: **no protege de la escritura**. Si Terminal **no tiene acceso para leer el escritorio de un usuario, aún puede escribir en él**:
+Esto no es un bypass, es simplemente cómo funciona TCC: **no protege de la escritura**. Si Terminal **no tiene acceso para leer el Escritorio de un usuario, aún puede escribir en él**:
 ```shell-session
 username@hostname ~ % ls Desktop 
 ls: Desktop: Operation not permitted
@@ -12,7 +26,7 @@ ls: Desktop: Operation not permitted
 username@hostname ~ % cat Desktop/lalala
 asd
 ```
-El **atributo extendido `com.apple.macl`** se agrega al nuevo **archivo** para dar acceso a la **aplicación creadora** para leerlo.
+El **atributo extendido `com.apple.macl`** se agrega al nuevo **archivo** para dar acceso a la **aplicación creadora** a leerlo.
 
 ### Bypass de SSH
 
@@ -26,7 +40,7 @@ Aquí puede encontrar ejemplos de cómo algunos **malwares han podido evitar est
 
 ### Manejar extensiones - CVE-2022-26767
 
-El atributo **`com.apple.macl`** se otorga a los archivos para darle a una **aplicación específica permisos para leerlo**. Este atributo se establece cuando se **arrastra y suelta** un archivo sobre una aplicación, o cuando un usuario **hace doble clic** en un archivo para abrirlo con la **aplicación predeterminada**.
+El atributo **`com.apple.macl`** se otorga a los archivos para dar a una **aplicación específica permisos para leerlo**. Este atributo se establece cuando se **arrastra y suelta** un archivo sobre una aplicación, o cuando un usuario **hace doble clic** en un archivo para abrirlo con la **aplicación predeterminada**.
 
 Por lo tanto, un usuario podría **registrar una aplicación maliciosa** para manejar todas las extensiones y llamar a Launch Services para **abrir** cualquier archivo (por lo que el archivo malicioso obtendrá acceso para leerlo).
 
@@ -121,7 +135,7 @@ $> ls ~/Documents
 
 Notas tenía acceso a ubicaciones protegidas por TCC, pero cuando se crea una nota, esta se **crea en una ubicación no protegida**. Por lo tanto, se podría pedir a Notas que copie un archivo protegido en una nota (en una ubicación no protegida) y luego acceder al archivo:
 
-<figure><img src="../../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2021-XXXX - Translocación
 
@@ -187,7 +201,7 @@ __attribute__((constructor)) static void constructor(int argc, const char **argv
 ```
 Para obtener más información, consulte el [**informe original**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/).
 
-### Plug-ins de la capa de abstracción del dispositivo (DAL)
+### Complementos de la capa de abstracción del dispositivo (DAL)
 
 Las aplicaciones del sistema que abren el flujo de la cámara a través de Core Media I/O (aplicaciones con **`kTCCServiceCamera`**) cargan **en el proceso estos complementos** ubicados en `/Library/CoreMediaIO/Plug-Ins/DAL` (no restringidos por SIP).
 
@@ -205,7 +219,7 @@ Existen diferentes técnicas para inyectar código dentro de un proceso y abusar
 
 ### Firefox
 
-La aplicación Firefox sigue siendo vulnerable teniendo la concesión `com.apple.security.cs.disable-library-validation`:
+La aplicación Firefox sigue siendo vulnerable al tener la concesión `com.apple.security.cs.disable-library-validation`:
 ```xml
 codesign -d --entitlements :- /Applications/Firefox.app
 Executable=/Applications/Firefox.app/Contents/MacOS/firefox
@@ -229,7 +243,7 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Para obtener más información sobre cómo explotar esto fácilmente, consulte el [**informe original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Para obtener más información sobre cómo explotar esto, consulte el [**informe original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
@@ -278,7 +292,7 @@ exploit_location]; task.standardOutput = pipe;
 ```
 ## Mediante montaje
 
-### CVE-2020-9771 - Bypass de TCC y escalada de privilegios de mount\_apfs
+### CVE-2020-9771 - Bypass de TCC de montaje_apfs y escalada de privilegios
 
 **Cualquier usuario** (incluso los no privilegiados) puede crear y montar una instantánea de Time Machine y **acceder a TODOS los archivos** de esa instantánea.\
 El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Acceso completo al disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser otorgado por un administrador. 
@@ -353,7 +367,7 @@ La carpeta **`/var/db/locationd/` no estaba protegida de la montura de DMG**, po
 
 En varias ocasiones, los archivos almacenarán información sensible como correos electrónicos, números de teléfono, mensajes... en ubicaciones no protegidas (lo que cuenta como una vulnerabilidad en Apple).
 
-<figure><img src="../../../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 ## Referencia
 

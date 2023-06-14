@@ -32,7 +32,7 @@ Los protocolos de infrarrojos difieren en 3 factores:
 
 Los bits se codifican mediante la modulación de la duración del espacio entre pulsos. El ancho del pulso en sí es constante.
 
-<figure><img src="../../.gitbook/assets/image (16) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
 
 **2. Codificación de ancho de pulso**
 
@@ -42,7 +42,7 @@ Los bits se codifican mediante la modulación del ancho del pulso. El ancho del 
 
 **3. Codificación de fase**
 
-También se conoce como codificación Manchester. El valor lógico se define por la polaridad de la transición entre el estallido de pulso y el espacio. "Espacio a estallido de pulso" denota la lógica "0", "estallido de pulso a espacio" denota la lógica "1".
+También se conoce como codificación de Manchester. El valor lógico se define por la polaridad de la transición entre el estallido de pulso y el espacio. "Espacio a estallido de pulso" denota la lógica "0", "estallido de pulso a espacio" denota la lógica "1".
 
 <figure><img src="../../.gitbook/assets/image (25).png" alt=""><figcaption></figcaption></figure>
 
@@ -62,7 +62,7 @@ La forma más fiable de ver cómo se ve la señal de infrarrojos del mando a dis
 
 Por lo general, hay un preámbulo al principio de un paquete codificado. Esto permite al receptor determinar el nivel de ganancia y el fondo. También hay protocolos sin preámbulo, por ejemplo, Sharp.
 
-Luego se transmite la información. La estructura, el preámbulo y el método de codificación de bits son determinados por el protocolo específico.
+A continuación se transmite la información. La estructura, el preámbulo y el método de codificación de bits son determinados por el protocolo específico.
 
 El **protocolo NEC de infrarrojos** contiene un comando corto y un código de repetición, que se envía mientras se presiona el botón. Tanto el comando como el código de repetición tienen el mismo preámbulo al principio.
 
@@ -75,4 +75,4 @@ Para la lógica "0" y "1", NEC utiliza la codificación de distancia de pulso: p
 ### Acondicionadores de aire
 
 A diferencia de otros mandos a distancia, **los acondicionadores de aire no transmiten sólo el código del botón pulsado**. También **transmiten toda la información** cuando se pulsa un botón para asegurarse de que la **máquina de aire acondicionado y el mando a distancia estén sincronizados**.\
-Esto evitará que una máquina configurada a 20ºC
+Esto evitará que una máquina configurada a 20ºC se aumente a

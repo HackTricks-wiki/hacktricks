@@ -35,7 +35,7 @@ struct fat_arch {
 
 El encabezado tiene los bytes **magic** seguidos del **número** de **archivos** que el archivo **contiene** (`nfat_arch`) y cada archivo tendrá una estructura `fat_arch`.
 
-Compruébelo con:
+Verifíquelo con:
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
 /bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
@@ -64,7 +64,7 @@ fat_magic FAT_MAGIC
 
 o usando la herramienta [Mach-O View](https://sourceforge.net/projects/machoview/):
 
-<figure><img src="../../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (5) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Como puede estar pensando, por lo general, un binario universal compilado para 2 arquitecturas **duplica el tamaño** de uno compilado para solo 1 arquitectura.
 
@@ -179,11 +179,11 @@ struct section_64 { /* for 64-bit architectures */
 ```
 Ejemplo de **encabezado de sección**:
 
-<figure><img src="../../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (6) (2).png" alt=""><figcaption></figcaption></figure>
 
 Si **agregas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 También es posible obtener **información de encabezado** desde la **línea de comandos** con:
 ```bash

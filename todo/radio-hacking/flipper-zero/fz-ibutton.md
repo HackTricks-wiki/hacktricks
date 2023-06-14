@@ -24,19 +24,19 @@ Para obtener más información sobre qué es un iButton, consulte:
 
 La parte **azul** de la siguiente imagen es cómo debería **colocar el iButton real** para que el Flipper pueda **leerlo**. La parte **verde** es cómo debe **tocar el lector** con el Flipper zero para **emular correctamente un iButton**.
 
-<figure><img src="../../../.gitbook/assets/image (20) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (20).png" alt=""><figcaption></figcaption></figure>
 
 ## Acciones
 
 ### Leer
 
-En el modo de lectura, Flipper está esperando que la llave iButton toque y es capaz de digerir cualquiera de los tres tipos de llaves: **Dallas, Cyfral y Metakom**. Flipper **determinará el tipo de llave por sí mismo**. El nombre del protocolo de la llave se mostrará en la pantalla sobre el número de identificación.
+En el modo de lectura, Flipper está esperando que se toque la llave iButton y es capaz de digerir cualquiera de los tres tipos de llaves: **Dallas, Cyfral y Metakom**. Flipper **determinará el tipo de llave por sí mismo**. El nombre del protocolo de la llave se mostrará en la pantalla encima del número de identificación.
 
 ### Añadir manualmente
 
 Es posible **añadir manualmente** un iButton de tipo: **Dallas, Cyfral y Metakom**.
 
-### **Emular**
+### Emular
 
 Es posible **emular** iButtons guardados (leídos o añadidos manualmente).
 

@@ -55,15 +55,15 @@ if ($envPath -notlike "*$folderPath*") {
 * **Después** de que se **genere el archivo**, **cierre** la ventana abierta de **`procmon`** y **abra el archivo de eventos**.
 * Agregue estos **filtros** y encontrará todas las Dll que algún **proceso intentó cargar** desde la carpeta de ruta del sistema escribible:
 
-<figure><img src="../../../.gitbook/assets/image (18) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
 
 ### Dlls perdidas
 
-Al ejecutar esto en una **máquina virtual (vmware) gratuita de Windows 11** obtuve estos resultados:
+Al ejecutar esto en una máquina virtual (vmware) gratuita de Windows 11, obtuve estos resultados:
 
 <figure><img src="../../../.gitbook/assets/image (253).png" alt=""><figcaption></figcaption></figure>
 
-En este caso, los .exe son inútiles, así que ignórelos, las Dlls perdidas son de:
+En este caso, los .exe son inútiles, así que ignórelos, las DLL perdidas eran de:
 
 | Servicio                         | Dll                | Línea de comandos                                                     |
 | ------------------------------- | ------------------ | -------------------------------------------------------------------- |
@@ -75,26 +75,26 @@ Después de encontrar esto, encontré esta interesante publicación de blog que 
 
 ### Explotación
 
-Entonces, para **escalar privilegios** vamos a secuestrar la biblioteca **WptsExtensions.dll**. Teniendo la **ruta** y el **nombre** solo necesitamos **generar la Dll maliciosa**.
+Entonces, para **escalar privilegios**, vamos a secuestrar la biblioteca **WptsExtensions.dll**. Teniendo la **ruta** y el **nombre**, solo necesitamos **generar la DLL maliciosa**.
 
 Puede [**intentar usar cualquiera de estos ejemplos**](../dll-hijacking.md#creating-and-compiling-dlls). Podría ejecutar cargas útiles como: obtener una shell inversa, agregar un usuario, ejecutar un beacon...
 
 {% hint style="warning" %}
 Tenga en cuenta que **no todos los servicios se ejecutan** con **`NT AUTHORITY\SYSTEM`** algunos también se ejecutan con **`NT AUTHORITY\LOCAL SERVICE`** que tiene **menos privilegios** y no podrá crear un nuevo usuario abusar de sus permisos.\
-Sin embargo, ese usuario tiene el privilegio **`seImpersonate`**, por lo que puede usar la [**suite potato para escalar privilegios**](../roguepotato-and-printspoofer.md). Entonces, en este caso, una shell inversa es una mejor opción que intentar crear un usuario.
+Sin embargo, ese usuario tiene el privilegio **`seImpersonate`**, por lo que puede usar la [**suite de patatas para escalar privilegios**](../roguepotato-and-printspoofer.md). Entonces, en este caso, una shell inversa es una mejor opción que intentar crear un usuario.
 {% endhint %}
 
 En el momento de escribir esto, el servicio **Programador de tareas** se ejecuta con **Nt AUTHORITY\SYSTEM**.
 
-Habiendo **generado la Dll maliciosa** (_en mi caso usé una shell inversa x64 y obtuve una shell de vuelta, pero defender la mató porque era de msfvenom_), guárdela en la ruta del sistema escribible con el nombre **WptsExtensions.dll** y **reinicie** la computadora (o reinicie el servicio o haga lo que sea necesario para volver a ejecutar el servicio/programa afectado).
+Habiendo **generado la DLL maliciosa** (_en mi caso usé una shell inversa x64 y obtuve una shell de vuelta, pero Defender la mató porque era de msfvenom_), guárdela en la ruta del sistema escribible con el nombre **WptsExtensions.dll** y **reinicie** la computadora (o reinicie el servicio o haga lo que sea necesario para volver a ejecutar el servicio/programa afectado).
 
-Cuando se reinicie el servicio, la **dll debería cargarse y ejecutarse** (puede **reutilizar** el truco de **procmon** para verificar si la **biblioteca se cargó como se esperaba**).
+Cuando se reinicie el servicio, la **DLL debería cargarse y ejecutarse** (puede **reutilizar** el truco de **procmon** para verificar si la **biblioteca se cargó como se esperaba**).
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* ¿Trabaja en una **empresa de ciberseguridad**? ¿Quiere ver su **empresa anunciada en HackTricks**? o ¿quiere tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* ¿Trabaja en una **empresa de ciberseguridad**? ¿Quiere ver su **empresa anunciada en HackTricks**? ¿O quiere tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulte los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos.
 * Obtenga el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únase al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígame** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**

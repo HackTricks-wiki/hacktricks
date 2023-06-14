@@ -14,9 +14,9 @@
 
 ## Introducción
 
-iButton es un nombre genérico para una llave de identificación electrónica empaquetada en un **contenedor metálico en forma de moneda**. También se llama memoria táctil Dallas o memoria de contacto. Aunque a menudo se le llama erróneamente una llave "magnética", no hay **nada magnético** en ella. De hecho, un microchip completo que opera en un protocolo digital está oculto en su interior.
+iButton es un nombre genérico para una llave de identificación electrónica empaquetada en un **contenedor de metal en forma de moneda**. También se llama memoria táctil de Dallas o memoria de contacto. Aunque a menudo se le llama erróneamente una llave "magnética", no hay **nada magnético** en ella. De hecho, un microchip completo que opera en un protocolo digital está oculto en su interior.
 
-<figure><img src="../../.gitbook/assets/image (19) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (19).png" alt=""><figcaption></figcaption></figure>
 
 ### ¿Qué es iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 

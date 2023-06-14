@@ -8,7 +8,7 @@
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -19,7 +19,7 @@
 
 Si logras **comprometer las credenciales de administrador** para acceder a la plataforma de gestión, puedes **potencialmente comprometer todas las computadoras** distribuyendo tu malware en las máquinas.
 
-Para el red teaming en entornos MacOS, es muy recomendable tener cierta comprensión de cómo funcionan los MDM:
+Para el red teaming en entornos MacOS, es altamente recomendable tener cierta comprensión de cómo funcionan los MDMs:
 
 {% content-ref url="macos-mdm/" %}
 [macos-mdm](macos-mdm/)
@@ -47,13 +47,13 @@ Ve a una página como `https://<company-name>.jamfcloud.com/enroll/` para ver si
 
 Podrías usar el script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) para realizar un ataque de spraying de contraseñas.
 
-Además, después de encontrar las credenciales adecuadas, podrías ser capaz de hacer fuerza bruta en otros nombres de usuario con el siguiente formulario:
+Además, después de encontrar las credenciales adecuadas, podrías ser capaz de realizar un ataque de fuerza bruta en otros nombres de usuario con el siguiente formulario:
 
-![](<../../.gitbook/assets/image (19).png>)
+![](<../../.gitbook/assets/image (13).png>)
 
 #### Autenticación de dispositivos JAMF
 
-<figure><img src="../../.gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
 El binario **`jamf`** contenía el secreto para abrir el llavero que en el momento del descubrimiento estaba **compartido** entre todos y era: **`jk23ucnq91jfu9aj`**.\
 Además, jamf **persiste** como un **LaunchDaemon** en **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
@@ -94,11 +94,11 @@ Para **suplantar la comunicación** entre un dispositivo y JMF necesitas:
 * El **UUID** del dispositivo: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 * El **llavero JAMF** de: `/Library/Application\ Support/Jamf/JAMF.keychain` que contiene el certificado del dispositivo
 
-Con esta información, **crea una VM** con el **UUID** de hardware **robado** y con **SIP deshabilitado**, deja caer el **llavero JAMF,** **engancha** el **agente** de Jamf y roba su información.
+Con esta información, **crea una VM** con el **UUID** de hardware **robado** y con **SIP deshabilitado**, deja caer el **llavero JAMF,** **engancha** el agente de Jamf y roba su información.
 
 #### Robo de secretos
 
-<figure><img src="../../.gitbook/assets/image (8).png" alt=""><figcaption><p>a</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
 También puedes monitorear la ubicación `/Library/Application Support/Jamf/tmp/` para los **scripts personalizados** que los administradores puedan querer ejecutar a través de Jamf, ya que se **colocan aquí, se ejecutan y se eliminan**. Estos scripts **pueden contener credenciales**.
 
@@ -108,7 +108,7 @@ El script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-To
 
 ### Acceso remoto a macOS
 
-Y también sobre los **protocolos de red** **"especiales"** de **MacOS**:
+Y también sobre los **protocolos de red** "especiales" de **MacOS**:
 
 {% content-ref url="../macos-security-and-privilege-escalation/macos-protocols.md" %}
 [macos-protocols.md](../macos-security-and-privilege-escalation/macos-protocols.md)
@@ -130,7 +130,7 @@ En algunas ocasiones encontrarás que la **computadora MacOS está conectada a u
 [pentesting-kerberos-88](../../network-services-pentesting/pentesting-kerberos-88/)
 {% endcontent-ref %}
 
-Alguna **herramienta local de MacOS** que también puede ayudarte es `dscl`:
+Algunas **herramientas locales de MacOS** que también pueden ayudarte son `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
@@ -195,7 +195,7 @@ El Red Teaming de MacOS es diferente al Red Teaming regular de Windows ya que us
 
 Cuando se descarga un archivo en Safari, si es un archivo "seguro", se **abrirá automáticamente**. Por ejemplo, si se **descarga un archivo zip**, se descomprimirá automáticamente:
 
-<figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 ## Referencias
 
