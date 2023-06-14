@@ -54,7 +54,7 @@ It turns out that Microsoft Defender's Sandbox computername is HAL9TH, so, you c
 
 Some other really good tips from [@mgeeky](https://twitter.com/mariuszbit) for going against Sandboxes
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1) (2).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev channel</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1) (2) (1).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev channel</p></figcaption></figure>
 
 As we've said before in this post, **public tools** will eventually **get detected**, so, you should ask yourself something:
 
@@ -303,7 +303,7 @@ Most C2 frameworks (sliver, Covenant, metasploit, CobaltStrike, Havoc, etc.) alr
 
 It involves **spawning a new sacrificial process**, inject your post-exploitation malicious code into that new process, execute your malicious code and when finished, kill the new process. This has both its benefits and its drawbacks. The benefit to the fork and run method is that execution occurs **outside** our Beacon implant process. This means that if something in our post-exploitation action goes wrong or gets caught, there is a **much greater chance** of our **implant surviving.** The drawback is that you have a **greater chance** of getting caught by **Behavioural Detections**.
 
-<figure><img src="../.gitbook/assets/image (7) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (7) (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 * **Inline**
 

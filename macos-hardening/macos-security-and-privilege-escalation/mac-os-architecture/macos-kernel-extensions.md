@@ -22,7 +22,7 @@ Obviously, this is so powerful, it's complicated to load a kernel extension. The
 
 * Going into **recovery mode** Kexts need to be **allowed to be loaded**:
 
-<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 * The Kext must be **signed with a kernel code signing certificate**, which can only be granted by **Apple**. Who will be **reviewing** in detail the **company** and the **reasons** why this is needed.
 * The Kext also needs to be **notarized**, Apple will be able to check it for malware.

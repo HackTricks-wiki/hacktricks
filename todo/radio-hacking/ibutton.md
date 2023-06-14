@@ -16,7 +16,7 @@
 
 iButton is a generic name for an electronic identification key packed in a **coin-shaped metal container**. It is also called **Dallas Touch** Memory or contact memory. Even though it is often wrongly referred to as a “magnetic” key, there is **nothing magnetic** in it. In fact, a full-fledged **microchip** operating on a digital protocol is hidden inside.
 
-<figure><img src="../../.gitbook/assets/image (19) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (19).png" alt=""><figcaption></figcaption></figure>
 
 ### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 

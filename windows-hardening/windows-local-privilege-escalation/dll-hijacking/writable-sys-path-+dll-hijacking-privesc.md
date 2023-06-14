@@ -57,7 +57,7 @@ if ($envPath -notlike "*$folderPath*") {
 * **After** the **file** is **generated**, **close** the opened **`procmon`** window and **open the events file**.
 * Add these **filters** and you will find all the Dlls that some **proccess tried to load** from the writable System Path folder:
 
-<figure><img src="../../../.gitbook/assets/image (18) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
 
 ### Missed Dlls
 

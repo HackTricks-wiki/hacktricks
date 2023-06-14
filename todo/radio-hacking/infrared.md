@@ -32,7 +32,7 @@ IR protocols differ in 3 factors:
 
 Bits are encoded by modulating the duration of the space between pulses. The width of the pulse itself is constant.
 
-<figure><img src="../../.gitbook/assets/image (16) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
 
 **2. Pulse Width Encoding**
 

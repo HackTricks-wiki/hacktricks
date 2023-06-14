@@ -32,7 +32,7 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-Note that now **hardened** Electron applications will **ignore node parameters** (such as --inspect) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set.
+Note that now **hardened** Electron applications with **RunAsNode** disabled will **ignore node parameters** (such as --inspect) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set.
 
 However, you could still use the electron param `--remote-debugging-port=9229` but the previous payload won't work to execute other processes.
 {% endhint %}

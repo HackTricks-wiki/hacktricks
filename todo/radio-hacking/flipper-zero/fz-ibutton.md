@@ -24,7 +24,7 @@ For more info about what is an iButton check:
 
 The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.
 
-<figure><img src="../../../.gitbook/assets/image (20) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (20).png" alt=""><figcaption></figcaption></figure>
 
 ## Actions
 

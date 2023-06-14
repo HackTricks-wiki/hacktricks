@@ -49,11 +49,11 @@ You could use the script [**JamfSniper.py**](https://github.com/WithSecureLabs/J
 
 Moreover, after finding proper credentials you could be able to brute-force other usernames with the next form:
 
-![](<../../.gitbook/assets/image (19).png>)
+![](<../../.gitbook/assets/image (13).png>)
 
 #### JAMF device Authentication
 
-<figure><img src="../../.gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
 The **`jamf`** binary contained the secret to open the keychain which at the time of the discovery was **shared** among everybody and it was: **`jk23ucnq91jfu9aj`**.\
 Moreover, jamf **persist** as a **LaunchDaemon** in **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
@@ -100,7 +100,7 @@ With this information, **create a VM** with the **stolen** Hardware **UUID** and
 
 #### Secrets stealing
 
-<figure><img src="../../.gitbook/assets/image (8).png" alt=""><figcaption><p>a</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
 You could also monitor the location `/Library/Application Support/Jamf/tmp/` for the **custom scripts** admins might want to execute via Jamf as they are **placed here, executed and removed**. These scripts **might contain credentials**.
 
@@ -203,7 +203,7 @@ MacOS Red Teaming is different from a regular Windows Red Teaming as usually **M
 
 When a file is downloaded in Safari, if its a "safe" file, it will be **automatically opened**. So for example, if you **download a zip**, it will be automatically decompressed:
 
-<figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
