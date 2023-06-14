@@ -49,7 +49,7 @@ Você pode usar o script [**JamfSniper.py**](https://github.com/WithSecureLabs/J
 
 Além disso, depois de encontrar as credenciais adequadas, você pode ser capaz de fazer força bruta em outros nomes de usuário com o formulário a seguir:
 
-![](<../../.gitbook/assets/image (13).png>)
+![](<../../.gitbook/assets/image (6).png>)
 
 #### Autenticação de dispositivo JAMF
 

@@ -60,7 +60,7 @@ Para mais informações sobre Scripts da Apple, consulte:
 [macos-apple-scripts.md](macos-apple-scripts.md)
 {% endcontent-ref %}
 
-Por exemplo, se um aplicativo tiver permissão de Automação sobre o `iTerm`, por exemplo, neste exemplo o `Terminal` tem acesso sobre o iTerm:
+Por exemplo, se um aplicativo tiver permissão de Automação sobre o `iTerm`, neste exemplo, o `Terminal` tem acesso sobre o iTerm:
 
 <figure><img src="../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -154,25 +154,25 @@ launchctl setenv SQLITE_AUTO_TRACE 1
 ```
 ### Apple Remote Desktop
 
-Como root, você pode habilitar este serviço e o agente ARD terá acesso total ao disco, o que pode ser abusado por um usuário para fazer uma cópia de um novo banco de dados de usuário TCC.
+Como root, você pode habilitar este serviço e o **agente ARD terá acesso total ao disco**, o que pode ser abusado por um usuário para fazer uma cópia de um novo **banco de dados de usuário TCC**.
 
 ## Por plugins
 
-Plugins são códigos extras geralmente na forma de bibliotecas ou plist, que serão carregados pela aplicação principal e executarão sob seu contexto. Portanto, se a aplicação principal tiver acesso a arquivos restritos do TCC (por meio de permissões concedidas ou direitos), o código personalizado também terá.
+Plugins são códigos extras geralmente na forma de bibliotecas ou plist, que serão **carregados pela aplicação principal** e executarão sob seu contexto. Portanto, se a aplicação principal tiver acesso a arquivos restritos do TCC (por meio de permissões concedidas ou direitos), o **código personalizado também terá**.
 
 ### CVE-2020-27937 - Directory Utility
 
-A aplicação `/System/Library/CoreServices/Applications/Directory Utility.app` tinha o direito `kTCCServiceSystemPolicySysAdminFiles`, carregava plugins com extensão `.daplug` e não tinha o tempo de execução endurecido.
+A aplicação `/System/Library/CoreServices/Applications/Directory Utility.app` tinha o direito **`kTCCServiceSystemPolicySysAdminFiles`**, carregava plugins com extensão **`.daplug`** e **não tinha o tempo de execução endurecido**.
 
-Para tornar essa CVE uma arma, o `NFSHomeDirectory` é alterado (abusando do direito anterior) para poder assumir o banco de dados TCC dos usuários e contornar o TCC.
+Para tornar essa CVE uma arma, o **`NFSHomeDirectory`** é **alterado** (abusando do direito anterior) para poder **assumir o banco de dados TCC dos usuários** e contornar o TCC.
 
 Para mais informações, consulte o [**relatório original**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
 
 ### CVE-2020-29621 - Coreaudiod
 
-O binário `/usr/sbin/coreaudiod` tinha os direitos `com.apple.security.cs.disable-library-validation` e `com.apple.private.tcc.manager`. O primeiro permitindo a injeção de código e o segundo dando acesso para gerenciar o TCC.
+O binário **`/usr/sbin/coreaudiod`** tinha os direitos `com.apple.security.cs.disable-library-validation` e `com.apple.private.tcc.manager`. O primeiro **permitindo a injeção de código** e o segundo dando acesso para **gerenciar o TCC**.
 
-Este binário permitia carregar plug-ins de terceiros da pasta `/Library/Audio/Plug-Ins/HAL`. Portanto, era possível carregar um plugin e abusar das permissões do TCC com este PoC:
+Este binário permitia carregar **plug-ins de terceiros** da pasta `/Library/Audio/Plug-Ins/HAL`. Portanto, era possível **carregar um plug-in e abusar das permissões do TCC** com este PoC:
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
@@ -295,7 +295,7 @@ exploit_location]; task.standardOutput = pipe;
 ### CVE-2020-9771 - mount\_apfs TCC bypass e escalonamento de privilégios
 
 **Qualquer usuário** (mesmo não privilegiado) pode criar e montar um snapshot do time machine e **acessar TODOS os arquivos** desse snapshot.\
-O **único privilégio** necessário é para a aplicação usada (como `Terminal`) ter **Acesso Total ao Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`) que precisa ser concedido por um administrador.
+O **único privilégio** necessário é para a aplicação usada (como o `Terminal`) ter acesso de **Acesso Total ao Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`) que precisa ser concedido por um administrador. 
 
 {% code overflow="wrap" %}
 ```bash
@@ -367,7 +367,7 @@ A pasta **`/var/db/locationd/` não estava protegida da montagem de DMG**, entã
 
 Em várias ocasiões, arquivos armazenam informações sensíveis como e-mails, números de telefone, mensagens... em locais não protegidos (o que conta como uma vulnerabilidade na Apple).
 
-<figure><img src="../../../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
 
 ## Referência
 

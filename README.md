@@ -80,4 +80,4 @@ Obtenha acesso hoje:
 
 <figure><img src=".gitbook/assets/logo.svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) é uma empresa profissional de segurança cibernética com sede em **Amsterdã** que ajuda a **proteger** empresas **em todo o mundo** contra as últimas ameaças
+[**WebSec**](https://websec.nl) é uma empresa profissional de segurança cibernética com sede em **Amsterdã** que ajuda a **proteger** empresas **em todo o mundo** contra as últimas
