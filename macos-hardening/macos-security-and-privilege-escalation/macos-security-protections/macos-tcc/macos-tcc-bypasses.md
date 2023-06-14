@@ -8,7 +8,7 @@
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -38,11 +38,11 @@ Aqui você pode encontrar exemplos de como alguns malwares conseguiram contornar
 
 * [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
-### Manipular extensões - CVE-2022-26767
+### Lidar com extensões - CVE-2022-26767
 
 O atributo `com.apple.macl` é dado a arquivos para dar a uma determinada aplicação permissões para lê-lo. Este atributo é definido quando arrasta-se e solta-se um arquivo sobre um aplicativo, ou quando um usuário clica duas vezes em um arquivo para abri-lo com o aplicativo padrão.
 
-Portanto, um usuário poderia registrar um aplicativo malicioso para manipular todas as extensões e chamar o Launch Services para abrir qualquer arquivo (assim, o arquivo malicioso terá acesso para lê-lo).
+Portanto, um usuário poderia registrar um aplicativo malicioso para lidar com todas as extensões e chamar o Launch Services para abrir qualquer arquivo (assim, o arquivo malicioso terá acesso concedido para lê-lo).
 
 ### iCloud
 
@@ -50,15 +50,9 @@ Com a permissão `com.apple.private.icloud-account-access`, é possível se comu
 
 O iMovie e o Garageband tinham essa permissão e outras que permitiam.
 
-### Bypass do Electron
-
-O código JS de um aplicativo Electron não é assinado, então um invasor poderia mover o aplicativo para um local gravável, injetar código JS malicioso e lançar esse aplicativo e abusar das permissões do TCC.
-
-O Electron está trabalhando na chave `ElectronAsarIntegrity` em Info.plist que conterá um hash do arquivo app.asar para verificar a integridade do código JS antes de executá-lo.
-
 ### kTCCServiceAppleEvents / Automação
 
-Um aplicativo com a permissão `kTCCServiceAppleEvents` poderá controlar outros aplicativos. Isso significa que ele poderia ser capaz de abusar das permissões concedidas aos outros aplicativos.
+Um aplicativo com a permissão `kTCCServiceAppleEvents` poderá controlar outros aplicativos. Isso significa que ele pode ser capaz de abusar das permissões concedidas aos outros aplicativos.
 
 Para mais informações sobre Scripts da Apple, consulte:
 
@@ -141,7 +135,7 @@ $> ls ~/Documents
 
 As notas tinham acesso a locais protegidos pelo TCC, mas quando uma nota é criada, ela é **criada em um local não protegido**. Então, você poderia pedir para as notas copiarem um arquivo protegido em uma nota (ou seja, em um local não protegido) e, em seguida, acessar o arquivo:
 
-<figure><img src="../../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2021-XXXX - Translocação
 
@@ -298,10 +292,10 @@ exploit_location]; task.standardOutput = pipe;
 ```
 ## Por montagem
 
-### CVE-2020-9771 - bypass do TCC mount\_apfs e escalonamento de privilégios
+### CVE-2020-9771 - mount\_apfs TCC bypass e escalonamento de privilégios
 
 **Qualquer usuário** (mesmo não privilegiado) pode criar e montar um snapshot do time machine e **acessar TODOS os arquivos** desse snapshot.\
-O **único privilégio** necessário é para a aplicação usada (como o `Terminal`) ter acesso de **Acesso Total ao Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que precisa ser concedido por um administrador.
+O **único privilégio** necessário é para a aplicação usada (como o `Terminal`) ter acesso de **Acesso Total ao Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`) que precisa ser concedido por um administrador. 
 
 {% code overflow="wrap" %}
 ```bash
@@ -373,7 +367,7 @@ A pasta **`/var/db/locationd/` não estava protegida da montagem de DMG**, entã
 
 Em várias ocasiões, arquivos armazenam informações sensíveis como e-mails, números de telefone, mensagens... em locais não protegidos (o que conta como uma vulnerabilidade na Apple).
 
-<figure><img src="../../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
 
 ## Referência
 
@@ -386,7 +380,7 @@ Em várias ocasiões, arquivos armazenam informações sensíveis como e-mails, 
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**

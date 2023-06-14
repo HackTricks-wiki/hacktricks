@@ -7,7 +7,7 @@
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -18,7 +18,7 @@ Se você descobriu que pode **escrever em uma pasta do caminho do sistema** (obs
 
 Para fazer isso, você pode abusar de um **Dll Hijacking** em que você vai **sequestrar uma biblioteca sendo carregada** por um serviço ou processo com **mais privilégios** do que os seus, e porque esse serviço está carregando uma Dll que provavelmente nem existe em todo o sistema, ele vai tentar carregá-la do Caminho do Sistema onde você pode escrever.
 
-Para obter mais informações sobre **o que é Dll Hijacking**, consulte:
+Para mais informações sobre **o que é Dll Hijacking** confira:
 
 {% content-ref url="../dll-hijacking.md" %}
 [dll-hijacking.md](../dll-hijacking.md)
@@ -30,7 +30,7 @@ Para obter mais informações sobre **o que é Dll Hijacking**, consulte:
 
 A primeira coisa que você precisa é **identificar um processo** em execução com **mais privilégios** do que você que está tentando **carregar uma Dll do Caminho do Sistema** em que você pode escrever.
 
-O problema nesses casos é que provavelmente esses processos já estão em execução. Para encontrar quais Dlls estão faltando nos serviços que você precisa, inicie o procmon o mais rápido possível (antes que os processos sejam carregados). Então, para encontrar as .dlls ausentes, faça o seguinte:
+O problema nesses casos é que provavelmente esses processos já estão em execução. Para encontrar quais Dlls estão faltando nos serviços que você precisa lançar o procmon o mais rápido possível (antes que os processos sejam carregados). Então, para encontrar as .dlls ausentes faça:
 
 * **Crie** a pasta `C:\privesc_hijacking` e adicione o caminho `C:\privesc_hijacking` à **variável de ambiente do Caminho do Sistema**. Você pode fazer isso **manualmente** ou com **PS**:
 ```powershell
@@ -49,21 +49,21 @@ if ($envPath -notlike "*$folderPath*") {
     [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-* Inicie o **`procmon`** e vá em **`Opções`** --> **`Habilitar log de inicialização`** e pressione **`OK`** na janela de prompt.
+* Inicie o **`procmon`** e vá em **`Opções`** --> **`Habilitar log de inicialização`** e pressione **`OK`** na janela de confirmação.
 * Em seguida, **reinicie** o computador. Quando o Windows for reiniciado, o **`procmon`** começará a **gravar** eventos imediatamente.
 * Assim que o Windows for iniciado, execute o **`procmon`** novamente. Ele informará que está em execução e perguntará se você deseja armazenar os eventos em um arquivo. Responda **sim** e **armazene os eventos em um arquivo**.
 * **Depois** que o **arquivo** for **gerado**, **feche** a janela do **`procmon`** aberta e **abra o arquivo de eventos**.
 * Adicione esses **filtros** e você encontrará todas as DLLs que algum **processo tentou carregar** da pasta do caminho do sistema gravável:
 
-<figure><img src="../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (18) (3).png" alt=""><figcaption></figcaption></figure>
 
-### DLLs Perdidas
+### DLLs perdidas
 
-Ao executar isso em uma **máquina virtual (vmware) Windows 11** gratuita, obtive esses resultados:
+Ao executar isso em uma máquina virtual gratuita do **Windows 11 (vmware)**, obtive esses resultados:
 
 <figure><img src="../../../.gitbook/assets/image (253).png" alt=""><figcaption></figcaption></figure>
 
-Neste caso, os arquivos .exe são inúteis, então ignore-os. As DLLs perdidas eram de:
+Nesse caso, os arquivos .exe são inúteis, então ignore-os. As DLLs perdidas eram de:
 
 | Serviço | DLL | Linha de comando |
 | --- | --- | --- |
@@ -80,13 +80,13 @@ Portanto, para **escalar privilégios**, vamos sequestrar a biblioteca **WptsExt
 Você pode [**tentar usar qualquer um desses exemplos**](../dll-hijacking.md#creating-and-compiling-dlls). Você pode executar payloads como: obter um shell reverso, adicionar um usuário, executar um beacon...
 
 {% hint style="warning" %}
-Observe que **nem todos os serviços são executados** com **`NT AUTHORITY\SYSTEM`**, alguns também são executados com **`NT AUTHORITY\LOCAL SERVICE`**, que tem **menos privilégios** e você **não poderá criar um novo usuário** abusando de suas permissões.\
-No entanto, esse usuário tem o privilégio **`seImpersonate`**, então você pode usar o [**conjunto de ferramentas potato para escalar privilégios**](../roguepotato-and-printspoofer.md). Portanto, neste caso, um shell reverso é uma opção melhor do que tentar criar um usuário.
+Observe que **nem todos os serviços são executados** com **`NT AUTHORITY\SYSTEM`**, alguns também são executados com **`NT AUTHORITY\LOCAL SERVICE`**, que tem **menos privilégios** e você **não poderá criar um novo usuário** abusar de suas permissões.\
+No entanto, esse usuário tem o privilégio **`seImpersonate`**, então você pode usar o [**conjunto de ferramentas potato para escalar privilégios**](../roguepotato-and-printspoofer.md). Portanto, nesse caso, um shell reverso é uma opção melhor do que tentar criar um usuário.
 {% endhint %}
 
 No momento da escrita deste artigo, o serviço **Agendador de Tarefas** é executado com **Nt AUTHORITY\SYSTEM**.
 
-Tendo **gerado a DLL maliciosa** (_no meu caso, usei um shell reverso x64 e consegui um shell de volta, mas o defender o matou porque era do msfvenom_), salve-a no caminho do sistema gravável com o nome **WptsExtensions.dll** e **reinicie** o computador (ou reinicie o serviço ou faça o que for necessário para executar novamente o serviço/programa afetado).
+Tendo **gerado a DLL maliciosa** (_no meu caso, usei um shell reverso x64 e consegui um shell de volta, mas o defender o matou porque era do msfvenom_), salve-o no caminho do sistema gravável com o nome **WptsExtensions.dll** e **reinicie** o computador (ou reinicie o serviço ou faça o que for necessário para executar o serviço/programa afetado novamente).
 
 Quando o serviço for reiniciado, a **DLL deve ser carregada e executada** (você pode **reutilizar** o **truque do procmon** para verificar se a **biblioteca foi carregada conforme o esperado**).
 
@@ -97,7 +97,7 @@ Quando o serviço for reiniciado, a **DLL deve ser carregada e executada** (voc�
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me no** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

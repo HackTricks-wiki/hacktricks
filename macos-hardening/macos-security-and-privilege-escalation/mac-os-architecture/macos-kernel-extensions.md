@@ -22,7 +22,7 @@ Obviamente, isso é tão poderoso que é complicado carregar uma extensão de ke
 
 * Ao entrar no **modo de recuperação**, as extensões de kernel precisam ser **autorizadas a serem carregadas**:
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 * A extensão de kernel deve ser **assinada com um certificado de assinatura de código do kernel**, que só pode ser concedido pela **Apple**. Que irá **revisar** detalhadamente a **empresa** e as **razões** pelas quais isso é necessário.
 * A extensão de kernel também precisa ser **notarizada**, a Apple poderá verificá-la em busca de malware.
@@ -34,9 +34,9 @@ Obviamente, isso é tão poderoso que é complicado carregar uma extensão de ke
 De volta ao Catalina, era assim: É interessante notar que o processo de **verificação** ocorre em **userland**. No entanto, apenas aplicativos com a permissão **`com.apple.private.security.kext-management`** podem **solicitar ao kernel** para **carregar uma extensão:** kextcache, kextload, kextutil, kextd, syspolicyd
 
 1. **`kextutil`** cli **inicia** o processo de verificação para carregar uma extensão
-   * Ele irá se comunicar com **`kextd`** enviando usando um serviço Mach
+   * Ele falará com **`kextd`** enviando usando um serviço Mach
 2. **`kextd`** verificará várias coisas, como a assinatura
-   * Ele irá se comunicar com **`syspolicyd`** para verificar se a extensão pode ser carregada
+   * Ele falará com **`syspolicyd`** para verificar se a extensão pode ser carregada
 3. **`syspolicyd`** **pergunta** ao **usuário** se a extensão não foi carregada anteriormente
    * **`syspolicyd`** indicará o resultado para **`kextd`**
 4. **`kextd`** finalmente poderá indicar ao **kernel para carregar a extensão**

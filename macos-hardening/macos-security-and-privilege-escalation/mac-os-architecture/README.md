@@ -4,17 +4,17 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Kernel XNU
 
-O **núcleo do macOS é o XNU**, que significa "X não é Unix". Este kernel é fundamentalmente composto pelo **microkernel Mach** (a ser discutido posteriormente), **e** elementos do Berkeley Software Distribution (**BSD**). O XNU também fornece uma plataforma para **drivers de kernel por meio de um sistema chamado I/O Kit**. O kernel XNU faz parte do projeto de código aberto Darwin, o que significa que **seu código-fonte é livremente acessível**.
+O **núcleo do macOS é o XNU**, que significa "X is Not Unix". Este kernel é fundamentalmente composto pelo **microkernel Mach** (a ser discutido posteriormente), **e** elementos do Berkeley Software Distribution (**BSD**). O XNU também fornece uma plataforma para **drivers de kernel por meio de um sistema chamado I/O Kit**. O kernel XNU faz parte do projeto de código aberto Darwin, o que significa que **seu código-fonte é livremente acessível**.
 
 Do ponto de vista de um pesquisador de segurança ou de um desenvolvedor Unix, **o macOS** pode parecer bastante **semelhante** a um sistema **FreeBSD** com uma GUI elegante e uma série de aplicativos personalizados. A maioria dos aplicativos desenvolvidos para o BSD irá compilar e executar no macOS sem precisar de modificações, já que as ferramentas de linha de comando familiares aos usuários do Unix estão todas presentes no macOS. No entanto, como o kernel XNU incorpora o Mach, existem algumas diferenças significativas entre um sistema semelhante ao Unix tradicional e o macOS, e essas diferenças podem causar problemas potenciais ou fornecer vantagens únicas.
 
@@ -35,9 +35,9 @@ O **kernel XNU** também **incorpora** uma quantidade significativa de código d
 * Pilha TCP/IP e soquetes
 * Firewall e filtragem de pacotes
 
-Compreender a interação entre BSD e Mach pode ser complexo, devido aos seus diferentes quadros conceituais. Por exemplo, o BSD usa processos como sua unidade fundamental de execução, enquanto o Mach opera com base em threads. Essa discrepância é reconciliada no XNU **associando cada processo BSD a uma tarefa Mach** que contém exatamente uma thread Mach. Quando a chamada do sistema fork() do BSD é usada, o código do BSD dentro do kernel usa funções do Mach para criar uma tarefa e uma estrutura de thread.
+Compreender a interação entre BSD e Mach pode ser complexo, devido aos seus diferentes quadros conceituais. Por exemplo, o BSD usa processos como sua unidade fundamental de execução, enquanto o Mach opera com base em threads. Essa discrepância é reconciliada no XNU **associando cada processo BSD a uma tarefa Mach** que contém exatamente uma thread Mach. Quando a chamada do sistema fork() do BSD é usada, o código do BSD dentro do kernel usa funções Mach para criar uma tarefa e uma estrutura de thread.
 
-Além disso, **o Mach e o BSD mantêm modelos de segurança diferentes**: o modelo de segurança do **Mach** é baseado em **direitos de porta**, enquanto o modelo de segurança do BSD opera com base na **propriedade do processo**. Disparidades entre esses dois modelos ocasionalmente resultaram em vulnerabilidades de escalonamento de privilégios locais. Além das chamadas do sistema típicas, também existem **armadilhas do Mach que permitem que programas de espaço do usuário interajam com o kernel**. Esses diferentes elementos juntos formam a arquitetura multifacetada e híbrida do kernel do macOS.
+Além disso, **o Mach e o BSD mantêm modelos de segurança diferentes**: o modelo de segurança do **Mach** é baseado em **direitos de porta**, enquanto o modelo de segurança do BSD opera com base na **propriedade do processo**. Disparidades entre esses dois modelos ocasionalmente resultaram em vulnerabilidades de escalonamento de privilégios locais. Além das chamadas do sistema típicas, também existem **armadilhas Mach que permitem que programas de espaço do usuário interajam com o kernel**. Esses diferentes elementos juntos formam a arquitetura híbrida multifacetada do kernel do macOS.
 
 ### I/O Kit - Drivers
 
@@ -71,7 +71,7 @@ Para encontrar extensões específicas, você pode usar:
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
 ```
-Para carregar e descarregar extensões de kernel, faça:
+Para carregar e descarregar extensões de kernel, faça o seguinte:
 ```bash
 kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
@@ -84,10 +84,18 @@ kextunload com.apple.iokit.IOReportFamily
 
 ## Extensões de Kernel do macOS
 
-O macOS é **super restritivo para carregar Extensões de Kernel** (.kext) devido aos altos privilégios que o código executará. Na verdade, por padrão, é virtualmente impossível (a menos que seja encontrada uma forma de contornar isso).
+O macOS é **super restritivo para carregar Extensões de Kernel** (.kext) devido aos altos privilégios que o código executará. Na verdade, por padrão, é virtualmente impossível (a menos que uma bypass seja encontrada).
 
 {% content-ref url="macos-kernel-extensions.md" %}
 [macos-kernel-extensions.md](macos-kernel-extensions.md)
+{% endcontent-ref %}
+
+### Extensões de Sistema do macOS
+
+Em vez de usar Extensões de Kernel, o macOS criou as Extensões de Sistema, que oferece APIs em nível de usuário para interagir com o kernel. Dessa forma, os desenvolvedores podem evitar o uso de extensões de kernel.
+
+{% content-ref url="macos-system-extensions.md" %}
+[macos-system-extensions.md](macos-system-extensions.md)
 {% endcontent-ref %}
 
 ## Referências
@@ -100,7 +108,7 @@ O macOS é **super restritivo para carregar Extensões de Kernel** (.kext) devid
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).

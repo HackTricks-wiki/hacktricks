@@ -7,7 +7,7 @@
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -32,7 +32,7 @@ Os protocolos de infravermelho diferem em 3 fatores:
 
 Os bits são codificados pela modulação da duração do espaço entre os pulsos. A largura do próprio pulso é constante.
 
-<figure><img src="../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (16) (3).png" alt=""><figcaption></figcaption></figure>
 
 **2. Codificação de Largura de Pulso**
 
@@ -51,7 +51,7 @@ Também é conhecida como codificação Manchester. O valor lógico é definido 
 {% hint style="info" %}
 Existem protocolos de infravermelho que estão **tentando se tornar universais** para vários tipos de dispositivos. Os mais famosos são RC5 e NEC. Infelizmente, o mais famoso **não significa o mais comum**. Em meu ambiente, encontrei apenas dois controles remotos NEC e nenhum RC5.
 
-Os fabricantes adoram usar seus próprios protocolos de infravermelho exclusivos, mesmo dentro da mesma faixa de dispositivos (por exemplo, TV-boxes). Portanto, controles remotos de empresas diferentes e às vezes de modelos diferentes da mesma empresa, não conseguem trabalhar com outros dispositivos do mesmo tipo.
+Os fabricantes adoram usar seus próprios protocolos de infravermelho exclusivos, mesmo dentro da mesma faixa de dispositivos (por exemplo, TV-boxes). Portanto, controles remotos de diferentes empresas e às vezes de modelos diferentes da mesma empresa, não conseguem trabalhar com outros dispositivos do mesmo tipo.
 {% endhint %}
 
 ### Explorando um Sinal de Infravermelho
@@ -60,7 +60,7 @@ A maneira mais confiável de ver como o sinal de infravermelho do controle remot
 
 <figure><img src="../../.gitbook/assets/image (18) (2).png" alt=""><figcaption></figcaption></figure>
 
-Geralmente, há um preâmbulo no início de um pacote codificado. Isso permite que o receptor determine o nível de ganho e o fundo. Existem também protocolos sem preâmbulo, por exemplo, Sharp.
+Geralmente, há um preâmbulo no início de um pacote codificado. Isso permite que o receptor determine o nível de ganho e fundo. Existem também protocolos sem preâmbulo, por exemplo, Sharp.
 
 Em seguida, os dados são transmitidos. A estrutura, o preâmbulo e o método de codificação de bits são determinados pelo protocolo específico.
 
@@ -74,4 +74,4 @@ Para a lógica "0" e "1", a NEC usa a Codificação de Distância de Pulso: prim
 
 ### Condicionadores de Ar
 
-Ao contrário de outros controles remotos, **os condicionadores de ar não transmitem apenas o código do botão pressionado**. Eles também **transmitem todas as informações** quando um
+Ao contrário de outros controles remotos, **os condicionadores de ar não transmitem apenas o código do botão pressionado**. Eles também **transmitem todas as informações** quando um botão

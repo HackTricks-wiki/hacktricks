@@ -1,6 +1,12 @@
-## Inspecionar Aplicações Electron
+## Injeção de Aplicações Electron no macOS
 
-De acordo com [**este**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), se você executar uma aplicação Electron com flags como **`--inspect`**, **`--inspect-brk`** e **`--remote-debugging-port`**, uma **porta de depuração será aberta** para que você possa se conectar a ela (por exemplo, do Chrome em `chrome://inspect`) e você será capaz de **injetar código nela** ou até mesmo lançar novos processos.\
+O código JS de um aplicativo Electron não é assinado, então um invasor pode mover o aplicativo para um local gravável, injetar código JS malicioso e lançar esse aplicativo e abusar das permissões TCC.
+
+No entanto, a permissão **`kTCCServiceSystemPolicyAppBundles`** é **necessária** para modificar um aplicativo, portanto, por padrão, isso não é mais possível.
+
+## Inspeção de Aplicações Electron
+
+De acordo com [**isto**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), se você executar um aplicativo Electron com flags como **`--inspect`**, **`--inspect-brk`** e **`--remote-debugging-port`**, uma **porta de depuração será aberta** para que você possa se conectar a ela (por exemplo, do Chrome em `chrome://inspect`) e você poderá **injetar código nele** ou até mesmo lançar novos processos.\
 Por exemplo:
 
 {% code overflow="wrap" %}

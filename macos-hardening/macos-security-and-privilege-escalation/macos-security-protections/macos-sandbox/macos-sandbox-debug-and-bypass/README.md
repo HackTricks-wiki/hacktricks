@@ -14,7 +14,7 @@
 
 ## Processo de carregamento do Sandbox
 
-<figure><img src="../../../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption><p>Imagem de <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2).png" alt=""><figcaption><p>Imagem de <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
 Na imagem anterior, é possível observar **como o sandbox será carregado** quando um aplicativo com a permissão **`com.apple.security.app-sandbox`** é executado.
 
@@ -123,13 +123,13 @@ Embora o Sandbox do macOS seja projetado para ser resistente a ataques, ele não
 
 - **Escalada de privilégios**: o Sandbox é executado com privilégios limitados, o que significa que não pode acessar todos os recursos do sistema. No entanto, se um atacante conseguir executar código com privilégios mais elevados, ele poderá contornar o Sandbox.
 
-- **Engenharia reversa**: o Sandbox é implementado usando uma série de políticas e restrições que são definidas em um arquivo de configuração chamado Info.plist. Se um atacante conseguir engenharia reversa nesse arquivo, ele poderá modificar as políticas e restrições para contornar o Sandbox.
+- **Engenharia reversa**: o Sandbox é implementado usando uma série de políticas de segurança que são definidas em um arquivo de configuração chamado Info.plist. Se um atacante conseguir engenharia reversa nesse arquivo, ele poderá modificar as políticas de segurança e contornar o Sandbox.
 
-- **Injeção de código**: é possível injetar código em um aplicativo no Sandbox usando técnicas como a injeção de código dinâmico (Dyld Injection). Isso pode ser usado para contornar o Sandbox e executar código malicioso no contexto do aplicativo.
+- **Injeção de código**: é possível injetar código em um aplicativo no Sandbox usando técnicas como a injeção de código dinâmico (Dyld Injection). Isso pode ser usado para contornar o Sandbox, pois o código injetado não está restrito pelo Sandbox.
 
 ## Conclusão
 
-O Sandbox do macOS é um mecanismo de segurança importante que ajuda a limitar o impacto de um possível ataque ou exploração de vulnerabilidades em um aplicativo. No entanto, ele não é perfeito e pode ser contornado por um atacante experiente. É importante estar ciente dessas técnicas de depuração e bypass do Sandbox para poder proteger melhor seus aplicativos e sistemas.
+O Sandbox do macOS é um mecanismo de segurança importante que ajuda a proteger o sistema contra ataques e explorações de vulnerabilidades em aplicativos. No entanto, como vimos, o Sandbox não é perfeito e pode ser contornado por um atacante experiente. É importante estar ciente dessas técnicas de depuração e bypass do Sandbox para poder proteger melhor o sistema.
 ```xml
 <plist version="1.0">
 <dict>

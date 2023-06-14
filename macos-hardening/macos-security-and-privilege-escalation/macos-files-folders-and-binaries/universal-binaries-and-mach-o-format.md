@@ -1,6 +1,6 @@
 # Binários universais do macOS e Formato Mach-O
 
-Os binários do Mac OS geralmente são compilados como **binários universais**. Um **binário universal** pode **suportar várias arquiteturas no mesmo arquivo**.
+As binários do Mac OS geralmente são compilados como **binários universais**. Um **binário universal** pode **suportar várias arquiteturas no mesmo arquivo**.
 
 Esses binários seguem a **estrutura Mach-O** que é basicamente composta por:
 
@@ -31,7 +31,7 @@ struct fat_arch {
 };
 </code></pre>
 
-O cabeçalho tem os bytes **mágicos** seguidos pelo **número** de **arquiteturas** que o arquivo **contém** (`nfat_arch`) e cada arquitetura terá uma estrutura `fat_arch`.
+O cabeçalho tem os bytes **magic** seguidos pelo **número** de **arquiteturas** que o arquivo **contém** (`nfat_arch`) e cada arquitetura terá uma estrutura `fat_arch`.
 
 Verifique com:
 
@@ -181,7 +181,7 @@ Exemplo de **cabeçalho de seção**:
 
 Se você **adicionar** o **deslocamento da seção** (0x37DC) + o **deslocamento** onde o **arquitetura começa**, neste caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 Também é possível obter **informações de cabeçalho** a partir da **linha de comando** com:
 ```bash
@@ -201,7 +201,7 @@ Segmentos comuns carregados por este cmd:
   * `__bss`: Variáveis estáticas (que não foram inicializadas)
   * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Informações usadas pelo tempo de execução do Objective-C
 * **`__LINKEDIT`**: Contém informações para o linker (dyld) como, "símbolo, string e entradas de tabela de realocação".
-* **`__OBJC`**: Contém informações usadas pelo tempo de execução do Objective-C. Embora essas informações também possam ser encontradas no segmento \_\_DATA, dentro de várias seções \_\_objc\_\*.
+* **`__OBJC`**: Contém informações usadas pelo tempo de execução do Objective-C. Embora essas informações também possam ser encontradas no segmento \_\_DATA, dentro de várias seções em \_\_objc\_\*.
 
 ### **`LC_MAIN`**
 
