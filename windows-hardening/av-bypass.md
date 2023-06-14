@@ -128,7 +128,7 @@ These are the results:
 
 Both our shellcode (encoded with [SGN](https://github.com/EgeBalci/sgn)) and the proxy DLL have a 0/26 Detection rate in [antiscan.me](https://antiscan.me)! I would call that a success.
 
-<figure><img src="../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (11) (3).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 I **highly recommend** you watch [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) about DLL Sideloading and also [ippsec's video](https://www.youtube.com/watch?v=3eROsG\_WNpE) to learn more about what we've discussed more in-depth.
@@ -251,7 +251,7 @@ SmartScreen mainly works with a reputation-based approach, meaning that uncommon
 
 **MoTW** (Mark of The Web) is an [NTFS Alternate Data Stream](https://en.wikipedia.org/wiki/NTFS#Alternate\_data\_stream\_\(ADS\)) with the name of Zone.Identifier which is automatically created upon download files from the internet, along with the URL it was downloaded from.
 
-<figure><img src="../.gitbook/assets/image (13).png" alt=""><figcaption><p>Checking the Zone.Identifier ADS for a file downloaded from the internet.</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (13) (3).png" alt=""><figcaption><p>Checking the Zone.Identifier ADS for a file downloaded from the internet.</p></figcaption></figure>
 
 {% hint style="info" %}
 It's important to note that executables signed with a **trusted** signing certificate **won't trigger SmartScreen**.

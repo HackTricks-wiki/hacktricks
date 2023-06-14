@@ -12,6 +12,12 @@
 
 </details>
 
+## Adding code to Electron Applications
+
+The JS code of an Electron App is not signed, so an attacker could move the app to a writable location, inject malicious JS code and launch that app and abuse the TCC permissions.
+
+However, the **`kTCCServiceSystemPolicyAppBundles`** permission is **needed** to modify an App, so by default this is no longer possible.
+
 ## Inspect Electron Application
 
 According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), if you execute an Electron application with flags such as **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`**, a **debug port will be open** so you can connect to it (for example from Chrome in `chrome://inspect`) and you will be able to **inject code on it** or even launch new processes.\

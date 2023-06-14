@@ -96,6 +96,14 @@ macOS is **super restrictive to load Kernel Extensions** (.kext) because of the 
 [macos-kernel-extensions.md](macos-kernel-extensions.md)
 {% endcontent-ref %}
 
+### macOS System Extensions
+
+Instead of using Kernel Extensions macOS created the System Extensions, which offers in user level APIs to interact with the kernel. This way, developers can avoid to use kernel extensions.
+
+{% content-ref url="macos-system-extensions.md" %}
+[macos-system-extensions.md](macos-system-extensions.md)
+{% endcontent-ref %}
+
 ## References
 
 * [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt\_other?\_encoding=UTF8\&me=\&qid=)

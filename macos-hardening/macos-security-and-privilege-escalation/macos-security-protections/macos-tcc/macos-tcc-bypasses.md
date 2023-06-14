@@ -46,17 +46,11 @@ The attribute **`com.apple.macl`** is given to files to give a **certain applica
 
 Therefore, a user could **register a malicious app** to handle all the extensions and call Launch Services to **open** any file (so the malicious file will be granted access to read it).
 
-### iCLoud
+### iCloud
 
 The entitlement **`com.apple.private.icloud-account-access`** it's possible to communicate with **`com.apple.iCloudHelper`** XPC service which will **provide iCloud tokens**.
 
 **iMovie** and **Garageband** had this entitlement and others that allowed.
-
-### Electron Bypass
-
-The JS code of an Electron App is not signed, so an attacker could move the app to a writable location, inject malicious JS code and launch that app and abuse the TCC permissions.
-
-Electron is working on **`ElectronAsarIntegrity`** key in Info.plist that will contain a hash of the app.asar file to check the integrity of the JS code before executing it.
 
 ### kTCCServiceAppleEvents / Automation
 
@@ -149,7 +143,7 @@ $> ls ~/Documents
 
 Notes had access to TCC protected locations but when a note is created this is **created in a non-protected location**. So, you could ask notes to copy a protected file in a noe (so in a non-protected location) and then access the file:
 
-<figure><img src="../../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2021-XXXX - Translocation
 
@@ -393,7 +387,7 @@ The folder **`/var/db/locationd/` wasn't protected from DMG mounting** so it was
 
 In several occasions files will store sensitive information like emails, phone numbers, messages... in non protected locations (which count as a vulnerability in Apple).
 
-<figure><img src="../../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
 
 ## Reference
 

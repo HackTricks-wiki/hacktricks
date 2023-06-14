@@ -17,6 +17,10 @@
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
+## Commonly whitelisted domains to exfiltrate information
+
+Check [https://lots-project.com/](https://lots-project.com/) to find commonly whitelisted domains taht can be abused
+
 ## Copy\&Paste Base64
 
 **Linux**
