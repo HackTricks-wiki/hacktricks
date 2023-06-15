@@ -191,6 +191,14 @@ dsconfigad -show
 
 More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
+## Accessing the Keychain
+
+The Keychain highly probably contains sensitive information that if accessed withuot generating a prompt could help to move forward a red team exercise:
+
+{% content-ref url="macos-keychain.md" %}
+[macos-keychain.md](macos-keychain.md)
+{% endcontent-ref %}
+
 ## External Services
 
 MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** (like github, aws...) via OneLogin:
