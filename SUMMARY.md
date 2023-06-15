@@ -177,6 +177,7 @@
   * [macOS MDM](macos-hardening/macos-red-teaming/macos-mdm/README.md)
     * [Enrolling Devices in Other Organisations](macos-hardening/macos-red-teaming/macos-mdm/enrolling-devices-in-other-organisations.md)
     * [macOS Serial Number](macos-hardening/macos-red-teaming/macos-mdm/macos-serial-number.md)
+  * [macOS Keychain](macos-hardening/macos-red-teaming/macos-keychain.md)
 * [macOS Useful Commands](macos-hardening/macos-useful-commands.md)
 * [macOS Auto Start Locations](macos-hardening/macos-auto-start-locations.md)
 

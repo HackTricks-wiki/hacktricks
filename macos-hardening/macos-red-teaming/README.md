@@ -89,12 +89,12 @@ sudo jamf policy -id 0
 
 #### Impersonação JAMF
 
-Para **impersonar a comunicação** entre um dispositivo e JMF você precisa:
+Para **impersonar a comunicação** entre um dispositivo e o JMF, você precisa de:
 
 * O **UUID** do dispositivo: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 * O **keychain JAMF** de: `/Library/Application\ Support/Jamf/JAMF.keychain` que contém o certificado do dispositivo
 
-Com essas informações, **crie uma VM** com o **UUID de hardware roubado** e com o **SIP desativado**, solte o **keychain JAMF,** **hook** o agente Jamf e roube suas informações.
+Com essas informações, **crie uma VM** com o **UUID de hardware roubado** e com o **SIP desativado**, solte o **keychain JAMF**, **intercepte** o agente Jamf e roube suas informações.
 
 #### Roubo de segredos
 
@@ -102,7 +102,7 @@ Com essas informações, **crie uma VM** com o **UUID de hardware roubado** e co
 
 Você também pode monitorar a localização `/Library/Application Support/Jamf/tmp/` para os **scripts personalizados** que os administradores podem querer executar via Jamf, pois eles são **colocados aqui, executados e removidos**. Esses scripts **podem conter credenciais**.
 
-No entanto, **credenciais** podem ser passadas para esses scripts como **parâmetros**, então você precisaria monitorar `ps aux | grep -i jamf` (sem nem mesmo ser root).
+No entanto, **as credenciais** podem ser passadas para esses scripts como **parâmetros**, então você precisaria monitorar `ps aux | grep -i jamf` (sem nem mesmo ser root).
 
 O script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) pode ouvir novos arquivos sendo adicionados e novos argumentos de processo.
 
@@ -181,9 +181,17 @@ dsconfigad -show
 ```
 Mais informações em [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
+## Acessando o Keychain
+
+O Keychain provavelmente contém informações sensíveis que, se acessadas sem gerar uma solicitação, poderiam ajudar a avançar um exercício de red team:
+
+{% content-ref url="macos-keychain.md" %}
+[macos-keychain.md](macos-keychain.md)
+{% endcontent-ref %}
+
 ## Serviços Externos
 
-O Red Teaming do MacOS é diferente do Red Teaming regular do Windows, pois geralmente o **MacOS é integrado com várias plataformas externas diretamente**. Uma configuração comum do MacOS é acessar o computador usando **credenciais sincronizadas do OneLogin e acessar vários serviços externos** (como github, aws...) via OneLogin:
+O Red Teaming do MacOS é diferente de um Red Teaming regular do Windows, pois geralmente o **MacOS está integrado a várias plataformas externas diretamente**. Uma configuração comum do MacOS é acessar o computador usando **credenciais sincronizadas do OneLogin e acessar vários serviços externos** (como github, aws...) via OneLogin:
 
 ![](<../../.gitbook/assets/image (563).png>)
 
