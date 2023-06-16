@@ -8,7 +8,7 @@
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -46,7 +46,7 @@ Observe que agora, para poder habilitar o SSH, você precisa de "Acesso total ao
 
 O atributo `com.apple.macl` é dado a arquivos para dar a uma determinada aplicação permissões para lê-lo. Este atributo é definido quando arrasta-se e solta-se um arquivo sobre um aplicativo, ou quando um usuário clica duas vezes em um arquivo para abri-lo com o aplicativo padrão.
 
-Portanto, um usuário poderia registrar um aplicativo malicioso para lidar com todas as extensões e chamar o Launch Services para abrir qualquer arquivo (assim, o arquivo malicioso terá acesso concedido para lê-lo).
+Portanto, um usuário poderia registrar um aplicativo malicioso para lidar com todas as extensões e chamar o Launch Services para abrir qualquer arquivo (assim, o arquivo malicioso terá acesso para lê-lo).
 
 ### iCloud
 
@@ -54,11 +54,13 @@ Com a permissão `com.apple.private.icloud-account-access`, é possível se comu
 
 O iMovie e o Garageband tinham essa permissão e outras que permitiam.
 
-### kTCCServiceAppleEvents / Automação
+Para mais informações sobre a exploração para obter tokens do iCloud a partir dessa permissão, confira a palestra: [#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
-Um aplicativo com a permissão `kTCCServiceAppleEvents` poderá controlar outros aplicativos. Isso significa que ele poderia ser capaz de abusar das permissões concedidas aos outros aplicativos.
+### kTCCServiceAppleEvents / Automation
 
-Para mais informações sobre Scripts da Apple, consulte:
+Um aplicativo com a permissão `kTCCServiceAppleEvents` poderá controlar outros aplicativos. Isso significa que ele poderá abusar das permissões concedidas aos outros aplicativos.
+
+Para mais informações sobre Scripts da Apple, confira:
 
 {% content-ref url="macos-apple-scripts.md" %}
 [macos-apple-scripts.md](macos-apple-scripts.md)
