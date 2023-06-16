@@ -56,6 +56,8 @@ The entitlement **`com.apple.private.icloud-account-access`** it's possible to c
 
 **iMovie** and **Garageband** had this entitlement and others that allowed.
 
+For more **information** about the exploit to **get icloud tokens** from that entitlement chec the talk: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=\_6e2LhmxVc0)
+
 ### kTCCServiceAppleEvents / Automation
 
 An app with the **`kTCCServiceAppleEvents`** permission will be able to **control other Apps**. This means that it could be able to **abuse the permissions granted to the other Apps**.
