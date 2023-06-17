@@ -8,7 +8,7 @@
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -45,17 +45,17 @@ Para aprender como **atacar um AD**, você precisa **entender** muito bem o **pr
 
 ## Cheat Sheet
 
-Você pode acessar [https://wadcoms.github.io/](https://wadcoms.github.io) para ter uma visão rápida dos comandos que você pode executar para enumerar/explorar um AD.
+Você pode acessar [https://wadcoms.github.io/](https://wadcoms.github.io) para ter uma visão rápida dos comandos que você pode executar para enumerar / explorar um AD.
 
-## Reconhecimento do Active Directory (sem credenciais/sessões)
+## Reconhecimento do Active Directory (sem credenciais / sessões)
 
-Se você só tem acesso a um ambiente AD, mas não tem credenciais/sessões, você pode:
+Se você tem acesso apenas a um ambiente AD, mas não tem credenciais / sessões, você pode:
 
 * **Testar a rede:**
-  * Escanear a rede, encontrar máquinas e portas abertas e tentar **explorar vulnerabilidades** ou **extrair credenciais** delas (por exemplo, [impressoras podem ser alvos muito interessantes](ad-information-in-printers.md).
+  * Escanear a rede, encontrar máquinas e portas abertas e tentar **explorar vulnerabilidades** ou **extrair credenciais** deles (por exemplo, [impressoras podem ser alvos muito interessantes](ad-information-in-printers.md).
   * Enumerar DNS pode fornecer informações sobre servidores-chave no domínio, como web, impressoras, compartilhamentos, VPN, mídia, etc.
     * `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
-  * Dê uma olhada na [**Metodologia de Pentesting Genérica**](../../generic-methodologies-and-resources/pentesting-method
+  * Dê uma olhada na [**Metodologia de Pentesting Genérica**](../../generic-methodologies-and-resources/pentesting-methodology.md) para obter mais informações sobre
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -68,7 +68,7 @@ crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
 ```
 * **Servidor OWA (Outlook Web Access)**
 
-Se você encontrou um desses servidores na rede, também pode realizar **enumeração de usuários** contra ele. Por exemplo, você pode usar a ferramenta [**MailSniper**](https://github.com/dafthack/MailSniper):
+Se você encontrou um desses servidores na rede, também pode realizar **enumeração de usuários contra ele**. Por exemplo, você pode usar a ferramenta [**MailSniper**](https://github.com/dafthack/MailSniper):
 ```bash
 ipmo C:\Tools\MailSniper\MailSniper.ps1
 # Get info about the domain
@@ -88,7 +88,7 @@ No entanto, você deve ter o **nome das pessoas que trabalham na empresa** a par
 
 ### Sabendo um ou vários nomes de usuário
 
-Ok, então você sabe que já tem um nome de usuário válido, mas não tem senhas... Então tente:
+Ok, então você já sabe que tem um nome de usuário válido, mas não tem senhas... Então tente:
 
 * [**ASREPRoast**](asreproast.md): Se um usuário **não tem** o atributo _DONT\_REQ\_PREAUTH_, você pode **solicitar uma mensagem AS\_REP** para esse usuário que conterá alguns dados criptografados por uma derivação da senha do usuário.
 * [**Password Spraying**](password-spraying.md): Vamos tentar as senhas mais **comuns** com cada um dos usuários descobertos, talvez algum usuário esteja usando uma senha ruim (lembre-se da política de senhas!).
@@ -108,7 +108,7 @@ Você pode ser capaz de **obter** alguns **hashes** de desafio para quebrar **en
 
 ### NTML Relay
 
-Se você conseguiu enumerar o Active Directory, terá **mais e-mails e uma melhor compreensão da rede**. Você pode ser capaz de forçar ataques de **retransmissão NTML** para obter acesso ao ambiente AD.
+Se você conseguiu enumerar o Active Directory, terá **mais e-mails e uma melhor compreensão da rede**. Você pode ser capaz de forçar ataques de **retransmissão NTML** \*\*\*\* para obter acesso ao ambiente AD.
 
 ### Roubar credenciais NTLM
 
@@ -120,9 +120,9 @@ Se você pode **acessar outros PCs ou compartilhamentos** com o usuário **null 
 
 ## Enumerando o Active Directory COM credenciais/sessão
 
-Para esta fase, você precisa ter **comprometido as credenciais ou uma sessão de uma conta de domínio válida**. Se você tiver algumas credenciais válidas ou um shell como um usuário de domínio, **lembre-se de que as opções dadas anteriormente ainda são opções para comprometer outros usuários**.
+Para esta fase, você precisa ter **comprometido as credenciais ou uma sessão de uma conta de domínio válida**. Se você tiver algumas credenciais válidas ou um shell como usuário de domínio, **lembre-se de que as opções dadas anteriormente ainda são opções para comprometer outros usuários**.
 
-Antes de começar a enumeração autenticada, você deve saber o que é o **problema de duplo salto Kerberos**.
+Antes de iniciar a enumeração autenticada, você deve saber qual é o **problema de duplo salto do Kerberos**.
 
 {% content-ref url="kerberos-double-hop-problem.md" %}
 [kerberos-double-hop-problem.md](kerberos-double-hop-problem.md)
@@ -130,7 +130,7 @@ Antes de começar a enumeração autenticada, você deve saber o que é o **prob
 
 ### Enumeração
 
-Ter comprometido uma conta é um **grande passo para começar a comprometer todo o domínio**, porque você vai ser capaz de começar a **Enumeração do Active Directory**:
+Ter comprometido uma conta é um **grande passo para começar a comprometer todo o domínio**, porque você vai ser capaz de começar a **enumerar o Active Directory:**
 
 Com relação ao [**ASREPRoast**](asreproast.md), agora você pode encontrar todos os usuários vulneráveis possíveis, e com relação ao [**Password Spraying**](password-spraying.md), você pode obter uma **lista de todos os nomes de usuário** e tentar a senha da conta comprometida, senhas vazias e novas senhas promissoras.
 
@@ -163,7 +163,9 @@ Mais sobre isso em:
 
 ### Conexão remota (RDP, SSH, FTP, Win-RM, etc)
 
-Depois de obter algumas credenciais, você pode verificar se tem acesso a qualquer **máquina**. Para isso, você pode usar o **CrackMapExec** para tentar se conectar em vários servidores com diferentes protocolos, de acordo com suas varreduras de portas
+Depois de obter algumas credenciais, você pode verificar se tem acesso a alguma **máquina**. Para isso, você pode usar o **CrackMapExec** para tentar se conectar em vários servidores com diferentes protocolos, de acordo com suas varreduras de portas.
+
+### Escalada de
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -177,13 +179,13 @@ Se você conseguiu enumerar o Active Directory, terá **mais e-mails e uma melho
 
 ### **Procurando Credenciais em Compartilhamentos de Computador**
 
-Agora que você tem algumas credenciais básicas, deve verificar se pode **encontrar** quaisquer **arquivos interessantes compartilhados dentro do AD**. Você poderia fazer isso manualmente, mas é uma tarefa muito chata e repetitiva (e mais ainda se você encontrar centenas de documentos que precisa verificar).
+Agora que você tem algumas credenciais básicas, deve verificar se pode **encontrar** quaisquer **arquivos interessantes sendo compartilhados dentro do AD**. Você poderia fazer isso manualmente, mas é uma tarefa muito chata e repetitiva (e mais ainda se você encontrar centenas de documentos que precisa verificar).
 
 [**Siga este link para aprender sobre as ferramentas que você pode usar.**](../../network-services-pentesting/pentesting-smb.md#domain-shared-folders-search)
 
 ### Roubar Credenciais NTLM
 
-Se você pode **acessar outros PCs ou compartilhamentos**, você pode **colocar arquivos** (como um arquivo SCF) que, se acessados de alguma forma, irão **disparar uma autenticação NTML contra você** para que você possa **roubar** o **desafio NTLM** para quebrá-lo:
+Se você pode **acessar outros PCs ou compartilhamentos**, você pode **colocar arquivos** (como um arquivo SCF) que, se acessados de alguma forma, **dispararão uma autenticação NTML contra você** para que você possa **roubar** o **desafio NTLM** para quebrá-lo:
 
 {% content-ref url="../ntlm/places-to-steal-ntlm-creds.md" %}
 [places-to-steal-ntlm-creds.md](../ntlm/places-to-steal-ntlm-creds.md)
@@ -201,7 +203,7 @@ Essa vulnerabilidade permitiu que qualquer usuário autenticado **comprometesse 
 
 **Para as seguintes técnicas, um usuário de domínio regular não é suficiente, você precisa de algumas credenciais/privilégios especiais para realizar esses ataques.**
 
-### Extração de Hash
+### Extração de hash
 
 Com sorte, você conseguiu **comprometer alguma conta de administrador local** usando [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) incluindo relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalando privilégios localmente](../windows-local-privilege-escalation/).\
 Então, é hora de despejar todos os hashes na memória e localmente.\
@@ -210,7 +212,7 @@ Então, é hora de despejar todos os hashes na memória e localmente.\
 ### Pass the Hash
 
 **Depois de ter o hash de um usuário**, você pode usá-lo para **se passar por ele**.\
-Você precisa usar alguma **ferramenta** que irá **realizar** a **autenticação NTLM usando** esse **hash**, **ou** você poderia criar um novo **sessionlogon** e **injetar** esse **hash** dentro do **LSASS**, então quando qualquer **autenticação NTLM for realizada**, esse **hash será usado**. A última opção é o que o mimikatz faz.\
+Você precisa usar alguma **ferramenta** que **realize** a **autenticação NTLM usando** esse **hash**, **ou** você poderia criar um novo **sessionlogon** e **injetar** esse **hash** dentro do **LSASS**, então quando qualquer **autenticação NTLM for realizada**, esse **hash será usado**. A última opção é o que o mimikatz faz.\
 [**Leia esta página para mais informações.**](../ntlm/#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
@@ -229,7 +231,7 @@ Este ataque é semelhante ao Pass the Key, mas em vez de usar hashes para solici
 [pass-the-ticket.md](pass-the-ticket.md)
 {% endcontent-ref %}
 
-### Reutilização de Credenciais
+### Reutilização de credenciais
 
 Se você tem o **hash** ou **senha** de um **administrador local**, você deve tentar **fazer login localmente** em outros **PCs** com ele.
 ```bash
@@ -270,7 +272,7 @@ Então, se você **comprometer o hash** deste usuário / computador, poderá **s
 [constrained-delegation.md](constrained-delegation.md)
 {% endcontent-ref %}
 
-### Delegação baseada em recursos
+### Delegação restrita baseada em recursos
 
 É possível obter a execução de código com **privilégios elevados em um computador remoto se você tiver privilégio de gravação** no objeto AD desse computador.
 
@@ -294,11 +296,13 @@ Se você puder encontrar algum **serviço de spooler ouvindo** dentro do domíni
 ### Abuso de sessões de terceiros
 
 Se **outros usuários acessarem** a **máquina comprometida**, é possível **coletar credenciais da memória** e até mesmo **injetar beacons em seus processos** para se passar por eles.\
-Normalmente, os usuários acessarão o sistema via RDP, então aqui você tem como realizar alguns ataques em sessões RDP de terceiros:
+Normalmente, os usuários acessarão o sistema via RDP, então aqui está como realizar alguns ataques em sessões RDP de terceiros:
 
 {% content-ref url="rdp-sessions-abuse.md" %}
 [rdp-sessions-abuse.md](rdp-sessions-abuse.md)
-{%
+{% endcontent-ref %}
+
+### LAPS
 ### Diferentes confianças
 
 É importante notar que **uma confiança pode ser de uma via ou de duas vias**. Na opção de duas vias, ambos os domínios confiarão um no outro, mas na relação de confiança de **uma via**, um dos domínios será o **confiável** e o outro o domínio **confiante**. Neste último caso, **você só poderá acessar recursos dentro do domínio confiante a partir do confiável**.
@@ -308,9 +312,9 @@ Se o Domínio A confia no Domínio B, A é o domínio confiante e B é o domíni
 **Diferentes relacionamentos de confiança**
 
 * **Pai-Filho** - parte da mesma floresta - um domínio filho mantém uma confiança transitiva implícita de duas vias com seu pai. Este é provavelmente o tipo mais comum de confiança que você encontrará.
-* **Cross-link** - também conhecido como uma confiança "shortcut" entre domínios filhos para melhorar os tempos de referência. Normalmente, as referências em uma floresta complexa têm que filtrar até a raiz da floresta e depois voltar para o domínio de destino, então, para um cenário geograficamente disperso, os cross-links podem fazer sentido para reduzir os tempos de autenticação.
-* **Externo** - uma confiança implicitamente não transitiva criada entre domínios díspares. "[As confianças externas fornecem acesso a recursos em um domínio fora da floresta que ainda não foi unido por uma confiança de floresta.](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx)" As confianças externas aplicam a filtragem SID, uma proteção de segurança abordada posteriormente neste post.
-* **Raiz da árvore** - uma confiança transitiva implícita de duas vias entre o domínio raiz da floresta e a nova raiz da árvore que você está adicionando. Eu não encontrei confianças de raiz de árvore com muita frequência, mas a partir da [documentação da Microsoft](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx), elas são criadas quando você cria uma nova árvore de domínio em uma floresta. Estas são confianças intra-floresta e elas [preservam a transitividade de duas vias](https://technet.microsoft.com/en-us/library/cc757352\(v=ws.10\).aspx) permitindo que a árvore tenha um nome de domínio separado (em vez de filho.pai.com).
+* **Cross-link** - também conhecido como "confiança de atalho" entre domínios filhos para melhorar os tempos de referência. Normalmente, as referências em uma floresta complexa precisam filtrar até a raiz da floresta e depois voltar para o domínio de destino, portanto, para um cenário geograficamente disperso, os cross-links podem fazer sentido para reduzir os tempos de autenticação.
+* **Externo** - uma confiança implicitamente não transitiva criada entre domínios díspares. "[As confianças externas fornecem acesso a recursos em um domínio fora da floresta que ainda não está unido por uma confiança de floresta.](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx)" As confianças externas aplicam a filtragem SID, uma proteção de segurança abordada posteriormente neste post.
+* **Raiz da árvore** - uma confiança transitiva implícita de duas vias entre o domínio raiz da floresta e a nova raiz da árvore que você está adicionando. Não encontrei confianças de raiz de árvore com muita frequência, mas a partir da [documentação da Microsoft](https://technet.microsoft.com/en-us/library/cc773178\(v=ws.10\).aspx), elas são criadas quando você cria uma nova árvore de domínio em uma floresta. Essas são confianças intra-floresta e elas [preservam a transitividade de duas vias](https://technet.microsoft.com/en-us/library/cc757352\(v=ws.10\).aspx) permitindo que a árvore tenha um nome de domínio separado (em vez de filho.pai.com).
 * **Floresta** - uma confiança transitiva entre dois domínios raiz da floresta. As confianças de floresta também aplicam a filtragem SID.
 * **MIT** - uma confiança com um domínio Kerberos não-Windows [compatível com RFC4120](https://tools.ietf.org/html/rfc4120). Espero mergulhar mais nas confianças MIT no futuro.
 
@@ -361,16 +365,37 @@ Escalando como administrador da empresa para o domínio filho/pai abusando da co
 
 #### Explorando a NC de Configuração gravável
 
-A NC de Configuração é o repositório primário de informações de configuração para uma floresta e é replicada para todos os DCs na floresta. Além disso, cada DC gravável (não DCs somente leitura) na floresta possui uma cópia gravável da NC de Configuração. Explorar isso requer a execução como SYSTEM em um DC (filho).
+A NC de Configuração é o repositório primário para informações de configuração para uma floresta e é replicada para todos os DCs na floresta. Além disso, todos os DCs graváveis (não DCs somente leitura) na floresta possuem uma cópia gravável da NC de Configuração. Explorar isso requer a execução como SYSTEM em um DC (filho).
 
-É possível comprometer o domínio raiz de várias maneiras. Exemplos:
+É possível comprometer o domínio raiz de várias maneiras, conforme descrito abaixo.
 
-* [Vincular GPO ao site do DC raiz](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research)
-* [Comprometer gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
-* [Ataque de esquema](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)
-* Explorar ADCS - Criar/modificar modelo de certificado para permitir autenticação como qualquer usuário (por exemplo, administradores da empresa)
+##### Vincular GPO ao site do DC raiz
+O contêiner Sites na NC de Configuração contém todos os sites dos computadores associados ao domínio na floresta do AD. É possível vincular GPOs a sites quando executado como SYSTEM em qualquer DC na floresta, incluindo o(s) site(s) dos DCs raiz da floresta, e assim comprometê-los.
 
-### Domínio de Floresta Externa - Unidirecional (Entrada) ou bidirecional
+Mais detalhes podem ser lidos aqui [Bypass SID filtering research](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
+
+##### Comprometer qualquer gMSA na floresta
+O ataque depende de gMSAs privilegiados no domínio visado.
+
+A chave KDS Root, que é usada para calcular a senha de gMSAs na floresta, é armazenada na NC de Configuração. Quando executado como SYSTEM em qualquer DC na floresta, pode-se ler a chave KDS Root e calcular a senha de qualquer gMSA na floresta.
+
+Mais detalhes podem ser lidos aqui: [Golden gMSA trust attack from child to parent](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
+
+##### Ataque de mudança de esquema
+O ataque requer que o invasor aguarde a criação de novos objetos AD privilegiados.
+
+Quando executado como SYSTEM em qualquer DC na floresta, pode-se conceder a qualquer usuário controle total sobre todas as classes no Esquema AD. Esse controle pode ser abusado para criar um ACE no descritor de segurança padrão de qualquer objeto AD que conceda controle total a um principal comprometido. Todas as novas instâncias dos tipos de objeto AD modificados terão esse ACE.
+
+Mais detalhes podem ser lidos aqui: [Schema change trust attack from child to parent](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
+
+##### De DA para EA com ADCS ESC5
+Os ataques ADCS ESC5 (Controle de Acesso de Objeto PKI Vulnerável) abusam do controle sobre objetos PKI para criar um modelo de certificado vulnerável que pode ser abusado para autenticar como qualquer usuário na floresta. Como todos os objetos PKI são armazenados na NC de Configuração, pode-se executar o ESC5 se tiver comprometido qualquer DC gravável (filho) na floresta.
+
+Mais detalhes podem ser lidos aqui: [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c)
+
+Caso a floresta AD não tenha ADCS, o invasor pode criar os componentes necessários conforme descrito aqui: [Escalating from child domain’s admins to enterprise admins in 5 minutes by abusing AD CS, a follow up](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
+
+### Domínio de Floresta Externa - Unidirecional (Entrada) ou Bidirecional
 ```powershell
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -401,13 +426,13 @@ WhenChanged     : 2/19/2021 10:15:24 PM
 ```
 Neste cenário, **seu domínio** está **confiando** alguns **privilégios** a um principal de um **domínio diferente**.
 
-No entanto, quando um **domínio é confiável** pelo domínio confiante, o domínio confiável **cria um usuário** com um **nome previsível** que usa como **senha a senha confiável**. O que significa que é possível **acessar um usuário do domínio confiante para entrar no domínio confiável** para enumerá-lo e tentar escalar mais privilégios:
+No entanto, quando um **domínio é confiável** pelo domínio confiante, o domínio confiável **cria um usuário** com um **nome previsível** que usa como **senha a senha confiável**. O que significa que é possível **acessar um usuário do domínio confiante para entrar no confiável** para enumerá-lo e tentar escalar mais privilégios:
 
 {% content-ref url="external-forest-domain-one-way-outbound.md" %}
 [external-forest-domain-one-way-outbound.md](external-forest-domain-one-way-outbound.md)
 {% endcontent-ref %}
 
-Outra maneira de comprometer o domínio confiável é encontrar um [**link confiável SQL**](abusing-ad-mssql.md#mssql-trusted-links) criado na **direção oposta** da confiança do domínio (o que não é muito comum).
+Outra maneira de comprometer o domínio confiável é encontrar um [**link confiável do SQL**](abusing-ad-mssql.md#mssql-trusted-links) criado na **direção oposta** da confiança do domínio (o que não é muito comum).
 
 Outra maneira de comprometer o domínio confiável é esperar em uma máquina onde um **usuário do domínio confiável pode acessar** para fazer login via **RDP**. Então, o atacante poderia injetar código no processo da sessão RDP e **acessar o domínio de origem da vítima** a partir daí.\
 Além disso, se a **vítima montou seu disco rígido**, a partir do processo da sessão RDP, o atacante poderia armazenar **backdoors** na **pasta de inicialização do disco rígido**. Essa técnica é chamada de **RDPInception**.
@@ -421,15 +446,15 @@ Além disso, se a **vítima montou seu disco rígido**, a partir do processo da 
 **Filtragem de SID:**
 
 * Evite ataques que abusam do atributo de histórico de SID em confiança entre florestas.
-* Habilitado por padrão em todas as confianças inter-florestais. As confianças intra-florestais são consideradas seguras por padrão (a Microsoft considera a floresta e não o domínio como uma fronteira de segurança).
+* Habilitado por padrão em todas as confianças entre florestas. As confianças intraflorestais são consideradas seguras por padrão (a Microsoft considera a floresta e não o domínio como uma fronteira de segurança).
 * Mas, como a filtragem de SID tem o potencial de quebrar aplicativos e acesso do usuário, muitas vezes é desativada.
 * Autenticação seletiva
-  * Em uma confiança inter-florestal, se a Autenticação seletiva estiver configurada, os usuários entre as confianças não serão autenticados automaticamente. O acesso individual a domínios e servidores no domínio/floresta confiante deve ser concedido.
-* Não impede a exploração de NC de Configuração gravável e ataque de conta de confiança.
+  * Em uma confiança entre florestas, se a Autenticação seletiva estiver configurada, os usuários entre as confianças não serão autenticados automaticamente. O acesso individual a domínios e servidores no domínio/floresta confiante deve ser concedido.
+* Não impede a exploração de NC de Configuração gravável e o ataque de conta de confiança.
 
 [**Mais informações sobre confiança de domínio em ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
-## AD -> Nuvem e Nuvem -> AD
+## AD -> Cloud & Cloud -> AD
 
 {% embed url="https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/azure-ad-connect-hybrid-identity" %}
 
@@ -500,9 +525,9 @@ Se você não executar isso a partir de um Controlador de Domínio, o ATA vai pe
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
