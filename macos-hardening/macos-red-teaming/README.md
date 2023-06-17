@@ -35,7 +35,7 @@ No entanto, para instalar um aplicativo em um dispositivo inscrito, você ainda 
 
 Para inscrever o dispositivo em um MDM, você precisa instalar um arquivo **`mobileconfig`** como root, que pode ser entregue via um arquivo **pkg** (você pode compactá-lo em zip e quando baixado do safari ele será descompactado).
 
-O agente **Mythic Orthrus** usa essa técnica.
+O agente Mythic Orthrus usa essa técnica.
 
 ### Abusando do JAMF PRO
 
@@ -49,11 +49,11 @@ Você pode usar o script [**JamfSniper.py**](https://github.com/WithSecureLabs/J
 
 Além disso, depois de encontrar as credenciais adequadas, você pode ser capaz de fazer força bruta em outros nomes de usuário com o formulário a seguir:
 
-![](<../../.gitbook/assets/image (6).png>)
+![](<../../.gitbook/assets/image (7).png>)
 
 #### Autenticação de dispositivo JAMF
 
-<figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 O binário **`jamf`** continha o segredo para abrir o keychain que, na época da descoberta, era **compartilhado** entre todos e era: **`jk23ucnq91jfu9aj`**.\
 Além disso, o jamf **persiste** como um **LaunchDaemon** em **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
@@ -89,20 +89,20 @@ sudo jamf policy -id 0
 
 #### Impersonação JAMF
 
-Para **impersonar a comunicação** entre um dispositivo e o JMF, você precisa de:
+Para **impersonar a comunicação** entre um dispositivo e JMF você precisa:
 
 * O **UUID** do dispositivo: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 * O **keychain JAMF** de: `/Library/Application\ Support/Jamf/JAMF.keychain` que contém o certificado do dispositivo
 
-Com essas informações, **crie uma VM** com o **UUID de hardware roubado** e com o **SIP desativado**, solte o **keychain JAMF**, **intercepte** o agente Jamf e roube suas informações.
+Com essas informações, **crie uma VM** com o **UUID de hardware roubado** e com o **SIP desativado**, solte o **keychain JAMF,** **hook** o agente Jamf e roube suas informações.
 
 #### Roubo de segredos
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption><p>a</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
 Você também pode monitorar a localização `/Library/Application Support/Jamf/tmp/` para os **scripts personalizados** que os administradores podem querer executar via Jamf, pois eles são **colocados aqui, executados e removidos**. Esses scripts **podem conter credenciais**.
 
-No entanto, **as credenciais** podem ser passadas para esses scripts como **parâmetros**, então você precisaria monitorar `ps aux | grep -i jamf` (sem nem mesmo ser root).
+No entanto, **credenciais** podem ser passadas para esses scripts como **parâmetros**, então você precisaria monitorar `ps aux | grep -i jamf` (sem nem mesmo ser root).
 
 O script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) pode ouvir novos arquivos sendo adicionados e novos argumentos de processo.
 
@@ -201,7 +201,7 @@ O Red Teaming do MacOS é diferente de um Red Teaming regular do Windows, pois g
 
 Quando um arquivo é baixado no Safari, se for um arquivo "seguro", ele será **aberto automaticamente**. Então, por exemplo, se você **baixar um zip**, ele será descompactado automaticamente:
 
-<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 ## Referências
 

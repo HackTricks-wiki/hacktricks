@@ -16,7 +16,7 @@
 
 Ao contrário das Extensões do Kernel, as **Extensões do Sistema são executadas no espaço do usuário** em vez do espaço do kernel, reduzindo o risco de falha do sistema devido a mau funcionamento da extensão.
 
-<figure><img src="../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 Existem três tipos de extensões do sistema: Extensões do DriverKit, Extensões de Rede e Extensões de Segurança de Endpoint.
 
@@ -56,7 +56,7 @@ Os eventos que o framework Endpoint Security pode monitorar são categorizados e
 
 ### Arquitetura do Framework de Segurança de Endpoint
 
-<figure><img src="../../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 A **comunicação do espaço do usuário** com o framework Endpoint Security ocorre por meio da classe IOUserClient. Duas subclasses diferentes são usadas, dependendo do tipo de chamador:
 
@@ -75,11 +75,11 @@ O ESF é usado por ferramentas de segurança que tentarão detectar um red teame
 
 ### CVE-2021-30965
 
-A questão é que o aplicativo de segurança precisa ter **permissões de Acesso Total ao Disco**. Então, se um atacante pudesse remover isso, ele poderia impedir que o software fosse executado:
+A questão é que o aplicativo de segurança precisa ter **permissões de Acesso Total ao Disco**. Então, se um invasor pudesse remover isso, ele poderia impedir que o software fosse executado:
 ```bash
 tccutil reset All
 ```
-Para **mais informações** sobre essa falha e outras relacionadas, confira a palestra [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
+Para **mais informações** sobre essa falha de segurança e outras relacionadas, confira a palestra [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
 No final, isso foi corrigido dando a nova permissão **`kTCCServiceEndpointSecurityClient`** ao aplicativo de segurança gerenciado por **`tccd`** para que o `tccutil` não limpe suas permissões, impedindo-o de ser executado.
 

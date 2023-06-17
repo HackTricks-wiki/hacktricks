@@ -22,11 +22,11 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 
 (Esta parte foi retirada deste [post de blog](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html))
 
-Basicamente, é um [VNC](https://en.wikipedia.org/wiki/Virtual\_Network\_Computing) modificado com algumas **características específicas do macOS**.\
-No entanto, a opção **Screen Sharing** é apenas um servidor **VNC básico**. Há também uma opção avançada de ARD ou Gerenciamento Remoto para **definir uma senha de tela de controle** que tornará o ARD compatível com clientes **VNC**. No entanto, há uma fraqueza nesse método de autenticação que **limita** essa **senha** a um **buffer de autenticação de 8 caracteres**, tornando-a muito fácil de ser **forçada por brute force** com uma ferramenta como [Hydra](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) ou [GoRedShell](https://github.com/ahhh/GoRedShell/) (não há **limites de taxa por padrão**).\
-Você pode identificar **instâncias vulneráveis de Screen Sharing** ou Gerenciamento Remoto com o **nmap**, usando o script `vnc-info`, e se o serviço suportar `VNC Authentication (2)`, então eles provavelmente são **vulneráveis a brute force**. O serviço truncará todas as senhas enviadas no fio para 8 caracteres, de modo que, se você definir a autenticação VNC como "senha", tanto "senhas" quanto "senha123" serão autenticadas.
+Basicamente, é um [VNC](https://en.wikipedia.org/wiki/Virtual\_Network\_Computing) modificado com algumas **funcionalidades específicas do macOS**.\
+No entanto, a opção **Screen Sharing** é apenas um servidor **VNC básico**. Há também uma opção avançada de ARD ou Remote Management para **definir uma senha de tela de controle** que tornará o ARD **compatível com clientes VNC**. No entanto, há uma fraqueza nesse método de autenticação que **limita** essa **senha** a um **buffer de autenticação de 8 caracteres**, tornando-a muito fácil de ser **quebrada por força bruta** com uma ferramenta como [Hydra](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) ou [GoRedShell](https://github.com/ahhh/GoRedShell/) (também não há **limites de taxa por padrão**).\
+Você pode identificar **instâncias vulneráveis de Screen Sharing** ou Remote Management com o **nmap**, usando o script `vnc-info`, e se o serviço suportar `VNC Authentication (2)`, então eles provavelmente são **vulneráveis a ataques de força bruta**. O serviço truncará todas as senhas enviadas na rede para 8 caracteres, de modo que, se você definir a autenticação VNC como "senha", tanto "senha" quanto "senha123" serão autenticadas.
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
 
 Se você quiser habilitá-lo para escalar privilégios (aceitar prompts TCC), acessar com uma GUI ou espionar o usuário, é possível habilitá-lo com:
 
@@ -119,10 +119,10 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
