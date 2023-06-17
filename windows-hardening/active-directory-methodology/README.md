@@ -596,12 +596,33 @@ Escalate as Enterprise admin to the child/parent domain abusing the trust with S
 
 The Configuration NC is the primary repository for configuration information for a forest and is replicated to every DC in the forest. Additionally, every writable DC (not read-only DCs) in the forest holds a writable copy of the Configuration NC. Exploiting this require running as SYSTEM on a (child) DC.
 
-It is possible to compromise the root domain in various ways. Examples:
+It is possible to compromise the root domain in various ways covered below.
 
-* [Link GPO to to root DC site](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research)
-* [Compromise gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
-* [Schema attack](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)
-* Exploit ADCS - Create/modify certificate template to allow authentication as any user (e.g. Enterprise Admins)
+##### Link GPO to root DC site
+The Sites container in Configuration NC contains all sites of the domain-joined computers in the AD forest. It is possible to link GPOs to sites when running as SYSTEM on any DC in the forest, including the site(s) of the forest root DCs, and thereby compromise these.
+
+More details can be read here [Bypass SID filtering research](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
+
+##### Compromise any gMSA in the forest
+The attack depends on privileged gMSAs in the targeted domain.
+
+The KDS Root key, which is used to calculate the password of gMSAs in the forest, is stored in the Configuration NC. When running as SYSTEM on any DC in the forest, one can read out the KDS Root key and calculate the password of any gMSA in the forest. 
+
+More details can be read here: [Golden gMSA trust attack from child to parent](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
+
+##### Schema change attack
+The attack requires the attacker to wait for new privileged AD objects to be created.
+
+When running as SYSTEM on any DC in the forest, one can grant any user full control over all classes in the AD Schema. That control can be abused to create an ACE in the default security descriptor of any AD object that grants full control to a compromised principal. All new instances of the modified AD object types will have this ACE. 
+
+More details can be read here: [Schema change trust attack from child to parent](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
+
+##### From DA to EA with ADCS ESC5
+The ADCS ESC5 (Vulnerable PKI Object Access Control) attacks abuse control over PKI objects to create a vulnerable certificate template that can be abused to authenticate as any user in the forest. Since all the PKI objects are stored in the Configuration NC, one can execute ESC5 if they have compromised any writable (child) DC in the forest.
+
+More details can be read here: [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c)
+
+In case the AD forest does not have ADCS, the attacker can create the necessary components as described here: [Escalating from child domain’s admins to enterprise admins in 5 minutes by abusing AD CS, a follow up](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
 
 ### External Forest Domain - One-Way (Inbound) or bidirectional
 
