@@ -8,7 +8,7 @@
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
@@ -49,11 +49,11 @@ Podrías usar el script [**JamfSniper.py**](https://github.com/WithSecureLabs/Ja
 
 Además, después de encontrar las credenciales adecuadas, podrías ser capaz de realizar un ataque de fuerza bruta en otros nombres de usuario con el siguiente formulario:
 
-![](<../../.gitbook/assets/image (6).png>)
+![](<../../.gitbook/assets/image (7).png>)
 
 #### Autenticación de dispositivos JAMF
 
-<figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 El binario **`jamf`** contenía el secreto para abrir el llavero que en el momento del descubrimiento estaba **compartido** entre todos y era: **`jk23ucnq91jfu9aj`**.\
 Además, jamf **persiste** como un **LaunchDaemon** en **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
@@ -78,7 +78,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 ```
 {% endcode %}
 
-Por lo tanto, un atacante podría dejar caer un paquete malicioso (`pkg`) que **sobrescribe este archivo** cuando se instala, estableciendo la **URL en un escucha de Mythic C2 desde un agente de Typhon** para poder abusar de JAMF como C2.
+Entonces, un atacante podría dejar caer un paquete malicioso (`pkg`) que **sobrescribe este archivo** cuando se instala estableciendo la **URL a un escucha de Mythic C2 desde un agente Typhon** para ahora poder abusar de JAMF como C2.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -98,7 +98,7 @@ Con esta información, **crea una VM** con el **UUID** de hardware **robado** y 
 
 #### Robo de secretos
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption><p>a</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
 También puedes monitorear la ubicación `/Library/Application Support/Jamf/tmp/` para los **scripts personalizados** que los administradores puedan querer ejecutar a través de Jamf, ya que se **colocan aquí, se ejecutan y se eliminan**. Estos scripts **pueden contener credenciales**.
 
@@ -130,7 +130,7 @@ En algunas ocasiones encontrarás que la **computadora MacOS está conectada a u
 [pentesting-kerberos-88](../../network-services-pentesting/pentesting-kerberos-88/)
 {% endcontent-ref %}
 
-Algunas **herramientas locales de MacOS** que también pueden ayudarte son `dscl`:
+Alguna **herramienta local de MacOS** que también puede ayudarte es `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
@@ -185,7 +185,7 @@ Más información en [https://its-a-feature.github.io/posts/2018/01/Active-Direc
 
 ## Accediendo al Keychain
 
-Es muy probable que el Keychain contenga información sensible que, si se accede sin generar una solicitud, podría ayudar a avanzar en un ejercicio de red team:
+Es muy probable que el Keychain contenga información sensible que, si se accede sin generar una solicitud, podría ayudar a avanzar en un ejercicio de red teaming:
 
 {% content-ref url="macos-keychain.md" %}
 [macos-keychain.md](macos-keychain.md)
@@ -193,7 +193,7 @@ Es muy probable que el Keychain contenga información sensible que, si se accede
 
 ## Servicios Externos
 
-El red teaming de MacOS es diferente al red teaming regular de Windows ya que usualmente **MacOS está integrado con varias plataformas externas directamente**. Una configuración común de MacOS es acceder a la computadora usando **credenciales sincronizadas de OneLogin y acceder a varios servicios externos** (como github, aws...) a través de OneLogin:
+El red teaming en MacOS es diferente al red teaming regular de Windows, ya que normalmente **MacOS está integrado con varias plataformas externas directamente**. Una configuración común de MacOS es acceder al ordenador usando **credenciales sincronizadas de OneLogin y acceder a varios servicios externos** (como github, aws...) a través de OneLogin:
 
 ![](<../../.gitbook/assets/image (563).png>)
 
@@ -201,9 +201,9 @@ El red teaming de MacOS es diferente al red teaming regular de Windows ya que us
 
 ### Safari
 
-Cuando se descarga un archivo en Safari, si es un archivo "seguro", se **abrirá automáticamente**. Por ejemplo, si se **descarga un archivo zip**, se descomprimirá automáticamente:
+Cuando se descarga un archivo en Safari, si es un archivo "seguro", se **abrirá automáticamente**. Así que, por ejemplo, si se **descarga un zip**, se descomprimirá automáticamente:
 
-<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 ## Referencias
 
@@ -217,9 +217,9 @@ Cuando se descarga un archivo en Safari, si es un archivo "seguro", se **abrirá
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Revisa los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos.
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

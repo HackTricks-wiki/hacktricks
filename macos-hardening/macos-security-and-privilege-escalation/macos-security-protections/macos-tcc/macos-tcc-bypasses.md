@@ -1,8 +1,22 @@
+## Bypasses de TCC en macOS
+
+<details>
+
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue la [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+
+</details>
+
 ## Por funcionalidad
 
 ### Bypass de escritura
 
-Esto no es un bypass, es simplemente cómo funciona TCC: **no protege de la escritura**. Si Terminal **no tiene acceso para leer el escritorio de un usuario, aún puede escribir en él**:
+Esto no es un bypass, es simplemente cómo funciona TCC: **no protege de la escritura**. Si Terminal **no tiene acceso para leer el Escritorio de un usuario, aún puede escribir en él**:
 ```shell-session
 username@hostname ~ % ls Desktop 
 ls: Desktop: Operation not permitted
@@ -36,15 +50,15 @@ Por lo tanto, un usuario podría **registrar una aplicación maliciosa** para ma
 
 ### iCloud
 
-Con el permiso **`com.apple.private.icloud-account-access`** es posible comunicarse con el servicio XPC **`com.apple.iCloudHelper`**, que **proporcionará tokens de iCloud**.
+Con el permiso **`com.apple.private.icloud-account-access`** es posible comunicarse con el servicio XPC **`com.apple.iCloudHelper`** que **proporcionará tokens de iCloud**.
 
-**iMovie** y **Garageband** tenían este permiso y otros que lo permitían.
+**iMovie** y **Garageband** tenían este permiso y otros que permitían.
 
 Para obtener más **información** sobre la explotación para **obtener tokens de iCloud** de ese permiso, consulte la charla: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=\_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / Automatización
 
-Una aplicación con el permiso **`kTCCServiceAppleEvents`** podrá **controlar otras aplicaciones**. Esto significa que podría ser capaz de **abusar de los permisos otorgados a otras aplicaciones**.
+Una aplicación con el permiso **`kTCCServiceAppleEvents`** podrá **controlar otras aplicaciones**. Esto significa que podría ser capaz de **abusar de los permisos otorgados a las otras aplicaciones**.
 
 Para obtener más información sobre los Scripts de Apple, consulte:
 
@@ -52,7 +66,7 @@ Para obtener más información sobre los Scripts de Apple, consulte:
 [macos-apple-scripts.md](macos-apple-scripts.md)
 {% endcontent-ref %}
 
-Por ejemplo, si una aplicación tiene **permiso de Automatización sobre `iTerm`**, en este ejemplo **`Terminal`** tiene acceso sobre iTerm:
+Por ejemplo, si una aplicación tiene **permiso de Automatización sobre `iTerm`**, por ejemplo en este ejemplo **`Terminal`** tiene acceso sobre iTerm:
 
 <figure><img src="../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -94,7 +108,7 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 
 El demonio **tccd** de usuario utiliza la variable de entorno **`HOME`** para acceder a la base de datos de usuarios de TCC desde: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
-Según [esta publicación de Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) y debido a que el demonio TCC se ejecuta a través de `launchd` dentro del dominio del usuario actual, es posible **controlar todas las variables de entorno** que se le pasan.\
+Según [esta publicación de Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) y debido a que el demonio TCC se está ejecutando a través de `launchd` dentro del dominio del usuario actual, es posible **controlar todas las variables de entorno** que se le pasan.\
 Por lo tanto, un **atacante podría establecer la variable de entorno `$HOME`** en **`launchctl`** para que apunte a un **directorio controlado**, **reiniciar** el demonio **TCC** y luego **modificar directamente la base de datos de TCC** para otorgarse a sí mismo **todos los permisos de TCC disponibles** sin nunca solicitar al usuario final.\
 PoC:
 ```bash
@@ -127,7 +141,7 @@ $> ls ~/Documents
 
 Notas tenía acceso a ubicaciones protegidas por TCC, pero cuando se crea una nota, esta se **crea en una ubicación no protegida**. Por lo tanto, se podría pedir a Notas que copie un archivo protegido en una nota (en una ubicación no protegida) y luego acceder al archivo:
 
-<figure><img src="../../../../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2021-XXXX - Translocación
 
@@ -211,7 +225,7 @@ Existen diferentes técnicas para inyectar código dentro de un proceso y abusar
 
 ### Firefox
 
-La aplicación Firefox sigue siendo vulnerable al tener la concesión `com.apple.security.cs.disable-library-validation`:
+La aplicación Firefox sigue siendo vulnerable teniendo la concesión `com.apple.security.cs.disable-library-validation`:
 ```xml
 codesign -d --entitlements :- /Applications/Firefox.app
 Executable=/Applications/Firefox.app/Contents/MacOS/firefox
@@ -235,7 +249,7 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Para obtener más información sobre cómo explotar esto, consulte el [**informe original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Para obtener más información sobre cómo explotar esto fácilmente, consulte el [**informe original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
@@ -347,7 +361,7 @@ La herramienta **`/usr/sbin/asr`** permitía copiar todo el disco y montarlo en 
 ### Servicios de ubicación
 
 Hay una tercera base de datos de TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes autorizados a **acceder a los servicios de ubicación**.\
-La carpeta **`/var/db/locationd/` no estaba protegida de la montura de DMG**, por lo que era posible montar nuestro propio plist.
+La carpeta **`/var/db/locationd/` no estaba protegida del montaje de DMG**, por lo que era posible montar nuestro propio plist.
 
 ## Por aplicaciones de inicio
 
@@ -359,13 +373,13 @@ La carpeta **`/var/db/locationd/` no estaba protegida de la montura de DMG**, po
 
 En varias ocasiones, los archivos almacenarán información sensible como correos electrónicos, números de teléfono, mensajes... en ubicaciones no protegidas (lo que cuenta como una vulnerabilidad en Apple).
 
-<figure><img src="../../../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
 ## Referencia
 
 * [**https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8**](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
 * [**https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/**](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
-* [**20+ formas de evadir los mecanismos de privacidad de macOS**](https://www.youtube.com/watch?v=W9GxnP8c8FU)
+* [**20+ formas de evadir los mecanismos de privacidad de tu macOS**](https://www.youtube.com/watch?v=W9GxnP8c8FU)
 * [**Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms**](https://www.youtube.com/watch?v=a9hsxPdRxsY)
 
 <details>

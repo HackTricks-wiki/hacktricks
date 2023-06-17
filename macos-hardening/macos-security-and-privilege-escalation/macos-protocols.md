@@ -20,13 +20,13 @@ printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharin
 ```
 ### Pentesting ARD
 
-(Esta parte fue tomada de [**esta publicación de blog**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html))
+(Esta parte fue [**tomada de esta publicación de blog**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html))
 
-Esencialmente, es un [VNC](https://en.wikipedia.org/wiki/Virtual\_Network\_Computing) bastardizado con algunas **características específicas de macOS adicionales**.\
-Sin embargo, la opción **Screen Sharing** es solo un servidor **VNC básico**. También hay una opción avanzada de ARD o Administración remota para **establecer una contraseña de pantalla de control** que hará que ARD sea **compatible con clientes VNC**. Sin embargo, hay una debilidad en este método de autenticación que **limita** esta **contraseña** a un **búfer de autenticación de 8 caracteres**, lo que lo hace muy fácil de **atacar por fuerza bruta** con una herramienta como [Hydra](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) o [GoRedShell](https://github.com/ahhh/GoRedShell/) (tampoco hay **límites de velocidad por defecto**).\
-Puede identificar **instancias vulnerables de Screen Sharing** o Administración remota con **nmap**, utilizando el script `vnc-info`, y si el servicio admite `Autenticación VNC (2)` es probable que sean **vulnerables a ataques por fuerza bruta**. El servicio truncará todas las contraseñas enviadas por cable a 8 caracteres, de modo que si establece la autenticación VNC en "contraseña", tanto "contraseña" como "contraseña123" se autenticarán.
+Es esencialmente un [VNC](https://en.wikipedia.org/wiki/Virtual\_Network\_Computing) bastardizado con algunas **características específicas de macOS adicionales**.\
+Sin embargo, la opción **Screen Sharing** es solo un servidor **VNC básico**. También hay una opción avanzada de ARD o Remote Management para **establecer una contraseña de pantalla de control** que hará que ARD sea **compatible con clientes VNC**. Sin embargo, hay una debilidad en este método de autenticación que **limita** esta **contraseña** a un **búfer de autenticación de 8 caracteres**, lo que lo hace muy fácil de **atacar por fuerza bruta** con una herramienta como [Hydra](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) o [GoRedShell](https://github.com/ahhh/GoRedShell/) (tampoco hay **límites de velocidad por defecto**).\
+Puede identificar **instancias vulnerables de Screen Sharing** o Remote Management con **nmap**, utilizando el script `vnc-info`, y si el servicio admite `VNC Authentication (2)`, es probable que sean **vulnerables a ataques por fuerza bruta**. El servicio truncará todas las contraseñas enviadas por cable a 8 caracteres, de modo que si establece la autenticación VNC en "password", tanto "passwords" como "password123" se autenticarán.
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
 
 Si desea habilitarlo para escalar privilegios (aceptar las solicitudes de TCC), acceder con una GUI o espiar al usuario, es posible habilitarlo con:
 
