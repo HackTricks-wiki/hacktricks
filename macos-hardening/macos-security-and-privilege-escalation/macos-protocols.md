@@ -42,7 +42,7 @@ It's essentially a bastardized [VNC](https://en.wikipedia.org/wiki/Virtual\_Netw
 However, the **Screen Sharing option** is just a **basic VNC** server. There is also an advanced ARD or Remote Management option to **set a control screen password** which will make ARD backwards **compatible for VNC clients**. However there is a weakness to this authentication method that **limits** this **password** to an **8 character auth buffer**, making it very easy to **brute force** with a tool like [Hydra](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) or [GoRedShell](https://github.com/ahhh/GoRedShell/) (there are also **no rate limits by default**).\
 You can identify **vulnerable instances of Screen Sharing** or Remote Management with **nmap**, using the script `vnc-info`, and if the service supports `VNC Authentication (2)` then they are likely **vulnerable to brute force**. The service will truncate all passwords sent on the wire down to 8 characters, such that if you set the VNC auth to "password", both "passwords" and "password123" will authenticate.
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
 
 If you want to enable it to escalate privileges (accept TCC prompts), access with a GUI or spy the user, it's possible to enable it with:
 
