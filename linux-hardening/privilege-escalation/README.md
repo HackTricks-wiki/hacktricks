@@ -1249,15 +1249,18 @@ In **newest versions** you will be able to **connect** to screen sessions only o
 
 ```bash
 screen -ls
+screen -ls <username>/ # Show another user' screen sessions
 ```
 
 ![](<../../.gitbook/assets/image (130).png>)
+
 
 **Attach to a session**
 
 ```bash
 screen -dr <session> #The -d is to detach whoever is attached to it
 screen -dr 3350.foo #In the example of the image
+screen -x [user]/[session id]
 ```
 
 ## tmux sessions hijacking
