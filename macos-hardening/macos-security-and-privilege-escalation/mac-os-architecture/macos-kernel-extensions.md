@@ -27,6 +27,7 @@ Obviously, this is so powerful, it's complicated to load a kernel extension. The
 * The Kext must be **signed with a kernel code signing certificate**, which can only be granted by **Apple**. Who will be **reviewing** in detail the **company** and the **reasons** why this is needed.
 * The Kext also needs to be **notarized**, Apple will be able to check it for malware.
 * Then, the **root user** is the one that can load the Kext and the files inside the bundle must belong to root.
+* During the loading process the bundle must be staged to a rootless protected location: /`Library/StagedExtensions` (requires entitlement `com.apple.rootless.storage.KernelExtensionManagement`)
 * Finally, once trying to load it, the [**user will be prompted for confirmation**](https://developer.apple.com/library/archive/technotes/tn2459/\_index.html) and if accepted, the computer must **reboot** to load it.
 
 ### Loading Process
@@ -46,6 +47,7 @@ If kextd is not available, kextutil can perform the same checks.
 ## References
 
 * [https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/](https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/)
+* [https://www.youtube.com/watch?v=hGKOskSiaQo](https://www.youtube.com/watch?v=hGKOskSiaQo)
 
 <details>
 
