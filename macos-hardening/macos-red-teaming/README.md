@@ -68,17 +68,17 @@ Este archivo básicamente contiene la URL:
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 
 [...]
-	<key>is_virtual_machine</key>
-	<false/>
-	<key>jss_url</key>
-	<string>https://halbornasd.jamfcloud.com/</string>
-	<key>last_management_framework_change_id</key>
-	<integer>4</integer>
+<key>is_virtual_machine</key>
+<false/>
+<key>jss_url</key>
+<string>https://halbornasd.jamfcloud.com/</string>
+<key>last_management_framework_change_id</key>
+<integer>4</integer>
 [...]
 ```
 {% endcode %}
 
-Entonces, un atacante podría dejar caer un paquete malicioso (`pkg`) que **sobrescribe este archivo** cuando se instala estableciendo la **URL a un escucha de Mythic C2 desde un agente Typhon** para ahora poder abusar de JAMF como C2.
+Por lo tanto, un atacante podría dejar caer un paquete malicioso (`pkg`) que **sobrescribe este archivo** cuando se instala, estableciendo la **URL en un escucha de Mythic C2 desde un agente de Typhon** para poder abusar de JAMF como C2.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -94,7 +94,7 @@ Para **suplantar la comunicación** entre un dispositivo y JMF necesitas:
 * El **UUID** del dispositivo: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 * El **llavero JAMF** de: `/Library/Application\ Support/Jamf/JAMF.keychain` que contiene el certificado del dispositivo
 
-Con esta información, **crea una VM** con el **UUID** de hardware **robado** y con **SIP deshabilitado**, deja caer el **llavero JAMF,** **engancha** el agente de Jamf y roba su información.
+Con esta información, **crea una VM** con el **UUID** de hardware **robado** y con **SIP deshabilitado**, deja caer el **llavero JAMF,** **engancha** el **agente** de Jamf y roba su información.
 
 #### Robo de secretos
 
@@ -130,13 +130,13 @@ En algunas ocasiones encontrarás que la **computadora MacOS está conectada a u
 [pentesting-kerberos-88](../../network-services-pentesting/pentesting-kerberos-88/)
 {% endcontent-ref %}
 
-Alguna **herramienta local de MacOS** que también puede ayudarte es `dscl`:
+Algunas **herramientas locales de MacOS** que también pueden ayudarte son `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
 También hay algunas herramientas preparadas para MacOS para enumerar automáticamente el AD y jugar con Kerberos:
 
-* [**Machound**](https://github.com/XMCyber/MacHound): MacHound es una extensión de la herramienta de auditoría Bloodhound que permite recopilar e ingerir relaciones de Active Directory en hosts MacOS.
+* [**Machound**](https://github.com/XMCyber/MacHound): MacHound es una extensión de la herramienta de auditoría Bloodhound que permite recopilar e ingerir relaciones de Active Directory en hosts de MacOS.
 * [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost es un proyecto Objective-C diseñado para interactuar con las APIs de Heimdal krb5 en macOS. El objetivo del proyecto es permitir una mejor prueba de seguridad en torno a Kerberos en dispositivos macOS utilizando APIs nativas sin requerir ningún otro marco o paquete en el objetivo.
 * [**Orchard**](https://github.com/its-a-feature/Orchard): Herramienta de JavaScript para Automatización (JXA) para hacer enumeración de Active Directory. 
 
@@ -203,7 +203,7 @@ El red teaming en MacOS es diferente al red teaming regular de Windows, ya que n
 
 Cuando se descarga un archivo en Safari, si es un archivo "seguro", se **abrirá automáticamente**. Así que, por ejemplo, si se **descarga un zip**, se descomprimirá automáticamente:
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
 
 ## Referencias
 

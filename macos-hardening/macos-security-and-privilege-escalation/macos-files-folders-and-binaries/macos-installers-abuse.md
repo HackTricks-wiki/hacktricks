@@ -30,19 +30,19 @@ cpio -i < Scripts
 ```
 ## Información básica de DMG
 
-Los archivos DMG, o imágenes de disco de Apple, son un formato de archivo utilizado por el sistema operativo macOS de Apple para imágenes de disco. Un archivo DMG es esencialmente una **imagen de disco montable** (contiene su propio sistema de archivos) que contiene datos de bloque sin procesar, generalmente comprimidos y a veces cifrados. Cuando abres un archivo DMG, macOS lo **monta como si fuera un disco físico**, lo que te permite acceder a su contenido.
+Los archivos DMG, o Imágenes de Disco de Apple, son un formato de archivo utilizado por el sistema operativo macOS de Apple para imágenes de disco. Un archivo DMG es esencialmente una **imagen de disco montable** (contiene su propio sistema de archivos) que contiene datos de bloque sin procesar, generalmente comprimidos y a veces cifrados. Cuando abres un archivo DMG, macOS lo **monta como si fuera un disco físico**, lo que te permite acceder a su contenido.
 
 ### Jerarquía
 
-<figure><img src="../../../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (12) (2).png" alt=""><figcaption></figcaption></figure>
 
 La jerarquía de un archivo DMG puede ser diferente según el contenido. Sin embargo, para los DMG de aplicaciones, generalmente sigue esta estructura:
 
 * Nivel superior: este es la raíz de la imagen del disco. A menudo contiene la aplicación y posiblemente un enlace a la carpeta de Aplicaciones.
-  * Aplicación (.app): esta es la aplicación real. En macOS, una aplicación es típicamente un paquete que contiene muchos archivos y carpetas individuales que conforman la aplicación.
-  * Enlace de Aplicaciones: este es un acceso directo a la carpeta de Aplicaciones en macOS. El propósito de esto es hacer que sea fácil para ti instalar la aplicación. Puedes arrastrar el archivo .app a este acceso directo para instalar la aplicación.
+* Aplicación (.app): esta es la aplicación real. En macOS, una aplicación es típicamente un paquete que contiene muchos archivos y carpetas individuales que conforman la aplicación.
+* Enlace de Aplicaciones: este es un acceso directo a la carpeta de Aplicaciones en macOS. El propósito de esto es hacer que sea fácil para ti instalar la aplicación. Puedes arrastrar el archivo .app a este acceso directo para instalar la aplicación.
 
-## Escalada de privilegios a través del abuso de pkg
+## Escalada de privilegios mediante el abuso de pkg
 
 ### Ejecución desde directorios públicos
 
