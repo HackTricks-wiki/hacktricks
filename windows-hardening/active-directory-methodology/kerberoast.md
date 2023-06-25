@@ -129,7 +129,9 @@ If you have **enough permissions** over a user you can **make it kerberoastable*
 
 You can find useful **tools** for **kerberoast** attacks here: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-If you find this **error** from Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** it because of your local time, you need to synchronise the host with the DC: `ntpdate <IP of DC>`
+If you find this **error** from Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** it because of your local time, you need to synchronise the host with the DC. There are a few options: 
+- `ntpdate <IP of DC>` - Deprecated as of Ubuntu 16.04
+- `rdate -n <IP of DC>`
 
 ### Mitigation
 
