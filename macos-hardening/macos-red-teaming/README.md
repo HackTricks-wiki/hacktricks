@@ -19,7 +19,7 @@
 
 Se você conseguir **comprometer as credenciais de administrador** para acessar a plataforma de gerenciamento, você pode **potencialmente comprometer todos os computadores** distribuindo seu malware nas máquinas.
 
-Para o red teaming em ambientes MacOS, é altamente recomendável ter algum entendimento de como os MDMs funcionam:
+Para o red teaming em ambientes MacOS, é altamente recomendável ter alguma compreensão de como os MDMs funcionam:
 
 {% content-ref url="macos-mdm/" %}
 [macos-mdm](macos-mdm/)
@@ -35,7 +35,7 @@ No entanto, para instalar um aplicativo em um dispositivo inscrito, você ainda 
 
 Para inscrever o dispositivo em um MDM, você precisa instalar um arquivo **`mobileconfig`** como root, que pode ser entregue via um arquivo **pkg** (você pode compactá-lo em zip e quando baixado do safari ele será descompactado).
 
-O agente Mythic Orthrus usa essa técnica.
+O agente **Mythic Orthrus** usa essa técnica.
 
 ### Abusando do JAMF PRO
 
@@ -68,12 +68,12 @@ Este arquivo basicamente contém a URL:
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 
 [...]
-	<key>is_virtual_machine</key>
-	<false/>
-	<key>jss_url</key>
-	<string>https://halbornasd.jamfcloud.com/</string>
-	<key>last_management_framework_change_id</key>
-	<integer>4</integer>
+<key>is_virtual_machine</key>
+<false/>
+<key>jss_url</key>
+<string>https://halbornasd.jamfcloud.com/</string>
+<key>last_management_framework_change_id</key>
+<integer>4</integer>
 [...]
 ```
 {% endcode %}
@@ -201,7 +201,7 @@ O Red Teaming do MacOS é diferente de um Red Teaming regular do Windows, pois g
 
 Quando um arquivo é baixado no Safari, se for um arquivo "seguro", ele será **aberto automaticamente**. Então, por exemplo, se você **baixar um zip**, ele será descompactado automaticamente:
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
 
 ## Referências
 

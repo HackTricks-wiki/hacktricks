@@ -32,9 +32,9 @@ O Hooking de Função envolve **interceptar chamadas de função** ou mensagens 
 [macos-function-hooking.md](../mac-os-architecture/macos-function-hooking.md)
 {% endcontent-ref %}
 
-### Comunicação Interprocesso
+### Comunicação entre Processos
 
-A Comunicação Interprocesso (IPC) refere-se a diferentes métodos pelos quais processos separados **compartilham e trocam dados**. Embora a IPC seja fundamental para muitas aplicações legítimas, ela também pode ser mal utilizada para subverter o isolamento de processos, vazar informações sensíveis ou realizar ações não autorizadas.
+A Comunicação entre Processos (IPC) refere-se a diferentes métodos pelos quais processos separados **compartilham e trocam dados**. Embora o IPC seja fundamental para muitas aplicações legítimas, ele também pode ser mal utilizado para subverter o isolamento de processos, vazar informações sensíveis ou realizar ações não autorizadas.
 
 {% content-ref url="../mac-os-architecture/macos-ipc-inter-process-communication/" %}
 [macos-ipc-inter-process-communication](../mac-os-architecture/macos-ipc-inter-process-communication/)
@@ -42,10 +42,18 @@ A Comunicação Interprocesso (IPC) refere-se a diferentes métodos pelos quais 
 
 ### Injeção de Aplicativos Electron
 
-Os aplicativos Electron executados com variáveis de ambiente específicas podem ser vulneráveis à injeção de processos:
+Aplicativos Electron executados com variáveis de ambiente específicas podem ser vulneráveis à injeção de processos:
 
 {% content-ref url="macos-electron-applications-injection.md" %}
 [macos-electron-applications-injection.md](macos-electron-applications-injection.md)
+{% endcontent-ref %}
+
+### Injeção de Aplicativos .Net
+
+É possível injetar código em aplicativos .Net **abusando da funcionalidade de depuração do .Net** (não protegida pelas proteções do macOS, como o endurecimento de tempo de execução).
+
+{% content-ref url="macos-.net-applications-injection.md" %}
+[macos-.net-applications-injection.md](macos-.net-applications-injection.md)
 {% endcontent-ref %}
 
 ## Detecção
@@ -72,4 +80,6 @@ Os aplicativos Electron executados com variáveis de ambiente específicas podem
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlosp
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+
+</details>

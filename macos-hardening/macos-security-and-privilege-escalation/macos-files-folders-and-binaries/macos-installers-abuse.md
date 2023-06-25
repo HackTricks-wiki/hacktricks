@@ -34,13 +34,13 @@ Os arquivos DMG, ou Apple Disk Images, são um formato de arquivo usado pelo mac
 
 ### Hierarquia
 
-<figure><img src="../../../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (12) (2).png" alt=""><figcaption></figcaption></figure>
 
 A hierarquia de um arquivo DMG pode ser diferente com base no conteúdo. No entanto, para DMGs de aplicativos, geralmente segue esta estrutura:
 
 * Nível superior: este é a raiz da imagem do disco. Ele geralmente contém o aplicativo e possivelmente um link para a pasta Aplicativos.
-  * Aplicativo (.app): este é o aplicativo real. No macOS, um aplicativo é tipicamente um pacote que contém muitos arquivos e pastas individuais que compõem o aplicativo.
-  * Link de aplicativos: este é um atalho para a pasta Aplicativos no macOS. O objetivo disso é tornar fácil a instalação do aplicativo. Você pode arrastar o arquivo .app para este atalho para instalar o aplicativo.
+* Aplicativo (.app): este é o aplicativo real. No macOS, um aplicativo é tipicamente um pacote que contém muitos arquivos e pastas individuais que compõem o aplicativo.
+* Link de aplicativos: este é um atalho para a pasta Aplicativos no macOS. O objetivo disso é tornar fácil a instalação do aplicativo. Você pode arrastar o arquivo .app para este atalho para instalar o aplicativo.
 
 ## Privesc via abuso de pkg
 
@@ -72,7 +72,7 @@ Um exemplo disso é **CVE-2021-26089**, que conseguiu **sobrescrever um script p
 
 É possível gerar apenas um arquivo **`.pkg`** com **scripts de pré e pós-instalação** sem nenhuma carga útil.
 
-### JS no xml de distribuição
+### JS em xml de distribuição
 
 É possível adicionar tags **`<script>`** no arquivo **xml de distribuição** do pacote e esse código será executado e pode **executar comandos** usando **`system.run`**:
 
@@ -90,7 +90,7 @@ Um exemplo disso é **CVE-2021-26089**, que conseguiu **sobrescrever um script p
 * Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) **grupo do Discord** ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -163,6 +163,7 @@
       * [macOS XPC Authorization](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-ipc-inter-process-communication/macos-xpc-authorization.md)
     * [macOS Electron Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-electron-applications-injection.md)
     * [macOS Function Hooking](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-function-hooking.md)
+    * [macOS .Net Applications Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-.net-applications-injection.md)
     * [macOS Library Injection](macos-hardening/macos-security-and-privilege-escalation/macos-proces-abuse/macos-library-injection/README.md)
       * [macOS Dyld Hijacking & DYLD\_INSERT\_LIBRARIES](macos-hardening/macos-security-and-privilege-escalation/macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
   * [macOS Security Protections](macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/README.md)
