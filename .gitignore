@@ -3,3 +3,5 @@ scripts/
 scripts/*
 .DS_Store
 **/.DS_Store
+.vscode
+.vscode/*
