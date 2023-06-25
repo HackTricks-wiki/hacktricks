@@ -48,6 +48,14 @@ Electron applications executed with specific env variables could be vulnerable t
 [macos-electron-applications-injection.md](macos-electron-applications-injection.md)
 {% endcontent-ref %}
 
+### .Net Applications Injection
+
+It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtim hardening).
+
+{% content-ref url="macos-.net-applications-injection.md" %}
+[macos-.net-applications-injection.md](macos-.net-applications-injection.md)
+{% endcontent-ref %}
+
 ## Detection
 
 ### Shield

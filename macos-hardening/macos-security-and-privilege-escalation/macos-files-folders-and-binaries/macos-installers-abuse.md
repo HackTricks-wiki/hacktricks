@@ -50,7 +50,7 @@ DMG files, or Apple Disk Images, are a file format used by Apple's macOS for dis
 
 ### Hierarchy
 
-<figure><img src="../../../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (12) (2).png" alt=""><figcaption></figcaption></figure>
 
 The hierarchy of a DMG file can be different based on the content. However, for application DMGs, it usually follows this structure:
 
