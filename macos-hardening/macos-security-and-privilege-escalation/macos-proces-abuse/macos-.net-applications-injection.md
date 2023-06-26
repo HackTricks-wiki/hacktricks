@@ -1,4 +1,4 @@
-## Inyección de aplicaciones .Net en macOS
+# Inyección de aplicaciones .Net en macOS
 
 <details>
 
@@ -16,12 +16,12 @@
 
 ### **Establecer una sesión de depuración** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-[**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) es responsable de manejar la **comunicación** entre el depurador y el depurado de .Net.\
-Crea dos tuberías con nombres por proceso .Net en [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) llamando a [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (uno terminará en **`-in`** y el otro en **`-out`** y el resto del nombre será el mismo).
+[**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) es responsable de manejar la **comunicación** entre el depurador y el depurado de .NET.\
+Crea dos tuberías con nombre por proceso .Net en [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) llamando a [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (uno terminará en **`-in`** y el otro en **`-out`** y el resto del nombre será el mismo).
 
 Por lo tanto, si vas al directorio **`$TMPDIR`** de los usuarios, podrás encontrar **fifos de depuración** que podrías usar para depurar aplicaciones .Net:
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 La función [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) manejará la comunicación desde un depurador.
 
@@ -80,7 +80,7 @@ read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
 ### Leer memoria
 
-Con una sesión de depuración establecida, es posible **leer la memoria** utilizando el tipo de mensaje [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). Para leer cierta memoria, el código principal necesario sería:
+Con una sesión de depuración establecida, es posible **leer memoria** utilizando el tipo de mensaje [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). Para leer cierta memoria, el código principal necesario sería:
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
 
@@ -169,11 +169,11 @@ Lo primero es identificar, por ejemplo, una región de memoria con permisos **`r
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-Entonces, para activar la ejecución, sería necesario conocer algún lugar donde se almacena un puntero de función para sobrescribirlo. Es posible sobrescribir un puntero dentro de la **Tabla de Funciones Dinámicas (DFT)**, que es utilizada por el tiempo de ejecución de .NET Core para proporcionar funciones auxiliares para la compilación JIT. Una lista de punteros de función compatibles se puede encontrar dentro de [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h).
+Entonces, para activar la ejecución, sería necesario conocer algún lugar donde se almacena un puntero de función para sobrescribirlo. Es posible sobrescribir un puntero dentro de la **Tabla de Funciones Dinámicas (DFT)**, que es utilizada por el tiempo de ejecución de .NET Core para proporcionar funciones auxiliares para la compilación JIT. Una lista de punteros de función compatibles se puede encontrar en [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h).
 
 En las versiones x64, esto es sencillo utilizando la técnica de **búsqueda de firma** al estilo de mimikatz para buscar a través de **`libcorclr.dll`** una referencia al símbolo **`_hlpDynamicFuncTable`**, al que podemos desreferenciar:
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 Todo lo que queda por hacer es encontrar una dirección desde la cual comenzar nuestra búsqueda de firma. Para hacer esto, aprovechamos otra función de depuración expuesta, **`MT_GetDCB`**. Esto devuelve una serie de bits de información útiles sobre el proceso objetivo, pero en nuestro caso, estamos interesados en un campo devuelto que contiene la **dirección de una función auxiliar**, **`m_helperRemoteStartAddr`**. Usando esta dirección, sabemos exactamente **dónde se encuentra `libcorclr.dll`** dentro de la memoria del proceso objetivo y podemos comenzar nuestra búsqueda de la DFT.
 
@@ -190,9 +190,9 @@ El código completo de POC utilizado para la inyección en PowerShell se puede e
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de exclusivos [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Consigue el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

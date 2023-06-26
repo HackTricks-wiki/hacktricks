@@ -1,4 +1,4 @@
-# IPC de macOS - Comunicacion entre procesos
+# IPC de macOS - Comunicación entre procesos
 
 <details>
 
@@ -20,7 +20,7 @@ La comunicación entre tareas se produce a través de la Comunicación entre Pro
 
 Los derechos de puerto, que definen las operaciones que una tarea puede realizar, son clave para esta comunicación. Los posibles **derechos de puerto** son:
 
-* **Derecho de recepción**, que permite recibir mensajes enviados al puerto. Los puertos de Mach son colas MPSC (múltiples productores, un solo consumidor), lo que significa que solo puede haber **un derecho de recepción para cada puerto** en todo el sistema (a diferencia de las tuberías, donde varios procesos pueden tener descriptores de archivo para el extremo de lectura de una tubería).
+* **Derecho de recepción**, que permite recibir mensajes enviados al puerto. Los puertos Mach son colas MPSC (múltiples productores, un solo consumidor), lo que significa que solo puede haber **un derecho de recepción para cada puerto** en todo el sistema (a diferencia de las tuberías, donde varios procesos pueden tener descriptores de archivo para el extremo de lectura de una tubería).
 * Una **tarea con el derecho de recepción** puede recibir mensajes y **crear derechos de envío**, lo que le permite enviar mensajes. Originalmente, solo la **propia tarea tiene el derecho de recepción sobre su puerto**.
 * **Derecho de envío**, que permite enviar mensajes al puerto.
 * **Derecho de envío único**, que permite enviar un mensaje al puerto y luego desaparece.
@@ -41,16 +41,16 @@ Como se menciona, para establecer el canal de comunicación, está involucrado e
 
 El servidor de arranque **no puede autenticar** el nombre del servicio reclamado por una tarea. Esto significa que una **tarea** podría potencialmente **suplantar cualquier tarea del sistema**, como **falsamente reclamar un nombre de servicio de autorización** y luego aprobar cada solicitud.
 
-Luego, Apple almacena los **nombres de los servicios proporcionados por el sistema** en archivos de configuración seguros, ubicados en directorios protegidos por SIP: `/System/Library/LaunchDaemons` y `/System/Library/LaunchAgents`. Junto a cada nombre de servicio, también se almacena el **binario asociado**. El servidor de arranque creará y mantendrá un **derecho de RECEPCIÓN para cada uno de estos nombres de servicio**.
+Entonces, Apple almacena los **nombres de los servicios proporcionados por el sistema** en archivos de configuración seguros, ubicados en directorios protegidos por SIP: `/System/Library/LaunchDaemons` y `/System/Library/LaunchAgents`. Junto a cada nombre de servicio, también se almacena el **binario asociado**. El servidor de arranque creará y mantendrá un **derecho de RECEPCIÓN para cada uno de estos nombres de servicio**.
 
-Para estos servicios predefinidos, el **proceso de búsqueda difiere ligeramente**. Cuando se busca un nombre de servicio, launchd inicia el servicio dinámicamente. El nuevo flujo de trabajo es el siguiente:
+Para estos servicios predefinidos del sistema, el **proceso de búsqueda difiere ligeramente**. Cuando se busca un nombre de servicio, launchd inicia el servicio dinámicamente. El nuevo flujo de trabajo es el siguiente:
 
 * La tarea **B** inicia una **búsqueda de arranque** para un nombre de servicio.
 * **launchd** comprueba si la tarea se está ejecutando y, si no lo está, **la inicia**.
 * La tarea **A** (el servicio) realiza un **registro de arranque**. Aquí, el servidor de arranque crea un derecho de ENVÍO, lo retiene y **transfiere el derecho de RECEPCIÓN a la tarea A**.
 * launchd duplica el **derecho de ENVÍO y lo envía a la tarea B**.
 
-Sin embargo, este proceso solo se aplica a las tareas del sistema predefinidas. Las tareas que no son del sistema todavía funcionan como se describe originalmente, lo que podría permitir la suplantación.
+Sin embargo, este proceso solo se aplica a las tareas predefinidas del sistema. Las tareas que no son del sistema aún operan como se describe originalmente, lo que podría permitir la suplantación.
 ### Ejemplo de código
 
 Observe cómo el **emisor** **asigna** un puerto, crea un **derecho de envío** para el nombre `org.darlinghq.example` y lo envía al **servidor de arranque** mientras que el emisor solicitó el **derecho de envío** de ese nombre y lo usó para **enviar un mensaje**.
@@ -124,65 +124,7 @@ printf("Text: %s, number: %d\n", message.some_text, message.some_number);
 ```
 {% endtab %}
 
-{% tab title="receiver.c" %}Este es un ejemplo de código para un receptor de IPC en macOS. El receptor crea un puerto de recepción y espera a que se reciba un mensaje. Cuando se recibe un mensaje, se imprime en la consola y se envía una respuesta al remitente.
-
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <mach/mach.h>
-
-int main(int argc, char** argv) {
-    mach_port_t receive_port;
-    kern_return_t result;
-
-    result = mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &receive_port);
-    if (result != KERN_SUCCESS) {
-        printf("[-] Error: Could not allocate receive port\n");
-        return 1;
-    }
-
-    result = mach_port_insert_right(mach_task_self(), receive_port, receive_port, MACH_MSG_TYPE_MAKE_SEND);
-    if (result != KERN_SUCCESS) {
-        printf("[-] Error: Could not insert send right\n");
-        return 1;
-    }
-
-    printf("[+] Receiver: Waiting for message...\n");
-
-    while (1) {
-        mach_msg_header_t* msg = malloc(sizeof(mach_msg_header_t));
-        result = mach_msg(msg, MACH_RCV_MSG, 0, sizeof(mach_msg_header_t), receive_port, MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
-        if (result != KERN_SUCCESS) {
-            printf("[-] Error: Could not receive message\n");
-            return 1;
-        }
-
-        printf("[+] Receiver: Message received: %s\n", (char*)msg + sizeof(mach_msg_header_t));
-
-        mach_msg_destroy(msg);
-
-        printf("[+] Receiver: Sending response...\n");
-
-        mach_msg_header_t* response = malloc(sizeof(mach_msg_header_t));
-        response->msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0);
-        response->msgh_size = sizeof(mach_msg_header_t);
-        response->msgh_remote_port = msg->msgh_remote_port;
-        response->msgh_local_port = MACH_PORT_NULL;
-        response->msgh_id = 0;
-
-        result = mach_msg_send(response);
-        if (result != KERN_SUCCESS) {
-            printf("[-] Error: Could not send response\n");
-            return 1;
-        }
-
-        mach_msg_destroy(response);
-    }
-
-    return 0;
-}
-```
+{% tab title="receiver.c" %}
 ```c
 // Code from https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html
 // gcc sender.c -o sender
@@ -234,18 +176,21 @@ return 1;
 printf("Sent a message\n");
 }
 ```
+{% endtab %}
+{% endtabs %}
+
 ### Puertos privilegiados
 
-* **Puerto de host**: si un proceso tiene el privilegio **Enviar** sobre este puerto, puede obtener **información** sobre el **sistema** (por ejemplo, `host_processor_info`).
-* **Puerto de host privado**: un proceso con el derecho de **Enviar** sobre este puerto puede realizar acciones **privilegiadas** como cargar una extensión del kernel. El **proceso necesita ser root** para obtener este permiso.
-* Además, para llamar a la API **`kext_request`** es necesario tener la autorización **`com.apple.private.kext`**, que solo se otorga a binarios de Apple.
-* **Puerto de nombre de tarea**: una versión no privilegiada del _puerto de tarea_. Hace referencia a la tarea, pero no permite controlarla. Lo único que parece estar disponible a través de él es `task_info()`.
-* **Puerto de tarea** (también conocido como puerto del kernel)**:** con el permiso de Enviar sobre este puerto, es posible controlar la tarea (leer/escribir memoria, crear hilos...).
+* **Puerto de host**: Si un proceso tiene el privilegio **Enviar** sobre este puerto, puede obtener **información** sobre el **sistema** (por ejemplo, `host_processor_info`).
+* **Puerto de host privado**: Un proceso con el derecho de **Enviar** sobre este puerto puede realizar **acciones privilegiadas** como cargar una extensión del kernel. El **proceso necesita ser root** para obtener este permiso.
+* Además, para llamar a la API **`kext_request`** es necesario tener la autorización **`com.apple.private.kext`**, que solo se otorga a los binarios de Apple.
+* **Puerto de nombre de tarea**: Una versión no privilegiada del _puerto de tarea_. Hace referencia a la tarea, pero no permite controlarla. Lo único que parece estar disponible a través de él es `task_info()`.
+* **Puerto de tarea** (también conocido como puerto del kernel)**:** Con el permiso de Enviar sobre este puerto, es posible controlar la tarea (leer/escribir memoria, crear hilos...).
 * Llame a `mach_task_self()` para **obtener el nombre** de este puerto para la tarea del llamador. Este puerto solo se **hereda** a través de **`exec()`**; una nueva tarea creada con `fork()` obtiene un nuevo puerto de tarea (como caso especial, una tarea también obtiene un nuevo puerto de tarea después de `exec()`ing un binario suid). La única forma de generar una tarea y obtener su puerto es realizar la ["danza de intercambio de puertos"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) mientras se realiza un `fork()`.
 * Estas son las restricciones para acceder al puerto (de `macos_task_policy` del binario `AppleMobileFileIntegrity`):
 * Si la aplicación tiene la autorización **`com.apple.security.get-task-allow`**, los procesos del **mismo usuario pueden acceder al puerto de tarea** (comúnmente agregado por Xcode para depurar). El proceso de **notarización** no lo permitirá en las versiones de producción.
 * Las aplicaciones con la autorización **`com.apple.system-task-ports`** pueden obtener el **puerto de tarea para cualquier** proceso, excepto el kernel. En versiones anteriores se llamaba **`task_for_pid-allow`**. Esto solo se otorga a las aplicaciones de Apple.
-* **Root puede acceder a los puertos de tarea** de aplicaciones **no** compiladas con un tiempo de ejecución **fortificado** (y no de Apple).
+* **Root puede acceder a los puertos de tarea** de las aplicaciones **no** compiladas con un tiempo de ejecución **fortificado** (y no de Apple).
 
 ### Inyección de proceso de shellcode a través del puerto de tarea
 
@@ -274,15 +219,19 @@ return 0;
 
 {% tab title="entitlements.plist" %}
 
-## Entitlements
+## Entitlements.plist
 
-Los entitlements son una forma de especificar los permisos que una aplicación necesita para realizar ciertas acciones en el sistema. Estos permisos pueden incluir acceso a ciertos recursos del sistema, como la cámara o el micrófono, o la capacidad de realizar ciertas operaciones de red. Los entitlements se especifican en un archivo llamado `entitlements.plist`, que se incluye en el paquete de la aplicación.
+El archivo `entitlements.plist` es un archivo de propiedad que se utiliza para especificar los permisos y capacidades de una aplicación en macOS. Estos permisos y capacidades se utilizan para restringir el acceso a ciertas funciones y recursos del sistema operativo. 
 
-Cuando una aplicación se ejecuta, el sistema operativo verifica los entitlements de la aplicación para asegurarse de que tiene los permisos necesarios para realizar las acciones que está intentando realizar. Si la aplicación no tiene los entitlements necesarios, el sistema operativo puede denegar la acción o mostrar una alerta al usuario pidiendo permiso.
+Los desarrolladores pueden utilizar el archivo `entitlements.plist` para especificar qué permisos y capacidades necesita su aplicación para funcionar correctamente. Por ejemplo, una aplicación que necesita acceso a la cámara del dispositivo debe tener un permiso específico en su archivo `entitlements.plist`.
 
-Los entitlements también se utilizan para limitar los privilegios de una aplicación. Por ejemplo, una aplicación puede tener un entitlement que le permite acceder a la cámara, pero no a la ubicación del usuario. Esto significa que la aplicación puede tomar fotos, pero no puede acceder a la información de ubicación del usuario.
+Los permisos y capacidades especificados en el archivo `entitlements.plist` se verifican cuando la aplicación se ejecuta en el sistema operativo. Si la aplicación intenta acceder a un recurso o función para la que no tiene permiso, se le negará el acceso.
 
-En general, es importante revisar cuidadosamente los entitlements de una aplicación antes de instalarla o ejecutarla. Si una aplicación tiene demasiados entitlements o entitlements innecesarios, puede representar un riesgo de seguridad para el sistema.
+Los hackers pueden intentar modificar el archivo `entitlements.plist` de una aplicación para obtener permisos y capacidades adicionales. Si tienen éxito, pueden utilizar estos permisos y capacidades para realizar ataques de escalada de privilegios y comprometer el sistema operativo.
+
+Por lo tanto, es importante que los desarrolladores aseguren adecuadamente el archivo `entitlements.plist` de sus aplicaciones y que los usuarios solo instalen aplicaciones de fuentes confiables para reducir el riesgo de compromiso del sistema operativo. 
+
+{% endtab %}
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -461,7 +410,7 @@ return 0;
 gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pid-of-mysleep>
 ```
-### Inyección de Dylib en proceso a través del puerto de tarea
+### Inyección de proceso Dylib a través del puerto de tarea
 
 En macOS, los **hilos** pueden ser manipulados a través de **Mach** o utilizando la **API posix `pthread`**. El hilo que generamos en la inyección anterior fue generado utilizando la API Mach, por lo que **no es compatible con posix**.
 
@@ -769,8 +718,8 @@ XPC utiliza una forma de Comunicación entre Procesos (IPC), que es un conjunto 
 
 Los principales beneficios de XPC incluyen:
 
-1. **Seguridad**: Al separar el trabajo en diferentes procesos, cada proceso solo puede recibir los permisos que necesita. Esto significa que incluso si un proceso está comprometido, tiene una capacidad limitada para hacer daño.
-2. **Estabilidad**: XPC ayuda a aislar los fallos en el componente donde ocurren. Si un proceso falla, se puede reiniciar sin afectar al resto del sistema.
+1. **Seguridad**: Al separar el trabajo en diferentes procesos, cada proceso puede recibir solo los permisos que necesita. Esto significa que incluso si un proceso está comprometido, tiene una capacidad limitada para hacer daño.
+2. **Estabilidad**: XPC ayuda a aislar los fallos en el componente donde ocurren. Si un proceso falla, puede reiniciarse sin afectar al resto del sistema.
 3. **Rendimiento**: XPC permite una fácil concurrencia, ya que se pueden ejecutar diferentes tareas simultáneamente en diferentes procesos.
 
 El único **inconveniente** es que **separar una aplicación en varios procesos** para que se comuniquen a través de XPC es **menos eficiente**. Pero en los sistemas actuales esto casi no se nota y los beneficios son mucho mejores.
@@ -783,11 +732,11 @@ Los componentes XPC de una aplicación están **dentro de la aplicación en sí*
 
 Como puede estar pensando, un **componente XPC tendrá diferentes permisos y privilegios** que los otros componentes XPC o el binario principal de la aplicación. EXCEPTO si un servicio XPC está configurado con [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession) establecido en "True" en su archivo **Info.plist**. En este caso, el servicio XPC se ejecutará en la misma sesión de seguridad que la aplicación que lo llamó.
 
-Los servicios XPC se **inician** por **launchd** cuando sea necesario y se **apagan** una vez que todas las tareas están **completas** para liberar los recursos del sistema. **Los componentes XPC específicos de la aplicación solo pueden ser utilizados por la aplicación**, reduciendo así el riesgo asociado con posibles vulnerabilidades.
+Los servicios XPC se **inician** por **launchd** cuando sea necesario y se **apagan** una vez que todas las tareas están **completas** para liberar los recursos del sistema. **Los componentes XPC específicos de la aplicación solo pueden ser utilizados por la aplicación**, lo que reduce el riesgo asociado con posibles vulnerabilidades.
 
 ### Servicios XPC de todo el sistema
 
-Los **servicios XPC de todo el sistema** son accesibles para todos los usuarios. Estos servicios, ya sean de tipo launchd o Mach, deben estar **definidos en archivos plist** ubicados en directorios especificados como **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** o **`/Library/LaunchAgents`**.
+Los servicios XPC de todo el sistema son accesibles para todos los usuarios. Estos servicios, ya sean de tipo launchd o Mach, deben **definirse en archivos plist** ubicados en directorios especificados como **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** o **`/Library/LaunchAgents`**.
 
 Estos archivos plist tendrán una clave llamada **`MachServices`** con el nombre del servicio y una clave llamada **`Program`** con la ruta al binario:
 ```xml
@@ -839,13 +788,13 @@ Cuando un proceso intenta llamar a un método a través de una conexión XPC, el
 
 ### Autorización XPC
 
-Apple también permite que las aplicaciones **configuren algunos derechos y cómo obtenerlos** para que, si el proceso que llama los tiene, se le permita **llamar a un método** del servicio XPC:
+Apple también permite que las aplicaciones **configuren algunos derechos y cómo obtenerlos**, por lo que si el proceso que llama los tiene, se le permitiría **llamar a un método** del servicio XPC:
 
 {% content-ref url="macos-xpc-authorization.md" %}
 [macos-xpc-authorization.md](macos-xpc-authorization.md)
 {% endcontent-ref %}
 
-### Ejemplo de código en C
+### Ejemplo de código C
 
 {% tabs %}
 {% tab title="xpc_server.c" %}
@@ -937,17 +886,29 @@ return 0;
 
 {% tab title="xyz.hacktricks.service.plist" %}
 
-El archivo `xyz.hacktricks.service.plist` es un archivo de propiedad de Launchd que se utiliza para iniciar un servicio en macOS. Este archivo se encuentra en la ruta `/Library/LaunchDaemons/` y se ejecuta como root. 
+# Comunicación entre procesos en macOS
 
-Para aprovechar este archivo, un atacante puede modificarlo para ejecutar su propio código malicioso en el sistema. Esto se puede hacer agregando un nuevo diccionario de clave-valor en el archivo plist que especifica el comando a ejecutar y los argumentos necesarios. 
+En macOS, la comunicación entre procesos (IPC) se realiza a través de varios mecanismos, como sockets, notificaciones, colas de mensajes y puertos. Estos mecanismos se utilizan para que los procesos se comuniquen entre sí y compartan recursos.
 
-Una vez que se ha modificado el archivo plist, el atacante puede cargar el servicio utilizando el comando `launchctl load /Library/LaunchDaemons/xyz.hacktricks.service.plist`. Esto iniciará el servicio malicioso y permitirá al atacante ejecutar comandos con privilegios de root en el sistema. 
+## Sockets
 
-Es importante tener en cuenta que para modificar este archivo, el atacante necesitará acceso de escritura a la ruta `/Library/LaunchDaemons/`, lo que generalmente requiere privilegios de root o acceso físico al sistema. 
+Los sockets son uno de los mecanismos de IPC más comunes en macOS. Los sockets se utilizan para la comunicación entre procesos en la misma máquina o en diferentes máquinas a través de una red. Los sockets se pueden utilizar para la comunicación en tiempo real o para la transferencia de archivos.
 
-Para evitar este tipo de ataque, se recomienda asegurarse de que los permisos de archivo sean adecuados y de que solo los usuarios autorizados tengan acceso de escritura a los archivos de Launchd. Además, se recomienda monitorear regularmente los archivos de Launchd en busca de modificaciones no autorizadas. 
+## Notificaciones
 
-{% endtab %}
+Las notificaciones son otro mecanismo de IPC en macOS. Las notificaciones se utilizan para enviar mensajes entre procesos. Los procesos pueden registrarse para recibir notificaciones de eventos específicos, como la finalización de una tarea o la llegada de un nuevo correo electrónico.
+
+## Colas de mensajes
+
+Las colas de mensajes son otro mecanismo de IPC en macOS. Las colas de mensajes se utilizan para enviar mensajes entre procesos. Los mensajes se colocan en una cola y se recuperan en orden. Las colas de mensajes se utilizan a menudo para la comunicación entre procesos en sistemas embebidos.
+
+## Puertos
+
+Los puertos son otro mecanismo de IPC en macOS. Los puertos se utilizan para la comunicación entre procesos en la misma máquina. Los puertos se pueden utilizar para la comunicación en tiempo real o para la transferencia de archivos.
+
+## Conclusión
+
+La comunicación entre procesos es esencial en cualquier sistema operativo. En macOS, hay varios mecanismos de IPC disponibles para que los procesos se comuniquen entre sí. Es importante entender estos mecanismos para poder desarrollar aplicaciones seguras y eficientes en macOS.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -970,6 +931,8 @@ Para evitar este tipo de ataque, se recomienda asegurarse de que los permisos de
 ```
 {% endtab %}
 {% endtabs %}
+
+Esto concluye nuestra discusión sobre la comunicación interproceso en macOS. Hemos cubierto los conceptos básicos de IPC, los diferentes mecanismos de IPC disponibles en macOS y cómo se utilizan en diferentes escenarios. También hemos discutido cómo los atacantes pueden aprovechar los mecanismos de IPC para llevar a cabo ataques de escalada de privilegios y cómo los desarrolladores pueden proteger sus aplicaciones de estos ataques. Esperamos que esta guía haya sido útil para usted y lo haya ayudado a comprender mejor la seguridad de IPC en macOS.
 ```bash
 # Compile the server & client
 gcc xpc_server.c -o xpc_server
@@ -1044,36 +1007,7 @@ sleep(10); // Fake something is done and then it ends
 ```
 {% endtab %}
 
-{% tab title="README.md" %}
-# Comunicación interproceso (IPC) en macOS
-
-En macOS, los procesos pueden comunicarse entre sí utilizando varios mecanismos de IPC, como notificaciones de centro de mensajes, sockets de dominio de Unix y XPC. En este documento, nos centraremos en XPC, que es un marco de IPC de Apple que se utiliza para la comunicación entre procesos en macOS y iOS.
-
-## ¿Qué es XPC?
-
-XPC es un marco de IPC de Apple que se utiliza para la comunicación entre procesos en macOS y iOS. XPC se utiliza para enviar mensajes entre procesos y para crear servicios que se ejecutan en segundo plano. XPC se utiliza en muchos lugares en macOS, como en el centro de notificaciones, en el sistema de archivos y en el sistema de seguridad.
-
-## ¿Cómo funciona XPC?
-
-XPC funciona mediante la creación de conexiones entre procesos. Cada conexión se compone de un objeto de conexión y un objeto de punto final. El objeto de conexión se utiliza para enviar mensajes al proceso remoto, mientras que el objeto de punto final se utiliza para recibir mensajes del proceso remoto.
-
-Para enviar un mensaje a un proceso remoto, se crea un objeto de mensaje y se envía a través de la conexión. El proceso remoto recibe el mensaje a través de su objeto de punto final y puede responder al mensaje enviando otro mensaje de vuelta a través de la conexión.
-
-## ¿Cómo se utiliza XPC en macOS?
-
-XPC se utiliza en muchos lugares en macOS, como en el centro de notificaciones, en el sistema de archivos y en el sistema de seguridad. Los desarrolladores también pueden utilizar XPC para crear sus propios servicios y comunicarse con ellos desde sus aplicaciones.
-
-Para utilizar XPC en una aplicación, primero se debe crear un objeto de conexión y un objeto de punto final. A continuación, se pueden enviar mensajes a través de la conexión y recibir mensajes a través del objeto de punto final.
-
-## ¿Cómo se puede utilizar XPC para la escalada de privilegios?
-
-XPC se puede utilizar para la escalada de privilegios si se puede encontrar un servicio que se ejecute con privilegios elevados y que tenga una vulnerabilidad que permita la ejecución de código arbitrario. Si se puede encontrar una vulnerabilidad en un servicio de XPC, se puede utilizar para ejecutar código con los mismos privilegios que el servicio.
-
-Para encontrar servicios de XPC que se ejecuten con privilegios elevados, se puede utilizar el comando `launchctl list` para enumerar los servicios que se ejecutan en el sistema. A continuación, se pueden buscar servicios que se ejecuten con privilegios elevados y que utilicen XPC para la comunicación entre procesos.
-
-Una vez que se ha encontrado un servicio que se ejecuta con privilegios elevados y que utiliza XPC, se puede buscar una vulnerabilidad en el servicio que permita la ejecución de código arbitrario. Esto puede implicar la búsqueda de errores de programación, la búsqueda de desbordamientos de búfer y la búsqueda de problemas de validación de entrada.
-
-Si se encuentra una vulnerabilidad en un servicio de XPC, se puede utilizar para ejecutar código con los mismos privilegios que el servicio. Esto puede permitir la escalada de privilegios y la obtención de acceso a recursos protegidos del sistema.
+{% tab title="oc_xpc_server.m" %}
 ```objectivec
 // gcc -framework Foundation oc_xpc_client.m -o oc_xpc_client
 #include <Foundation/Foundation.h>
@@ -1106,68 +1040,67 @@ Inter-Process Communication (IPC) is a mechanism that allows processes to commun
 * Mach ports
 * Unix domain sockets
 * Distributed Objects
-* XPC
+* XPC services
+
+Each of these mechanisms has its own strengths and weaknesses, and can be used for different purposes. In this section, we will focus on Mach ports and XPC services, as they are the most commonly used IPC mechanisms on macOS.
 
 ## Mach Ports
 
-Mach ports are a low-level IPC mechanism used by macOS. They are used to send messages between processes and to create inter-process communication channels. Mach ports are used by many macOS system services, including launchd, the WindowServer, and the kernel.
+Mach ports are a low-level IPC mechanism provided by the Mach kernel. They are used extensively by macOS and iOS to implement various system services and APIs. Mach ports are similar to Unix domain sockets in that they provide a bidirectional communication channel between two processes. However, Mach ports are more powerful than Unix domain sockets, as they can be used to send and receive messages of arbitrary size and complexity.
 
-Mach ports are identified by a port name, which is a 32-bit integer. Ports can be created, destroyed, and passed between processes. When a process creates a port, it can specify whether the port is a send right, a receive right, or both. A send right allows a process to send messages to the port, while a receive right allows a process to receive messages from the port.
+Mach ports are identified by a port name, which is a 32-bit integer. Each process has a namespace of Mach ports, which is used to manage the ports that the process owns and the ports that the process has access to. Mach ports can be used to send messages to other processes, receive messages from other processes, or both.
 
-Mach ports can be used to perform a variety of tasks, including:
+Mach ports can be used to implement various types of IPC mechanisms, including:
 
-* Sending messages between processes
-* Sharing memory between processes
-* Creating inter-process communication channels
-* Creating synchronization primitives
+* Remote procedure calls (RPC)
+* Distributed notifications
+* Distributed objects
+* Kernel event notifications
 
-Mach ports are a powerful IPC mechanism, but they are also complex and difficult to use correctly. Improper use of Mach ports can lead to security vulnerabilities, including privilege escalation and denial-of-service attacks.
+Mach ports can also be used to implement various types of security mechanisms, including:
 
-## Unix Domain Sockets
+* Sandboxing
+* Code signing
+* Entitlements
 
-Unix domain sockets are a type of IPC mechanism used by macOS and other Unix-based operating systems. They provide a mechanism for processes to communicate with each other over the local network. Unix domain sockets are similar to TCP/IP sockets, but they are implemented entirely within the operating system kernel.
+Mach ports are a powerful IPC mechanism, but they are also complex and difficult to use correctly. Improper use of Mach ports can lead to various security vulnerabilities, including:
 
-Unix domain sockets are identified by a socket file, which is a special type of file that is used to represent the socket. When a process creates a socket, it can specify whether the socket is a stream socket or a datagram socket. Stream sockets provide a reliable, connection-oriented communication channel, while datagram sockets provide an unreliable, connectionless communication channel.
+* Denial-of-service (DoS) attacks
+* Information leaks
+* Privilege escalation
 
-Unix domain sockets can be used to perform a variety of tasks, including:
+## XPC Services
 
-* Sending messages between processes
-* Sharing memory between processes
-* Creating inter-process communication channels
-* Creating synchronization primitives
+XPC services are a high-level IPC mechanism provided by the XPC framework. They are used extensively by macOS and iOS to implement various system services and APIs. XPC services are built on top of Mach ports and provide a simpler and more secure way to implement IPC.
 
-Unix domain sockets are a simpler and more lightweight IPC mechanism than Mach ports, but they are also less powerful. They are typically used for communication between processes running on the same system.
+XPC services are identified by a service name, which is a string. Each XPC service runs in its own process and communicates with other processes using Mach ports. XPC services can be used to implement various types of IPC mechanisms, including:
 
-## Distributed Objects
+* Remote procedure calls (RPC)
+* Distributed notifications
+* Distributed objects
 
-Distributed Objects is an IPC mechanism provided by macOS that allows objects to be passed between processes. It is based on the Objective-C language and provides a high-level, object-oriented interface to IPC.
+XPC services can also be used to implement various types of security mechanisms, including:
 
-Distributed Objects allows objects to be passed between processes using a proxy mechanism. When a process wants to use an object in another process, it creates a proxy object that represents the remote object. The proxy object can be used to call methods on the remote object, and the results are returned to the calling process.
+* Sandboxing
+* Code signing
+* Entitlements
 
-Distributed Objects provides a number of features, including:
+XPC services provide several advantages over Mach ports, including:
 
-* Automatic serialization and deserialization of objects
-* Automatic garbage collection of objects
-* Support for remote method invocation
-* Support for distributed notifications
+* Automatic message serialization and deserialization
+* Automatic memory management
+* Automatic crash detection and recovery
+* Automatic sandboxing
 
-Distributed Objects is a powerful IPC mechanism, but it is also complex and difficult to use correctly. Improper use of Distributed Objects can lead to security vulnerabilities, including privilege escalation and denial-of-service attacks.
+XPC services are a powerful IPC mechanism, but they are also simpler and easier to use than Mach ports. Proper use of XPC services can help prevent various security vulnerabilities, including:
 
-## XPC
+* Denial-of-service (DoS) attacks
+* Information leaks
+* Privilege escalation
 
-XPC is a modern IPC mechanism provided by macOS. It is designed to be more secure and easier to use than Mach ports and Distributed Objects. XPC provides a high-level, object-oriented interface to IPC.
+## Conclusion
 
-XPC is based on a client-server model. A process that wants to provide a service creates an XPC service, which is a special type of process that runs in the background and provides the service. A process that wants to use the service creates an XPC connection to the service and uses it to communicate with the service.
-
-XPC provides a number of features, including:
-
-* Automatic serialization and deserialization of objects
-* Automatic memory management of objects
-* Support for remote method invocation
-* Support for distributed notifications
-* Support for sandboxing and code signing
-
-XPC is a powerful and easy-to-use IPC mechanism that is designed to be more secure than Mach ports and Distributed Objects. It is the recommended IPC mechanism for modern macOS applications.
+IPC is a powerful mechanism that allows processes to communicate with each other and share data. However, IPC can also be a source of security vulnerabilities if not used correctly. Mach ports and XPC services are two IPC mechanisms provided by macOS that can be used to implement various types of IPC and security mechanisms. Proper use of these mechanisms can help prevent various security vulnerabilities, including DoS attacks, information leaks, and privilege escalation.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -1190,6 +1123,8 @@ XPC is a powerful and easy-to-use IPC mechanism that is designed to be more secu
 ```
 {% endtab %}
 {% endtabs %}
+
+Esto concluye nuestra discusión sobre IPC en macOS. Hemos cubierto los conceptos básicos de IPC, los diferentes mecanismos de IPC disponibles en macOS y cómo se pueden utilizar para la escalada de privilegios. También hemos discutido algunas técnicas de mitigación que se pueden utilizar para protegerse contra los ataques de escalada de privilegios basados en IPC. Esperamos que esta discusión haya sido útil para usted en su viaje de aprendizaje de seguridad de macOS.
 ```bash
 # Compile the server & client
 gcc -framework Foundation oc_xpc_server.m -o oc_xpc_server
@@ -1222,7 +1157,7 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) **grupo de Discord** o al [**grupo de telegram**](https://t.me/peass) o **sígueme en** **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
