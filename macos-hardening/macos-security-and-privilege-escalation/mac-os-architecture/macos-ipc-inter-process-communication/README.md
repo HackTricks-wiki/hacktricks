@@ -1,4 +1,4 @@
-# IPC de macOS - Comunicación entre procesos
+# IPC de macOS - Comunicacion entre procesos
 
 <details>
 
