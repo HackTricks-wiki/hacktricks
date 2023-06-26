@@ -1,4 +1,4 @@
-## IPC do macOS - Comunicação entre Processos
+# IPC do macOS - Comunicação entre Processos
 
 O Mach utiliza **tarefas** como a **unidade mais pequena** para compartilhar recursos, e cada tarefa pode conter **várias threads**. Essas **tarefas e threads são mapeadas 1:1 para processos e threads POSIX**.
 
