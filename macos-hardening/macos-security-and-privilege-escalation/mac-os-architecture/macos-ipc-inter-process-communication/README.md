@@ -1,37 +1,23 @@
 ## IPC do macOS - Comunicação entre Processos
 
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
-
-## Mensagens Mach via Portas
-
-O Mach usa **tarefas** como a **unidade menor** para compartilhar recursos, e cada tarefa pode conter **várias threads**. Essas **tarefas e threads são mapeadas 1:1 para processos e threads POSIX**.
+O Mach utiliza **tarefas** como a **unidade mais pequena** para compartilhar recursos, e cada tarefa pode conter **várias threads**. Essas **tarefas e threads são mapeadas 1:1 para processos e threads POSIX**.
 
 A comunicação entre tarefas ocorre via Comunicação Interprocesso (IPC) do Mach, utilizando canais de comunicação unidirecionais. **As mensagens são transferidas entre portas**, que atuam como **filas de mensagens** gerenciadas pelo kernel.
 
 Os direitos de porta, que definem quais operações uma tarefa pode executar, são fundamentais para essa comunicação. Os possíveis **direitos de porta** são:
 
-* **Direito de recebimento**, que permite receber mensagens enviadas para a porta. As portas Mach são filas MPSC (múltiplos produtores, um único consumidor), o que significa que pode haver apenas **um direito de recebimento para cada porta** em todo o sistema (ao contrário dos pipes, onde vários processos podem ter descritores de arquivo para a extremidade de leitura de um pipe).
+* **Direito de recebimento**, que permite receber mensagens enviadas para a porta. As portas do Mach são filas MPSC (múltiplos produtores, um único consumidor), o que significa que pode haver apenas **um direito de recebimento para cada porta** em todo o sistema (ao contrário dos pipes, onde vários processos podem ter descritores de arquivo para a extremidade de leitura de um pipe).
 * Uma **tarefa com o direito de recebimento** pode receber mensagens e **criar direitos de envio**, permitindo que ela envie mensagens. Originalmente, apenas a **própria tarefa tem o direito de recebimento sobre sua porta**.
 * **Direito de envio**, que permite enviar mensagens para a porta.
 * **Direito de envio único**, que permite enviar uma mensagem para a porta e depois desaparece.
 * **Direito de conjunto de porta**, que denota um _conjunto de porta_ em vez de uma única porta. Desenfileirar uma mensagem de um conjunto de portas desenfileira uma mensagem de uma das portas que ele contém. Os conjuntos de portas podem ser usados para ouvir várias portas simultaneamente, muito parecido com `select`/`poll`/`epoll`/`kqueue` no Unix.
 * **Nome morto**, que não é um direito de porta real, mas apenas um espaço reservado. Quando uma porta é destruída, todos os direitos de porta existentes para a porta se transformam em nomes mortos.
 
-**As tarefas podem transferir direitos de ENVIO para outros**, permitindo que eles enviem mensagens de volta. **Os direitos de ENVIO também podem ser clonados, para que uma tarefa possa duplicar e dar o direito a uma terceira tarefa**. Isso, combinado com um processo intermediário conhecido como **servidor de inicialização**, permite uma comunicação eficaz entre tarefas.
+**As tarefas podem transferir direitos de ENVIO para outras**, permitindo que elas enviem mensagens de volta. **Os direitos de ENVIO também podem ser clonados, para que uma tarefa possa duplicar e dar o direito a uma terceira tarefa**. Isso, combinado com um processo intermediário conhecido como **servidor de inicialização**, permite uma comunicação eficaz entre tarefas.
 
 #### Etapas:
 
-Como mencionado, para estabelecer o canal de comunicação, o **servidor de inicialização** (**launchd** no mac) está envolvido.
+Como mencionado, para estabelecer o canal de comunicação, o **servidor de inicialização** (**launchd** no Mac) está envolvido.
 
 1. A tarefa **A** inicia uma **nova porta**, obtendo um **direito de RECEBIMENTO** no processo.
 2. A tarefa **A**, sendo a detentora do direito de RECEBIMENTO, **gera um direito de ENVIO para a porta**.
@@ -46,7 +32,7 @@ Então, a Apple armazena os **nomes dos serviços fornecidos pelo sistema** em a
 Para esses serviços predefinidos, o **processo de busca difere ligeiramente**. Quando um nome de serviço está sendo procurado, o launchd inicia o serviço dinamicamente. O novo fluxo de trabalho é o seguinte:
 
 * A tarefa **B** inicia uma **busca de inicialização** para um nome de serviço.
-* **launchd** verifica se a tarefa está em execução e, se não estiver, a **inicia**.
+* **launchd** verifica se a tarefa está em execução e, se não estiver, **a inicia**.
 * A tarefa **A** (o serviço) realiza um **check-in de inicialização**. Aqui, o **servidor de inicialização cria um direito de ENVIO, o retém e transfere o direito de RECEBIMENTO para a tarefa A**.
 * launchd duplica o **direito de ENVIO e o envia para a tarefa B**.
 
@@ -146,13 +132,13 @@ int main() {
     int msgid;
     message_buf buf;
 
-    key = ftok("receiver.c", 'B');
+    key = ftok("receiver.c", 'R');
     msgid = msgget(key, 0666 | IPC_CREAT);
 
     buf.mtype = 1;
     strcpy(buf.mtext, "Hello, world!");
 
-    msgsnd(msgid, &buf, sizeof(buf.mtext), 0);
+    msgsnd(msgid, &buf, strlen(buf.mtext)+1, 0);
 
     return 0;
 }
@@ -214,16 +200,16 @@ printf("Sent a message\n");
 
 * **Porta do host**: Se um processo tem o privilégio **Enviar** sobre esta porta, ele pode obter **informações** sobre o **sistema** (por exemplo, `host_processor_info`).
 * **Porta de privilégio do host**: Um processo com o direito de **Enviar** sobre esta porta pode realizar ações **privilegiadas** como carregar uma extensão do kernel. O **processo precisa ser root** para obter essa permissão.
-* Além disso, para chamar a API **`kext_request`**, é necessário ter a permissão **`com.apple.private.kext`**, que é dada apenas a binários da Apple.
+* Além disso, para chamar a API **`kext_request`**, é necessário ter a autorização **`com.apple.private.kext`**, que é dada apenas a binários da Apple.
 * **Porta do nome da tarefa:** Uma versão não privilegiada da _porta da tarefa_. Ele faz referência à tarefa, mas não permite controlá-la. A única coisa que parece estar disponível através dela é `task_info()`.
 * **Porta da tarefa** (também conhecida como porta do kernel)**:** Com a permissão de Envio sobre esta porta, é possível controlar a tarefa (ler/escrever memória, criar threads...).
-* Chame `mach_task_self()` para **obter o nome** desta porta para a tarefa do chamador. Esta porta é apenas **herdada** através do **`exec()`**; uma nova tarefa criada com `fork()` recebe uma nova porta de tarefa (como um caso especial, uma tarefa também recebe uma nova porta de tarefa após `exec()`ing um binário suid). A única maneira de criar uma tarefa e obter sua porta é realizar a ["dança de troca de porta"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) enquanto faz um `fork()`.
+* Chame `mach_task_self()` para **obter o nome** desta porta para a tarefa do chamador. Esta porta é apenas **herdada** através do **`exec()`**; uma nova tarefa criada com `fork()` recebe uma nova porta de tarefa (como um caso especial, uma tarefa também recebe uma nova porta de tarefa após `exec()`ing um binário suid). A única maneira de gerar uma tarefa e obter sua porta é realizar a ["dança de troca de porta"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) enquanto faz um `fork()`.
 * Estas são as restrições para acessar a porta (de `macos_task_policy` do binário `AppleMobileFileIntegrity`):
-* Se o aplicativo tiver a permissão **`com.apple.security.get-task-allow`**, processos do **mesmo usuário podem acessar a porta da tarefa** (comumente adicionado pelo Xcode para depuração). O processo de **notarização** não permitirá isso em lançamentos de produção.
-* Aplicativos com a permissão **`com.apple.system-task-ports`** podem obter a **porta da tarefa para qualquer** processo, exceto o kernel. Em versões mais antigas, era chamado de **`task_for_pid-allow`**. Isso é concedido apenas a aplicativos da Apple.
-* **Root pode acessar portas de tarefa** de aplicativos **não** compilados com um tempo de execução **fortificado** (e não da Apple).
+* Se o aplicativo tiver a autorização **`com.apple.security.get-task-allow`**, processos do **mesmo usuário podem acessar a porta da tarefa** (comumente adicionado pelo Xcode para depuração). O processo de **notarização** não permitirá isso em lançamentos de produção.
+* Aplicativos com a autorização **`com.apple.system-task-ports`** podem obter a **porta da tarefa para qualquer** processo, exceto o kernel. Em versões mais antigas, era chamado de **`task_for_pid-allow`**. Isso é concedido apenas a aplicativos da Apple.
+* **Root pode acessar portas de tarefas** de aplicativos **não** compilados com um tempo de execução **fortificado** (e não da Apple).
 
-### Injeção de Processo Shellcode via Porta de Tarefa
+### Injeção de Processo Shellcode via Porta da Tarefa
 
 Você pode pegar um shellcode de:
 
@@ -249,18 +235,7 @@ return 0;
 {% endtab %}
 
 {% tab title="entitlements.plist" %}
-
-# Entitlements.plist
-
-O arquivo `entitlements.plist` é um arquivo de propriedades que contém informações sobre as permissões e recursos que um aplicativo tem acesso. Ele é usado para definir as permissões de acesso a recursos do sistema, como acesso à rede, acesso ao sistema de arquivos, acesso ao microfone e câmera, etc.
-
-Os aplicativos podem solicitar permissões adicionais por meio do arquivo `entitlements.plist`. Por exemplo, um aplicativo que precisa acessar a câmera do dispositivo pode incluir uma entrada no arquivo `entitlements.plist` para solicitar permissão para acessar a câmera.
-
-Os arquivos `entitlements.plist` são assinados digitalmente e verificados pelo sistema operacional antes de serem executados. Isso garante que os aplicativos não possam obter permissões adicionais sem a aprovação do usuário.
-
-Os arquivos `entitlements.plist` são usados ​​para garantir que os aplicativos tenham acesso apenas aos recursos necessários e para evitar que os aplicativos acessem recursos não autorizados. Eles são uma parte importante do sistema de segurança do macOS e devem ser usados ​​corretamente para garantir a segurança do sistema. 
-
-{% endtab %}
+O arquivo `entitlements.plist` é um arquivo de propriedades que contém informações sobre as permissões que um processo tem no sistema. Ele é usado para especificar quais recursos um processo pode acessar e quais ações ele pode executar. O arquivo é assinado digitalmente e verificado pelo sistema operacional antes de ser executado. Se o arquivo não for assinado ou se a assinatura for inválida, o processo não será executado. O arquivo `entitlements.plist` é usado para restringir o acesso a recursos sensíveis do sistema, como a câmera, o microfone e a localização do usuário. Ele também é usado para restringir o acesso a recursos de rede, como a conexão com a Internet e a rede local.
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -731,13 +706,19 @@ fprintf(stderr,"Dylib não encontrado\n");
 gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
+### Injeção de Thread via porta de tarefa <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
+
+{% content-ref url="../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md" %}
+[macos-thread-injection-via-task-port.md](../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md)
+{% endcontent-ref %}
+
 ## XPC
 
 ### Informações básicas
 
-XPC, que significa Comunicação Interprocessos XNU (o kernel usado pelo macOS), é um framework para **comunicação entre processos** no macOS e iOS. O XPC fornece um mecanismo para fazer **chamadas de método assíncronas seguras entre diferentes processos** no sistema. É uma parte do paradigma de segurança da Apple, permitindo a **criação de aplicativos com privilégios separados** onde cada **componente** é executado com **apenas as permissões necessárias** para fazer seu trabalho, limitando assim o potencial de danos de um processo comprometido.
+XPC, que significa Comunicação Interprocessual XNU (o kernel usado pelo macOS), é um framework para **comunicação entre processos** no macOS e iOS. O XPC fornece um mecanismo para fazer **chamadas de método assíncronas seguras entre diferentes processos** no sistema. É uma parte do paradigma de segurança da Apple, permitindo a **criação de aplicativos separados por privilégios** onde cada **componente** é executado com **apenas as permissões necessárias** para fazer seu trabalho, limitando assim o potencial de danos de um processo comprometido.
 
-O XPC usa uma forma de Comunicação Interprocessos (IPC), que é um conjunto de métodos para diferentes programas em execução no mesmo sistema para enviar dados de ida e volta.
+O XPC usa uma forma de Comunicação Interprocessual (IPC), que é um conjunto de métodos para diferentes programas em execução no mesmo sistema para enviar dados de ida e volta.
 
 Os principais benefícios do XPC incluem:
 
@@ -745,7 +726,7 @@ Os principais benefícios do XPC incluem:
 2. **Estabilidade**: O XPC ajuda a isolar falhas no componente onde elas ocorrem. Se um processo falhar, ele pode ser reiniciado sem afetar o restante do sistema.
 3. **Desempenho**: O XPC permite fácil concorrência, pois diferentes tarefas podem ser executadas simultaneamente em diferentes processos.
 
-A única **desvantagem** é que **separar um aplicativo em vários processos** fazendo com que eles se comuniquem via XPC é **menos eficiente**. Mas nos sistemas de hoje isso é quase imperceptível e os benefícios são muito melhores.
+A única **desvantagem** é que **separar um aplicativo em vários processos** fazendo com que eles se comuniquem via XPC é **menos eficiente**. Mas nos sistemas de hoje isso quase não é perceptível e os benefícios são muito melhores.
 
 Um exemplo pode ser visto no QuickTime Player, onde um componente que usa XPC é responsável pela decodificação de vídeo. O componente é especificamente projetado para realizar tarefas computacionais, portanto, no caso de uma violação, ele não forneceria nenhum ganho útil ao atacante, como acesso a arquivos ou à rede.
 
@@ -759,7 +740,7 @@ Os serviços XPC são **iniciados** pelo **launchd** quando necessário e **ence
 
 ### Serviços XPC em todo o sistema
 
-Os **serviços XPC em todo o sistema** são acessíveis a todos os usuários. Esses serviços, sejam do tipo launchd ou Mach, precisam ser **definidos em arquivos plist** localizados em diretórios especificados, como **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** ou **`/Library/LaunchAgents`**.
+Os **serviços XPC em todo o sistema** são acessíveis a todos os usuários. Esses serviços, seja launchd ou do tipo Mach, precisam ser **definidos em arquivos plist** localizados em diretórios especificados, como **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** ou **`/Library/LaunchAgents`**.
 
 Esses arquivos plist terão uma chave chamada **`MachServices`** com o nome do serviço e uma chave chamada **`Program`** com o caminho para o binário:
 ```xml
@@ -909,13 +890,7 @@ return 0;
 
 {% tab title="xyz.hacktricks.service.plist" %}
 
-Este arquivo é um arquivo de propriedades do Launchd que define um serviço personalizado que será executado no sistema. O Launchd é o sistema de inicialização e gerenciamento de processos do macOS. Ele é responsável por iniciar, parar e monitorar processos e serviços em segundo plano.
-
-O arquivo plist contém informações sobre o serviço, como o caminho do executável, os argumentos a serem passados para o executável, o usuário e o grupo que executarão o serviço e outras opções de configuração.
-
-Para instalar o serviço, basta colocar o arquivo plist na pasta /Library/LaunchDaemons ou ~/Library/LaunchAgents e executar o comando launchctl load /path/to/plist. O serviço será iniciado automaticamente na próxima vez que o sistema for iniciado.
-
-Para desinstalar o serviço, basta executar o comando launchctl unload /path/to/plist e remover o arquivo plist da pasta LaunchDaemons ou LaunchAgents.
+Este arquivo é um arquivo de propriedades do Launchd que define um serviço personalizado que será executado no sistema. O Launchd é o sistema de gerenciamento de serviços do macOS que inicia, para e monitora processos e serviços do sistema. O arquivo plist contém informações sobre o serviço, como o caminho do executável, argumentos, diretório de trabalho, variáveis de ambiente e muito mais. É possível usar o Launchd para iniciar serviços personalizados com privilégios elevados, o que pode ser útil para a escalada de privilégios.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -939,33 +914,33 @@ Para desinstalar o serviço, basta executar o comando launchctl unload /path/to/
 {% endtab %}
 {% endtabs %} 
 
-{% tabs %}
 {% tab title="Introdução" %}
-O macOS é um sistema operacional baseado em Unix que é amplamente utilizado em computadores pessoais da Apple. O macOS é conhecido por sua segurança e privacidade robustas, mas ainda é vulnerável a ataques devido a vulnerabilidades de segurança e configurações incorretas. Neste guia, exploraremos a arquitetura do macOS e como ela lida com a comunicação entre processos. Também discutiremos técnicas de escalonamento de privilégios que podem ser usadas para obter acesso não autorizado a recursos protegidos do sistema. 
+O macOS é um sistema operacional baseado em Unix que usa o kernel XNU. O XNU é um kernel híbrido que combina um kernel Mach com componentes do kernel BSD. O macOS usa o Mach para gerenciar a memória, threads e IPC (Inter-Process Communication). O IPC é um mecanismo que permite que processos diferentes se comuniquem entre si. O IPC é usado para implementar muitos recursos do macOS, como notificações, Apple Events, XPC e outros. O IPC é uma parte importante do macOS e é frequentemente usado em exploits de escalonamento de privilégios.
 {% endtab %}
 
-{% tab title="Comunicação entre processos" %}
-O macOS usa vários mecanismos de comunicação entre processos (IPC) para permitir que os processos se comuniquem uns com os outros. Esses mecanismos incluem:
-
-- **Mach IPC**: um mecanismo de IPC de baixo nível usado pelo kernel do macOS e pelos processos do usuário.
-- **XPC**: um mecanismo de IPC de alto nível usado para comunicação entre processos do usuário.
-- **Distributed Objects**: um mecanismo de IPC de alto nível usado para comunicação entre processos do usuário.
-
-Esses mecanismos de IPC são usados para uma variedade de finalidades, incluindo comunicação entre processos do sistema, comunicação entre processos do usuário e comunicação entre processos do sistema e do usuário. 
-
-Os mecanismos de IPC do macOS são projetados para serem seguros e proteger a privacidade do usuário. No entanto, eles ainda são vulneráveis a ataques devido a vulnerabilidades de segurança e configurações incorretas. 
+{% tab title="IPC" %}
+O IPC é um mecanismo que permite que processos diferentes se comuniquem entre si. Existem vários tipos de IPC disponíveis no macOS, incluindo notificações, Apple Events, XPC e outros. O IPC é uma parte importante do macOS e é frequentemente usado em exploits de escalonamento de privilégios. O IPC é gerenciado pelo Mach e é implementado usando portas Mach. As portas Mach são usadas para enviar mensagens entre processos. Cada porta Mach tem um nome e um número de porta. O número da porta é usado para identificar a porta Mach e o nome da porta é usado para se conectar à porta Mach.
 {% endtab %}
 
-{% tab title="Escalonamento de privilégios" %}
-O escalonamento de privilégios é uma técnica usada para obter acesso não autorizado a recursos protegidos do sistema. No macOS, existem várias técnicas de escalonamento de privilégios que podem ser usadas para obter acesso não autorizado a recursos protegidos do sistema. Essas técnicas incluem:
-
-- **Exploração de vulnerabilidades**: a exploração de vulnerabilidades em aplicativos ou no próprio sistema operacional pode permitir que um invasor obtenha acesso não autorizado a recursos protegidos do sistema.
-- **Injeção de código**: a injeção de código em um processo do sistema pode permitir que um invasor execute código com privilégios elevados.
-- **Engenharia social**: a engenharia social pode ser usada para obter acesso não autorizado a recursos protegidos do sistema, como senhas ou informações confidenciais.
-
-Para proteger o sistema contra escalonamento de privilégios, é importante manter o sistema atualizado com as últimas atualizações de segurança e seguir as melhores práticas de segurança, como limitar o acesso de usuários privilegiados e restringir o acesso a recursos protegidos do sistema. 
+{% tab title="Portas Mach" %}
+As portas Mach são usadas para enviar mensagens entre processos. Cada porta Mach tem um nome e um número de porta. O número da porta é usado para identificar a porta Mach e o nome da porta é usado para se conectar à porta Mach. As portas Mach são gerenciadas pelo kernel e são usadas para implementar vários recursos do macOS, como notificações, Apple Events, XPC e outros. As portas Mach são uma parte importante do macOS e são frequentemente usadas em exploits de escalonamento de privilégios.
 {% endtab %}
-{% endtabs %}
+
+{% tab title="Notificações" %}
+As notificações são uma forma de IPC que permite que os aplicativos enviem mensagens para o Centro de Notificações do macOS. As notificações são implementadas usando portas Mach. Quando um aplicativo envia uma notificação, ele envia uma mensagem para a porta Mach do Centro de Notificações. O Centro de Notificações recebe a mensagem e exibe a notificação para o usuário. As notificações são uma parte importante do macOS e são frequentemente usadas em exploits de escalonamento de privilégios.
+{% endtab %}
+
+{% tab title="Eventos da Apple" %}
+Os eventos da Apple são uma forma de IPC que permite que os aplicativos enviem mensagens uns aos outros. Os eventos da Apple são implementados usando portas Mach. Quando um aplicativo envia um evento da Apple, ele envia uma mensagem para a porta Mach do aplicativo de destino. O aplicativo de destino recebe a mensagem e executa a ação apropriada. Os eventos da Apple são uma parte importante do macOS e são frequentemente usados em exploits de escalonamento de privilégios.
+{% endtab %}
+
+{% tab title="XPC" %}
+O XPC é uma forma de IPC que permite que os aplicativos se comuniquem uns com os outros. O XPC é implementado usando portas Mach. Quando um aplicativo envia uma mensagem XPC, ele envia uma mensagem para a porta Mach do aplicativo de destino. O aplicativo de destino recebe a mensagem e executa a ação apropriada. O XPC é uma parte importante do macOS e é frequentemente usado em exploits de escalonamento de privilégios.
+{% endtab %}
+
+{% tab title="Conclusão" %}
+O IPC é uma parte importante do macOS e é frequentemente usado em exploits de escalonamento de privilégios. Existem vários tipos de IPC disponíveis no macOS, incluindo notificações, Apple Events, XPC e outros. O IPC é gerenciado pelo Mach e é implementado usando portas Mach. As portas Mach são usadas para enviar mensagens entre processos. Cada porta Mach tem um nome e um número de porta. O número da porta é usado para identificar a porta Mach e o nome da porta é usado para se conectar à porta Mach. As portas Mach são uma parte importante do macOS e são frequentemente usadas em exploits de escalonamento de privilégios.
+{% endtab %}
 ```bash
 # Compile the server & client
 gcc xpc_server.c -o xpc_server
@@ -1044,35 +1019,23 @@ sleep(10); // Fake something is done and then it ends
 
 # Servidor XPC
 
-O servidor XPC é responsável por criar e gerenciar a conexão XPC com o cliente. Ele também é responsável por definir os manipuladores de mensagens que serão chamados quando o cliente enviar uma mensagem.
+O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele. O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele.
 
-O servidor XPC é iniciado chamando a função `xpc_main()`. Esta função cria uma conexão XPC e define os manipuladores de mensagens. Em seguida, ele entra em um loop infinito, aguardando mensagens do cliente.
+O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele. O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele.
 
-Quando uma mensagem é recebida, o manipulador de mensagem apropriado é chamado. O manipulador de mensagem é responsável por processar a mensagem e enviar uma resposta de volta ao cliente, se necessário.
+O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele. O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele.
 
-# Compilando e executando o servidor XPC
+O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele. O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele.
 
-Para compilar o servidor XPC, execute o seguinte comando:
+O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele. O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele.
 
-```
-$ clang -o oc_xpc_server oc_xpc_server.m -framework Foundation -framework XPC
-```
+O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele. O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele.
 
-Para executar o servidor XPC, execute o seguinte comando:
+O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele. O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele.
 
-```
-$ ./oc_xpc_server
-```
+O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele. O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele.
 
-# Testando o servidor XPC
-
-Para testar o servidor XPC, execute o seguinte comando:
-
-```
-$ ./oc_xpc_client
-```
-
-Isso enviará uma mensagem para o servidor XPC e imprimirá a resposta recebida do servidor.
+O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele. O servidor XPC é responsável por criar a conexão XPC e gerenciar as mensagens recebidas do cliente XPC. O servidor XPC é iniciado pelo sistema operacional quando o cliente XPC se conecta a ele.
 
 {% endtab %}
 ```objectivec
@@ -1111,7 +1074,7 @@ Inter-Process Communication (IPC) is a mechanism that allows processes to commun
 
 ## Mach Ports
 
-Mach ports are a low-level IPC mechanism used by macOS and iOS. They are used to send messages between processes and to create inter-process communication channels. Mach ports are used by many macOS system services, including launchd, the WindowServer, and the kernel.
+Mach ports are a low-level IPC mechanism used by macOS and iOS. They are used to send messages between processes and to create inter-process communication channels. Mach ports are used by many macOS and iOS system services, including launchd, the kernel, and the WindowServer.
 
 Mach ports are identified by a port name, which is a 32-bit integer. Ports can be created, destroyed, and passed between processes. When a process creates a port, it can specify whether the port is a send right, a receive right, or both. A send right allows a process to send messages to the port, while a receive right allows a process to receive messages from the port.
 
@@ -1124,36 +1087,45 @@ Mach ports can be used to perform a variety of tasks, including:
 
 ## Unix Domain Sockets
 
-Unix domain sockets are a type of IPC mechanism that allows processes to communicate with each other using the file system. They are similar to network sockets, but they are only accessible on the local machine.
+Unix domain sockets are a type of IPC mechanism that allows processes to communicate with each other using the file system. They are similar to network sockets, but they are only accessible on the local machine. Unix domain sockets are commonly used by system services and daemons to communicate with each other.
 
-Unix domain sockets are identified by a file path, which is used to create a socket file in the file system. Processes can connect to a socket by opening the socket file and sending messages to it. Unix domain sockets can be used to perform a variety of tasks, including:
+Unix domain sockets are identified by a file path, which is used to create and connect to the socket. When a process creates a socket, it can specify whether the socket is a stream socket or a datagram socket. Stream sockets provide a reliable, byte-stream oriented communication channel, while datagram sockets provide an unreliable, message-oriented communication channel.
+
+Unix domain sockets can be used to perform a variety of tasks, including:
 
 * Sending messages between processes
 * Sharing file descriptors between processes
 * Creating inter-process communication channels
+* Creating synchronization primitives, such as semaphores and mutexes
 
 ## Distributed Objects
 
-Distributed Objects is an IPC mechanism that allows objects to be passed between processes. It is based on the Objective-C runtime and is used primarily by macOS system services.
+Distributed Objects is a high-level IPC mechanism provided by macOS. It allows objects to be passed between processes, and it provides a transparent mechanism for remote method invocation. Distributed Objects is built on top of Mach ports and Unix domain sockets.
 
-Distributed Objects allows objects to be passed between processes using a proxy object. The proxy object is responsible for forwarding messages between the local object and the remote object. Distributed Objects can be used to perform a variety of tasks, including:
+Distributed Objects allows objects to be passed between processes using a proxy object. The proxy object is responsible for forwarding method invocations to the remote object, and for marshalling and unmarshalling arguments and return values. Distributed Objects provides a transparent mechanism for remote method invocation, so the caller does not need to know whether the object is local or remote.
 
-* Sharing objects between processes
-* Creating inter-process communication channels
+Distributed Objects can be used to perform a variety of tasks, including:
+
+* Passing objects between processes
+* Invoking methods on remote objects
+* Creating distributed objects that span multiple processes
 
 ## XPC Services
 
-XPC Services is a high-level IPC mechanism used by macOS and iOS. It is based on the XPC (eXtensible Procedure Call) protocol and is used primarily by macOS system services.
+XPC Services is a high-level IPC mechanism provided by macOS. It allows processes to communicate with each other using a message-passing model. XPC Services is built on top of Mach ports and Unix domain sockets.
 
-XPC Services allows processes to communicate with each other using a message-passing model. Processes can send messages to each other and receive responses asynchronously. XPC Services can be used to perform a variety of tasks, including:
+XPC Services allows processes to communicate with each other using a message-passing model. A process can create an XPC service, which is a separate process that provides a specific service. The process can then send messages to the XPC service to request the service, and the XPC service can send messages back to the process to provide the service.
 
-* Running background tasks
-* Sharing data between processes
-* Creating inter-process communication channels
+XPC Services can be used to perform a variety of tasks, including:
+
+* Providing services to other processes
+* Running tasks in a separate process
+* Creating sandboxed processes
+* Creating privileged helper tools
 
 ## Conclusion
 
-Inter-Process Communication is an important mechanism for macOS and iOS. It allows processes to communicate with each other and share data, which is essential for many system services and applications. Understanding the different IPC mechanisms available on macOS can help you develop more efficient and secure applications.
+Inter-Process Communication is an important mechanism for macOS and iOS. It allows processes to communicate with each other and share data, which is essential for many system services and daemons. Understanding the different IPC mechanisms provided by macOS is important for both developers and security researchers.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -1174,32 +1146,6 @@ Inter-Process Communication is an important mechanism for macOS and iOS. It allo
 </dict>
 </plist>
 ```
-{% endtab %}
-{% endtabs %} 
-
-{% tabs %}
-{% tab title="Introdução" %}
-O macOS é um sistema operacional baseado em Unix que é amplamente utilizado em computadores pessoais da Apple. O macOS é conhecido por sua segurança e privacidade robustas, mas ainda é vulnerável a ataques devido a vulnerabilidades de segurança e configurações incorretas. Neste guia, exploraremos a arquitetura do macOS e como ela lida com a comunicação entre processos. Também discutiremos técnicas de escalonamento de privilégios que podem ser usadas para obter acesso não autorizado a recursos protegidos do sistema. 
-{% endtab %}
-
-{% tab title="Comunicação entre processos" %}
-O macOS usa vários mecanismos de comunicação entre processos (IPC) para permitir que os processos se comuniquem uns com os outros. Esses mecanismos incluem:
-
-- **Mach IPC**: um mecanismo de IPC de baixo nível usado pelo kernel do macOS e pelos processos do usuário.
-- **XPC**: um mecanismo de IPC de alto nível usado para comunicação entre processos do usuário.
-- **Distributed Objects**: um mecanismo de IPC de alto nível usado para comunicação entre processos do usuário.
-
-Esses mecanismos de IPC são usados ​​para permitir que os processos se comuniquem uns com os outros e compartilhem recursos. No entanto, eles também podem ser usados ​​para ataques de escalonamento de privilégios, como veremos na seção a seguir. 
-{% endtab %}
-
-{% tab title="Escalonamento de privilégios" %}
-O macOS é projetado com várias camadas de segurança para proteger o sistema contra ataques. No entanto, essas camadas de segurança podem ser contornadas usando técnicas de escalonamento de privilégios. Algumas técnicas comuns de escalonamento de privilégios no macOS incluem:
-
-- **Exploração de vulnerabilidades**: os atacantes podem explorar vulnerabilidades de segurança no sistema operacional ou em aplicativos de terceiros para obter acesso não autorizado a recursos protegidos do sistema.
-- **Ataques de injeção de código**: os atacantes podem injetar código malicioso em processos do sistema para obter acesso não autorizado a recursos protegidos do sistema.
-- **Ataques de IPC**: os atacantes podem usar mecanismos de IPC para se comunicar com processos protegidos e obter acesso não autorizado a recursos protegidos do sistema.
-
-Para proteger o sistema contra ataques de escalonamento de privilégios, é importante manter o sistema operacional e os aplicativos de terceiros atualizados e configurar corretamente as configurações de segurança do sistema. 
 {% endtab %}
 {% endtabs %}
 ```bash
