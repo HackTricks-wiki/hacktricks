@@ -50,11 +50,19 @@ Electron applications executed with specific env variables could be vulnerable t
 
 ### .Net Applications Injection
 
-It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtim hardening).
+It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
 
 {% content-ref url="macos-.net-applications-injection.md" %}
 [macos-.net-applications-injection.md](macos-.net-applications-injection.md)
 {% endcontent-ref %}
+
+### Python Injection
+
+If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished.
+
+Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary scode.
+
+Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
 
 ## Detection
 
