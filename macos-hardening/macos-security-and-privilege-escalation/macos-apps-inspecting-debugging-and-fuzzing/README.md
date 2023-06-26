@@ -21,7 +21,7 @@ otool -tv /bin/ps #Decompile application
 ```
 ### objdump
 
-Objdump es una herramienta de línea de comandos que se utiliza para inspeccionar archivos binarios y de objeto. Puede mostrar información detallada sobre los archivos, como los encabezados de sección, los símbolos y las instrucciones de ensamblaje. También se puede utilizar para desensamblar archivos y analizar su contenido. Objdump es una herramienta útil para la depuración y el análisis de archivos binarios en macOS.
+objdump es una herramienta de línea de comandos que se utiliza para inspeccionar archivos binarios y de objeto. Puede mostrar información detallada sobre los archivos, como los encabezados de sección, los símbolos y las instrucciones de ensamblaje. También se puede utilizar para desensamblar archivos y analizar su contenido.
 ```bash
 objdump -m --dylibs-used /bin/ls #List dynamically linked libraries
 objdump -m -h /bin/ls # Get headers information
@@ -48,7 +48,7 @@ ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Autom
 ```
 ### Codesign
 
-Codesign
+Codesign es una herramienta de línea de comandos que se utiliza para firmar digitalmente archivos en macOS. La firma digital proporciona una forma de verificar la integridad y autenticidad de los archivos. Los desarrolladores de software utilizan codesign para firmar sus aplicaciones antes de distribuirlas a los usuarios finales. Los administradores de sistemas también pueden utilizar codesign para verificar la autenticidad de las aplicaciones instaladas en sus sistemas.
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -80,45 +80,81 @@ Será montado en `/Volumes`
 
 ### Objective-C
 
-Cuando se llama a una función en un binario que utiliza Objective-C, en lugar de llamar a esa función, el código compilado llamará a **`objc_msgSend`**. Que llamará a la función final:
+#### Metadatos
+
+{% hint style="danger" %}
+Tenga en cuenta que los programas escritos en Objective-C **mantienen** sus declaraciones de clase **cuando** son compilados en [binarios Mach-O](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Tales declaraciones de clase **incluyen** el nombre y tipo de:
+{% endhint %}
+
+* La clase
+* Los métodos de clase
+* Las variables de instancia de clase
+
+Puede obtener esta información usando [**class-dump**](https://github.com/nygard/class-dump):
+```bash
+class-dump Kindle.app
+```
+Nota que estos nombres podrían estar obfuscados para hacer la reversión del binario más difícil.
+
+#### Llamada de función
+
+Cuando se llama a una función en un binario que utiliza Objective-C, el código compilado en lugar de llamar a esa función, llamará a **`objc_msgSend`**. Lo que llamará a la función final:
 
 ![](<../../../.gitbook/assets/image (560).png>)
 
 Los parámetros que esta función espera son:
 
-* El primer parámetro (**self**) es "un puntero que apunta a la **instancia de la clase que recibirá el mensaje**". O dicho de manera más simple, es el objeto sobre el que se invoca el método. Si el método es un método de clase, esto será una instancia del objeto de la clase (en su totalidad), mientras que para un método de instancia, self apuntará a una instancia instanciada de la clase como objeto.
-* El segundo parámetro, (**op**), es "el selector del método que maneja el mensaje". De nuevo, de manera más simple, este es solo el **nombre del método**.
+* El primer parámetro (**self**) es "un puntero que apunta a la **instancia de la clase que recibirá el mensaje**". O más simplemente, es el objeto sobre el que se invoca el método. Si el método es un método de clase, esto será una instancia del objeto de la clase (en su totalidad), mientras que para un método de instancia, self apuntará a una instancia instanciada de la clase como objeto.
+* El segundo parámetro, (**op**), es "el selector del método que maneja el mensaje". De nuevo, más simplemente, este es solo el **nombre del método**.
 * Los parámetros restantes son cualquier **valor que requiera el método** (op).
 
-| **Argumento**      | **Registro**                                                    | **(para) objc\_msgSend**                                |
+| **Argumento**     | **Registro**                                                    | **(para) objc\_msgSend**                                |
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **1er argumento**  | **rdi**                                                         | **self: objeto sobre el que se invoca el método** |
-| **2do argumento**  | **rsi**                                                         | **op: nombre del método**                             |
-| **3er argumento**  | **rdx**                                                         | **1er argumento para el método**                         |
-| **4to argumento**  | **rcx**                                                         | **2do argumento para el método**                         |
-| **5to argumento**  | **r8**                                                          | **3er argumento para el método**                         |
-| **6to argumento**  | **r9**                                                          | **4to argumento para el método**                         |
-| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento para el método**                        |
+| **1er argumento** | **rdi**                                                         | **self: objeto sobre el que se invoca el método**      |
+| **2do argumento** | **rsi**                                                         | **op: nombre del método**                              |
+| **3er argumento** | **rdx**                                                         | **1er argumento para el método**                       |
+| **4to argumento** | **rcx**                                                         | **2do argumento para el método**                       |
+| **5to argumento** | **r8**                                                          | **3er argumento para el método**                       |
+| **6to argumento** | **r9**                                                          | **4to argumento para el método**                       |
+| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento para el método**                      |
+
+### Swift
+
+Con binarios de Swift, dado que hay compatibilidad con Objective-C, a veces se pueden extraer declaraciones usando [class-dump](https://github.com/nygard/class-dump/) pero no siempre.
+
+Con las líneas de comando **`jtool -l`** o **`otool -l`** es posible encontrar varias secciones que comienzan con el prefijo **`__swift5`**:
+```bash
+jtool2 -l /Applications/Stocks.app/Contents/MacOS/Stocks
+LC 00: LC_SEGMENT_64              Mem: 0x000000000-0x100000000    __PAGEZERO
+LC 01: LC_SEGMENT_64              Mem: 0x100000000-0x100028000    __TEXT
+[...]
+Mem: 0x100026630-0x100026d54        __TEXT.__swift5_typeref
+Mem: 0x100026d60-0x100027061        __TEXT.__swift5_reflstr
+Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
+Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
+[...]
+```
+Puede encontrar más información sobre la [**información almacenada en estas secciones en esta publicación de blog**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
 ### Binarios empaquetados
 
-* Verificar la alta entropía
-* Verificar las cadenas (si hay casi ninguna cadena comprensible, empaquetado)
-* El empaquetador UPX para MacOS genera una sección llamada "\_\_XHDR"
+* Verifique la entropía alta.
+* Verifique las cadenas (si hay casi ninguna cadena comprensible, está empaquetado).
+* El empaquetador UPX para MacOS genera una sección llamada "\_\_XHDR".
 
 ## Análisis dinámico
 
 {% hint style="warning" %}
-Tenga en cuenta que para depurar binarios, **SIP debe estar deshabilitado** (`csrutil disable` o `csrutil enable --without debug`) o copiar los binarios a una carpeta temporal y **eliminar la firma** con `codesign --remove-signature <ruta-del-binario>` o permitir la depuración del binario (puede usar [este script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b))
+Tenga en cuenta que para depurar binarios, **SIP debe estar deshabilitado** (`csrutil disable` o `csrutil enable --without debug`) o copiar los binarios a una carpeta temporal y **eliminar la firma** con `codesign --remove-signature <ruta-del-binario>` o permitir la depuración del binario (puede usar [este script](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b)).
 {% endhint %}
 
 {% hint style="warning" %}
-Tenga en cuenta que para **instrumentar binarios del sistema**, (como `cloudconfigurationd`) en macOS, **SIP debe estar deshabilitado** (simplemente eliminar la firma no funcionará).
+Tenga en cuenta que para **instrumentar binarios del sistema** (como `cloudconfigurationd`) en macOS, **SIP debe estar deshabilitado** (simplemente eliminar la firma no funcionará).
 {% endhint %}
 
 ### Registros unificados
 
-MacOS genera muchos registros que pueden ser muy útiles al ejecutar una aplicación tratando de entender **qué está haciendo**.
+MacOS genera muchos registros que pueden ser muy útiles al ejecutar una aplicación para tratar de entender **qué está haciendo**.
 
 Además, hay algunos registros que contendrán la etiqueta `<private>` para **ocultar** alguna información **identificable** del **usuario** o **computadora**. Sin embargo, es posible **instalar un certificado para revelar esta información**. Siga las explicaciones de [**aquí**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
 
@@ -130,15 +166,15 @@ En el panel izquierdo de Hopper es posible ver los símbolos (**Etiquetas**) del
 
 #### Panel central
 
-En el panel central se puede ver el **código desensamblado**. Y se puede ver como **desensamblado** en bruto, como **gráfico**, como **descompilado** y como **binario** haciendo clic en el icono respectivo:
+En el panel central se puede ver el **código desensamblado**. Y se puede ver como **crudo**, como **gráfico**, como **descompilado** y como **binario** haciendo clic en el icono respectivo:
 
 <figure><img src="../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
 
-Al hacer clic con el botón derecho en un objeto de código, puede ver las **referencias desde/hacia ese objeto** o incluso cambiar su nombre (esto no funciona en pseudocódigo descompilado):
+Al hacer clic derecho en un objeto de código, puede ver las **referencias desde/hacia ese objeto** o incluso cambiar su nombre (esto no funciona en pseudocódigo descompilado):
 
 <figure><img src="../../../.gitbook/assets/image (1) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
-Además, en la **parte inferior central se pueden escribir comandos python**.
+Además, en la **parte inferior central se pueden escribir comandos de Python**.
 
 #### Panel derecho
 
@@ -164,12 +200,12 @@ DTrace utiliza la función **`dtrace_probe_create`** para crear una sonda para c
 Las sondas disponibles de dtrace se pueden obtener con:
 ```bash
 dtrace -l | head
-   ID   PROVIDER            MODULE                          FUNCTION NAME
-    1     dtrace                                                     BEGIN
-    2     dtrace                                                     END
-    3     dtrace                                                     ERROR
-   43    profile                                                     profile-97
-   44    profile                                                     profile-199
+ID   PROVIDER            MODULE                          FUNCTION NAME
+1     dtrace                                                     BEGIN
+2     dtrace                                                     END
+3     dtrace                                                     ERROR
+43    profile                                                     profile-97
+44    profile                                                     profile-199
 ```
 El nombre de la sonda consta de cuatro partes: el proveedor, el módulo, la función y el nombre (`fbt:mach_kernel:ptrace:entry`). Si no se especifica alguna parte del nombre, Dtrace la aplicará como comodín.
 
@@ -194,17 +230,17 @@ syscall:::entry
 }
 
 #Log every syscall of a PID
-sudo dtrace -s script.d 1234 
+sudo dtrace -s script.d 1234
 ```
 
 ```bash
 syscall::open:entry
 {
-    printf("%s(%s)", probefunc, copyinstr(arg0));
+printf("%s(%s)", probefunc, copyinstr(arg0));
 }
 syscall::close:entry
 {
-        printf("%s(%d)\n", probefunc, arg0);
+printf("%s(%d)\n", probefunc, arg0);
 }
 
 #Log files opened and closed by a process
@@ -214,11 +250,11 @@ sudo dtrace -s b.d -c "cat /etc/hosts"
 ```bash
 syscall:::entry
 {
-        ;
+;
 }
 syscall:::return
 {
-        printf("=%d\n", arg1);
+printf("=%d\n", arg1);
 }
 
 #Log sys calls with values
@@ -242,11 +278,15 @@ fs_usage -w -f network curl #This tracks network actions
 ### TaskExplorer
 
 [**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) es útil para ver las **bibliotecas** utilizadas por un binario, los **archivos** que está utilizando y las **conexiones de red**.\
-También verifica los procesos binarios en **virustotal** y muestra información sobre el binario.
+También verifica los procesos binarios contra **virustotal** y muestra información sobre el binario.
+
+## PT\_DENY\_ATTACH <a href="#page-title" id="page-title"></a>
+
+En [**esta publicación de blog**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) puedes encontrar un ejemplo sobre cómo **depurar un daemon en ejecución** que utilizó **`PT_DENY_ATTACH`** para evitar la depuración incluso si SIP estaba deshabilitado.
 
 ### lldb
 
-**lldb** es la herramienta de **hecho** para la **depuración** de binarios de **macOS**.
+**lldb** es la herramienta de facto para la **depuración** de binarios de **macOS**.
 ```bash
 lldb ./malware.bin
 lldb -p 1122
@@ -290,14 +330,13 @@ Cuando se llama a la función **`objc_sendMsg`**, el registro **rsi** contiene e
 * El comando **`sysctl hw.model`** devuelve "Mac" cuando el **anfitrión es un MacOS**, pero algo diferente cuando es una VM.
 * Jugando con los valores de **`hw.logicalcpu`** y **`hw.physicalcpu`**, algunos malwares intentan detectar si es una VM.
 * Algunos malwares también pueden **detectar** si la máquina es **VMware** en función de la dirección MAC (00:50:56).
-* También es posible encontrar **si un proceso está siendo depurado** con un código simple como:
+* También es posible encontrar si un proceso está siendo depurado con un código simple como:
 
-  * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //proceso siendo depurado }`
-
+`if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //proceso siendo depurado }`
 * También puede invocar la llamada al sistema **`ptrace`** con la bandera **`PT_DENY_ATTACH`**. Esto **impide** que un depurador se adjunte y rastree.
-  * Puede verificar si la función **`sysctl`** o **`ptrace`** está siendo **importada** (pero el malware podría importarla dinámicamente)
-  * Como se señala en este artículo, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-    “_El mensaje Process # exited with **status = 45 (0x0000002d)** es generalmente una señal reveladora de que el objetivo de depuración está usando **PT\_DENY\_ATTACH**_”
+* Puede verificar si la función **`sysctl`** o **`ptrace`** está siendo **importada** (pero el malware podría importarla dinámicamente)
+* Como se señala en este artículo, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
+“_El mensaje Process # exited with **status = 45 (0x0000002d)** es generalmente una señal reveladora de que el objetivo de depuración está usando **PT\_DENY\_ATTACH**_”
 
 ## Fuzzing
 

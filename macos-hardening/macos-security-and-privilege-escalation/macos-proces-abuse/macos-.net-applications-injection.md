@@ -17,11 +17,11 @@
 ### **Establecer una sesión de depuración** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
 [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) es responsable de manejar la **comunicación** entre el depurador y el depurado de .Net.\
-Crea 2 tuberías con nombres por proceso .Net en [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) llamando a [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (uno terminará en **`-in`** y el otro en **`-out`** y el resto del nombre será el mismo).
+Crea 2 tuberías con nombre por proceso .Net en [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) llamando a [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (una terminará en **`-in`** y la otra en **`-out`** y el resto del nombre será el mismo).
 
 Por lo tanto, si vas al directorio **`$TMPDIR`** de los usuarios, podrás encontrar **fifos de depuración** que podrías usar para depurar aplicaciones .Net:
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 La función [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) manejará la comunicación desde un depurador.
 
@@ -80,7 +80,7 @@ read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
 ### Leer memoria
 
-Con una sesión de depuración establecida, es posible **leer memoria** utilizando el tipo de mensaje [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). Para leer cierta memoria, el código principal necesario sería:
+Con una sesión de depuración establecida, es posible **leer la memoria** utilizando el tipo de mensaje [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). Para leer cierta memoria, el código principal necesario sería:
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
 
@@ -164,7 +164,7 @@ El código POC utilizado para hacer esto se puede encontrar [aquí](https://gist
 
 ### Ejecución de código .NET Core <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-Lo primero es identificar, por ejemplo, una región de memoria con permisos **`rwx`** en ejecución para guardar el shellcode a ejecutar. Esto se puede hacer fácilmente con:
+Lo primero es identificar, por ejemplo, una región de memoria con permisos **`rwx`** en ejecución para guardar el shellcode que se ejecutará. Esto se puede hacer fácilmente con:
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
@@ -173,9 +173,9 @@ Entonces, para activar la ejecución, sería necesario conocer algún lugar dond
 
 En las versiones x64, esto es sencillo utilizando la técnica de **búsqueda de firma** al estilo de mimikatz para buscar a través de **`libcorclr.dll`** una referencia al símbolo **`_hlpDynamicFuncTable`**, al que podemos desreferenciar:
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-Todo lo que queda por hacer es encontrar una dirección desde la cual comenzar nuestra búsqueda de firma. Para hacer esto, aprovechamos otra función de depurador expuesta, **`MT_GetDCB`**. Esto devuelve una serie de bits de información útiles sobre el proceso objetivo, pero en nuestro caso, estamos interesados en un campo devuelto que contiene la **dirección de una función auxiliar**, **`m_helperRemoteStartAddr`**. Usando esta dirección, sabemos exactamente **dónde se encuentra `libcorclr.dll`** dentro de la memoria del proceso objetivo y podemos comenzar nuestra búsqueda de la DFT.
+Todo lo que queda por hacer es encontrar una dirección desde la cual comenzar nuestra búsqueda de firma. Para hacer esto, aprovechamos otra función de depurador expuesta, **`MT_GetDCB`**. Esto devuelve una serie de bits de información útiles sobre el proceso objetivo, pero para nuestro caso, estamos interesados en un campo devuelto que contiene la **dirección de una función auxiliar**, **`m_helperRemoteStartAddr`**. Usando esta dirección, sabemos exactamente **dónde se encuentra `libcorclr.dll`** dentro de la memoria del proceso objetivo y podemos comenzar nuestra búsqueda de la DFT.
 
 Conociendo esta dirección, es posible sobrescribir el puntero de función con nuestro propio shellcode.
 
