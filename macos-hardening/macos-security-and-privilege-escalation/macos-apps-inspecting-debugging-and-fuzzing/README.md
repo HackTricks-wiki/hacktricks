@@ -4,15 +4,15 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Análise Estática
+## Análise estática
 
 ### otool
 ```bash
@@ -79,29 +79,65 @@ Será montado em `/Volumes`
 
 ### Objective-C
 
+#### Metadados
+
+{% hint style="danger" %}
+Observe que programas escritos em Objective-C **mantêm** suas declarações de classe **quando** **compilados** em [binários Mach-O](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Tais declarações de classe **incluem** o nome e o tipo de:
+{% endhint %}
+
+* A classe
+* Os métodos da classe
+* As variáveis de instância da classe
+
+Você pode obter essas informações usando [**class-dump**](https://github.com/nygard/class-dump):
+```bash
+class-dump Kindle.app
+```
+Observe que esses nomes podem ser ofuscados para tornar a reversão do binário mais difícil.
+
+#### Chamada de função
+
 Quando uma função é chamada em um binário que usa Objective-C, o código compilado, em vez de chamar essa função, chamará **`objc_msgSend`**. Que chamará a função final:
 
 ![](<../../../.gitbook/assets/image (560).png>)
 
 Os parâmetros que essa função espera são:
 
-* O primeiro parâmetro (**self**) é "um ponteiro que aponta para a **instância da classe que receberá a mensagem**". Ou, de forma mais simples, é o objeto no qual o método está sendo invocado. Se o método for um método de classe, isso será uma instância do objeto da classe (como um todo), enquanto para um método de instância, o self apontará para uma instância instanciada da classe como um objeto.
+* O primeiro parâmetro (**self**) é "um ponteiro que aponta para a **instância da classe que receberá a mensagem**". Ou seja, é o objeto no qual o método está sendo invocado. Se o método for um método de classe, isso será uma instância do objeto da classe (como um todo), enquanto para um método de instância, self apontará para uma instância instanciada da classe como um objeto.
 * O segundo parâmetro (**op**) é "o seletor do método que manipula a mensagem". Novamente, de forma mais simples, este é apenas o **nome do método**.
 * Os parâmetros restantes são quaisquer **valores necessários pelo método** (op).
 
-| **Argumento**      | **Registro**                                                    | **(para) objc\_msgSend**                                |
+| **Argumento**     | **Registrador**                                                 | **(para) objc\_msgSend**                                |
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| **1º argumento**  | **rdi**                                                         | **self: objeto no qual o método está sendo invocado** |
-| **2º argumento**  | **rsi**                                                         | **op: nome do método**                             |
+| **1º argumento**  | **rdi**                                                         | **self: objeto no qual o método está sendo invocado**  |
+| **2º argumento**  | **rsi**                                                         | **op: nome do método**                                 |
 | **3º argumento**  | **rdx**                                                         | **1º argumento para o método**                         |
 | **4º argumento**  | **rcx**                                                         | **2º argumento para o método**                         |
 | **5º argumento**  | **r8**                                                          | **3º argumento para o método**                         |
 | **6º argumento**  | **r9**                                                          | **4º argumento para o método**                         |
-| **7º+ argumento** | <p><strong>rsp+</strong><br><strong>(na pilha)</strong></p> | **5º+ argumento para o método**                        |
+| **7º+ argumento** | <p><strong>rsp+</strong><br><strong>(na pilha)</strong></p>     | **5º+ argumento para o método**                        |
+
+### Swift
+
+Com binários Swift, uma vez que há compatibilidade com Objective-C, às vezes é possível extrair declarações usando [class-dump](https://github.com/nygard/class-dump/), mas nem sempre.
+
+Com as linhas de comando **`jtool -l`** ou **`otool -l`**, é possível encontrar várias seções que começam com o prefixo **`__swift5`**:
+```bash
+jtool2 -l /Applications/Stocks.app/Contents/MacOS/Stocks
+LC 00: LC_SEGMENT_64              Mem: 0x000000000-0x100000000    __PAGEZERO
+LC 01: LC_SEGMENT_64              Mem: 0x100000000-0x100028000    __TEXT
+[...]
+Mem: 0x100026630-0x100026d54        __TEXT.__swift5_typeref
+Mem: 0x100026d60-0x100027061        __TEXT.__swift5_reflstr
+Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
+Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
+[...]
+```
+Você pode encontrar mais informações sobre as informações armazenadas nessas seções neste [post de blog](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
 ### Binários compactados
 
-* Verifique a alta entropia
+* Verifique a entropia alta
 * Verifique as strings (se houver quase nenhuma string compreensível, compactada)
 * O empacotador UPX para MacOS gera uma seção chamada "\_\_XHDR"
 
@@ -112,14 +148,14 @@ Observe que, para depurar binários, **o SIP precisa ser desativado** (`csrutil 
 {% endhint %}
 
 {% hint style="warning" %}
-Observe que, para **instrumentar binários do sistema**, (como `cloudconfigurationd`) no macOS, **o SIP deve ser desativado** (apenas remover a assinatura não funcionará).
+Observe que, para **instrumentar binários do sistema** (como `cloudconfigurationd`) no macOS, **o SIP deve ser desativado** (apenas remover a assinatura não funcionará).
 {% endhint %}
 
 ### Logs unificados
 
 O MacOS gera muitos logs que podem ser muito úteis ao executar um aplicativo tentando entender **o que ele está fazendo**.
 
-Além disso, existem alguns logs que conterão a tag `<private>` para **ocultar** algumas informações **identificáveis** do **usuário** ou do **computador**. No entanto, é possível **instalar um certificado para divulgar essas informações**. Siga as explicações de [**aqui**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
+Além disso, existem alguns logs que conterão a tag `<private>` para **ocultar** algumas informações **identificáveis** do **usuário** ou do **computador**. No entanto, é possível **instalar um certificado para divulgar essas informações**. Siga as explicações [**aqui**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
 
 ### Hopper
 
@@ -133,7 +169,7 @@ No painel central, você pode ver o **código desmontado**. E você pode vê-lo 
 
 <figure><img src="../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
 
-Clicando com o botão direito em um objeto de código, você pode ver **referências para/de objetos** ou até mesmo alterar seu nome (isso não funciona no pseudocódigo descompilado):
+Clicando com o botão direito em um objeto de código, você pode ver **referências para/de esse objeto** ou até mesmo alterar seu nome (isso não funciona no pseudocódigo descompilado):
 
 <figure><img src="../../../.gitbook/assets/image (1) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
@@ -163,16 +199,16 @@ O DTrace usa a função **`dtrace_probe_create`** para criar uma sonda para cada
 As sondas disponíveis do dtrace podem ser obtidas com:
 ```bash
 dtrace -l | head
-   ID   PROVIDER            MODULE                          FUNCTION NAME
-    1     dtrace                                                     BEGIN
-    2     dtrace                                                     END
-    3     dtrace                                                     ERROR
-   43    profile                                                     profile-97
-   44    profile                                                     profile-199
+ID   PROVIDER            MODULE                          FUNCTION NAME
+1     dtrace                                                     BEGIN
+2     dtrace                                                     END
+3     dtrace                                                     ERROR
+43    profile                                                     profile-97
+44    profile                                                     profile-199
 ```
 O nome da sonda consiste em quatro partes: o provedor, o módulo, a função e o nome (`fbt:mach_kernel:ptrace:entry`). Se você não especificar alguma parte do nome, o Dtrace aplicará essa parte como um caractere curinga.
 
-Para configurar o DTrace para ativar sondas e especificar quais ações executar quando elas dispararem, precisaremos usar a linguagem D.
+Para configurar o DTrace para ativar sondas e especificar quais ações executar quando elas são acionadas, precisaremos usar a linguagem D.
 
 Uma explicação mais detalhada e mais exemplos podem ser encontrados em [https://illumos.org/books/dtrace/chp-intro.html](https://illumos.org/books/dtrace/chp-intro.html)
 
@@ -193,17 +229,17 @@ syscall:::entry
 }
 
 #Log every syscall of a PID
-sudo dtrace -s script.d 1234 
+sudo dtrace -s script.d 1234
 ```
 
 ```bash
 syscall::open:entry
 {
-    printf("%s(%s)", probefunc, copyinstr(arg0));
+printf("%s(%s)", probefunc, copyinstr(arg0));
 }
 syscall::close:entry
 {
-        printf("%s(%d)\n", probefunc, arg0);
+printf("%s(%d)\n", probefunc, arg0);
 }
 
 #Log files opened and closed by a process
@@ -213,11 +249,11 @@ sudo dtrace -s b.d -c "cat /etc/hosts"
 ```bash
 syscall:::entry
 {
-        ;
+;
 }
 syscall:::return
 {
-        printf("=%d\n", arg1);
+printf("=%d\n", arg1);
 }
 
 #Log sys calls with values
@@ -241,11 +277,15 @@ fs_usage -w -f network curl #This tracks network actions
 ### TaskExplorer
 
 [**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) é útil para ver as **bibliotecas** usadas por um binário, os **arquivos** que ele está usando e as **conexões de rede**.\
-Ele também verifica os processos binários no **virustotal** e mostra informações sobre o binário.
+Ele também verifica os processos binários contra o **virustotal** e mostra informações sobre o binário.
+
+## PT\_DENY\_ATTACH <a href="#page-title" id="page-title"></a>
+
+Neste [**post de blog**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html), você pode encontrar um exemplo de como **depurar um daemon em execução** que usou **`PT_DENY_ATTACH`** para evitar a depuração, mesmo que o SIP estivesse desativado.
 
 ### lldb
 
-**lldb** é a ferramenta **de facto** para **depuração** de binários **macOS**.
+**lldb** é a ferramenta de **fato** para **depuração** de binários **macOS**.
 ```bash
 lldb ./malware.bin
 lldb -p 1122
@@ -290,13 +330,11 @@ Ao chamar a função **`objc_sendMsg`**, o registro **rsi** contém o **nome do 
 * Manipulando os valores de **`hw.logicalcpu`** e **`hw.physicalcpu`**, alguns malwares tentam detectar se é uma VM.
 * Alguns malwares também podem **detectar** se a máquina é baseada no VMware pelo endereço MAC (00:50:56).
 * Também é possível encontrar **se um processo está sendo depurado** com um código simples como:
-
-  * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //processo sendo depurado }`
-
-* Ele também pode invocar a chamada do sistema **`ptrace`** com a flag **`PT_DENY_ATTACH`**. Isso **impede** um depurador de anexar e rastrear.
-  * Você pode verificar se a função **`sysctl`** ou **`ptrace`** está sendo **importada** (mas o malware pode importá-la dinamicamente)
-  * Como observado neste artigo, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
-    "_A mensagem Process # exited with **status = 45 (0x0000002d)** é geralmente um sinal revelador de que o alvo de depuração está usando **PT\_DENY\_ATTACH**_"
+* `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //processo sendo depurado }`
+* Também pode invocar a chamada do sistema **`ptrace`** com a flag **`PT_DENY_ATTACH`**. Isso **impede** um depurador de anexar e rastrear.
+* Você pode verificar se a função **`sysctl`** ou **`ptrace`** está sendo **importada** (mas o malware pode importá-la dinamicamente)
+* Como observado neste artigo, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
+“_A mensagem Process # exited with **status = 45 (0x0000002d)** é geralmente um sinal revelador de que o alvo de depuração está usando **PT\_DENY\_ATTACH**_”
 
 ## Fuzzing
 

@@ -144,7 +144,7 @@
   * [macOS AppleFS](macos-hardening/macos-security-and-privilege-escalation/macos-applefs.md)
   * [macOS Bypassing Firewalls](macos-hardening/macos-security-and-privilege-escalation/macos-bypassing-firewalls.md)
   * [macOS Defensive Apps](macos-hardening/macos-security-and-privilege-escalation/macos-defensive-apps.md)
-  * [macOS Kernel](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/README.md)
+  * [macOS Kernel & System Extensions](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/README.md)
     * [macOS Kernel Extensions](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-kernel-extensions.md)
     * [macOS System Extensions](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-system-extensions.md)
   * [macOS Network Services & Protocols](macos-hardening/macos-security-and-privilege-escalation/macos-protocols.md)

