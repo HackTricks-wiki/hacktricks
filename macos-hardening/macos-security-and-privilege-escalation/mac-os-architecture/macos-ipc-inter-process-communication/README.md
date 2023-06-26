@@ -1,8 +1,22 @@
 ## IPC de macOS - Comunicación entre procesos
 
-Mach utiliza **tareas** como la **unidad más pequeña** para compartir recursos, y cada tarea puede contener **múltiples hilos**. Estas **tareas y hilos se asignan 1:1 a procesos y hilos POSIX**.
+<details>
 
-La comunicación entre tareas se realiza a través de la Comunicación entre Procesos de Mach (IPC), utilizando canales de comunicación unidireccionales. **Los mensajes se transfieren entre puertos**, que actúan como **colas de mensajes** gestionadas por el kernel.
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+
+* ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Consigue el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+
+</details>
+
+## Mensajería Mach a través de puertos
+
+Mach utiliza **tareas** como la **unidad más pequeña** para compartir recursos, y cada tarea puede contener **múltiples hilos**. Estas **tareas y hilos se asignan en una relación 1:1 a los procesos y hilos POSIX**.
+
+La comunicación entre tareas se produce a través de la Comunicación entre Procesos de Mach (IPC), utilizando canales de comunicación unidireccionales. **Los mensajes se transfieren entre puertos**, que actúan como **colas de mensajes** gestionadas por el kernel.
 
 Los derechos de puerto, que definen las operaciones que una tarea puede realizar, son clave para esta comunicación. Los posibles **derechos de puerto** son:
 
@@ -10,7 +24,7 @@ Los derechos de puerto, que definen las operaciones que una tarea puede realizar
 * Una **tarea con el derecho de recepción** puede recibir mensajes y **crear derechos de envío**, lo que le permite enviar mensajes. Originalmente, solo la **propia tarea tiene el derecho de recepción sobre su puerto**.
 * **Derecho de envío**, que permite enviar mensajes al puerto.
 * **Derecho de envío único**, que permite enviar un mensaje al puerto y luego desaparece.
-* **Derecho de conjunto de puertos**, que denota un _conjunto de puertos_ en lugar de un solo puerto. Desencolar un mensaje de un conjunto de puertos desencola un mensaje de uno de los puertos que contiene. Los conjuntos de puertos se pueden usar para escuchar varios puertos simultáneamente, como `select`/`poll`/`epoll`/`kqueue` en Unix.
+* **Derecho de conjunto de puertos**, que denota un _conjunto de puertos_ en lugar de un solo puerto. Desencolar un mensaje de un conjunto de puertos desencola un mensaje de uno de los puertos que contiene. Los conjuntos de puertos se pueden utilizar para escuchar varios puertos simultáneamente, como `select`/`poll`/`epoll`/`kqueue` en Unix.
 * **Nombre muerto**, que no es un derecho de puerto real, sino simplemente un marcador de posición. Cuando se destruye un puerto, todos los derechos de puerto existentes para el puerto se convierten en nombres muertos.
 
 **Las tareas pueden transferir derechos de ENVÍO a otros**, lo que les permite enviar mensajes de vuelta. **Los derechos de ENVÍO también se pueden clonar, por lo que una tarea puede duplicar y dar el derecho a una tercera tarea**. Esto, combinado con un proceso intermedio conocido como el **servidor de arranque**, permite una comunicación efectiva entre tareas.
@@ -32,11 +46,11 @@ Luego, Apple almacena los **nombres de los servicios proporcionados por el siste
 Para estos servicios predefinidos, el **proceso de búsqueda difiere ligeramente**. Cuando se busca un nombre de servicio, launchd inicia el servicio dinámicamente. El nuevo flujo de trabajo es el siguiente:
 
 * La tarea **B** inicia una **búsqueda de arranque** para un nombre de servicio.
-* **launchd** verifica si la tarea se está ejecutando y, si no lo está, **la inicia**.
+* **launchd** comprueba si la tarea se está ejecutando y, si no lo está, **la inicia**.
 * La tarea **A** (el servicio) realiza un **registro de arranque**. Aquí, el servidor de arranque crea un derecho de ENVÍO, lo retiene y **transfiere el derecho de RECEPCIÓN a la tarea A**.
 * launchd duplica el **derecho de ENVÍO y lo envía a la tarea B**.
 
-Sin embargo, este proceso solo se aplica a las tareas predefinidas del sistema. Las tareas que no son del sistema aún operan como se describe originalmente, lo que podría permitir la suplantación.
+Sin embargo, este proceso solo se aplica a las tareas del sistema predefinidas. Las tareas que no son del sistema todavía funcionan como se describe originalmente, lo que podría permitir la suplantación.
 ### Ejemplo de código
 
 Observe cómo el **emisor** **asigna** un puerto, crea un **derecho de envío** para el nombre `org.darlinghq.example` y lo envía al **servidor de arranque** mientras que el emisor solicitó el **derecho de envío** de ese nombre y lo usó para **enviar un mensaje**.
@@ -110,7 +124,65 @@ printf("Text: %s, number: %d\n", message.some_text, message.some_number);
 ```
 {% endtab %}
 
-{% tab title="receiver.c" %}
+{% tab title="receiver.c" %}Este es un ejemplo de código para un receptor de IPC en macOS. El receptor crea un puerto de recepción y espera a que se reciba un mensaje. Cuando se recibe un mensaje, se imprime en la consola y se envía una respuesta al remitente.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <mach/mach.h>
+
+int main(int argc, char** argv) {
+    mach_port_t receive_port;
+    kern_return_t result;
+
+    result = mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &receive_port);
+    if (result != KERN_SUCCESS) {
+        printf("[-] Error: Could not allocate receive port\n");
+        return 1;
+    }
+
+    result = mach_port_insert_right(mach_task_self(), receive_port, receive_port, MACH_MSG_TYPE_MAKE_SEND);
+    if (result != KERN_SUCCESS) {
+        printf("[-] Error: Could not insert send right\n");
+        return 1;
+    }
+
+    printf("[+] Receiver: Waiting for message...\n");
+
+    while (1) {
+        mach_msg_header_t* msg = malloc(sizeof(mach_msg_header_t));
+        result = mach_msg(msg, MACH_RCV_MSG, 0, sizeof(mach_msg_header_t), receive_port, MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
+        if (result != KERN_SUCCESS) {
+            printf("[-] Error: Could not receive message\n");
+            return 1;
+        }
+
+        printf("[+] Receiver: Message received: %s\n", (char*)msg + sizeof(mach_msg_header_t));
+
+        mach_msg_destroy(msg);
+
+        printf("[+] Receiver: Sending response...\n");
+
+        mach_msg_header_t* response = malloc(sizeof(mach_msg_header_t));
+        response->msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0);
+        response->msgh_size = sizeof(mach_msg_header_t);
+        response->msgh_remote_port = msg->msgh_remote_port;
+        response->msgh_local_port = MACH_PORT_NULL;
+        response->msgh_id = 0;
+
+        result = mach_msg_send(response);
+        if (result != KERN_SUCCESS) {
+            printf("[-] Error: Could not send response\n");
+            return 1;
+        }
+
+        mach_msg_destroy(response);
+    }
+
+    return 0;
+}
+```
 ```c
 // Code from https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html
 // gcc sender.c -o sender
@@ -210,7 +282,7 @@ Cuando una aplicación se ejecuta, el sistema operativo verifica los entitlement
 
 Los entitlements también se utilizan para limitar los privilegios de una aplicación. Por ejemplo, una aplicación puede tener un entitlement que le permite acceder a la cámara, pero no a la ubicación del usuario. Esto significa que la aplicación puede tomar fotos, pero no puede acceder a la información de ubicación del usuario.
 
-En general, es importante revisar cuidadosamente los entitlements de una aplicación antes de instalarla o ejecutarla, para asegurarse de que no está solicitando permisos innecesarios o excesivos.
+En general, es importante revisar cuidadosamente los entitlements de una aplicación antes de instalarla o ejecutarla. Si una aplicación tiene demasiados entitlements o entitlements innecesarios, puede representar un riesgo de seguridad para el sistema.
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -393,9 +465,9 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 
 En macOS, los **hilos** pueden ser manipulados a través de **Mach** o utilizando la **API posix `pthread`**. El hilo que generamos en la inyección anterior fue generado utilizando la API Mach, por lo que **no es compatible con posix**.
 
-Fue posible **inyectar un shellcode simple** para ejecutar un comando porque no necesitaba trabajar con APIs compatibles con posix, solo con Mach. **Inyecciones más complejas** necesitarían que el **hilo** también sea **compatible con posix**.
+Fue posible **inyectar un shellcode simple** para ejecutar un comando porque **no necesitaba trabajar con APIs compatibles con posix**, solo con Mach. **Inyecciones más complejas** necesitarían que el **hilo** también sea **compatible con posix**.
 
-Por lo tanto, para **mejorar el shellcode**, debería llamar a **`pthread_create_from_mach_thread`**, lo que creará un pthread válido. Luego, este nuevo pthread podría **llamar a dlopen** para **cargar nuestra dylib** desde el sistema.
+Por lo tanto, para **mejorar el shellcode**, debería llamar a **`pthread_create_from_mach_thread`**, lo que **creará un pthread válido**. Luego, este nuevo pthread podría **llamar a dlopen** para **cargar nuestra dylib** desde el sistema.
 
 Puede encontrar **ejemplos de dylibs** en (por ejemplo, el que genera un registro y luego puede escucharlo):
 
@@ -711,7 +783,7 @@ Los componentes XPC de una aplicación están **dentro de la aplicación en sí*
 
 Como puede estar pensando, un **componente XPC tendrá diferentes permisos y privilegios** que los otros componentes XPC o el binario principal de la aplicación. EXCEPTO si un servicio XPC está configurado con [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession) establecido en "True" en su archivo **Info.plist**. En este caso, el servicio XPC se ejecutará en la misma sesión de seguridad que la aplicación que lo llamó.
 
-Los servicios XPC se **inician** por **launchd** cuando sea necesario y se **apagan** una vez que todas las tareas están **completas** para liberar los recursos del sistema. **Los componentes XPC específicos de la aplicación solo pueden ser utilizados por la aplicación**, lo que reduce el riesgo asociado con posibles vulnerabilidades.
+Los servicios XPC se **inician** por **launchd** cuando sea necesario y se **apagan** una vez que todas las tareas están **completas** para liberar los recursos del sistema. **Los componentes XPC específicos de la aplicación solo pueden ser utilizados por la aplicación**, reduciendo así el riesgo asociado con posibles vulnerabilidades.
 
 ### Servicios XPC de todo el sistema
 
@@ -871,7 +943,9 @@ Para aprovechar este archivo, un atacante puede modificarlo para ejecutar su pro
 
 Una vez que se ha modificado el archivo plist, el atacante puede cargar el servicio utilizando el comando `launchctl load /Library/LaunchDaemons/xyz.hacktricks.service.plist`. Esto iniciará el servicio malicioso y permitirá al atacante ejecutar comandos con privilegios de root en el sistema. 
 
-Para evitar este tipo de ataque, se recomienda asegurarse de que los archivos plist de Launchd solo sean modificados por usuarios autorizados y de confianza. Además, se debe monitorear regularmente los archivos plist para detectar cualquier modificación no autorizada. 
+Es importante tener en cuenta que para modificar este archivo, el atacante necesitará acceso de escritura a la ruta `/Library/LaunchDaemons/`, lo que generalmente requiere privilegios de root o acceso físico al sistema. 
+
+Para evitar este tipo de ataque, se recomienda asegurarse de que los permisos de archivo sean adecuados y de que solo los usuarios autorizados tengan acceso de escritura a los archivos de Launchd. Además, se recomienda monitorear regularmente los archivos de Launchd en busca de modificaciones no autorizadas. 
 
 {% endtab %}
 ```xml
@@ -970,77 +1044,36 @@ sleep(10); // Fake something is done and then it ends
 ```
 {% endtab %}
 
-{% tab title="oc_xpc_server.m" %}
+{% tab title="README.md" %}
+# Comunicación interproceso (IPC) en macOS
 
-# Servidor XPC
+En macOS, los procesos pueden comunicarse entre sí utilizando varios mecanismos de IPC, como notificaciones de centro de mensajes, sockets de dominio de Unix y XPC. En este documento, nos centraremos en XPC, que es un marco de IPC de Apple que se utiliza para la comunicación entre procesos en macOS y iOS.
 
-El servidor XPC es responsable de crear y configurar la conexión XPC. En este ejemplo, el servidor XPC se encarga de crear una conexión XPC y configurar el objeto de conexión para que pueda recibir mensajes del cliente XPC.
+## ¿Qué es XPC?
 
-```objective-c
-#include <Foundation/Foundation.h>
-#include <xpc/xpc.h>
+XPC es un marco de IPC de Apple que se utiliza para la comunicación entre procesos en macOS y iOS. XPC se utiliza para enviar mensajes entre procesos y para crear servicios que se ejecutan en segundo plano. XPC se utiliza en muchos lugares en macOS, como en el centro de notificaciones, en el sistema de archivos y en el sistema de seguridad.
 
-@interface OCXPCServer : NSObject
-@end
+## ¿Cómo funciona XPC?
 
-@implementation OCXPCServer
+XPC funciona mediante la creación de conexiones entre procesos. Cada conexión se compone de un objeto de conexión y un objeto de punto final. El objeto de conexión se utiliza para enviar mensajes al proceso remoto, mientras que el objeto de punto final se utiliza para recibir mensajes del proceso remoto.
 
-- (void)handleMessage:(xpc_object_t)message {
-    xpc_type_t type = xpc_get_type(message);
-    if (type == XPC_TYPE_DICTIONARY) {
-        const char *request = xpc_dictionary_get_string(message, "request");
-        if (request) {
-            xpc_object_t reply = xpc_dictionary_create_reply(message);
-            if (strcmp(request, "hello") == 0) {
-                xpc_dictionary_set_string(reply, "response", "world");
-            } else {
-                xpc_dictionary_set_string(reply, "response", "unknown request");
-            }
-            xpc_connection_send_message(xpc_dictionary_get_remote_connection(message), reply);
-            xpc_release(reply);
-        }
-    }
-}
+Para enviar un mensaje a un proceso remoto, se crea un objeto de mensaje y se envía a través de la conexión. El proceso remoto recibe el mensaje a través de su objeto de punto final y puede responder al mensaje enviando otro mensaje de vuelta a través de la conexión.
 
-static void OCXPCServerEventHandler(xpc_connection_t connection, xpc_object_t event) {
-    xpc_type_t type = xpc_get_type(event);
-    if (type == XPC_TYPE_ERROR) {
-        NSLog(@"XPC error: %s", xpc_dictionary_get_string(event, XPC_ERROR_KEY_DESCRIPTION));
-    } else {
-        [[OCXPCServer alloc] handleMessage:event];
-    }
-}
+## ¿Cómo se utiliza XPC en macOS?
 
-- (void)run {
-    xpc_connection_t connection = xpc_connection_create_mach_service("com.example.ocxpc", NULL, XPC_CONNECTION_MACH_SERVICE_LISTENER);
-    xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
-        OCXPCServerEventHandler(connection, event);
-    });
-    xpc_connection_resume(connection);
-    [[NSRunLoop currentRunLoop] run];
-}
+XPC se utiliza en muchos lugares en macOS, como en el centro de notificaciones, en el sistema de archivos y en el sistema de seguridad. Los desarrolladores también pueden utilizar XPC para crear sus propios servicios y comunicarse con ellos desde sus aplicaciones.
 
-@end
+Para utilizar XPC en una aplicación, primero se debe crear un objeto de conexión y un objeto de punto final. A continuación, se pueden enviar mensajes a través de la conexión y recibir mensajes a través del objeto de punto final.
 
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        [[OCXPCServer alloc] run];
-    }
-    return 0;
-}
-```
+## ¿Cómo se puede utilizar XPC para la escalada de privilegios?
 
-El servidor XPC crea una conexión XPC utilizando `xpc_connection_create_mach_service()`. Este método crea una conexión XPC y la registra como un servicio Mach. El segundo parámetro es el nombre del servicio. En este ejemplo, el nombre del servicio es "com.example.ocxpc". El tercer parámetro indica que la conexión XPC se está creando como un oyente de servicio Mach.
+XPC se puede utilizar para la escalada de privilegios si se puede encontrar un servicio que se ejecute con privilegios elevados y que tenga una vulnerabilidad que permita la ejecución de código arbitrario. Si se puede encontrar una vulnerabilidad en un servicio de XPC, se puede utilizar para ejecutar código con los mismos privilegios que el servicio.
 
-El servidor XPC también establece un controlador de eventos utilizando `xpc_connection_set_event_handler()`. Este método se llama cada vez que se recibe un evento en la conexión XPC. El controlador de eventos llama al método `handleMessage:` para procesar el mensaje.
+Para encontrar servicios de XPC que se ejecuten con privilegios elevados, se puede utilizar el comando `launchctl list` para enumerar los servicios que se ejecutan en el sistema. A continuación, se pueden buscar servicios que se ejecuten con privilegios elevados y que utilicen XPC para la comunicación entre procesos.
 
-El método `handleMessage:` comprueba si el mensaje es un diccionario XPC y si contiene una clave "request". Si el mensaje cumple estos requisitos, el método comprueba el valor de la clave "request". Si el valor es "hello", el método crea una respuesta con la clave "response" y el valor "world". Si el valor no es "hello", el método crea una respuesta con la clave "response" y el valor "unknown request". La respuesta se envía utilizando `xpc_connection_send_message()`.
+Una vez que se ha encontrado un servicio que se ejecuta con privilegios elevados y que utiliza XPC, se puede buscar una vulnerabilidad en el servicio que permita la ejecución de código arbitrario. Esto puede implicar la búsqueda de errores de programación, la búsqueda de desbordamientos de búfer y la búsqueda de problemas de validación de entrada.
 
-El servidor XPC se ejecuta en un bucle de eventos utilizando `[[NSRunLoop currentRunLoop] run]`. Esto asegura que el servidor XPC siga ejecutándose y procesando mensajes hasta que se detenga explícitamente.
-
-{% endtab %}
-
-{% endtabs %}
+Si se encuentra una vulnerabilidad en un servicio de XPC, se puede utilizar para ejecutar código con los mismos privilegios que el servicio. Esto puede permitir la escalada de privilegios y la obtención de acceso a recursos protegidos del sistema.
 ```objectivec
 // gcc -framework Foundation oc_xpc_client.m -o oc_xpc_client
 #include <Foundation/Foundation.h>
