@@ -193,7 +193,7 @@ int main() {
     * Apps the **`com.apple.system-task-ports`** entitlement can get the **task port for any** process, except the kernel. In older versions it was called **`task_for_pid-allow`**. This is only granted to Apple applications.
     * **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
 
-### Shellcode Process Injection via Task port
+### Shellcode Process Injection via Task port&#x20;
 
 You can grab a shellcode from:
 
@@ -696,6 +696,12 @@ int main(int argc, const char * argv[])
 gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
+
+### Thread Injection via Task port <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
+
+{% content-ref url="../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md" %}
+[macos-thread-injection-via-task-port.md](../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md)
+{% endcontent-ref %}
 
 ## XPC
 
