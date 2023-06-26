@@ -731,7 +731,7 @@ XPC services are **started** by **launchd** when required and **shut down** once
 
 ### System Wide XPC services
 
-**System-wide XPC services** are accessible to all users. These services, either launchd or Mach-type, need to be **defined in plist** files located in specified directories such as **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, or **`/Library/LaunchAgents`**.
+System-wide XPC services are accessible to all users. These services, either launchd or Mach-type, need to be **defined in plist** files located in specified directories such as **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, or **`/Library/LaunchAgents`**.
 
 These plists files will have a key called **`MachServices`** with the name of the service, and a key called **`Program`** with the path to the binary:
 
