@@ -16,16 +16,16 @@
 
 ### **Estabelecer uma sessão de depuração** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-[**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) é responsável por lidar com a **comunicação** entre o depurador e o depurado.\
+[**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) é responsável por lidar com a **comunicação** entre o depurador e o depurado do .NET.\
 Ele cria 2 pipes nomeados por processo .Net em [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) chamando [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (um terminará em **`-in`** e o outro em **`-out`** e o restante do nome será o mesmo).
 
-Portanto, se você for para o diretório de usuários **`$TMPDIR`**, poderá encontrar **fifos de depuração** que poderá usar para depurar aplicativos .Net:
+Portanto, se você for para o diretório **`$TMPDIR`** do usuário, poderá encontrar **fifos de depuração** que poderá usar para depurar aplicativos .Net:
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 A função [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) lidará com a comunicação de um depurador.
 
-A primeira coisa que um depurador precisa fazer é **criar uma nova sessão de depuração**. Isso é feito **enviando uma mensagem via o pipe `out`** começando com uma estrutura `MessageHeader`, que podemos obter a partir do código-fonte do .NET:
+A primeira coisa que um depurador precisa fazer é **criar uma nova sessão de depuração**. Isso é feito **enviando uma mensagem via o pipe `out`** começando com uma estrutura `MessageHeader`, que podemos obter do código-fonte do .NET:
 ```c
 struct MessageHeader
 {
@@ -173,13 +173,13 @@ Em seguida, para acionar a execução, seria necessário saber algum lugar onde 
 
 Nas versões x64, isso é direto usando a técnica de **caça de assinaturas** semelhante ao mimikatz para procurar em **`libcorclr.dll`** uma referência ao símbolo **`_hlpDynamicFuncTable`**, que podemos desreferenciar:
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 Tudo o que resta a fazer é encontrar um endereço a partir do qual iniciar nossa pesquisa de assinatura. Para fazer isso, aproveitamos outra função de depurador exposta, **`MT_GetDCB`**. Isso retorna vários bits de informações úteis sobre o processo de destino, mas para o nosso caso, estamos interessados em um campo retornado contendo o **endereço de uma função auxiliar**, **`m_helperRemoteStartAddr`**. Usando este endereço, sabemos exatamente **onde `libcorclr.dll` está localizado** na memória do processo de destino e podemos iniciar nossa pesquisa pela DFT.
 
 Sabendo deste endereço, é possível sobrescrever o ponteiro de função com o nosso shellcode.
 
-O código completo do POC usado para injetar no PowerShell pode ser encontrado [aqui](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
+O código POC completo usado para injetar no PowerShell pode ser encontrado [aqui](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
 ## Referências
 
@@ -189,10 +189,10 @@ O código completo do POC usado para injetar no PowerShell pode ser encontrado [
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
