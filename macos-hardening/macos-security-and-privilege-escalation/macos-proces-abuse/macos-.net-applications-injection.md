@@ -1,4 +1,4 @@
-## Injeção de Aplicações .NET no macOS
+# Injeção de Aplicações .NET no macOS
 
 <details>
 
@@ -19,9 +19,9 @@
 [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) é responsável por lidar com a **comunicação** entre o depurador e o depurado do .NET.\
 Ele cria 2 pipes nomeados por processo .Net em [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) chamando [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (um terminará em **`-in`** e o outro em **`-out`** e o restante do nome será o mesmo).
 
-Portanto, se você for para o diretório **`$TMPDIR`** do usuário, poderá encontrar **fifos de depuração** que poderá usar para depurar aplicativos .Net:
+Portanto, se você for para o diretório de usuários **`$TMPDIR`**, poderá encontrar **fifos de depuração** que poderá usar para depurar aplicativos .Net:
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 A função [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) lidará com a comunicação de um depurador.
 
@@ -62,7 +62,7 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion
 // Finally set the number of bytes which follow this header
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-Uma vez construído, **enviamos isso para o alvo** usando a chamada do sistema `write`:
+Depois de construído, **enviamos isso para o alvo** usando a chamada do sistema `write`:
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 ```
@@ -169,11 +169,11 @@ O primeiro passo é identificar, por exemplo, uma região de memória com **`rwx
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-Em seguida, para acionar a execução, seria necessário saber algum lugar onde um ponteiro de função é armazenado para sobrescrevê-lo. É possível sobrescrever um ponteiro dentro da **Tabela de Funções Dinâmicas (DFT)**, que é usada pelo tempo de execução do .NET Core para fornecer funções auxiliares para a compilação JIT. Uma lista de ponteiros de função suportados pode ser encontrada em [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h).
+Então, para acionar a execução, seria necessário saber algum lugar onde um ponteiro de função é armazenado para sobrescrevê-lo. É possível sobrescrever um ponteiro dentro da **Tabela de Funções Dinâmicas (DFT)**, que é usada pelo tempo de execução do .NET Core para fornecer funções auxiliares para a compilação JIT. Uma lista de ponteiros de função suportados pode ser encontrada em [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h).
 
-Nas versões x64, isso é direto usando a técnica de **caça de assinaturas** semelhante ao mimikatz para procurar em **`libcorclr.dll`** uma referência ao símbolo **`_hlpDynamicFuncTable`**, que podemos desreferenciar:
+Nas versões x64, isso é direto usando a técnica de **caça de assinaturas** estilo mimikatz para procurar em **`libcorclr.dll`** uma referência ao símbolo **`_hlpDynamicFuncTable`**, que podemos desreferenciar:
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 Tudo o que resta a fazer é encontrar um endereço a partir do qual iniciar nossa pesquisa de assinatura. Para fazer isso, aproveitamos outra função de depurador exposta, **`MT_GetDCB`**. Isso retorna vários bits de informações úteis sobre o processo de destino, mas para o nosso caso, estamos interessados em um campo retornado contendo o **endereço de uma função auxiliar**, **`m_helperRemoteStartAddr`**. Usando este endereço, sabemos exatamente **onde `libcorclr.dll` está localizado** na memória do processo de destino e podemos iniciar nossa pesquisa pela DFT.
 
@@ -189,7 +189,7 @@ O código POC completo usado para injetar no PowerShell pode ser encontrado [aqu
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
