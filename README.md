@@ -1,6 +1,5 @@
 ---
-description: >-
-Bienvenido a la wiki donde encontrarás cada truco/técnica/herramienta de hacking que he aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias.
+description: Bienvenido a la wiki donde encontrarás cada truco/técnica/herramienta de hacking que he aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias.
 ---
 
 # HackTricks
