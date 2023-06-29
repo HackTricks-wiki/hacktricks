@@ -16,7 +16,7 @@
 
 **LAPS** allows you to **manage the local Administrator password** (which is **randomised**, unique, and **changed regularly**) on domain-joined computers. These passwords are centrally stored in Active Directory and restricted to authorised users using ACLs. Passwords are protected in transit from the client to the server using Kerberos v5 and AES.
 
-When using LAPS, **2 new attributes** appear in the **computer** objects of the domain: **`ms-msc-AdmPwd`** and **`ms-mcs-AdmPwdExpirationTime`**_._ These attributes contains the **plain-text admin password and the expiration time**. Then, in a domain environment, it could be interesting to check **which users can read** these attributes.
+When using LAPS, **2 new attributes** appear in the **computer** objects of the domain: **`ms-mcs-AdmPwd`** and **`ms-mcs-AdmPwdExpirationTime`**_._ These attributes contains the **plain-text admin password and the expiration time**. Then, in a domain environment, it could be interesting to check **which users can read** these attributes.
 
 ### Check if activated
 
