@@ -107,18 +107,6 @@ In addition to the above WebSec is also a **committed supporter of HackTricks.**
 
 {% embed url="https://www.syncubes.com/" %}
 
-### [HACK THE BOX](https://www.hackthebox.com/)
-
-<figure><img src=".gitbook/assets/image (2) (2).png" alt=""><figcaption></figcaption></figure>
-
-Hack The Box is an online platform designed to facilitate **learning and advancement in the field of cybersecurity**. Providing an array of real-life scenarios in a safe and controlled environment, Hack The Box allows users to test and grow their skills in penetration testing and ethical hacking.
-
-The platform features a range of challenges of varying difficulty levels, covering different aspects of cybersecurity. Users can engage in **virtual Capture The Flag (CTF) competitions**, solve individual problems, and even access a plethora of educational resources.
-
-Hack The Box serves a diverse audience, from **beginners taking their first steps** into the world of cybersecurity, to **seasoned professionals** looking to refine and update their knowledge. Its unique blend of challenge, learning, and community interaction makes it an invaluable resource for those interested in cybersecurity.
-
-{% embed url="https://www.hackthebox.com/" %}
-
 ## License
 
 **Copyright © Carlos Polop 2023. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **by Carlos Polop is licensed under the**[ **Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
