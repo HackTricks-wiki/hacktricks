@@ -4,145 +4,139 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングのトリックを共有**するには、[**hacktricks repo**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>
 
 ![](<../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築し、自動化します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Extracting data from all files
+## すべてのファイルからデータを抽出する
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-Binwalk is a tool for searching binary files, like images and audio files, for embedded hidden files and data.\
-It can be installed with `apt`, and the [source](https://github.com/ReFirmLabs/binwalk) can be found on Github.\
-**Useful commands**:\
-`binwalk file` : Displays the embedded data in the given file\
-`binwalk -e file` : Displays and extracts the data from the given file\
-`binwalk --dd ".*" file` : Displays and extracts the data from the given file
+Binwalkは、画像や音声ファイルなどのバイナリファイルを検索して、埋め込まれた隠しファイルやデータを見つけるためのツールです。\
+`apt`を使用してインストールでき、[ソース](https://github.com/ReFirmLabs/binwalk)はGithubで見つけることができます。\
+**便利なコマンド**:\
+`binwalk file`：指定したファイルに埋め込まれたデータを表示します。\
+`binwalk -e file`：指定したファイルからデータを表示して抽出します。\
+`binwalk --dd ".*" file`：指定したファイルからデータを表示して抽出します。
 
 ### Foremost <a href="#foremost" id="foremost"></a>
 
-Foremost is a program that recovers files based on their headers, footers, and internal data structures. I find it especially useful when dealing with png images. You can select the files that Foremost will extract by changing the config file in **/etc/foremost.conf.**\
-It can be installed with `apt`, and the [source](https://github.com/korczis/foremost) can be found on Github.\
-**Useful commands:**\
-`foremost -i file` : extracts data from the given file.
+Foremostは、ヘッダー、フッター、および内部データ構造に基づいてファイルを回復するプログラムです。特にpng画像を扱う際に非常に便利です。Foremostが抽出するファイルを選択するには、**/etc/foremost.conf**の設定ファイルを変更します。\
+`apt`を使用してインストールでき、[ソース](https://github.com/korczis/foremost)はGithubで見つけることができます。\
+**便利なコマンド**:\
+`foremost -i file`：指定したファイルからデータを抽出します。
 
 ### Exiftool <a href="#exiftool" id="exiftool"></a>
 
-Sometimes, important stuff is hidden in the metadata of an image or file; exiftool can be very helpful to view file metadata.\
-You can get it from [here](https://www.sno.phy.queensu.ca/\~phil/exiftool/)\
-**Useful commands:**\
-`exiftool file` : shows the metadata of the given file
+時には、重要な情報が画像やファイルのメタデータに隠されていることがあります。exiftoolは、ファイルのメタデータを表示するのに非常に役立ちます。\
+[ここから](https://www.sno.phy.queensu.ca/\~phil/exiftool/)入手できます。\
+**便利なコマンド**:\
+`exiftool file`：指定したファイルのメタデータを表示します。
 
 ### Exiv2 <a href="#exiv2" id="exiv2"></a>
 
-A tool similar to exiftool.\
-It can be installed with `apt`, and the [source](https://github.com/Exiv2/exiv2) can be found on Github.\
-[Official website](http://www.exiv2.org/)\
-**Useful commands:**\
-`exiv2 file` : shows the metadata of the given file
+exiftoolに似たツールです。\
+`apt`を使用してインストールでき、[ソース](https://github.com/Exiv2/exiv2)はGithubで見つけることができます。\
+[公式ウェブサイト](http://www.exiv2.org/)\
+**便利なコマンド**:\
+`exiv2 file`：指定したファイルのメタデータを表示します。
 
 ### File
 
-Check out what kind of file you have
+どの種類のファイルかを確認してください。
 
 ### Strings
 
-Extract strings from the file.\
-Useful commands:\
-`strings -n 6 file`: Extract the strings with min length of 6\
-`strings -n 6 file | head -n 20`: Extract first 20 strings with min length of 6\
-`strings -n 6 file | tail -n 20`: Extract last 20 strings with min length of 6\
-`strings -e s -n 6 file`: Extract 7bit strings\
-`strings -e S -n 6 file`: Extract 8bit strings\
-`strings -e l -n 6 file`: Extract 16bit strings (little-endian)\
-`strings -e b -n 6 file`: Extract 16bit strings (big-endian)\
-`strings -e L -n 6 file`: Extract 32bit strings (little-endian)\
-`strings -e B -n 6 file`: Extract 32bit strings (big-endian)
+ファイルから文字列を抽出します。\
+便利なコマンド:\
+`strings -n 6 file`：最小長さ6の文字列を抽出します。\
+`strings -n 6 file | head -n 20`：最小長さ6の最初の20個の文字列を抽出します。\
+`strings -n 6 file | tail -n 20`：最小長さ6の最後の20個の文字列を抽出します。\
+`strings -e s -n 6 file`：7ビットの文字列を抽出します。\
+`strings -e S -n 6 file`：8ビットの文字列を抽出します。\
+`strings -e l -n 6 file`：16ビットの文字列（リトルエンディアン）を抽出します。\
+`strings -e b -n 6 file`：16ビットの文字列（ビッグエンディアン）を抽出します。\
+`strings -e L -n 6 file`：32ビットの文字列（リトルエンディアン）を抽出します。\
+`strings -e B -n 6 file`：32ビットの文字列（ビッグエンディアン）を抽出します。
 
-### cmp - Comparison
+### cmp - 比較
 
-If you have some **modified** image/audio/video, check if you can **find the exact original one** on the internet, then **compare both** files with:
-
+**変更された**画像/音声/ビデオがある場合、インターネット上で**元のファイルを正確に見つける**ことができるかどうかを確認し、次のコマンドで両方のファイルを**比較**します。
 ```
 cmp original.jpg stego.jpg -b -l
 ```
+## テキストから隠されたデータを抽出する
 
-## Extracting hidden data in text
+### スペースに隠されたデータ
 
-### Hidden data in spaces
-
-If you find that a **text line** is **bigger** than it should be, then some **hidden information** could be included inside the **spaces** using invisible characters.󐁈󐁥󐁬󐁬󐁯󐀠󐁴󐁨\
-To **extract** the **data**, you can use: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+もし、**テキストの行**が予想よりも**大きい**場合、見えない文字を使って**スペース**の中に**隠された情報**が含まれている可能性があります。󐁈󐁥󐁬󐁬󐁯󐀠󐁴󐁨\
+データを**抽出**するには、次のリンクを使用できます：[https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
 
 ![](<../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.io/)を使用して、世界で最も**高度な**コミュニティツールによって強化されたワークフローを簡単に構築し、自動化することができます。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Extracting data from images
+## 画像からデータを抽出する
 
 ### identify
 
-[GraphicMagick](https://imagemagick.org/script/download.php) tool to check what kind of image a file is. Also checks if the image is corrupted.
-
+[GraphicMagick](https://imagemagick.org/script/download.php)ツールを使用して、ファイルがどの種類の画像であるかを確認します。また、画像が破損しているかどうかも確認します。
 ```
 ./magick identify -verbose stego.jpg
 ```
-
-If the image is damaged, you may be able to restore it by simply adding a metadata comment to it (if it's very badly damaged this won't work):
-
+もし画像が損傷している場合、メタデータコメントを追加することで復元することができるかもしれません（非常にひどく損傷している場合はこれは機能しません）。
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
-
 ### Steghide \[JPEG, BMP, WAV, AU] <a href="#steghide" id="steghide"></a>
 
-Steghide is a steganography program that hides data in various kinds of image and audio files. It supports the following file formats : `JPEG, BMP, WAV and AU`. It’s also useful for extracting embedded and encrypted data from other files.\
-It can be installed with `apt`, and the [source](https://github.com/StefanoDeVuono/steghide) can be found on Github.\
-**Useful commands:**\
-`steghide info file` : displays info about whether a file has embedded data or not.\
-`steghide extract -sf file [--passphrase password]` : extracts embedded data from a file \[using a password]
+Steghideは、さまざまな種類の画像や音声ファイルにデータを隠すステガノグラフィープログラムです。サポートされているファイル形式は、`JPEG、BMP、WAV、AU`です。また、他のファイルから埋め込まれた暗号化されたデータを抽出するのにも役立ちます。\
+`apt`を使用してインストールでき、[ソース](https://github.com/StefanoDeVuono/steghide)はGithubで見つけることができます。\
+**便利なコマンド:**\
+`steghide info file`：ファイルに埋め込まれたデータの有無についての情報を表示します。\
+`steghide extract -sf file [--passphrase password]`：ファイルから埋め込まれたデータを抽出します \[パスワードを使用して]
 
-You can also extract content from steghide using the web: [https://futureboy.us/stegano/decinput.html](https://futureboy.us/stegano/decinput.html)
+また、ウェブを使用してsteghideからコンテンツを抽出することもできます：[https://futureboy.us/stegano/decinput.html](https://futureboy.us/stegano/decinput.html)
 
-**Bruteforcing** Steghide: [stegcracker](https://github.com/Paradoxis/StegCracker.git) `stegcracker <file> [<wordlist>]`
+**Steghideのブルートフォース攻撃**: [stegcracker](https://github.com/Paradoxis/StegCracker.git) `stegcracker <file> [<wordlist>]`
 
 ### Zsteg \[PNG, BMP] <a href="#zsteg" id="zsteg"></a>
 
-zsteg is a tool that can detect hidden data in png and bmp files.\
-To install it : `gem install zsteg`. The source can also be found on [Github](https://github.com/zed-0xff/zsteg)\
-**Useful commands:**\
-`zsteg -a file` : Runs every detection method on the given file\
-`zsteg -E file` : Extracts data with the given payload (example : zsteg -E b4,bgr,msb,xy name.png)
+zstegは、pngおよびbmpファイルに隠されたデータを検出するツールです。\
+インストール方法：`gem install zsteg`。ソースは[Github](https://github.com/zed-0xff/zsteg)でも見つけることができます。\
+**便利なコマンド:**\
+`zsteg -a file`：指定したファイルに対してすべての検出方法を実行します。\
+`zsteg -E file`：指定したペイロードでデータを抽出します（例：zsteg -E b4,bgr,msb,xy name.png）
 
-### stegoVeritas JPG, PNG, GIF, TIFF, BMP
+### stegoVeritas JPG、PNG、GIF、TIFF、BMP
 
-Capable of a wide variety of simple and advanced tricks, this tool can check file metadata, create transformed images, brute force LSB, and more. Check out `stegoveritas.py -h` to read about its full capabilities. Execute `stegoveritas.py stego.jpg` to run all checks.
+さまざまなシンプルなトリックや高度なトリックが可能なこのツールは、ファイルのメタデータをチェックしたり、変換された画像を作成したり、LSBをブルートフォースしたりすることができます。その全ての機能については、`stegoveritas.py -h`を参照してください。すべてのチェックを実行するには、`stegoveritas.py stego.jpg`を実行します。
 
 ### Stegsolve
 
-Sometimes there is a message or a text hidden in the image itself that, in order to view it, must have color filters applied, or some color levels changed. Although you can do that with something like GIMP or Photoshop, Stegsolve makes it easier. It's a small Java tool that applies many useful color filters on images; In CTF challenges, Stegsolve is often a real timesaver.\
-You can get it from [Github](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)\
-To use it, just open the image and click on the `<` `>` buttons.
+画像自体にメッセージやテキストが隠されており、それを表示するためには、カラーフィルタを適用したり、カラーレベルを変更したりする必要がある場合があります。GIMPやPhotoshopのようなツールを使用してもできますが、Stegsolveを使用すると簡単になります。これは、画像に多くの便利なカラーフィルタを適用する小さなJavaツールです。CTFの課題では、Stegsolveは本当に時間を節約することがよくあります。\
+[Github](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)から入手できます。\
+使用するには、画像を開き、`<` `>`ボタンをクリックします。
 
 ### FFT
 
-To find hidden content using Fast Fourier T:
+Fast Fourier Tを使用して隠されたコンテンツを検出するには：
 
 * [http://bigwww.epfl.ch/demo/ip/demos/FFT/](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 * [https://www.ejectamenta.com/Fourifier-fullscreen/](https://www.ejectamenta.com/Fourifier-fullscreen/)
@@ -151,21 +145,21 @@ To find hidden content using Fast Fourier T:
 
 ### Stegpy \[PNG, BMP, GIF, WebP, WAV]
 
-A program for encoding information in image and audio files through steganography. It can store the data as either plaintext or encrypted.\
-Find it on [Github](https://github.com/dhsdshdhk/stegpy).
+ステガノグラフィを使用して画像や音声ファイルに情報をエンコードするためのプログラムです。データは平文または暗号化された形式で保存することができます。\
+[Github](https://github.com/dhsdshdhk/stegpy)で入手できます。
 
 ### Pngcheck
 
-Get details on a PNG file (or even find out it's actually something else!).\
-`apt-get install pngcheck`: Install the tool\
-`pngcheck stego.png` : Obtain info about the PNG
+PNGファイルの詳細を取得します（または実際には別のファイルであることを確認します）。\
+`apt-get install pngcheck`：ツールをインストールします。\
+`pngcheck stego.png`：PNGに関する情報を取得します。
 
-### Some other image tools worth mentioning
+### その他の言及に値する画像ツール
 
 * [http://magiceye.ecksdee.co.uk/](http://magiceye.ecksdee.co.uk/)
 * [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
-## Extracting data from audios
+## オーディオからデータを抽出する
 
 ### [Steghide \[JPEG, BMP, WAV, AU\]](stego-tricks.md#steghide) <a href="#steghide" id="steghide"></a>
 
@@ -173,60 +167,57 @@ Get details on a PNG file (or even find out it's actually something else!).\
 
 ### ffmpeg
 
-ffmpeg can be used to check the integrity of audio files, reporting various information about the file, as well as any errors it finds.\
+ffmpegは、オーディオファイルの整合性をチェックし、ファイルに関するさまざまな情報やエラーを報告するために使用できます。\
 `ffmpeg -v info -i stego.mp3 -f null -`
 
 ### Wavsteg \[WAV] <a href="#wavsteg" id="wavsteg"></a>
 
-WavSteg is a Python3 tool that can hide data, using least significant bit, in wav files. It can also search for, and extract, data from wav files.\
-You can get it from [Github](https://github.com/ragibson/Steganography#WavSteg)\
-Useful commands:\
-`python3 WavSteg.py -r -b 1 -s soundfile -o outputfile` : Extracts to an output file (taking only 1 lsb)\
-`python3 WavSteg.py -r -b 2 -s soundfile -o outputfile` : Extracts to an output file (taking only 2 lsb)
+WavStegは、wavファイルに最下位ビットを使用してデータを隠すことができるPython3ツールです。また、wavファイルからデータを検索および抽出することもできます。\
+[Github](https://github.com/ragibson/Steganography#WavSteg)から入手できます。\
+便利なコマンド：\
+`python3 WavSteg.py -r -b 1 -s soundfile -o outputfile`：出力ファイルに抽出します（最下位ビットのみを取得）\
+`python3 WavSteg.py -r -b 2 -s soundfile -o outputfile`：出力ファイルに抽出します（最下位2ビットのみを取得）
 
 ### Deepsound
 
-Hide, and check for, information encrypted with AES-265 in sound files. Download from [the oficial page](http://jpinsoft.net/deepsound/download.aspx).\
-To search for hidden info, simply run the program and open the sound file. If DeepSound finds any data hidden, you'll need to provide the password to unlock it.
+音声ファイルにAES-265で暗号化された情報を隠したり、その情報を検索したりすることができます。[公式ページ](http://jpinsoft.net/deepsound/download.aspx)からダウンロードしてください。\
+隠された情報を検索するには、プログラムを実行して音声ファイルを開きます。DeepSoundが隠されたデータを見つけた場合、解除するためのパスワードが必要です。
 
 ### Sonic visualizer <a href="#sonic-visualizer" id="sonic-visualizer"></a>
 
-Sonic visualizer is a tool for viewing and analyzing the contents of audio files. It can be very helpful when facing audio steganography challenges; you can reveal hidden shapes in audio files that many other tools won't detect.\
-If you're stuck, always check the spectrogram of the audio. [Offical Website](https://www.sonicvisualiser.org/)
+Sonic visualizerは、オーディオファイルの内容を表示および分析するためのツールです。オーディオステガノグラフィの課題に直面した場合、他の多くのツールでは検出できないオーディオファイルの隠れた形状を明らかにすることができます。\
+行き詰まった場合は、常にオーディオのスペクトログラムをチェックしてください。[公式ウェブサイト](https://www.sonicvisualiser.org/)
 
-### DTMF Tones - Dial tones
+### DTMF Tones - ダイヤル音
 
 * [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 * [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
+## その他のトリック
 
-## Other tricks
+### 2進数の長さSQRT - QRコード
 
-### Binary length SQRT - QR Code
-
-If you receive binary data with an SQRT length of an entire number, it could be some kind of QR code:
-
+もし、受け取ったバイナリデータの長さが整数の平方根である場合、それはQRコードの一種かもしれません。
 ```
 import math
 math.sqrt(2500) #50
 ```
+バイナリの「1」と「0」を適切な画像に変換するには、[https://www.dcode.fr/binary-image](https://github.com/carlospolop/hacktricks/tree/32fa51552498a17d266ff03e62dfd1e2a61dcd10/binary-image/README.md)を使用します。
 
-To convert binary "1"s and "0"s to a proper image: [https://www.dcode.fr/binary-image](https://github.com/carlospolop/hacktricks/tree/32fa51552498a17d266ff03e62dfd1e2a61dcd10/binary-image/README.md)\
-To read a QR code: [https://online-barcode-reader.inliteresearch.com/](https://online-barcode-reader.inliteresearch.com/)
+QRコードを読み取るには、[https://online-barcode-reader.inliteresearch.com/](https://online-barcode-reader.inliteresearch.com/)を使用します。
 
-### Braile
+### ブライユ
 
 [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator\))
 
-## **References**
+## **参考文献**
 
 * [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/)
 * [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
 
 ![](<../.gitbook/assets/image (9) (1) (2).png>)
 
-\
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -234,10 +225,10 @@ Get Access Today:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
 
 </details>

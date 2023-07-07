@@ -4,116 +4,115 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Intro <a href="#kfpn7" id="kfpn7"></a>
+## イントロ <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.
+Flipper Zeroは、内蔵モジュールを使用して、300-928 MHzの範囲の無線周波数を**受信および送信**することができます。このモジュールは、リモートコントロールを読み取り、保存、エミュレートすることができます。これらのコントロールは、ゲート、バリア、ラジオロック、リモートコントロールスイッチ、ワイヤレスドアベル、スマートライトなどの操作に使用されます。Flipper Zeroは、セキュリティが侵害されているかどうかを確認するのに役立ちます。
 
 <figure><img src="../../../.gitbook/assets/image (3) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
-## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
+## Sub-GHzハードウェア <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and a radio antenna (the maximum range is 50 meters). Both the CC1101 chip and the antenna are designed to operate at frequencies in the 300-348 MHz, 387-464 MHz, and 779-928 MHz bands.
+Flipper Zeroには、[﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101チップ](https://www.ti.com/lit/ds/symlink/cc1101.pdf)と無線アンテナ（最大範囲は50メートル）を搭載した、内蔵のサブ1 GHzモジュールがあります。CC1101チップとアンテナは、300-348 MHz、387-464 MHz、および779-928 MHzの周波数で動作するように設計されています。
 
 <figure><img src="../../../.gitbook/assets/image (1) (8) (1).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## アクション
 
-### Frequency Analyser
-
-{% hint style="info" %}
-How to find which frequency is the remote using
-{% endhint %}
-
-When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).
-
-To determine the remote's frequency, do the following:
-
-1. Place the remote control very close to the left of Flipper Zero.
-2. Go to **Main Menu** **→ Sub-GHz**.
-3. Select **Frequency Analyzer**, then press and hold the button on the remote control you want to analyze.
-4. Review the frequency value on the screen.
-
-### Read
+### 周波数アナライザー
 
 {% hint style="info" %}
-Find info about the frequency used (also another way to find which frequency is used)
+リモートが使用している周波数を見つける方法
 {% endhint %}
 
-The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.
+解析中、Flipper Zeroは周波数設定で利用可能なすべての周波数で信号強度（RSSI）をスキャンします。Flipper Zeroは、-90 [dBm](https://en.wikipedia.org/wiki/DBm)よりも高い信号強度を持つ最も高いRSSI値の周波数を表示します。
 
-While Read is in use, it's possible to press the **left button** and **configure it**.\
-At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
+リモートの周波数を特定するには、次の手順を実行します。
+
+1. リモートコントロールをFlipper Zeroの左側に非常に近づけます。
+2. **メインメニュー** **→ サブ-GHz**に移動します。
+3. **周波数アナライザー**を選択し、解析したいリモートコントロールのボタンを押し続けます。
+4. 画面上の周波数値を確認します。
+
+### 読み取り
+
+{% hint style="info" %}
+使用されている周波数に関する情報を見つける（使用されている周波数を見つける別の方法もあります）
+{% endhint %}
+
+**読み取り**オプションは、指定された変調（デフォルトでは433.92 AM）で設定された周波数で**リスニング**します。読み取り中に**何かが見つかると**、画面に情報が表示されます。この情報は、将来の信号の複製に使用できます。
+
+Readを使用している間に、**左ボタン**を押して**設定**することができます。\
+現在、**4つの変調**（AM270、AM650、FM328、FM476）があり、**いくつかの関連する周波数**が保存されています。
 
 <figure><img src="../../../.gitbook/assets/image (28).png" alt=""><figcaption></figcaption></figure>
 
-You can set **any that interests you**, however, if you are **not sure which frequency** could be the one used by the remote you have, **set Hopping to ON** (Off by default), and press the button several times until Flipper captures it and give you the info you need to set the frequency.
+**興味のある周波数**を設定できますが、リモートで使用されている周波数が**わからない場合は、ホッピングをONに設定**（デフォルトではオフ）し、Flipperがキャプチャし、必要な周波数を提供するまでボタンを何度も押します。
 
 {% hint style="danger" %}
-Switching between frequencies takes some time, therefore signals transmitted at the time of switching can be missed. For better signal reception, set a fixed frequency determined by Frequency Analyzer.
+周波数の切り替えには時間がかかるため、切り替え時に送信される信号は見逃される可能性があります。信号の受信を改善するために、周波数アナライザーで決定された固定周波数を設定してください。
 {% endhint %}
 
-### **Read Raw**
+### **生データの読み取り**
 
 {% hint style="info" %}
-Steal (and replay) a signal in the configured frequency
+設定された周波数での信号を盗み（および再生）する
 {% endhint %}
 
-The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
+**生データの読み取り**オプションは、リスニング周波数で送信される信号を**記録**します。これを使用して信号を**盗み**、**再生**することができます。
 
-By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
+デフォルトでは、**Read Raw**も433.92のAM650ですが、Readオプションで興味のある信号が異なる周波数/変調にあることがわかった場合は、左を押して（Read Rawオプション内で）それを変更することもできます。
 
-### Brute-Force
+### ブルートフォース
 
-If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)\*\*\*\*
-
-### Add Manually
+ガレージドアなどで使用されるプロトコルがわかっている場合、Flipper Zeroで**すべてのコードを生成し、送信**することができます。これは、一般的なガレージの一般的なタイプをサポートする例です：[**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)\*\*\*\*
+### 手動で追加
 
 {% hint style="info" %}
-Add signals from a configured list of protocols
+設定されたプロトコルのリストから信号を追加します
 {% endhint %}
 
-#### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#3iglu" id="3iglu"></a>
+#### [サポートされているプロトコルのリスト](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#3iglu" id="3iglu"></a>
 
-| Princeton\_433 (works with the majority of static code systems) | 433.92 | Static  |
+| Princeton\_433 (ほとんどの静的コードシステムで動作します) | 433.92 | 静的  |
 | --------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit\_433                                             | 433.92 | Static  |
-| Nice Flo 24bit\_433                                             | 433.92 | Static  |
-| CAME 12bit\_433                                                 | 433.92 | Static  |
-| CAME 24bit\_433                                                 | 433.92 | Static  |
-| Linear\_300                                                     | 300.00 | Static  |
-| CAME TWEE                                                       | 433.92 | Static  |
-| Gate TX\_433                                                    | 433.92 | Static  |
-| DoorHan\_315                                                    | 315.00 | Dynamic |
-| DoorHan\_433                                                    | 433.92 | Dynamic |
-| LiftMaster\_315                                                 | 315.00 | Dynamic |
-| LiftMaster\_390                                                 | 390.00 | Dynamic |
-| Security+2.0\_310                                               | 310.00 | Dynamic |
-| Security+2.0\_315                                               | 315.00 | Dynamic |
-| Security+2.0\_390                                               | 390.00 | Dynamic |
+| Nice Flo 12bit\_433                                             | 433.92 | 静的  |
+| Nice Flo 24bit\_433                                             | 433.92 | 静的  |
+| CAME 12bit\_433                                                 | 433.92 | 静的  |
+| CAME 24bit\_433                                                 | 433.92 | 静的  |
+| Linear\_300                                                     | 300.00 | 静的  |
+| CAME TWEE                                                       | 433.92 | 静的  |
+| Gate TX\_433                                                    | 433.92 | 静的  |
+| DoorHan\_315                                                    | 315.00 | 動的 |
+| DoorHan\_433                                                    | 433.92 | 動的 |
+| LiftMaster\_315                                                 | 315.00 | 動的 |
+| LiftMaster\_390                                                 | 390.00 | 動的 |
+| Security+2.0\_310                                               | 310.00 | 動的 |
+| Security+2.0\_315                                               | 315.00 | 動的 |
+| Security+2.0\_390                                               | 390.00 | 動的 |
 
-### Supported Sub-GHz vendors
+### サポートされているSub-GHzベンダー
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+[https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)でリストを確認してください。
 
-### Supported Frequencies by region
+### 地域別のサポートされている周波数
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+[https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)でリストを確認してください。
 
-### Test
+### テスト
 
 {% hint style="info" %}
-Get dBms of the saved frequencies
+保存された周波数のdBmを取得します
 {% endhint %}
 
-## Reference
+## 参考
 
 * [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
 *
@@ -122,10 +121,10 @@ Get dBms of the saved frequencies
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけて、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを見つけてください。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

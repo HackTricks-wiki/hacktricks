@@ -1,179 +1,176 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか、またはHackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有する**には、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>
 
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
-When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php)は、実行中のゲームのメモリ内に重要な値が保存されている場所を見つけて変更するための便利なプログラムです。\
+ダウンロードして実行すると、ツールの使用方法についてのチュートリアルが表示されます。ツールの使用方法を学びたい場合は、チュートリアルを完了することを強くお勧めします。
 
-# What are you searching?
+# 何を探していますか？
 
 ![](<../../.gitbook/assets/image (580).png>)
 
-This tool is very useful to find **where some value** (usually a number) **is stored in the memory** of a program.\
-**Usually numbers** are stored in **4bytes** form, but you could also find them in **double** or **float** formats, or you may want to look for something **different from a number**. For that reason you need to be sure you **select** what you want to **search for**:
+このツールは、プログラムのメモリ内にある**特定の値**（通常は数値）が保存されている場所を見つけるのに非常に便利です。\
+通常、数値は**4バイト**形式で保存されますが、**倍精度**や**単精度**の形式で見つけることもあります。また、数値以外のものを探したい場合もあります。そのため、**検索する内容**を**選択**する必要があります。
 
 ![](<../../.gitbook/assets/image (581).png>)
 
-Also you can indicate **different** types of **searches**:
+また、**異なる種類の検索**を指定することもできます。
 
 ![](<../../.gitbook/assets/image (582).png>)
 
-You can also check the box to **stop the game while scanning the memory**:
+メモリのスキャン中にゲームを**停止**するためのチェックボックスもチェックできます。
 
 ![](<../../.gitbook/assets/image (584).png>)
 
-## Hotkeys
+## ホットキー
 
-In _**Edit --> Settings --> Hotkeys**_ you can set different **hotkeys** for different purposes like **stopping** the **game** (which is quiet useful if at some point you want to scan the memory). Other options are available:
+_**編集 --> 設定 --> ホットキー**_で、**ゲームを停止**するなど、さまざまな目的に対して異なる**ホットキー**を設定できます（メモリのスキャンを行いたい場合には非常に便利です）。他のオプションも利用できます。
 
 ![](<../../.gitbook/assets/image (583).png>)
 
-# Modifying the value
+# 値の変更
 
-Once you **found** where is the **value** you are **looking for** (more about this in the following steps) you can **modify it** double clicking it, then double clicking its value:
+探している**値**の場所を**見つけたら**（次のステップで詳しく説明します）、それをダブルクリックして**変更**し、その値をダブルクリックします。
 
 ![](<../../.gitbook/assets/image (585).png>)
 
-And finally **marking the check** to get the modification done in the memory:
+そして、変更をメモリに反映させるためにチェックを入れます。
 
 ![](<../../.gitbook/assets/image (586).png>)
 
-The **change** to the **memory** will be immediately **applied** (note that until the game doesn't use this value again the value **won't be updated in the game**).
+メモリへの変更は即座に適用されます（ゲームがこの値を再度使用するまで、値はゲーム内で更新されません）。
 
-# Searching the value
+# 値の検索
 
-So, we are going to suppose that there is an important value (like the life of your user) that you want to improve, and you are looking for this value in the memory)
+したがって、重要な値（ユーザーのライフなど）を改善したいとし、その値をメモリ内で検索しているとします。
 
-## Through a known change
+## 既知の変更を通じて
 
-Supposing you are looking for the value 100, you **perform a scan** searching for that value and you find a lot of coincidences:
+値が100であることを探して、その値を検索して多くの一致を見つけました。
 
 ![](<../../.gitbook/assets/image (587).png>)
 
-Then, you do something so that **value changes**, and you **stop** the game and **perform** a **next scan**:
+次に、値が変更されるように何かを行い、ゲームを停止して**次のスキャン**を実行します。
 
 ![](<../../.gitbook/assets/image (588).png>)
 
-Cheat Engine will search for the **values** that **went from 100 to the new value**. Congrats, you **found** the **address** of the value you were looking for, you can now modify it.\
-_If you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
+Cheat Engineは、100から新しい値に変わった**値**を検索します。おめでとうございます、探していた値の**アドレス**を見つけました。これで変更できます。\
+_複数の値がまだある場合は、再びその値を変更するための何かを行い、別の「次のスキャン」を実行してアドレスをフィルタリングします。_
 
-## Unknown Value, known change
+## 未知の値、既知の変更
 
-In the scenario you **don't know the value** but you know **how to make it change** (and even the value of the change) you can look for your number.
+値を知らないが、**変更方法**（変更の値さえも）を知っている場合、その数値を探すことができます。
 
-So, start by performing a scan of type "**Unknown initial value**":
+まず、タイプが「**未知の初期値**」のスキャンを実行します。
 
 ![](<../../.gitbook/assets/image (589).png>)
 
-Then, make the value change, indicate **how** the **value** **changed** (in my case it was decreased by 1) and perform a **next scan**:
+次に、値を変更し、**値が変更された方法**（私の場合は1減少した）を示し、**次のスキャン**を実行します。
 
 ![](<../../.gitbook/assets/image (590).png>)
 
-You will be presented **all the values that were modified in the selected way**:
+選択した方法で変更された**すべての値**が表示されます。
 
 ![](<../../.gitbook/assets/image (591).png>)
 
-Once you have found your value, you can modify it.
+値が見つかったら、変更できます。
 
-Note that there are a **lot of possible changes** and you can do these **steps as much as you want** to filter the results:
+可能な変更は**たくさんあり**、これらのステップを**何度でも**繰り返して結果をフィルタリングできます。
 
 ![](<../../.gitbook/assets/image (592).png>)
+## ランダムメモリアドレス - コードの検索
 
-## Random Memory Address - Finding the code
+これまでに、値を格納しているアドレスを見つける方法を学びましたが、**ゲームの異なる実行では、そのアドレスはメモリの異なる場所にある可能性が非常に高い**です。そこで、常にそのアドレスを見つける方法を見つけましょう。
 
-Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.
-
-Using some of the mentioned tricks, find the address where your current game is storing the important value. Then (stopping the game if you whish) do a **right click** on the found **address** and select "**Find out what accesses this address**" or "**Find out what writes to this address**":
+いくつかのトリックを使用して、現在のゲームが重要な値を格納しているアドレスを見つけます。次に（ゲームを停止する場合は）見つかった**アドレス**を**右クリック**して、「**このアドレスを使用しているものを検索**」または「**このアドレスに書き込んでいるものを検索**」を選択します。
 
 ![](<../../.gitbook/assets/image (593).png>)
 
-The **first option** is useful to know which **parts** of the **code** are **using** this **address** (which is useful for more things like **knowing where you can modify the code** of the game).\
-The **second option** is more **specific**, and will be more helpful in this case as we are interested in knowing **from where this value is being written**.
+**最初のオプション**は、この**アドレスを使用しているコードのどの部分**を知るのに役立ちます（これはゲームのコードを変更できる場所を知るためにも役立ちます）。\
+**2番目のオプション**は、より**具体的**で、この場合は**どこからこの値が書き込まれているか**を知るのに役立ちます。
 
-Once you have selected one of those options, the **debugger** will be **attached** to the program and a new **empty window** will appear. Now, **play** the **game** and **modify** that **value** (without restarting the game). The **window** should be **filled** with the **addresses** that are **modifying** the **value**:
+これらのオプションのいずれかを選択すると、**デバッガ**がプログラムに**アタッチ**され、新しい**空のウィンドウ**が表示されます。今、**ゲーム**を**プレイ**し、その**値**を**変更**します（ゲームを再起動せずに）。**ウィンドウ**には、**値を変更しているアドレス**が**表示**されるはずです。
 
 ![](<../../.gitbook/assets/image (594).png>)
 
-Now that you found the address it's modifying the value you can **modify the code at your pleasure** (Cheat Engine allows you to modify it for NOPs real quick):
+値を変更しているアドレスを見つけたら、**コードを自由に変更**できます（Cheat Engineを使用して簡単に変更できます）。
 
 ![](<../../.gitbook/assets/image (595).png>)
 
-So, you can now modify it so the code won't affect your number, or will always affect in a positive way.
+したがって、コードを変更して数値に影響を与えないようにしたり、常に正の影響を与えるようにしたりできます。
 
-## Random Memory Address - Finding the pointer
+## ランダムメモリアドレス - ポインタの検索
 
-Following the previous steps, find where the value you are interested is. Then, using "**Find out what writes to this address**" find out which address writes this value and double click on it to get the disassembly view:
+前の手順に従って、興味のある値がある場所を見つけます。次に、「**このアドレスに書き込んでいるものを検索**」を使用して、この値を書き込んでいるアドレスを見つけ、それをダブルクリックしてディスアセンブリビューを取得します。
 
 ![](<../../.gitbook/assets/image (596).png>)
 
-Then, perform a new scan **searching for the hex value between "\[]"** (the value of $edx in this case):
+次に、**"\[\]"**（この場合の$edxの値）の間の16進数値を検索する新しいスキャンを実行します。
 
 ![](<../../.gitbook/assets/image (597).png>)
 
-(_If several appear you usually need the smallest address one_)\
-Now, we have f**ound the pointer that will be modifying the value we are interested in**.
+（複数の場合は通常、最小のアドレスが必要です）\
+これで、**興味のある値を変更するポインタ**を見つけました。
 
-Click on "**Add Address Manually**":
+「**アドレスを手動で追加**」をクリックします。
 
 ![](<../../.gitbook/assets/image (598).png>)
 
-Now, click on the "Pointer" check box and add the found address in the text box (in this scenario, the found address in the previous image was "Tutorial-i386.exe"+2426B0):
+次に、「ポインタ」のチェックボックスをクリックし、テキストボックスに見つかったアドレスを追加します（このシナリオでは、前の画像で見つかったアドレスは「Tutorial-i386.exe」+2426B0でした）。
 
 ![](<../../.gitbook/assets/image (599).png>)
 
-(Note how the first "Address" is automatically populated from the pointer address you introduce)
+（ポインタアドレスを入力すると、最初の「アドレス」が自動的に入力されることに注意してください）
 
-Click OK and a new pointer will be created:
+OKをクリックすると、新しいポインタが作成されます。
 
 ![](<../../.gitbook/assets/image (600).png>)
 
-Now, every time you modifies that value you are **modifying the important value even if the memory address where the value is is different.**
+これで、値が異なるメモリアドレスにある場合でも、その値を変更するたびに重要な値が変更されます。
 
-## Code Injection
+## コードインジェクション
 
-Code injection is a technique where you inject a piece of code into the target process, and then reroute the execution of code to go through your own written code (like giving you points instead of resting them).
+コードインジェクションは、ターゲットプロセスにコードの一部を注入し、コードの実行を自分自身の書かれたコードにリダイレクトする技術です（ポイントを減らす代わりにポイントを与えるなど）。
 
-So, imagine you have found the address that is subtracting 1 to the life of your player:
+したがって、プレイヤーのライフを1減らしているアドレスを見つけたとします。
 
 ![](<../../.gitbook/assets/image (601).png>)
 
-Click on Show disassembler to get the **disassemble code**.\
-Then, click **CTRL+a** to invoke the Auto assemble window and select _**Template --> Code Injection**_
+「ディスアセンブラを表示」をクリックして、**ディスアセンブルコード**を取得します。\
+次に、**CTRL+a**をクリックしてオートアセンブルウィンドウを呼び出し、_**テンプレート --> コードインジェクション**_を選択します。
 
 ![](<../../.gitbook/assets/image (602).png>)
 
-Fill the **address of the instruction you want to modify** (this is usually autofilled):
+**変更したい命令のアドレス**を入力します（通常は自動入力されます）。
 
 ![](<../../.gitbook/assets/image (603).png>)
 
-A template will be generated:
+テンプレートが生成されます。
 
 ![](<../../.gitbook/assets/image (604).png>)
 
-So, insert your new assembly code in the "**newmem**" section and remove the original code from the "**originalcode**" if you don't want it to be executed**.** In this example the injected code will add 2 points instead of substracting 1:
+したがって、新しいアセンブリコードを「**newmem**」セクションに挿入し、オリジナルのコードを実行しない場合は「**originalcode**」から削除します。この例では、注入されるコードは1を減算する代わりに2ポイントを追加します。
 
 ![](<../../.gitbook/assets/image (605).png>)
 
-**Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
+**実行**をクリックすると、コードがプログラムに注入され、機能の動作が変更されます。
 
-# **References**
+# **参考文献**
 
-* **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+* **Cheat Engineのチュートリアル、Cheat Engineの始め方を学ぶために完了してください**
 
 
 
@@ -181,16 +178,14 @@ So, insert your new assembly code in the "**newmem**" section and remove the ori
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？ [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！**
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **[💬](https://emojipedia.org/speech-balloon/) [Discordグループ](https://discord.gg/hRep4RUj7f)**または**[Telegramグループ](https://t.me/peass)**に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
-
-

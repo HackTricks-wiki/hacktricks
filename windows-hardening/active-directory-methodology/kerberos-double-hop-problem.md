@@ -1,77 +1,70 @@
-# Kerberos Double Hop Problem
+# Kerberosダブルホップ問題
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Introduction
+## はじめに
 
-The Kerberos "Double Hop" problem appears when an attacker attempts to use **Kerberos authentication across two** **hops**, for example using **PowerShell**/**WinRM**.
+Kerberosの「ダブルホップ」問題は、攻撃者が**Kerberos認証を使用して2つのホップ**を介して攻撃しようとした場合に発生します。たとえば、**PowerShell**/**WinRM**を使用する場合です。
 
-When an **authentication** occurs through **Kerberos**, **credentials** **aren't** cached in **memory.** Therefore, if you run mimikatz you **won't find credentials** of the user in the machine even if he is running processes.
+**Kerberos**を介した**認証**が行われると、**資格情報はメモリにキャッシュされません**。したがって、mimikatzを実行しても、ユーザーの資格情報はマシンに存在しません。
 
-This is because when connecting with Kerberos these are the steps:
+これは、Kerberosで接続する場合の手順です。
 
-1. User1 provides credentials and **domain controller** returns a Kerberos **TGT** to the User1.
-2. User1 uses **TGT** to request a **service ticket** to **connect** to Server1.
-3. User1 **connects** to **Server1** and provides **service ticket**.
-4. **Server1** **doesn't** have **credentials** of User1 cached or the **TGT** of User1. Therefore, when User1 from Server1 tries to login to a second server, he is **not able to authenticate**.
+1. ユーザー1が資格情報を提供し、**ドメインコントローラ**がユーザー1にKerberos **TGT**を返します。
+2. ユーザー1は**TGT**を使用して、**Server1**に接続するための**サービスチケット**を要求します。
+3. ユーザー1は**Server1**に**接続**し、**サービスチケット**を提供します。
+4. **Server1**には、ユーザー1の資格情報やユーザー1の**TGT**がキャッシュされていません。そのため、Server1から2番目のサーバーにログインしようとすると、ユーザー1は**認証できません**。
 
-### Unconstrained Delegation
+### 制約のない委任
 
-If **unconstrained delegation** is enabled in the PC, this won't happen as the **Server** will **get** a **TGT** of each user accessing it. Moreover, if unconstrained delegation is used you probably can **compromise the Domain Controller** from it.\
-[**More info in the unconstrained delegation page**](unconstrained-delegation.md).
+PCで**制約のない委任**が有効になっている場合、これは発生しません。なぜなら、**サーバー**はそれにアクセスする各ユーザーの**TGT**を**取得**するからです。さらに、制約のない委任が使用されている場合、それを介してドメインコントローラを**侵害**する可能性があります。\
+[**制約のない委任ページで詳細を確認**](unconstrained-delegation.md)してください。
 
 ### CredSSP
 
-Another suggested option to **sysadmins** to avoid this problem which is [**notably insecure**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) \*\*\*\* is **Credential Security Support Provider**. Enabling CredSSP has been a solution mentioned on various forums throughout the years. From Microsoft:
+この問題を回避するために、**システム管理者**に提案される別のオプションは、[**明らかに安全ではない**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) **Credential Security Support Provider**です。CredSSPを有効にすることは、さまざまなフォーラムで何年も言及されてきた解決策です。Microsoftからの引用：
 
-_“CredSSP authentication delegates the user credentials from the local computer to a remote computer. This practice increases the security risk of the remote operation. If the remote computer is compromised, when credentials are passed to it, the credentials can be used to control the network session.”_
+_「CredSSP認証は、ユーザーの資格情報をローカルコンピュータからリモートコンピュータに委任します。この方法は、リモート操作のセキュリティリスクを増加させます。リモートコンピュータが侵害された場合、資格情報が渡されると、ネットワークセッションを制御するために資格情報が使用される可能性があります。」_
 
-If you find **CredSSP enabled** on production systems, sensitive networks, etc it’s recommended they be disabled. A quick way to **check CredSSP status** is by running `Get-WSManCredSSP`. Which can be executed remotely if WinRM is enabled.
-
+本番システム、機密ネットワークなどでCredSSPが有効になっている場合は、無効にすることをお勧めします。CredSSPのステータスを**確認する**簡単な方法は、`Get-WSManCredSSP`を実行することです。WinRMが有効になっている場合、リモートで実行することもできます。
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
-    Get-WSManCredSSP
+Get-WSManCredSSP
 }
 ```
-
-## Workarounds
+## 回避策
 
 ### Invoke Command <a href="#invoke-command" id="invoke-command"></a>
 
-This method is sort of _“working with”_ the double hop issue, not necessarily solving it. It doesn’t rely on any configurations, and you can simply run it from your attacking box. It’s basically a **nested `Invoke-Command`**.
+この方法は、二重ホップの問題を「一緒に動作させる」方法であり、必ずしも解決するものではありません。構成に依存せず、攻撃ボックスから簡単に実行できます。基本的には**ネストされた`Invoke-Command`**です。
 
-This’ll **run** **`hostname`** on the **second server:**
-
+これにより、**2番目のサーバーで`hostname`を実行**します。
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
-    Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
+Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
-
-You could also have a **PS-Session** established with the **first server** and simply **run** the **`Invoke-Command`** with `$cred` from there instead of nesting it. Although, running it from your attacking box centralizes tasking:
-
+あなたはまた、最初のサーバーとの**PS-Session**を確立し、単にそこから`Invoke-Command`を`$cred`とともに実行することもできます。ただし、攻撃ボックスから実行することで、タスクを集中化することができます。
 ```powershell
 # From the WinRM connection
 $pwd = ConvertTo-SecureString 'uiefgyvef$/E3' -AsPlainText -Force
 $cred = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
 # Use "-Credential $cred" option in Powerview commands
 ```
+### PSSessionの構成を登録する
 
-### Register PSSession Configuration
-
-If instead of using **`evil-winrm`** you can use **`Enter-PSSession`** cmdlet you can then use **`Register-PSSessionConfiguration`** and reconnect to bypass the double hop problem:
-
+**`evil-winrm`**を使用する代わりに、**`Enter-PSSession`**コマンドレットを使用することで、**`Register-PSSessionConfiguration`**を使用して再接続し、ダブルホップ問題をバイパスすることができます。
 ```powershell
 # Register a new PS Session configuration
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
@@ -83,72 +76,65 @@ Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Creden
 klist
 # In this session you won't have the double hop problem anymore
 ```
+### ポートフォワーディング <a href="#portproxy" id="portproxy"></a>
 
-### PortForwarding <a href="#portproxy" id="portproxy"></a>
+中間ターゲットである**bizintel: 10.35.8.17**にローカル管理者権限があるため、リクエストを最終/3番目のサーバーである**secdev: 10.35.8.23**に送信するためのポートフォワーディングルールを追加できます。
 
-Since we have Local Administrator on the intermediate target **bizintel: 10.35.8.17**, you can add a port forwarding rule to send your requests to the final/third server **secdev: 10.35.8.23**.
-
-Can quickly use **netsh** to rip out a one-liner and add the rule.
-
+**netsh**を使用して、ワンライナーを作成してルールを追加できます。
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 ```
+以下は、Kerberosのダブルホップ問題に関する内容です。
 
-So **the first server** is listening on port 5446 and will forward requests hitting 5446 off to **the second server** port 5985 (aka WinRM).
+最初のサーバーはポート5446でリッスンし、ポート5985（WinRMとも呼ばれる）にリクエストを転送します。
 
-Then punch a hole in the Windows firewall, which can also be done with a swift netsh one-liner.
-
+次に、Windowsファイアウォールに穴を開けます。これは、迅速なnetshのワンライナーで行うこともできます。
 ```bash
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
 ```
-
-Now establish the session, which will forward us to **the first server**.
+セッションを確立し、**最初のサーバー**に転送します。
 
 <figure><img src="../../.gitbook/assets/image (3) (5) (1).png" alt=""><figcaption></figcaption></figure>
 
 #### winrs.exe <a href="#winrsexe" id="winrsexe"></a>
 
-**Portforwarding WinRM** requests also seems to work when using **`winrs.exe`**. This may be a better options if you’re aware PowerShell is being monitored. The below command brings back “**secdev**” as the result of `hostname`.
-
+**`winrs.exe`**を使用すると、**WinRMのポートフォワーディング**リクエストも動作するようです。PowerShellが監視されていることを認識している場合、これはより良いオプションです。以下のコマンドは、`hostname`の結果として「**secdev**」を返します。
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
-
-Like `Invoke-Command`, this can be easily scripted so the attacker can simply issue system commands as an argument. A generic batch script example _winrm.bat_:
+`Invoke-Command`と同様に、攻撃者はシステムコマンドを引数として簡単にスクリプト化することができます。一般的なバッチスクリプトの例である_winrm.bat_：
 
 <figure><img src="../../.gitbook/assets/image (2) (6) (2).png" alt=""><figcaption></figcaption></figure>
 
 ### OpenSSH <a href="#openssh" id="openssh"></a>
 
-This method requires [installing OpenSSH](https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH) on the first server box. Installing OpenSSH for Windows can be done **completely via CLI** and doesn’t take much time at all - plus it doesn’t flag as malware!
+この方法では、最初のサーバーボックスに[OpenSSHをインストール](https://github.com/PowerShell/Win32-OpenSSH/wiki/Install-Win32-OpenSSH)する必要があります。Windows用のOpenSSHのインストールは、**完全にCLIで**行うことができ、それほど時間もかかりません - さらに、マルウェアとして検出されることもありません！
 
-Of course in certain circumstances it may not be feasible, too cumbersome or may be a general OpSec risk.
+もちろん、特定の状況では実現が困難であったり、手間がかかったり、一般的なOpSecのリスクがある場合もあります。
 
-This method may be especially useful on a jump box setup - with access to an otherwise inaccessible network. Once the SSH connection is established, the user/attacker can fire-off as many `New-PSSession`’s as needed against the segmented network without blasting into the double-hop issue.
+この方法は、ジャンプボックスのセットアップ時に特に有用です - それ以外のネットワークにアクセスできない状況で。SSH接続が確立されると、ユーザー/攻撃者はセグメント化されたネットワークに対して必要なだけ`New-PSSession`を発行することができ、ダブルホップの問題に突入することなく処理することができます。
 
-When configured to use **Password Authentication** in OpenSSH (not keys or Kerberos), the **logon type is 8** aka _Network Clear text logon_. This doesn’t mean your password is sent in the clear - it is in fact encrypted by SSH. Upon arrival it’s unencrypted into clear text via its [authentication package](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-logonusera?redirectedfrom=MSDN) for your session to further request juicy TGT’s!
+OpenSSHで**パスワード認証**を使用するように構成されている場合（キーまたはKerberosではなく）、**ログオンタイプは8**、つまり_ネットワーククリアテキストログオン_です。これはパスワードがクリアテキストで送信されることを意味するものではありません - 実際にはSSHによって暗号化されます。到着時には、[認証パッケージ](https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-logonusera?redirectedfrom=MSDN)を介してクリアテキストに復号化され、セッションのためのジューシーなTGTをさらに要求するためです！
 
-This allows the intermediary server to request & obtain a TGT on your behalf to store locally on the intermediary server. Your session can then use this TGT to authenticate(PS remote) to additional servers.
+これにより、中間サーバーはあなたの代わりにTGTを要求して取得し、中間サーバーにローカルに保存することができます。その後、セッションはこのTGTを使用して追加のサーバーに対して認証（PSリモート）することができます。
 
-#### OpenSSH Install Scenario
+#### OpenSSHのインストールシナリオ
 
-Download the latest [OpenSSH Release zip from github](https://github.com/PowerShell/Win32-OpenSSH/releases) onto you attacking box and move it over (or download it directly onto the jump box).
+最新の[OpenSSHリリースzipをgithubからダウンロード](https://github.com/PowerShell/Win32-OpenSSH/releases)し、攻撃ボックスに移動させるか、直接ジャンプボックスにダウンロードします。
 
-Uncompress the zip to where you’d like. Then, run the install script - `Install-sshd.ps1`
+zipファイルを適当な場所に解凍します。次に、インストールスクリプト`Install-sshd.ps1`を実行します。
 
 <figure><img src="../../.gitbook/assets/image (2) (1) (3).png" alt=""><figcaption></figcaption></figure>
 
-Lastly, just add a firewall rule to **open port 22**. Verify the SSH services are installed, and start them. Both of these services will need to be running for SSH to work.
+最後に、**ポート22を開く**ためのファイアウォールルールを追加します。SSHサービスがインストールされていることを確認し、それらを起動します。これらのサービスは、SSHが動作するために実行されている必要があります。
 
 <figure><img src="../../.gitbook/assets/image (1) (7).png" alt=""><figcaption></figcaption></figure>
 
-If you receive a `Connection reset` error, update permissions to allow **Everyone: Read & Execute** on the root OpenSSH directory.
-
+`Connection reset`エラーが表示される場合は、ルートのOpenSSHディレクトリで**Everyone: Read & Execute**を許可するために権限を更新してください。
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
-
-## References
+## 参考文献
 
 * [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
 * [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
@@ -159,10 +145,10 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

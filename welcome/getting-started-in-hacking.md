@@ -1,76 +1,72 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 
-# Learning by Practice
+# 実践による学習
 
 ## [https://www.hackthebox.eu/](https://www.hackthebox.eu) & [https://academy.hackthebox.eu/catalogue](https://academy.hackthebox.eu/catalogue)
 
-Hackthebox has online machines to hack, it's the best place to learn by practicing. If you are new I would recommend you learning by doing retired machines following Ippsec videos.
+Hacktheboxはハッキングするオンラインマシンを持っており、実践による学習に最適な場所です。初心者の場合は、Ippsecのビデオに従って引退したマシンを実際に学ぶことをお勧めします。
 
-HackTheBox academy is the new platform to learn hacking in a more guided way, also a great resource if you want to practice hacking some specific technology!
+HackTheBoxアカデミーは、ハッキングをよりガイドされた方法で学ぶための新しいプラットフォームであり、特定の技術をハッキングする練習をしたい場合にも素晴らしいリソースです！
 
 ## [https://tryhackme.com/](https://tryhackme.com)
 
-Tryhackme is a platform with virtual machines that need to be solved through walkthroughs, which is very good for beginners and normal CTFs where you self must hack into the machines.
+Tryhackmeは、ウォークスルーを通じて解決する必要のある仮想マシンを持つプラットフォームであり、初心者や自己でマシンにハッキングする必要のある通常のCTFに非常に適しています。
 
 ## [https://www.root-me.org/](https://www.root-me.org)
 
-Rootme is another page for online hosted virtual machines to hack.
+Rootmeは、ハッキングするためのオンラインホストされた仮想マシンの別のページです。
 
 ## [https://www.vulnhub.com/](https://www.vulnhub.com)
 
-Vulnhub has machines to download and then to hack
+Vulnhubには、ダウンロードしてハッキングするためのマシンがあります。
 
 ## [https://hack.me/](https://hack.me)
 
-This site seems to be a community platform
+このサイトはコミュニティプラットフォームのようです。
 
 ## [https://www.hacker101.com/](https://www.hacker101.com)
 
-free site with videos and CTFs
+ビデオとCTFが無料で提供されるサイトです。
 
 ## [https://crackmes.one/](https://crackmes.one)
 
-This site has a lot of binaries for forensic learning.
+このサイトには、フォレンジック学習のための多くのバイナリがあります。
 
 ## [https://www.hackthissite.org/missions/basic/](https://www.hackthissite.org/missions/basic/)
 
 ## [https://attackdefense.com/](https://attackdefense.com)
 
 ## [https://portswigger.net/web-security/dashboard](https://portswigger.net/web-security/dashboard)
-This website has a lot of web exploitation labs
+このウェブサイトには、多くのウェブエクスプロイトラボがあります。
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
-
-

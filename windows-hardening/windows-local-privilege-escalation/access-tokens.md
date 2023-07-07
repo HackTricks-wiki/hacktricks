@@ -1,23 +1,22 @@
-# Access Tokens
+# アクセス トークン
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で会社を宣伝**したいですか？または、**最新バージョンの PEASS にアクセスしたり、HackTricks を PDF でダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な [**NFT**](https://opensea.io/collection/the-peass-family) のコレクションです。
+* [**公式の PEASS & HackTricks スワッグ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)** をフォロー**してください。
+* **ハッキングのトリックを共有**するには、[**hacktricks リポジトリ**](https://github.com/carlospolop/hacktricks) と [**hacktricks-cloud リポジトリ**](https://github.com/carlospolop/hacktricks-cloud) に PR を提出してください。
 
 </details>
 
-## Access Tokens
+## アクセス トークン
 
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+**システムにログインしたユーザーごとに、セキュリティ情報を持つアクセス トークンが作成**されます。ユーザーがログインすると、システムはアクセス トークンを作成します。**ユーザーの代わりに実行されるすべてのプロセスには、アクセス トークンのコピーがあります**。トークンには、ユーザー、ユーザーのグループ、およびユーザーの特権が識別されます。トークンには、現在のログインセッションを識別するログオン SID（セキュリティ識別子）も含まれています。
 
-You can see this information executing `whoami /all`
-
+この情報は、`whoami /all` を実行して確認できます。
 ```
 whoami /all
 
@@ -61,73 +60,68 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+または、Sysinternalsの_Process Explorer_を使用して（プロセスを選択し、「セキュリティ」タブにアクセス）：
 
 ![](<../../.gitbook/assets/image (321).png>)
 
-### Local administrator
+### ローカル管理者
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs.md#uac)**.**
+ローカル管理者がログインすると、**2つのアクセス トークンが作成**されます：1つは管理者権限を持ち、もう1つは通常の権限を持ちます。**デフォルトでは**、このユーザーがプロセスを実行するときには、**通常の**（管理者ではない）**権限のトークンが使用**されます。このユーザーが管理者として何かを実行しようとすると（たとえば、「管理者として実行」など）、**UAC**が許可を求めるために使用されます。\
+UACについて[**詳しくは、このページを読んでください**](../authentication-credentials-uac-and-efs.md#uac)**。**
 
-### Credentials user impersonation
+### 資格情報のユーザーなりすまし
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
-
+他のユーザーの**有効な資格情報**を持っている場合、それらの資格情報で**新しいログオンセッション**を作成できます：
 ```
 runas /user:domain\username cmd.exe
 ```
-
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
-You can launch a process that **uses different credentials for accessing network services** using:
-
+アクセストークンには、LSASS内のログオンセッションの参照もあります。これは、プロセスがネットワークのオブジェクトにアクセスする必要がある場合に便利です。\
+ネットワークサービスにアクセスするために異なる資格情報を使用するプロセスを起動することができます。
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+これは、ネットワーク内のオブジェクトにアクセスするための有用な資格情報を持っているが、これらの資格情報が現在のホスト内では有効ではない場合に役立ちます（現在のホストでは現在のユーザー権限が使用されます）。
 
-This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
+### トークンの種類
 
-### Types of tokens
+利用可能な2つのトークンの種類があります：
 
-There are two types of tokens available:
+* **プライマリトークン**：プライマリトークンは、**プロセスに関連付けられる**ことができ、プロセスのセキュリティサブジェクトを表します。プライマリトークンの作成とプロセスへの関連付けは、特権操作であり、特権の分離のために2つの異なる特権が必要です。典型的なシナリオでは、認証サービスがトークンを作成し、ログオンサービスがユーザーのオペレーティングシステムシェルに関連付けます。プロセスは最初に親プロセスのプライマリトークンのコピーを継承します。
+* **模倣トークン**：模倣は、Windows NTで実装されたセキュリティの概念であり、サーバーアプリケーションがセキュアオブジェクトへのアクセスに関して一時的に「クライアントとして」振る舞うことを可能にします。模倣には**4つの可能なレベル**があります：
 
-* **Primary token**: Primary tokens can only be **associated to processes**, and they represent a process's security subject. The creation of primary tokens and their association to processes are both privileged operations, requiring two different privileges in the name of privilege separation - the typical scenario sees the authentication service creating the token, and a logon service associating it to the user's operating system shell. Processes initially inherit a copy of the parent process's primary token.
-*   **Impersonation token**: Impersonation is a security concept implemented in Windows NT that **allows** a server application to **temporarily** "**be**" **the client** in terms of access to secure objects. Impersonation has **four possible levels**:
+* **匿名**：サーバーに匿名/未識別のユーザーのアクセス権を与えます
+* **識別**：サーバーがクライアントのアイデンティティを調査することを許可しますが、そのアイデンティティを使用してオブジェクトにアクセスすることはできません
+* **模倣**：サーバーがクライアントの代わりに動作することを許可します
+* **委任**：模倣と同じですが、サーバーが接続するリモートシステムにも拡張されます（資格情報の保存を通じて）。
 
-    * **anonymous**, giving the server the access of an anonymous/unidentified user
-    * **identification**, letting the server inspect the client's identity but not use that identity to access objects
-    * **impersonation**, letting the server act on behalf of the client
-    * **delegation**, same as impersonation but extended to remote systems to which the server connects (through the preservation of credentials).
+クライアントは、接続パラメータとしてサーバーに利用可能な最大模倣レベル（あれば）を選択できます。委任と模倣は特権操作です（模倣は元々特権ではありませんでしたが、クライアントAPIの実装上の注意不足により、デフォルトレベルを「識別」に制限しないことで、特権のないサーバーが意図しない特権のあるクライアントを模倣することができるようになりました）。**模倣トークンはスレッドにのみ関連付けることができ、クライアントプロセスのセキュリティサブジェクトを表します。模倣トークンは通常、DCE RPC、DDE、名前付きパイプなどのIPCメカニズムによって、暗黙的に現在のスレッドに作成および関連付けられます。**
 
-    The client can choose the maximum impersonation level (if any) available to the server as a connection parameter. Delegation and impersonation are privileged operations (impersonation initially was not, but historical carelessness in the implementation of client APIs failing to restrict the default level to "identification", letting an unprivileged server impersonate an unwilling privileged client, called for it). **Impersonation tokens can only be associated to threads**, and they represent a client process's security subject. Impersonation tokens are usually created and associated to the current thread implicitly, by IPC mechanisms such as DCE RPC, DDE and named pipes.
+#### トークンの模倣
 
-#### Impersonate Tokens
+Metasploitの_**incognito**_モジュールを使用すると、十分な特権があれば他のトークンを簡単に**リスト**して**模倣**することができます。これは、他のユーザーとして操作を実行するために役立つ場合があります。また、この技術を使用して特権を昇格させることもできます。
 
-Using the _**incognito**_\*\* module\*\* of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+### トークン特権
 
-### Token Privileges
-
-Learn which **token privileges can be abused to escalate privileges:**
+特権を昇格させるために悪用できる**トークン特権**を学びましょう：
 
 {% content-ref url="privilege-escalation-abusing-tokens/" %}
 [privilege-escalation-abusing-tokens](privilege-escalation-abusing-tokens/)
 {% endcontent-ref %}
 
-Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
+[**外部ページ**](https://github.com/gtworek/Priv2Admin)で**可能なトークン特権とその定義の一覧**をご覧ください。
 
-## References
+## 参考文献
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+トークンについての詳細は、次のチュートリアルを参照してください：[https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa)および[https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

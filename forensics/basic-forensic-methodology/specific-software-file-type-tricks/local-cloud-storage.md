@@ -1,123 +1,120 @@
-# Local Cloud Storage
+# ローカルクラウドストレージ
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
 ![](<../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## OneDrive
 
-In Windows, you can find the OneDrive folder in `\Users\<username>\AppData\Local\Microsoft\OneDrive`. And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` which contains some interesting data regarding the synchronized files:
+Windowsでは、OneDriveフォルダは`\Users\<username>\AppData\Local\Microsoft\OneDrive`にあります。そして、`logs\Personal`の中には、同期されたファイルに関するいくつかの興味深いデータが含まれている`SyncDiagnostics.log`というファイルがあります：
 
-* Size in bytes
-* Creation date
-* Modification date
-* Number of files in the cloud
-* Number of files in the folder
-* **CID**: Unique ID of the OneDrive user
-* Report generation time
-* Size of the HD of the OS
+* バイト単位のサイズ
+* 作成日
+* 変更日
+* クラウド内のファイル数
+* フォルダ内のファイル数
+* **CID**：OneDriveユーザーの一意のID
+* レポート生成時間
+* OSのHDのサイズ
 
-Once you have found the CID it's recommended to **search files containing this ID**. You may be able to find files with the name: _**\<CID>.ini**_ and _**\<CID>.dat**_ that may contain interesting information like the names of files synchronized with OneDrive.
+CIDを見つけたら、**このIDを含むファイルを検索**することをお勧めします。OneDriveと同期されたファイルの名前が_**\<CID>.ini**_と_**\<CID>.dat**_のようなファイルを見つけることができるかもしれません。これらのファイルには、OneDriveと同期されたファイルの名前など、興味深い情報が含まれている可能性があります。
 
 ## Google Drive
 
-In Windows, you can find the main Google Drive folder in `\Users\<username>\AppData\Local\Google\Drive\user_default`\
-This folder contains a file called Sync\_log.log with information like the email address of the account, filenames, timestamps, MD5 hashes of the files, etc. Even deleted files appear in that log file with its corresponding MD5.
+Windowsでは、メインのGoogle Driveフォルダは`\Users\<username>\AppData\Local\Google\Drive\user_default`にあります。\
+このフォルダには、アカウントのメールアドレス、ファイル名、タイムスタンプ、ファイルのMD5ハッシュなどの情報が含まれるSync\_log.logというファイルがあります。削除されたファイルも、対応するMD5とともにそのログファイルに表示されます。
 
-The file **`Cloud_graph\Cloud_graph.db`** is a sqlite database which contains the table **`cloud_graph_entry`**. In this table you can find the **name** of the **synchronized** **files**, modified time, size, and the MD5 checksum of the files.
+ファイル**`Cloud_graph\Cloud_graph.db`**は、テーブル**`cloud_graph_entry`**を含むsqliteデータベースです。このテーブルには、**同期されたファイル**の**名前**、変更時間、サイズ、およびファイルのMD5チェックサムが含まれています。
 
-The table data of the database **`Sync_config.db`** contains the email address of the account, the path of the shared folders and the Google Drive version.
+データベース**`Sync_config.db`**のテーブルデータには、アカウントのメールアドレス、共有フォルダのパス、およびGoogle Driveのバージョンが含まれています。
 
 ## Dropbox
 
-Dropbox uses **SQLite databases** to manage the files. In this\
-You can find the databases in the folders:
+Dropboxは**SQLiteデータベース**を使用してファイルを管理します。これには、次のフォルダにデータベースがあります。
 
 * `\Users\<username>\AppData\Local\Dropbox`
 * `\Users\<username>\AppData\Local\Dropbox\Instance1`
 * `\Users\<username>\AppData\Roaming\Dropbox`
 
-And the main databases are:
+そして、主なデータベースは次のとおりです。
 
 * Sigstore.dbx
 * Filecache.dbx
 * Deleted.dbx
 * Config.dbx
 
-The ".dbx" extension means that the **databases** are **encrypted**. Dropbox uses **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](https://docs.microsoft.com/en-us/previous-versions/ms995355\(v=msdn.10\)?redirectedfrom=MSDN))
+".dbx"拡張子は、データベースが**暗号化**されていることを意味します。Dropboxは**DPAPI**を使用します ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](https://docs.microsoft.com/en-us/previous-versions/ms995355\(v=msdn.10\)?redirectedfrom=MSDN))
 
-To understand better the encryption that Dropbox uses you can read [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
+Dropboxが使用する暗号化をよりよく理解するために、[https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html)を読んでください。
 
-However, the main information is:
+ただし、主な情報は次のとおりです。
 
-* **Entropy**: d114a55212655f74bd772e37e64aee9b
-* **Salt**: 0D638C092E8B82FC452883F95F355B8E
-* **Algorithm**: PBKDF2
-* **Iterations**: 1066
+* **エントロピー**：d114a55212655f74bd772e37e64aee9b
+* **ソルト**：0D638C092E8B82FC452883F95F355B8E
+* **アルゴリズム**：PBKDF2
+* **イテレーション**：1066
 
-Apart from that information, to decrypt the databases you still need:
+その情報に加えて、データベースを復号化するには、次のものが必要です。
 
-* The **encrypted DPAPI key**: You can find it in the registry inside `NTUSER.DAT\Software\Dropbox\ks\client` (export this data as binary)
-* The **`SYSTEM`** and **`SECURITY`** hives
-* The **DPAPI master keys**: Which can be found in `\Users\<username>\AppData\Roaming\Microsoft\Protect`
-* The **username** and **password** of the Windows user
+* **暗号化されたDPAPIキー**：これは、レジストリ内の`NTUSER.DAT\Software\Dropbox\ks\client`にあります（このデータをバイナリ形式でエクスポートします）
+* **`SYSTEM`**および**`SECURITY`**ハイブ
+* **DPAPIマスターキー**：これは`\Users\<username>\AppData\Roaming\Microsoft\Protect`に見つけることができます
+* Windowsユーザーの**ユーザー名**と**パスワード**
 
-Then you can use the tool [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi\_data\_decryptor.html)**:**
+その後、[**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi\_data\_decryptor.html)****ツールを使用できます。
 
 ![](<../../../.gitbook/assets/image (448).png>)
 
-If everything goes as expected, the tool will indicate the **primary key** that you need to **use to recover the original one**. To recover the original one, just use this [cyber\_chef receipt](https://gchq.github.io/CyberChef/#recipe=Derive\_PBKDF2\_key\(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D\)) putting the primary key as the "passphrase" inside the receipt.
+すべてが予想どおりに進むと、ツールは**元のキーを回復するために使用する主キー**を示します。元のキーを回復するには、この[cyber\_chefレシピ](https://gchq.github.io/CyberChef/#recipe=Derive\_PBKDF2\_key\(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D\))を使用し、主キーをレシピの「パスフレーズ」として入力します。
 
-The resulting hex is the final key used to encrypt the databases which can be decrypted with:
-
+結果の16進数が、データベースを復号化するために使用される最終キーです。
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
+**`config.dbx`**データベースには以下の情報が含まれています：
 
-The **`config.dbx`** database contains:
+* **Email**: ユーザーのメールアドレス
+* **usernamedisplayname**: ユーザーの名前
+* **dropbox\_path**: Dropboxフォルダが配置されているパス
+* **Host\_id: Hash**: クラウドへの認証に使用されるハッシュ。これはウェブからのみ取り消すことができます。
+* **Root\_ns**: ユーザー識別子
 
-* **Email**: The email of the user
-* **usernamedisplayname**: The name of the user
-* **dropbox\_path**: Path where the dropbox folder is located
-* **Host\_id: Hash** used to authenticate to the cloud. This can only be revoked from the web.
-* **Root\_ns**: User identifier
+**`filecache.db`**データベースには、Dropboxと同期されたすべてのファイルとフォルダに関する情報が含まれています。テーブル`File_journal`には、より多くの有用な情報があります：
 
-The **`filecache.db`** database contains information about all the files and folders synchronized with Dropbox. The table `File_journal` is the one with more useful information:
+* **Server\_path**: サーバー内のファイルの場所（このパスはクライアントの`host_id`で先行します）。
+* **local\_sjid**: ファイルのバージョン
+* **local\_mtime**: 変更日時
+* **local\_ctime**: 作成日時
 
-* **Server\_path**: Path where the file is located inside the server (this path is preceded by the `host_id` of the client).
-* **local\_sjid**: Version of the file
-* **local\_mtime**: Modification date
-* **local\_ctime**: Creation date
+このデータベース内の他のテーブルには、より興味深い情報が含まれています：
 
-Other tables inside this database contain more interesting information:
-
-* **block\_cache**: hash of all the files and folders of Dropbox
-* **block\_ref**: Related the hash ID of the table `block_cache` with the file ID in the table `file_journal`
-* **mount\_table**: Share folders of dropbox
-* **deleted\_fields**: Dropbox deleted files
+* **block\_cache**: Dropboxのすべてのファイルとフォルダのハッシュ
+* **block\_ref**: テーブル`block_cache`のハッシュIDをテーブル`file_journal`のファイルIDと関連付ける
+* **mount\_table**: Dropboxの共有フォルダ
+* **deleted\_fields**: Dropboxの削除されたファイル
 * **date\_added**
 
 ![](<../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -125,10 +122,10 @@ Get Access Today:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

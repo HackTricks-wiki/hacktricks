@@ -1,195 +1,190 @@
-# Cryptographic/Compression Algorithms
+# 暗号化/圧縮アルゴリズム
 
-## Cryptographic/Compression Algorithms
+## 暗号化/圧縮アルゴリズム
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Identifying Algorithms
+## アルゴリズムの特定
 
-If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
+もし、コードが**シフト演算、XOR演算、およびいくつかの算術演算**を使用している場合、それはおそらく**暗号化アルゴリズムの実装**である可能性が高いです。ここでは、**各ステップを逆にする必要なしに使用されているアルゴリズムを特定する**いくつかの方法を紹介します。
 
-### API functions
+### API関数
 
 **CryptDeriveKey**
 
-If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+この関数が使用されている場合、第2パラメータの値をチェックすることで、**どのアルゴリズムが使用されているか**を特定できます。
 
 ![](<../../.gitbook/assets/image (375) (1) (1) (1) (1).png>)
 
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+可能なアルゴリズムとそれに割り当てられた値の表はこちらを参照してください：[https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
-Compresses and decompresses a given buffer of data.
+指定されたデータのバッファを圧縮および展開します。
 
 **CryptAcquireContext**
 
-The **CryptAcquireContext** function is used to acquire a handle to a particular key container within a particular cryptographic service provider (CSP). **This returned handle is used in calls to CryptoAPI** functions that use the selected CSP.
+**CryptAcquireContext**関数は、特定の暗号化サービスプロバイダ（CSP）内の特定のキーコンテナへのハンドルを取得するために使用されます。選択したCSPを使用するCryptoAPI関数への呼び出しで使用される返されたハンドルです。
 
 **CryptCreateHash**
 
-Initiates the hashing of a stream of data. If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+データストリームのハッシュ化を開始します。この関数が使用されている場合、第2パラメータの値をチェックすることで、**どのアルゴリズムが使用されているか**を特定できます。
 
 ![](<../../.gitbook/assets/image (376).png>)
 
-\
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+可能なアルゴリズムとそれに割り当てられた値の表はこちらを参照してください：[https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Code constants
+### コード定数
 
-Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
+アルゴリズムを特定するのは非常に簡単な場合があります。なぜなら、特別でユニークな値を使用する必要があるからです。
 
 ![](<../../.gitbook/assets/image (370).png>)
 
-If you search for the first constant in Google this is what you get:
+最初の定数をGoogleで検索すると、次のような結果が得られます。
 
 ![](<../../.gitbook/assets/image (371).png>)
 
-Therefore, you can assume that the decompiled function is a **sha256 calculator.**\
-You can search any of the other constants and you will obtain (probably) the same result.
+したがって、逆コンパイルされた関数は**sha256の計算機**であると推定できます。他の定数のいずれかを検索しても（おそらく）同じ結果が得られます。
 
-### data info
+### データ情報
 
-If the code doesn't have any significant constant it may be **loading information from the .data section**.\
-You can access that data, **group the first dword** and search for it in google as we have done in the section before:
+コードに有意義な定数がない場合、おそらく**.dataセクションから情報を読み込んでいる**可能性があります。そのデータにアクセスし、最初のdwordを**グループ化**し、前のセクションと同様にGoogleで検索します。
 
 ![](<../../.gitbook/assets/image (372).png>)
 
-In this case, if you look for **0xA56363C6** you can find that it's related to the **tables of the AES algorithm**.
+この場合、**0xA56363C6**を検索すると、**AESアルゴリズムのテーブル**に関連していることがわかります。
 
-## RC4 **(Symmetric Crypt)**
+## RC4 **（対称暗号）**
 
-### Characteristics
+### 特徴
 
-It's composed of 3 main parts:
+RC4は3つの主要な部分で構成されています：
 
-* **Initialization stage/**: Creates a **table of values from 0x00 to 0xFF** (256bytes in total, 0x100). This table is commonly call **Substitution Box** (or SBox).
-* **Scrambling stage**: Will **loop through the table** crated before (loop of 0x100 iterations, again) creating modifying each value with **semi-random** bytes. In order to create this semi-random bytes, the RC4 **key is used**. RC4 **keys** can be **between 1 and 256 bytes in length**, however it is usually recommended that it is above 5 bytes. Commonly, RC4 keys are 16 bytes in length.
-* **XOR stage**: Finally, the plain-text or cyphertext is **XORed with the values created before**. The function to encrypt and decrypt is the same. For this, a **loop through the created 256 bytes** will be performed as many times as necessary. This is usually recognized in a decompiled code with a **%256 (mod 256)**.
+* **初期化ステージ**：0x00から0xFFまでの値のテーブル（合計256バイト、0x100）を作成します。このテーブルは一般的に**置換ボックス**（またはSBox）と呼ばれます。
+* **スクランブルステージ**：以前に作成したテーブルをループします（再び0x100回のループ）。このループでは、RC4の**キーを使用して**各値を**半ランダム**バイトで変更します。この半ランダムバイトを作成するためには、通常、RC4のキーは1バイトから256バイトの長さであることが推奨されます。一般的に、RC4のキーは16バイトの長さです。
+* **XORステージ**：最後に、平文または暗号文は、以前に作成した値とXOR演算されます。暗号化および復号化のための関数は同じです。そのため、作成された256バイトを必要な回数だけループします。これは通常、デコンパイルされたコードで**%256（mod 256）**として認識されます。
 
 {% hint style="info" %}
-**In order to identify a RC4 in a disassembly/decompiled code you can check for 2 loops of size 0x100 (with the use of a key) and then a XOR of the input data with the 256 values created before in the 2 loops probably using a %256 (mod 256)**
+**逆アセンブリ/デコンパイルされたコードでRC4を特定するには、2つの0x100サイズのループ（キーを使用）と、おそらく%256（mod 256）を使用して2つのループで作成された256個の値との入力データのXORをチェックできます。**
 {% endhint %}
-
-### **Initialization stage/Substitution Box:** (Note the number 256 used as counter and how a 0 is written in each place of the 256 chars)
+### **初期化ステージ/置換ボックス:**（256という数字がカウンターとして使用され、256文字の各桁に0が書かれていることに注意してください）
 
 ![](<../../.gitbook/assets/image (377).png>)
 
-### **Scrambling Stage:**
+### **スクランブルステージ:**
 
 ![](<../../.gitbook/assets/image (378).png>)
 
-### **XOR Stage:**
+### **XORステージ:**
 
 ![](<../../.gitbook/assets/image (379).png>)
 
-## **AES (Symmetric Crypt)**
+## **AES（対称暗号）**
 
-### **Characteristics**
+### **特徴**
 
-* Use of **substitution boxes and lookup tables**
-  * It's possible to **distinguish AES thanks to the use of specific lookup table values** (constants). _Note that the **constant** can be **stored** in the binary **or created**_ _**dynamically**._
-* The **encryption key** must be **divisible** by **16** (usually 32B) and usually an **IV** of 16B is used.
+* **置換ボックスとルックアップテーブル**の使用
+* 特定のルックアップテーブルの値（定数）の使用により、AESを区別することが可能です。_注意：この定数はバイナリに**格納**されるか、**動的に作成**されることができます。_
+* 暗号化キーは16で割り切れる必要があります（通常は32B）、通常は16BのIVが使用されます。
 
-### SBox constants
+### SBoxの定数
 
 ![](<../../.gitbook/assets/image (380).png>)
 
-## Serpent **(Symmetric Crypt)**
+## Serpent **（対称暗号）**
 
-### Characteristics
+### 特徴
 
-* It's rare to find some malware using it but there are examples (Ursnif)
-* Simple to determine if an algorithm is Serpent or not based on it's length (extremely long function)
+* 一部のマルウェアで使用されることは稀ですが、例があります（Ursnif）
+* 非常に長い関数に基づいて、アルゴリズムがSerpentであるかどうかを簡単に判断できます。
 
-### Identifying
+### 識別
 
-In the following image notice how the constant **0x9E3779B9** is used (note that this constant is also used by other crypto algorithms like **TEA** -Tiny Encryption Algorithm).\
-Also note the **size of the loop** (**132**) and the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
+次の画像では、定数**0x9E3779B9**が使用されていることに注意してください（この定数は**TEA**（Tiny Encryption Algorithm）などの他の暗号アルゴリズムでも使用されます）。また、**ループのサイズ**（**132**）と**XOR操作の数**を**逆アセンブリ**の命令と**コード**の例で確認してください。
 
 ![](<../../.gitbook/assets/image (381).png>)
 
-As it was mentioned before, this code can be visualized inside any decompiler as a **very long function** as there **aren't jumps** inside of it. The decompiled code can look like the following:
+前述のように、このコードはジャンプがないため、デコンパイラ内で非常に長い関数として視覚化することができます。デコンパイルされたコードは次のようになります。
 
 ![](<../../.gitbook/assets/image (382).png>)
 
-Therefore, it's possible to identify this algorithm checking the **magic number** and the **initial XORs**, seeing a **very long function** and **comparing** some **instructions** of the long function **with an implementation** (like the shift left by 7 and the rotate left by 22).
+したがって、このアルゴリズムは、**マジックナンバー**と**初期のXOR**をチェックし、**非常に長い関数**を見て、その関数の**いくつかの命令**を（左に7ビットシフトし、左に22ビット回転するなど）**実装と比較する**ことで識別することができます。
 
-## RSA **(Asymmetric Crypt)**
+## RSA **（非対称暗号）**
 
-### Characteristics
+### 特徴
 
-* More complex than symmetric algorithms
-* There are no constants! (custom implementation are difficult to determine)
-* KANAL (a crypto analyzer) fails to show hints on RSA ad it relies on constants.
+* 対称アルゴリズムよりも複雑です
+* 定数はありません！（カスタム実装は判断が難しいです）
+* RSAに関するヒントを表示するためには、KANAL（暗号解析ツール）は失敗します。
 
-### Identifying by comparisons
+### 比較による識別
 
 ![](<../../.gitbook/assets/image (383).png>)
 
-* In line 11 (left) there is a `+7) >> 3` which is the same as in line 35 (right): `+7) / 8`
-* Line 12 (left) is checking if `modulus_len < 0x040` and in line 36 (right) it's checking if `inputLen+11 > modulusLen`
+* 左側の11行目には`+7) >> 3`があり、右側の35行目には`+7) / 8`があります。
+* 左側の12行目では`modulus_len < 0x040`をチェックし、右側の36行目では`inputLen+11 > modulusLen`をチェックしています。
 
-## MD5 & SHA (hash)
+## MD5＆SHA（ハッシュ）
 
-### Characteristics
+### 特徴
 
-* 3 functions: Init, Update, Final
-* Similar initialize functions
+* 初期化、更新、最終の3つの関数があります
+* 類似した初期化関数
 
-### Identify
+### 識別
 
-**Init**
+**初期化**
 
-You can identify both of them checking the constants. Note that the sha\_init has 1 constant that MD5 doesn't have:
+両方を識別するには、定数をチェックします。MD5には存在しないsha\_initに1つの定数があることに注意してください。
 
 ![](<../../.gitbook/assets/image (385).png>)
 
-**MD5 Transform**
+**MD5変換**
 
-Note the use of more constants
+さらに多くの定数の使用に注意してください。
 
 ![](<../../.gitbook/assets/image (253) (1) (1) (1).png>)
 
-## CRC (hash)
+## CRC（ハッシュ）
 
-* Smaller and more efficient as it's function is to find accidental changes in data
-* Uses lookup tables (so you can identify constants)
+* データの偶発的な変更を検出するための機能として、より小さく効率的です
+* ルックアップテーブルを使用します（定数を識別できます）
 
-### Identify
+### 識別
 
-Check **lookup table constants**:
+**ルックアップテーブルの定数**をチェックします。
 
 ![](<../../.gitbook/assets/image (387).png>)
 
-A CRC hash algorithm looks like:
+CRCハッシュアルゴリズムは次のようになります。
 
 ![](<../../.gitbook/assets/image (386).png>)
 
-## APLib (Compression)
+## APLib（圧縮）
 
-### Characteristics
+### 特徴
 
-* Not recognizable constants
-* You can try to write the algorithm in python and search for similar things online
+* 識別可能な定数はありません
+* Pythonでアルゴリズムを書いて、オンラインで類似のものを検索することができます
 
-### Identify
+### 識別
 
-The graph is quiet large:
+グラフは非常に大きいです。
 
 ![](<../../.gitbook/assets/image (207) (2) (1).png>)
 
-Check **3 comparisons to recognise it**:
+**3つの比較をチェック**してそれを認識します。
 
 ![](<../../.gitbook/assets/image (384).png>)
 
@@ -197,10 +192,10 @@ Check **3 comparisons to recognise it**:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、PEASSの最新バージョンやHackTricksのPDFをダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)をご覧ください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

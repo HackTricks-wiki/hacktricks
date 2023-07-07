@@ -1,117 +1,110 @@
-# macOS XPC Authorization
+# macOS XPC 認証
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## XPC Authorization
+## XPC 認証
 
-Apple also proposes another way to authenticate if the connecting process has **permissions to call the an exposed XPC method**.
+Appleは、接続するプロセスが**公開されたXPCメソッドを呼び出す権限**を持っているかどうかを認証する別の方法も提案しています。
 
-When an application needs to **execute actions as a privileged user**, instead of running the app as a privileged user it usually installs as root a HelperTool as an XPC service that could be called from the app to perform those actions. However, the app calling the service should have enough authorization.
+アプリケーションが**特権ユーザーとしてアクションを実行する必要がある**場合、通常は特権ユーザーとしてアプリを実行する代わりに、XPCサービスとしてのHelperToolをrootとしてインストールします。このHelperToolは、アプリから呼び出されてこれらのアクションを実行することができます。ただし、サービスを呼び出すアプリには十分な認証が必要です。
 
-### ShuoldAcceptNewConnection always YES
+### ShuoldAcceptNewConnection は常に YES
 
-An example could be found in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` it tries to **connect** to the **HelperTool**. And in `HelperTool/HelperTool.m` the function **`shouldAcceptNewConnection`** **won't check** any of the requirements indicated previously. It'll always return YES:
-
+[EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)には、この例があります。`App/AppDelegate.m`では、**HelperTool**に**接続**しようとします。そして、`HelperTool/HelperTool.m`では、**`shouldAcceptNewConnection`**関数は、以前に示した要件のいずれも**チェックしません**。常にYESを返します。
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
-    // Called by our XPC listener when a new connection comes in.  We configure the connection
-    // with our protocol and ourselves as the main object.
+// Called by our XPC listener when a new connection comes in.  We configure the connection
+// with our protocol and ourselves as the main object.
 {
-    assert(listener == self.listener);
-    #pragma unused(listener)
-    assert(newConnection != nil);
+assert(listener == self.listener);
+#pragma unused(listener)
+assert(newConnection != nil);
 
-    newConnection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(HelperToolProtocol)];
-    newConnection.exportedObject = self;
-    [newConnection resume];
-    
-    return YES;
+newConnection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(HelperToolProtocol)];
+newConnection.exportedObject = self;
+[newConnection resume];
+
+return YES;
 }
 ```
-
-For more information about how to properly configure this check:
+詳しい設定方法については、次のチェックを適切に構成する方法に関する情報を参照してください：
 
 {% content-ref url="macos-xpc-connecting-process-check.md" %}
 [macos-xpc-connecting-process-check.md](macos-xpc-connecting-process-check.md)
 {% endcontent-ref %}
 
-### Application rights
+### アプリケーションの権限
 
-However, there is some **authorization going on when a method from the HelperTool is called**.
+ただし、**HelperToolからメソッドが呼び出される際には、いくつかの認可が行われます**。
 
-The function **`applicationDidFinishLaunching`** from `App/AppDelegate.m` will create an empty authorization reference after the app has started. This should always work.\
-Then, it will try to **add some rights** to that authorization reference calling `setupAuthorizationRights`:
-
+`App/AppDelegate.m`の`applicationDidFinishLaunching`関数は、アプリが起動した後に空の認可参照を作成します。これは常に機能するはずです。\
+その後、`setupAuthorizationRights`を呼び出して、その認可参照にいくつかの権限を追加しようとします。
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
-    [...]
-    err = AuthorizationCreate(NULL, NULL, 0, &self->_authRef);
-    if (err == errAuthorizationSuccess) {
-        err = AuthorizationMakeExternalForm(self->_authRef, &extForm);
-    }
-    if (err == errAuthorizationSuccess) {
-        self.authorization = [[NSData alloc] initWithBytes:&extForm length:sizeof(extForm)];
-    }
-    assert(err == errAuthorizationSuccess);
-    
-    // If we successfully connected to Authorization Services, add definitions for our default 
-    // rights (unless they're already in the database).
-    
-    if (self->_authRef) {
-        [Common setupAuthorizationRights:self->_authRef];
-    }
-    
-    [self.window makeKeyAndOrderFront:self];
+[...]
+err = AuthorizationCreate(NULL, NULL, 0, &self->_authRef);
+if (err == errAuthorizationSuccess) {
+err = AuthorizationMakeExternalForm(self->_authRef, &extForm);
+}
+if (err == errAuthorizationSuccess) {
+self.authorization = [[NSData alloc] initWithBytes:&extForm length:sizeof(extForm)];
+}
+assert(err == errAuthorizationSuccess);
+
+// If we successfully connected to Authorization Services, add definitions for our default
+// rights (unless they're already in the database).
+
+if (self->_authRef) {
+[Common setupAuthorizationRights:self->_authRef];
+}
+
+[self.window makeKeyAndOrderFront:self];
 }
 ```
-
-The function `setupAuthorizationRights` from `Common/Common.m` will store in the auth database `/var/db/auth.db` the rights of the application. Note how it will only add the rights that aren't yet in the database:
-
+`Common/Common.m`の`setupAuthorizationRights`関数は、アプリケーションの権限を`/var/db/auth.db`という認証データベースに保存します。データベースにまだ存在しない権限のみが追加されることに注意してください。
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
-    // See comment in header.
+// See comment in header.
 {
-    assert(authRef != NULL);
-    [Common enumerateRightsUsingBlock:^(NSString * authRightName, id authRightDefault, NSString * authRightDesc) {
-        OSStatus    blockErr;
-        
-        // First get the right.  If we get back errAuthorizationDenied that means there's 
-        // no current definition, so we add our default one.
-        
-        blockErr = AuthorizationRightGet([authRightName UTF8String], NULL);
-        if (blockErr == errAuthorizationDenied) {
-            blockErr = AuthorizationRightSet(
-                authRef,                                    // authRef
-                [authRightName UTF8String],                 // rightName
-                (__bridge CFTypeRef) authRightDefault,      // rightDefinition
-                (__bridge CFStringRef) authRightDesc,       // descriptionKey
-                NULL,                                       // bundle (NULL implies main bundle)
-                CFSTR("Common")                             // localeTableName
-            );
-            assert(blockErr == errAuthorizationSuccess);
-        } else { 
-            // A right already exists (err == noErr) or any other error occurs, we 
-            // assume that it has been set up in advance by the system administrator or
-            // this is the second time we've run.  Either way, there's nothing more for 
-            // us to do.
-        }
-    }];
+assert(authRef != NULL);
+[Common enumerateRightsUsingBlock:^(NSString * authRightName, id authRightDefault, NSString * authRightDesc) {
+OSStatus    blockErr;
+
+// First get the right.  If we get back errAuthorizationDenied that means there's
+// no current definition, so we add our default one.
+
+blockErr = AuthorizationRightGet([authRightName UTF8String], NULL);
+if (blockErr == errAuthorizationDenied) {
+blockErr = AuthorizationRightSet(
+authRef,                                    // authRef
+[authRightName UTF8String],                 // rightName
+(__bridge CFTypeRef) authRightDefault,      // rightDefinition
+(__bridge CFStringRef) authRightDesc,       // descriptionKey
+NULL,                                       // bundle (NULL implies main bundle)
+CFSTR("Common")                             // localeTableName
+);
+assert(blockErr == errAuthorizationSuccess);
+} else {
+// A right already exists (err == noErr) or any other error occurs, we
+// assume that it has been set up in advance by the system administrator or
+// this is the second time we've run.  Either way, there's nothing more for
+// us to do.
+}
+}];
 }
 ```
-
-The function `enumerateRightsUsingBlock` is the one used to get applications permissions, which are defined in `commandInfo`:
-
+関数`enumerateRightsUsingBlock`は、`commandInfo`で定義されるアプリケーションの権限を取得するために使用される関数です。
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -119,163 +112,156 @@ static NSString * kCommandKeyAuthRightDesc    = @"authRightDescription";
 
 + (NSDictionary *)commandInfo
 {
-    static dispatch_once_t sOnceToken;
-    static NSDictionary *  sCommandInfo;
-    
-    dispatch_once(&sOnceToken, ^{
-        sCommandInfo = @{
-            NSStringFromSelector(@selector(readLicenseKeyAuthorization:withReply:)) : @{
-                kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.readLicenseKey", 
-                kCommandKeyAuthRightDefault : @kAuthorizationRuleClassAllow, 
-                kCommandKeyAuthRightDesc    : NSLocalizedString(
-                    @"EBAS is trying to read its license key.", 
-                    @"prompt shown when user is required to authorize to read the license key"
-                )
-            },
-            NSStringFromSelector(@selector(writeLicenseKey:authorization:withReply:)) : @{
-                kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.writeLicenseKey", 
-                kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin, 
-                kCommandKeyAuthRightDesc    : NSLocalizedString(
-                    @"EBAS is trying to write its license key.", 
-                    @"prompt shown when user is required to authorize to write the license key"
-                )
-            },
-            NSStringFromSelector(@selector(bindToLowNumberPortAuthorization:withReply:)) : @{
-                kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.startWebService", 
-                kCommandKeyAuthRightDefault : @kAuthorizationRuleClassAllow, 
-                kCommandKeyAuthRightDesc    : NSLocalizedString(
-                    @"EBAS is trying to start its web service.", 
-                    @"prompt shown when user is required to authorize to start the web service"
-                )
-            }
-        };
-    });
-    return sCommandInfo;
+static dispatch_once_t sOnceToken;
+static NSDictionary *  sCommandInfo;
+
+dispatch_once(&sOnceToken, ^{
+sCommandInfo = @{
+NSStringFromSelector(@selector(readLicenseKeyAuthorization:withReply:)) : @{
+kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.readLicenseKey",
+kCommandKeyAuthRightDefault : @kAuthorizationRuleClassAllow,
+kCommandKeyAuthRightDesc    : NSLocalizedString(
+@"EBAS is trying to read its license key.",
+@"prompt shown when user is required to authorize to read the license key"
+)
+},
+NSStringFromSelector(@selector(writeLicenseKey:authorization:withReply:)) : @{
+kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.writeLicenseKey",
+kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+kCommandKeyAuthRightDesc    : NSLocalizedString(
+@"EBAS is trying to write its license key.",
+@"prompt shown when user is required to authorize to write the license key"
+)
+},
+NSStringFromSelector(@selector(bindToLowNumberPortAuthorization:withReply:)) : @{
+kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.startWebService",
+kCommandKeyAuthRightDefault : @kAuthorizationRuleClassAllow,
+kCommandKeyAuthRightDesc    : NSLocalizedString(
+@"EBAS is trying to start its web service.",
+@"prompt shown when user is required to authorize to start the web service"
+)
+}
+};
+});
+return sCommandInfo;
 }
 
 + (NSString *)authorizationRightForCommand:(SEL)command
-    // See comment in header.
+// See comment in header.
 {
-    return [self commandInfo][NSStringFromSelector(command)][kCommandKeyAuthRightName];
+return [self commandInfo][NSStringFromSelector(command)][kCommandKeyAuthRightName];
 }
 
 + (void)enumerateRightsUsingBlock:(void (^)(NSString * authRightName, id authRightDefault, NSString * authRightDesc))block
-    // Calls the supplied block with information about each known authorization right..
+// Calls the supplied block with information about each known authorization right..
 {
-    [self.commandInfo enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        #pragma unused(key)
-        #pragma unused(stop)
-        NSDictionary *  commandDict;
-        NSString *      authRightName;
-        id              authRightDefault;
-        NSString *      authRightDesc;
-        
-        // If any of the following asserts fire it's likely that you've got a bug 
-        // in sCommandInfo.
-        
-        commandDict = (NSDictionary *) obj;
-        assert([commandDict isKindOfClass:[NSDictionary class]]);
+[self.commandInfo enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+#pragma unused(key)
+#pragma unused(stop)
+NSDictionary *  commandDict;
+NSString *      authRightName;
+id              authRightDefault;
+NSString *      authRightDesc;
 
-        authRightName = [commandDict objectForKey:kCommandKeyAuthRightName];
-        assert([authRightName isKindOfClass:[NSString class]]);
+// If any of the following asserts fire it's likely that you've got a bug
+// in sCommandInfo.
 
-        authRightDefault = [commandDict objectForKey:kCommandKeyAuthRightDefault];
-        assert(authRightDefault != nil);
+commandDict = (NSDictionary *) obj;
+assert([commandDict isKindOfClass:[NSDictionary class]]);
 
-        authRightDesc = [commandDict objectForKey:kCommandKeyAuthRightDesc];
-        assert([authRightDesc isKindOfClass:[NSString class]]);
+authRightName = [commandDict objectForKey:kCommandKeyAuthRightName];
+assert([authRightName isKindOfClass:[NSString class]]);
 
-        block(authRightName, authRightDefault, authRightDesc);
-    }];
+authRightDefault = [commandDict objectForKey:kCommandKeyAuthRightDefault];
+assert(authRightDefault != nil);
+
+authRightDesc = [commandDict objectForKey:kCommandKeyAuthRightDesc];
+assert([authRightDesc isKindOfClass:[NSString class]]);
+
+block(authRightName, authRightDefault, authRightDesc);
+}];
 }
 ```
+これにより、このプロセスの最後には、`commandInfo`内で宣言された権限が`/var/db/auth.db`に保存されます。各メソッドには、**認証が必要な**場合に使用される**権限名**と**`kCommandKeyAuthRightDefault`**が含まれていることに注意してください。後者は、**この権限を取得できるユーザー**を示します。
 
-This means that at the end of this process, the permissions declared inside `commandInfo` will be stored in `/var/db/auth.db`. Note how there you can find for **each method** that will r**equire authentication**,  **permission name** and the **`kCommandKeyAuthRightDefault`**. The later one **indicates who can get this right**.
+権限にアクセスできるユーザーを示すためのさまざまなスコープがあります。それらの一部は[AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity\_authorization/lib/AuthorizationDB.h)で定義されています（[ここですべてを見つけることができます](https://www.dssw.co.uk/reference/authorization-rights/)）。要約すると：
 
-There are different scopes to indicate who can access a right. Some of them are defined in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity\_authorization/lib/AuthorizationDB.h) (you can find [all of them in here](https://www.dssw.co.uk/reference/authorization-rights/)), but as summary:
+<table><thead><tr><th width="284.3333333333333">名前</th><th width="165">値</th><th>説明</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>誰でも</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>誰も</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>現在のユーザーは管理者である必要があります（管理者グループ内）</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>ユーザーに認証を求めます。</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>ユーザーに認証を求めます。彼は管理者である必要があります（管理者グループ内）</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>ルールを指定します</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>権限に関する追加のコメントを指定します</td></tr></tbody></table>
 
-<table><thead><tr><th width="284.3333333333333">Name</th><th width="165">Value</th><th>Description</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Anyone</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Nobody</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Current user needs to be an admin (inside admin group)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Ask user to authenticate.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Ask user to authenticate. He needs to be an admin (inside admin group)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Specify rules</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Specify some extra comments on the right</td></tr></tbody></table>
+### 権限の検証
 
-### Rights Verification
-
-In `HelperTool/HelperTool.m` the function **`readLicenseKeyAuthorization`** checks if the caller is authorized to **execute such method** calling the function **`checkAuthorization`**. This function will check the **authData** sent by the calling process has a **correct format** and then will check **what is needed to get the right** to call the specific method. If all goes good the **returned `error` will be `nil`**:
-
+`HelperTool/HelperTool.m`の関数**`readLicenseKeyAuthorization`**は、呼び出し元が**そのメソッドを実行する**権限を持っているかどうかを確認するために、**`checkAuthorization`**関数を呼び出します。この関数は、呼び出し元プロセスが送信した**authData**が**正しい形式**であるかどうかをチェックし、その後、特定のメソッドを呼び出すために**どの権限が必要か**をチェックします。すべてがうまくいけば、**返される`error`は`nil`**になります。
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
-    [...]
+[...]
 
-    // First check that authData looks reasonable.
-    
-    error = nil;
-    if ( (authData == nil) || ([authData length] != sizeof(AuthorizationExternalForm)) ) {
-        error = [NSError errorWithDomain:NSOSStatusErrorDomain code:paramErr userInfo:nil];
-    }
-    
-    // Create an authorization ref from that the external form data contained within.
-    
-    if (error == nil) {
-        err = AuthorizationCreateFromExternalForm([authData bytes], &authRef);
-        
-        // Authorize the right associated with the command.
-        
-        if (err == errAuthorizationSuccess) {
-            AuthorizationItem   oneRight = { NULL, 0, NULL, 0 };
-            AuthorizationRights rights   = { 1, &oneRight };
+// First check that authData looks reasonable.
 
-            oneRight.name = [[Common authorizationRightForCommand:command] UTF8String];
-            assert(oneRight.name != NULL);
-            
-            err = AuthorizationCopyRights(
-                authRef,
-                &rights,
-                NULL,
-                kAuthorizationFlagExtendRights | kAuthorizationFlagInteractionAllowed,
-                NULL
-            );
-        }
-        if (err != errAuthorizationSuccess) {
-            error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil];
-        }
-    }
+error = nil;
+if ( (authData == nil) || ([authData length] != sizeof(AuthorizationExternalForm)) ) {
+error = [NSError errorWithDomain:NSOSStatusErrorDomain code:paramErr userInfo:nil];
+}
 
-    if (authRef != NULL) {
-        junk = AuthorizationFree(authRef, 0);
-        assert(junk == errAuthorizationSuccess);
-    }
+// Create an authorization ref from that the external form data contained within.
 
-    return error;
+if (error == nil) {
+err = AuthorizationCreateFromExternalForm([authData bytes], &authRef);
+
+// Authorize the right associated with the command.
+
+if (err == errAuthorizationSuccess) {
+AuthorizationItem   oneRight = { NULL, 0, NULL, 0 };
+AuthorizationRights rights   = { 1, &oneRight };
+
+oneRight.name = [[Common authorizationRightForCommand:command] UTF8String];
+assert(oneRight.name != NULL);
+
+err = AuthorizationCopyRights(
+authRef,
+&rights,
+NULL,
+kAuthorizationFlagExtendRights | kAuthorizationFlagInteractionAllowed,
+NULL
+);
+}
+if (err != errAuthorizationSuccess) {
+error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil];
+}
+}
+
+if (authRef != NULL) {
+junk = AuthorizationFree(authRef, 0);
+assert(junk == errAuthorizationSuccess);
+}
+
+return error;
 }
 ```
+注意してください。そのメソッドを呼び出すための要件を確認するために、関数`authorizationRightForCommand`は以前のコメントオブジェクト`commandInfo`をチェックします。その後、関数を呼び出す権限があるかどうかを確認するために`AuthorizationCopyRights`を呼び出します（フラグによってユーザーとの対話が許可されることに注意してください）。
 
-Note that to **check the requirements to get the right** to call that method the function `authorizationRightForCommand` will just check the previously comment object **`commandInfo`**. Then, it will call **`AuthorizationCopyRights`** to check **if it has the rights** to call the function (note that the flags allow interaction with the user).
+この場合、関数`readLicenseKeyAuthorization`を呼び出すために、`kCommandKeyAuthRightDefault`は`@kAuthorizationRuleClassAllow`に定義されています。したがって、**誰でもそれを呼び出すことができます**。
 
-In this case, to call the function `readLicenseKeyAuthorization` the `kCommandKeyAuthRightDefault` is defined to `@kAuthorizationRuleClassAllow`. So **anyone can call it**.
+### DB情報
 
-### DB Information
-
-It was mentioned that this information is stored in `/var/db/auth.db`. You can list all the stored rules with:
-
+この情報は`/var/db/auth.db`に保存されていると述べられています。次のコマンドで保存されているすべてのルールをリストアップできます。
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-
-Then, you can read who can access the right with:
-
+次に、誰が権限にアクセスできるかを確認することができます。
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

@@ -1,154 +1,145 @@
-# Partitions/File Systems/Carving
+# パーティション/ファイルシステム/カービング
 
-## Partitions/File Systems/Carving
+## パーティション/ファイルシステム/カービング
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Partitions
+## パーティション
 
-A hard drive or an **SSD disk can contain different partitions** with the goal of separating data physically.\
-The **minimum** unit of a disk is the **sector** (normally composed of 512B). So, each partition size needs to be multiple of that size.
+ハードドライブまたは**SSDディスクには、データを物理的に分離するための異なるパーティションが含まれる**場合があります。\
+ディスクの**最小単位はセクタ**です（通常は512Bで構成されています）。したがって、各パーティションのサイズはそのサイズの倍数である必要があります。
 
-### MBR (master Boot Record)
+### MBR（マスターブートレコード）
 
-It's allocated in the **first sector of the disk after the 446B of the boot code**. This sector is essential to indicate to the PC what and from where a partition should be mounted.\
-It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
-MBR allows **max 2.2TB**.
+これは、**ブートコードの446Bの後のディスクの最初のセクタ**に割り当てられます。このセクタは、PCにパーティションをどこからマウントするかを示すために必要です。\
+最大で**4つのパーティション**（最大で**1つだけがアクティブ/ブート可能**）を許可します。ただし、より多くのパーティションが必要な場合は、**拡張パーティション**を使用できます。この最初のセクタの最後のバイトは、ブートレコードの署名**0x55AA**です。1つのパーティションのみがアクティブにマークされることができます。\
+MBRは**最大2.2TB**を許可します。
 
 ![](<../../../.gitbook/assets/image (489).png>)
 
 ![](<../../../.gitbook/assets/image (490).png>)
 
-From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** (if Windows is used). The logical drive letter of the hard disk depends on the Windows Disk Signature. Changing this signature could prevent Windows from booting (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+MBRの**バイト440から443**には、**Windowsディスクシグネチャ**（Windowsを使用している場合）が含まれています。ハードディスクの論理ドライブレターは、Windowsディスクシグネチャに依存します。このシグネチャを変更すると、Windowsの起動が阻止される可能性があります（ツール：[**Active Disk Editor**](https://www.disk-editor.org/index.html)**）**。
 
 ![](<../../../.gitbook/assets/image (493).png>)
 
-**Format**
+**フォーマット**
 
-| Offset      | Length     | Item                |
-| ----------- | ---------- | ------------------- |
-| 0 (0x00)    | 446(0x1BE) | Boot code           |
-| 446 (0x1BE) | 16 (0x10)  | First Partition     |
-| 462 (0x1CE) | 16 (0x10)  | Second Partition    |
-| 478 (0x1DE) | 16 (0x10)  | Third Partition     |
-| 494 (0x1EE) | 16 (0x10)  | Fourth Partition    |
-| 510 (0x1FE) | 2 (0x2)    | Signature 0x55 0xAA |
+| オフセット   | 長さ       | 項目             |
+| ------------ | ---------- | ---------------- |
+| 0（0x00）    | 446（0x1BE）| ブートコード     |
+| 446（0x1BE） | 16（0x10） | 最初のパーティション |
+| 462（0x1CE） | 16（0x10） | 2番目のパーティション |
+| 478（0x1DE） | 16（0x10） | 3番目のパーティション |
+| 494（0x1EE） | 16（0x10） | 4番目のパーティション |
+| 510（0x1FE） | 2（0x2）   | シグネチャ0x55 0xAA |
 
-**Partition Record Format**
+**パーティションレコードのフォーマット**
 
-| Offset    | Length   | Item                                                   |
-| --------- | -------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01) | Active flag (0x80 = bootable)                          |
-| 1 (0x01)  | 1 (0x01) | Start head                                             |
-| 2 (0x02)  | 1 (0x01) | Start sector (bits 0-5); upper bits of cylinder (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Start cylinder lowest 8 bits                           |
-| 4 (0x04)  | 1 (0x01) | Partition type code (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01) | End head                                               |
-| 6 (0x06)  | 1 (0x01) | End sector (bits 0-5); upper bits of cylinder (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | End cylinder lowest 8 bits                             |
-| 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
-| 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
+| オフセット  | 長さ      | 項目                                                   |
+| ----------- | --------- | ------------------------------------------------------ |
+| 0（0x00）   | 1（0x01） | アクティブフラグ（0x80 = ブート可能）                   |
+| 1（0x01）   | 1（0x01） | 開始ヘッド                                             |
+| 2（0x02）   | 1（0x01） | 開始セクタ（ビット0-5）；シリンダの上位ビット（6-7）   |
+| 3（0x03）   | 1（0x01） | 開始シリンダの下位8ビット                             |
+| 4（0x04）   | 1（0x01） | パーティションタイプコード（0x83 = Linux）               |
+| 5（0x05）   | 1（0x01） | 終了ヘッド                                             |
+| 6（0x06）   | 1（0x01） | 終了セクタ（ビット0-5）；シリンダの上位ビット（6-7）   |
+| 7（0x07）   | 1（0x01） | 終了シリンダの下位8ビット                             |
+| 8（0x08）   | 4（0x04） | パーティションの前にあるセクタ（リトルエンディアン）   |
+| 12（0x0C）  | 4（0x04） | パーティション内のセクタ数                             |
 
-In order to mount an MBR in Linux you first need to get the start offset (you can use `fdisk` and the `p` command)
+LinuxでMBRをマウントするには、まず開始オフセットを取得する必要があります（`fdisk`と`p`コマンドを使用できます）
 
-![](<../../../.gitbook/assets/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (12).png>)
-
-And then use the following code
-
+![](<../../../.gitbook/assets/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1
 ```bash
 #Mount MBR in Linux
 mount -o ro,loop,offset=<Bytes>
 #63x512 = 32256Bytes
 mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
+**LBA（論理ブロックアドレッシング）**
 
-**LBA (Logical block addressing)**
+**論理ブロックアドレッシング**（LBA）は、コンピュータのストレージデバイス（一般的にはハードディスクドライブなどの二次記憶装置）に格納されたデータのブロックの場所を指定するために使用される一般的なスキームです。LBAは特にシンプルな線形アドレッシングスキームであり、ブロックは整数のインデックスによって特定されます。最初のブロックはLBA 0、2番目のブロックはLBA 1、以降のブロックは順に増加します。
 
-**Logical block addressing** (**LBA**) is a common scheme used for **specifying the location of blocks** of data stored on computer storage devices, generally secondary storage systems such as hard disk drives. LBA is a particularly simple linear addressing scheme; **blocks are located by an integer index**, with the first block being LBA 0, the second LBA 1, and so on.
+### GPT（GUIDパーティションテーブル）
 
-### GPT (GUID Partition Table)
+GPT（GUIDパーティションテーブル）とは、ドライブ上の各パーティションに**グローバルに一意の識別子**があるため、この名前が付けられています。
 
-It’s called GUID Partition Table because every partition on your drive has a **globally unique identifier**.
+MBRと同様に、GPTも**セクター0**から始まります。MBRは32ビットを占有しているのに対し、**GPT**は**64ビット**を使用します。\
+GPTでは、Windowsでは最大128のパーティションを作成でき、最大**9.4ZB**までサポートされています。\
+また、パーティションには36文字のUnicode名を付けることができます。
 
-Just like MBR it starts in the **sector 0**. The MBR occupies 32bits while **GPT** uses **64bits**.\
-GPT **allows up to 128 partitions** in Windows and up to **9.4ZB**.\
-Also, partitions can have a 36 character Unicode name.
+MBRディスクでは、パーティショニングとブートデータは1か所に格納されます。このデータが上書きされたり破損したりすると、問題が発生します。一方、**GPTはディスク全体に複数のコピーを保存**するため、より堅牢で、データが破損した場合でも回復することができます。
 
-On an MBR disk, the partitioning and boot data are stored in one place. If this data is overwritten or corrupted, you’re in trouble. In contrast, **GPT stores multiple copies of this data across the disk**, so it’s much more robust and can recover if the data is corrupted.
+GPTはまた、データが破損しているかどうかを確認するために**巡回冗長検査（CRC）**値を保存します。データが破損している場合、GPTは問題に気付き、ディスク上の別の場所から**破損したデータを回復しようとします**。
 
-GPT also stores **cyclic redundancy check (CRC)** values to check that its data is intact. If the data is corrupted, GPT can notice the problem and **attempt to recover the damaged data** from another location on the disk.
+**保護MBR（LBA0）**
 
-**Protective MBR (LBA0)**
-
-For limited backward compatibility, the space of the legacy MBR is still reserved in the GPT specification, but it is now used in a **way that prevents MBR-based disk utilities from misrecognizing and possibly overwriting GPT disks**. This is referred to as a protective MBR.
+互換性のために、GPT仕様では従来のMBRの領域が予約されていますが、これはMBRベースのディスクユーティリティがGPTディスクを誤認識して上書きすることを防ぐ**方法で使用**されています。これは保護MBRと呼ばれます。
 
 ![](<../../../.gitbook/assets/image (491).png>)
 
-**Hybrid MBR (LBA 0 + GPT)**
+**ハイブリッドMBR（LBA 0 + GPT）**
 
-In operating systems that support **GPT-based boot through BIOS** services rather than EFI, the first sector may also still be used to store the first stage of the **bootloader** code, but **modified** to recognize **GPT** **partitions**. The bootloader in the MBR must not assume a sector size of 512 bytes.
+BIOSを介して**GPTベースのブート**をサポートするオペレーティングシステムでは、最初のセクターは**ブートローダー**コードの最初のステージを格納するために使用される場合がありますが、**変更**されて**GPTパーティション**を認識するようになります。MBRのブートローダーは、セクターサイズが512バイトであるとは想定しないでください。
 
-**Partition table header (LBA 1)**
+**パーティションテーブルヘッダー（LBA 1）**
 
-The partition table header defines the usable blocks on the disk. It also defines the number and size of the partition entries that make up the partition table (offsets 80 and 84 in the table).
+パーティションテーブルヘッダーは、ディスク上の使用可能なブロックを定義します。また、パーティションテーブルを構成するパーティションエントリの数とサイズも定義します（テーブル内のオフセット80と84）。
 
-| Offset    | Length   | Contents                                                                                                                                                                        |
-| --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0 (0x00)  | 8 bytes  | Signature ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h or 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID\_Partition\_Table#cite\_note-8)on little-endian machines) |
-| 8 (0x08)  | 4 bytes  | Revision 1.0 (00h 00h 01h 00h) for UEFI 2.8                                                                                                                                     |
-| 12 (0x0C) | 4 bytes  | Header size in little endian (in bytes, usually 5Ch 00h 00h 00h or 92 bytes)                                                                                                    |
-| 16 (0x10) | 4 bytes  | [CRC32](https://en.wikipedia.org/wiki/CRC32) of header (offset +0 up to header size) in little endian, with this field zeroed during calculation                                |
-| 20 (0x14) | 4 bytes  | Reserved; must be zero                                                                                                                                                          |
-| 24 (0x18) | 8 bytes  | Current LBA (location of this header copy)                                                                                                                                      |
-| 32 (0x20) | 8 bytes  | Backup LBA (location of the other header copy)                                                                                                                                  |
-| 40 (0x28) | 8 bytes  | First usable LBA for partitions (primary partition table last LBA + 1)                                                                                                          |
-| 48 (0x30) | 8 bytes  | Last usable LBA (secondary partition table first LBA − 1)                                                                                                                       |
-| 56 (0x38) | 16 bytes | Disk GUID in mixed endian                                                                                                                                                       |
-| 72 (0x48) | 8 bytes  | Starting LBA of an array of partition entries (always 2 in primary copy)                                                                                                        |
-| 80 (0x50) | 4 bytes  | Number of partition entries in array                                                                                                                                            |
-| 84 (0x54) | 4 bytes  | Size of a single partition entry (usually 80h or 128)                                                                                                                           |
-| 88 (0x58) | 4 bytes  | CRC32 of partition entries array in little endian                                                                                                                               |
-| 92 (0x5C) | \*       | Reserved; must be zeroes for the rest of the block (420 bytes for a sector size of 512 bytes; but can be more with larger sector sizes)                                         |
+| オフセット   | 長さ     | 内容                                                                                                                                                                          |
+| ------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0 (0x00)     | 8バイト   | シグネチャ（"EFI PART"、45h 46h 49h 20h 50h 41h 52h 54hまたは0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID\_Partition\_Table#cite\_note-8)、リトルエンディアンマシンでは） |
+| 8 (0x08)     | 4バイト   | UEFI 2.8用のリビジョン1.0（00h 00h 01h 00h）                                                                                                                                  |
+| 12 (0x0C)    | 4バイト   | ヘッダーサイズ（リトルエンディアンでのバイト単位、通常は5Ch 00h 00h 00hまたは92バイト）                                                                                       |
+| 16 (0x10)    | 4バイト   | ヘッダーのCRC32（オフセット+0からヘッダーサイズまで）のリトルエンディアンでの値。計算中にこのフィールドはゼロになります。                                                   |
+| 20 (0x14)    | 4バイト   | 予約済み；ゼロである必要があります                                                                                                                                            |
+| 24 (0x18)    | 8バイト   | 現在のLBA（このヘッダーコピーの場所）                                                                                                                                          |
+| 32 (0x20)    | 8バイト   | バックアップLBA（他のヘッダーコピーの場所）                                                                                                                                    |
+| 40 (0x28)    | 8バイト   | パーティションの最初の使用可能なLBA（プライマリパーティションテーブルの最後のLBA + 1）                                                                                          |
+| 48 (0x30)    | 8バイト   | 最後の使用可能なLBA（セカンダリパーティションテーブルの最初のLBA−1）                                                                                                           |
+| 56 (0x38)    | 16バイト  | ディスクのGUID（ミックスエンディアン）                                                                                                                                         |
+| 72 (0x48)    | 8バイト   | パーティションエントリの配列の開始LBA（プライマリコピーでは常に2）                                                                                                               |
+| 80 (0x50)    | 4バイト   | 配列内のパーティションエントリの数                                                                                                                                            |
+| 84 (0x54)    | 4バイト   | 単一のパーティションエントリのサイズ（通常は80hまたは128）                                                                                                                     |
+| 88 (0x58)    | 4バイト   | パーティションエントリ配列のCRC32（リトルエンディアン）                                                                                                                         |
+| 92 (0x5C)    | \*       | ブロックの残りの部分にはゼロでなければなりません（セクターサイズが512バイトの場合は420バイトですが、より大きなセクターサイズの場合はそれ以上になる場合があります）                                         |
 
-**Partition entries (LBA 2–33)**
+**パーティションエントリ（LBA 2–33）**
 
-| GUID partition entry format |          |                                                                                                                   |
+| GUIDパーティションエントリ形式 |          |                                                                                                                   |
 | --------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| Offset                      | Length   | Contents                                                                                                          |
-| 0 (0x00)                    | 16 bytes | [Partition type GUID](https://en.wikipedia.org/wiki/GUID\_Partition\_Table#Partition\_type\_GUIDs) (mixed endian) |
-| 16 (0x10)                   | 16 bytes | Unique partition GUID (mixed endian)                                                                              |
-| 32 (0x20)                   | 8 bytes  | First LBA ([little endian](https://en.wikipedia.org/wiki/Little\_endian))                                         |
-| 40 (0x28)                   | 8 bytes  | Last LBA (inclusive, usually odd)                                                                                 |
-| 48 (0x30)                   | 8 bytes  | Attribute flags (e.g. bit 60 denotes read-only)                                                                   |
-| 56 (0x38)                   | 72 bytes | Partition name (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE code units)                                   |
+| オフセット                   | 長さ     | 内容                                                                                                              |
+| 0 (0x00)                    | 16バイト | [パーティションタイプGUID](https://en.wikipedia.org/wiki/GUID\_Partition\_Table#Partition\_type\_GUIDs)（ミックスエンディアン） |
+| 16 (0x10)                   | 16バイト | ユニークなパーティションGUID（ミックスエンディアン）                                                               |
+| 32 (0x20)                   | 8バイト   | 最初のLBA（[リトルエンディアン](https://en.wikipedia.org/wiki/Little\_endian)）                                     |
+| 40 (0x28)                   | 8バイト   | 最後のLBA（包括的、通常は奇数）                                                                                     |
+| 48 (0x30)                   | 8バイト   | 属性フラグ（例：ビット60は読み取り専用を示す）                                                                     |
+| 56 (0x38)                   | 72バイト  | パーティション名（36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LEコードユニット）                                 |
 
-**Partitions Types**
+**パーティションタイプ**
 
 ![](<../../../.gitbook/assets/image (492).png>)
 
-More partition types in [https://en.wikipedia.org/wiki/GUID\_Partition\_Table](https://en.wikipedia.org/wiki/GUID\_Partition\_Table)
+詳細なパーティションタイプは[https://en.wikipedia.org/wiki/GUID\_Partition\_Table](https://en.wikipedia.org/wiki/GUID\_Partition\_Table)を参照してください。
 
-### Inspecting
+### 検査
 
-After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image an **MBR** was detected on the **sector 0** and interpreted:
+[**ArsenalImageMounter**](https://arsenalrecon.com/downloads/)を使用してフォレンジックイメージ
+## ファイルシステム
 
-![](<../../../.gitbook/assets/image (494).png>)
-
-If it was a **GPT table instead of an MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
-
-## File-Systems
-
-### Windows file-systems list
+### Windowsのファイルシステム一覧
 
 * **FAT12/16**: MSDOS, WIN95/98/NT/200
 * **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
@@ -158,27 +149,27 @@ If it was a **GPT table instead of an MBR** it should appear the signature _EFI 
 
 ### FAT
 
-The **FAT (File Allocation Table)** file system is named for its method of organization, the file allocation table, which resides at the beginning of the volume. To protect the volume, **two copies** of the table are kept, in case one becomes damaged. In addition, the file allocation tables and the root folder must be stored in a **fixed location** so that the files needed to start the system can be correctly located.
+**FAT（File Allocation Table）**ファイルシステムは、その組織方法であるファイル割り当てテーブルにちなんで名付けられています。このテーブルはボリュームの先頭に存在し、ボリュームを保護するために**2つのコピー**が保持されます。さらに、ファイル割り当てテーブルとルートフォルダは、システムの起動に必要なファイルを正しく見つけるために**固定位置**に保存される必要があります。
 
 ![](<../../../.gitbook/assets/image (495).png>)
 
-The minimum space unit used by this file system is a **cluster, typically 512B** (which is composed of a number of sectors).
+このファイルシステムで使用される最小のスペース単位は、通常512Bの**クラスタ**です（セクタの数で構成されています）。
 
-The earlier **FAT12** had a **cluster addresses to 12-bit** values with up to **4078** **clusters**; it allowed up to 4084 clusters with UNIX. The more efficient **FAT16** increased to **16-bit** cluster address allowing up to **65,517 clusters** per volume. FAT32 uses 32-bit cluster address allowing up to **268,435,456 clusters** per volume
+初期の**FAT12**は、最大で**4078**の**クラスタ**を持つ12ビットのクラスタアドレスを使用し、UNIXでは最大で4084のクラスタを許可していました。より効率的な**FAT16**は、最大で**65,517のクラスタ**を許可する16ビットのクラスタアドレスを使用しています。FAT32は32ビットのクラスタアドレスを使用し、ボリュームあたり最大**268,435,456のクラスタ**を許可します。
 
-The **maximum file size allowed by FAT is 4GB** (minus one byte) because the file system uses a 32-bit field to store the file size in bytes, and 2^32 bytes = 4 GiB. This happens for FAT12, FAT16 and FAT32.
+FATが許容する**最大ファイルサイズは4GB**（1バイトを引いたもの）です。これは、ファイルシステムがバイト単位でファイルサイズを格納するために32ビットのフィールドを使用しており、2^32バイト=4 GiBになるためです。これはFAT12、FAT16、FAT32の場合に起こります。
 
-The **root directory** occupies a **specific position** for both FAT12 and FAT16 (in FAT32 it occupies a position like any other folder). Each file/folder entry contains this information:
+**ルートディレクトリ**は、FAT12とFAT16の場合には**特定の位置**を占めます（FAT32の場合は他のフォルダと同じ位置を占めます）。各ファイル/フォルダエントリには、次の情報が含まれています。
 
-* Name of the file/folder (8 chars max)
-* Attributes
-* Date of creation
-* Date of modification
-* Date of last access
-* Address of the FAT table where the first cluster of the file starts
-* Size
+* ファイル/フォルダの名前（最大8文字）
+* 属性
+* 作成日時
+* 変更日時
+* 最終アクセス日時
+* ファイルの最初のクラスタが格納されているFATテーブルのアドレス
+* サイズ
 
-When a file is "deleted" using a FAT file system, the directory entry remains almost **unchanged** except for the **first character of the file name** (modified to 0xE5), preserving most of the "deleted" file's name, along with its time stamp, file length and — most importantly — its physical location on the disk. The list of disk clusters occupied by the file will, however, be erased from the File Allocation Table, marking those sectors available for use by other files created or modified thereafter. In the case of FAT32, it is additionally an erased field responsible for the upper 16 bits of the file start cluster value.
+FATファイルシステムを使用してファイルが「削除」されると、ディレクトリエントリはほとんど**変更されません**（ファイル名の最初の文字が0xE5に変更されます）。これにより、「削除」されたファイルの名前のほとんど、タイムスタンプ、ファイルの長さ、そして最も重要なことにディスク上の物理的な場所が保持されます。ただし、その後に作成または変更された他のファイルによって使用されるため、ファイルが占有するディスククラスタのリストはファイル割り当てテーブルから消去されます。FAT32の場合、ファイルの開始クラスタ値の上位16ビットを担当する消去されたフィールドが追加されます。
 
 ### **NTFS**
 
@@ -188,65 +179,63 @@ When a file is "deleted" using a FAT file system, the directory entry remains al
 
 ### EXT
 
-**Ext2** is the most common file system for **not journaling** partitions (**partitions that don't change much**) like the boot partition. **Ext3/4** are **journaling** and are used usually for the **rest partitions**.
+**Ext2**は、ブートパーティションなどの**変更がほとんどない**パーティションに対して最も一般的なジャーナリングされていないファイルシステムです。**Ext3/4**は**ジャーナリング**されており、通常は**その他のパーティション**に使用されます。
 
 {% content-ref url="ext.md" %}
 [ext.md](ext.md)
 {% endcontent-ref %}
 
-## **Metadata**
+## **メタデータ**
 
-Some files contain metadata. This information is about the content of the file which sometimes might be interesting to an analyst as depending on the file type, it might have information like:
+一部のファイルにはメタデータが含まれています。この情報はファイルの内容に関するものであり、ファイルの種類によっては、次のような情報が含まれる場合があります。
 
-* Title
-* MS Office Version used
-* Author
-* Dates of creation and last modification
-* Model of the camera
-* GPS coordinates
-* Image information
+* タイトル
+* 使用されたMS Officeのバージョン
+* 作成日時と最終変更日時
+* カメラのモデル
+* GPS座標
+* 画像情報
 
-You can use tools like [**exiftool**](https://exiftool.org) and [**Metadiver**](https://www.easymetadata.com/metadiver-2/) to get the metadata of a file.
+[**exiftool**](https://exiftool.org)や[**Metadiver**](https://www.easymetadata.com/metadiver-2/)などのツールを使用して、ファイルのメタデータを取得することができます。
 
-## **Deleted Files Recovery**
+## **削除されたファイルの回復**
 
-### Logged Deleted Files
+### 削除されたファイルのログ
 
-As was seen before there are several places where the file is still saved after it was "deleted". This is because usually the deletion of a file from a file system just marks it as deleted but the data isn't touched. Then, it's possible to inspect the registries of the files (like the MFT) and find the deleted files.
+以前に見たように、ファイルが「削除」された後もまだいくつかの場所に保存されています。これは通常、ファイルシステムからのファイルの削除は単に削除されたとマークされるだけで、データは触れられないためです。そのため、ファイルのレジストリ（MFTなど）を調査し、削除されたファイルを見つけることが可能です。
 
-Also, the OS usually saves a lot of information about file system changes and backups, so it's possible to try to use them to recover the file or as much information as possible.
-
-{% content-ref url="file-data-carving-recovery-tools.md" %}
-[file-data-carving-recovery-tools.md](file-data-carving-recovery-tools.md)
-{% endcontent-ref %}
-
-### **File Carving**
-
-**File carving** is a technique that tries to **find files in the bulk of data**. There are 3 main ways tools like this work: **Based on file types headers and footers**, based on file types **structures** and based on the **content** itself.
-
-Note that this technique **doesn't work to retrieve fragmented files**. If a file **isn't stored in contiguous sectors**, then this technique won't be able to find it or at least part of it.
-
-There are several tools that you can use for file Carving indicating the file types you want to search for
+また、OSは通常、ファイルシステムの変更やバックアップに関する多くの情報を保存するため、ファイルまたは可能な限り多くの情報を回復するためにそれらを使用することができます。
 
 {% content-ref url="file-data-carving-recovery-tools.md" %}
 [file-data-carving-recovery-tools.md](file-data-carving-recovery-tools.md)
 {% endcontent-ref %}
 
-### Data Stream **C**arving
+### **ファイルカービング**
 
-Data Stream Carving is similar to File Carving but **instead of looking for complete files, it looks for interesting fragments** of information.\
-For example, instead of looking for a complete file containing logged URLs, this technique will search for URLs.
+**ファイルカービング**は、データの一括からファイルを見つけようとする技術です。このようなツールが動作する方法は、**ファイルタイプのヘッダとフッタ**に基づく方法、ファイルタイプの**構造**に基づく方法、および**コンテンツ**自体に基づく方法の3つがあります。
+
+この技術は、**断片化されたファイルを回復するためには機能しません**。ファイルが**連続したセクタに保存されていない**場合、この技術ではそれを見つけることができないか、少なくとも一部を見つけることができません。
+
+ファイルカービングには、検索したいファイルタイプを指定して使用できるいくつかのツールがあります。
 
 {% content-ref url="file-data-carving-recovery-tools.md" %}
 [file-data-carving-recovery-tools.md](file-data-carving-recovery-tools.md)
 {% endcontent-ref %}
 
-### Secure Deletion
+### データストリーム**カービング**
 
-Obviously, there are ways to **"securely" delete files and part of logs about them**. For example, it's possible to **overwrite the content** of a file with junk data several times, and then **remove** the **logs** from the **$MFT** and **$LOGFILE** about the file, and **remove the Volume Shadow Copies**.\
-You may notice that even performing that action there might be **other parts where the existence of the file is still logged**, and that's true and part of the forensics professional job is to find them.
+データストリームカービングは、ファイルカービングと似ていますが、**完全なファイルではなく興味深い断片**の情報を探します。\
+たとえば、ログに記録されたURLを含む完全なファイルを探すのではなく、この技術ではURLを検索します。
 
-## References
+{% content-ref url="file-data-carving-recovery-tools.md" %}
+[file-data-carving-recovery-tools.md](file-data-carving-recovery-tools.md)
+{% endcontent-ref %}
+
+### 安全な削除
+
+明らかに、ファイルを「安全に」削除し、それに関する一部のログを削除する方法があります。たとえば、ファイルの内容を複数回ジャンクデータで上書きし、その後、ファイルに関する**$MFT**と**$LOGFILE**のログを**削除**し、**ボリュームシャドウコピー**を削除することができます。\
+この操作を実行しても、ファイルの存在がまだログに記録されている他の部分があるかもしれないことに注意してください。これは、フォレンジックの専門家の仕事の一部です。
+## 参考文献
 
 * [https://en.wikipedia.org/wiki/GUID\_Partition\_Table](https://en.wikipedia.org/wiki/GUID\_Partition\_Table)
 * [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)
@@ -258,10 +247,10 @@ You may notice that even performing that action there might be **other parts whe
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？または、**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

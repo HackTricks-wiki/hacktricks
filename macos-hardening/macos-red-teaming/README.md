@@ -4,81 +4,81 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* サイバーセキュリティ会社で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、PEASSの最新バージョンにアクセスしたいですか、またはHackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* ハッキングのトリックを共有するために、PRを提出してください[**hacktricks repo**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)。
 
 </details>
 
-## Abusing MDMs
+## MDMの乱用
 
 * JAMF Pro: `jamf checkJSSConnection`
 * Kandji
 
-If you manage to **compromise admin credentials** to access the management platform, you can **potentially compromise all the computers** by distributing your malware in the machines.
+管理プラットフォームにアクセスするために**管理者の資格情報を侵害**することができれば、マシンにマルウェアを配布することで、**すべてのコンピュータを潜在的に侵害**することができます。
 
-For red teaming in MacOS environments it's highly recommended to have some understanding of how the MDMs work:
+MacOS環境でのレッドチーミングには、MDMの動作原理についての理解が非常に重要です：
 
 {% content-ref url="macos-mdm/" %}
 [macos-mdm](macos-mdm/)
 {% endcontent-ref %}
 
-### Using MDM as a C2
+### MDMをC2として乱用する
 
-A MDM will have permission to install, query or remove profiles, install applications, create local admin accounts, set firmware password, change the FileVault key...
+MDMは、プロファイルのインストール、クエリ、削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更などの権限を持っています。
 
-In order to run your own MDM you need to **your CSR signed by a vendor** which you could try to get with [**https://mdmcert.download/**](https://mdmcert.download/). And to run your own MDM for Apple devices you could use [**MicroMDM**](https://github.com/micromdm/micromdm).
+独自のMDMを実行するには、[**https://mdmcert.download/**](https://mdmcert.download/)で取得しようとすることができる**ベンダーによって署名されたCSR**が必要です。また、Appleデバイス用の独自のMDMを実行するには、[**MicroMDM**](https://github.com/micromdm/micromdm)を使用することができます。
 
-However, to install an application in an enrolled device, you still need it to be signed by a developer account... however, upon MDM enrolment the **device adds the SSL cert of the MDM as a trusted CA**, so you can now sign anything.
+ただし、登録されたデバイスにアプリケーションをインストールするには、開発者アカウントによって署名されている必要があります...ただし、MDMの登録時に**デバイスはMDMのSSL証明書を信頼できるCAとして追加**するため、今では何でも署名できます。
 
-To enrol the device in a MDM you. need to install a **`mobileconfig`** file as root, which could be delivered via a **pkg** file (you could compress it in zip and when downloaded from safari it will be decompressed).
+デバイスをMDMに登録するには、ルートとして**`mobileconfig`**ファイルをインストールする必要があります。これは**pkg**ファイルを介して配信することができます（zipで圧縮し、Safariからダウンロードすると解凍されます）。
 
-**Mythic agent Orthrus** uses this technique.
+**MythicエージェントOrthrus**は、この技術を使用しています。
 
-### Abusing JAMF PRO
+### JAMF PROの乱用
 
-JAMF can run **custom scripts** (scripts developed by the sysadmin), **native payloads** (local account creation, set EFI password, file/process monitoring...) and **MDM** (device configurations, device certificates...).
+JAMFは、**カスタムスクリプト**（システム管理者によって開発されたスクリプト）、**ネイティブペイロード**（ローカルアカウントの作成、EFIパスワードの設定、ファイル/プロセスの監視...）、**MDM**（デバイスの設定、デバイス証明書...）を実行できます。
 
-#### JAMF self-enrolment
+#### JAMFの自己登録
 
-Go to a page such as `https://<company-name>.jamfcloud.com/enroll/` to see if they have **self-enrolment enabled**. If they have it might **ask for credentials to access**.
+`https://<company-name>.jamfcloud.com/enroll/`のようなページにアクセスして、**自己登録が有効になっているかどうか**を確認します。有効な場合、**資格情報を要求**する場合があります。
 
-You could use the script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) to perform a password spraying attack.
+[**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py)スクリプトを使用してパスワードスプレー攻撃を実行できます。
 
-Moreover, after finding proper credentials you could be able to brute-force other usernames with the next form:
+さらに、適切な資格情報を見つけた後、次のフォームで他のユーザー名をブルートフォース攻撃することができます：
 
 ![](<../../.gitbook/assets/image (7).png>)
 
-#### JAMF device Authentication
+#### JAMFデバイス認証
 
 <figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
-The **`jamf`** binary contained the secret to open the keychain which at the time of the discovery was **shared** among everybody and it was: **`jk23ucnq91jfu9aj`**.\
-Moreover, jamf **persist** as a **LaunchDaemon** in **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
+**`jamf`**バイナリには、キーチェーンを開くための秘密が含まれており、発見当時は**誰でも共有**されていました。秘密は**`jk23ucnq91jfu9aj`**でした。\
+さらに、jamfは**LaunchDaemon**として**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に永続化されます。
 
-#### JAMF Device Takeover
+#### JAMFデバイスの乗っ取り
 
-The **JSS** (Jamf Software Server) **URL** that **`jamf`** will use is located in **`/Library/Preferences/com.jamfsoftware.jamf.plist`**. \
-This file basically contains the URL:
+**`jamf`**が使用する**JSS**（Jamf Software Server）**URL**は、**`/Library/Preferences/com.jamfsoftware.jamf.plist`**にあります。\
+このファイルには基本的にURLが含まれています：
 
 {% code overflow="wrap" %}
 ```bash
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 
 [...]
-	<key>is_virtual_machine</key>
-	<false/>
-	<key>jss_url</key>
-	<string>https://halbornasd.jamfcloud.com/</string>
-	<key>last_management_framework_change_id</key>
-	<integer>4</integer>
+<key>is_virtual_machine</key>
+<false/>
+<key>jss_url</key>
+<string>https://halbornasd.jamfcloud.com/</string>
+<key>last_management_framework_change_id</key>
+<integer>4</integer>
 [...]
 ```
 {% endcode %}
 
-So, an attacker could drop a malicious package (`pkg`) that **overwrites this file** when installed setting the **URL to a Mythic C2 listener from a Typhon agent** to now be able to abuse JAMF as C2.
+したがって、攻撃者は、このファイルを上書きする悪意のあるパッケージ（`pkg`）をインストールすることで、**URLをTyphonエージェントのMythic C2リスナーに設定**し、JAMFをC2として悪用することができます。
 
 {% code overflow="wrap" %}
 ```bash
@@ -89,28 +89,28 @@ sudo jamf policy -id 0
 ```
 {% endcode %}
 
-#### JAMF Impersonation
+#### JAMFのなりすまし
 
-In order to **impersonate the communication** between a device and JMF you need:
+デバイスとJMFの間の通信を**なりすます**ためには、以下が必要です：
 
-* The **UUID** of the device: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-* The **JAMF keychain** from: `/Library/Application\ Support/Jamf/JAMF.keychain` which contains the device certificate
+* デバイスの**UUID**：`ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
+* デバイス証明書を含む**JAMFキーチェーン**：`/Library/Application\ Support/Jamf/JAMF.keychain`
 
-With this information, **create a VM** with the **stolen** Hardware **UUID** and with **SIP disabled**, drop the **JAMF keychain,** **hook** the Jamf **agent** and steal its information.
+この情報を使用して、**盗まれた**ハードウェア**UUID**と**SIPが無効化された**JAMFキーチェーンを持つVMを作成し、Jamf**エージェント**を**フック**して情報を盗みます。
 
-#### Secrets stealing
+#### 秘密の盗み出し
 
 <figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-You could also monitor the location `/Library/Application Support/Jamf/tmp/` for the **custom scripts** admins might want to execute via Jamf as they are **placed here, executed and removed**. These scripts **might contain credentials**.
+また、Jamfを介して実行したい**カスタムスクリプト**を管理者が配置し、実行して削除するために、`/Library/Application Support/Jamf/tmp/`の場所を監視することもできます。これらのスクリプトには**資格情報**が含まれる可能性があります。
 
-However, **credentials** might be passed tho these scripts as **parameters**, so you would need to monitor `ps aux | grep -i jamf` (without even being root).
+ただし、これらのスクリプトには**パラメータ**として資格情報が渡される場合があるため、`ps aux | grep -i jamf`を監視する必要があります（rootでなくても可能です）。
 
-The script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) can listen for new files being added and new process arguments.
+スクリプト[**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py)は、新しいファイルの追加と新しいプロセス引数のリッスンを行うことができます。
 
-### macOS Remote Access
+### macOSリモートアクセス
 
-And also about **MacOS** "special" **network** **protocols**:
+また、**MacOS**の「特別な」**ネットワーク****プロトコル**についても説明します：
 
 {% content-ref url="../macos-security-and-privilege-escalation/macos-protocols.md" %}
 [macos-protocols.md](../macos-security-and-privilege-escalation/macos-protocols.md)
@@ -118,7 +118,7 @@ And also about **MacOS** "special" **network** **protocols**:
 
 ## Active Directory
 
-In some occasions you will find that the **MacOS computer is connected to an AD**. In this scenario you should try to **enumerate** the active directory as you are use to it. Find some **help** in the following pages:
+一部の場合、**MacOSコンピュータがADに接続されている**ことがわかるでしょう。このシナリオでは、通常どおりにActive Directoryを列挙してみることをお勧めします。以下のページで**ヘルプ**を見つけることができます：
 
 {% content-ref url="../../network-services-pentesting/pentesting-ldap.md" %}
 [pentesting-ldap.md](../../network-services-pentesting/pentesting-ldap.md)
@@ -132,41 +132,36 @@ In some occasions you will find that the **MacOS computer is connected to an AD*
 [pentesting-kerberos-88](../../network-services-pentesting/pentesting-kerberos-88/)
 {% endcontent-ref %}
 
-Some **local MacOS tool** that may also help you is `dscl`:
-
+また、あなたに役立つかもしれない**ローカルのMacOSツール**には、`dscl`があります：
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
+また、MacOS用にいくつかのツールが用意されており、ADの自動列挙とKerberosの操作が可能です：
 
-Also there are some tools prepared for MacOS to automatically enumerate the AD and play with kerberos:
+* [**Machound**](https://github.com/XMCyber/MacHound)：MacHoundは、Bloodhound監査ツールの拡張であり、MacOSホスト上でActive Directoryの関係を収集および取り込むことができます。
+* [**Bifrost**](https://github.com/its-a-feature/bifrost)：Bifrostは、Objective-Cプロジェクトであり、macOS上のHeimdal krb5 APIとの対話を目的としています。このプロジェクトの目標は、ネイティブAPIを使用してmacOSデバイス上のKerberosのセキュリティテストをより容易に行うことであり、対象となる環境に他のフレームワークやパッケージを必要としません。
+* [**Orchard**](https://github.com/its-a-feature/Orchard)：Active Directoryの列挙を行うためのJavaScript for Automation（JXA）ツールです。
 
-* [**Machound**](https://github.com/XMCyber/MacHound): MacHound is an extension to the Bloodhound audting tool allowing collecting and ingesting of Active Directory relationships on MacOS hosts.
-* [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost is an Objective-C project designed to interact with the Heimdal krb5 APIs on macOS. The goal of the project is to enable better security testing around Kerberos on macOS devices using native APIs without requiring any other framework or packages on the target.
-* [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) tool to do Active Directory enumeration.
-
-### Domain Information
-
+### ドメイン情報
 ```bash
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
+### ユーザー
 
-### Users
+MacOSのユーザーには3つのタイプがあります：
 
-The three types of MacOS users are:
+* **ローカルユーザー** - ローカルのOpenDirectoryサービスで管理されており、Active Directoryとは何の関係もありません。
+* **ネットワークユーザー** - 一時的なActive Directoryユーザーで、認証するためにDCサーバーへの接続が必要です。
+* **モバイルユーザー** - ローカルのバックアップを持つActive Directoryユーザーで、資格情報とファイルが保存されています。
 
-* **Local Users** — Managed by the local OpenDirectory service, they aren’t connected in any way to the Active Directory.
-* **Network Users** — Volatile Active Directory users who require a connection to the DC server to authenticate.
-* **Mobile Users** — Active Directory users with a local backup for their credentials and files.
+ユーザーとグループに関するローカル情報は、フォルダー_/var/db/dslocal/nodes/Default_に保存されています。\
+例えば、ユーザー名が_mark_の情報は_/var/db/dslocal/nodes/Default/users/mark.plist_に保存され、グループ名が_admin_の情報は_/var/db/dslocal/nodes/Default/groups/admin.plist_に保存されています。
 
-The local information about users and groups is stored in in the folder _/var/db/dslocal/nodes/Default._\
-For example, the info about user called _mark_ is stored in _/var/db/dslocal/nodes/Default/users/mark.plist_ and the info about the group _admin_ is in _/var/db/dslocal/nodes/Default/groups/admin.plist_.
+MacHoundは、HasSessionとAdminToのエッジに加えて、Bloodhoundデータベースに以下の3つの新しいエッジを追加します：
 
-In addition to using the HasSession and AdminTo edges, **MacHound adds three new edges** to the Bloodhound database:
-
-* **CanSSH** - entity allowed to SSH to host
-* **CanVNC** - entity allowed to VNC to host
-* **CanAE** - entity allowed to execute AppleEvent scripts on host
-
+* **CanSSH** - ホストへのSSHが許可されているエンティティ
+* **CanVNC** - ホストへのVNCが許可されているエンティティ
+* **CanAE** - ホストでAppleEventスクリプトを実行できるエンティティ
 ```bash
 #User enumeration
 dscl . ls /Users
@@ -188,32 +183,31 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 #Domain Information
 dsconfigad -show
 ```
+詳細は[https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)を参照してください。
 
-More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
+## キーチェーンへのアクセス
 
-## Accessing the Keychain
-
-The Keychain highly probably contains sensitive information that if accessed withuot generating a prompt could help to move forward a red team exercise:
+キーチェーンには、プロンプトを生成せずにアクセスできる場合に、赤チームの演習を進めるのに役立つ可能性のある機密情報が含まれています。
 
 {% content-ref url="macos-keychain.md" %}
 [macos-keychain.md](macos-keychain.md)
 {% endcontent-ref %}
 
-## External Services
+## 外部サービス
 
-MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** (like github, aws...) via OneLogin:
+MacOS Red Teamingは通常のWindows Red Teamingとは異なり、通常**MacOSは直接複数の外部プラットフォームと統合**されています。MacOSの一般的な設定は、**OneLoginの同期された資格情報を使用してコンピュータにアクセスし、OneLoginを介して複数の外部サービス**(github、awsなど)にアクセスすることです。
 
 ![](<../../.gitbook/assets/image (563).png>)
 
-## Misc Red Team techniques
+## その他のRed Teamテクニック
 
 ### Safari
 
-When a file is downloaded in Safari, if its a "safe" file, it will be **automatically opened**. So for example, if you **download a zip**, it will be automatically decompressed:
+Safariでファイルをダウンロードすると、それが「安全な」ファイルであれば、**自動的に開かれます**。例えば、**zipファイルをダウンロード**すると、自動的に展開されます。
 
 <figure><img src="../../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## 参考文献
 
 * [**https://www.youtube.com/watch?v=IiMladUbL6E**](https://www.youtube.com/watch?v=IiMladUbL6E)
 * [**https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6**](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
@@ -225,10 +219,10 @@ When a file is downloaded in Safari, if its a "safe" file, it will be **automati
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[NFT](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

@@ -1,83 +1,77 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したい**ですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
 
 
-# Basic Information
+# 基本情報
 
-Logstash  is used for collecting, transforming and outputting logs. This is realized by using **pipelines**, which contain input, filter and output modules. The service gets interesting when having compromised a machine which is running Logstash as a service.
+Logstashはログの収集、変換、出力に使用されます。これは、入力、フィルタ、出力モジュールを含む**パイプライン**を使用して実現されます。Logstashをサービスとして実行しているマシンを侵害した場合、このサービスは興味深くなります。
 
-## Pipelines
+## パイプライン
 
-The pipeline configuration file **/etc/logstash/pipelines.yml** specifies the locations of active pipelines:
-
+パイプラインの設定ファイルである**/etc/logstash/pipelines.yml**は、アクティブなパイプラインの場所を指定します：
 ```bash
 # This file is where you define your pipelines. You can define multiple.
 # For more information on multiple pipelines, see the documentation:
 # https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
 
 - pipeline.id: main
-  path.config: "/etc/logstash/conf.d/*.conf"
+path.config: "/etc/logstash/conf.d/*.conf"
 - pipeline.id: example
-  path.config: "/usr/share/logstash/pipeline/1*.conf"
-  pipeline.workers: 6
+path.config: "/usr/share/logstash/pipeline/1*.conf"
+pipeline.workers: 6
 ```
+ここでは、設定されたパイプラインを含む**.conf**ファイルのパスを見つけることができます。**Elasticsearch出力モジュール**が使用されている場合、**パイプライン**にはElasticsearchインスタンスの有効な**資格情報**が含まれる可能性があります。これらの資格情報は、LogstashがElasticsearchにデータを書き込む必要があるため、通常はより高い特権を持っています。ワイルドカードが使用されている場合、Logstashはワイルドカードに一致するそのフォルダにあるすべてのパイプラインを実行しようとします。
 
-In here you can find the paths to the **.conf** files, which contain the configured pipelines. If the **Elasticsearch output module** is used, **pipelines** are likely to **contain** valid **credentials** for an Elasticsearch instance. Those credentials have often more privileges, since Logstash has to write data to Elasticsearch. If wildcards are used, Logstash tries to run all pipelines located in that folder matching the wildcard.
+## 書き込み可能なパイプラインによる特権昇格
 
-## Privesc with writable pipelines
+自分の特権を昇格させる前に、logstashサービスを実行しているユーザーを確認する必要があります。なぜなら、それがあなたが後で所有するユーザーになるからです。デフォルトでは、logstashサービスは**logstash**ユーザーの特権で実行されます。
 
-Before trying to elevate your own privileges you should check which user is running the logstash service, since this will be the user, you will be owning afterwards. Per default the logstash service runs with the privileges of the **logstash** user.
+次のいずれかの権限を持っているかどうかを確認してください：
 
-Check whether you have **one** of the required rights:
+* パイプラインの**.conf**ファイルに**書き込み権限**があるか、
+* **/etc/logstash/pipelines.yml**にワイルドカードが含まれており、指定されたフォルダに書き込みが許可されているか
 
-* You have **write permissions** on a pipeline **.conf** file **or**
-* **/etc/logstash/pipelines.yml** contains a wildcard and you are allowed to write into the specified folder
+さらに、次のいずれかの要件を満たす必要があります：
 
-Further **one** of the requirements must be met:
+* logstashサービスを再起動できるか、
+* **/etc/logstash/logstash.yml**にエントリ**config.reload.automatic: true**が含まれているか
 
-* You are able to restart the logstash service **or**
-* **/etc/logstash/logstash.yml** contains the entry **config.reload.automatic: true**
-
-If a wildcard is specified, try to create a file matching that wildcard. Following content can be written into the file to execute commands:
-
+ワイルドカードが指定されている場合は、そのワイルドカードに一致するファイルを作成してみてください。以下の内容をファイルに書き込むと、コマンドを実行できます：
 ```bash
 input {
-  exec {
-    command => "whoami"
-    interval => 120
-  }
+exec {
+command => "whoami"
+interval => 120
+}
 }
 
 output {
-  file {
-    path => "/tmp/output.log"
-    codec => rubydebug
-  }
+file {
+path => "/tmp/output.log"
+codec => rubydebug
+}
 }
 ```
+**interval**は秒単位の時間を指定します。この例では、**whoami**コマンドが120秒ごとに実行されます。コマンドの出力は**/tmp/output.log**に保存されます。
 
-The **interval** specifies the time in seconds. In this example the **whoami** command is executed every 120 seconds. The output of the command is saved into **/tmp/output.log**.
+**/etc/logstash/logstash.yml**にエントリ**config.reload.automatic: true**が含まれている場合、コマンドが実行されるまで待つだけで十分です。Logstashは自動的に新しいパイプライン構成ファイルや既存のパイプライン構成の変更を認識します。それ以外の場合は、logstashサービスを再起動してください。
 
-If **/etc/logstash/logstash.yml** contains the entry **config.reload.automatic: true** you only have to wait until the command gets executed, since Logstash will automatically recognize new pipeline configuration files or any changes in existing pipeline configurations. Otherwise trigger a restart of the logstash service.
+ワイルドカードを使用しない場合、既存のパイプライン構成にこれらの変更を適用することができます。**何かを壊さないように注意してください！**
 
-If no wildcard is used, you can apply those changes to an existing pipeline configuration. **Make sure you do not break things!**
-
-# References
+# 参考文献
 
 * [https://insinuator.net/2021/01/pentesting-the-elk-stack/](https://insinuator.net/2021/01/pentesting-the-elk-stack/)
 
@@ -86,16 +80,14 @@ If no wildcard is used, you can apply those changes to an existing pipeline conf
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出**してください。
 
 </details>
-
-

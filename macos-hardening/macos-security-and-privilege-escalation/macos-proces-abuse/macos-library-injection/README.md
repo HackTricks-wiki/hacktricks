@@ -1,105 +1,96 @@
-# macOS Library Injection
+# macOSライブラリインジェクション
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有する**ために、PRを提出して[**hacktricks repo**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)に参加してください。
 
 </details>
 
 {% hint style="danger" %}
-The code of **dyld is open source** and can be found in [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) and cab be downloaded a tar using a **URL such as** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+**dyldのコードはオープンソース**であり、[https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/)で見つけることができ、**URL**を使用してtarをダウンロードすることができます。例：[https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 {% endhint %}
 
 ## **DYLD\_INSERT\_LIBRARIES**
 
-> This is a colon separated **list of dynamic libraries** to l**oad before the ones specified in the program**. This lets you test new modules of existing dynamic shared libraries that are used in flat-namespace images by loading a temporary dynamic shared library with just the new modules. Note that this has no effect on images built a two-level namespace images using a dynamic shared library unless DYLD\_FORCE\_FLAT\_NAMESPACE is also used.
+> これは、プログラムで指定されたライブラリの前に**ロードする動的ライブラリのリスト**です。これにより、新しいモジュールのみを含む一時的な動的共有ライブラリをロードすることで、フラットネームスペースイメージで使用される既存の動的共有ライブラリの新しいモジュールをテストすることができます。ただし、これは、DYLD\_FORCE\_FLAT\_NAMESPACEも使用されていない限り、2レベルの名前空間イメージを使用してビルドされたイメージには影響しません。
 
-This is like the [**LD\_PRELOAD on Linux**](../../../../linux-hardening/privilege-escalation#ld\_preload).
+これは、[**LinuxのLD\_PRELOAD**](../../../../linux-hardening/privilege-escalation#ld\_preload)のようなものです。
 
-This technique may be also **used as an ASEP technique** as every application installed has a plist called "Info.plist" that allows for the **assigning of environmental variables** using a key called `LSEnvironmental`.
+このテクニックは、ASEPテクニックとしても使用できます。インストールされているすべてのアプリケーションには、`LSEnvironmental`というキーを使用して環境変数を割り当てることができる「Info.plist」というplistがあります。
 
 {% hint style="info" %}
-Since 2012 **Apple has drastically reduced the power** of the **`DYLD_INSERT_LIBRARIES`**.
+2012年以降、**Appleは`DYLD_INSERT_LIBRARIES`の権限を大幅に制限**しています。
 
-Go to the code and **check `src/dyld.cpp`**. In the function **`pruneEnvironmentVariables`** you can see that **`DYLD_*`** variables are removed.
+コードに移動し、**`src/dyld.cpp`**を確認してください。関数**`pruneEnvironmentVariables`**では、**`DYLD_*`**変数が削除されていることがわかります。
 
-In the function **`processRestricted`** the reason of the restriction is set. Checking that code you can see that the reasons are:
+関数**`processRestricted`**では、制限の理由が設定されています。そのコードをチェックすると、理由は次のとおりです。
 
-* The binary is `setuid/setgid`
-* Existence of `__RESTRICT/__restrict` section in the macho binary.
-* The software has entitlements (hardened runtime) without [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables) entitlement or [`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation).
-  * Check **entitlements** of a binary with: `codesign -dv --entitlements :- </path/to/bin>`
-* If the lib is signed with a different certificate as the binary
-  * If the lib & the bin are signed with the same cert, this will bypass the previous restrictions
-* Programs with the entitlements **`system.install.apple-software`** and **`system.install.apple-software.standar-user`** can **install software** signed by Apple without asking the user for a password (privesc)
+* バイナリが`setuid/setgid`である
+* machoバイナリに`__RESTRICT/__restrict`セクションが存在する
+* ソフトウェアには、[`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_allow-dyld-environment-variables)エンタイトルメントまたは[`com.apple.security.cs.disable-library-validation`](https://developer.apple.com/documentation/bundleresources/entitlements/com\_apple\_security\_cs\_disable-library-validation)のエンタイトルメントがあります。
+* バイナリのエンタイトルメントを次のコマンドで確認します：`codesign -dv --entitlements :- </path/to/bin>`
+* ライブラリがバイナリと異なる証明書で署名されている場合
+* ライブラリとバイナリが同じ証明書で署名されている場合、これにより前の制限がバイパスされます
+* エンタイトルメント**`system.install.apple-software`**および**`system.install.apple-software.standar-user`**を持つプログラムは、ユーザーにパスワードを求めずにAppleによって署名されたソフトウェアを**インストール**できます（特権昇格）
 
-In more updated versions you can find this logic at the second part of the function **`configureProcessRestrictions`.** However, what is executed in newer versions is the **beginning checks of the function** (you can remove the ifs related to iOS or simulation as those won't be used in macOS.
+より新しいバージョンでは、このロジックは関数**`configureProcessRestrictions`**の後半にあります。ただし、新しいバージョンでは、関数の**最初のチェックが実行**されます（iOSやシミュレーションに関連するif文は使用されないため、それらを削除できます）。
 {% endhint %}
 
-You can check if a binary has **hardenend runtime** with `codesign --display --verbose <bin>` checking the flag runtime in **`CodeDirectory`** like: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
+バイナリに**ハードランタイム**があるかどうかは、`codesign --display --verbose <bin>`で**CodeDirectory**のフラグランタイムをチェックすることで確認できます。例：**`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
 
-Find a example on how to (ab)use this and check the restrictions in:
+これを悪用する方法と制限をチェックする例を次に示します：
 
 {% content-ref url="../../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
 [macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
 {% endcontent-ref %}
 
-## Dylib Hijacking
+## Dylibハイジャッキング
 
 {% hint style="danger" %}
-Remember that **previous restrictions also apply** to perform Dylib hijacking attacks.
+Dylibハイジャッキング攻撃を実行するには、**前述の制限も適用**することを忘れないでください。
 {% endhint %}
 
-As in Windows, in MacOS you can also **hijack dylibs** to make **applications** **execute** **arbitrary** **code**.\
-However, the way **MacOS** applications **load** libraries is **more restricted** than in Windows. This implies that **malware** developers can still use this technique for **stealth**, but the probably to be able to **abuse this to escalate privileges is much lower**.
+Windowsと同様に、MacOSでも**dylibをハイジャック**して、**アプリケーション**で**任意のコードを実行**することができます。ただし、MacOSのアプリケーションがライブラリをロードする方法は、Windowsよりも**制限が多い**です。これは、**マルウェア**開発者がこのテクニックを**ステルス**に使用できる可能性がある一方で、特権昇格に悪用する可能性はずっと低いということを意味します。
 
-First of all, is **more common** to find that **MacOS binaries indicates the full path** to the libraries to load. And second, **MacOS never search** in the folders of the **$PATH** for libraries.
+まず、**MacOSバイナリがライブラリをロードする際には、完全なパスが指定されることが一般的**です。そして、**MacOSは決して$PATHのフォルダを検索しません**。
 
-The **main** part of the **code** related to this functionality is in **`ImageLoader::recursiveLoadLibraries`** in `ImageLoader.cpp`.
-
-However, there are **2 types of dylib hijacking**:
-
-* **Missing weak linked libraries**: This means that the application will try to load a library that doesn't exist configured with **LC\_LOAD\_WEAK\_DYLIB**. Then, **if an attacker places a dylib where it's expected it will be loaded**.
-  * The fact that the link is "weak" means that the application will continue running even if the library isn't found.
-  * The **code related** to this is in the function `ImageLoaderMachO::doGetDependentLibraries` of `ImageLoaderMachO.cpp` where `lib->required` is only `false` when `LC_LOAD_WEAK_DYLIB` is true.
-  * **Find weak liked libraries** in binaries with (you have later an example on how to create hijacking libraries):
-    * ```
-      otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
-      cmdsize 56
-      name /var/tmp/lib/libUtl.1.dylib (offset 24)
-      time stamp 2 Wed Jun 21 12:23:31 1969
-      current version 1.0.0
-      compatibility version 1.0.0
-      ```
-* **Configured with @rpath**: Mach-O binaries can have the commands **`LC_RPATH`** and **`LC_LOAD_DYLIB`**. Base on the **values** of those commands, **libraries** are going to be **loaded** from **different directories**.
-  * **`LC_RPATH`** contains the paths of some folders used to load libraries by the binary.
-  * **`LC_LOAD_DYLIB`** contains the path to specific libraries to load. These paths can contain **`@rpath`**, which will be **replaced** by the values in **`LC_RPATH`**. If there are several paths in **`LC_RPATH`** everyone will be used to search the library to load. Example:
-    * If **`LC_LOAD_DYLIB`** contains `@rpath/library.dylib` and **`LC_RPATH`** contains `/application/app.app/Contents/Framework/v1/` and `/application/app.app/Contents/Framework/v2/`. Both folders are going to be used to load `library.dylib`**.** If the library doesn't exist in `[...]/v1/` and attacker could place it there to hijack the load of the library in `[...]/v2/` as the order of paths in **`LC_LOAD_DYLIB`** is followed.
-  * **Find rpath paths and libraries** in binaries with: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
+この機能に関連する**主なコード**
+otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
+cmdsize 56
+name /var/tmp/lib/libUtl.1.dylib (offset 24)
+time stamp 2 Wed Jun 21 12:23:31 1969
+current version 1.0.0
+compatibility version 1.0.0
+```
+* **`@rpath`**で構成された場合：Mach-Oバイナリには**`LC_RPATH`**と**`LC_LOAD_DYLIB`**のコマンドがあります。これらのコマンドの値に基づいて、ライブラリは**異なるディレクトリ**から**ロード**されます。
+* **`LC_RPATH`**には、バイナリでライブラリをロードするために使用されるいくつかのフォルダのパスが含まれています。
+* **`LC_LOAD_DYLIB`**には、ロードする特定のライブラリのパスが含まれています。これらのパスには**`@rpath`**が含まれる場合、**`LC_RPATH`**の値で置き換えられます。**`LC_RPATH`**に複数のパスがある場合、すべてのパスが使用されてライブラリを検索します。例：
+* **`LC_LOAD_DYLIB`**に`@rpath/library.dylib`が含まれ、**`LC_RPATH`**に`/application/app.app/Contents/Framework/v1/`と`/application/app.app/Contents/Framework/v2/`が含まれている場合、両方のフォルダが`library.dylib`をロードするために使用されます。**`LC_LOAD_DYLIB`**のパスの順序に従って、ライブラリが`[...]/v1/`に存在しない場合、攻撃者はそれを置くことができ、ライブラリのロードを`[...]/v2/`に乗っ取ることができます。
+* バイナリ内の**rpathパスとライブラリ**を次のコマンドで検索します：`otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
 {% hint style="info" %}
-**`@executable_path`**: Is the **path** to the directory containing the **main executable file**.
+**`@executable_path`**：メインの実行可能ファイルが含まれるディレクトリへの**パス**です。
 
-**`@loader_path`**: Is the **path** to the **directory** containing the **Mach-O binary** which contains the load command.
+**`@loader_path`**：ロードコマンドを含む**Mach-Oバイナリ**が含まれる**ディレクトリ**への**パス**です。
 
-* When used in an executable, **`@loader_path`** is effectively the **same** as **`@executable_path`**.
-* When used in a **dylib**, **`@loader_path`** gives the **path** to the **dylib**.
+* 実行可能ファイルで使用される場合、**`@loader_path`**は**`@executable_path`**と**同じ**です。
+* **dylib**で使用される場合、**`@loader_path`**は**dylib**への**パス**を与えます。
 {% endhint %}
 
-The way to **escalate privileges** abusing this functionality would be in the rare case that an **application** being executed **by** **root** is **looking** for some **library in some folder where the attacker has write permissions.**
+この機能を悪用して特権をエスカレーションする方法は、**root**によって実行されている**アプリケーション**が、攻撃者が書き込み権限を持つ**フォルダ**でライブラリを検索している**まれなケース**です。
 
 {% hint style="success" %}
-A nice **scanner** to find **missing libraries** in applications is [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) or a [**CLI version**](https://github.com/pandazheng/DylibHijack).\
-A nice **report with technical details** about this technique can be found [**here**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x).
+アプリケーション内の**欠落しているライブラリ**を見つけるための素晴らしい**スキャナ**は、[**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html)または[**CLIバージョン**](https://github.com/pandazheng/DylibHijack)です。\
+この技術に関する技術的な詳細を含む素晴らしい**レポート**は[**こちら**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x)で見つけることができます。
 {% endhint %}
 
-**Example**
+**例**
 
 {% content-ref url="../../macos-dyld-hijacking-and-dyld_insert_libraries.md" %}
 [macos-dyld-hijacking-and-dyld\_insert\_libraries.md](../../macos-dyld-hijacking-and-dyld\_insert\_libraries.md)
@@ -107,85 +98,81 @@ A nice **report with technical details** about this technique can be found [**he
 
 ### Dlopen Hijacking
 
-From **`man dlopen`**:
+**`man dlopen`**から：
 
-* When path **does not contain a slash character** (i.e. it is just a leaf name), **dlopen() will do searching**. If **`$DYLD_LIBRARY_PATH`** was set at launch, dyld will first **look in that director**y. Next, if the calling mach-o file or the main executable specify an **`LC_RPATH`**, then dyld will **look in those** directories. Next, if the process is **unrestricted**, dyld will search in the **current working directory**. Lastly, for old binaries, dyld will try some fallbacks. If **`$DYLD_FALLBACK_LIBRARY_PATH`** was set at launch, dyld will search in **those directories**, otherwise, dyld will look in **`/usr/local/lib/`** (if the process is unrestricted), and then in **`/usr/lib/`**.
-  1. `$DYLD_LIBRARY_PATH`
-  2. `LC_RPATH`
-  3. `CWD`(if unrestricted)
-  4. `$DYLD_FALLBACK_LIBRARY_PATH`
-  5. `/usr/local/lib/` (if unrestricted)
-  6. `/usr/lib/`
-* When path **looks like a framework** path (e.g. /stuff/foo.framework/foo), if **`$DYLD_FRAMEWORK_PATH`** was set at launch, dyld will first look in that directory for the framework partial path (e.g. foo.framework/foo). Next, dyld will try the **supplied path as-is** (using current working directory for relative paths). Lastly, for old binaries, dyld will try some fallbacks. If **`$DYLD_FALLBACK_FRAMEWORK_PATH`** was set at launch, dyld will search those directories. Otherwise, it will search **`/Library/Frameworks`** (on macOS if process is unrestricted), then **`/System/Library/Frameworks`**.
-  1. `$DYLD_FRAMEWORK_PATH`
-  2. supplied path (using current working directory for relative paths)
-  3. `$DYLD_FALLBACK_FRAMEWORK_PATH`(if unrestricted)
-  4. `/Library/Frameworks` (if unrestricted)
-  5. `/System/Library/Frameworks`
-* When path **contains a slash but is not a framework path** (i.e. a full path or a partial path to a dylib), dlopen() first looks in (if set) in **`$DYLD_LIBRARY_PATH`** (with leaf part from path ). Next, dyld **tries the supplied path** (using current working directory for relative paths (but only for unrestricted processes)). Lastly, for older binaries, dyld will try fallbacks. If **`$DYLD_FALLBACK_LIBRARY_PATH`** was set at launch, dyld will search in those directories, otherwise, dyld will look in **`/usr/local/lib/`** (if the process is unrestricted), and then in **`/usr/lib/`**.
-  1. `$DYLD_LIBRARY_PATH`
-  2. supplied path (using current working directory for relative paths if unrestricted)
-  3. `$DYLD_FALLBACK_LIBRARY_PATH`
-  4. `/usr/local/lib/` (if unrestricted)
-  5. `/usr/lib/`
+* パスに**スラッシュ文字が含まれていない**場合（つまり、単なるリーフ名である場合）、**dlopen()は検索**を行います。**`$DYLD_LIBRARY_PATH`**が起動時に設定されている場合、dyldはまずそのディレクトリを検索します。次に、呼び出し元のmach-oファイルまたはメインの実行可能ファイルが**`LC_RPATH`**を指定している場合、dyldはそれらのディレクトリを検索します。次に、プロセスが**制限されていない**場合、dyldは**現在の作業ディレクトリ**を検索します。最後に、古いバイナリの場合、dyldはいくつかのフォールバックを試みます。**`$DYLD_FALLBACK_LIBRARY_PATH`**が起動時に設定されている場合、dyldはそれらのディレクトリを検索します。それ以外の場合、dyldは**`/usr/local/lib/`**（プロセスが制限されていない場合）を検索し、次に**`/usr/lib/`**を検索します。
+1. `$DYLD_LIBRARY_PATH`
+2. `LC_RPATH`
+3. `CWD`（制限されていない場合）
+4. `$DYLD_FALLBACK_LIBRARY_PATH`
+5. `/usr/local/lib/`（制限されていない場合）
+6. `/usr/lib/`
+* パスが**フレームワークのパスのように見える場合**（例：/stuff/foo.framework/foo）、**`$DYLD_FRAMEWORK_PATH`**が起動時に設定されている場合、dyldはまずそのディレクトリをフレームワークの部分パス（例：foo.framework/foo）のために検索します。次に、dyldは**提供されたパスをそのまま**試します（相対パスの場合は現在の作業ディレクトリを使用）。最後に、古いバイナリの場合、dyldはいくつかのフォールバックを試みます。**`$DYLD_FALLBACK_FRAMEWORK_PATH`**が起動時に設定されている場合、dyldはそれらのディレクトリを検索します。それ以外の場合、dyldは**`/Library/Frameworks`**（macOSの場合、プロセスが制限されていない場合）を検索し、次に**`/System/Library/Frameworks`**を検索します。
+1. `$DYLD_FRAMEWORK_PATH`
+2. 提供されたパス（相対パスの場合は現在の作業ディレクトリを使用）
+3. `$DYLD_FALLBACK_FRAMEWORK_PATH`（制限されていない場合）
+4. `/Library/Frameworks`（制限されていない場合）
+5. `/System/Library/Frameworks`
+* パスに**スラッシュが含まれているがフレームワークのパスではない場合**（つまり、dylibへの完全パスまたは部分パス）、dlopen()は最初に（設定されている場合）**`$DYLD_LIBRARY_PATH`**（パスのリーフ部分を使用）を検索します。次に、dyldは提供されたパスを試します（制限されているプロセスの場合は現在の作業ディレクトリを使用）。最後に、古いバイナリの場合、dyldはいくつかのフォールバックを試みます。**`$DYLD_FALLBACK_LIBRARY_PATH`**が起動時に設定されている場合、dyldはそれらのディレクトリを検索します。それ以外の場合、dyldは**`/usr/local/lib/`**（プロセスが制限されていない場合）を検索し、次に**`/usr/lib/`**を検索します。
+1. `$DYLD_LIBRARY_PATH`
+2. 提供されたパス（制限されているプロセスの場合は現在の作業ディレクトリを使用）
+3. `$DYLD_FALLBACK_LIBRARY_PATH`
+4. `/usr/local/lib/`（制限されていない場合）
+5. `/usr/lib/`
 
-Note: If the main executable is a **set\[ug]id binary or codesigned with entitlements**, then **all environment variables are ignored**, and only a full path can be used.
+注意：メインの実行可能ファイルが**set\[ug]idバイナリであるか、エンタイトルメントで署名されている**場合、**すべての環境変数は無視**され、完全パスのみ使用できます。
 
-**Check paths**
+**パスをチェック**
 
-Lets check all the options with the following code:
-
+次のコードですべてのオプションを
 ```c
 #include <dlfcn.h>
 #include <stdio.h>
 
 int main(void)
 {
-    void* handle;
+void* handle;
 
-    handle = dlopen("just_name_dlopentest.dylib",1);
-    if (!handle) {
-        fprintf(stderr, "Error loading: %s\n", dlerror());
-    }
+handle = dlopen("just_name_dlopentest.dylib",1);
+if (!handle) {
+fprintf(stderr, "Error loading: %s\n", dlerror());
+}
 
-    handle = dlopen("a/framework/rel_framework_dlopentest.dylib",1);
-    if (!handle) {
-        fprintf(stderr, "Error loading: %s\n", dlerror());
-    }
+handle = dlopen("a/framework/rel_framework_dlopentest.dylib",1);
+if (!handle) {
+fprintf(stderr, "Error loading: %s\n", dlerror());
+}
 
-    handle = dlopen("/a/abs/framework/abs_framework_dlopentest.dylib",1);
-    if (!handle) {
-        fprintf(stderr, "Error loading: %s\n", dlerror());
-    }
+handle = dlopen("/a/abs/framework/abs_framework_dlopentest.dylib",1);
+if (!handle) {
+fprintf(stderr, "Error loading: %s\n", dlerror());
+}
 
-    handle = dlopen("a/folder/rel_folder_dlopentest.dylib",1);
-    if (!handle) {
-        fprintf(stderr, "Error loading: %s\n", dlerror());
-    }
+handle = dlopen("a/folder/rel_folder_dlopentest.dylib",1);
+if (!handle) {
+fprintf(stderr, "Error loading: %s\n", dlerror());
+}
 
-    handle = dlopen("/a/abs/folder/abs_folder_dlopentest.dylib",1);
-    if (!handle) {
-        fprintf(stderr, "Error loading: %s\n", dlerror());
-    }
+handle = dlopen("/a/abs/folder/abs_folder_dlopentest.dylib",1);
+if (!handle) {
+fprintf(stderr, "Error loading: %s\n", dlerror());
+}
 
-    return 0;
+return 0;
 }
 ```
-
-If you compile and execute it you can see **where each library was unsuccessfully searched for**. Also, you could **filter the FS logs**:
-
+もしコンパイルして実行すると、**各ライブラリが失敗した場所がわかります**。また、**FSログをフィルタリングすることもできます**。
 ```bash
 sudo fs_usage | grep "dlopentest"
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ会社で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

@@ -1,106 +1,95 @@
-# macOS Auto Start Locations
+# macOSの自動起動場所
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-Here are locations on the system that could lead to the **execution** of a binary **without** **user** **interaction**.
+以下は、ユーザーの操作なしにバイナリが**実行**される可能性のあるシステム上の場所です。
 
 ### Launchd
 
-**`launchd`** is the **first** **process** executed by OX S kernel at startup and the last one to finish at shut down. It should always have the **PID 1**. This process will **read and execute** the configurations indicated in the **ASEP** **plists** in:
+**`launchd`**は、OX Sカーネルによって起動時に最初に実行され、シャットダウン時に最後に終了する**プロセス**です。常に**PID 1**を持つべきです。このプロセスは、以下の場所にある**ASEP** **plists**で指定された設定を**読み取り、実行**します。
 
-* `/Library/LaunchAgents`: Per-user agents installed by the admin
-* `/Library/LaunchDaemons`: System-wide daemons installed by the admin
-* `/System/Library/LaunchAgents`: Per-user agents provided by Apple.
-* `/System/Library/LaunchDaemons`: System-wide daemons provided by Apple.
+* `/Library/LaunchAgents`：管理者によってインストールされたユーザーごとのエージェント
+* `/Library/LaunchDaemons`：管理者によってインストールされたシステム全体のデーモン
+* `/System/Library/LaunchAgents`：Appleが提供するユーザーごとのエージェント
+* `/System/Library/LaunchDaemons`：Appleが提供するシステム全体のデーモン
 
-When a user logs in the plists located in `/Users/$USER/Library/LaunchAgents` and `/Users/$USER/Library/LaunchDemons` are started with the **logged users permissions**.
+ユーザーがログインすると、`/Users/$USER/Library/LaunchAgents`と`/Users/$USER/Library/LaunchDemons`にあるplistsが**ログインしたユーザーの権限**で起動されます。
 
-The **main difference between agents and daemons is that agents are loaded when the user logs in and the daemons are loaded at system startup** (as there are services like ssh that needs to be executed before any user access the system). Also agents may use GUI while daemons need to run in the background.
-
+**エージェントとデーモンの主な違いは、エージェントはユーザーがログインすると読み込まれ、デーモンはシステムの起動時に読み込まれる**ことです（sshなどのサービスは、ユーザーがシステムにアクセスする前に実行する必要があるため）。また、エージェントはGUIを使用する場合がありますが、デーモンはバックグラウンドで実行する必要があります。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN">
 <plist version="1.0">
 <dict>
-    <key>Label</key>
-        <string>com.apple.someidentifier</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/Users/username/malware</string>
-    </array>
-    <key>RunAtLoad</key><true/> <!--Execute at system startup-->
-    <key>StartInterval</key>
-    <integer>800</integer> <!--Execute each 800s-->
-    <key>KeepAlive</key>
-    <dict>
-        <key>SuccessfulExit</key></false> <!--Re-execute if exit unsuccessful-->
-        <!--If previous is true, then re-execute in successful exit-->
-    </dict>
+<key>Label</key>
+<string>com.apple.someidentifier</string>
+<key>ProgramArguments</key>
+<array>
+<string>/Users/username/malware</string>
+</array>
+<key>RunAtLoad</key><true/> <!--Execute at system startup-->
+<key>StartInterval</key>
+<integer>800</integer> <!--Execute each 800s-->
+<key>KeepAlive</key>
+<dict>
+<key>SuccessfulExit</key></false> <!--Re-execute if exit unsuccessful-->
+<!--If previous is true, then re-execute in successful exit-->
+</dict>
 </dict>
 </plist>
 ```
+ユーザーがログインする前に**エージェントを実行する必要がある**場合があります。これらは**PreLoginAgents**と呼ばれます。たとえば、これはログイン時に支援技術を提供するために役立ちます。これらは`/Library/LaunchAgents`にも見つけることができます（[**こちら**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents)に例があります）。
 
-There are cases where an **agent needs to be executed before the user logins**, these are called **PreLoginAgents**. For example, this is useful to provide assistive technology at login. They can be found also in `/Library/LaunchAgents`(see [**here**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) an example).
+\{% hint style="info" %\} 新しいデーモンまたはエージェントの設定ファイルは、**次回の再起動後または** `launchctl load <target.plist>`を使用して**ロードされます**。また、`launchctl -F <file>`を使用して拡張子なしで.plistファイルをロードすることも可能です（ただし、これらのplistファイルは自動的に再起動後にロードされません）。\
+`launchctl unload <target.plist>`を使用して**アンロード**することも可能です（それによって指定されたプロセスは終了します）。
 
-\{% hint style="info" %\} New Daemons or Agents config files will be **loaded after next reboot or using** `launchctl load <target.plist>` It's **also possible to load .plist files without that extension** with `launchctl -F <file>` (however those plist files won't be automatically loaded after reboot).\
-It's also possible to **unload** with `launchctl unload <target.plist>` (the process pointed by it will be terminated),
+エージェントまたはデーモンが**実行されるのを妨げる**（オーバーライドなど）**何もないことを確認する**には、次のコマンドを実行します：`sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist` \{% endhint %\}
 
-To **ensure** that there isn't **anything** (like an override) **preventing** an **Agent** or **Daemon** **from** **running** run: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist` \{% endhint %\}
-
-List all the agents and daemons loaded by the current user:
-
+現在のユーザーによってロードされているすべてのエージェントとデーモンをリストアップします：
 ```bash
 launchctl list
 ```
-
 ### Cron
 
-List the cron jobs of the **current user** with:
-
+以下のコマンドで、**現在のユーザー**のcronジョブをリストします。
 ```bash
 crontab -l
 ```
+ユーザーのすべてのcronジョブは、**`/usr/lib/cron/tabs/`**と**`/var/at/tabs/`**で確認できます（root権限が必要です）。
 
-You can also see all the cron jobs of the users in **`/usr/lib/cron/tabs/`** and **`/var/at/tabs/`** (needs root).
-
-In MacOS several folders executing scripts with **certain frequency** can be found in:
-
+MacOSでは、**特定の頻度**でスクリプトを実行するいくつかのフォルダが見つかります。
 ```bash
 ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
 ```
+以下では、通常のcronジョブ、あまり使用されないatジョブ、および一時ファイルのクリーニングに主に使用される定期ジョブを見つけることができます。たとえば、デイリーの定期ジョブは次のように実行できます：`periodic daily`。
 
-There you can find the regular **cron** **jobs**, the **at** **jobs** (not very used) and the **periodic** **jobs** (mainly used for cleaning temporary files). The daily periodic jobs can be executed for example with: `periodic daily`.
-
-The periodic scripts (**`/etc/periodic`**) are executed because of the **launch daemons** configured in `/System/Library/LaunchDaemons/com.apple.periodic*`. Note that if a script is stored in `/etc/periodic/` as a way to **escalate privilege**s, it will be **executed** as the **owner of the file**.
-
+定期スクリプト（`/etc/periodic`）は、`/System/Library/LaunchDaemons/com.apple.periodic*`に設定されたランチデーモンのために実行されます。スクリプトが特権を昇格させるために`/etc/periodic/`に保存されている場合、それはファイルの所有者として実行されることに注意してください。
 ```bash
 ls -l /System/Library/LaunchDaemons/com.apple.periodic*
 -rw-r--r--  1 root  wheel  887 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-daily.plist
 -rw-r--r--  1 root  wheel  895 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-monthly.plist
 -rw-r--r--  1 root  wheel  891 May 13 00:29 /System/Library/LaunchDaemons/com.apple.periodic-weekly.plist
 ```
-
 ### kext
 
-In order to install a KEXT as a startup item, it needs to be **installed in one of the following locations**:
+KEXTを起動アイテムとしてインストールするためには、次のいずれかの場所に**インストールする必要があります**：
 
 * `/System/Library/Extensions`
-  * KEXT files built into the OS X operating system.
+* OS Xオペレーティングシステムに組み込まれたKEXTファイル。
 * `/Library/Extensions`
-  * KEXT files installed by 3rd party software
+* サードパーティのソフトウェアによってインストールされたKEXTファイル
 
-You can list currently loaded kext files with:
-
+現在ロードされているkextファイルをリストアップするには、次のコマンドを使用します：
 ```bash
 kextstat #List loaded kext
 kextload /path/to/kext.kext #Load a new one based on path
@@ -108,50 +97,40 @@ kextload -b com.apple.driver.ExampleBundle #Load a new one based on path
 kextunload /path/to/kext.kext
 kextunload -b com.apple.driver.ExampleBundle
 ```
+詳細については、[**カーネル拡張に関するこのセクション**](macos-security-and-privilege-escalation/mac-os-architecture#i-o-kit-drivers)を参照してください。
 
-For more information about [**kernel extensions check this section**](macos-security-and-privilege-escalation/mac-os-architecture#i-o-kit-drivers).
+### **ログインアイテム**
 
-### **Login Items**
-
-In System Preferences -> Users & Groups -> **Login Items** you can find **items to be executed when the user logs in**.\
-It it's possible to list them, add and remove from the command line:
-
+システム環境設定 -> ユーザーとグループ -> **ログインアイテム**では、**ユーザーがログインするときに実行されるアイテム**を見つけることができます。\
+これらをリストアップしたり、コマンドラインから追加や削除することが可能です。
 ```bash
 #List all items:
 osascript -e 'tell application "System Events" to get the name of every login item'
 
 #Add an item:
-osascript -e 'tell application "System Events" to make login item at end with properties {path:"/path/to/itemname", hidden:false}' 
+osascript -e 'tell application "System Events" to make login item at end with properties {path:"/path/to/itemname", hidden:false}'
 
 #Remove an item:
-osascript -e 'tell application "System Events" to delete login item "itemname"' 
+osascript -e 'tell application "System Events" to delete login item "itemname"'
 ```
-
-These items are stored in the file /Users/\<username>/Library/Application Support/com.apple.backgroundtaskmanagementagent
+これらのアイテムは、ファイル/Users/<username>/Library/Application Support/com.apple.backgroundtaskmanagementagentに保存されています。
 
 ### At
 
-“At tasks” are used to **schedule tasks at specific times**.\
-These tasks differ from cron in that **they are one time tasks** t**hat get removed after executing**. However, they will **survive a system restart** so they can’t be ruled out as a potential threat.
+「Atタスク」は、**特定の時間にタスクをスケジュールするため**に使用されます。\
+これらのタスクはcronと異なり、**一度だけ実行された後に削除される**一時的なタスクです。ただし、**システムの再起動後も残り続ける**ため、潜在的な脅威として排除することはできません。
 
-By **default** they are **disabled** but the **root** user can **enable** **them** with:
-
+**デフォルトでは**無効化されていますが、**root**ユーザーはこれらを**有効化**することができます。
 ```bash
 sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
 ```
-
-This will create a file at 13:37:
-
+これにより、13:37にファイルが作成されます。
 ```bash
 echo hello > /tmp/hello | at 1337
 ```
+### ログイン/ログアウトフック
 
-If AT tasks aren't enabled the created tasks won't be executed.
-
-### Login/Logout Hooks
-
-They are deprecated but can be used to execute commands when a user logs in.
-
+これらは非推奨ですが、ユーザーがログインする際にコマンドを実行するために使用することができます。
 ```bash
 cat > $HOME/hook.sh << EOF
 #!/bin/bash
@@ -160,51 +139,44 @@ EOF
 chmod +x $HOME/hook.sh
 defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh
 ```
-
-This setting is stored in `/Users/$USER/Library/Preferences/com.apple.loginwindow.plist`
-
+この設定は`/Users/$USER/Library/Preferences/com.apple.loginwindow.plist`に保存されています。
 ```bash
 defaults read /Users/$USER/Library/Preferences/com.apple.loginwindow.plist
 {
-    LoginHook = "/Users/username/hook.sh";
-    MiniBuddyLaunch = 0;
-    TALLogoutReason = "Shut Down";
-    TALLogoutSavesState = 0;
-    oneTimeSSMigrationComplete = 1;
+LoginHook = "/Users/username/hook.sh";
+MiniBuddyLaunch = 0;
+TALLogoutReason = "Shut Down";
+TALLogoutSavesState = 0;
+oneTimeSSMigrationComplete = 1;
 }
 ```
-
-To delete it:
-
+削除するには：
 ```bash
 defaults delete com.apple.loginwindow LoginHook
 ```
+前の例では、**LoginHook**を作成して削除しましたが、**LogoutHook**も作成することができます。
 
-In the previous example we have created and deleted a **LoginHook**, it's also possible to create a **LogoutHook**.
-
-The root user one is stored in `/private/var/root/Library/Preferences/com.apple.loginwindow.plist`
+rootユーザーの場合、それは`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`に保存されます。
 
 ### Emond
 
-Apple introduced a logging mechanism called **emond**. It appears it was never fully developed, and development may have been **abandoned** by Apple for other mechanisms, but it remains **available**.
+Appleは**emond**というログ記録メカニズムを導入しました。これは完全に開発されなかったようで、Appleは他のメカニズムのために**放棄**した可能性がありますが、それは**利用可能**なままです。
 
-This little-known service may **not be much use to a Mac admin**, but to a threat actor one very good reason would be to use it as a **persistence mechanism that most macOS admins probably wouldn't know** to look for. Detecting malicious use of emond shouldn't be difficult, as the System LaunchDaemon for the service looks for scripts to run in only one place:
-
+このあまり知られていないサービスは、Macの管理者にはあまり役に立たないかもしれませんが、脅威の存在する者にとっては、macOSの管理者のほとんどが知らない**永続性メカニズム**として使用する非常に良い理由となるでしょう。 emondの悪用を検出することは難しくありません。なぜなら、サービスのためのSystem LaunchDaemonはスクリプトを実行する場所を1つだけ探しに行くからです：
 ```bash
 ls -l /private/var/db/emondClients
 ```
-
 {% hint style="danger" %}
-**As this isn't used much, anything in that folder should be suspicious**
+**あまり使用されていないため、そのフォルダ内のすべてのものは疑わしいものと見なすべきです**
 {% endhint %}
 
-### Startup Items
+### スタートアップアイテム
 
-\{% hint style="danger" %\} **This is deprecated, so nothing should be found in the following directories.** \{% endhint %\}
+\{% hint style="danger" %\} **これは非推奨ですので、以下のディレクトリには何も見つかるべきではありません。** \{% endhint %\}
 
-A **StartupItem** is a **directory** that gets **placed** in one of these two folders. `/Library/StartupItems/` or `/System/Library/StartupItems/`
+**StartupItem**は、次の2つのフォルダのいずれかに**配置**される**ディレクトリ**です。`/Library/StartupItems/`または`/System/Library/StartupItems/`
 
-After placing a new directory in one of these two locations, **two more items** need to be placed inside that directory. These two items are a **rc script** **and a plist** that holds a few settings. This plist must be called “**StartupParameters.plist**”.
+これらの2つの場所のいずれかに新しいディレクトリを配置した後、そのディレクトリ内に**2つのアイテム**をさらに配置する必要があります。これらの2つのアイテムは、**rcスクリプト**といくつかの設定を保持する**plist**です。このplistは「**StartupParameters.plist**」と呼ばれる必要があります。
 
 {% tabs %}
 {% tab title="StartupParameters.plist" %}
@@ -213,34 +185,32 @@ After placing a new directory in one of these two locations, **two more items** 
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>Description</key>
-        <string>This is a description of this service</string>
-    <key>OrderPreference</key>
-        <string>None</string> <!--Other req services to execute before this -->
-    <key>Provides</key>
-    <array>
-        <string>superservicename</string> <!--Name of the services provided by this file -->
-    </array>
+<key>Description</key>
+<string>This is a description of this service</string>
+<key>OrderPreference</key>
+<string>None</string> <!--Other req services to execute before this -->
+<key>Provides</key>
+<array>
+<string>superservicename</string> <!--Name of the services provided by this file -->
+</array>
 </dict>
 </plist>
 ```
-{% endtab %}
-
-{% tab title="superservicename" %}
+{% tab title="superservicename" %}スーパーサービス名
 ```bash
 #!/bin/sh
 . /etc/rc.common
 
 StartService(){
-    touch /tmp/superservicestarted
+touch /tmp/superservicestarted
 }
 
 StopService(){
-    rm /tmp/superservicestarted
+rm /tmp/superservicestarted
 }
 
 RestartService(){
-    echo "Restarting"
+echo "Restarting"
 }
 
 RunService "$1"
@@ -251,11 +221,10 @@ RunService "$1"
 ### /etc/rc.common
 
 {% hint style="danger" %}
-**This isn't working in modern MacOS versions**
+**これは最新のMacOSバージョンでは機能しません**
 {% endhint %}
 
-It's also possible to place here **commands that will be executed at startup.** Example os regular rc.common script:
-
+ここには**起動時に実行されるコマンドを配置することもできます。**通常のrc.commonスクリプトの例：
 ```bash
 #
 # Common setup for startup scripts.
@@ -295,16 +264,16 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/libexec:/System/Library/CoreServices; ex
 #
 CheckForNetwork()
 {
-    local test
+local test
 
-    if [ -z "${NETWORKUP:=}" ]; then
-	test=$(ifconfig -a inet 2>/dev/null | sed -n -e '/127.0.0.1/d' -e '/0.0.0.0/d' -e '/inet/p' | wc -l)
-	if [ "${test}" -gt 0 ]; then
-	    NETWORKUP="-YES-"
-	else
-	    NETWORKUP="-NO-"
-	fi
-    fi
+if [ -z "${NETWORKUP:=}" ]; then
+test=$(ifconfig -a inet 2>/dev/null | sed -n -e '/127.0.0.1/d' -e '/0.0.0.0/d' -e '/inet/p' | wc -l)
+if [ "${test}" -gt 0 ]; then
+NETWORKUP="-YES-"
+else
+NETWORKUP="-NO-"
+fi
+fi
 }
 
 alias ConsoleMessage=echo
@@ -314,25 +283,25 @@ alias ConsoleMessage=echo
 #
 GetPID ()
 {
-    local program="$1"
-    local pidfile="${PIDFILE:=/var/run/${program}.pid}"
-    local     pid=""
+local program="$1"
+local pidfile="${PIDFILE:=/var/run/${program}.pid}"
+local     pid=""
 
-    if [ -f "${pidfile}" ]; then
-	pid=$(head -1 "${pidfile}")
-	if ! kill -0 "${pid}" 2> /dev/null; then
-	    echo "Bad pid file $pidfile; deleting."
-	    pid=""
-	    rm -f "${pidfile}"
-	fi
-    fi
+if [ -f "${pidfile}" ]; then
+pid=$(head -1 "${pidfile}")
+if ! kill -0 "${pid}" 2> /dev/null; then
+echo "Bad pid file $pidfile; deleting."
+pid=""
+rm -f "${pidfile}"
+fi
+fi
 
-    if [ -n "${pid}" ]; then
-	echo "${pid}"
-	return 0
-    else
-	return 1
-    fi
+if [ -n "${pid}" ]; then
+echo "${pid}"
+return 0
+else
+return 1
+fi
 }
 
 #
@@ -340,26 +309,23 @@ GetPID ()
 #
 RunService ()
 {
-    case $1 in
-      start  ) StartService   ;;
-      stop   ) StopService    ;;
-      restart) RestartService ;;
-      *      ) echo "$0: unknown argument: $1";;
-    esac
+case $1 in
+start  ) StartService   ;;
+stop   ) StopService    ;;
+restart) RestartService ;;
+*      ) echo "$0: unknown argument: $1";;
+esac
 }
 ```
+### プロファイル
 
-### Profiles
+設定プロファイルは、ユーザーに特定のブラウザの設定、DNSプロキシの設定、またはVPNの設定を使用させることができます。その他にも、悪用される可能性のある多くのペイロードが存在します。
 
-Configuration profiles can force a user to use certain browser settings, DNS proxy settings, or VPN settings. Many other payloads are possible which make them ripe for abuse.
-
-You can enumerate them running:
-
+以下のコマンドを実行して、それらを列挙することができます。
 ```bash
 ls -Rl /Library/Managed\ Preferences/
 ```
-
-### Other persistence techniques and tools
+### その他の持続性の技術とツール
 
 * [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
 * [https://github.com/D00MFist/PersistentJXA](https://github.com/D00MFist/PersistentJXA)
@@ -368,10 +334,10 @@ ls -Rl /Library/Managed\ Preferences/
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

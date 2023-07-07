@@ -1,120 +1,99 @@
-# INE Courses and eLearnSecurity Certifications Reviews
+# INEコースとeLearnSecurity認定のレビュー
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
-## eLearnSecurity Mobile Application Penetration Tester (eMAPT) and the respective INE courses
+## eLearnSecurityモバイルアプリケーションペネトレーションテスター（eMAPT）とそれに対応するINEコース
 
-### Course: [**Android & Mobile App Pentesting**](https://my.ine.com/CyberSecurity/courses/cfd5ec2b/android-mobile-app-pentesting)
+### コース：[**Android＆モバイルアプリのペネトレーションテスト**](https://my.ine.com/CyberSecurity/courses/cfd5ec2b/android-mobile-app-pentesting)
 
-This is the course to **prepare for the eMAPT certificate exam**. It will teach you the **basics of Android** as OS, how the **applications works**, the **most sensitive components** of the Android applications, and how to **configure and use** the main **tools** to test the applications. The goal is to **prepare you to be able to pentest Android applications in the real life**.
+これはeMAPTの認定試験の準備をするためのコースです。Androidの基礎、アプリケーションの動作方法、Androidアプリケーションの最も重要なコンポーネント、およびアプリケーションをテストするための主要なツールの設定と使用方法を教えてくれます。目標は、実際の生活でAndroidアプリケーションのペネトレーションテストができるように準備することです。
 
-I found the course to be a great one for **people that don't have any experience pentesting Android** applications. However, **if** you are someone with **experience** in the topic and you have access to the course I also recommend you to **take a look to it**. That **was my case** when I did this course and even having a few years of experience pentesting Android applications **this course taught me some Android basics I didn't know and some new tricks**.
+このコースは、Androidアプリケーションのペネトレーションテストの経験がない人にとっては素晴らしいものです。ただし、トピックに経験があり、コースにアクセスできる場合は、それを見てみることもおすすめです。私がこのコースを受講したときも、数年間のAndroidアプリケーションのペネトレーションテストの経験がありましたが、このコースでは知らなかったAndroidの基礎と新しいトリックを学びました。
 
-Finally, note **two more things** about this course: It has **great labs to practice** what you learn, however, it **doesn't explain every possible vulnerability** you can find in an Android application. Anyway, that's not an issue as **it teach you the basics to be able to understand other Android vulnerabilities**.\
-Besides, once you have completed the course (or before) you can go to the [**Hacktricks Android Applications pentesting section**](../mobile-pentesting/android-app-pentesting/) and learn more tricks.
+最後に、このコースについて2つのことを注意しておきます。学んだことを実践するための素晴らしいラボがありますが、Androidアプリケーションで見つけることができるすべての可能な脆弱性を説明しているわけではありません。それでも、他のAndroidの脆弱性を理解するための基礎を教えてくれるので、問題ありません。\
+また、コースを完了した後（または前）に、[**Hacktricks Androidアプリケーションのペネトレーションテストセクション**](../mobile-pentesting/android-app-pentesting/)に移動して、さらにトリックを学ぶことができます。
 
-### Course: [**iOS & Mobile App Pentesting**](https://my.ine.com/CyberSecurity/courses/089d060b/ios-mobile-app-pentesting)
+### コース：[**iOS＆モバイルアプリのペネトレーションテスト**](https://my.ine.com/CyberSecurity/courses/089d060b/ios-mobile-app-pentesting)
 
-When I performed this course I didn't have much experience with iOS applications, and I found this **course to be a great resource to get me started quickly in the topic, so if you have the chance to perform the course don't miss the opportunity.** As the previous course, this course will teach you the **basics of iOS**, how the **iOS** **applications works**, the **most sensitive components** of the applications, and how to **configure and use** the main **tools** to test the applications.\
-However, there is a very important difference with the Android course, if you want to follow the labs, I would recommend you to **get a jailbroken iOS or pay for some good iOS emulator.**
+私がこのコースを受講したときは、iOSアプリケーションにあまり経験がなかったため、このコースは私が迅速にトピックに入るための素晴らしいリソースであると感じました。したがって、コースを受講する機会がある場合は、逃さないでください。前のコースと同様に、このコースではiOSの基礎、iOSアプリケーションの動作方法、アプリケーションの最も重要なコンポーネント、およびアプリケーションをテストするための主要なツールの設定と使用方法を教えてくれます。\
+ただし、Androidのコースとは非常に重要な違いがあります。ラボに従う場合は、**ジェイルブレイクされたiOSを入手するか、良いiOSエミュレータを購入することをお勧めします。**
 
-As in the previous course, this course has some very useful labs to practice what you learn, but it doesn't explain every possible vulnerability of iOS applications. However, that's not an issue as **it teach you the basics to be able to understand other iOS vulnerabilities**.\
-Besides, once you have completed the course (or before) you can go to the [**Hacktricks iOS Applications pentesting section**](../mobile-pentesting/ios-pentesting/) and learn more tricks.
-
+前のコースと同様に、このコースには学んだことを実践するための非常に役立つラボがありますが、iOSアプリケーションのすべての可能な脆弱性を説明しているわけではありません。ただし、他のiOSの脆弱性を理解するための基礎を教えてくれるので、問題ありません。\
+また、コースを完了した後（または前）に、[**Hacktricks iOSアプリケーションのペネトレーションテストセクション**](../mobile-pentesting/ios-pentesting/)に移動して、さらにトリックを学ぶことができます。
 
 ### [eMAPT](https://elearnsecurity.com/product/emapt-certification/)
 
-> The eLearnSecurity Mobile Application Penetration Tester (eMAPT) certification is issued to cyber security experts that display advanced mobile application security knowledge through a scenario-based exam.
+> eLearnSecurity Mobile Application Penetration Tester（eMAPT）認定は、シナリオベースの試験を通じて高度なモバイルアプリケーションセキュリティの知識を示すサイバーセキュリティの専門家に発行されます。
 
-The goal of this certificate is to **show** that you are capable of performing common **mobile applications pentests**.
+この認定の目標は、一般的なモバイルアプリケーションのペネトレーションテストを実行できる能力を示すことです。
 
-During the exam you are **given 2 vulnerable Android applications** and you need to **create** an A**ndroid** **application** that **exploits** the vulnerabilities automatically. In order to **pass the exam**, you need to **send** the **exploit** **application** (the apk and the code) and it must **exploit** the **other** **apps** **vulnerabilities**.
+試験では、**2つの脆弱なAndroidアプリケーション**が提供され、これらのアプリケーションの脆弱性を自動的に悪用する**Androidアプリケーションを作成**する必要があります。試験に合格するためには、**悪用アプリケーション**（apkとコード）を**送信**し、他のアプリケーションの脆弱性を**悪用**する必要があります。
 
-Having done the [**INE course about Android applications pentesting**](https://my.ine.com/CyberSecurity/courses/cfd5ec2b/android-mobile-app-pentesting) **is** **more than enough** to find the vulnerabilities of the applications. What I found to be more "complicated" of the exam was to **write an Android application** that exploits vulnerabilities. However, having some experience as Java developer and looking for tutorials on the Internet about what I wanted to do **I was able to complete the exam in just some hours**. They give you 7 days to complete the exam, so if you find the vulnerabilities you will have plenty of time to develop the exploit app.
+[**Androidアプリケーションのペネトレーションテストに関するINEコース**](https://my.ine.com/CyberSecurity/courses/cfd5ec2b/android-mobile-app-pentesting)を受講したことは、アプリケーションの脆弱性を見つけるのに十分です。私が試験で少し「複雑」と感じたのは、脆弱性を悪用するAndroidアプリケーションを作成することでした。ただし、Java開発者としての経験があり、やりたいことについてインターネットでチュートリアルを探してみると、数時間で試験を完了することができました。試験を完
+## eLearnSecurity Web application Penetration Tester eXtreme (eWPTXv2)と関連するINEコース
 
-In this exam I **missed the opportunity to exploit more vulnerabilities**, however, **I lost a bit the "fear" to write Android applications to exploit a vulnerability**. So it felt just like **another part of the course to complete your knowledge in Android applications pentesting**.
+### コース：[**Web Application Penetration Testing eXtreme**](https://my.ine.com/CyberSecurity/courses/630a470a/web-application-penetration-testing-extreme)
 
-## eLearnSecurity Web application Penetration Tester eXtreme (eWPTXv2) and the INE course related
+このコースは、**eWPTXv2** **証明書試験**に向けて**準備**するためのものです。\
+私はこのコースを受講する前に数年間ウェブペントスターとして働いていましたが、このコースでは「奇妙な」ウェブの脆弱性や保護回避方法についていくつかの便利なハッキングトリックを教えてもらいました。さらに、コースには学んだことを実践できる素晴らしいラボがあり、脆弱性を完全に理解するのに役立ちます。
 
-### Course: [**Web Application Penetration Testing eXtreme**](https://my.ine.com/CyberSecurity/courses/630a470a/web-application-penetration-testing-extreme)
+私はこのコースがウェブハッキング初心者向けではないと思います（[**Web Application Penetration Testing**](https://my.ine.com/CyberSecurity/courses/38316560/web-application-penetration-testing)**などの他のINEコースがあります）。**ただし、初心者でない場合、ハッキングウェブの「レベル」に関係なく、このコースをぜひ見てみることをお勧めします。私が学んだように、新しいことを必ず学ぶことができます。
 
-This course is the one meant to **prepare** you for the **eWPTXv2** **certificate** **exam**.\
-Even having been working as web pentester for several years before doing the course, it taught me several **neat hacking tricks about "weird" web vulnerabilities and ways to bypass protections**. Moreover, the course contains **pretty nice labs where you can practice what you learn**, and that is always helpful to fully understand the vulnerabilities.
+## eLearnSecurity Certified Digital Forensics Professional (eCDFP)とそれに関連するINEコース
 
-I think this course **isn't for web hacking beginners** (there are other INE courses for that like [**Web Application Penetration Testing**](https://my.ine.com/CyberSecurity/courses/38316560/web-application-penetration-testing)**).** However, if you aren't a beginner, independently on the hacking web "level" you think you have, **I definitely recommend you to take a look to the course** because I'm sure you **will learn new things** like I did.
+### コース：[**Certified Digital Forensics Professional**](https://ine.com/learning/certifications/internal/elearnsecurity-certified-digital-forensics-professional)
 
-## eLearnSecurity Certified Digital Forensics Professional (eCDFP) and the respective INE courses
+これはeCDFP証明書試験に向けたコースです。デジタルフォレンジックスの基礎、オペレーティングシステムの動作方法、デジタルフォレンジックスを実行するために収集できるオペレーティングシステムの最も価値のあるコンポーネント、およびデジタルフォレンジックスを実行するための主要なツールの設定と使用方法を教えてくれます。目標は、実際の現場でデジタルフォレンジックスを実行できるように準備することです。
 
-### Course: [**Certified Digital Forensics Professional**](https://ine.com/learning/certifications/internal/elearnsecurity-certified-digital-forensics-professional)
+私はこのコースがデジタルフォレンジックスの経験がない人にとって素晴らしいものだと思いました。ただし、トピックに経験がある場合、コースにアクセスできる場合は、ぜひ見てみることをお勧めします。私がこのコースを受講したときも、数年間のデジタルフォレンジックスの経験がありましたが、このコースでは私にいくつかの基本的な知識と新しいヒントやトリックを教えてくれました。
 
-This is the course to **prepare for the eCDFP certificate exam**. It will teach you the **basics of Digital Forensics**, how the **Operating System works**, the **most valuable components** of the Operating Systems which can be gathered for performing Digital Forensics, and how to **configure and use** the main **tools** to perform Digital Forensics. The goal is to **prepare you to be able to perform Digital Forensics in the real life**.
-
-I found the course to be a great one for **people that don't have any experience in Digital Forensics** applications. However, **if** you are someone with **experience** in the topic and you have access to the course I also recommend you to **take a look to it**. That **was my case** when I did this course and even having a few years of experience performing Digital Forensics **this course taught me some great basics I didn't knew and some new tips and tricks**.
-
-Finally, note **two more things** about this course: It has **great labs to practice** what you learn. Also it defined your baseline to get started in **Digital Forenics** and to start doing it in real life scenario on your own.
+最後に、このコースについて2つの注意点があります。学んだことを実践できる素晴らしいラボがあります。また、デジタルフォレンジックスの基礎を確立し、実際の現場で独自に実行するための出発点を定義します。
 
 ### [eWPTXv2](https://elearnsecurity.com/product/ewptxv2-certification/)
 
-> The eLearnSecurity Web Application Penetration Tester eXtreme (eWAPTX) is our most advanced web application pentesting certification. The eWPTX exam requires students to perform an expert-level penetration test that is then assessed by INE’s cyber security instructors. Students are expected to provide a complete report of their findings as they would in the corporate sector in order to pass.
+> eLearnSecurity Web Application Penetration Tester eXtreme（eWAPTX）は、最も高度なウェブアプリケーションペントesting認定です。eWPTX試験では、学生はINEのサイバーセキュリティインストラクターによって評価されるエキスパートレベルのペネトレーションテストを実施する必要があります。学生は、企業セクターでの調査結果と同様に、発見したすべての脆弱性について完全なレポートを提供することが求められます。
 
-The exam was composed of a **few web applications full of vulnerabilities**. In order to pass the exam you will need to compromise a few machines abusing web vulnerabilities. However, note that that's not enough to pass the exam, you need to **send a professional pentest report detailing** all the vulnerabilities discovered, how to exploit them and how to remediate them.\
-**I reported more than 10 unique vulnerabilities** (most of them high/critical and presented in different places of the webs), including the read of the flag and several ways to gain RCE and I passed.
+試験は、脆弱性が多数存在するいくつかのウェブアプリケーションで構成されています。試験に合格するためには、ウェブの脆弱性を悪用していくつかのマシンを侵害する必要があります。ただし、試験に合格するにはそれだけでは十分ではありません。発見したすべての脆弱性、それらを悪用する方法、および修復方法についてのプロのペントストレポートを提出する必要があります。\
+私は10以上のユニークな脆弱性（ほとんどは高/重要で、ウェブのさまざまな場所で発生）を報告し、フラグの読み取りやRCEの取得方法など、いくつかの方法で合格しました。
 
-**All the vulnerabilities I reported could be found explained in the** [**Web Application Penetration Testing eXtreme course**](https://my.ine.com/CyberSecurity/courses/630a470a/web-application-penetration-testing-extreme)**.** However, order to pass this exam I think that you **don't only need to know about web vulnerabilities**, but you need to be **experienced exploiting them**. So, if you are doing the course, at least practice with the labs and potentially play with other platform where you can improve your skills exploiting web vulnerabilities.
+私が報告したすべての脆弱性は、[**Web Application Penetration Testing eXtremeコース**](https://my.ine.com/CyberSecurity/courses/630a470a/web-application-penetration-testing-extreme)**で詳しく説明されています。**ただし、この試験に合格するためには、ウェブの脆弱性について知っているだけでなく、それらを悪用する経験が必要です。したがって、コースを受講している場合は、少なくともラボで練習し、ウェブの脆弱性を悪用するスキルを向上させることができる他のプラットフォームで遊ぶことをお勧めします。
 
-## Course: **Data Science on the Google Cloud Platform**
+## コース：**Google Cloud Platformでのデータサイエンス**
 
 \
-It's a very interesting basic course about **how to use the ML environment provided by Google** using services such as big-query (to store al load results), Google Deep Learning APIs (Google Vision API, Google Speech API, Google Natural Language API and Google Video Intelligence API) and even how to train your own model.
+これは、Googleが提供するML環境の使用方法についての非常に興味深い基礎コースです。big-query（結果の保存と読み込みに使用）、Google Deep Learning API（Google Vision API、Google Speech API、Google Natural Language API、Google Video Intelligence API）などのサービスを使用して、さらには独自のモデルをトレーニングする方法まで学ぶことができます。
 
-## Course: **Machine Learning with scikit-learn Starter Pass**
+## コース：**scikit-learnを使用した機械学習スターターパス**
 
-In the course [**Machine Learning with scikit-learn Starter Pass**](https://my.ine.com/DataScience/courses/58c4e71b/machine-learning-with-scikit-learn-starter-pass) you will learn, as the name indicates, **how to use scikit-learn to create Machine Learning models**.
+コース[**Machine Learning with scikit-learn Starter Pass**](https://my.ine.com/DataScience/courses/58c4e71b/machine-learning-with-scikit-learn-starter-pass)では、その名前が示すように、**scikit-learnを使用して機械学習モデルを作成する方法**を学びます。
 
-It's definitely recommended for people that haven't use scikit-learn (but know python)
+scikit-learnを使用したことがないが、Pythonを知っている人にはぜひおすすめです。
 
-## **Course: Classification Algorithms**
+## **コース：分類アルゴリズム**
 
-The [**Classification Algorithms course**](https://my.ine.com/DataScience/courses/2c6de5ea/classification-algorithms) is a great course for people that is **starting to learn about machine learning**. Here you will find information about the main classification algorithms you need to know and some mathematical concepts like **logistic regression** and **gradient descent**, **KNN**, **SVM**, and **Decision trees**.
+[**Classification Algorithmsコース**](https://my.ine.com/DataScience/courses/2c6de5ea/classification-algorithms)は、**機械学習について学び始める人にとって素晴らしいコース**です。ここでは、知っておく必要のある主要な分類アルゴリズムや**ロジスティック回帰**、**勾配降下法**、**KNN**、**SVM**、**決定木**などの数学的な概念について説明しています。
 
-It also shows how to **create models** with with **scikit-learn.**
+また、scikit-learnを使用してモデルを作成する方法も示しています。
 
-## Course: **Decision Trees**
+## コース：**決定木**
 
-The [**Decision Trees course**](https://my.ine.com/DataScience/courses/83fcfd52/decision-trees) was very useful to improve my knowledge about **Decision and Regressions Trees**, **when** are they **useful**, **how** they **work** and how to properly **tune them**.
+[**Decision Treesコース**](https://my.ine.com/DataScience/courses/83fcfd52/decision-trees)は、**決定木と回帰木**についての知識を向上させるのに非常に役立ちました。いつ決定木と回帰木が有用か、それらがどのように機能し、適切に調整する方法を学ぶことが
+- **[💬](https://emojipedia.org/speech-balloon/)ディスコードグループ**に参加するか、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-It also explains **how to create tree models** with scikit-learn different techniques to **measure how good the created model is** and how to **visualize the tree**.
-
-The only drawback I could find was in some cases some lack of mathematical explanations about how the used algorithm works. However, this course is **pretty useful for people that are learning about Machine Learning**.
-
-##
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **あなたのハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>

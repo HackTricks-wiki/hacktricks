@@ -1,164 +1,156 @@
-# Physical Attacks
+# 物理攻撃
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
-## BIOS password
+## BIOSパスワード
 
-### The battery
+### バッテリー
 
-Most of the **motherbords** have a **battery**. If you **remove** it **30min** the settings of the BIOS will be **restarted** (password included).
+ほとんどの**マザーボード**には**バッテリー**があります。バッテリーを**30分間取り外す**と、BIOSの設定が**リセット**されます（パスワードも含まれます）。
 
-### Jumper CMOS
+### CMOSジャンパー
 
-Most of the **motherboards** have a **jumper** that can restart the settings. This jumper connects a central pin with another, if you **connect thoses pins the motherbord will be reseted**.
+ほとんどの**マザーボード**には、設定をリセットできる**ジャンパー**があります。このジャンパーは、中央のピンと別のピンを接続します。これらのピンを接続すると、マザーボードがリセットされます。
 
-### Live Tools
+### ライブツール
 
-If you could **run** for example a **Kali** Linux from a Live CD/USB you could use tools like _**killCmos**_ or _**CmosPWD**_ (this last one is included in Kali) you could try to **recover the password of the BIOS**.
+たとえば、Live CD/USBから**Kali** Linuxを実行できる場合、_**killCmos**_や_**CmosPWD**_（これはKaliに含まれています）などのツールを使用して、BIOSのパスワードを**回復**することができます。
 
-### Online BIOS password recovery
+### オンラインBIOSパスワードの回復
 
-Put the password of the BIOS **3 times wrong**, then the BIOS will **show an error messag**e and it will be blocked.\
-Visit the page [https://bios-pw.org](https://bios-pw.org) and **introduce the error code** shown by the BIOS and you could be lucky and get a **valid password** (the **same search could show you different passwords and more than 1 could be valid**).
+BIOSのパスワードを**3回間違える**と、BIOSは**エラーメッセージを表示**してブロックされます。\
+[https://bios-pw.org](https://bios-pw.org)にアクセスし、BIOSに表示される**エラーコード**を入力すると、**有効なパスワード**（同じ検索でも異なるパスワードが表示される場合があり、複数のパスワードが有効になる場合があります）を取得できるかもしれません。
 
 ## UEFI
 
-To check the settings of the UEFI and perform some kind of attack you should try [chipsec](https://github.com/chipsec/chipsec/blob/master/chipsec-manual.pdf).\
-Using this tool you could easily disable the Secure Boot:
-
+UEFIの設定を確認し、攻撃を行うためには、[chipsec](https://github.com/chipsec/chipsec/blob/master/chipsec-manual.pdf)を試してみる必要があります。\
+このツールを使用すると、簡単にSecure Bootを無効にすることができます：
 ```
 python chipsec_main.py -module exploits.secure.boot.pk
 ```
-
 ## RAM
 
-### Cold boot
+### コールドブート
 
-The **RAM memory is persistent from 1 to 2 minutes** from the time the computer is powered off. If you apply **cold** (liquid nitrogen, for example) on the memory card you can extend this time up to **10 minutes**.
+**RAMメモリは、コンピュータの電源が切れてから1〜2分間は持続的**です。もしメモリカードに**コールド**（例えば液体窒素）を適用すると、この時間を**最大10分間**まで延長することができます。
 
-Then, you can do a **memory dump** (using tools like dd.exe, mdd.exe, Memoryze, win32dd.exe or DumpIt) to analyze the memory.
+その後、**dd.exe、mdd.exe、Memoryze、win32dd.exe、DumpIt**などのツールを使用して、**メモリダンプ**を行い、メモリを分析することができます。
 
-You should **analyze** the memory **using volatility**.
+メモリを**volatility**を使用して分析する必要があります。
 
 ### [INCEPTION](https://github.com/carmaa/inception)
 
-Inception is a **physical memory manipulation** and hacking tool exploiting PCI-based DMA. The tool can attack over **FireWire**, **Thunderbolt**, **ExpressCard**, PC Card and any other PCI/PCIe HW interfaces.\
-**Connect** your computer to the victim computer over one of those **interfaces** and **INCEPTION** will try to **patch** the **pyshical memory** to give you **access**.
+Inceptionは、PCIベースのDMAを利用した**物理的なメモリ操作**およびハッキングツールです。このツールは、**FireWire**、**Thunderbolt**、**ExpressCard**、PCカード、およびその他のPCI/PCIe HWインターフェースを介して攻撃することができます。\
+自分のコンピュータを被害者のコンピュータにこれらの**インターフェース**のいずれかで接続し、**INCEPTION**が**物理メモリ**を**パッチ**して**アクセス**を提供しようとします。
 
-**If INCEPTION succeeds, any password introduced will be vaid.**
+**INCEPTIONが成功すると、入力されたパスワードは有効になります。**
 
-**It doesn't work with Windows10.**
+**Windows10では動作しません。**
 
 ## Live CD/USB
 
-### Sticky Keys and more
+### Sticky Keys およびその他
 
-* **SETHC:** _sethc.exe_ is invoked when SHIFT is pressed 5 times
-* **UTILMAN:** _Utilman.exe_ is invoked by pressing WINDOWS+U
-* **OSK:** _osk.exe_ is invoked by pressing WINDOWS+U, then launching the on-screen keyboard
-* **DISP:** _DisplaySwitch.exe_ is invoked by pressing WINDOWS+P
+* **SETHC:** SHIFTキーが5回押されたときに_sethc.exe_が呼び出されます。
+* **UTILMAN:** WINDOWS+Uを押すと_Utilman.exe_が呼び出されます。
+* **OSK:** WINDOWS+Uを押し、その後オンスクリーンキーボードを起動すると_osk.exe_が呼び出されます。
+* **DISP:** WINDOWS+Pを押すと_DisplaySwitch.exe_が呼び出されます。
 
-These binaries are located inside _**C:\Windows\System32**_. You can **change** any of them for a **copy** of the binary **cmd.exe** (also in the same folder) and any time that you invoke any of those binaries a command prompt as **SYSTEM** will appear.
+これらのバイナリは_**C:\Windows\System32**_内にあります。これらのバイナリのいずれかを、同じフォルダにある**cmd.exe**のコピーに**変更**することができ、これらのバイナリを呼び出すたびに、**SYSTEM**としてのコマンドプロンプトが表示されます。
 
-### Modifying SAM
+### SAMの変更
 
-You can use the tool _**chntpw**_ to **modify the** _**SAM**_ **file** of a mounted Windows filesystem. Then, you could change the password of the Administrator user, for example.\
-This tool is available in KALI.
-
+ツール_**chntpw**_を使用して、マウントされたWindowsファイルシステムの_**SAM**_ファイルを**変更**することができます。その後、例えばAdministratorユーザーのパスワードを変更することができます。\
+このツールはKALIで利用可能です。
 ```
 chntpw -h
 chntpw -l <path_to_SAM>
 ```
-
-**Inside a Linux system you could modify the** _**/etc/shadow**_ **or** _**/etc/passwd**_ **file.**
+**Linuxシステム内では、** _**/etc/shadow**_ **または** _**/etc/passwd**_ **ファイルを変更することができます。**
 
 ### **Kon-Boot**
 
-**Kon-Boot** is one of the best tools around which can log you into Windows without knowing the password. It works by **hooking into the system BIOS and temporarily changing the contents of the Windows kernel** while booting (new versions work also with **UEFI**). It then allows you to enter **anything as the password** during login. The next time you start the computer without Kon-Boot, the original password will be back, the temporary changes will be discarded and the system will behave as if nothing has happened.\
-Read More: [https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/)
+**Kon-Boot**は、パスワードを知らずにWindowsにログインできる最高のツールの一つです。**システムBIOSにフックし、Windowsカーネルの内容を一時的に変更**することで動作します（新しいバージョンでは**UEFI**でも動作します）。その後、ログイン時に**任意のパスワードを入力**することができます。Kon-Bootなしでコンピュータを再起動すると、元のパスワードが復元され、一時的な変更は破棄され、システムは何も起こったかのように動作します。\
+詳細はこちらを参照してください：[https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/)
 
-It is a live CD/USB that can **patch the memory** so you **won't need to know the password to login**.\
-Kon-Boot also performs the **StickyKeys** trick so you could press _**Shift**_ **5 times to get an Administrator cmd**.
+これはライブCD/USBであり、メモリを**パッチ**することができるため、**ログインするためにパスワードを知る必要はありません**。\
+Kon-Bootはまた、**StickyKeys**のトリックを実行するため、_**Shift**_ **を5回押すと管理者のコマンドプロンプトが表示されます**。
 
-## **Running Windows**
+## **Windowsの実行**
 
-### Initial shortcuts
+### 初期のショートカット
 
-### Booting shortcuts
+### ブートのショートカット
 
 * supr - BIOS
-* f8 - Recovery mode
+* f8 - リカバリーモード
 * _supr_ - BIOS ini
-* _f8_ - Recovery mode
-* _Shitf_ (after the windows banner) - Go to login page instead of autologon (avoid autologon)
+* _f8_ - リカバリーモード
+* _Shitf_（Windowsバナーの後） - 自動ログオンではなくログインページに移動する（自動ログオンを回避）
 
-### **BAD USBs**
+### **BAD USB**
 
-#### **Rubber Ducky tutorials**
+#### **Rubber Duckyのチュートリアル**
 
-* [Tutorial 1](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Tutorials)
-* [Tutorial 2](https://blog.hartleybrody.com/rubber-ducky-guide/)
+* [チュートリアル1](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Tutorials)
+* [チュートリアル2](https://blog.hartleybrody.com/rubber-ducky-guide/)
 
 #### **Teensyduino**
 
-* [Payloads and tutorials](https://github.com/Screetsec/Pateensy)
+* [ペイロードとチュートリアル](https://github.com/Screetsec/Pateensy)
 
-There are also tons of tutorials about **how to create your own bad USB**.
+**自分自身のBAD USBを作成する方法**についてのチュートリアルもたくさんあります。
 
-### Volume Shadow Copy
+### ボリュームシャドウコピー
 
-With administrators privileges and powershell you could make a copy of the SAM file.[ See this code](../windows-hardening/basic-powershell-for-pentesters/#volume-shadow-copy).
+管理者特権とPowerShellを使用して、SAMファイルのコピーを作成することができます。[このコードを参照してください](../windows-hardening/basic-powershell-for-pentesters/#volume-shadow-copy)。
 
-## Bypassing Bitlocker
+## Bitlockerのバイパス
 
-Bitlocker uses **2 passwords**. The one used by the **user**, and the **recovery** password (48 digits).
+Bitlockerは**2つのパスワード**を使用します。ユーザーが使用するパスワードと**リカバリ**パスワード（48桁）です。
 
-If you are lucky and inside the current session of Windows exists the file _**C:\Windows\MEMORY.DMP**_ (It is a memory dump) you could try to **search inside of it the recovery password**. You can **get this file** and a **copy of the filesytem** and then use _Elcomsoft Forensic Disk Decryptor_ to get the content (this will only work if the password is inside the memory dump). You could also **force the memory dump** using _**NotMyFault**_ of _Sysinternals,_ but this will reboot the system and has to be executed as Administrator.
+もし現在のWindowsセッション内に _**C:\Windows\MEMORY.DMP**_（メモリダンプ）というファイルが存在する場合、その中から**リカバリパスワードを検索**することができます。このファイルとファイルシステムの**コピーを取得**し、それから_Elcomsoft Forensic Disk Decryptor_を使用して内容を取得することができます（これはパスワードがメモリダンプ内に含まれている場合にのみ機能します）。また、_Sysinternals_の_NotMyFault_を使用してメモリダンプを**強制的に実行**することもできますが、これによりシステムが再起動され、管理者として実行する必要があります。
 
-You could also try a **bruteforce attack** using _**Passware Kit Forensic**_.
+_Passware Kit Forensic_を使用して**ブルートフォース攻撃**を試すこともできます。
 
-### Social Engineering
+### ソーシャルエンジニアリング
 
-Finally, you could make the user add a new recovery password making him executed as administrator:
-
+最後に、ユーザーに管理者として実行させるように依頼し、新しいリカバリパスワードを追加させることもできます。
 ```bash
 schtasks /create /SC ONLOGON /tr "c:/windows/system32/manage-bde.exe -protectors -add c: -rp 000000-000000-000000-000000-000000-000000-000000-000000" /tn tarea /RU SYSTEM /f
 ```
+次回のログイン時に、新しいリカバリーキー（48個のゼロで構成される）が追加されます。
 
-This will add a new recovery key (composed of 48 zeros) in the next login.
-
-To check the valid recovery keys you can execute:
-
+有効なリカバリーキーを確認するには、次のコマンドを実行します。
 ```
 manage-bde -protectors -get c:
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

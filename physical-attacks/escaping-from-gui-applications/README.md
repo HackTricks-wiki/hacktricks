@@ -1,64 +1,64 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください**。
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
 
 
-# Check for possible actions inside the GUI application
+# GUIアプリケーション内の可能なアクションをチェックする
 
-**Common Dialogs** are those options of **saving a file**, **opening a file**, selecting a font, a color... Most of them will **offer a full Explorer functionality**. This means that you will be able to access Explorer functionalities if you can access these options:
+**共通のダイアログ**は、**ファイルの保存**、**ファイルの開く**、フォントの選択、色の選択などのオプションです。ほとんどの場合、これらのオプションにアクセスできる場合、**完全なエクスプローラの機能**を提供します。
 
-* Close/Close as
-* Open/Open with
-* Print
-* Export/Import
-* Search
-* Scan
+これは、次のオプションにアクセスできる場合、エクスプローラの機能にアクセスできることを意味します。
 
-You should check if you can:
+* 閉じる/閉じる
+* 開く/開く
+* 印刷
+* エクスポート/インポート
+* 検索
+* スキャン
 
-* Modify or create new files
-* Create symbolic links
-* Get access to restricted areas
-* Execute other apps
+次のことをチェックする必要があります：
 
-## Command Execution
+* ファイルの変更または作成
+* シンボリックリンクの作成
+* 制限された領域へのアクセス
+* 他のアプリの実行
 
-Maybe **using a **_**Open with**_** option** you can open/execute some kind of shell.
+## コマンドの実行
+
+おそらく、**_**開く**_**オプションを使用して、シェルの種類を開いたり実行したりできるかもしれません。
 
 ### Windows
 
-For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands (and perform unexpected actions) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+たとえば、_cmd.exe、command.com、Powershell/Powershell ISE、mmc.exe、at.exe、taskschd.msc..._ ここでコマンドを実行するために使用できる他のバイナリを見つけることができます：[https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 ### \*NIX __
 
-_bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash、sh、zsh..._ ここでコマンドを実行するために使用できる他のバイナリを見つけることができます：[https://gtfobins.github.io/](https://gtfobins.github.io)
 
 # Windows
 
-## Bypassing path restrictions
+## パス制限のバイパス
 
-* **Environment variables**: There are a lot of environment variables that are pointing to some path
-* **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
-* **Symbolic links**
-* **Shortcuts**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager),  Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
-  * Hidden Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
-* **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-* **UNC paths**: Paths to connect to shared folders. You should try to connect to the C$ of the local machine ("\\\127.0.0.1\c$\Windows\System32")
-  * **More UNC paths:**
+* **環境変数**：いくつかのパスを指す環境変数があります
+* **その他のプロトコル**：_about:、data:、ftp:、file:、mailto:、news:、res:、telnet:、view-source:_
+* **シンボリックリンク**
+* **ショートカット**：CTRL+N（新しいセッションを開く）、CTRL+R（コマンドの実行）、CTRL+SHIFT+ESC（タスクマネージャー）、Windows+E（エクスプローラを開く）、CTRL-B、CTRL-I（お気に入り）、CTRL-H（履歴）、CTRL-L、CTRL-O（ファイル/開くダイアログ）、CTRL-P（印刷ダイアログ）、CTRL-S（名前を付けて保存）
+* 隠し管理メニュー：CTRL-ALT-F8、CTRL-ESC-F9
+* **シェルURI**：_shell:Administrative Tools、shell:DocumentsLibrary、shell:Librariesshell:UserProfiles、shell:Personal、shell:SearchHomeFolder、shell:Systemshell:NetworkPlacesFolder、shell:SendTo、shell:UsersProfiles、shell:Common Administrative Tools、shell:MyComputerFolder、shell:InternetFolder_
+* **UNCパス**：共有フォルダに接続するためのパス。ローカルマシンのC$に接続してみてください（"\\\127.0.0.1\c$\Windows\System32"）
+* **その他のUNCパス**：
 
 | UNC                       | UNC            | UNC                  |
 | ------------------------- | -------------- | -------------------- |
@@ -72,13 +72,13 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-## Download Your Binaries
+## バイナリのダウンロード
 
-Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
-Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+コンソール：[https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
+エクスプローラ：[https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
+レジストリエディタ：[https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-## Accessing filesystem from the browser
+## ブラウザからファイルシステムにアクセスする
 
 | PATH                | PATH              | PATH               | PATH                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
@@ -89,48 +89,49 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 | C:\windows\\        | C:\windows/       | %WINDIR%           | %TMP%               |
 | %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
 | %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
+## ショートカット
 
-## ShortCuts
-
-* Sticky Keys – Press SHIFT 5 times
+* Sticky Keys – SHIFTキーを5回押す
 * Mouse Keys – SHIFT+ALT+NUMLOCK
 * High Contrast – SHIFT+ALT+PRINTSCN
-* Toggle Keys – Hold NUMLOCK for 5 seconds
-* Filter Keys – Hold right SHIFT for 12 seconds
-* WINDOWS+F1 – Windows Search
-* WINDOWS+D – Show Desktop
-* WINDOWS+E – Launch Windows Explorer
-* WINDOWS+R – Run
-* WINDOWS+U – Ease of Access Centre
-* WINDOWS+F – Search
-* SHIFT+F10 – Context Menu
-* CTRL+SHIFT+ESC – Task Manager
-* CTRL+ALT+DEL – Splash screen on newer Windows versions
-* F1 – Help F3 – Search
-* F6 – Address Bar
-* F11 – Toggle full screen within Internet Explorer
-* CTRL+H – Internet Explorer History
-* CTRL+T – Internet Explorer – New Tab
-* CTRL+N – Internet Explorer – New Page
-* CTRL+O – Open File
-* CTRL+S – Save CTRL+N – New RDP / Citrix
+* Toggle Keys – NUMLOCKキーを5秒間押し続ける
+* Filter Keys – 右SHIFTキーを12秒間押し続ける
+* WINDOWS+F1 – Windows検索
+* WINDOWS+D – デスクトップを表示
+* WINDOWS+E – Windows Explorerを起動
+* WINDOWS+R – 実行
+* WINDOWS+U – アクセシビリティセンター
+* WINDOWS+F – 検索
+* SHIFT+F10 – コンテキストメニュー
+* CTRL+SHIFT+ESC – タスクマネージャー
+* CTRL+ALT+DEL – 新しいWindowsバージョンのスプラッシュスクリーン
+* F1 – ヘルプ
+* F3 – 検索
+* F6 – アドレスバー
+* F11 – Internet Explorer内のフルスクリーンの切り替え
+* CTRL+H – Internet Explorerの履歴
+* CTRL+T – Internet Explorer – 新しいタブ
+* CTRL+N – Internet Explorer – 新しいページ
+* CTRL+O – ファイルを開く
+* CTRL+S – 保存
+* CTRL+N – 新しいRDP / Citrix
 
-## Swipes
+## スワイプ
 
-* Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
-* Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
-* Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
-* Swipe up from the bottom to show  the taskbar in a full screen app.
+* 左側から右にスワイプして、すべての開いているウィンドウを表示し、KIOSKアプリを最小化してOS全体にアクセスします。
+* 右側から左にスワイプして、アクションセンターを開き、KIOSKアプリを最小化してOS全体にアクセスします。
+* 上端からスワイプして、フルスクリーンモードで開いているアプリのタイトルバーを表示します。
+* 下から上にスワイプして、フルスクリーンアプリでタスクバーを表示します。
 
-## Internet Explorer Tricks
+## Internet Explorerのトリック
 
 ### 'Image Toolbar'
 
-It's a toolbar that appears on the top-left of image when it's clicked. You will be able to Save, Print, Mailto, Open "My Pictures" in Explorer. The Kiosk needs to be using Internet Explorer.
+画像をクリックすると、画像の左上に表示されるツールバーです。保存、印刷、メール送信、エクスプローラーで「マイピクチャ」を開くことができます。KioskはInternet Explorerを使用する必要があります。
 
-### Shell Protocol
+### シェルプロトコル
 
-Type this URLs to obtain an Explorer view:
+次のURLを入力してエクスプローラービューを取得します。
 
 * `shell:Administrative Tools`
 * `shell:DocumentsLibrary`
@@ -149,159 +150,143 @@ Type this URLs to obtain an Explorer view:
 * `Shell:System`
 * `Shell:ControlPanelFolder`
 * `Shell:Windows`
-* `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Control Panel
-* `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> My Computer
-* `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
+* `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> コントロールパネル
+* `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> マイコンピュータ
+* `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> マイネットワークプレース
 * `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-# Browsers tricks
+# ブラウザのトリック
 
-Backup iKat versions:
+iKatのバックアップバージョン：
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\
 
-Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`  
-Source: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+JavaScriptを使用して共通のダイアログを作成し、ファイルエクスプローラーにアクセスします：`document.write('<input/type=file>')`
+ソース：https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 # iPad
 
-## Gestures and bottoms
+## ジェスチャーとボタン
 
-### Swipe up with four (or five) fingers / Double-tap Home button
+### 4本（または5本）の指で上にスワイプ/ホームボタンを2回タップ
 
-To view the multitask view and change App
+マルチタスクビューを表示してアプリを切り替える
 
-### Swipe one way or another with four or five fingers
+### 4本または5本の指で片方向にスワイプ
 
-In order to change to the next/last App
+次の/前のアプリに切り替えるため
 
-### Pinch the screen with five fingers / Touch Home button / Swipe up with 1 finger from the bottom of the screen in a quick motion to the up
+### 5本の指で画面をつまむ/ホームボタンをタッチ/画面の下から1本の指で上に素早くスワイプ
 
-To access Home
+ホームにアクセスするため
 
-### Swipe one finger from the bottom of the screen just 1-2 inches (slow)
+### 画面の下から1本の指で1〜2インチスワイプ（ゆっくり）
 
-The dock will appear
+ドックが表示されます
 
-### Swipe down from the top of the display with 1 finger
+### 画面の上から1本の指で下にスワイプ
 
-To view your notifications
+通知を表示するため
 
-### Swipe down with 1 finger the top-right corner of the screen
+### 画面の右上隅から1本の指で下にスワイプ
 
-To see iPad Pro's control centre
+iPad Proのコントロールセンターを表示するため
 
-### Swipe 1 finger from the left of the screen 1-2 inches
+### 画面の左から1本の指で1〜2インチスワイプ
 
-To see Today view
+今日のビューを表示するため
 
-### Swipe fast 1 finger from the centre of the screen to the right or left
+### 画面の中央から右または左に素早く1本の指でスワイプ
 
-To change to next/last App
+次の/前のアプリに切り替えるため
 
-### Press and hold the On/**Off**/Sleep button at the upper-right corner of the **iPad +** Move the Slide to **power off** slider all the way to the right,
+### 上部右隅から1本の指で画面を押し続ける/スライドを右に全体に移動する
 
-To power off
+電源を切るため
 
-### Press the  On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**
+### 上部右隅のOn/**Off**/Sleepボタンを押し続ける/スライドを右に全体に移動する
 
-To force a hard power off
+強制的に電源を切るため
 
-### Press the  On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**
+### 上部右隅のOn/**Off**/Sleepボタンとホームボタンを素早く押す
 
-To take a screenshot that will pop up in the lower left of the display. Press both buttons at the same time very briefly as if you hold them a few seconds a hard power off will be performed.
+スクリーンショットを撮影し、ディスプレイの左下に表示されます。両方のボタンを同時に非常に短く押すと、数秒間押し続けるように見えますが、強制的に電源が切られます。
 
-## Shortcuts
+## ショートカット
 
-You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that could help escaping from the application will be shown here.
+iPadのキーボードまたはUSBキーボードアダプターが必要です。アプリケーションからの脱出に役立つショートカットのみがここに表示されます。
 
-| Key | Name         |
+| キー | 名前         |
 | --- | ------------ |
-| ⌘   | Command      |
-| ⌥   | Option (Alt) |
-| ⇧   | Shift        |
-| ↩   | Return       |
-| ⇥   | Tab          |
-| ^   | Control      |
-| ←   | Left Arrow   |
-| →   | Right Arrow  |
-| ↑   | Up Arrow     |
-| ↓   | Down Arrow   |
+| ⌘   | コマンド      |
+| ⌥   | オプション（Alt） |
+| ⇧   | シフト        |
+| ↩   | リターン       |
+| ⇥   | タブ          |
+| ^   | コントロール      |
+| ←   | 左矢印   |
+| →   | 右矢印  |
+| ↑   | 上矢印     |
+| ↓   | 下矢印   |
 
-### System shortcuts
+### システムショートカット
 
-These shortcuts are for the visual settings and sound settings, depending on the use of the iPad.
+これらのショートカットは、iPadの使用方法に応じて、ビジュアル設定とサウンド設定に使用されます。
 
-| Shortcut | Action                                                                         |
+| ショートカット | アクション                                                                         |
 | -------- | ------------------------------------------------------------------------------ |
-| F1       | Dim Sscreen                                                                    |
-| F2       | Brighten screen                                                                |
-| F7       | Back one song                                                                  |
-| F8       | Play/pause                                                                     |
-| F9       | Skip song                                                                      |
-| F10      | Mute                                                                           |
-| F11      | Decrease volume                                                                |
-| F12      | Increase volume                                                                |
-| ⌘ Space  | Display a list of available languages; to choose one, tap the space bar again. |
+| F1       | 画面を暗くする                                                                    |
+| F2       | 画面を明るくする                                                                |
+| F7       | 前の曲に戻る                                                                  |
+| F8       | 再生/一時停止                                                                     |
+| F9       | 次の曲にスキップ                                                                      |
+| F10      | ミュート                                                                           |
+| F11      | 音量を下げる                                                                |
+| F12      | 音量を上げる                                                                |
+| ⌘ Space  | 使用可能な言語のリストを表示します。選択するには、再度スペースバーをタップします。 |
 
-### iPad navigation
+### iPadのナビゲーション
 
-| Shortcut                                           | Action                                                  |
+| ショートカット                                           | アクション                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Go to Home                                              |
-| ⌘⇧H (Command-Shift-H)                              | Go to Home                                              |
-| ⌘ (Space)                                          | Open Spotlight                                          |
-| ⌘⇥ (Command-Tab)                                   | List last ten used apps                                 |
-| ⌘\~                                                | Go t the last App                                       |
-| ⌘⇧3 (Command-Shift-3)                              | Screenshot (hovers in bottom left to save or act on it) |
-| ⌘⇧4                                                | Screenshot and open it in the editor                    |
-| Press and hold ⌘                                   | List of shortcuts available for the App                 |
-| ⌘⌥D (Command-Option/Alt-D)                         | Brings up the dock                                      |
-| ^⌥H (Control-Option-H)                             | Home button                                             |
-| ^⌥H H (Control-Option-H-H)                         | Show multitask bar                                      |
-| ^⌥I (Control-Option-i)                             | Item chooser                                            |
-| Escape                                             | Back button                                             |
-| → (Right arrow)                                    | Next item                                               |
-| ← (Left arrow)                                     | Previous item                                           |
-| ↑↓ (Up arrow, Down arrow)                          | Simultaneously tap selected item                        |
-| ⌥ ↓ (Option-Down arrow)                            | Scroll down                                             |
-| ⌥↑ (Option-Up arrow)                               | Scroll up                                               |
-| ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Scroll left or right                                    |
-| ^⌥S (Control-Option-S)                             | Turn VoiceOver speech on or off                         |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | Switch to the previous app                              |
-| ⌘⇥ (Command-Tab)                                   | Switch back to the original app                         |
-| ←+→, then Option + ← or Option+→                   | Navigate through Dock                                   |
+| ⌘H                                                 | ホームに移動                                              |
+| ⌘⇧H (Command-Shift-H)                              | ホームに移動                                              |
+| ⌘ (Space)                                          | Spotlightを開く                                          |
+| ⌘⇥
+| ⌘⇧⇥ (Command-Shift-Tab)                            | 前のアプリに切り替える                              |
+| ⌘⇥ (Command-Tab)                                   | 元のアプリに戻る                                     |
+| ←+→, その後 Option + ← または Option+→                   | ドックを通じてナビゲートする                                   |
 
-### Safari shortcuts
+### Safari ショートカット
 
-| Shortcut                | Action                                           |
+| ショートカット                | アクション                                           |
 | ----------------------- | ------------------------------------------------ |
-| ⌘L (Command-L)          | Open Location                                    |
-| ⌘T                      | Open a new tab                                   |
-| ⌘W                      | Close the current tab                            |
-| ⌘R                      | Refresh the current tab                          |
-| ⌘.                      | Stop loading the current tab                     |
-| ^⇥                      | Switch to the next tab                           |
-| ^⇧⇥ (Control-Shift-Tab) | Move to the previous tab                         |
-| ⌘L                      | Select the text input/URL field to modify it     |
-| ⌘⇧T (Command-Shift-T)   | Open last closed tab (can be used several times) |
-| ⌘\[                     | Goes back one page in your browsing history      |
-| ⌘]                      | Goes forward one page in your browsing history   |
-| ⌘⇧R                     | Activate Reader Mode                             |
+| ⌘L (Command-L)          | ロケーションを開く                                    |
+| ⌘T                      | 新しいタブを開く                                     |
+| ⌘W                      | 現在のタブを閉じる                                   |
+| ⌘R                      | 現在のタブをリフレッシュする                             |
+| ⌘.                      | 現在のタブの読み込みを停止する                           |
+| ^⇥                      | 次のタブに切り替える                                   |
+| ^⇧⇥ (Control-Shift-Tab) | 前のタブに移動する                                     |
+| ⌘L                      | テキスト入力/URLフィールドを選択して変更する                 |
+| ⌘⇧T (Command-Shift-T)   | 最後に閉じたタブを開く（複数回使用できる）                     |
+| ⌘\[                     | ブラウジング履歴で1ページ戻る                             |
+| ⌘]                      | ブラウジング履歴で1ページ進む                             |
+| ⌘⇧R                     | リーダーモードをアクティブにする                             |
 
-### Mail shortcuts
+### メール ショートカット
 
-| Shortcut                   | Action                       |
+| ショートカット                   | アクション                       |
 | -------------------------- | ---------------------------- |
-| ⌘L                         | Open Location                |
-| ⌘T                         | Open a new tab               |
-| ⌘W                         | Close the current tab        |
-| ⌘R                         | Refresh the current tab      |
-| ⌘.                         | Stop loading the current tab |
-| ⌘⌥F (Command-Option/Alt-F) | Search in your mailbox       |
+| ⌘L                         | ロケーションを開く                |
+| ⌘T                         | 新しいタブを開く                 |
+| ⌘W                         | 現在のタブを閉じる               |
+| ⌘R                         | 現在のタブをリフレッシュする         |
+| ⌘.                         | 現在のタブの読み込みを停止する       |
+| ⌘⌥F (Command-Option/Alt-F) | メールボックス内を検索する           |
 
-## References
+## 参考文献
 
 * [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 * [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
@@ -313,16 +298,14 @@ These shortcuts are for the visual settings and sound settings, depending on the
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業で働いていますか？** **HackTricks**で**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか？または、**HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、**[telegramグループ](https://t.me/peass)**に参加するか、**Twitter**で**フォロー**する[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
-
-

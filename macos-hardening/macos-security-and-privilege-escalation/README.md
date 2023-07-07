@@ -1,38 +1,38 @@
-# macOS Security & Privilege Escalation
+# macOSセキュリティと特権エスカレーション
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
 <figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+[**HackenProofをフォロー**](https://bit.ly/3xrrDrL) **して、web3のバグについてもっと学びましょう**
 
-🐞 Read web3 bug tutorials
+🐞 web3のバグチュートリアルを読む
 
-🔔 Get notified about new bug bounties
+🔔 新しいバグバウンティについて通知を受ける
 
-💬 Participate in community discussions
+💬 コミュニティディスカッションに参加する
 
-## Basic MacOS
+## 基本的なMacOS
 
-If you are not familiar with macOS, you should start learning the basics of macOS:&#x20;
+MacOSに慣れていない場合は、MacOSの基礎を学ぶことから始めるべきです：&#x20;
 
-* Special macOS **files & permissions:**
+* 特別なMacOSの**ファイルと権限:**
 
 {% content-ref url="macos-files-folders-and-binaries/" %}
 [macos-files-folders-and-binaries](macos-files-folders-and-binaries/)
 {% endcontent-ref %}
 
-* Common macOS **users**
+* 一般的なMacOSの**ユーザー**
 
 {% content-ref url="macos-users.md" %}
 [macos-users.md](macos-users.md)
@@ -44,13 +44,13 @@ If you are not familiar with macOS, you should start learning the basics of macO
 [macos-applefs.md](macos-applefs.md)
 {% endcontent-ref %}
 
-* The **architecture** of the k**ernel**
+* **カーネルのアーキテクチャ**
 
 {% content-ref url="mac-os-architecture/" %}
 [mac-os-architecture](mac-os-architecture/)
 {% endcontent-ref %}
 
-* Common macOS n**etwork services & protocols**
+* 一般的なMacOSの**ネットワークサービスとプロトコル**
 
 {% content-ref url="macos-protocols.md" %}
 [macos-protocols.md](macos-protocols.md)
@@ -58,66 +58,65 @@ If you are not familiar with macOS, you should start learning the basics of macO
 
 ### MacOS MDM
 
-In companies **macOS** systems are highly probably going to be **managed with a MDM**. Therefore, from the perspective of an attacker is interesting to know **how that works**:
+企業では、**MacOSシステムはおそらくMDMで管理**されることが多いです。したがって、攻撃者の視点からは、**それがどのように機能するか**を知ることが興味深いです：
 
 {% content-ref url="../macos-red-teaming/macos-mdm/" %}
 [macos-mdm](../macos-red-teaming/macos-mdm/)
 {% endcontent-ref %}
 
-### MacOS - Inspecting, Debugging and Fuzzing
+### MacOS - 検査、デバッグ、およびFuzzing
 
 {% content-ref url="macos-apps-inspecting-debugging-and-fuzzing/" %}
 [macos-apps-inspecting-debugging-and-fuzzing](macos-apps-inspecting-debugging-and-fuzzing/)
 {% endcontent-ref %}
 
-## MacOS Security Protections
+## MacOSセキュリティ保護
 
 {% content-ref url="macos-security-protections/" %}
 [macos-security-protections](macos-security-protections/)
 {% endcontent-ref %}
 
-## Attack Surface
+## 攻撃対象
 
-### File Permissions
+### ファイルの権限
 
-If a **process running as root writes** a file that can be controlled by a user, the user could abuse this to **escalate privileges**.\
-This could occur in the following situations:
+**rootとして実行されているプロセスが**ユーザーによって制御可能なファイルを書き込む場合、ユーザーはこれを悪用して**特権をエスカレーション**することができます。\
+これは次の状況で発生する可能性があります：
 
-* File used was already created by a user (owned by the user)
-* File used is writable by the user because of a group
-* File used is inside a directory owned by the user (the user could create the file)
-* File used is inside a directory owned by root but user has write access over it because of a group (the user could create the file)
+* ユーザーによって既に作成されたファイル（ユーザーが所有）
+* グループによって書き込み可能なファイル
+* ユーザーが所有するディレクトリ内のファイル（ユーザーがファイルを作成できる）
+* rootが所有するディレクトリ内のファイルであり、ユーザーがグループによる書き込みアクセス権を持っている（ユーザーがファイルを作成できる）
 
-Being able to **create a file** that is going to be **used by root**, allows a user to **take advantage of its content** or even create **symlinks/hardlinks** to point it to another place.
+**rootが使用するファイル**を**作成**できるようになると、ユーザーはその内容を利用したり、別の場所を指すために**シンボリックリンク/ハードリンク**を作成したりすることができます。
 
-For this kind of vulnerabilities don't forget to **check vulnerable `.pkg` installers**:
+このような脆弱性をチェックする際には、**脆弱な`.pkg`インストーラー**を確認することを忘れないでください：
 
 {% content-ref url="macos-files-folders-and-binaries/macos-installers-abuse.md" %}
 [macos-installers-abuse.md](macos-files-folders-and-binaries/macos-installers-abuse.md)
 {% endcontent-ref %}
 
-### Entitlements and Privileges abuse via process abuse
+### 権限と特権の乱用によるエンタイトルメント
 
-If a process can **inject code in another process with better privileges or entitlements** or contact it to perform privileges actions, he could escalate privileges and bypass defensive meassures such as [Sandbox](macos-security-protections/macos-sandbox/) or [TCC](macos-security-protections/macos-tcc/).
+プロセスが**特権やエンタイトルメントのある別のプロセスにコードをインジェクト**したり、特権アクションを実行するためにそれに接触したりできる場合、特権をエスカレーションし、[Sandbox](macos-security-protections/macos-sandbox/)や[TCC](macos-security-protections/macos-tcc/)などの防御策を回避することができます。
 
 {% content-ref url="macos-proces-abuse/" %}
 [macos-proces-abuse](macos-proces-abuse/)
 {% endcontent-ref %}
 
-### File Extension & URL scheme app handlers
+### ファイル拡張子とURLスキームアプリハンドラ
 
-Weird apps registered by file extensions could be abused and different applications can be register to open specific protocols
+ファイル拡張子によって登録された奇妙なアプリは悪用される可能性があり、異なるアプリケーションが特定のプロトコルを開くために登録されることがあります。
 
 {% content-ref url="macos-file-extension-apps.md" %}
 [macos-file-extension-apps.md](macos-file-extension-apps.md)
 {% endcontent-ref %}
+## MacOS特権エスカレーション
 
-## MacOS Privilege Escalation
+### CVE-2020-9771 - mount\_apfs TCCバイパスと特権エスカレーション
 
-### CVE-2020-9771 - mount\_apfs TCC bypass and privilege escalation
-
-**Any user** (even unprivileged ones) can create and mount a time machine snapshot an **access ALL the files** of that snapshot.\
-The **only privileged** needed is for the application used (like `Terminal`) to have **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) which need to be granted by an admin.
+**どのユーザーでも**（特権を持たないユーザーでも）タイムマシンのスナップショットを作成し、マウントすることができ、そのスナップショットの**すべてのファイルにアクセス**することができます。\
+必要なのは、使用されるアプリケーション（例：`Terminal`）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つための特権のみであり、これは管理者によって許可される必要があります。
 
 {% code overflow="wrap" %}
 ```bash
@@ -141,9 +140,9 @@ ls /tmp/snap/Users/admin_user # This will work
 ```
 {% endcode %}
 
-A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve\_2020\_9771/)**.**
+より詳しい説明は[**元のレポート**](https://theevilbit.github.io/posts/cve\_2020\_9771/)にあります。
 
-### Sensitive Information
+### 機密情報
 
 {% content-ref url="macos-files-folders-and-binaries/macos-sensitive-locations.md" %}
 [macos-sensitive-locations.md](macos-files-folders-and-binaries/macos-sensitive-locations.md)
@@ -151,15 +150,15 @@ A more detailed explanation can be [**found in the original report**](https://th
 
 ### Linux Privesc
 
-First of all, please note that **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** machines. So see:
+まず、**Linux/Unixに影響を与える特権昇格に関するほとんどのトリックは、MacOSマシンにも影響を与えます**。したがって、以下を参照してください：
 
 {% content-ref url="../../linux-hardening/privilege-escalation/" %}
 [privilege-escalation](../../linux-hardening/privilege-escalation/)
 {% endcontent-ref %}
 
-## MacOS Defensive Apps
+## MacOSの防御アプリ
 
-## References
+## 参考文献
 
 * [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 * [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
@@ -169,22 +168,22 @@ First of all, please note that **most of the tricks about privilege escalation a
 
 <figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+[**HackenProofをフォロー**](https://bit.ly/3xrrDrL) **して、web3のバグについてもっと学びましょう**
 
-🐞 Read web3 bug tutorials
+🐞 web3のバグのチュートリアルを読む
 
-🔔 Get notified about new bug bounties
+🔔 新しいバグバウンティについて通知を受ける
 
-💬 Participate in community discussions
+💬 コミュニティディスカッションに参加する
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを発見してください
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れる
+* **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で**私**を**フォロー**[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

@@ -1,151 +1,145 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 
 ## smss.exe
 
-**Session Manager**.\
-Session 0 starts **csrss.exe** and **wininit.exe** (**OS** **services**) while Session 1 starts **csrss.exe** and **winlogon.exe** (**User** **session**). However, you should see **only one process** of that **binary** without children in the processes tree.
+**セッションマネージャ**。\
+セッション0では**csrss.exe**と**wininit.exe**（**OSサービス**）が開始されますが、セッション1では**csrss.exe**と**winlogon.exe**（**ユーザーセッション**）が開始されます。ただし、プロセスツリーには**そのバイナリのプロセスが1つだけ**表示されるはずです。
 
-Also, sessions apart from 0 and 1 may mean that RDP sessions are occurring.
+また、セッション0と1以外のセッションは、RDPセッションが発生していることを意味する場合があります。
 
 
 ## csrss.exe
 
-**Client/Server Run Subsystem Process**.\
-It manages **processes** and **threads**, makes the **Windows** **API** available for other processes and also **maps drive letters**, create **temp files**, and handles the **shutdown** **process**.
+**クライアント/サーバーランサブシステムプロセス**。\
+プロセスとスレッドを管理し、他のプロセスに**Windows API**を利用可能にし、**ドライブレターをマップ**し、**一時ファイルを作成**し、**シャットダウンプロセス**を処理します。
 
-There is one **running in Session 0 and another one in Session 1** (so **2 processes** in the processes tree). Another one is created **per new Session**.
+セッション0とセッション1のそれぞれに1つずつ存在します（プロセスツリーには2つのプロセスがあります）。新しいセッションごとにもう1つ作成されます。
 
 
 ## winlogon.exe
 
-**Windows Logon Process**.\
-It's responsible for user **logon**/**logoffs**. It launches **logonui.exe** to ask for username and password and then calls **lsass.exe** to verify them.
+**Windowsログオンプロセス**。\
+ユーザーの**ログオン**/**ログオフ**に責任があります。ユーザー名とパスワードを求めるために**logonui.exe**を起動し、それから**lsass.exe**を呼び出して検証します。
 
-Then it launches **userinit.exe** which is specified in **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** with key **Userinit**.
+その後、**`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`**にある**Userinit**キーで指定された**userinit.exe**を起動します。
 
-Mover over, the previous registry should have **explorer.exe** in the **Shell key** or it might be abused as a **malware persistence method**.
+さらに、前述のレジストリには**Shellキー**に**explorer.exe**があるはずであり、それは**マルウェアの持続性手法**として悪用される可能性があります。
 
 
 ## wininit.exe
 
-**Windows Initialization Process**. \
-It launches **services.exe**, **lsass.exe**, and **lsm.exe** in Session 0. There should only be 1 process.
+**Windows初期化プロセス**。\
+セッション0で**services.exe**、**lsass.exe**、**lsm.exe**を起動します。プロセスは1つだけであるはずです。
 
 
 ## userinit.exe
 
-**Userinit Logon Application**.\
-Loads the **ntduser.dat in HKCU** and initialises the **user** **environment** and runs **logon** **scripts** and **GPO**.
+**Userinitログオンアプリケーション**。\
+**ntduser.datをHKCUに**ロードし、**ユーザー**の**環境**を初期化し、**ログオンスクリプト**と**GPO**を実行します。
 
-It launches **explorer.exe**.
+**explorer.exe**を起動します。
 
 
 ## lsm.exe
 
-**Local Session Manager**.\
-It works with smss.exe to manipulate user sessions: Logon/logoff, shell start, lock/unlock desktop, etc.
+**ローカルセッションマネージャ**。\
+smss.exeと協力してユーザーセッションを操作します：ログオン/ログオフ、シェルの開始、デスクトップのロック/ロック解除など。
 
-After W7 lsm.exe was transformed into a service (lsm.dll).
+W7以降、lsm.exeはサービス（lsm.dll）に変換されました。
 
-There should only be 1 process in W7 and from them a service running the DLL.
+W7では1つのプロセスのみが存在し、そのうちの1つがDLLを実行するサービスです。
 
 
 ## services.exe
 
-**Service Control Manager**.\
-It **loads** **services** configured as **auto-start** and **drivers**.
+**サービス制御マネージャ**。\
+**自動起動**と**ドライバ**として構成された**サービス**を**ロード**します。
 
-It's the parent process of **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** and many more.
+**svchost.exe**、**dllhost.exe**、**taskhost.exe**、**spoolsv.exe**などの親プロセスです。
 
-Services are defined in `HKLM\SYSTEM\CurrentControlSet\Services` and this process maintains a DB in memory of service info that can be queried by sc.exe.
+サービスは`HKLM\SYSTEM\CurrentControlSet\Services`で定義され、このプロセスはサービス情報のメモリ内データベースを維持し、sc.exeによってクエリできます。
 
-Note how **some** **services** are going to be running in a **process of their own** and others are going to be **sharing a svchost.exe process**.
+**一部のサービス**は**独自のプロセス**で実行され、他のサービスは**svchost.exeプロセスを共有**します。
 
-There should only be 1 process.
+プロセスは1つだけであるはずです。
 
 
 ## lsass.exe
 
-**Local Security Authority Subsystem**.\
-It's responsible for the user **authentication** and create the **security** **tokens**. It uses authentication packages located in `HKLM\System\CurrentControlSet\Control\Lsa`.
+**ローカルセキュリティ機関サブシステム**。\
+ユーザーの**認証**を担当し、**セキュリティトークン**を作成します。認証パッケージは`HKLM\System\CurrentControlSet\Control\Lsa`にあります。
 
-It writes to the **Security** **event** **log** and there should only be 1 process.
+**セキュリティイベントログ**に書き込みます。プロセスは1つだけであるはずです。
 
-Keep in mind that this process is highly attacked to dump passwords.
+このプロセスはパスワードをダンプするために攻撃されやすいことに注意してください。
 
 
 ## svchost.exe
 
-**Generic Service Host Process**.\
-It hosts multiple DLL services in one shared process.
+**汎用サービスホストプロセス**。\
+複数のDLLサービスを1つの共有プロセスでホストします。
 
-Usually, you will find that **svchost.exe** is launched with the `-k` flag. This will launch a query to the registry **HKEY\_LOCAL\_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** where there will be a key with the argument mentioned in -k that will contain the services to launch in the same process.
+通常、**svchost.exe**は`-k`フラグとともに起動されます。これにより、レジストリ**HKEY\_LOCAL\_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost**にクエリが送信され、-kで指定された引数を持つキーがあり、同じプロセスで起動するサービスが含まれています。
 
-For example: `-k UnistackSvcGroup` will launch: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
+例：`-k UnistackSvcGroup`は次のものを起動します：`PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
 
-If the **flag `-s`** is also used with an argument, then svchost is asked to **only launch the specified service** in this argument.
+**フラグ`-s`**も引数とともに使用される場合、svchostにはこの引数で指定されたサービスのみを起動するように要求されます。
 
-There will be several processes of `svchost.exe`. If any of them is **not using the `-k` flag**, then that's very suspicious. If you find that **services.exe is not the parent**, that's also very suspicious.
-
-
+`svchost.exe`の複数のプロセスが存在します。**`-k`フラグを使用していない**ものがあれば、それは非常に疑わしいです。**services.exeが親でない**場合も非常に疑わしいです。
 ## taskhost.exe
 
-This process act as a host for processes running from DLLs. It also loads the services that are running from DLLs.
+このプロセスは、DLLから実行されるプロセスのホストとして機能します。また、DLLから実行されるサービスを読み込みます。
 
-In W8 this is called taskhostex.exe and in W10 taskhostw.exe.
+W8では、これはtaskhostex.exeと呼ばれ、W10ではtaskhostw.exeと呼ばれます。
 
 
 ## explorer.exe
 
-This is the process responsible for the **user's desktop** and launching files via file extensions.
+これは、**ユーザーのデスクトップ**とファイルの拡張子を介してのファイルの起動を担当するプロセスです。
 
-**Only 1** process should be spawned **per logged on user.**
+**ログインしているユーザーごとに1つだけ**のプロセスが生成されるべきです。
 
-This is run from **userinit.exe** which should be terminated, so **no parent** should appear for this process.
+これは**userinit.exe**から実行され、このプロセスには**親プロセス**が表示されないように終了する必要があります。
 
 
-# Catching Malicious Processes
+# 悪意のあるプロセスの検出
 
-* Is it running from the expected path? (No Windows binaries run from temp location)
-* Is it communicating with weird IPs?
-* Check digital signatures (Microsoft artifacts should be signed)
-* Is it spelled correctly?
-* Is running under the expected SID?
-* Is the parent process the expected one (if any)?
-* Are the children processes the expecting ones? (no cmd.exe, wscript.exe, powershell.exe..?)
+* 期待されるパスから実行されていますか？（Windowsのバイナリは一時的な場所から実行されません）
+* 奇妙なIPと通信していますか？
+* デジタル署名をチェックします（Microsoftのアーティファクトは署名されているはずです）
+* 正しくスペルされていますか？
+* 期待されるSIDの下で実行されていますか？
+* 親プロセスは期待されるものですか（ある場合）？
+* 子プロセスは期待されるものですか（cmd.exe、wscript.exe、powershell.exeなどはありませんか？）
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**または**[telegramグループ](https://t.me/peass)**に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
-
-

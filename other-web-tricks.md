@@ -1,45 +1,45 @@
-# Other Web Tricks
+# その他のウェブトリック
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ会社で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**してください。
+* **ハッキングのトリックを共有する**には、[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>
 
-### Host header
+### ホストヘッダー
 
-Several times the back-end trust the **Host header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+バックエンドは、何らかのアクションを実行するために**ホストヘッダー**を信頼することがあります。たとえば、**パスワードリセットの送信先ドメイン**としてその値を使用することがあります。したがって、パスワードをリセットするためのリンクが含まれたメールを受け取った場合、使用されているドメインはホストヘッダーに入力したものです。そのため、他のユーザーのパスワードリセットをリクエストし、ドメインを自分が制御するドメインに変更して、彼らのパスワードリセットコードを盗むことができます。[WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)。
 
 {% hint style="warning" %}
-Note that it's possible that you don't even need to wait for the user to click on the reset password link to get the token, as maybe even **spam filters or other intermediary devices/bots will click on it to analyze it**.
+ユーザーがリセットパスワードリンクをクリックするのを待つ必要はないかもしれません。**スパムフィルターや他の中間デバイス/ボットがリンクをクリックして分析する**可能性があります。
 {% endhint %}
 
-### Session booleans
+### セッションブール値
 
-Some times when you complete some verification correctly the back-end will **just add a boolean with the value "True" to a security attribute your session**. Then, a different endpoint will know if you successfully passed that check.\
-However, if you **pass the check** and your sessions is granted that "True" value in the security attribute, you can try to **access other resources** that **depends on the same attribute** but that you **shouldn't have permissions** to access. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+バックエンドがいくつかの検証を正しく完了すると、セッションに**値が「True」のブール値をセキュリティ属性として追加**することがあります。その後、別のエンドポイントは、そのチェックに成功したかどうかを知ることができます。\
+ただし、チェックに合格し、セッションがセキュリティ属性に「True」の値を持つ場合、**アクセス権を持っていないはずの同じ属性に依存する他のリソースにアクセス**を試みることができます。[WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)。
 
-### Register functionality
+### 登録機能
 
-Try to register as an already existent user. Try also using equivalent characters (dots, lots of spaces and Unicode).
+既に存在するユーザーとして登録してみてください。また、同等の文字（ドット、多くのスペース、Unicode）を使用してみてください。
 
-### Takeover emails
+### メールの乗っ取り
 
-Register an email, before confirming it change the email, then, if the new confirmation email is sent to the first registered email,you can takeover any email. Or if you can enable the second email confirming the firt one, you can also takeover any account.
+メールを登録し、確認する前にメールを変更してください。その後、新しい確認メールが最初に登録したメールに送信される場合、任意のメールを乗っ取ることができます。または、最初のメールを有効にすることができれば、2番目のメールを確認して任意のアカウントを乗っ取ることもできます。
 
-### Access Internal servicedesk of companies using atlassian
+### Atlassianを使用した企業の内部サービスデスクへのアクセス
 
 {% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
 
-### TRACE method
+### TRACEメソッド
 
-Developers might forget to disable various debugging options in the production environment. For example, the HTTP `TRACE` method is designed for diagnostic purposes. If enabled, the web server will respond to requests that use the `TRACE` method by echoing in the response the exact request that was received. This behaviour is often harmless, but occasionally leads to information disclosure, such as the name of internal authentication headers that may be appended to requests by reverse proxies.![Image for post](https://miro.medium.com/max/60/1\*wDFRADTOd9Tj63xucenvAA.png?q=20)
+開発者は、本番環境でさまざまなデバッグオプションを無効にするのを忘れることがあります。たとえば、HTTPの`TRACE`メソッドは診断目的で設計されています。有効になっている場合、Webサーバーは`TRACE`メソッドを使用するリクエストに対して、受信した正確なリクエストをレスポンスでエコーします。この動作は通常無害ですが、場合によっては、リバースプロキシによってリクエストに追加される内部認証ヘッダーの名前など、情報の漏洩につながることがあります。![Image for post](https://miro.medium.com/max/60/1\*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1\*wDFRADTOd9Tj63xucenvAA.png)
 
@@ -48,10 +48,8 @@ Developers might forget to disable various debugging options in the production e
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
+* **サイバーセキュリティ会社で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**してください。
+* **ハッキングのトリックを共有する**には、[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlo

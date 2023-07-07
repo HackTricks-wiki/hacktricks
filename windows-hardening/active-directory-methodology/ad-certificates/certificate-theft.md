@@ -1,25 +1,24 @@
-# AD CS Certificate Theft
+# AD CS 証明書の盗難
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricks で会社を宣伝**したいですか？または、**PEASS の最新バージョンにアクセスしたり、HackTricks を PDF でダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式の PEASS & HackTricks スワッグ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discord グループ**](https://discord.gg/hRep4RUj7f)または[**telegram グループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricks リポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud リポジトリ](https://github.com/carlospolop/hacktricks-cloud)**に PR を提出してください。
 
 </details>
 
-## What can I do with a certificate
+## 証明書で何ができるか
 
-Before checking how to steal the certificates here you have some info about how to find what the certificate is useful for:
-
+証明書を盗む方法を確認する前に、証明書がどのように役立つかについての情報をいくつか紹介します。
 ```powershell
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -31,36 +30,34 @@ $Cert.EnhancedKeyUsageList
 # cmd
 certutil.exe -dump -v cert.pfx
 ```
+## Crypto APIを使用して証明書をエクスポートする - THEFT1
 
-## Exporting Certificates Using the Crypto APIs – THEFT1
+ユーザーまたはマシンの証明書と秘密鍵を抽出する最も簡単な方法は、**対話型デスクトップセッション**を介して行うことです。もし**秘密鍵**が**エクスポート可能**であれば、`certmgr.msc`で証明書を右クリックし、`すべてのタスク → エクスポート...`を選択して、パスワードで保護された.pfxファイルとしてエクスポートすることができます。\
+これは**プログラムで**も実行することができます。PowerShellの`ExportPfxCertificate`コマンドレットや[TheWoverのCertStealer C#プロジェクト](https://github.com/TheWover/CertStealer)などの例があります。
 
-The easiest way to extract a user or machine certificate and private key is through an **interactive desktop session**. If the **private key** is **exportable**, one can simply right click the certificate in `certmgr.msc`, and go to `All Tasks → Export`… to export a password protected .pfx file. \
-One can accomplish this **programmatically** as well. Examples include PowerShell’s `ExportPfxCertificate` cmdlet or [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer).
+これらの方法は、証明書ストアとのやり取りに**Microsoft CryptoAPI**（CAPI）またはより新しいCryptography API: Next Generation（CNG）を使用しています。これらのAPIは、証明書の保存と認証に必要なさまざまな暗号化サービスを提供します（他の用途も含まれます）。
 
-Underneath, these methods use the **Microsoft CryptoAPI** (CAPI) or more modern Cryptography API: Next Generation (CNG) to interact with the certificate store. These APIs perform various cryptographic services that needed for certificate storage and authentication (amongst other uses).
+もし秘密鍵がエクスポート不可能であれば、CAPIとCNGはエクスポート不可能な証明書の抽出を許可しません。**Mimikatz**の`crypto::capi`および`crypto::cng`コマンドを使用すると、CAPIとCNGをパッチして秘密鍵のエクスポートを許可することができます。`crypto::capi`は現在のプロセスで**CAPIをパッチ**しますが、`crypto::cng`は**lsass.exeのメモリをパッチ**する必要があります。
 
-If the private key is non-exportable, CAPI and CNG will not allow extraction of non-exportable certificates. **Mimikatz’s** `crypto::capi` and `crypto::cng` commands can patch the CAPI and CNG to **allow exportation** of private keys. `crypto::capi` **patches** **CAPI** in the current process whereas `crypto::cng` requires **patching** **lsass.exe’s** memory.
+## DPAPIを使用したユーザー証明書の盗難 - THEFT2
 
-## User Certificate Theft via DPAPI – THEFT2
-
-More info about DPAPI in:
+DPAPIについての詳細は次の場所で確認できます：
 
 {% content-ref url="../../windows-local-privilege-escalation/dpapi-extracting-passwords.md" %}
 [dpapi-extracting-passwords.md](../../windows-local-privilege-escalation/dpapi-extracting-passwords.md)
 {% endcontent-ref %}
 
-Windows **stores certificate private keys using DPAPI**. Microsoft breaks out the storage locations for user and machine private keys. When manually decrypting the encrypted DPAPI blobs, a developer needs to understand which cryptography API the OS used as the private key file structure differs between the two APIs. When using SharpDPAPI, it automatically accounts for these file format differences.&#x20;
+Windowsは、証明書の秘密鍵を**DPAPIを使用して保存**します。Microsoftは、ユーザーとマシンの秘密鍵の保存場所を分けています。暗号化されたDPAPIのブロブを手動で復号化する場合、開発者はOSが使用した暗号化APIを理解する必要があります。なぜなら、秘密鍵ファイルの構造は2つのAPI間で異なるからです。SharpDPAPIを使用すると、これらのファイル形式の違いを自動的に考慮します。
 
-Windows most **commonly stores user certificates** in the registry in the key `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, though some personal certificates for users are **also** stored in `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. The associated user **private key locations** are primarily at `%APPDATA%\Microsoft\Crypto\RSA\User SID\` for **CAPI** keys and `%APPDATA%\Microsoft\Crypto\Keys\` for **CNG** keys.
+Windowsは、ユーザー証明書を**一般的には**レジストリの`HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`に保存しますが、一部のユーザーの個人証明書は`%APPDATA%\Microsoft\SystemCertificates\My\Certificates`にも保存されます。関連するユーザーの**秘密鍵の場所**は、主に**CAPI**キーの場合は`%APPDATA%\Microsoft\Crypto\RSA\User SID\`、**CNG**キーの場合は`%APPDATA%\Microsoft\Crypto\Keys\`です。
 
-To obtain a certificate and its associated private key, one needs to:
+証明書と関連する秘密鍵を取得するには、次の手順を実行する必要があります：
 
-1. Identify w**hich certificate one wants to steal** from the user’s certificate store and extract the key store name.
-2. Find the **DPAPI masterkey** needed to decrypt the associated private key.
-3. Obtain the plaintext DPAPI masterkey and use it to **decrypt the private key**.
+1. ユーザーの証明書ストアから**盗みたい証明書**を特定し、キーストア名を抽出します。
+2. 関連する秘密鍵を復号化するために必要な**DPAPIマスターキー**を見つけます。
+3. 平文のDPAPIマスターキーを取得し、それを使用して秘密鍵を**復号化**します。
 
-To **get the plaintext DPAPI masterkey**:
-
+平文のDPAPIマスターキーを**取得するには**：
 ```bash
 # With mimikatz
 ## Running in a process in the users context
@@ -70,66 +67,61 @@ dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
 ## knowing the users password
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /sid:accountSid /password:PASS
 ```
-
-To simplify masterkey file and private key file decryption, [**SharpDPAPI’s**](https://github.com/GhostPack/SharpDPAPI) `certificates` command can be used with the `/pvk`, `/mkfile`, `/password`, or `{GUID}:KEY` arguments to decrypt the private keys and associated certificates, outputting a `.pem` text file.
-
+マスターキーファイルとプライベートキーファイルの復号を簡素化するために、[**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI)の`certificates`コマンドを使用できます。`/pvk`、`/mkfile`、`/password`、または`{GUID}:KEY`引数を使用して、プライベートキーと関連する証明書を復号し、`.pem`テキストファイルを出力します。
 ```bash
 SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
 
 # Transfor .pem to .pfx
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
+## DPAPIを使用したマシン証明書の盗難 – THEFT3
 
-## Machine Certificate Theft via DPAPI – THEFT3
+Windowsはマシン証明書をレジストリキー `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` に保存し、プライベートキーはアカウントによって異なる場所に保存します。\
+SharpDPAPIはこれらの場所すべてを検索しますが、最も興味深い結果は `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys`（CAPI）および `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys`（CNG）から得られます。これらの**プライベートキー**は**マシン証明書**ストアに関連付けられており、Windowsはこれらを**マシンのDPAPIマスターキー**で暗号化します。\
+これらのキーはドメインのDPAPIバックアップキーを使用して復号することはできませんが、代わりにシステムの**DPAPI\_SYSTEM LSAシークレット**を使用する必要があります。このシークレットは**SYSTEMユーザーのみがアクセスできます**。&#x20;
 
-Windows stores machine certificates in the registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` and stores private keys in several different places depending on the account.\
-Although SharpDPAPI will search all these locations, the most interesting results tend to come from `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (CAPI) and `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (CNG). These **private keys** are associated with the **machine certificate** store and Windows encrypts them with the **machine’s DPAPI master keys**.\
-One cannot decrypt these keys using the domain’s DPAPI backup key, but rather **must** use the **DPAPI\_SYSTEM LSA secret** on the system which is **accessible only by the SYSTEM user**.&#x20;
+**Mimikatz**の**`lsadump::secrets`**コマンドを使用してこれを手動で行い、抽出したキーを使用して**マシンマスターキー**を**復号化**することができます。\
+また、CAPI/CNGを以前と同じようにパッチし、**Mimikatz**の`crypto::certificates /export /systemstore:LOCAL_MACHINE`コマンドを使用することもできます。\
+**SharpDPAPI**のcertificatesコマンドには**`/machine`**フラグがあります（昇格している場合）、これにより自動的に**SYSTEMに昇格**し、**DPAPI\_SYSTEM** LSAシークレットをダンプし、これを使用してマシンのDPAPIマスターキーを復号化し、キーの平文をルックアップテーブルとして使用してマシン証明書のプライベートキーを復号化します。
 
-You can do this manually with **Mimikatz’** **`lsadump::secrets`** command and then use the extracted key to **decrypt machine masterkeys**. \
-You can also patch CAPI/CNG as before and use **Mimikatz’** `crypto::certificates /export /systemstore:LOCAL_MACHINE` command. \
-**SharpDPAPI’s** certificates command with the **`/machine`** flag (while elevated) will automatically **elevate** to **SYSTEM**, **dump** the **DPAPI\_SYSTEM** LSA secret, use this to **decrypt** and found machine DPAPI masterkeys, and use the key plaintexts as a lookup table to decrypt any machine certificate private keys.
+## 証明書ファイルの検索 – THEFT4
 
-## Finding Certificate Files – THEFT4
+時には証明書がファイルシステムにあることがあります。たとえば、ファイル共有やダウンロードフォルダにあります。\
+私たちがよく見るWindowsに焦点を当てた証明書ファイルの一般的なタイプは、**`.pfx`** と **`.p12`** ファイルです。**`.pkcs12`** や **`.pem`** も時々現れますが、頻度は低いです。\
+他にも興味深い証明書関連のファイル拡張子には、**`.key`**（プライベートキー）、**`.crt/.cer`**（証明書のみ）、**`.csr`**（証明書署名要求、証明書やプライベートキーは含まれていません）、**`.jks/.keystore/.keys`**（Javaキーストア。Javaアプリケーションで使用される証明書とプライベートキーが含まれる場合があります）があります。
 
-Sometimes **certificates are just in the filesystem**, like in file shares or in the Downloads folder.\
-The most common type of Windows-focused certificate files we have seen are **`.pfx`** and **`.p12`** files, with **`.pkcs12`** and ** `.pem` ** sometimes showing up but less often.\
-Other interesting certificate-related file extensions are: **`.key`** (_private key_), **`.crt/.cer`** (_just cert_), **`.csr`** (_Certificate Signing Request, it doesn't contain certs of priv keys_), **`.jks/.keystore/.keys`** (_Java Keystore. May contain certs + private keys used by Java applications_).
+これらの拡張子を使用して、PowerShellまたはコマンドプロンプトで検索すれば、これらのファイルを見つけることができます。
 
-To find this files, just search for those extensions using powershell or the cmd.
+もし**PKCS#12**証明書ファイルを見つけ、それが**パスワードで保護されている**場合、[pfx2john.py](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john\_8py\_source.html)を使用してハッシュを抽出し、JohnTheRipperを使用してクラックすることができます。
 
-If you find a **PKCS#12** certificate file and it is **password protected**, you can extract a hash using [pfx2john.py](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john\_8py\_source.html) **crack** it using JohnTheRipper.
+## PKINITを介したNTLM資格情報の盗難 – THEFT5
 
-## NTLM Credential Theft via PKINIT – THEFT5
+> NTLM認証をサポートするために、Kerberos認証をサポートしないネットワークサービスに接続するアプリケーションに対して、PKCAが使用される場合、KDCは特権属性証明書（PAC）の**`PAC_CREDENTIAL_INFO`**バッファにユーザーのNTLMワンウェイ関数（OWF）を返します。
 
-> In order to **support NTLM authentication** \[MS-NLMP] for applications connecting to network services that **do not support Kerberos** authentication, when PKCA is used, the KDC returns the **user’s NTLM** one-way function (OWF) in the privilege attribute certificate (PAC) **`PAC_CREDENTIAL_INFO`** buffer
+したがって、アカウントが認証され、PKINITを介して**TGTを取得**した場合、現在のホストは**TGTからNTLMハッシュを取得**するための組み込みの「failsafe」があります。これには、NTLM平文の**`PAC_CREDENTIAL_DATA`**構造を**復号化**することが含まれます。この構造は、NTLM平文のネットワークデータ表現（NDR）シリアル化表現です。
 
-So, if account authenticates and gets a **TGT through PKINIT**, there is a built-in “failsafe” that allows the current host to **obtain our NTLM hash from the TGT** to support legacy authentication. This involves **decrypting** a **`PAC_CREDENTIAL_DATA`** **structure** that is a Network Data Representation (NDR) serialized representation of the NTLM plaintext.
-
-[**Kekeo**](https://github.com/gentilkiwi/kekeo) can be used to ask for a TGT with this information an retrieve the users NTML
-
+[**Kekeo**](https://github.com/gentilkiwi/kekeo)を使用して、この情報を含むTGTを要求し、ユーザーのNTLMハッシュを取得することができます。
 ```bash
 tgt::pac /caname:thename-DC-CA /subject:harmj0y /castore:current_user /domain:domain.local
 ```
+Kekeoの実装は、[**PINを回復**](https://github.com/CCob/PinSwipe)**することができれば、現在接続されているスマートカードで保護された証明書でも動作します。**また、[**Rubeus**](https://github.com/GhostPack/Rubeus)でもサポートされます。
 
-Kekeo’s implementation will also work with smartcard-protected certs that are currently plugged in if you can [**recover the pin**](https://github.com/CCob/PinSwipe)**.** It will also be supported in [**Rubeus**](https://github.com/GhostPack/Rubeus).
+## 参考文献
 
-## References
-
-* All the info was taken from [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)
+* すべての情報は[https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)から取得されました。
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で**フォロー**する[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>

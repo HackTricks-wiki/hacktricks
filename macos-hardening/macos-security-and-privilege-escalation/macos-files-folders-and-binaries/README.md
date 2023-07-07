@@ -1,134 +1,132 @@
-# macOS Files, Folders, Binaries & Memory
+# macOSのファイル、フォルダ、バイナリ＆メモリ
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ会社で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有して、PRを提出してください** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)。
 
 </details>
 
-## File hierarchy layout
+## ファイル階層レイアウト
 
-* **/Applications**: The installed apps should be here. All the users will be able to access them.
-* **/bin**: Command line binaries
-* **/cores**: If exists, it's used to store core dumps
-* **/dev**: Everything is treated as a file so you may see hardware devices stored here.
-* **/etc**: Configuration files
-* **/Library**: A lot of subdirectories and files related to preferences, caches and logs can be found here. A Library folder exists in root and on each user's directory.
-* **/private**: Undocumented but a lot of the mentioned folders are symbolic links to the private directory.
-* **/sbin**: Essential system binaries (related to administration)
-* **/System**: File fo making OS X run. You should find mostly only Apple specific files here (not third party).
-* **/tmp**: Files are deleted after 3 days (it's a soft link to /private/tmp)
-* **/Users**: Home directory for users.
-* **/usr**: Config and system binaries
-* **/var**: Log files
-* **/Volumes**: The mounted drives will apear here.
-* **/.vol**: Running `stat a.txt` you obtain something like `16777223 7545753 -rw-r--r-- 1 username wheel ...` where the first number is the id number of the volume where the file exists and the second one is the inode number. You can access the content of this file through /.vol/ with that information running `cat /.vol/16777223/7545753`
+* **/Applications**: インストールされたアプリはここにあります。すべてのユーザーがアクセスできます。
+* **/bin**: コマンドラインのバイナリ
+* **/cores**: 存在する場合、コアダンプを保存するために使用されます
+* **/dev**: すべてがファイルとして扱われるため、ここにハードウェアデバイスが保存されている場合があります。
+* **/etc**: 設定ファイル
+* **/Library**: 好み、キャッシュ、ログに関連する多くのサブディレクトリとファイルがここにあります。ルートと各ユーザーのディレクトリにLibraryフォルダが存在します。
+* **/private**: 文書化されていませんが、多くの言及されたフォルダはprivateディレクトリへのシンボリックリンクです。
+* **/sbin**: システムの管理に関連する必須のシステムバイナリ
+* **/System**: OS Xを実行するためのファイル。ここには主にAppleの固有のファイルがあります（サードパーティではありません）。
+* **/tmp**: ファイルは3日後に削除されます（/private/tmpへのソフトリンクです）
+* **/Users**: ユーザーのホームディレクトリ。
+* **/usr**: 設定とシステムバイナリ
+* **/var**: ログファイル
+* **/Volumes**: マウントされたドライブはここに表示されます。
+* **/.vol**: `stat a.txt`を実行すると、`16777223 7545753 -rw-r--r-- 1 username wheel ...`のような結果が得られます。最初の数値はファイルが存在するボリュームのID番号であり、2番目の数値はinode番号です。その情報を使用して、このファイルの内容には/.vol/からアクセスできます。情報を使用して`cat /.vol/16777223/7545753`を実行します。
 
-### Applications Folders
+### アプリケーションフォルダ
 
-* **System applications** are located under `/System/Applications`
-* **Installed** applications are usually installed in `/Applications` or in `~/Applications`
-* **Application data** can be found in `/Library/Application Support` for the applications running as root and `~/Library/Application Support` for applications running as the user.
-* Third-party applications **daemons** that **need to run as root** as usually located in `/Library/PrivilegedHelperTools/`
-* **Sandboxed** apps are mapped into the `~/Library/Containers` folder. Each app has a folder named according to the application’s bundle ID (`com.apple.Safari`).
-* The **kernel** is located in `/System/Library/Kernels/kernel`
-* **Apple's kernel extensions** are located in `/System/Library/Extensions`
-* **Third-party kernel extensions** are stored in `/Library/Extensions`
+* **システムアプリケーション**は`/System/Applications`にあります。
+* **インストールされた**アプリケーションは通常`/Applications`または`~/Applications`にインストールされます。
+* **アプリケーションデータ**は、ルートとして実行されるアプリケーションの場合は`/Library/Application Support`に、ユーザーとして実行されるアプリケーションの場合は`~/Library/Application Support`にあります。
+* **ルートとして実行する必要がある**サードパーティのアプリケーション**デーモン**は通常`/Library/PrivilegedHelperTools/`に配置されます。
+* **サンドボックス化された**アプリは`~/Library/Containers`フォルダにマップされます。各アプリには、アプリケーションのバンドルID（`com.apple.Safari`など）に基づいた名前のフォルダがあります。
+* **カーネル**は`/System/Library/Kernels/kernel`にあります。
+* **Appleのカーネル拡張**は`/System/Library/Extensions`にあります。
+* **サードパーティのカーネル拡張**は`/Library/Extensions`に保存されます。
 
-### Files with Sensitive Information
+### 機密情報を含むファイル
 
-MacOS stores information such as passwords in several places:
+MacOSは、パスワードなどの情報をいくつかの場所に保存します：
 
 {% content-ref url="macos-sensitive-locations.md" %}
 [macos-sensitive-locations.md](macos-sensitive-locations.md)
 {% endcontent-ref %}
 
-### Vulnerable pkg installers
+### 脆弱なpkgインストーラ
 
 {% content-ref url="macos-installers-abuse.md" %}
 [macos-installers-abuse.md](macos-installers-abuse.md)
 {% endcontent-ref %}
 
-## OS X Specific Extensions
+## OS X固有の拡張子
 
-* **`.dmg`**: Apple Disk Image files are very frequent for installers.
-* **`.kext`**: It must follow a specific structure and it's the OS X version of a driver. (it's a bundle)
-* **`.plist`**: Also known as property list stores information in XML or binary format.
-  * Can be XML or binary. Binary ones can be read with:
-    * `defaults read config.plist`
-    * `/usr/libexec/PlistBuddy -c print config.plsit`
-    * `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
-    * `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
-    * `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
-* **`.app`**: Apple applications that follows directory structure (It's a bundle).
-* **`.dylib`**: Dynamic libraries (like Windows DLL files)
-* **`.pkg`**: Are the same as xar (eXtensible Archive format). The installer command can be use to install the contents of these files.
-* **`.DS_Store`**: This file is on each directory, it saves the attributes and customisations of the directory.
-* **`.Spotlight-V100`**: This folder appears on the root directory of every volume on the system.
-* **`.metadata_never_index`**: If this file is at the root of a volume Spotlight won't index that volume.
-* **`.noindex`**: Files and folder with this extension won't be indexed by Spotlight.
+* **`.dmg`**: Appleディスクイメージファイルはインストーラーに非常に頻繁に使用されます。
+* **`.kext`**: 特定の構造に従う必要があり、ドライバーのOS Xバージョンです（バンドルです）。
+* **`.plist`**: プロパティリストとしても知られ、情報をXMLまたはバイナリ形式で保存します。
+* XMLまたはバイナリ形式になります。バイナリ形式のものは次のコマンドで読み取ることができます：
+* `defaults read config.plist`
+* `/usr/libexec/PlistBuddy -c print config.plsit`
+* `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
+* `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
+* `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
+* **`.app`**: ディレクトリ構造に従うAppleアプリケーション（バンドルです）。
+* **`.dylib`**: 動的ライブラリ（WindowsのDLLファイルのようなもの）
+* **`.pkg`**: xar（eXtensible Archive形式）と同じです。installerコマンドを使用してこれらのファイルの内容をインストールできます。
+* **`.DS_Store`**: このファイルは各ディレクトリにあり、ディレクトリの属性とカスタマイズを保存します。
+* **`.Spotlight-V100`**: このフォルダはシステムのすべてのボリュームのルートディレクトリに表示されます。
+* **`.metadata_never_index`**: このファイルがボリュームのルートにある場合、Spotlightはそのボリュームをインデックスしません。
+* **`.noindex`**: この拡張子を持つファイルとフォルダはSpotlightによってインデックスされません。
+### macOSバンドル
 
-### macOS Bundles
-
-Basically, a bundle is a **directory structure** within the file system. Interestingly, by default this directory **looks like a single object in Finder** (like `.app`).&#x20;
+基本的に、バンドルはファイルシステム内の**ディレクトリ構造**です。興味深いことに、このディレクトリはデフォルトでFinderで**単一のオブジェクトのように見えます**（例：`.app`）。&#x20;
 
 {% content-ref url="macos-bundles.md" %}
 [macos-bundles.md](macos-bundles.md)
 {% endcontent-ref %}
 
-## Special File Permissions
+## 特殊なファイルの権限
 
-### Folder permissions
+### フォルダの権限
 
-In a **folder**, **read** allows to **list it**, **write** allows to **delete** and **write** files on it, and **execute** allows to **traverse** the directory. So, for example, a user with **read permission over a file** inside a directory where he **doesn't have execute** permission **won't be able to read** the file.
+**フォルダ**では、**読み取り**は**リスト表示**を許可し、**書き込み**はファイルの**削除**と**書き込み**を許可し、**実行**はディレクトリの**トラバース**を許可します。したがって、例えば、**ファイルの読み取り権限**を持つユーザーが、**実行権限がない**ディレクトリ内のファイルを**読み取ることはできません**。
 
-### Flag modifiers
+### フラグの修飾子
 
-There are some flags that could be set in the files that will make file behave differently. You can **check the flags** of the files inside a directory with `ls -lO /path/directory`
+ファイルに設定されるいくつかのフラグがあり、これによりファイルの動作が異なるようになります。ディレクトリ内のファイルのフラグを`ls -lO /path/directory`で確認できます。
 
-* **`uchg`**: Known as **uchange** flag will **prevent any action** changing or deleting the **file**. To set it do: `chflags uchg file.txt`
-  * The root user could **remove the flag** and modify the file
-* **`restricted`**: This flag makes the file be **protected by SIP** (you cannot add this flag to a file).
-* **`Sticky bit`**: If a directory with sticky bit, **only** the **directories owner or root can remane or delete** files. Typically this is set on the /tmp directory to prevent ordinary users from deleting or moving other users’ files.
+* **`uchg`**：**uchange**フラグとして知られ、**ファイルの変更や削除を防止**します。設定するには：`chflags uchg file.txt`
+* ルートユーザーはフラグを**削除**してファイルを変更できます
+* **`restricted`**：このフラグはファイルを**SIPで保護**します（このフラグをファイルに追加することはできません）。
+* **`Sticky bit`**：スティッキービットが設定されたディレクトリでは、**ディレクトリの所有者またはルートのみがファイルの名前を変更または削除**できます。通常、これは/tmpディレクトリに設定され、一般ユーザーが他のユーザーのファイルを削除または移動できないようにします。
 
-### **File ACLs**
+### **ファイルACL**
 
-File **ACLs** contain **ACE** (Access Control Entries) where more **granular permissions** can be assigned to different users.
+ファイルの**ACL（アクセス制御エントリ）**には、異なるユーザーに対してより**細かい権限**を割り当てることができる**ACE（アクセス制御エントリ）**が含まれています。
 
-It's possible to grant a **directory** these permissions: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
-Ans to a **file**: `read`, `write`, `append`, `execute`.
+ディレクトリにはこれらの権限を付与することができます：`list`、`search`、`add_file`、`add_subdirectory`、`delete_child`、`delete_child`。\
+ファイルにはこれらの権限を付与することができます：`read`、`write`、`append`、`execute`。
 
-When the file contains ACLs you will **find a "+" when listing the permissions like in**:
-
+ファイルにACLが含まれている場合、パーミッションをリスト表示する際に**"+"が表示されます**。
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
 ```
-
-You can **read the ACLs** of the file with:
-
+次のコマンドでファイルのACLを読むことができます:
 ```bash
 ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
- 0: group:everyone deny delete
+0: group:everyone deny delete
+```
+次のコマンドを使用して、**ACLを持つすべてのファイル**を見つけることができます（これは非常に遅いです）:
+
+```bash
+find / -type f -exec ls -le {} \; 2>/dev/null
 ```
 
-You can find **all the files with ACLs** with (this is veeery slow):
-
+このコマンドは、ACLを持つすべてのファイルを検索し、それぞれのファイルのACL情報を表示します。ただし、このコマンドは非常に時間がかかる可能性があるため、注意が必要です。
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
+### リソースフォーク | macOS ADS
 
-### Resource Forks | macOS ADS
-
-This is a way to obtain **Alternate Data Streams in MacOS** machines. You can save content inside an extended attribute called **com.apple.ResourceFork** inside a file by saving it in **file/..namedfork/rsrc**.
-
+これは、**macOSマシンでの代替データストリーム**を取得する方法です。ファイルを**file/..namedfork/rsrc**に保存することで、**com.apple.ResourceFork**という拡張属性内にコンテンツを保存することができます。
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -139,59 +137,60 @@ com.apple.ResourceFork: Hello Mac ADS
 ls -l a.txt #The file length is still q
 -rw-r--r--@ 1 username  wheel  6 17 Jul 01:15 a.txt
 ```
+次のコマンドを使用して、この拡張属性を持つすべてのファイルを見つけることができます：
 
-You can **find all the files containing this extended attribute** with:
-
-{% code overflow="wrap" %}
+```bash
+find / -xattrname <extended_attribute_name>
+```
 ```bash
 find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
 ```
 {% endcode %}
 
-## **Universal binaries &** Mach-o Format
+## **ユニバーサルバイナリと**Mach-oフォーマット
 
-Mac OS binaries usually are compiled as **universal binaries**. A **universal binary** can **support multiple architectures in the same file**.
+Mac OSのバイナリは通常、**ユニバーサルバイナリ**としてコンパイルされます。**ユニバーサルバイナリ**は、**同じファイル内で複数のアーキテクチャをサポート**することができます。
 
 {% content-ref url="universal-binaries-and-mach-o-format.md" %}
 [universal-binaries-and-mach-o-format.md](universal-binaries-and-mach-o-format.md)
 {% endcontent-ref %}
 
-## macOS memory dumping
+## macOSメモリダンプ
 
 {% content-ref url="macos-memory-dumping.md" %}
 [macos-memory-dumping.md](macos-memory-dumping.md)
 {% endcontent-ref %}
 
-## Risk Category Files Mac OS
+## リスクカテゴリファイルMac OS
 
-The files `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` contains the risk associated to files depending on the file extension.
+ファイル`/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System`には、ファイルの拡張子に応じたリスクが含まれています。
 
-The possible categories include the following:
+可能なカテゴリは次のとおりです：
 
-* **LSRiskCategorySafe**: **Totally** **safe**; Safari will auto-open after download
-* **LSRiskCategoryNeutral**: No warning, but **not auto-opened**
-* **LSRiskCategoryUnsafeExecutable**: **Triggers** a **warning** “This file is an application...”
-* **LSRiskCategoryMayContainUnsafeExecutable**: This is for things like archives that contain an executable. It **triggers a warning unless Safari can determine all the contents are safe or neutral**.
+* **LSRiskCategorySafe**：**完全に安全**；ダウンロード後にSafariが自動的に開く
+* **LSRiskCategoryNeutral**：警告はないが、**自動的に開かれない**
+* **LSRiskCategoryUnsafeExecutable**：「このファイルはアプリケーションです...」という**警告をトリガー**する
+* **LSRiskCategoryMayContainUnsafeExecutable**：実行可能ファイルを含むアーカイブなどに使用されます。Safariがすべてのコンテンツが安全または中立であることを判断できない場合、**警告をトリガー**します。
 
-## Log files
+## ログファイル
 
-* **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contains information about downloaded files, like the URL from where they were downloaded.
-* **`/var/log/system.log`**: Main log of OSX systems. com.apple.syslogd.plist is responsible for the execution of syslogging (you can check if it's disabled looking for "com.apple.syslogd" in `launchctl list`.
-* **`/private/var/log/asl/*.asl`**: These are the Apple System Logs which may contain interesting information.
-* **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Stores recently accessed files and applications through "Finder".
-* **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Stores items to launch upon system startup
-* **`$HOME/Library/Logs/DiskUtility.log`**: Log file for thee DiskUtility App (info about drives, including USBs)
-* **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Data about wireless access points.
-* **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List of daemons deactivated.
+* **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**：ダウンロードされたファイルに関する情報が含まれています。ダウンロード元のURLなど。
+* **`/var/log/system.log`**：OSXシステムのメインログ。sysloggingの実行はcom.apple.syslogd.plistが担当しています（`launchctl list`で「com.apple.syslogd」を検索して無効になっているかどうかを確認できます）。
+* **`/private/var/log/asl/*.asl`**：興味深い情報が含まれている可能性があるApple System Logsです。
+* **`$HOME/Library/Preferences/com.apple.recentitems.plist`**：「Finder」を介して最近アクセスしたファイルとアプリケーションを保存します。
+* **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**：システム起動時に起動するアイテムを保存します。
+* **`$HOME/Library/Logs/DiskUtility.log`**：DiskUtilityアプリのログファイル（ドライブに関する情報、USBを含む）
+* **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**：ワイヤレスアクセスポイントに関するデータ。
+* **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**：無効化されたデーモンのリスト。
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式PEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

@@ -1,91 +1,84 @@
-# macOS System Extensions
+# macOSシステム拡張
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロードしたいですか？** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## System Extensions / Endpoint Security Framework
+## システム拡張/エンドポイントセキュリティフレームワーク
 
-Unlike Kernel Extensions, **System Extensions run in user space** instead of kernel space, reducing the risk of a system crash due to extension malfunction.
+カーネル拡張とは異なり、**システム拡張はカーネルスペースではなくユーザースペースで実行**されるため、拡張機能の不具合によるシステムクラッシュのリスクが低減されます。
 
 <figure><img src="../../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
-There are three types of system extensions: **DriverKit** Extensions, **Network** Extensions, and **Endpoint Security** Extensions.
+システム拡張には、**DriverKit**拡張、**Network**拡張、および**Endpoint Security**拡張の3つのタイプがあります。
 
-### **DriverKit Extensions**
+### **DriverKit拡張**
 
-DriverKit is a replacement for kernel extensions that **provide hardware support**. It allows device drivers (like USB, Serial, NIC, and HID drivers) to run in user space rather than kernel space. The DriverKit framework includes **user space versions of certain I/O Kit classes**, and the kernel forwards normal I/O Kit events to user space, offering a safer environment for these drivers to run.
+DriverKitは、**ハードウェアサポートを提供する**カーネル拡張の代替です。これにより、デバイスドライバ（USB、シリアル、NIC、HIDドライバなど）がカーネルスペースではなくユーザースペースで実行されるようになります。DriverKitフレームワークには、特定のI/O Kitクラスのユーザースペースバージョンが含まれており、カーネルは通常のI/O Kitイベントをユーザースペースに転送することで、これらのドライバが実行される安全な環境を提供します。
 
-### **Network Extensions**
+### **Network拡張**
 
-Network Extensions provide the ability to customize network behaviors. There are several types of Network Extensions:
+Network拡張は、ネットワークの動作をカスタマイズする機能を提供します。いくつかのタイプのNetwork拡張があります。
 
-* **App Proxy**: This is used for creating a VPN client that implements a flow-oriented, custom VPN protocol. This means it handles network traffic based on connections (or flows) rather than individual packets.
-* **Packet Tunnel**: This is used for creating a VPN client that implements a packet-oriented, custom VPN protocol. This means it handles network traffic based on individual packets.
-* **Filter Data**: This is used for filtering network "flows". It can monitor or modify network data at the flow level.
-* **Filter Packet**: This is used for filtering individual network packets. It can monitor or modify network data at the packet level.
-* **DNS Proxy**: This is used for creating a custom DNS provider. It can be used to monitor or modify DNS requests and responses.
+* **App Proxy**: これは、接続（またはフロー）単位ではなく個々のパケットに基づいてネットワークトラフィックを処理する、フロー指向のカスタムVPNプロトコルを実装するVPNクライアントの作成に使用されます。
+* **Packet Tunnel**: これは、個々のパケットに基づいてネットワークトラフィックを処理するパケット指向のカスタムVPNプロトコルを実装するVPNクライアントの作成に使用されます。
+* **Filter Data**: これは、ネットワークデータをフローレベルで監視または変更するために使用されます。
+* **Filter Packet**: これは、個々のネットワークパケットをフィルタリングするために使用されます。ネットワークデータをパケットレベルで監視または変更することができます。
+* **DNS Proxy**: これは、カスタムDNSプロバイダを作成するために使用されます。DNSリクエストとレスポンスを監視または変更するために使用できます。
 
-## Endpoint Security Framework
+## エンドポイントセキュリティフレームワーク
 
-Endpoint Security is a framework provided by Apple in macOS that provides a set of APIs for system security. It's intended for use by **security vendors and developers to build products that can monitor and control system activity** to identify and protect against malicious activity.
+エンドポイントセキュリティは、AppleがmacOSで提供するフレームワークで、システムセキュリティのための一連のAPIを提供します。これは、悪意のある活動を特定し、保護するために、**セキュリティベンダーや開発者がシステムの活動を監視および制御するための製品を構築するために使用されます**。
 
-This framework provides a **collection of APIs to monitor and control system activity**, such as process executions, file system events, network and kernel events.
+このフレームワークは、プロセスの実行、ファイルシステムイベント、ネットワークおよびカーネルイベントなど、**システムの活動を監視および制御するためのAPIのコレクション**を提供します。
 
-The core of this framework is implemented in the kernel, as a Kernel Extension (KEXT) located at **`/System/Library/Extensions/EndpointSecurity.kext`**. This KEXT is made up of several key components:
+このフレームワークのコアは、カーネル内に実装されたカーネル拡張（KEXT）である**`/System/Library/Extensions/EndpointSecurity.kext`**によって実現されています。このKEXTは、いくつかの主要なコンポーネントで構成されています。
 
-* **EndpointSecurityDriver**: This acts as the "entry point" for the kernel extension. It's the main point of interaction between the OS and the Endpoint Security framework.
-* **EndpointSecurityEventManager**: This component is responsible for implementing kernel hooks. Kernel hooks allow the framework to monitor system events by intercepting system calls.
-* **EndpointSecurityClientManager**: This manages the communication with user space clients, keeping track of which clients are connected and need to receive event notifications.
-* **EndpointSecurityMessageManager**: This sends messages and event notifications to user space clients.
+* **EndpointSecurityDriver**: これはカーネル拡張の「エントリーポイント」として機能します。これはOSとEndpoint Securityフレームワークの間の主な相互作用ポイントです。
+* **EndpointSecurityEventManager**: このコンポーネントはカーネルフックの実装を担当します。カーネルフックにより、フレームワークはシステムコールを傍受することでシステムイベントを監視できます。
+* **EndpointSecurityClientManager**: これはユーザースペースクライアントとの通信を管理し、接続してイベント通知を受け取る必要があるクライアントを追跡します。
+* **EndpointSecurityMessageManager**: これはユーザースペースクライアントにメッセージとイベント通知を送信します。
 
-The events that the Endpoint Security framework can monitor are categorized into:
+Endpoint Securityフレームワークが監視できるイベントは、次のカテゴリに分類されます。
 
-* File events
-* Process events
-* Socket events
-* Kernel events (such as loading/unloading a kernel extension or opening an I/O Kit device)
+* ファイルイベント
+* プロセスイベント
+* ソケットイベント
+* カーネルイベント（カーネル拡張の読み込み/アンロードやI/O Kitデバイスのオープンなど）
 
-### Endpoint Security Framework Architecture
+### エンドポイントセキュリティフレームワークのアーキテクチャ
 
 <figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
-**User-space communication** with the Endpoint Security framework happens through the IOUserClient class. Two different subclasses are used, depending on the type of caller:
+エンドポイントセキュリティフレームワークとの**ユーザースペース間の通信**は、IOUserClientクラスを介して行われます。呼び出し元のタイプに応じて、2つの異なるサブクラスが使用されます。
 
-* **EndpointSecurityDriverClient**: This requires the `com.apple.private.endpoint-security.manager` entitlement, which is only held by the system process `endpointsecurityd`.
-* **EndpointSecurityExternalClient**: This requires the `com.apple.developer.endpoint-security.client` entitlement. This would typically be used by third-party security software that needs to interact with the Endpoint Security framework.
+* **EndpointSecurityDriverClient**: これには`com.apple.private.endpoint-security.manager`の権限が必要で、これはシステムプロセス`endpointsecurityd`のみが保持しています。
+* **EndpointSecurityExternalClient**: これには`com.apple.developer.endpoint-security.client`の権限が必要です。これは通常、Endpoint Securityフレームワークと対話する必要があるサードパーティのセキュリティソフトウェアによって使用されます。
 
-The Endpoint Security Extensions:**`libEndpointSecurity.dylib`** is the C library that system extensions use to communicate with the kernel. This library uses the I/O Kit (`IOKit`) to communicate with the Endpoint Security KEXT.
+エンドポイントセキュリティ拡張機能で使用される**`libEndpointSecurity.dylib`**は、システム拡張機能がカーネルと通信するために使用するCライブラリです。このラ
+## ESFのバイパス
 
-**`endpointsecurityd`** is a key system daemon involved in managing and launching endpoint security system extensions, particularly during the early boot process. **Only system extensions** marked with **`NSEndpointSecurityEarlyBoot`** in their `Info.plist` file receive this early boot treatment.
-
-Another system daemon, **`sysextd`**, **validates system extensions** and moves them into the proper system locations. It then asks the relevant daemon to load the extension. The **`SystemExtensions.framework`** is responsible for activating and deactivating system extensions.
-
-## Bypassing ESF
-
-ESF is used by security tools that will try to detect a red teamer, so any information about how this could be avoided sounds interesting.
+ESFは、レッドチームを検出しようとするセキュリティツールによって使用されるため、これを回避する方法に関する情報は興味深いです。
 
 ### CVE-2021-30965
 
-The thing is that the security application needs to have **Full Disk Access permissions**. So if an attacker could remove that, he could prevent the software from running:
-
+問題は、セキュリティアプリケーションが**フルディスクアクセス権限**を持っている必要があることです。したがって、攻撃者がそれを削除できれば、ソフトウェアの実行を防ぐことができます。
 ```bash
 tccutil reset All
 ```
+**詳細情報**については、トーク[#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)を参照してください。
 
-For **more information** about this bypass and related ones check the talk [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
+最終的には、新しい権限**`kTCCServiceEndpointSecurityClient`**を**`tccd`**が管理するセキュリティアプリに与えることで、`tccutil`がアクセス許可をクリアしないようにし、実行を防止することで修正されました。
 
-At the end this was fixed by giving the new permission **`kTCCServiceEndpointSecurityClient`** to the security app managed by **`tccd`** so `tccutil` won't clear its permissions preventing it from running.
-
-## References
+## 参考文献
 
 * [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
 * [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
@@ -94,10 +87,10 @@ At the end this was fixed by giving the new permission **`kTCCServiceEndpointSec
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFTs**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>

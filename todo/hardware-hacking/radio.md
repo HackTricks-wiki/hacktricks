@@ -1,227 +1,225 @@
-# Radio
+# ラジオ
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger)is a free digital signal analyzer for GNU/Linux and macOS, designed to extract information of unknown radio signals. It supports a variety of SDR devices through SoapySDR, and allows adjustable demodulation of FSK, PSK and ASK signals, decode analog video, analyze bursty signals and listen to analog voice channels (all in real time).
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)は、GNU/LinuxとmacOS用の無料のデジタル信号アナライザであり、未知の無線信号の情報を抽出するために設計されています。SoapySDRを介してさまざまなSDRデバイスをサポートし、FSK、PSK、ASK信号の可変復調、アナログビデオのデコード、バースト信号の分析、アナログ音声チャネルのリアルタイムリスニングなどをサポートしています。
 
-### Basic Config
+### 基本設定
 
-After installing there are a few things that you could consider configuring.\
-In settings (the second tab button) you can select the **SDR device** or **select a file** to read and which frequency to syntonise and the Sample rate (recommended to up to 2.56Msps if your PC support it)\\
+インストール後、いくつかの設定を検討することができます。\
+設定（2番目のタブボタン）では、**SDRデバイス**を選択するか、**ファイルを選択**して読み取る周波数とサンプルレート（PCがサポートしている場合は2.56Mspsまで推奨）を選択できます。
 
 ![](<../../.gitbook/assets/image (655) (1).png>)
 
-In the GUI behaviour it's recommended to enable a few things if your PC support it:
+GUIの動作では、PCがサポートしている場合はいくつかの機能を有効にすることをお勧めします。
 
 ![](<../../.gitbook/assets/image (465) (2).png>)
 
 {% hint style="info" %}
-If you realise that your PC is not capturing things try to disable OpenGL and lowering the sample rate.
+PCがキャプチャできていないことに気付いた場合は、OpenGLを無効にし、サンプルレートを下げてみてください。
 {% endhint %}
 
-### Uses
+### 用途
 
-* Just to **capture some time of a signal and analyze it** just maintain the button "Push to capture" as long as you need.
+* **信号の一部をキャプチャして分析する**場合は、「Push to capture」ボタンを必要な時間だけ押し続けます。
 
 ![](<../../.gitbook/assets/image (631).png>)
 
-* The **Tuner** of SigDigger helps to **capture better signals** (but it can also degrade them). Ideally start with 0 and keep **making it bigger until** you find the **noise** introduce is **bigger** than the **improvement of the signal** you need).
+* SigDiggerの**チューナー**は、信号をより良くキャプチャするのに役立ちます（ただし、信号を劣化させることもあります）。理想的には、0から始めて、ノイズが本当に増加し始めるレベルまで**大きくしていく**ことが望ましいです。
 
 ![](<../../.gitbook/assets/image (658).png>)
 
-### Synchronize with radio channel
+### ラジオチャンネルとの同期
 
-With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with the channel you want to hear, configure "Baseband audio preview" option, configure the bandwith to get all the info being sent and then set the Tuner to the level before the noise is really starting to increase:
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)を使用して、聞きたいチャンネルと同期し、"Baseband audio preview"オプションを設定し、送信されているすべての情報を取得するための帯域幅を設定し、ノイズが本当に増加し始める前のレベルにチューナーを設定します。
 
 ![](<../../.gitbook/assets/image (389).png>)
 
-## Interesting tricks
+## おもしろいトリック
 
-* When a device is sending bursts of information, usually the **first part is going to be a preamble** so you **don't** need to **worry** if you **don't find information** in there **or if there are some errors** there.
-* In frames of information you usually should **find different frames well aligned between them**:
+* デバイスが情報のバーストを送信している場合、通常は**最初の部分が前置部**になるため、そこに情報がない場合やエラーがある場合は心配する必要はありません。
+* 情報のフレームでは、通常、**互いによく整列した異なるフレーム**を見つけるはずです。
 
 ![](<../../.gitbook/assets/image (660) (1).png>)
 
 ![](<../../.gitbook/assets/image (652) (1) (1).png>)
 
-* **After recovering the bits you might need to process them someway**. For example, in Manchester codification a up+down will be a 1 or 0 and a down+up will be the other one. So pairs of 1s and 0s (ups and downs) will be a real 1 or a real 0.
-* Even if a signal is using Manchester codification (it's impossible to find more than two 0s or 1s in a row), you might **find several 1s or 0s together in the preamble**!
+* **ビットを回復した後、何らかの方法で処理する必要がある場合があります**。たとえば、マンチェスターコーディングでは、上下は1または0であり、下がり上がりはもう一方の値です。つまり、1と0のペア（上と下）は実際の1または実際の0になります。
+* マンチェスターコーディングを使用している場合でも（連続して2つ以上の0または1を見つけることは不可能です）、前置部には複数の1または0が一緒になっている場合があります！
 
-### Uncovering modulation type with IQ
+### IQを使用して変調方式を特定する
 
-There are 3 ways to store information in signals: Modulating the **amplitude**, **frequency** or **phase**.\
-If you are checking a signal there are different ways to try to figure out what is being used to store information (fin more ways below) but a good one is to check the IQ graph.
+信号には情報を格納するための3つの方法があります：振幅、周波数、または位相を変調します。\
+信号をチェックしている場合、情報が格納されている方法を特定しようとするさまざまな方法があります（以下にさらなる方法があります）、しかし、IQグラフをチェックするのは良い方法の1つです。
 
 ![](<../../.gitbook/assets/image (630).png>)
 
-* **Detecting AM**: If in the IQ graph appears for example **2 circles** (probably one in 0 and other in a different amplitude), it could means that this is an AM signal. This is because in the IQ graph the distance between the 0 and the circle is the amplitude of the signal, so it's easy to visualize different amplitudes being used.
-* **Detecting PM**: Like in the previous image, if you find small circles not related between them it probably means that a phase modulation is used. This is because in the IQ graph, the angle between the point and the 0,0 is the phase of the signal, so that means that 4 different phases are used.
-  * Note that if the information is hidden in the fact that a phase is changed and not in the phase itself, you won't see different phases clearly differentiated.
-* **Detecting FM**: IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-  Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-  Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
-
-## AM Example
+* **AMを検出する**：IQグラフに例えば**2つの円**が表示される場合（おそらく1つは0で、もう1つは異なる振幅である可能性があります）、これはAM信号である可能性があります。これは、IQグラフで0と円の間の距離が信号の振幅であるため、異なる振幅が使用されているのが視覚的にわかりやすいからです。
+* **PMを検出する**：前の画像のように、関連しない小さな円が見つかる場合、おそらく位相変調が使用されていることを意味します。これは、IQグラフで、点と0,0の間の角度が信号の位相であるため、4つの異なる位相が使用されていることを意味します。
+* 情報が位相自体ではなく位相の変化に隠されている場合、異なる位相が明確に区別されない場合があります。
+* **FMを検出する**：IQには周波数を識別するためのフィールドがありません（中心への距離は振幅であり、角度は位相です）。\
+したがって、FMを識別するには、このグラフで基本的に**円だけを見る**必要があります。\
+さらに、異なる周波数は、IQグラフによって**円を加速させることで「表現」**されます（したがって、SysDiggerで信号を選択するとIQグラフが生成され、作成された円に加
+## AMの例
 
 {% file src="../../.gitbook/assets/sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw" %}
 
-### Uncovering AM
+### AMの解明
 
-#### Checking the envelope
+#### エンベロープの確認
 
-Checking AM info with [**SigDigger** ](https://github.com/BatchDrake/SigDigger)and just looking at the **envelop** you can see different clear amplitude levels. The used signal is sending pulses with information in AM, this is how one pulse looks like:
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)を使用してAM情報を確認し、**エンベロープ**を見るだけで、異なる明確な振幅レベルが見えます。使用されている信号はAMで情報をパルスで送信しており、以下が1つのパルスの見た目です：
 
 ![](<../../.gitbook/assets/image (636).png>)
 
-And this is how part of the symbol looks like with the waveform:
+そして、以下が波形でシンボルの一部の見た目です：
 
 ![](<../../.gitbook/assets/image (650) (1).png>)
 
-#### Checking the Histogram
+#### ヒストグラムの確認
 
-You can **select the whole signal** where information is located, select **Amplitude** mode and **Selection** and click on **Histogram.** You can observer that 2 clear levels are only found
+情報が存在する信号全体を選択し、**振幅**モードと**選択**を選択し、**ヒストグラム**をクリックします。2つの明確なレベルのみが見つかることがわかります。
 
 ![](<../../.gitbook/assets/image (647) (1) (1).png>)
 
-For example, if you select Frequency instead of Amplitude in this AM signal you find just 1 frequency (no way information modulated in frequency is just using 1 freq).
+例えば、このAM信号で振幅の代わりに周波数を選択すると、1つの周波数のみが見つかります（周波数で情報が変調されている場合、1つの周波数のみを使用している可能性はありません）。
 
 ![](<../../.gitbook/assets/image (637) (1) (1).png>)
 
-If you find a lot of frequencies potentially this won't be a FM, probably the signal frequency was just modified because of the channel.
+もし多くの周波数が見つかる場合、これはFMではないかもしれません。おそらく、チャンネルの影響で信号の周波数が変更されたためです。
 
-#### With IQ
+#### IQでの確認
 
-In this example you can see how there is a **big circle** but also **a lot of points in the centre.**
+この例では、**大きな円**があることと、**中心に多くの点**があることがわかります。
 
 ![](<../../.gitbook/assets/image (640).png>)
 
-### Get Symbol Rate
+### シンボルレートの取得
 
-#### With one symbol
+#### 1つのシンボルで
 
-Select the smallest symbol you can find (so you are sure it's just 1) and check the "Selection freq". I this case it would be 1.013kHz (so 1kHz).
+最も小さいシンボルを選択し（1つだけであることを確認するため）、"Selection freq"を確認します。この場合、1.013kHz（つまり1kHz）です。
 
 ![](<../../.gitbook/assets/image (638) (1).png>)
 
-#### With a group of symbols
+#### グループのシンボルで
 
-You can also indicate the number of symbols you are going to select and SigDigger will calculate the frequency of 1 symbol (the more symbols selected the better probably). In this scenario I selected 10 symbols and the "Selection freq" is 1.004 Khz:
+選択するシンボルの数を指定することもできます。この場合、10個のシンボルを選択し、"Selection freq"は1.004 kHzです。
 
 ![](<../../.gitbook/assets/image (635).png>)
 
-### Get Bits
+### ビットの取得
 
-Having found this is an **AM modulated** signal and the **symbol rate** (and knowing that in this case something up means 1 and something down means 0), it's very easy to **obtain the bits** encoded in the signal. So, select the signal with info and configure the sampling and decision and press sample (check that **Amplitude** is selected, the discovered **Symbol rate** is configured and the **Gadner clock recovery** is selected):
+これが**AM変調**された信号であり、**シンボルレート**がわかっている（この場合、上が1を意味し、下が0を意味する）ことがわかっている場合、信号にエンコードされたビットを非常に簡単に取得できます。したがって、情報を持つ信号を選択し、サンプリングと決定を設定し、サンプルを押します（**振幅**が選択されていること、発見された**シンボルレート**が設定されていること、**ガードナークロックリカバリ**が選択されていることを確認してください）：
 
 ![](<../../.gitbook/assets/image (642) (1).png>)
 
-* **Sync to selection intervals** means that if you previously selected intervals to find the symbol rate, that symbol rate will be used.
-* **Manual** means that the indicated symbol rate is going to be used
-* In **Fixed interval selection** you indicate the number of intervals that should be selected and it calculates the symbol rate from it
-* **Gadner clock recovery** is usually the best option, but you still need to indicate some approximate symbol rate.
+* **Sync to selection intervals**は、シンボルレートを見つけるために事前に選択した間隔を使用することを意味します。
+* **Manual**は、指定したシンボルレートが使用されることを意味します。
+* **Fixed interval selection**では、選択する間隔の数を指定し、それからシンボルレートを計算します。
+* **ガードナークロックリカバリ**は通常最適なオプションですが、おおよそのシンボルレートを指定する必要があります。
 
-Pressing sample this appears:
+サンプルを押すと、次のように表示されます：
 
 ![](<../../.gitbook/assets/image (659).png>)
 
-Now, to make SigDigger understand **where is the range** of the level carrying information you need to click on the **lower level** and maintain clicked until the biggest level:
+次に、SigDiggerに情報を保持しているレベルの範囲を理解させるために、**下のレベル**をクリックし、最大のレベルまでクリックし続ける必要があります。
 
 ![](<../../.gitbook/assets/image (662) (1) (1) (1).png>)
 
-If there would have been for example **4 different levels of amplitude**, you should have need to configure the **Bits per symbol to 2** and select from the smallest to the biggest.
+もし例えば**振幅の異なる4つのレベル**があった場合、**Bits per symbolを2に設定**し、最小から最大まで選択する必要があります。
 
-Finally **increasing** the **Zoom** and **changing the Row size** you can see the bits (and you can select all and copy to get all the bits):
+最後に、**ズームを増やし**、**行のサイズを変更**することでビットを見ることができます（すべてを選択してコピーすることもできます）：
 
 ![](<../../.gitbook/assets/image (649) (1).png>)
 
-If the signal has more than 1 bit per symbol (for example 2), SigDigger has **no way to know which symbol is** 00, 01, 10, 11, so it will use different **grey scales** the represent each (and if you copy the bits it will use **numbers from 0 to 3**, you will need to treat them).
+信号が1つのシンボルあたり1ビット以上（例えば2ビット）を持つ場合、SigDiggerはどのシンボルが00、01、10、11であるかを**知る方法がありません**。そのため、それぞれを表すために異なる**グレースケール**を使用します（ビットをコピーすると、**0から3の数字**が使用されますので、それらを処理する必要があります）。
 
-Also, use **codifications** such as **Manchester**, and **up+down** can be **1 or 0** and an down+up can be a 1 or 0. In those cases you need to **treat the obtained ups (1) and downs (0)** to substitute the pairs of 01 or 10 as 0s or 1s.
+また、**マンチェスター**などの**符号化**を使用する場合、**上+下**は**1または0**であり、**下+上**は1または0になります。この場合、取得した上（1）と下（0）を処理して、01または10のペアを0または1に置き換える必要があります。
 
-## FM Example
+## FMの例
 
 {% file src="../../.gitbook/assets/sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw" %}
 
-### Uncovering FM
+### FMの解明
 
-#### Checking the frequencies and waveform
+#### 周波数と波形の確認
 
-Signal example sending information modulated in FM:
+FMで変調された情報を送信する信号の例：
 
 ![](<../../.gitbook/assets/image (661) (1).png>)
 
-In the previous image you can observe pretty good that **2 frequencies are used** but if you **observe** the **waveform** you might n**ot be able to identify correctly the 2 different frequencies**:
+前の画像では、**2つの周波数が使用されている**ことがよくわかりますが、**波形**を観察しても正しく2つの異なる周波数を識別することはできないかもしれません：
 
 ![](<../../.gitbook/assets/image (653).png>)
 
-This is because I capture the signal in booth frequencies, therefore one is approximately the other in negative:
+これは、私が信号を両方の周波数でキャプチャしたためであり、したがって、1つの周波数は他の周波数に対しておおよそ負の値です：
 
 ![](<../../.gitbook/assets/image (656).png>)
 
-If the synchronized frequency is **closer to one frequency than to the other** you can easily see the 2 different frequencies:
+同期周波数が**1つの周波数に近い**場合、2つの異なる周波数を簡単に見ることができます：
 
 ![](<../../.gitbook/assets/image (648) (1) (1) (1).png>)
 
 ![](<../../.gitbook/assets/image (634).png>)
 
-#### Checking the histogram
+#### ヒストグラムの確認
 
-Checking the frequency histogram of the signal with information you can easily see 2 different signals:
+情報を含む信号の周波数ヒストグラムを確認すると、2つの異なる信号が簡単に見つかります：
 
 ![](<../../.gitbook/assets/image (657).png>)
 
-In this case if you check the **Amplitude histogram** you will find **only one amplitude**, so it **cannot be AM** (if you find a lot of amplitudes it might be because the signal has been losing power along the channel):
+この場合、**振幅ヒストグラム**を確認すると、**1つの振幅のみ**が見つかるため、これは**AMではない**ことがわかります（多くの振幅が見つかる場合、信号がチャネルを通じてパワーを失っている可能性があります）：
 
 ![](<../../.gitbook/assets/image (646).png>)
 
-And this is would be phase histogram (which makes very clear the signal is not modulated in phase):
+そして、これが位相ヒストグラムです（信号が位相で変調されていないことが非常に明確です）：
 
 ![](<../../.gitbook/assets/image (201) (2).png>)
+#### IQを使用して
 
-#### With IQ
-
-IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
+IQには周波数を識別するためのフィールドがありません（中心への距離は振幅で、角度は位相です）。\
+したがって、FMを識別するには、このグラフでは**基本的に円**しか見えません。\
+さらに、異なる周波数はIQグラフによって**円周上の速度加速度で「表現」**されます（したがって、SysDiggerで信号を選択するとIQグラフが生成されますが、作成された円に加速度や方向の変化がある場合、これはFMである可能性があります）：
 
 ![](<../../.gitbook/assets/image (643) (1).png>)
 
-### Get Symbol Rate
+### シンボルレートの取得
 
-You can use the **same technique as the one used in the AM example** to get the symbol rate once you have found the frequencies carrying symbols.
+シンボルを運ぶ周波数を見つけた後、AMの例と同じ技術を使用してシンボルレートを取得することができます。
 
-### Get Bits
+### ビットの取得
 
-You can use the **same technique as the one used in the AM example** to get the bits once you have **found the signal is modulated in frequency** and the **symbol rate**.
+信号が周波数で変調されており、シンボルレートがわかっている場合、AMの例と同じ技術を使用してビットを取得することができます。
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>

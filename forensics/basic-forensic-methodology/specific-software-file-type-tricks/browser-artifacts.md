@@ -1,91 +1,71 @@
-# Browser Artifacts
+# ブラウザのアーティファクト
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
 
 </details>
 
 ![](<../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築し、自動化しましょう。\
+今すぐアクセスしてください：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Browsers Artifacts <a href="#3def" id="3def"></a>
+## ブラウザのアーティファクト <a href="#3def" id="3def"></a>
 
-When we talk about browser artifacts we talk about, navigation history, bookmarks, list of downloaded files, cache data, etc.
+ブラウザのアーティファクトとは、ナビゲーション履歴、ブックマーク、ダウンロードしたファイルのリスト、キャッシュデータなどを指します。
 
-These artifacts are files stored inside specific folders in the operating system.
+これらのアーティファクトは、オペレーティングシステム内の特定のフォルダに格納されています。
 
-Each browser stores its files in a different place than other browsers and they all have different names, but they all store (most of the time) the same type of data (artifacts).
+各ブラウザは、他のブラウザとは異なる場所にファイルを保存し、異なる名前を持っていますが、ほとんどの場合、同じタイプのデータ（アーティファクト）を保存しています。
 
-Let us take a look at the most common artifacts stored by browsers.
+最も一般的なブラウザによって保存されるアーティファクトを見てみましょう。
 
-* **Navigation History:** Contains data about the navigation history of the user. Can be used to track down if the user has visited some malicious sites for example
-* **Autocomplete Data:** This is the data that the browser suggests based on what you search for the most. Can be used in tandem with the navigation history to get more insight.
-* **Bookmarks:** Self Explanatory.
-* **Extensions and Add ons:** Self Explanatory.
-* **Cache:** When navigating websites, the browser creates all sorts of cache data (images, javascript files…etc) for many reasons. For example to speed the loading time of websites. These cache files can be a great source of data during a forensic investigation.
-* **Logins:** Self Explanatory.
-* **Favicons:** They are the little icons found in tabs, urls, bookmarks and the such. They can be used as another source to get more information about the website or places the user visited.
-* **Browser Sessions:** Self Explanatory.
-* **Downloads**: Self Explanatory.
-* **Form Data:** Anything typed inside forms is oftentimes stored by the browser, so the next time the user enters something inside of a form the browser can suggest previously entered data.
-* **Thumbnails:** Self Explanatory.
-* **Custom Dictionary.txt**: Words added to the dictionary by the user.
+* **ナビゲーション履歴：** ユーザーのナビゲーション履歴に関するデータが含まれています。たとえば、ユーザーが悪意のあるサイトを訪れたかどうかを追跡するために使用できます。
+* **オートコンプリートデータ：** ブラウザが最も検索される内容に基づいて提案するデータです。ナビゲーション履歴と組み合わせて、さらなる洞察を得ることができます。
+* **ブックマーク：** 自己説明的です。
+* **拡張機能とアドオン：** 自己説明的です。
+* **キャッシュ：** ウェブサイトを閲覧する際、ブラウザはさまざまな理由でキャッシュデータ（画像、JavaScriptファイルなど）を作成します。たとえば、ウェブサイトの読み込み時間を高速化するためです。これらのキャッシュファイルは、法的調査中にデータの貴重な情報源となる場合があります。
+* **ログイン情報：** 自己説明的です。
+* **ファビコン：** タブ、URL、ブックマークなどで見つかる小さなアイコンです。ユーザーが訪れたウェブサイトや場所に関する追加情報を取得するための別の情報源として使用できます。
+* **ブラウザセッション：** 自己説明的です。
+* **ダウンロード：** 自己説明的です。
+* **フォームデータ：** フォーム内に入力された内容は、ブラウザによって保存されることが多いため、次回ユーザーがフォームに入力する際に以前に入力されたデータをブラウザが提案できます。
+* **サムネイル：** 自己説明的です。
+* **カスタム辞書.txt：** ユーザーによって辞書に追加された単語。
 
 ## Firefox
 
-Firefox create the profiles folder in \~/_**.mozilla/firefox/**_ (Linux), in **/Users/$USER/Library/Application Support/Firefox/Profiles/** (MacOS), _**%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\\**_ (Windows)_**.**_\
-Inside this folder, the file _**profiles.ini**_ should appear with the name(s) of the user profile(s).\
-Each profile has a "**Path**" variable with the name of the folder where its data is going to be stored. The folder should be **present in the same directory where the \_profiles.ini**\_\*\* exist\*\*. If it isn't, then, probably it was deleted.
+Firefoxは、\~/_**.mozilla/firefox/**_（Linux）、**/Users/$USER/Library/Application Support/Firefox/Profiles/**（MacOS）、_**%userprofile%\AppData\Roaming\Mozilla\Firefox\Profiles\\**_（Windows）にプロファイルフォルダを作成します。\
+このフォルダ内には、ユーザープロファイルの名前が記載された_**profiles.ini**_ファイルが表示されるはずです。\
+各プロファイルには、そのデータが保存されるフォルダの名前を示す「**Path**」変数があります。フォルダは、_profiles.ini_ファイルと同じディレクトリに存在するはずです。存在しない場合は、おそらく削除されたものです。
 
-Inside the folder **of each profile** (_\~/.mozilla/firefox/\<ProfileName>/_) path you should be able to find the following interesting files:
+各プロファイルのフォルダ（_\~/.mozilla/firefox/\<ProfileName>/_）内には、次の興味深いファイルが見つかるはずです。
 
-* _**places.sqlite**_ : History (moz\_\_places), bookmarks (moz\_bookmarks), and downloads (moz\_\_annos). In Windows the tool [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html) can be used to read the history inside _**places.sqlite**_.
-  * Query to dump history: `select datetime(lastvisitdate/1000000,'unixepoch') as visit_date, url, title, visit_count, visit_type FROM moz_places,moz_historyvisits WHERE moz_places.id = moz_historyvisits.place_id;`
-    * Note that a link type is a number that indicates:
-      * 1: User followed a link
-      * 2: User wrote the URL
-      * 3: User used a favorite
-      * 4: Loaded from Iframe
-      * 5: Accessed via HTTP redirect 301
-      * 6: Accessed via HTTP redirect 302
-      * 7: Downloaded file
-      * 8: User followed a link inside an Iframe
-  * Query to dump downloads: `SELECT datetime(lastModified/1000000,'unixepoch') AS down_date, content as File, url as URL FROM moz_places, moz_annos WHERE moz_places.id = moz_annos.place_id;`
-  *
-* _**bookmarkbackups/**_ : Bookmarks backups
-* _**formhistory.sqlite**_ : **Web form data** (like emails)
-* _**handlers.json**_ : Protocol handlers (like, which app is going to handle _mailto://_ protocol)
-* _**persdict.dat**_ : Words added to the dictionary
-* _**addons.json**_ and \_**extensions.sqlite** \_ : Installed addons and extensions
-* _**cookies.sqlite**_ : Contains **cookies.** [**MZCookiesView**](https://www.nirsoft.net/utils/mzcv.html) can be used in Windows to inspect this file.
-*   _**cache2/entries**_ or _**startupCache**_ : Cache data (\~350MB). Tricks like **data carving** can also be used to obtain the files saved in the cache. [MozillaCacheView](https://www.nirsoft.net/utils/mozilla\_cache\_viewer.html) can be used to see the **files saved in the cache**.
+* _**places.sqlite**_：履歴（moz\_\_places）、ブックマーク（moz\_bookmarks）、およびダウンロード（moz\_\_annos）に関するデータ。Windowsでは、ツール[BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html)を使用して、_**places.sqlite**_内の履歴を読み取ることができます。
+* 履歴をダンプするクエリ：`select datetime(lastvisitdate/1000000,'unixepoch') as visit_date, url, title, visit_count, visit_type FROM moz_places,moz_historyvisits WHERE moz_places.id = moz_historyvisits.place_id;`
+* リンクタイプは、以下のように示される番号です：
+* 1：ユーザーがリンクをクリックしました
+* 2：ユーザーがURLを入力しました
+* 3：ユーザーがお気に入りを使用しました
+* 4：Iframeからロードされました
+* 5：HTTPリダイレクト301経由でアクセスされました
+* _**logins.json**_ : 暗号化されたユーザー名とパスワード
+* **ブラウザの組み込みのフィッシング対策:** `grep 'browser.safebrowsing' ~/Library/Application Support/Firefox/Profiles/*/prefs.js`
+* セーフサーチ設定が無効にされている場合、"safebrowsing.malware.enabled"と"phishing.enabled"がfalseとして返されます
+* _**key4.db**_または_**key3.db**_ : マスターキー？
 
-    Information that can be obtained:
-
-    * URL, fetch Count, Filename, Content type, File size, Last modified time, Last fetched time, Server Last Modified, Server Response
-* _**favicons.sqlite**_ : Favicons
-* _**prefs.js**_ : Settings and Preferences
-* _**downloads.sqlite**_ : Old downloads database (now it's inside places.sqlite)
-* _**thumbnails/**_ : Thumbnails
-* _**logins.json**_ : Encrypted usernames and passwords
-* **Browser’s built-in anti-phishing:** `grep 'browser.safebrowsing' ~/Library/Application Support/Firefox/Profiles/*/prefs.js`
-  * Will return “safebrowsing.malware.enabled” and “phishing.enabled” as false if the safe search settings have been disabled
-* _**key4.db**_ or _**key3.db**_ : Master key?
-
-To try to decrypt the master password, you can use [https://github.com/unode/firefox\_decrypt](https://github.com/unode/firefox\_decrypt)\
-With the following script and call you can specify a password file to brute force:
+マスターパスワードを復号化するために、[https://github.com/unode/firefox\_decrypt](https://github.com/unode/firefox\_decrypt)を使用することができます。\
+以下のスクリプトと呼び出しを使用して、パスワードファイルをブルートフォースで指定できます：
 
 {% code title="brute.sh" %}
 ```bash
@@ -94,8 +74,8 @@ With the following script and call you can specify a password file to brute forc
 #./brute.sh top-passwords.txt 2>/dev/null | grep -A2 -B2 "chrome:"
 passfile=$1
 while read pass; do
-  echo "Trying $pass"
-  echo "$pass" | python firefox_decrypt.py
+echo "Trying $pass"
+echo "$pass" | python firefox_decrypt.py
 done < $passfile
 ```
 {% endcode %}
@@ -104,175 +84,173 @@ done < $passfile
 
 ## Google Chrome
 
-Google Chrome creates the profile inside the home of the user _**\~/.config/google-chrome/**_ (Linux), in _**C:\Users\XXX\AppData\Local\Google\Chrome\User Data\\**_ (Windows), or in \_**/Users/$USER/Library/Application Support/Google/Chrome/** \_ (MacOS).\
-Most of the information will be saved inside the _**Default/**_ or _**ChromeDefaultData/**_ folders inside the paths indicated before. Here you can find the following interesting files:
+Google Chromeは、ユーザーのホームディレクトリ内の_**\~/.config/google-chrome/**_（Linux）、_**C:\Users\XXX\AppData\Local\Google\Chrome\User Data\\**_（Windows）、または_**/Users/$USER/Library/Application Support/Google/Chrome/**_（MacOS）にプロファイルを作成します。ほとんどの情報は、前述のパス内の_**Default/**_または_**ChromeDefaultData/**_フォルダに保存されます。ここで、次の興味深いファイルを見つけることができます：
 
-* _**History**_: URLs, downloads and even searched keywords. In Windows, you can use the tool [ChromeHistoryView](https://www.nirsoft.net/utils/chrome\_history\_view.html) to read the history. The "Transition Type" column means:
-  * Link: User clicked on a link
-  * Typed: The url was written
-  * Auto Bookmark
-  * Auto Subframe: Add
-  * Start page: Home page
-  * Form Submit: A form was filled and sent
-  * Reloaded
-* _**Cookies**_: Cookies. [ChromeCookiesView](https://www.nirsoft.net/utils/chrome\_cookies\_view.html) can be used to inspect the cookies.
-* _**Cache**_: Cache. In Windows, you can use the tool [ChromeCacheView](https://www.nirsoft.net/utils/chrome\_cache\_view.html) to inspect the ca
-* _**Bookmarks**_: Bookmarks
-* _**Web Data**_: Form History
-* _**Favicons**_: Favicons
-* _**Login Data**_: Login information (usernames, passwords...)
-* _**Current Session**_ and _**Current Tabs**_: Current session data and current tabs
-* _**Last Session**_ and _**Last Tabs**_: These files hold sites that were active in the browser when Chrome was last closed.
-* _**Extensions**_: Extensions and addons folder
-* **Thumbnails** : Thumbnails
-* **Preferences**: This file contains a plethora of good information such as plugins, extensions, sites using geolocation, popups, notifications, DNS prefetching, certificate exceptions, and much more. If you’re trying to research whether or not a specific Chrome setting was enabled, you will likely find that setting in here.
-* **Browser’s built-in anti-phishing:** `grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`
-  * You can simply grep for “**safebrowsing**” and look for `{"enabled: true,"}` in the result to indicate anti-phishing and malware protection is on.
+* _**History**_：URL、ダウンロード、さらには検索キーワードまで。Windowsでは、ツール[ChromeHistoryView](https://www.nirsoft.net/utils/chrome\_history\_view.html)を使用して履歴を読み取ることができます。"Transition Type"列の意味は次のとおりです：
+* Link：ユーザーがリンクをクリックしました
+* Typed：URLが入力されました
+* Auto Bookmark
+* Auto Subframe：追加
+* Start page：ホームページ
+* Form Submit：フォームが入力されて送信されました
+* Reloaded
+* _**Cookies**_：クッキー。[ChromeCookiesView](https://www.nirsoft.net/utils/chrome\_cookies\_view.html)を使用してクッキーを検査することができます。
+* _**Cache**_：キャッシュ。Windowsでは、ツール[ChromeCacheView](https://www.nirsoft.net/utils/chrome\_cache\_view.html)を使用してキャッシュを検査することができます。
+* _**Bookmarks**_：ブックマーク
+* _**Web Data**_：フォームの履歴
+* _**Favicons**_：Favicons
+* _**Login Data**_：ログイン情報（ユーザー名、パスワードなど）
+* _**Current Session**_および_**Current Tabs**_：現在のセッションデータと現在のタブ
+* _**Last Session**_および_**Last Tabs**_：これらのファイルには、Chromeが最後に閉じられたときにブラウザでアクティブだったサイトが保存されています。
+* _**Extensions**_：拡張機能とアドオンのフォルダ
+* **Thumbnails**：サムネイル
+* **Preferences**：このファイルには、プラグイン、拡張機能、ジオロケーションを使用するサイト、ポップアップ、通知、DNSプリフェッチング、証明書例外など、多くの有用な情報が含まれています。特定のChromeの設定が有効になっているかどうかを調査しようとしている場合、おそらくこの設定をここで見つけることができるでしょう。
+* **ブラウザの組み込みのフィッシング対策**：`grep 'safebrowsing' ~/Library/Application Support/Google/Chrome/Default/Preferences`を使用します
+* 単純に「**safebrowsing**」をgrepして、結果の中で`{"enabled: true,"}`を見つけると、フィッシング対策とマルウェア保護がオンになっていることを示します。
 
-## **SQLite DB Data Recovery**
+## **SQLite DBデータの回復**
 
-As you can observe in the previous sections, both Chrome and Firefox use **SQLite** databases to store the data. It's possible to **recover deleted entries using the tool** [**sqlparse**](https://github.com/padfoot999/sqlparse) **or** [**sqlparse\_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases).
+前のセクションで観察できるように、ChromeとFirefoxの両方がデータを保存するために**SQLite**データベースを使用しています。ツール[**sqlparse**](https://github.com/padfoot999/sqlparse) **または** [**sqlparse\_gui**](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser/releases)を使用して、削除されたエントリを回復することができます。
 
 ## **Internet Explorer 11**
 
-Internet Explorer stores **data** and **metadata** in different locations. The metadata will allow finding the data.
+Internet Explorerは、データとメタデータを異なる場所に保存します。メタデータを使用してデータを見つけることができます。
 
-The **metadata** can be found in the folder `%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data` where VX can be V01, V16, or V24.\
-In the previous folder, you can also find the file V01.log. In case the **modified time** of this file and the WebcacheVX.data file **are different** you may need to run the command `esentutl /r V01 /d` to **fix** possible **incompatibilities**.
+メタデータは、フォルダ`%userprofile%\Appdata\Local\Microsoft\Windows\WebCache\WebcacheVX.data`にあります（VXはV01、V16、またはV24になります）。\
+前のフォルダには、ファイルV01.logもあります。このファイルの**変更時刻**とWebcacheVX.dataファイルの**異なる場合**、コマンド`esentutl /r V01 /d`を実行して、可能な**非互換性**を修正する必要があります。
 
-Once **recovered** this artifact (It's an ESE database, photorec can recover it with the options Exchange Database or EDB) you can use the program [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html) to open it. Once **opened**, go to the table named "**Containers**".
+このアーティファクトを**回復**した後（これはESEデータベースであり、photorecを使用してExchange DatabaseまたはEDBのオプションで回復できます）、プログラム[ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html)を使用して開くことができます。開いたら、"**Containers**"という名前のテーブルに移動します。
 
 ![](<../../../.gitbook/assets/image (446).png>)
 
-Inside this table, you can find in which other tables or containers each part of the stored information is saved. Following that, you can find the **locations of the data** stored by the browsers and the **metadata** that is inside.
+このテーブルの中で、保存された情報の各部分がどの他のテーブルまたはコンテナに保存されているかを見つけることができます。それに続いて、ブラウザによって保存されたデータの**場所**と**メタデータ**を見つけることができます。
 
-**Note that this table indicates metadata of the cache for other Microsoft tools also (e.g. skype)**
+**このテーブルは、他のMicrosoftのツール（例：skype）のキャッシュのメタデータも示していることに注意してください**
 
-### Cache
+### キャッシュ
 
-You can use the tool [IECacheView](https://www.nirsoft.net/utils/ie\_cache\_viewer.html) to inspect the cache. You need to indicate the folder where you have extracted the cache date.
+ツール[IECacheView](https://www.nirsoft.net/utils/ie\_cache\_viewer.html)を使用してキャッシュを検査することができます。キャッシュデータが抽出されたフォルダを指定する必要があります。
 
-#### Metadata
+#### メタデータ
 
-The metadata information about the cache stores:
+キャッシュに関するメタデータ情報は次のとおりです：
 
-* Filename in the disc
-* SecureDIrectory: Location of the file inside the cache directories
-* AccessCount: Number of times it was saved in the cache
-* URL: The url origin
-* CreationTime: First time it was cached
-* AccessedTime: Time when the cache was used
-* ModifiedTime: Last webpage version
-* ExpiryTime: Time when the cache will expire
+* ディスク上のファイル名
+* SecureDIrectory：キャッシュディレクトリ内のファイルの場所
+* AccessCount：キャッシュに保存された回数
+* URL：元のURL
+* CreationTime：キャッシュされた最初の時間
+* AccessedTime：キャッシュが使用された時間
+* ModifiedTime：最後のウェブページのバージョン
+* ExpiryTime：キャッシュの有効期限
 
-#### Files
+#### ファイル
 
-The cache information can be found in _**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5**_ and _**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5\low**_
+キャッシュ情報は、_**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5**_および_**%userprofile%\Appdata\Local\Microsoft\Windows\Temporary Internet Files\Content.IE5\low**_にあります。
 
-The information inside these folders is a **snapshot of what the user was seeing**. The caches have a size of **250 MB** and the timestamps indicate when the page was visited (first time, creation date of the NTFS, last time, modification time of the NTFS).
+これらのフォルダ内の情報は、ユーザーが表示していた内容の**スナップショット**です。キャッシュのサイズは**250 MB**であり、タイムスタンプはページが訪問された時点（初回、NTFSの作成日、最後の時間、NTFSの変更日時）を示しています。
 
-### Cookies
+### クッキー
 
-You can use the tool [IECookiesView](https://www.nirsoft.net/utils/iecookies.html) to inspect the cookies. You need to indicate the folder where you have extracted the cookies.
+ツール[IECookiesView](https://www.nirsoft.net/utils/iecookies.html)を使用してクッキーを検査することができます。クッキーが抽出されたフォルダを指定する必要があります。
 
-#### **Metadata**
+#### **メタデータ**
 
-The metadata information about the cookies stored:
+クッキーに関するメタデータ情報は次のとおりです：
 
-* Cookie name in the filesystem
+* ファイルシステム内のクッキー名
 * URL
-* AccessCount: Number of times the cookies have been sent to the server
-* CreationTime: First time the cookie was created
-* ModifiedTime: Last time the cookie was modified
-* AccessedTime: Last time the cookie was accessed
-* ExpiryTime: Time of expiration of the cookie
+* AccessCount：クッキーがサーバーに送信された回数
+* CreationTime：クッキーが作成された最初の時間
+* ModifiedTime：クッキーが最後に変更された時間
+* AccessedTime：クッキーが最後にアクセスされた時間
+* ExpiryTime：クッキーの有効期限
 
-#### Files
+#### ファイル
 
-The cookies data can be found in _**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies**_ and _**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies\low**_
+クッキーデータは、_**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies**_および_**%userprofile%\Appdata\Roaming\Microsoft\Windows\Cookies\low**_にあります。
 
-Session cookies will reside in memory and persistent cookie in the disk.
+セッションクッキーはメモリに、永続的なクッキーはディスクに保存されます。
+### ダウンロード
 
-### Downloads
+#### **メタデータ**
 
-#### **Metadata**
-
-Checking the tool [ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html) you can find the container with the metadata of the downloads:
+[ESEDatabaseView](https://www.nirsoft.net/utils/ese\_database\_view.html)というツールを使用して、ダウンロードのメタデータを含むコンテナを確認できます。
 
 ![](<../../../.gitbook/assets/image (445).png>)
 
-Getting the information of the column "ResponseHeaders" you can transform from hex that information and obtain the URL, the file type and the location of the downloaded file.
+"ResponseHeaders"列の情報を取得し、その情報を16進数から変換することで、ダウンロードされたファイルのURL、ファイルタイプ、および場所を取得できます。
 
-#### Files
+#### ファイル
 
-Look in the path _**%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory**_
+パス _**%userprofile%\Appdata\Roaming\Microsoft\Windows\IEDownloadHistory**_ を確認してください。
 
-### **History**
+### **履歴**
 
-The tool [BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html) can be used to read the history. But first, you need to indicate the browser in advanced options and the location of the extracted history files.
+[BrowsingHistoryView](https://www.nirsoft.net/utils/browsing\_history\_view.html)というツールを使用して履歴を読み取ることができます。ただし、最初にブラウザと抽出された履歴ファイルの場所を指定する必要があります。
 
-#### **Metadata**
+#### **メタデータ**
 
-* ModifiedTime: First time a URL is found
-* AccessedTime: Last time
-* AccessCount: Number of times accessed
+* ModifiedTime: URLが最初に見つかった時刻
+* AccessedTime: 最後のアクセス時刻
+* AccessCount: アクセス回数
 
-#### **Files**
+#### **ファイル**
 
-Search in _**userprofile%\Appdata\Local\Microsoft\Windows\History\History.IE5**_ and _**userprofile%\Appdata\Local\Microsoft\Windows\History\Low\History.IE5**_
+_**userprofile%\Appdata\Local\Microsoft\Windows\History\History.IE5**_ および _**userprofile%\Appdata\Local\Microsoft\Windows\History\Low\History.IE5**_ を検索してください。
 
-### **Typed URLs**
+### **入力済みのURL**
 
-This information can be found inside the registry NTDUSER.DAT in the path:
+この情報は、レジストリのNTDUSER.DAT内のパスに見つけることができます。
 
 * _**Software\Microsoft\InternetExplorer\TypedURLs**_
-  * Stores the last 50 URLs typed by the user
+* ユーザーが入力した最後の50のURLを保存します
 * _**Software\Microsoft\InternetExplorer\TypedURLsTime**_
-  * last time the URL was typed
+* URLが入力された最後の時刻を保存します
 
 ## Microsoft Edge
 
-For analyzing Microsoft Edge artifacts all the **explanations about cache and locations from the previous section (IE 11) remain valid** with the only difference that the base locating, in this case, is _**%userprofile%\Appdata\Local\Packages**_ (as can be observed in the following paths):
+Microsoft Edgeのアーティファクトを分析するためには、前のセクション（IE 11）のキャッシュと場所に関する説明がすべて有効であることに注意してください。ただし、この場合のベースの場所は _**%userprofile%\Appdata\Local\Packages**_ です（次のパスで確認できます）：
 
-* Profile Path: _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC**_
-* History, Cookies and Downloads: _**C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat**_
-* Settings, Bookmarks, and Reading List: _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb**_
-* Cache: _**C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC#!XXX\MicrosoftEdge\Cache**_
-* Last active sessions: _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active**_
+* プロファイルパス： _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC**_
+* 履歴、クッキー、ダウンロード： _**C:\Users\XX\AppData\Local\Microsoft\Windows\WebCache\WebCacheV01.dat**_
+* 設定、ブックマーク、読み取りリスト： _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\DataStore\Data\nouser1\XXX\DBStore\spartan.edb**_
+* キャッシュ： _**C:\Users\XXX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC#!XXX\MicrosoftEdge\Cache**_
+* 最後のアクティブなセッション： _**C:\Users\XX\AppData\Local\Packages\Microsoft.MicrosoftEdge\_XXX\AC\MicrosoftEdge\User\Default\Recovery\Active**_
 
 ## **Safari**
 
-The databases can be found in `/Users/$User/Library/Safari`
+データベースは `/Users/$User/Library/Safari` にあります。
 
-* **History.db**: The tables `history_visits` _and_ `history_items` contains information about the history and timestamps.
-  * `sqlite3 ~/Library/Safari/History.db "SELECT h.visit_time, i.url FROM history_visits h INNER JOIN history_items i ON h.history_item = i.id"`
-* **Downloads.plist**: Contains the info about the downloaded files.
-* **Book-marks.plis**t: URLs bookmarked.
-* **TopSites.plist**: List of the most visited websites that the user browses to.
-* **Extensions.plist**: To retrieve an old-style list of Safari browser extensions.
-  * `plutil -p ~/Library/Safari/Extensions/Extensions.plist| grep "Bundle Directory Name" | sort --ignore-case`
-  * `pluginkit -mDvvv -p com.apple.Safari.extension`
-* **UserNotificationPermissions.plist**: Domains that are allowed to push notifications.
-  * `plutil -p ~/Library/Safari/UserNotificationPermissions.plist | grep -a3 '"Permission" => 1'`
-* **LastSession.plist**: Tabs that were opened the last time the user exited Safari.
-  * `plutil -p ~/Library/Safari/LastSession.plist | grep -iv sessionstate`
-* **Browser’s built-in anti-phishing:** `defaults read com.apple.Safari WarnAboutFraudulentWebsites`
-  * The reply should be 1 to indicate the setting is active
+* **History.db**: `history_visits`テーブルと`history_items`テーブルには、履歴とタイムスタンプに関する情報が含まれています。
+* `sqlite3 ~/Library/Safari/History.db "SELECT h.visit_time, i.url FROM history_visits h INNER JOIN history_items i ON h.history_item = i.id"`
+* **Downloads.plist**: ダウンロードされたファイルに関する情報が含まれています。
+* **Book-marks.plist**: ブックマークされたURL。
+* **TopSites.plist**: ユーザーが最も頻繁に閲覧するウェブサイトのリスト。
+* **Extensions.plist**: 古いスタイルのSafariブラウザ拡張機能のリストを取得するために使用します。
+* `plutil -p ~/Library/Safari/Extensions/Extensions.plist| grep "Bundle Directory Name" | sort --ignore-case`
+* `pluginkit -mDvvv -p com.apple.Safari.extension`
+* **UserNotificationPermissions.plist**: 通知を送信することが許可されているドメイン。
+* `plutil -p ~/Library/Safari/UserNotificationPermissions.plist | grep -a3 '"Permission" => 1'`
+* **LastSession.plist**: ユーザーがSafariを終了したときに開かれていたタブ。
+* `plutil -p ~/Library/Safari/LastSession.plist | grep -iv sessionstate`
+* **ブラウザの組み込みのフィッシング対策**: `defaults read com.apple.Safari WarnAboutFraudulentWebsites`
+* 設定が有効であることを示すために、返答は1である必要があります
 
 ## Opera
 
-The databases can be found in `/Users/$USER/Library/Application Support/com.operasoftware.Opera`
+データベースは `/Users/$USER/Library/Application Support/com.operasoftware.Opera` にあります。
 
-Opera **stores browser history and download data in the exact same format as Google Chrome**. This applies to the file names as well as the table names.
+Operaは、Google Chromeとまったく同じ形式でブラウザの履歴とダウンロードデータを保存します。これは、ファイル名だけでなく、テーブル名にも適用されます。
 
-* **Browser’s built-in anti-phishing:** `grep --color 'fraud_protection_enabled' ~/Library/Application Support/com.operasoftware.Opera/Preferences`
-  * **fraud\_protection\_enabled** should be **true**
+* **ブラウザの組み込みのフィッシング対策**: `grep --color 'fraud_protection_enabled' ~/Library/Application Support/com.operasoftware.Opera/Preferences`
+* **fraud\_protection\_enabled** は **true** である必要があります
 
 ![](<../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化できます。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -280,10 +258,10 @@ Get Access Today:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)をご覧ください。独占的な[NFT](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

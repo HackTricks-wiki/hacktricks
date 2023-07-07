@@ -1,44 +1,42 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけて、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを発見してください。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 
-# Baseline
+# ベースライン
 
-A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.
+ベースラインは、システムの特定の部分のスナップショットを取ることで、将来の状態と比較して変更点を強調するために使用されます。
 
-For example, you can calculate and store the hash of each file of the filesystem to be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all. 
+例えば、ファイルシステムの各ファイルのハッシュを計算して保存し、変更されたファイルを特定することができます。\
+これは、作成されたユーザーアカウント、実行中のプロセス、実行中のサービスなど、あまり変更されない、または全く変更されないはずのものに対しても行うことができます。
 
-## File Integrity Monitoring
+## ファイル整合性監視
 
-File integrity monitoring is one of the most powerful techniques used to secure IT infrastructures and business data against a wide variety of both known and unknown threats.\
-The goal is to generate a **baseline of all the files** that you want to monitor and then **periodically** **check** those files for possible **changes** (in the content, attribute, metadata, etc.).
+ファイル整合性監視は、ITインフラストラクチャとビジネスデータをさまざまな既知および未知の脅威から保護するために使用される最も強力な技術の一つです。\
+目標は、監視したいすべてのファイルのベースラインを生成し、その後、これらのファイルを定期的に変更（内容、属性、メタデータなど）の可能性に対してチェックすることです。
 
-1\. **Baseline comparison,** wherein one or more file attributes will be captured or calculated and stored as a baseline that can be compared against in the future. This can be as simple as the time and date of the file, however, since this data can be easily spoofed, a more trustworthy approach is typically used. This may include periodically assessing the cryptographic checksum for a monitored file, (e.g. using the MD5 or SHA-2 hashing algorithm) and then comparing the result to the previously calculated checksum.
+1\. **ベースラインの比較**では、1つ以上のファイル属性がキャプチャまたは計算され、将来の比較のためにベースラインとして保存されます。これは、ファイルの時刻や日付などの単純なものでも構いませんが、このデータは簡単に偽装される可能性があるため、信頼性の高いアプローチが通常使用されます。これには、監視されたファイルの暗号ハッシュ（たとえば、MD5やSHA-2ハッシュアルゴリズムを使用）を定期的に評価し、その結果を以前に計算されたハッシュと比較することが含まれる場合があります。
 
-2\. **Real-time change notification**, which is typically implemented within or as an extension to the kernel of the operating system that will flag when a file is accessed or modified.
+2\. **リアルタイムの変更通知**は、通常、ファイルがアクセスまたは変更されたときにフラグを立てるオペレーティングシステムのカーネル内または拡張機能として実装されます。
 
-## Tools
+## ツール
 
 * [https://github.com/topics/file-integrity-monitoring](https://github.com/topics/file-integrity-monitoring)
 * [https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software](https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software)
 
-# References
+# 参考文献
 
 * [https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it](https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it)
 
@@ -47,16 +45,14 @@ The goal is to generate a **baseline of all the files** that you want to monitor
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけて、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを発見してください。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
-
-

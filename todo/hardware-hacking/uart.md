@@ -1,65 +1,61 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
 
-# Basic Information
+# 基本情報
 
-UART is a serial protocol, which means it transfers data between components one bit at a time. In contrast, parallel communication protocols transmit data simultaneously through multiple channels. Common serial protocols include RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, and USB.
+UARTはシリアルプロトコルであり、コンポーネント間でデータを1ビットずつ転送します。一方、並列通信プロトコルは複数のチャネルを介してデータを同時に転送します。一般的なシリアルプロトコルにはRS-232、I2C、SPI、CAN、Ethernet、HDMI、PCI Express、およびUSBがあります。
 
-Generally, the line is held high (at a logical 1 value) while UART is in the idle state. Then, to signal the start of a data transfer, the transmitter sends a start bit to the receiver, during which the signal is held low (at a logical 0 value). Next, the transmitter sends five to eight data bits containing the actual message, followed by an optional parity bit and one or two stop bits (with a logical 1 value), depending on the configuration. The parity bit, used for error checking, is rarely seen in practice. The stop bit (or bits) signify the end of transmission.
+一般的に、UARTはアイドル状態ではラインが高い（論理1の値）に保持されます。次に、データ転送の開始を示すために、送信機は受信機にスタートビットを送信します。この間、信号は低い（論理0の値）に保持されます。次に、送信機は実際のメッセージを含む5〜8ビットのデータビットを送信し、オプションのパリティビットと1つまたは2つのストップビット（論理1の値）が続きます。エラーチェックに使用されるパリティビットは実際にはほとんど見られません。ストップビット（またはビット）は送信の終わりを示します。
 
-We call the most common configuration 8N1: eight data bits, no parity, and one stop bit. For example, if we wanted to send the character C, or 0x43 in ASCII, in an 8N1 UART configuration, we would send the following bits: 0 (the start bit); 0, 1, 0, 0, 0, 0, 1, 1 (the value of 0x43 in binary), and 0 (the stop bit).
+最も一般的な構成は8N1と呼ばれます：8ビットのデータ、パリティなし、および1ビットのストップビットです。たとえば、8N1 UART構成で文字C、またはASCIIの0x43を送信する場合、次のビットを送信します：0（スタートビット）；0、1、0、0、0、0、1、1（バイナリの0x43の値）；0（ストップビット）。
 
 ![](<../../.gitbook/assets/image (648) (1) (1) (1) (1).png>)
 
-Hardware tools to communicate with UART:
+UARTと通信するためのハードウェアツール：
 
-* USB-to-serial adapter
-* Adapters with the CP2102 or PL2303 chips
-* Multipurpose tool such as: Bus Pirate, the Adafruit FT232H, the Shikra, or the Attify Badge
+* USBシリアルアダプタ
+* CP2102またはPL2303チップを搭載したアダプタ
+* Bus Pirate、Adafruit FT232H、Shikra、またはAttify Badgeなどの多目的ツール
 
-## Identifying UART Ports
+## UARTポートの特定
 
-UART has 4 ports: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), and **GND**(Ground). You might be able to find 4 ports with the **`TX`** and **`RX`** letters **written** in the PCB. But if there is no indication, you might need to try to find them yourself using a **multimeter** or a **logic analyzer**.
+UARTには**TX**（送信）、**RX**（受信）、**Vcc**（電圧）、および**GND**（グラウンド）の4つのポートがあります。PCBに**`TX`**と**`RX`**の文字が**書かれている**ポートを見つけることができるかもしれません。ただし、表示がない場合は、**マルチメータ**または**ロジックアナライザ**を使用して自分で見つける必要があるかもしれません。
 
-With a **multimeter** and the device powered off:
+マルチメータとデバイスの電源を切った状態で：
 
-* To identify the **GND** pin use the **Continuity Test** mode, place the back lead into ground and test with the red one until you hear a sound from the multimeter. Several GND pins can be found the PCB, so you might have found or not the one belonging to UART.
-* To identify the **VCC port**, set the **DC voltage mode** and set it up to 20 V of voltage. Black probe on ground and red probe on the pin. Power on the device. If the multimeter measures a constant voltage of either 3.3 V or 5 V, you’ve found the Vcc pin. If you get other voltages, retry with other ports.
-* To identify the **TX** **port**, **DC voltage mode** up to 20 V of voltage, black probe on ground, and red probe on the pin, and power on the device. If you find the voltage fluctuates for a few seconds and then stabilizes at the Vcc value, you’ve most likely found the TX port. This is because when powering on, it sends some debug data.
-* The **RX port** would be the closest one to the other 3, it has the lowest voltage fluctuation and lowest overall value of all the UART pins.
+* **GND**ピンを特定するには、**連続性テスト**モードを使用し、バックリードをグラウンドに置き、赤いリードでテストします。マルチメータから音が聞こえるまで、いくつかのGNDピンを見つけることができますが、UARTに属するピンを見つけることができるかもしれません。
+* **VCCポート**を特定するには、**DC電圧モード**を設定し、電圧を20Vに設定します。黒いプローブをグラウンドに、赤いプローブをピンに接続します。デバイスの電源をオンにします。マルチメータが3.3Vまたは5Vの一定の電圧を測定する場合、Vccピンを見つけました。他の電圧が表示される場合は、他のポートで再試行します。
+* **TXポート**を特定するには、**DC電圧モード**を20Vに設定し、黒いプローブをグラウンドに、赤いプローブをピンに接続し、デバイスの電源をオンにします。電源をオンにすると、一時的に電圧が変動し、その後Vccの値で安定する場合、おそらくTXポートを見つけたと思われます。これは、電源をオンにすると、デバッグデータを送信するためです。
+* **RXポート**は他の3つに最も近いものであり、UARTピンの中で最も電圧変動が少なく、最も低い値です。
 
-You can confuse the TX and RX ports and nothing would happen, but if you confuses the GND and the VCC port you might fry the circuit.
+TXとRXのポートを混同しても何も起こりませんが、GNDとVCCのポートを混同すると回路を破損する可能性があります。
 
-With a logic analyzer:
+ロジックアナライザを使用する場合：
 
-## Identifying the UART Baud Rate
+## UARTボーレートの特定
 
-The easiest way to identify the correct baud rate is to look at the **TX pin’s output and try to read the data**. If the data you receive isn’t readable, switch to the next possible baud rate until the data becomes readable. You can use a USB-to-serial adapter or a multipurpose device like Bus Pirate to do this, paired with a helper script, such as [baudrate.py](https://github.com/devttys0/baudrate/). The most common baud rates are 9600, 38400, 19200, 57600, and 115200.
+正しいボーレートを特定する最も簡単な方法は、**TXピンの出力を見てデータを読み取ろうとする**ことです。受け取ったデータが読み取れない場合は、データが読み取れるまで次の可能なボーレートに切り替えます。これにはUSBシリアルアダプタやBus Pirateなどの多目的デバイスと、[baudrate.py](https://github.com/devttys0/baudrate/)などのヘルパースクリプトを使用できます。最も一般的なボーレートは9600、38400、19200、57600、および115200です。
 
 {% hint style="danger" %}
-It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
+このプロトコルでは、デバイスのTXを他のデバイスのRXに接続する必要があることに注意してください！
 {% endhint %}
-
 # Bus Pirate
 
-In this scenario we are going to sniff the UART communication of the Arduino that is sending all the prints of the program to the Serial Monitor.
-
+このシナリオでは、Arduinoがプログラムのすべての出力をシリアルモニターに送信しているUART通信をスニフィングします。
 ```bash
 # Check the modes
 UART>m
@@ -79,39 +75,39 @@ x. exit(without change)
 # Select UART
 (1)>3
 Set serial port speed: (bps)
- 1. 300
- 2. 1200
- 3. 2400
- 4. 4800
- 5. 9600
- 6. 19200
- 7. 38400
- 8. 57600
- 9. 115200
+1. 300
+2. 1200
+3. 2400
+4. 4800
+5. 9600
+6. 19200
+7. 38400
+8. 57600
+9. 115200
 10. BRG raw value
 
 # Select the speed the communication is occurring on (you BF all this until you find readable things)
 # Or you could later use the macro (4) to try to find the speed
 (1)>5
 Data bits and parity:
- 1. 8, NONE *default
- 2. 8, EVEN
- 3. 8, ODD
- 4. 9, NONE
- 
- # From now on pulse enter for default
+1. 8, NONE *default
+2. 8, EVEN
+3. 8, ODD
+4. 9, NONE
+
+# From now on pulse enter for default
 (1)>
 Stop bits:
- 1. 1 *default
- 2. 2
+1. 1 *default
+2. 2
 (1)>
 Receive polarity:
- 1. Idle 1 *default
- 2. Idle 0
+1. Idle 1 *default
+2. Idle 0
 (1)>
 Select output type:
- 1. Open drain (H=Hi-Z, L=GND)
- 2. Normal (H=3.3V, L=GND)
+1. Open drain (H=Hi-Z, L=GND)
+2. Normal (H=3.3V, L=GND)
 
 (1)>
 Clutch disengaged!!!
@@ -131,22 +127,18 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
-
-

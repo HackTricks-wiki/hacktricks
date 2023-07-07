@@ -1,172 +1,166 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 
-# Timestamps
+# タイムスタンプ
 
-An attacker may be interested in **changing the timestamps of files** to avoid being detected.\
-It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` __ and __ `$FILE_NAME`.
+攻撃者は、検出を回避するためにファイルのタイムスタンプを変更することに興味を持つかもしれません。\
+MFT内の属性`$STANDARD_INFORMATION`と`$FILE_NAME`には、タイムスタンプが含まれています。
 
-Both attributes have 4 timestamps: **Modification**, **access**, **creation**, and **MFT registry modification** (MACE or MACB).
+両方の属性には、**変更**、**アクセス**、**作成**、および**MFTレジストリの変更**（MACEまたはMACB）の4つのタイムスタンプがあります。
 
-**Windows explorer** and other tools show the information from **`$STANDARD_INFORMATION`**.
+**Windowsエクスプローラ**や他のツールは、**`$STANDARD_INFORMATION`**の情報を表示します。
 
-## TimeStomp - Anti-forensic Tool
+## TimeStomp - アンチフォレンジックツール
 
-This tool **modifies** the timestamp information inside **`$STANDARD_INFORMATION`** **but** **not** the information inside **`$FILE_NAME`**. Therefore, it's possible to **identify** **suspicious** **activity**.
+このツールは、**`$STANDARD_INFORMATION`**内のタイムスタンプ情報を**変更**しますが、**`$FILE_NAME`**内の情報は変更しません。したがって、**不審な活動**を**特定**することができます。
 
 ## Usnjrnl
 
-The **USN Journal** (Update Sequence Number Journal), or Change Journal, is a feature of the Windows NT file system (NTFS) that **maintains a record of changes made to the volume**.\
-It's possible to use the tool [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) to search for modifications to this record.
+**USNジャーナル**（Update Sequence Number Journal）または変更ジャーナルは、Windows NTファイルシステム（NTFS）の機能であり、**ボリュームへの変更の記録を保持**します。\
+このレコードの変更を検索するために、[**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv)というツールを使用することができます。
 
 ![](<../../.gitbook/assets/image (449).png>)
 
-The previous image is the **output** shown by the **tool** where it can be observed that some **changes were performed** to the file.
+前の画像は、ツールによって表示される**出力**で、いくつかの**変更がファイルに行われた**ことがわかります。
 
 ## $LogFile
 
-All metadata changes to a file system are logged to ensure the consistent recovery of critical file system structures after a system crash. This is called [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead\_logging).\
-The logged metadata is stored in a file called “**$LogFile**”, which is found in a root directory of an NTFS file system.\
-It's possible to use tools like [LogFileParser](https://github.com/jschicht/LogFileParser) to parse this file and find changes.
+ファイルシステムのすべてのメタデータの変更は、システムクラッシュ後の重要なファイルシステム構造の一貫した回復を保証するためにログに記録されます。これは[write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead\_logging)と呼ばれます。\
+記録されたメタデータは、「**$LogFile**」という名前のファイルに格納されており、NTFSファイルシステムのルートディレクトリにあります。\
+[LogFileParser](https://github.com/jschicht/LogFileParser)などのツールを使用して、このファイルを解析し、変更を見つけることができます。
 
 ![](<../../.gitbook/assets/image (450).png>)
 
-Again, in the output of the tool it's possible to see that **some changes were performed**.
+ツールの出力でも、**いくつかの変更が行われた**ことがわかります。
 
-Using the same tool it's possible to identify to **which time the timestamps were modified**:
+同じツールを使用して、**タイムスタンプが変更された時刻**を特定することもできます。
 
 ![](<../../.gitbook/assets/image (451).png>)
 
-* CTIME: File's creation time
-* ATIME: File's modification time
-* MTIME: File's MFT registry modification
-* RTIME: File's access time
+* CTIME：ファイルの作成時刻
+* ATIME：ファイルの変更時刻
+* MTIME：ファイルのMFTレジストリの変更時刻
+* RTIME：ファイルのアクセス時刻
 
-## `$STANDARD_INFORMATION` and `$FILE_NAME` comparison
+## `$STANDARD_INFORMATION`と`$FILE_NAME`の比較
 
-Another way to identify suspicious modified files would be to compare the time on both attributes looking for **mismatches**.
+変更されたファイルを特定する別の方法は、両方の属性の時間を比較し、**不一致**を探すことです。
 
-## Nanoseconds
+## ナノ秒
 
-**NTFS** timestamps have a **precision** of **100 nanoseconds**. Then, finding files with timestamps like 2010-10-10 10:10:**00.000:0000 is very suspicious**.
+**NTFS**のタイムスタンプは、**100ナノ秒**の精度を持ちます。そのため、2010-10-10 10:10:**00.000:0000**のようなタイムスタンプを持つファイルは非常に不審です。
 
-## SetMace - Anti-forensic Tool
+## SetMace - アンチフォレンジックツール
 
-This tool can modify both attributes `$STARNDAR_INFORMATION` and `$FILE_NAME`. However, from Windows Vista, it's necessary for a live OS to modify this information.
+このツールは、`$STARNDAR_INFORMATION`と`$FILE_NAME`の両方の属性を変更することができます。ただし、Windows Vista以降では、ライブOSがこの情報を変更するために必要です。
 
-# Data Hiding
+# データの隠蔽
 
-NFTS uses a cluster and the minimum information size. That means that if a file occupies uses and cluster and a half, the **reminding half is never going to be used** until the file is deleted. Then, it's possible to **hide data in this slack space**.
+NFTSはクラスタと最小情報サイズを使用します。つまり、ファイルが1つのクラスタと半分を使用している場合、**残りの半分はファイルが削除されるまで使用されません**。そのため、このスラックスペースにデータを**隠すことができます**。
 
-There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the `$logfile` and `$usnjrnl` can show that some data was added:
+このような「隠された」スペースにデータを隠すことができるslackerなどのツールがあります。ただし、`$logfile`と`$usnjrnl`の分析によって、データが追加されたことがわかる場合があります。
 
 ![](<../../.gitbook/assets/image (452).png>)
 
-Then, it's possible to retrieve the slack space using tools like FTK Imager. Note that this kind of tool can save the content obfuscated or even encrypted.
+その後、FTK Imagerなどのツールを使用してスラックスペースを取得することができます。この種のツールは、コンテンツを曖昧化したり、暗号化したりすることができます。
 
 # UsbKill
 
-This is a tool that will **turn off the computer if any change in the USB** ports is detected.\
-A way to discover this would be to inspect the running processes and **review each python script running**.
+これは、USBポートに変更が検出された場合にコンピューターを**シャットダウンするツール**です。\
+これを発見する方法は、実行中のプロセスを調査し、**実行中の各Pythonスクリプトを確認する**ことです。
 
-# Live Linux Distributions
+# Live Linuxディストリビューション
 
-These distros are **executed inside the RAM** memory. The only way to detect them is **in case the NTFS file-system is mounted with write permissions**. If it's mounted just with read permissions it won't be possible to detect the intrusion.
-
-# Secure Deletion
+これらのディストリビューションは、**RAMメモリ内で実行**されます。NTFSファイルシステムが書き込み権限でマウントされている場合にのみ、これらを検出することができます。読み取り権限のみでマウントされている場合、侵入を検出することはできません。
+# 安全な削除
 
 [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
-# Windows Configuration
+# Windowsの設定
 
-It's possible to disable several windows logging methods to make the forensics investigation much harder.
+フォレンジック調査を困難にするために、いくつかのWindowsのログ記録方法を無効にすることができます。
 
-## Disable Timestamps - UserAssist
+## タイムスタンプの無効化 - UserAssist
 
-This is a registry key that maintains dates and hours when each executable was run by the user.
+これは、ユーザーが実行した各実行可能ファイルの日付と時間を保持するレジストリキーです。
 
-Disabling UserAssist requires two steps:
+UserAssistを無効にするには、2つのステップが必要です。
 
-1. Set two registry keys, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` and `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, both to zero in order to signal that we want UserAssist disabled.
-2. Clear your registry subtrees that look like `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+1. `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs`と`HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`の2つのレジストリキーを0に設定して、UserAssistを無効にすることを示します。
+2. `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`のようなレジストリのサブツリーをクリアします。
 
-## Disable Timestamps - Prefetch
+## タイムスタンプの無効化 - Prefetch
 
-This will save information about the applications executed with the goal of improving the performance of the Windows system. However, this can also be useful for forensics practices.
+これは、Windowsシステムのパフォーマンスを向上させるために実行されたアプリケーションに関する情報を保存します。ただし、これはフォレンジックの実践にも役立ちます。
 
-* Execute `regedit`
-* Select the file path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-* Right-click on both `EnablePrefetcher` and `EnableSuperfetch`
-* Select Modify on each of these to change the value from 1 (or 3) to 0
-* Restart
+* `regedit`を実行します。
+* ファイルパス`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`を選択します。
+* `EnablePrefetcher`と`EnableSuperfetch`の両方を右クリックし、値を1（または3）から0に変更します。
+* 再起動します。
 
-## Disable Timestamps - Last Access Time
+## タイムスタンプの無効化 - 最終アクセス時刻
 
-Whenever a folder is opened from an NTFS volume on a Windows NT server, the system takes the time to **update a timestamp field on each listed folder**, called the last access time. On a heavily used NTFS volume, this can affect performance.
+Windows NTサーバーのNTFSボリュームからフォルダが開かれるたびに、システムはリストされた各フォルダのタイムスタンプフィールドである最終アクセス時刻を更新します。使用頻度の高いNTFSボリュームでは、これがパフォーマンスに影響する可能性があります。
 
-1. Open the Registry Editor (Regedit.exe).
-2. Browse to `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Look for `NtfsDisableLastAccessUpdate`. If it doesn’t exist, add this DWORD and set its value to 1, which will disable the process.
-4. Close the Registry Editor, and reboot the server.
+1. レジストリエディタ（Regedit.exe）を開きます。
+2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`に移動します。
+3. `NtfsDisableLastAccessUpdate`を探します。存在しない場合は、このDWORDを追加し、値を1に設定してプロセスを無効にします。
+4. レジストリエディタを閉じ、サーバーを再起動します。
 
-## Delete USB History
+## USBの履歴を削除する
 
-All the **USB Device Entries** are stored in Windows Registry Under the **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device into your PC or Laptop. You can find this key here H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
-You may also use the tool [**USBDeview**](https://www.nirsoft.net/utils/usb\_devices\_view.html) to be sure you have deleted them (and to delete them).
+すべての**USBデバイスエントリ**は、PCまたはノートパソコンにUSBデバイスを接続するたびに作成されるサブキーを含む**USBSTOR**レジストリキーの下に保存されます。このキーは`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`にあります。これを削除すると、USBの履歴が削除されます。\
+また、USBに関する情報を保存する別のファイルは、`C:\Windows\INF`内の`setupapi.dev.log`です。これも削除する必要があります。
 
-Another file that saves information about the USBs is the file `setupapi.dev.log` inside `C:\Windows\INF`. This should also be deleted.
+## シャドウコピーの無効化
 
-## Disable Shadow Copies
+シャドウコピーを**リスト**するには、`vssadmin list shadowstorage`を実行します。\
+シャドウコピーを**削除**するには、`vssadmin delete shadow`を実行します。
 
-**List** shadow copies with `vssadmin list shadowstorage`\
-**Delete** them running `vssadmin delete shadow`
+また、[https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)で提案された手順に従ってGUIからも削除できます。
 
-You can also delete them via GUI following the steps proposed in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+シャドウコピーを無効にするには：
 
-To disable shadow copies:
-
-1. Go to the Windows start button and type "services" into the text search box; open the Services program.
-2. Locate "Volume Shadow Copy" from the list, highlight it,  and then right-click > Properties.
-3. From the "Startup type" drop-down menu, select Disabled, and then click Apply and OK.
+1. Windowsのスタートボタンに移動し、「services」と入力してテキスト検索ボックスに入力します。Servicesプログラムを開きます。
+2. リストから「Volume Shadow Copy」を見つけ、ハイライトして右クリックし、「プロパティ」を選択します。
+3. 「起動の種類」のドロップダウンメニューから「無効」を選択し、適用してOKをクリックします。
 
 ![](<../../.gitbook/assets/image (453).png>)
 
-It's also possible to modify the configuration of which files are going to be copied in the shadow copy in the registry `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+シャドウコピーでコピーされるファイルの構成も、レジストリ`HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`で変更することができます。
 
-## Overwrite deleted files
+## 削除されたファイルの上書き
 
-* You can use a **Windows tool**: `cipher /w:C` This will indicate cipher to remove any data from the available unused disk space inside the C drive.
-* You can also use tools like [**Eraser**](https://eraser.heidi.ie)
+* **Windowsツール**を使用することができます：`cipher /w:C`これにより、cipherにCドライブ内の使用可能な未使用ディスク領域からデータを削除するよう指示します。
+* [**Eraser**](https://eraser.heidi.ie)のようなツールも使用できます。
 
-## Delete Windows event logs
+## Windowsイベントログの削除
 
-* Windows + R --> eventvwr.msc --> Expand "Windows Logs" --> Right click each category and select "Clear Log"
+* Windows + R --> eventvwr.msc --> 「Windowsログ」を展開 --> 各カテゴリを右クリックし、「ログをクリア」を選択します。
 * `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 * `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
-## Disable Windows event logs
+## Windowsイベントログの無効化
 
 * `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-* Inside the services section disable the service "Windows Event Log"
-* `WEvtUtil.exec clear-log` or `WEvtUtil.exe cl`
+* サービスセクション内で「Windowsイベントログ」サービスを無効にします。
+* `WEvtUtil.exec clear-log`または`WEvtUtil.exe cl`
 
-## Disable $UsnJrnl
+## $UsnJrnlの無効化
 
 * `fsutil usn deletejournal /d c:`
 
@@ -175,16 +169,14 @@ It's also possible to modify the configuration of which files are going to be co
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？ [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksのリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudのリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
-
-

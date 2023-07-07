@@ -1,53 +1,53 @@
-# PDF File analysis
+# PDFファイルの分析
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**してください。
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
 ![](<../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築し、自動化します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 From: [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 
-PDF is an extremely complicated document file format, with enough tricks and hiding places [to write about for years](https://www.sultanik.com/pocorgtfo/). This also makes it popular for CTF forensics challenges. The NSA wrote a guide to these hiding places in 2008 titled "Hidden Data and Metadata in Adobe PDF Files: Publication Risks and Countermeasures." It's no longer available at its original URL, but you can [find a copy here](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf). Ange Albertini also keeps a wiki on GitHub of [PDF file format tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md).
+PDFは非常に複雑なドキュメントファイル形式であり、[何年もの間にわたって書かれるほど](https://www.sultanik.com/pocorgtfo/)のトリックや隠し場所があります。これは、CTFフォレンジックチャレンジでも人気があります。NSAは2008年に「Hidden Data and Metadata in Adobe PDF Files: Publication Risks and Countermeasures」というタイトルのガイドを作成しましたが、元のURLでは入手できなくなっています。ただし、[ここでコピーを見つけることができます](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf)。Ange Albertiniは、[PDFファイル形式のトリックの](https://github.com/corkami/docs/blob/master/PDF/PDF.md)GitHub上のウィキも保持しています。
 
-The PDF format is partially plain-text, like HTML, but with many binary "objects" in the contents. Didier Stevens has written [good introductory material](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) about the format. The binary objects can be compressed or even encrypted data, and include content in scripting languages like JavaScript or Flash. To display the structure of a PDF, you can either browse it with a text editor or open it with a PDF-aware file-format editor like Origami.
+PDF形式は部分的にはHTMLのようなプレーンテキストですが、多くのバイナリ「オブジェクト」を含んでいます。Didier Stevensは、[フォーマットに関する良い入門資料](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/)を書いています。バイナリオブジェクトには、圧縮または暗号化されたデータが含まれることもあり、JavaScriptやFlashのようなスクリプト言語でのコンテンツも含まれます。PDFの構造を表示するには、テキストエディタで閲覧するか、OrigamiのようなPDF対応のファイル形式エディタで開くことができます。
 
-[qpdf](https://github.com/qpdf/qpdf) is one tool that can be useful for exploring a PDF and transforming or extracting information from it. Another is a framework in Ruby called [Origami](https://github.com/mobmewireless/origami-pdf).
+[qpdf](https://github.com/qpdf/qpdf)は、PDFを探索し、情報を変換または抽出するのに役立つツールの1つです。もう1つはRubyのフレームワークである[Origami](https://github.com/mobmewireless/origami-pdf)です。
 
-When exploring PDF content for hidden data, some of the hiding places to check include:
+隠しデータを探索する際にチェックするいくつかの隠し場所には、次のものがあります。
 
-* non-visible layers
-* Adobe's metadata format "XMP"
-* the "incremental generation" feature of PDF wherein a previous version is retained but not visible to the user
-* white text on a white background
-* text behind images
-* an image behind an overlapping image
-* non-displayed comments
+* 非表示のレイヤー
+* Adobeのメタデータ形式「XMP」
+* PDFの「増分生成」機能。以前のバージョンはユーザーには表示されませんが、保持されます
+* 白い背景に白いテキスト
+* 画像の後ろにテキスト
+* 重なり合う画像の後ろに画像
+* 非表示のコメント
 
-There are also several Python packages for working with the PDF file format, like [PeepDF](https://github.com/jesparza/peepdf), that enable you to write your own parsing scripts.
+また、[PeepDF](https://github.com/jesparza/peepdf)のようなPythonパッケージもあり、PDFファイル形式で作業するためのもので、独自の解析スクリプトを作成することができます。
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)を**フォロー**してください。
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

@@ -1,41 +1,38 @@
-# AD CS Domain Persistence
+# AD CS ドメインの永続化
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
-## Forging Certificates with Stolen CA Certificates - DPERSIST1
+## 盗まれたCA証明書を使用した証明書の偽造 - DPERSIST1
 
-How can you tell that a certificate is a CA certificate?
+証明書がCA証明書であるかどうかをどのように判断できますか？
 
-* The CA certificate exists on the **CA server itself**, with its **private key protected by machine DPAPI** (unless the OS uses a TPM/HSM/other hardware for protection).
-* The **Issuer** and **Subject** for the cert are both set to the **distinguished name of the CA**.
-* CA certificates (and only CA certs) **have a “CA Version” extension**.
-* There are **no EKUs**
+* CA証明書は、**CAサーバー自体**に存在し、その**秘密鍵はマシンDPAPIによって保護されています**（OSがTPM/HSM/その他のハードウェアを使用して保護している場合を除く）。
+* 証明書の**発行者**と**サブジェクト**は、両方とも**CAの識別名**に設定されています。
+* CA証明書（CA証明書のみ）には**「CAバージョン」拡張子**があります。
+* **EKUはありません**
 
-The built-in GUI supported way to **extract this certificate private key** is with `certsrv.msc` on the CA server.\
-However, this certificate **isn't different** from other certificates stored in the system, so for example check the [**THEFT2 technique**](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) to see how to **extract** them.
+この証明書の秘密鍵を抽出するための組み込みのGUIサポートされた方法は、CAサーバー上の`certsrv.msc`を使用することです。\
+ただし、この証明書はシステムに格納されている他の証明書とは**異なりません**。そのため、例えば[**THEFT2テクニック**](certificate-theft.md#user-certificate-theft-via-dpapi-theft2)をチェックして、**抽出方法**を確認してください。
 
-You can also get the cert and private key using [**certipy**](https://github.com/ly4k/Certipy):
-
+また、[**certipy**](https://github.com/ly4k/Certipy)を使用して証明書と秘密鍵を取得することもできます。
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
-
-Once you have the **CA cert** with the private key in `.pfx` format you can use [**ForgeCert**](https://github.com/GhostPack/ForgeCert)  to create valid certificates:
-
+**CA証明書**を`.pfx`形式で秘密鍵と共に取得したら、[**ForgeCert**](https://github.com/GhostPack/ForgeCert)を使用して有効な証明書を作成できます。
 ```bash
 # Create new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
@@ -49,49 +46,21 @@ Rubeus.exe asktgt /user:localdomain /certificate:C:\ForgeCert\localadmin.pfx /pa
 # User new certi with certipy to authenticate
 certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
-
 {% hint style="warning" %}
-**Note**: The target **user** specified when forging the certificate needs to be **active/enabled** in AD and **able to authenticate** since an authentication exchange will still occur as this user. Trying to forge a certificate for the krbtgt account, for example, will not work.
+**注意**: 証明書の偽造時に指定する**ユーザー**は、ADで**アクティブ/有効**であり、**認証できる必要があります**。なぜなら、このユーザーとして認証の交換が行われるからです。例えば、krbtgtアカウントの証明書を偽造しようとしてもうまくいきません。
 {% endhint %}
 
-This forged certificate will be **valid** until the end date specified and as **long as the root CA certificate is valid** (usually from 5 to **10+ years**). It's also valid for **machines**, so combined with **S4U2Self**, an attacker can **maintain persistence on any domain machine** for as long as the CA certificate is valid.\
-Moreover, the **certificates generated** with this method **cannot be revoked** as CA is not aware of them.
+この偽造された証明書は、指定された終了日まで**有効**であり、**ルートCA証明書が有効な限り**（通常は5年から**10年以上**）有効です。また、**マシン**にも有効であり、**S4U2Self**と組み合わせることで、攻撃者はCA証明書が有効な限り、任意のドメインマシンで**持続性を維持**することができます。\
+さらに、この方法で生成された**証明書は取り消すことができません**。なぜなら、CAがそれらを認識していないからです。
 
-## Trusting Rogue CA Certificates - DPERSIST2
+## 信頼されたローグCA証明書 - DPERSIST2
 
-The object `NTAuthCertificates` defines one or more **CA certificates** in its `cacertificate` **attribute** and AD uses it: During authentication, the **domain controller** checks if **`NTAuthCertificates`** object **contains** an entry for the **CA specified** in the authenticating **certificate’s** Issuer field. If **it is, authentication proceeds**.
+オブジェクト`NTAuthCertificates`は、その`cacertificate`**属性**に1つ以上の**CA証明書**を定義し、ADはそれを使用します。認証中、**ドメインコントローラ**は、認証中の証明書の発行者フィールドに指定された**CA**に対して**`NTAuthCertificates`**オブジェクトにエントリが含まれているかどうかをチェックします。**含まれている場合、認証が進行します**。
 
-An attacker could generate a **self-signed CA certificate** and **add** it to the **`NTAuthCertificates`** object. Attackers can do this if they have **control** over the **`NTAuthCertificates`** AD object (in default configurations only **Enterprise Admin** group members and members of the **Domain Admins** or **Administrators** in the **forest root’s domain** have these permissions). With the elevated access, one can **edit** the **`NTAuthCertificates`** object from any system with `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126` , or using the [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).&#x20;
+攻撃者は、**自己署名のCA証明書**を生成し、それを**`NTAuthCertificates`**オブジェクトに**追加**することができます。攻撃者は、**`NTAuthCertificates`**ADオブジェクトを**制御**できる場合にこれを行うことができます（デフォルトの構成では、**Enterprise Admin**グループのメンバーと**Domain Admins**または**Administrators**のメンバーはこれらの権限を持っています）。昇格したアクセス権を持つ場合、`certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`を使用して、任意のシステムから**`NTAuthCertificates`**オブジェクトを編集することができます。または、[**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool)を使用することもできます。
 
-The specified certificate should **work with the previously detailed forgery method with ForgeCert** to generate certificates on demand.
+指定された証明書は、以前に詳細に説明した**ForgeCert**を使用して、必要に応じて証明書を生成するために使用することができます。
 
-## Malicious Misconfiguration - DPERSIST3
+## 悪意のあるミス構成 - DPERSIST3
 
-There is a myriad of opportunities for **persistence** via **security descriptor modifications of AD CS** components. Any scenario described in the “[Domain Escalation](domain-escalation.md)” section could be maliciously implemented by an attacker with elevated access, as well as addition of “control rights'' (i.e., WriteOwner/WriteDACL/etc.) to sensitive components. This includes:
-
-* **CA server’s AD computer** object
-* The **CA server’s RPC/DCOM server**
-* Any **descendant AD object or container** in the container **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (e.g., the Certificate Templates container, Certification Authorities container, the NTAuthCertificates object, etc.)
-* **AD groups delegated rights to control AD CS by default or by the current organization** (e.g., the built-in Cert Publishers group and any of its members)
-
-For example, an attacker with **elevated permissions** in the domain could add the **`WriteOwner`** permission to the default **`User`** certificate template, where the attacker is the principal for the right. To abuse this at a later point, the attacker would first modify the ownership of the **`User`** template to themselves, and then would **set** **`mspki-certificate-name-flag`** to **1** on the template to enable **`ENROLLEE_SUPPLIES_SUBJECT`** (i.e., allowing a user to supply a Subject Alternative Name in the request). The attacker could then **enroll** in the **template**, specifying a **domain administrator** name as an alternative name, and use the resulting certificate for authentication as the DA.
-
-## References
-
-* All the information of this page was taken from [https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified\_Pre-Owned.pdf)
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
+AD CSのコンポーネントの**セキュリティ記述子の変更**による**持続性**のための無数の機会があります。"[ドメインエスカレーション](domain-escalation.md)"セクションで説明されているシナリオは、昇格したアクセス権を持つ攻撃者によって悪意のある目的で実装される可能性があります。また、感​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​

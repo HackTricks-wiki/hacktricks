@@ -4,93 +4,91 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Garage Doors
+## ガレージのドア
 
-Garage door openers typically operate at frequencies in the 300-190 MHz range, with the most common frequencies being 300 MHz, 310 MHz, 315 MHz, and 390 MHz. This frequency range is commonly used for garage door openers because it is less crowded than other frequency bands and is less likely to experience interference from other devices.
+ガレージドアオープナーは通常、300〜190 MHzの周波数で動作し、最も一般的な周波数は300 MHz、310 MHz、315 MHz、および390 MHzです。この周波数帯は、他の周波数帯よりも混雑しておらず、他のデバイスからの干渉を受けにくいため、ガレージドアオープナーによく使用されます。
 
-## Car Doors
+## 車のドア
 
-Most car key fobs operate on either **315 MHz or 433 MHz**. These are both radio frequencies, and they are used in a variety of different applications. The main difference between the two frequencies is that 433 MHz has a longer range than 315 MHz. This means that 433 MHz is better for applications that require a longer range, such as remote keyless entry.\
-In Europe 433.92MHz is commonly used and in U.S. and Japan it's the 315MHz.
+ほとんどの車のキーフォブは、**315 MHzまたは433 MHz**で動作します。これらはいずれも無線周波数であり、さまざまなアプリケーションで使用されています。2つの周波数の主な違いは、433 MHzの方が315 MHzよりも長い範囲を持っていることです。これは、リモートキーレスエントリーなどの長い範囲を必要とするアプリケーションには433 MHzが適していることを意味します。\
+ヨーロッパでは433.92MHzが一般的に使用され、米国と日本では315MHzです。
 
-## **Brute-force Attack**
+## **ブルートフォース攻撃**
 
 <figure><img src="../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
 
-If instead of sending each code 5 times (sent like this to make sure the receiver gets it) so just send it once, the time is reduced to 6mins:
+各コードを5回送信する代わりに（受信機が受信することを確認するためにこのように送信される）、1回だけ送信すると、時間が6分に短縮されます。
 
 <figure><img src="../../.gitbook/assets/image (1) (1) (2) (2).png" alt=""><figcaption></figcaption></figure>
 
-and if you **remove the 2 ms waiting** period between signals you can **reduce the time to 3minutes.**
+また、信号間の2ミリ秒の待ち時間を**削除**すると、時間を3分に短縮できます。
 
-Moreover, by using the De Bruijn Sequence (a way to reduce the number of bits needed to send all the potential binary numbers to burteforce) this **time is reduced just to 8 seconds**:
+さらに、De Bruijn Sequence（すべての潜在的なバイナリ数を送信するために必要なビット数を減らす方法）を使用すると、この時間はわずか8秒に短縮されます。
 
 <figure><img src="../../.gitbook/assets/image (5) (2) (3).png" alt=""><figcaption></figcaption></figure>
 
-Example of this attack was implemented in [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+この攻撃の例は、[https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)で実装されています。
 
-Requiring **a preamble will avoid the De Bruijn Sequence** optimization and **rolling codes will prevent this attack** (supposing the code is long enough to not be bruteforceable).
+**プリアンブルを要求することで**、De Bruijn Sequenceの最適化を回避し、**ローリングコードはこの攻撃を防ぎます**（コードが十分に長く、ブルートフォース攻撃できない場合を想定しています）。
 
-## Sub-GHz Attack
+## Sub-GHz攻撃
 
-To attack these signals with Flipper Zero check:
+Flipper Zeroを使用してこれらの信号を攻撃するには、次を確認してください：
 
 {% content-ref url="flipper-zero/fz-sub-ghz.md" %}
 [fz-sub-ghz.md](flipper-zero/fz-sub-ghz.md)
 {% endcontent-ref %}
 
-## Rolling Codes Protection
+## ローリングコードの保護
 
-Automatic garage door openers typically use a wireless remote control to open and close the garage door. The remote control **sends a radio frequency (RF) signal** to the garage door opener, which activates the motor to open or close the door.
+自動ガレージドアオープナーは通常、ワイヤレスリモコンを使用してガレージドアを開閉します。リモコンはガレージドアオープナーに**無線周波数（RF）信号**を送信し、モーターを作動させてドアを開閉します。
 
-It is possible for someone to use a device known as a code grabber to intercept the RF signal and record it for later use. This is known as a **replay attack**. To prevent this type of attack, many modern garage door openers use a more secure encryption method known as a **rolling code** system.
+コードグラバーと呼ばれるデバイスを使用してRF信号を傍受し、後で使用するために記録することができます。これは**リプレイ攻撃**として知られています。このタイプの攻撃を防ぐために、多くの現代のガレージドアオープナーは、より安全な暗号化方式である**ローリングコード**システムを使用しています。
 
-The **RF signal is typically transmitted using a rolling code**, which means that the code changes with each use. This makes it **difficult** for someone to **intercept** the signal and **use** it to gain **unauthorised** access to the garage.
+**RF信号は通常、ローリングコードを使用して送信**されるため、コードは使用ごとに変更されます。これにより、コードを傍受してガレージへの**不正アクセス**を試みることが困難になります。
 
-In a rolling code system, the remote control and the garage door opener have a **shared algorithm** that **generates a new code** every time the remote is used. The garage door opener will only respond to the **correct code**, making it much more difficult for someone to gain unauthorised access to the garage just by capturing a code.
+ローリングコードシステムでは、リモコンとガレージドアオープナーには、リモコンが使用されるたびに新しいコードを生成する**共有アルゴリズム**があります。ガレージドアオープナーは**正しいコード**にのみ応答し、コードを傍受してガレージへの不正アクセスを試みることをはるかに困難にします。
 
-### **Missing Link Attack**
+### **Missing Link攻撃**
 
-Basically, you listen for the button and **capture the signal whilst the remote is out of range** of the device (say the car or garage). You then move to the device and **use the captured code to open it**.
+基本的には、リモートがデバイス（車やガレージなど）の**範囲外**にある間にボタンを聞き、**キャプチャしたコードを使用してデバイスを開く**ことです。
 
-### Full Link Jamming Attack
+### フルリンクジャミング攻撃
 
-An attacker could **jam the signal near the vehicle or receive**r so the **receiver cannot actually ‘hear’ the code**, and once that is happening you can simply **capture and replay** the code when you have stopped jamming.
+攻撃者は、車両または受信機の**近くで信号を妨害**することができます。そのため、受信機は実際にはコードを「聞く」ことができず、ジャミングを停止した後にコードを**キャプチャして再生**することができます。
 
-The victim at some point will use the **keys to lock the car**, but then the attack will have **recorded enough "close door" codes** that hopefully could be resent to open the door (a **change of frequency might be needed** as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
-
-{% hint style="warning" %}
-**Jamming works**, but it's noticeable as if the **person locking the car simply tests the doors** to ensure they are locked they would notice the car unlocked. Additionally if they were aware of such attacks they could even listen to the fact that the doors never made the lock **sound** or the cars **lights** never flashed when they pressed the ‘lock’ button.
-{% endhint %}
-
-### **Code Grabbing Attack ( aka ‘RollJam’ )**
-
-This is a more **stealth Jamming technique**. The attacker will jam the signal, so when the victim tries to lock the door it won't work, but the attacker will **record this code**. Then, the victim will **try to lock the car again** pressing the button and the car will **record this second code**.\
-Instantly after this the **attacker can send the first code** and the **car will lock** (victim will think the second press closed it). Then, the attacker will be able to **send the second stolen code to open** the car (supposing that a **"close car" code can also be used to open it**). A change of frequency might be needed (as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
-
-The attacker can **jam the car receiver and not his receiver** because if the car receiver is listening in for example a 1MHz broadband, the attacker won't **jam** the exact frequency used by the remote but **a close one in that spectrum** while the **attackers receiver will be listening in a smaller range** where he can listen the remote signal **without the jam signal**.
+被害者はある時点で**車をロックするためにキーを使用**しますが、その後、攻撃は十分な「ドアを閉める」コードを記録していることを願って、ドアを開くために再送信できるでしょう（異なる周波数で両方のコマンドを受信する車もあるため、周波数の変更が必要になる場合があります）。
 
 {% hint style="warning" %}
-Other implementations seen in specifications show that the **rolling code is a portion** of the total code sent. Ie the code sent is a **24 bit key** where the first **12 are the rolling code**, the **second 8 are the command** (such as lock or unlock) and the last 4 is the **checksum**. Vehicles implementing this type are also naturally susceptible as the attacker merely needs to replace the rolling code segment to be able to **use any rolling code on both frequencies**.
+**ジャミングは機能します**が、車をロックする人が単にドアがロックされていることを確認するためにドアをテストすると、ロックされていないことに気付くでしょう。さらに、このような攻撃について知っている場合、車を「ロック」ボタンを押したときにロックの**音**が鳴らなかったり、車の**ライト**が点滅
+### **コードグラビング攻撃（別名「RollJam」）**
+
+これはより**ステルスなジャミング技術**です。攻撃者は信号をジャミングし、被害者がドアをロックしようとしてもうまくいかないようにしますが、攻撃者は**このコードを記録**します。その後、被害者はボタンを押して再び車をロックしようとしますが、車は**この2回目のコードを記録**します。\
+これにより、**攻撃者は最初のコードを送信**し、車はロックされます（被害者は2回目の押しでロックされたと思うでしょう）。その後、攻撃者は盗まれた2番目のコードを送信して車を開けることができます（「車を閉める」コードも開けるため、前提としています）。周波数の変更が必要な場合もあります（開くと閉じるに同じコードを使用する車があり、両方のコマンドを異なる周波数で受信する）。
+
+攻撃者は**自分の受信機ではなく車の受信機をジャム**することができます。たとえば、車の受信機が1MHzの広帯域で受信している場合、攻撃者はリモートが使用している正確な周波数を**ジャム**するのではなく、そのスペクトラム内の**近い周波数**をジャムします。一方、**攻撃者の受信機はより狭い範囲で受信**し、ジャム信号なしでリモート信号を受信できます。
+
+{% hint style="warning" %}
+仕様で見られる他の実装では、**ローリングコードは送信されるコードの一部**です。つまり、送信されるコードは**24ビットのキー**であり、最初の**12ビットがローリングコード**、次の8ビットが**コマンド**（ロックまたはアンロックなど）、最後の4ビットが**チェックサム**です。このタイプを実装している車は、攻撃者が単にローリングコードセグメントを置き換えるだけで、**両方の周波数で任意のローリングコードを使用**できるようになります。
 {% endhint %}
 
 {% hint style="danger" %}
-Note that if the victim sends a third code while the attacker is sending the first one, the first and second code will be invalidated.
+被害者が攻撃者が最初のコードを送信している間に3番目のコードを送信した場合、最初のコードと2番目のコードは無効になります。
 {% endhint %}
 
-### Alarm Sounding Jamming Attack
+### アラーム音ジャミング攻撃
 
-Testing against an aftermarket rolling code system installed on a car, **sending the same code twice** immediately **activated the alarm** and immobiliser providing a unique **denial of service** opportunity. Ironically the means of **disabling the alarm** and immobiliser was to **press** the **remote**, providing an attacker with the ability to **continually perform DoS attack**. Or mix this attack with the **previous one to obtain more codes** as the victim would like to stop the attack asap.
+車に取り付けられたアフターマーケットのローリングコードシステムに対するテストでは、**同じコードを2回送信**すると、アラームとイモビライザーが**即座に作動**し、ユニークな**サービス拒否**の機会が提供されました。皮肉なことに、アラームとイモビライザーを**無効にする手段**は、**リモートを押す**ことでした。これにより、攻撃者は**継続的にDoS攻撃を実行**する能力を持ちます。または、被害者が攻撃をできるだけ早く停止したいと思うため、この攻撃を**前の攻撃と組み合わせてさらに多くのコードを取得**することもできます。
 
-## References
+## 参考文献
 
 * [https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/](https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/)
 * [https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
@@ -101,10 +99,10 @@ Testing against an aftermarket rolling code system installed on a car, **sending
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) **をチェックしてください！**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)をご覧ください。当社の独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションをご覧ください。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

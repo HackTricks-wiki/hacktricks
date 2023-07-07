@@ -4,86 +4,85 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)をご覧ください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Intro <a href="#9wrzi" id="9wrzi"></a>
+## イントロ <a href="#9wrzi" id="9wrzi"></a>
 
-For info about RFID and NFC check the following page:
+RFIDとNFCに関する情報は、次のページを参照してください：
 
 {% content-ref url="../../../radio-hacking/pentesting-rfid.md" %}
 [pentesting-rfid.md](../../../radio-hacking/pentesting-rfid.md)
 {% endcontent-ref %}
 
-## Supported NFC cards <a href="#9wrzi" id="9wrzi"></a>
+## サポートされているNFCカード <a href="#9wrzi" id="9wrzi"></a>
 
 {% hint style="danger" %}
-Apart from NFC cards Flipper Zero supports **other type of High-frequency cards** such as several **Mifare** Classic and Ultralight and **NTAG**.
+NFCカード以外にも、Flipper Zeroは**他の種類の高周波カード**（Mifare ClassicやUltralight、NTAGなど）もサポートしています。
 {% endhint %}
 
-New types of NFC cards will be added to the list of supported cards. Flipper Zero supports the following **NFC cards type A** (ISO 14443A):
+新しいタイプのNFCカードは、サポートされるカードのリストに追加されます。Flipper Zeroは、以下の**NFCカードタイプA**（ISO 14443A）をサポートしています：
 
-* ﻿**Bank cards (EMV)** — only read UID, SAK, and ATQA without saving.
-* ﻿**Unknown cards** — read (UID, SAK, ATQA) and emulate an UID.
+* ﻿**銀行カード（EMV）** — UID、SAK、ATQAの読み取りのみで保存はしません。
+* ﻿**不明なカード** — UID、SAK、ATQAの読み取りとUIDのエミュレーションが可能です。
 
-For **NFC cards type B, type F, and type V**, Flipper Zero is able to read an UID without saving it.
+**NFCカードタイプB、タイプF、タイプV**については、Flipper ZeroはUIDの読み取りのみで保存はしません。
 
-### NFC cards type A <a href="#uvusf" id="uvusf"></a>
+### NFCカードタイプA <a href="#uvusf" id="uvusf"></a>
 
-#### Bank card (EMV) <a href="#kzmrp" id="kzmrp"></a>
+#### 銀行カード（EMV） <a href="#kzmrp" id="kzmrp"></a>
 
-Flipper Zero can only read an UID, SAK, ATQA, and stored data on bank cards **without saving**.
+Flipper Zeroは、銀行カードのデータを**保存せずに**UID、SAK、ATQA、および保存されたデータを読み取ることができます。
 
-Bank card reading screenFor bank cards, Flipper Zero can only read data **without saving and emulating it**.
+銀行カードの読み取り画面Flipper Zeroは、銀行カードのデータを**保存およびエミュレートせずに**読み取ることができます。
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=916&#x26;w=2662" alt=""><figcaption></figcaption></figure>
 
-#### Unknown cards <a href="#37eo8" id="37eo8"></a>
+#### 不明なカード <a href="#37eo8" id="37eo8"></a>
 
-When Flipper Zero is **unable to determine NFC card's type**, then only an **UID, SAK, and ATQA** can be **read and saved**.
+Flipper Zeroが**NFCカードのタイプを特定できない**場合、UID、SAK、ATQAのみを**読み取りおよび保存**することができます。
 
-Unknown card reading screenFor unknown NFC cards, Flipper Zero can emulate only an UID.
+不明なカードの読み取り画面不明なNFCカードの場合、Flipper ZeroはUIDのエミュレーションのみが可能です。
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=932&#x26;w=2634" alt=""><figcaption></figcaption></figure>
 
-### NFC cards types B, F, and V <a href="#wyg51" id="wyg51"></a>
+### NFCカードタイプB、F、V <a href="#wyg51" id="wyg51"></a>
 
-For **NFC cards types B, F, and V**, Flipper Zero can only **read and display an UID** without saving it.
+**NFCカードタイプB、F、V**については、Flipper ZeroはUIDの読み取りのみで保存はしません。
 
 <figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=1080&#x26;w=2704" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## アクション
 
-For an intro about NFC [**read this page**](../../../radio-hacking/pentesting-rfid.md#high-frequency-rfid-tags-13.56-mhz).
+NFCについてのイントロについては、[**このページ**](../../../radio-hacking/pentesting-rfid.md#high-frequency-rfid-tags-13.56-mhz)を読んでください。
 
-### Read
+### 読み取り
 
-Flipper Zero can **read NFC cards**, however, it **doesn't understand all the protocols** that are based on ISO 14443. However, since **UID is a low-level attribute**, you might find yourself in a situation when **UID is already read, but the high-level data transfer protocol is still unknown**. You can read, emulate and manually input UID using Flipper for the primitive readers that use UID for authorization.
+Flipper Zeroは**NFCカードを読み取る**ことができますが、ISO 14443に基づく**すべてのプロトコルを理解するわけではありません**。ただし、**UIDは低レベルの属性**であるため、UIDが既に読み取られているが、ハイレベルのデータ転送プロトコルがまだ不明な状況になることがあります。UIDを使用してプリミティブなリーダーで読み取り、エミュレート、手動で入力することができます。
 
-#### Reading the UID VS Reading the Data Inside <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
+#### UIDの読み取りと内部のデータの読み取り <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
 <figure><img src="../../../.gitbook/assets/image (26).png" alt=""><figcaption></figcaption></figure>
 
-In Flipper, reading 13.56 MHz tags can be divided into two parts:
+Flipperでは、13.56 MHzのタグの読み取りは2つのパートに分けることができます：
 
-* **Low-level read** — reads only the UID, SAK, and ATQA. Flipper tries to guess the high-level protocol based on this data read from the card. You can't be 100% certain with this, as it is just an assumption based on certain factors.
-* **High-level read** — reads the data from the card's memory using a specific high-level protocol. That would be reading the data on a Mifare Ultralight, reading the sectors from a Mifare Classic, or reading the card's attributes from PayPass/Apple Pay.
+* **低レベルの読み取り** — UID、SAK、ATQAのみを読み取ります。Flipperは、カードから読み取ったこのデータに基づいてハイレベルのプロトコルを推測しようとします。これはあくまで一部の要素に基づく推測であり、100％確実ではありません。
+* **ハイレベルの読み取り** — 特定のハイレベルのプロトコルを使用してカードのメモリからデータを読み取ります。これはMifare Ultralightのデータの読み取り、Mifare Classicのセクターの読み取り、PayPass/Apple Payからカードの属性の読み取りなどが該当します。
+### 特定の読み取り
 
-### Read Specific
+Flipper Zeroが低レベルデータからカードの種類を見つけることができない場合、`追加のアクション`で`特定のカードの種類を読み取る`を選択し、**手動で読み取りたいカードの種類を指定**することができます。
 
-In case Flipper Zero isn't capable of finding the type of card from the low level data, in `Extra Actions` you can select `Read Specific Card Type` and **manually** **indicate the type of card you would like to read**.
+#### EMV銀行カード（PayPass、payWave、Apple Pay、Google Pay）<a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-#### EMV Bank Cards (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
+UIDだけでなく、銀行カードからはさらに多くのデータを抽出することができます。カードの表面にある16桁の**カード番号全体**、**有効期限**、そして一部の場合は**所有者の名前**と**最新の取引のリスト**を取得することができます。\
+ただし、この方法では**CVV（カードの裏面にある3桁の番号）は読み取れません**。また、**銀行カードはリプレイ攻撃から保護されているため**、Flipperでコピーしてからそれをエミュレートして支払いを試みることはできません。
 
-Apart from simply reading the UID, you can extract a lot more data from a bank card. It's possible to **get the full card number** (the 16 digits on the front of the card), **validity date**, and in some cases even the **owner's name** along with a list of the **most recent transactions**.\
-However, you **can't read the CVV this way** (the 3 digits on the back of the card). Also **bank cards are protected from replay attacks**, so copying it with Flipper and then trying to emulate it to pay for something won't work.
-
-## References
+## 参考文献
 
 * [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
@@ -91,10 +90,10 @@ However, you **can't read the CVV this way** (the 3 digits on the back of the ca
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

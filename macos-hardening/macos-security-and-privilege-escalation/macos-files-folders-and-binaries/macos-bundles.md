@@ -1,63 +1,49 @@
-# macOS Bundles
+# macOS バンドル
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Basic Information
+## 基本情報
 
-Basically, a bundle is a **directory structure** within the file system. Interestingly, by default this directory **looks like a single object in Finder**.&#x20;
+基本的に、バンドルはファイルシステム内の**ディレクトリ構造**です。興味深いことに、このディレクトリはデフォルトでは**Finderで単一のオブジェクトのように見えます**。&#x20;
 
-The **common** frequent bundle we will encounter is the **`.app` bundle**, but many other executables are also packaged as bundles, such as **`.framework`** and **`.systemextension`** or **`.kext`**.
+**一般的な**バンドルは、**`.app`バンドル**ですが、他にも**`.framework`**や**`.systemextension`**、**`.kext`**などの実行可能ファイルもバンドルとしてパッケージ化されています。
 
-The types of resources contained within a bundle may consist of applications, libraries, images, documentation, header files, etc. All these files are inside `<application>.app/Contents/`
-
+バンドルに含まれるリソースの種類は、アプリケーション、ライブラリ、画像、ドキュメント、ヘッダーファイルなどがあります。これらのファイルは`<application>.app/Contents/`内にあります。
 ```bash
 ls -lR /Applications/Safari.app/Contents
 ```
-
 *   `Contents/_CodeSignature`
 
-    Contains **code-signing information** about the application (i.e., hashes, etc.).
+アプリケーションに関する**コード署名情報**（ハッシュなど）が含まれています。
 *   `Contents/MacOS`
 
-    Contains the **application’s binary** (which is executed when the user double-clicks the application icon in the UI).
+アプリケーションの**バイナリ**が含まれています（ユーザーがUIのアプリケーションアイコンをダブルクリックしたときに実行されます）。
 *   `Contents/Resources`
 
-    Contains **UI elements of the application**, such as images, documents, and nib/xib files (that describe various user interfaces).
+アプリケーションの**UI要素**が含まれています。画像、ドキュメント、およびさまざまなユーザーインターフェースを記述するnib/xibファイルなどです。
 * `Contents/Info.plist`\
-  The application’s main “**configuration file.**” Apple notes that “the system relies on the presence of this file to identify relevant information about \[the] application and any related files”.
-  * **Plist** **files** contains configuration information. You can find find information about the meaning of they plist keys in [https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)
-  *   Pairs that may be of interest when analyzing an application include:\\
+アプリケーションの主要な「**設定ファイル**」です。Appleは、「システムはこのファイルの存在に依存して、\[アプリケーション]と関連ファイルに関する関連情報を識別する」と述べています。
+* **Plist** **ファイル**には設定情報が含まれています。[https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html)でplistキーの意味に関する情報を見つけることができます。
+*   アプリケーションの解析時に興味がある可能性のあるペアは次のとおりです:\\
 
-      * **CFBundleExecutable**
+* **CFBundleExecutable**
 
-      Contains the **name of the application’s binary** (found in Contents/MacOS).
+アプリケーションのバイナリの**名前**が含まれています（Contents/MacOS内に見つかります）。
 
-      * **CFBundleIdentifier**
+* **CFBundleIdentifier**
 
-      Contains the application’s bundle identifier (often used by the system to **globally** **identify** the application).
+アプリケーションのバンドル識別子が含まれています（システムがアプリケーションを**グローバルに識別**するためによく使用されます）。
 
-      * **LSMinimumSystemVersion**
+* **LSMinimumSystemVersion**
 
-      Contains the **oldest** **version** of **macOS** that the application is compatible with.
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
-
-</details>
+アプリケーションが互換性のある**最も古いmacOSのバージョン**が含まれています。

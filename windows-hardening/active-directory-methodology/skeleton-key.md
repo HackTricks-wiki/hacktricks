@@ -1,76 +1,69 @@
-# Skeleton Key
+# スケルトンキー
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で**フォロー**する[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
 
-## **Skeleton Key**
+## **スケルトンキー**
 
-**From:** [**https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/**](https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/)
+**出典:** [**https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/**](https://blog.stealthbits.com/unlocking-all-the-doors-to-active-directory-with-the-skeleton-key-attack/)
 
-There are several methods for compromising Active Directory accounts that attackers can use to elevate privileges and create persistence once they have established themselves in your domain. The Skeleton Key is a particularly scary piece of malware targeted at Active Directory domains to make it alarmingly easy to hijack any account. This malware **injects itself into LSASS and creates a master password that will work for any account in the domain**. Existing passwords will also continue to work, so it is very difficult to know this attack has taken place unless you know what to look for.
+攻撃者がドメイン内に侵入した後、特権を昇格させ、持続性を作成するために使用できるActive Directoryアカウントの侵害方法はいくつかあります。スケルトンキーは、Active Directoryドメインを対象とした特に恐ろしいマルウェアで、任意のアカウントを乗っ取ることが驚くほど簡単になります。このマルウェアは**LSASSに自己注入し、ドメイン内の任意のアカウントで機能するマスターパスワードを作成**します。既存のパスワードも引き続き機能するため、この攻撃が行われたことを知るのは非常に困難です。
 
-Not surprisingly, this is one of the many attacks that is packaged and very easy to perform using [Mimikatz](https://github.com/gentilkiwi/mimikatz). Let’s take a look at how it works.
+予想通り、これは[Mimikatz](https://github.com/gentilkiwi/mimikatz)を使用して非常に簡単に実行できる多くの攻撃の1つです。それがどのように機能するかを見てみましょう。
 
-### Requirements for the Skeleton Key Attack
+### スケルトンキー攻撃の要件
 
-In order to perpetrate this attack, **the attacker must have Domain Admin rights**. This attack must be **performed on each and every domain controller for complete compromise, but even targeting a single domain controller can be effective**. **Rebooting** a domain controller **will remove this malware** and it will have to be redeployed by the attacker.
+この攻撃を行うためには、**攻撃者はドメイン管理者権限を持っている必要があります**。この攻撃は**完全な侵害のためにすべてのドメインコントローラで実行する必要がありますが、単一のドメインコントローラを対象にするだけでも効果的です**。ドメインコントローラを**再起動**すると、このマルウェアは削除され、攻撃者によって再展開する必要があります。
 
-### Performing the Skeleton Key Attack
+### スケルトンキー攻撃の実行
 
-Performing the attack is very straightforward to do. It only requires the following **command to be run on each domain controller**: `misc::skeleton`. After that, you can authenticate as any user with the default password of Mimikatz.
+攻撃の実行は非常に簡単です。各ドメインコントローラで次の**コマンドを実行するだけです**: `misc::skeleton`。その後、Mimikatzのデフォルトパスワードを使用して、任意のユーザーとして認証できます。
 
-![Injecting a skeleton key using the misc::skeleton into a domain controller with Mimikatz](https://blog.stealthbits.com/wp-content/uploads/2017/07/1-3.png)
+![Mimikatzを使用してドメインコントローラにスケルトンキーを注入する](https://blog.stealthbits.com/wp-content/uploads/2017/07/1-3.png)
 
-Here is an authentication for a Domain Admin member using the skeleton key as a password to get administrative access to a domain controller:
+以下は、スケルトンキーをパスワードとして使用してドメインコントローラに管理アクセスを取得するためのドメイン管理者メンバーの認証です。
 
-![Using the skeleton key as a password with the misc::skeleton command to get administrative access to a domain controller with the default password of Mimikatz](https://blog.stealthbits.com/wp-content/uploads/2017/07/2-5.png)
+![Mimikatzのデフォルトパスワードを使用してドメインコントローラに管理アクセスを取得するためのスケルトンキーをパスワードとして使用する](https://blog.stealthbits.com/wp-content/uploads/2017/07/2-5.png)
 
-Note: If you do get a message saying, “System error 86 has occurred. The specified network password is not correct”, just try using the domain\account format for the username and it should work.
+注意: "System error 86 has occurred. The specified network password is not correct"というメッセージが表示された場合は、ユーザー名にドメイン\アカウントの形式を使用してみてください。
 
-![Using the domain\account format for the username if you get a message saying System error 86 has occurred The specified network password is not correct](https://blog.stealthbits.com/wp-content/uploads/2017/07/3-3.png)
+!["System error 86 has occurred. The specified network password is not correct"というメッセージが表示された場合は、ユーザー名にドメイン\アカウントの形式を使用してみてください](https://blog.stealthbits.com/wp-content/uploads/2017/07/3-3.png)
 
-If lsass was **already patched** with skeleton, then this **error** will appear:
+もしlsassがすでにスケルトンキーでパッチされている場合、このエラーが表示されます:
 
 ![](<../../.gitbook/assets/image (160).png>)
 
-### Mitigations
+### 緩和策
 
-* Events:
-  * System Event ID 7045 - A service was installed in the system. (Type Kernel Mode driver)
-  * Security Event ID 4673 – Sensitive Privilege Use ("Audit privilege use" must be enabled)
-  * Event ID 4611 – A trusted logon process has been registered with the Local Security Authority ("Audit privilege use" must be enabled)
+* イベント:
+* システムイベントID 7045 - システムにサービスがインストールされました（カーネルモードドライバータイプ）
+* セキュリティイベントID 4673 - 機密特権の使用（"特権の使用を監査する"が有効になっている必要があります）
+* イベントID 4611 - ローカルセキュリティ機関に信頼されたログオンプロセスが登録されました（"特権の使用を監査する"が有効になっている必要があります）
 * `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "`_`Kernel Mode Driver"}`_
-* This only detect mimidrv `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$`_`.message -like "Kernel Mode Driver" -and $`_`.message -like "`_`mimidrv`_`"}`
-* Mitigation:
-  * Run lsass.exe as a protected process, it forces an attacker to load a kernel mode driver
-  * `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
-  * Verify after reboot: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "`_`protected process"}`_
+* これはmimidrvのみを検出します `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$`_`.message -like "Kernel Mode Driver" -and $`_`.message -like "`_`mimidrv`_`"}`
+* 緩和策:
+* lsass.exeを保護されたプロセスとして実行し、攻撃者がカーネルモードドライバをロードすることを強制します
+* `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
+* 再起動後に確認: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "`_`protected process"}`_
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、
+- **[💬](https://emojipedia.org/speech-balloon/)Discordグループ**に参加するか、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
+- **あなたのハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**

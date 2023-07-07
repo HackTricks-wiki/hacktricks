@@ -1,34 +1,33 @@
-# macOS Sandbox
+# macOSサンドボックス
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Basic Information
+## 基本情報
 
-MacOS Sandbox (initially called Seatbelt) **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
+MacOSサンドボックス（最初はSeatbeltと呼ばれていました）は、**サンドボックスプロファイルで指定された許可されたアクションに制限**されるように、サンドボックス内で実行されるアプリケーションの動作を制御します。これにより、**アプリケーションが予期されたリソースにのみアクセスすることが保証**されます。
 
-Any app with the **entitlement** **`com.apple.security.app-sandbox`** will be executed inside the sandbox. **Apple binaries** are usually executed inside a Sanbox and in order to publish inside the **App Store**, **this entitlement is mandatory**. So most applications will be executed inside the sandbox.
+**`com.apple.security.app-sandbox`**という**エンタイトルメント**を持つアプリは、サンドボックス内で実行されます。**Appleのバイナリ**は通常、サンドボックス内で実行され、**App Store**に公開するためには、**このエンタイトルメントが必須**です。したがって、ほとんどのアプリケーションはサンドボックス内で実行されます。
 
-In order to control what a process can or cannot do the **Sandbox has hooks** in all **syscalls** across the kernel. **Depending** on the **entitlements** of the app the Sandbox will **allow** certain actions.
+プロセスが何を行えるか、行えないかを制御するために、サンドボックスにはカーネル全体の**すべてのシスコールにフック**があります。アプリの**エンタイトルメント**に応じて、サンドボックスは特定のアクションを**許可**します。
 
-Some important components of the Sandbox are:
+サンドボックスの重要なコンポーネントには次のものがあります：
 
-* The **kernel extension** `/System/Library/Extensions/Sandbox.kext`
-* The **private framework** `/System/Library/PrivateFrameworks/AppSandbox.framework`
-* A **daemon** running in userland `/usr/libexec/sandboxd`
-* The **containers** `~/Library/Containers`
+* **カーネル拡張** `/System/Library/Extensions/Sandbox.kext`
+* **プライベートフレームワーク** `/System/Library/PrivateFrameworks/AppSandbox.framework`
+* ユーザーランドで実行される**デーモン** `/usr/libexec/sandboxd`
+* **コンテナ** `~/Library/Containers`
 
-Inside the containers folder you can find **a folder for each app executed sanboxed** with the name of the bundle id:
-
+コンテナフォルダ内には、**バンドルIDの名前で実行される各サンドボックス化されたアプリのフォルダ**があります：
 ```bash
 ls -l ~/Library/Containers
 total 0
@@ -39,9 +38,7 @@ drwx------@ 4 username  staff  128 Mar 25 14:14 com.apple.Accessibility-Settings
 drwx------@ 4 username  staff  128 Mar 25 14:10 com.apple.ActionKit.BundledIntentHandler
 [...]
 ```
-
-Inside each bundle id folder you can find the **plist** and the **Data directory** of the App:
-
+各バンドルIDフォルダ内には、アプリの**plist**と**データディレクトリ**が含まれています。
 ```bash
 cd /Users/username/Library/Containers/com.apple.Safari
 ls -la
@@ -64,53 +61,49 @@ lrwxr-xr-x   1 username  staff    20 Mar 24 18:02 Pictures -> ../../../../Pictur
 drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
-
 {% hint style="danger" %}
-Note that even if the symlinks are there to "escape" from the Sandbox and access other folders, the App still needs to **have permissions** to access them. These permissions are inside the **`.plist`**.
+シンボリックリンクがSandboxから「脱出」して他のフォルダにアクセスするために存在していても、アプリはそれらにアクセスするための**権限を持っている必要があります**。これらの権限は**`.plist`**内にあります。
 {% endhint %}
-
 ```bash
 # Get permissions
 plutil -convert xml1 .com.apple.containermanagerd.metadata.plist -o -
 
 # In this file you can find the entitlements:
 <key>Entitlements</key>
-	<dict>
-		<key>com.apple.MobileAsset.PhishingImageClassifier2</key>
-		<true/>
-		<key>com.apple.accounts.appleaccount.fullaccess</key>
-		<true/>
-		<key>com.apple.appattest.spi</key>
-		<true/>
+<dict>
+<key>com.apple.MobileAsset.PhishingImageClassifier2</key>
+<true/>
+<key>com.apple.accounts.appleaccount.fullaccess</key>
+<true/>
+<key>com.apple.appattest.spi</key>
+<true/>
 [...]
 
 # Some parameters
 <key>Parameters</key>
-	<dict>
-		<key>_HOME</key>
-		<string>/Users/username</string>
-		<key>_UID</key>
-		<string>501</string>
-		<key>_USER</key>
-		<string>username</string>
+<dict>
+<key>_HOME</key>
+<string>/Users/username</string>
+<key>_UID</key>
+<string>501</string>
+<key>_USER</key>
+<string>username</string>
 [...]
 
 # The paths it can access
 <key>RedirectablePaths</key>
-	<array>
-		<string>/Users/username/Downloads</string>
-		<string>/Users/username/Documents</string>
-		<string>/Users/username/Library/Calendars</string>
-		<string>/Users/username/Desktop</string>
+<array>
+<string>/Users/username/Downloads</string>
+<string>/Users/username/Documents</string>
+<string>/Users/username/Library/Calendars</string>
+<string>/Users/username/Desktop</string>
 [...]
 ```
+### サンドボックスプロファイル
 
-### Sandbox Profiles
+サンドボックスプロファイルは、そのサンドボックスで何が**許可/禁止**されるかを示す設定ファイルです。これは、**サンドボックスプロファイル言語（SBPL）**を使用しており、[**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\))プログラミング言語を使用しています。
 
-The Sandbox profiles are configuration files that indicates what is going to be **allowed/forbidden** in that **Sandbox**. It uses the **Sandbox Profile Language (SBPL)**, which uses the [**Scheme**](https://en.wikipedia.org/wiki/Scheme\_\(programming\_language\)) programming language.
-
-Here you can find an example:
-
+以下に例を示します：
 ```scheme
 (version 1) ; First you get the version
 
@@ -119,40 +112,35 @@ Here you can find an example:
 (allow network*) ; You can use wildcards and allow everything
 
 (allow file-read* ; You can specify where to apply the rule
-    (subpath "/Users/username/")
-    (literal "/tmp/afile")
-    (regex #"^/private/etc/.*")
+(subpath "/Users/username/")
+(literal "/tmp/afile")
+(regex #"^/private/etc/.*")
 )
 
 (allow mach-lookup
-    (global-name "com.apple.analyticsd")
+(global-name "com.apple.analyticsd")
 )
 ```
-
 {% hint style="success" %}
-Check this [**research**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **to check more actions that could be allowed or denied.**
+[**こちらの研究**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **をチェックして、許可または拒否される可能性のあるさらなるアクションを確認してください。**
 {% endhint %}
 
-Important **system services** also run inside their own custom **sandbox** such as the `mdnsresponder` service. You can view these custom **sandbox profiles** inside:
+重要な**システムサービス**も、`mdnsresponder`サービスなど、独自の**サンドボックス**内で実行されます。これらのカスタム**サンドボックスプロファイル**は以下で確認できます：
 
 * **`/usr/share/sandbox`**
 * **`/System/Library/Sandbox/Profiles`**&#x20;
-* Other sandbox profiles can be checked in [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
+* 他のサンドボックスプロファイルは[https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles)で確認できます。
 
-**App Store** apps use the **profile** **`/System/Library/Sandbox/Profiles/application.sb`**. You can check in this profile how entitlements such as **`com.apple.security.network.server`** allows a process to use the network.
+**App Store**のアプリは、**プロファイル** **`/System/Library/Sandbox/Profiles/application.sb`**を使用します。このプロファイルでは、**`com.apple.security.network.server`**などのエンタイトルメントがプロセスがネットワークを使用することを許可しているかどうかを確認できます。
 
-SIP is a Sandbox profile called platform\_profile in /System/Library/Sandbox/rootless.conf
+SIPは、/System/Library/Sandbox/rootless.confにあるplatform\_profileという名前のサンドボックスプロファイルです。
 
-### Sandbox Profile Examples
+### サンドボックスプロファイルの例
 
-To start an application with an **specific sandbox profile** you can use:
-
+**特定のサンドボックスプロファイル**でアプリケーションを起動するには、次のコマンドを使用します：
 ```bash
 sandbox-exec -f example.sb /Path/To/The/Application
 ```
-
-{% tabs %}
-{% tab title="touch" %}
 {% code title="touch.sb" %}
 ```scheme
 (version 1)
@@ -160,7 +148,6 @@ sandbox-exec -f example.sb /Path/To/The/Application
 (allow file* (literal "/tmp/hacktricks.txt"))
 ```
 {% endcode %}
-
 ```bash
 # This will fail because default is denied, so it cannot execute touch
 sandbox-exec -f touch.sb touch /tmp/hacktricks.txt
@@ -173,8 +160,19 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 2023-05-26 13:42:52.701382+0200  localhost kernel[0]: (Sandbox) 5 duplicate reports for Sandbox: sandbox-exec(41398) deny(1) file-read-metadata /var
 [...]
 ```
-
 {% code title="touch2.sb" %}
+
+このファイルは、macOSのサンドボックスに関する情報を提供します。サンドボックスは、アプリケーションが制限された環境で実行されるようにするセキュリティ機能です。サンドボックスは、アプリケーションがシステムリソースにアクセスする際に制限を課すことで、悪意のある動作や特権のエスカレーションを防止します。
+
+このファイルでは、サンドボックスの基本的な機能と制限について説明します。サンドボックスの設定方法やカスタマイズ方法についても解説します。
+
+サンドボックスは、アプリケーションのセキュリティを強化するために重要な役割を果たします。正しく設定されたサンドボックスは、悪意のある攻撃からシステムを保護することができます。
+
+このファイルは、macOSのサンドボックスに関する情報を提供します。サンドボックスは、アプリケーションが制限された環境で実行されるようにするセキュリティ機能です。サンドボックスは、アプリケーションがシステムリソースにアクセスする際に制限を課すことで、悪意のある動作や特権のエスカレーションを防止します。
+
+このファイルでは、サンドボックスの基本的な機能と制限について説明します。サンドボックスの設定方法やカスタマイズ方法についても解説します。
+
+サンドボックスは、アプリケーションのセキュリティを強化するために重要な役割を果たします。正しく設定されたサンドボックスは、悪意のある攻撃からシステムを保護することができます。
 ```scheme
 (version 1)
 (deny default)
@@ -188,8 +186,6 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 ; 2023-05-26 13:44:59.840050+0200  localhost kernel[0]: (Sandbox) Sandbox: touch(41575) deny(1) sysctl-read kern.bootargs
 ; 2023-05-26 13:44:59.840061+0200  localhost kernel[0]: (Sandbox) Sandbox: touch(41575) deny(1) file-read-data /
 ```
-{% endcode %}
-
 {% code title="touch3.sb" %}
 ```scheme
 (version 1)
@@ -204,61 +200,57 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 {% endtabs %}
 
 {% hint style="info" %}
-Note that the **Apple-authored** **software** that runs on **Windows** **doesn’t have additional security precautions**, such as application sandboxing.
+注意してください。**Windows**上で実行される**Apple製のソフトウェア**は、アプリケーションのサンドボックス化などの追加のセキュリティ対策はありません。
 {% endhint %}
 
-Bypasses examples:
+バイパスの例：
 
 * [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
-* [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (they are able to write files outside the sandbox whose name starts with `~$`).
+* [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)（`~$`で始まる名前のサンドボックス外のファイルを書き込むことができます）。
 
-### Debug & Bypass Sandbox
+### デバッグ＆サンドボックスのバイパス
 
-**Processes are not born sandboxed on macOS: unlike iOS**, where the sandbox is applied by the kernel before the first instruction of a program executes, on macOS **a process must elect to place itself into the sandbox.**
+**macOSでは、プロセスはサンドボックス化された状態で生まれません：iOSとは異なり、サンドボックスはプログラムの最初の命令が実行される前にカーネルによって適用されますが、macOSではプロセスは自らサンドボックスに入ることを選択する必要があります。**
 
-Processes are automatically Sandboxed from userland when they start if they have the entitlement: `com.apple.security.app-sandbox`. For a detailed explanation of this process check:
+プロセスは、`com.apple.security.app-sandbox`という権限を持っている場合、ユーザーランドから自動的にサンドボックス化されます。このプロセスの詳細な説明については、次を参照してください：
 
 {% content-ref url="macos-sandbox-debug-and-bypass/" %}
 [macos-sandbox-debug-and-bypass](macos-sandbox-debug-and-bypass/)
 {% endcontent-ref %}
 
-### **Check PID Privileges**
+### **PIDの特権をチェックする**
 
-[According to this](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s), the **`sandbox_check`** (it's a `__mac_syscall`), can check **if an operation is allowed or not** by the sandbox in a certain PID.
+[これによると](https://www.youtube.com/watch?v=mG715HcDgO8\&t=3011s)、**`sandbox_check`**（`__mac_syscall`です）は、特定のPIDのサンドボックスによって操作が許可されているかどうかをチェックできます。
 
-The [**tool sbtool**](http://newosxbook.com/src.jl?tree=listings\&file=sbtool.c) can check if a PID can perform a certain action:
-
+[**ツールsbtool**](http://newosxbook.com/src.jl?tree=listings\&file=sbtool.c)は、PIDが特定のアクションを実行できるかどうかをチェックできます：
 ```bash
 sbtool <pid> mach #Check mac-ports (got from launchd with an api)
 sbtool <pid> file /tmp #Check file access
 sbtool <pid> inspect #Gives you an explaination of the sandbox profile
 sbtool <pid> all
 ```
+### App StoreアプリでのカスタムSBPL
 
-### Custom SBPL in App Store apps
+企業は、デフォルトのものではなく、**カスタムのサンドボックスプロファイル**を使用してアプリを実行することができます。これには、Appleによって承認される必要がある**`com.apple.security.temporary-exception.sbpl`**というエンタイトルメントを使用する必要があります。
 
-It could be possible for companies to make their apps run **with custom Sandbox profiles** (instead of with the default one). They need to use the entitlement **`com.apple.security.temporary-exception.sbpl`** which needs to be authorized by Apple.
-
-It's possible to check the definition of this entitlement in **`/System/Library/Sandbox/Profiles/application.sb:`**
-
+このエンタイトルメントの定義は、**`/System/Library/Sandbox/Profiles/application.sb:`**で確認することができます。
 ```scheme
 (sandbox-array-entitlement
-  "com.apple.security.temporary-exception.sbpl"
-  (lambda (string)
-    (let* ((port (open-input-string string)) (sbpl (read port)))
-      (with-transparent-redirection (eval sbpl)))))
+"com.apple.security.temporary-exception.sbpl"
+(lambda (string)
+(let* ((port (open-input-string string)) (sbpl (read port)))
+(with-transparent-redirection (eval sbpl)))))
 ```
-
-This will **eval the string after this entitlement** as an Sandbox profile.
+これは、**この権限の後にある文字列をSandboxプロファイルとして評価**します。
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝したいですか**？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロードしたり**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

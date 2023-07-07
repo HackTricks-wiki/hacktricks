@@ -1,190 +1,169 @@
-# BloodHound & Other AD Enum Tools
+# BloodHound & 他のAD Enumツール
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) is from Sysinternal Suite:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer)はSysinternal Suiteから提供されています：
 
-> An advanced Active Directory (AD) viewer and editor. You can use AD Explorer to navigate an AD database easily, define favourite locations, view object properties, and attributes without opening dialog boxes, edit permissions, view an object's schema, and execute sophisticated searches that you can save and re-execute.
+> 高度なActive Directory（AD）ビューアおよびエディターです。AD Explorerを使用して、ADデータベースを簡単にナビゲートしたり、お気に入りの場所を定義したり、オブジェクトのプロパティや属性をダイアログボックスを開かずに表示したり、アクセス許可を編集したり、オブジェクトのスキーマを表示したり、保存および再実行できる高度な検索を実行したりすることができます。
 
-### Snapshots
+### スナップショット
 
-AD Explorer can create snapshots of an AD so you can check it offline.\
-It can be used to discover vulns offline, or to compare different states of the AD DB across the time.
+AD ExplorerはADのスナップショットを作成することができます。\
+オフラインでチェックするために使用することができます。\
+オフラインで脆弱性を発見したり、AD DBの異なる状態を比較したりすることができます。
 
-You will be requires the username, password, and direction to connect (any AD user is required).
-
-To take a snapshot of AD, go to `File` --> `Create Snapshot` and enter a name for the snapshot.
+スナップショットを取るには、`File` --> `Create Snapshot`に移動し、スナップショットの名前を入力します。
 
 ## ADRecon
 
-****[**ADRecon**](https://github.com/adrecon/ADRecon) is a tool which extracts and combines various artefacts out of an AD environment. The information can be presented in a **specially formatted** Microsoft Excel **report** that includes summary views with metrics to facilitate analysis and provide a holistic picture of the current state of the target AD environment.
-
+[**ADRecon**](https://github.com/adrecon/ADRecon)は、AD環境からさまざまなアーティファクトを抽出して組み合わせるツールです。情報は、分析を容易にし、対象のAD環境の現在の状態の包括的なイメージを提供するためのメトリックを含む、**特別にフォーマットされた**Microsoft Excel **レポート**で表示することができます。
 ```bash
 # Run it
 .\ADRecon.ps1
 ```
-
 ## BloodHound
 
-> BloodHound is a single page Javascript web application, built on top of [Linkurious](http://linkurio.us), compiled with [Electron](http://electron.atom.io), with a [Neo4j](https://neo4j.com)database fed by a PowerShell ingestor.
->
-> BloodHound uses graph theory to reveal the hidden and often unintended relationships within an Active Directory environment. Attackers can use BloodHound to easily identify highly complex attack paths that would otherwise be impossible to quickly identify. Defenders can use BloodHound to identify and eliminate those same attack paths. Both blue and red teams can use BloodHound to easily gain a deeper understanding of privilege relationships in an Active Directory environment.
->
-> BloodHound is developed by [@\_wald0](https://www.twitter.com/\_wald0), [@CptJesus](https://twitter.com/CptJesus), and [@harmj0y](https://twitter.com/harmj0y).
->
+> BloodHoundは、[Linkurious](http://linkurio.us)をベースにしたシングルページのJavaScriptウェブアプリケーションで、[Electron](http://electron.atom.io)でコンパイルされ、PowerShellのインジェストツールによって供給される[Neo4j](https://neo4j.com)データベースを使用しています。
+
+> BloodHoundは、グラフ理論を使用してActive Directory環境内の隠れた関係や意図しない関係を明らかにします。攻撃者は、BloodHoundを使用して、通常は素早く特定することができない非常に複雑な攻撃経路を簡単に特定することができます。防御側は、BloodHoundを使用して、同じ攻撃経路を特定し、排除することができます。ブルーチームとレッドチームの両方は、BloodHoundを使用して、Active Directory環境の特権関係をより深く理解することができます。
+
+> BloodHoundは、[\_wald0](https://www.twitter.com/\_wald0)、[@CptJesus](https://twitter.com/CptJesus)、[@harmj0y](https://twitter.com/harmj0y)によって開発されています。
+
 > From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
-So, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)is an amazing tool which can enumerate a domain automatically, save all the information, find possible privilege escalation paths and show all the information using graphs.
+したがって、[Bloodhound](https://github.com/BloodHoundAD/BloodHound)は、ドメインを自動的に列挙し、すべての情報を保存し、特権エスカレーションの可能な経路を見つけ、グラフを使用してすべての情報を表示することができる素晴らしいツールです。
 
-Booldhound is composed of 2 main parts: **ingestors** and the **visualisation application**.
+Bloodhoundは、**インジェストツール**と**可視化アプリケーション**の2つの主要な部分で構成されています。
 
-The **ingestors** are used to **enumerate the domain and extract all the information** in a format that the visualisation application will understand.
+**インジェストツール**は、ドメインを列挙し、可視化アプリケーションが理解できる形式ですべての情報を抽出するために使用されます。
 
-The **visualisation application uses neo4j** to show how all the information is related and to show different ways to escalate privileges in the domain.
+**可視化アプリケーションはneo4jを使用**して、情報の関連性を表示し、ドメイン内で特権をエスカレーションするための異なる方法を示します。
 
-### Installation
+### インストール
 
 1. Bloodhound
 
-To install the visualisation application you will need to install **neo4j** and the **bloodhound application**.\
-The easiest way to do this is just doing:
-
+可視化アプリケーションをインストールするには、**neo4j**と**bloodhoundアプリケーション**をインストールする必要があります。\
+これを簡単に行う方法は、次のようにします：
 ```
 apt-get install bloodhound
 ```
+**ダウンロード**は[こちら](https://neo4j.com/download-center/#community)から**neo4jのコミュニティ版**をダウンロードできます。
 
-You can **download the community version of neo4j** from [here](https://neo4j.com/download-center/#community).
+1. インジェスター
 
-1. Ingestors
-
-You can download the Ingestors from:
+インジェスターは以下からダウンロードできます：
 
 * https://github.com/BloodHoundAD/SharpHound/releases
 * https://github.com/BloodHoundAD/BloodHound/releases
 * https://github.com/fox-it/BloodHound.py
 
-1. Learn the path from the graph
+1. グラフからパスを学ぶ
 
-Bloodhound come with various queries to highlight sensitive compromission path. It it possible to add custom queries to enhance the search and correlation between objects and more!
+Bloodhoundには、機密性の高い侵害経路を強調するためのさまざまなクエリが用意されています。カスタムクエリを追加して、オブジェクト間の検索と相関関係を向上させることも可能です！
 
-This repo has a nice collections of queries: https://github.com/CompassSecurity/BloodHoundQueries
+このリポジトリには、素晴らしいクエリのコレクションがあります：https://github.com/CompassSecurity/BloodHoundQueries
 
-Installation process:
-
+インストール手順：
 ```
 $ curl -o "~/.config/bloodhound/customqueries.json" "https://raw.githubusercontent.com/CompassSecurity/BloodHoundQueries/master/BloodHound_Custom_Queries/customqueries.json"
 ```
+### 可視化アプリの実行
 
-### Visualisation app Execution
-
-After downloading/installing the required applications, lets start them.\
-First of all you need to **start the neo4j database**:
-
+必要なアプリケーションをダウンロード/インストールした後、それらを起動しましょう。\
+まず、**neo4jデータベースを起動する必要があります**:
 ```bash
 ./bin/neo4j start
 #or
 service neo4j start
 ```
+初めてこのデータベースを起動する際には、[http://localhost:7474/browser/](http://localhost:7474/browser/) にアクセスする必要があります。デフォルトの資格情報（neo4j:neo4j）が求められ、**パスワードの変更が必要**ですので、変更して忘れないようにしてください。
 
-The first time that you start this database you will need to access [http://localhost:7474/browser/](http://localhost:7474/browser/). You will be asked default credentials (neo4j:neo4j) and you will be **required to change the password**, so change it and don't forget it.
-
-Now, start the **bloodhound application**:
-
+さて、**bloodhoundアプリケーション**を起動します。
 ```bash
 ./BloodHound-linux-x64
 #or
 bloodhound
 ```
+データベースの資格情報を入力するように求められます: **neo4j:\<新しいパスワード>**
 
-You will be prompted for the database credentials: **neo4j:\<Your new password>**
-
-And bloodhound will be ready to ingest data.
+そして、Bloodhoundはデータを取り込む準備ができます。
 
 ![](<../../.gitbook/assets/image (171) (1).png>)
 
 ### SharpHound
 
-They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
-
+いくつかのオプションがありますが、ドメインに参加しているPCからSharpHoundを実行し、現在のユーザーを使用してすべての情報を抽出する場合は、次のようにします:
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
+> **CollectionMethod**についての詳細は[こちら](https://bloodhound.readthedocs.io/en/latest/data-collection/sharphound-all-flags.html)で読むことができます。
 
-> You can read more about **CollectionMethod** and loop session [here](https://bloodhound.readthedocs.io/en/latest/data-collection/sharphound-all-flags.html)
-
-If you wish to execute SharpHound using different credentials you can create a CMD netonly session and run SharpHound from there:
-
+異なる資格情報を使用してSharpHoundを実行したい場合は、CMD netonlyセッションを作成し、そこからSharpHoundを実行することができます。
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
-
-[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+[**Bloodhoundについて詳しくは、ired.teamを参照してください。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
 
 **Windows Silent**
 
 ### **Python bloodhound**
 
-If you have domain credentials you can run a **python bloodhound ingestor from any platform** so you don't need to depend on Windows.\
-Download it from [https://github.com/fox-it/BloodHound.py](https://github.com/fox-it/BloodHound.py) or doing `pip3 install bloodhound`
-
+ドメインの資格情報を持っている場合、**どのプラットフォームからでもPythonのBloodhoundインジェストツールを実行**することができるため、Windowsに依存する必要はありません。\
+[https://github.com/fox-it/BloodHound.py](https://github.com/fox-it/BloodHound.py)からダウンロードするか、`pip3 install bloodhound`を実行してください。
 ```bash
 bloodhound-python -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all
 ```
-
-If you are running it through proxychains add `--dns-tcp` for the DNS resolution to work throught the proxy.
-
+もしproxychainsを使って実行している場合は、DNS解決がプロキシを通じて動作するように`--dns-tcp`を追加してください。
 ```bash
 proxychains bloodhound-python -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all --dns-tcp
 ```
-
 ### Python SilentHound
 
-This script will **quietly enumerate an Active Directory Domain via LDAP** parsing users, admins, groups, etc.
+このスクリプトは、LDAPを介してActive Directoryドメインを**静かに列挙**し、ユーザー、管理者、グループなどを解析します。
 
-Check it out in [**SilentHound github**](https://github.com/layer8secure/SilentHound).
+[**SilentHoundのgithub**](https://github.com/layer8secure/SilentHound)で確認してください。
 
 ### RustHound
 
-BloodHound in Rust, [**check it here**](https://github.com/OPENCYBER-FR/RustHound).
+Rustで作られたBloodHound、[**こちらで確認してください**](https://github.com/OPENCYBER-FR/RustHound)。
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) **** is a tool to find **vulnerabilities** in Active Directory associated **Group Policy**. \
-You need to **run group3r** from a host inside the domain using **any domain user**.
-
+[**Group3r**](https://github.com/Group3r/Group3r)は、Active Directoryに関連する**グループポリシー**の**脆弱性**を見つけるためのツールです。\
+**ドメイン内のホストから任意のドメインユーザー**を使用して、group3rを実行する必要があります。
 ```bash
-group3r.exe -f <filepath-name.log> 
+group3r.exe -f <filepath-name.log>
 # -s sends results to stdin
 # -f send results to file
 ```
-
 ## PingCastle
 
-****[**PingCastle**](https://www.pingcastle.com/documentation/) **evaluates the security posture of an AD environment** and provides a nice **report** with graphs.
+****[**PingCastle**](https://www.pingcastle.com/documentation/) **はAD環境のセキュリティポストを評価**し、グラフを含む**素晴らしいレポート**を提供します。
 
-To run it, can execute the binary `PingCastle.exe` and it will start an **interactive session** presenting a menu of options. The default option to use is **`healthcheck`** which will establish a baseline **overview** of the **domain**, and find **misconfigurations** and **vulnerabilities**.&#x20;
+実行するには、バイナリの`PingCastle.exe`を実行し、**対話セッション**が開始され、オプションのメニューが表示されます。使用するデフォルトのオプションは**`healthcheck`**で、**ドメイン**のベースライン**概要**を確立し、**設定ミス**と**脆弱性**を見つけます。&#x20;
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

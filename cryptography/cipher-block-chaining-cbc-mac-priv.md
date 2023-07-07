@@ -1,89 +1,84 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- 独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションである[**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で**フォロー**する[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
 
 # CBC
 
-If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
+もし**クッキー**が**ユーザー名**だけ（またはクッキーの最初の部分がユーザー名）であり、ユーザー名「**admin**」をなりすます場合、ユーザー名**「bdmin」**を作成し、クッキーの**最初のバイト**を**ブルートフォース**できます。
 
 # CBC-MAC
 
-In cryptography, a **cipher block chaining message authentication code** (**CBC-MAC**) is a technique for constructing a message authentication code from a block cipher. The message is encrypted with some block cipher algorithm in CBC mode to create a **chain of blocks such that each block depends on the proper encryption of the previous block**. This interdependence ensures that a **change** to **any** of the plaintext **bits** will cause the **final encrypted block** to **change** in a way that cannot be predicted or counteracted without knowing the key to the block cipher.
+暗号学において、**Cipher Block Chaining Message Authentication Code**（**CBC-MAC**）は、ブロック暗号からメッセージ認証コードを構築するための技術です。メッセージは、いくつかのブロック暗号アルゴリズムを使用してCBCモードで暗号化され、**各ブロックが前のブロックの適切な暗号化に依存するようにブロックのチェーンが作成**されます。この相互依存性により、平文の**任意のビットの変更が、鍵を知らない限り予測または打ち消すことができない方法で最終的な暗号化ブロックを変更**させます。
 
-To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero initialization vector and keeps the last block. The following figure sketches the computation of the CBC-MAC of a message comprising blocks![m\_{1}\\|m\_{2}\\|\cdots \\|m\_{x}](https://wikimedia.org/api/rest\_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) using a secret key k and a block cipher E:
+メッセージmのCBC-MACを計算するには、ゼロの初期化ベクトルでmをCBCモードで暗号化し、最後のブロックを保持します。次の図は、秘密鍵kとブロック暗号Eを使用してブロック![m\_{1}\\|m\_{2}\\|\cdots \\|m\_{x}](https://wikimedia.org/api/rest\_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5)からなるメッセージのCBC-MACの計算をスケッチしたものです。
 
 ![CBC-MAC structure (en).svg](https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC\_structure\_\(en\).svg/570px-CBC-MAC\_structure\_\(en\).svg.png)
 
-# Vulnerability
+# 脆弱性
 
-With CBC-MAC usually the **IV used is 0**.\
-This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
+CBC-MACでは通常、使用される**IVは0**です。\
+これは、2つの既知のメッセージ（`m1`と`m2`）が独立して2つの署名（`s1`と`s2`）を生成することを意味します。したがって：
 
 * `E(m1 XOR 0) = s1`
 * `E(m2 XOR 0) = s2`
 
-Then a message composed by m1 and m2 concatenated (m3) will generate 2 signatures (s31 and s32):
+その後、m1とm2を連結したメッセージ（m3）は2つの署名（s31とs32）を生成します：
 
 * `E(m1 XOR 0) = s31 = s1`
 * `E(m2 XOR s1) = s32`
 
-**Which is possible to calculate without knowing the key of the encryption.**
+**これは、暗号化の鍵を知らなくても計算可能です。**
 
-Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
+名前**Administrator**を**8バイト**のブロックで暗号化していると想像してください：
 
 * `Administ`
 * `rator\00\00\00`
 
-You can create a username called **Administ** (m1) and retrieve the signature (s1).\
-Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, you can use s32 as the signature of the full name **Administrator**.
+**Administ**（m1）というユーザー名を作成し、署名（s1）を取得できます。\
+次に、**rator\00\00\00 XOR s1 XOR 0**の結果となるユーザー名を作成できます。これにより、`E(m2 XOR s1 XOR 0)`が生成され、それはs32です。\
+これで、s32をフルネーム**Administrator**の署名として使用できます。
 
-### Summary
+### 要約
 
-1. Get the signature of username **Administ** (m1) which is s1
-2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
-3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
+1. ユーザー名**Administ**（m1）の署名であるs1を取得します。
+2. ユーザー名**rator\x00\x00\x00 XOR s1 XOR 0**の署名であるs32を取得します。
+3. クッキーをs32に設定し、ユーザー**Administrator**の有効なクッキーになります。
 
-# Attack Controlling IV
+# 攻撃時のIVの制御
 
-If you can control the used IV the attack could be very easy.\
-If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\
-Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0] XOR "A" == IV'\[0] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
+使用されるIVを制御できる場合、攻撃は非常に簡単になります。\
+クッキーが単に暗号化されたユーザー名である場合、ユーザー**administrator**をなりすますためにユーザー**Administrator**を作成し、そのクッキーを取得できます。\
+さて、IVを制御できる場合、IVの最初のバイトを変更して**IV\[0] XOR "A" == IV'\[0] XOR "a"**とすることができ、ユーザー**Administrator**のクッキーを再生成できます。このクッキーは、初期の**IV**で**ユーザーadministrator**を**なりすます**ために有効です。
 
-# References
+# 参考文献
 
-More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
+詳細は[https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)を参照してください。
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- 独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションである[**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+- **[💬](https://emojipedia.org/speech-balloon/)ディスコードグループ**に参加するか、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
-
-

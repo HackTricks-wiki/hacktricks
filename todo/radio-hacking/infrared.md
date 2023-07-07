@@ -1,91 +1,90 @@
-# Infrared
+# 赤外線
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## 赤外線の動作原理 <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.
+**赤外線は人間には見えません**。赤外線の波長は**0.7から1000マイクロメートル**です。家庭用リモコンはデータの送信に赤外線信号を使用し、波長範囲は0.75から1.4マイクロメートルです。リモコンのマイクロコントローラは、特定の周波数で赤外線LEDを点滅させ、デジタル信号を赤外線信号に変換します。
 
-To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.
+赤外線信号を受信するためには、**フォトリシーバ**が使用されます。これは赤外線を電圧パルスに変換し、すでに**デジタル信号**になります。通常、受信機内部には**ダークライトフィルタ**があり、**望ましい波長のみを通過**させ、ノイズをカットします。
 
-### Variety of IR Protocols <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### 複数の赤外線プロトコル <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR protocols differ in 3 factors:
+赤外線プロトコルは以下の3つの要素で異なります：
 
-* bit encoding
-* data structure
-* carrier frequency — often in range 36..38 kHz
+* ビットエンコーディング
+* データ構造
+* キャリア周波数 - 通常は36から38 kHzの範囲
 
-#### Bit encoding ways <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### ビットエンコーディング方法 <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. Pulse Distance Encoding**
+**1. パルス間隔エンコーディング**
 
-Bits are encoded by modulating the duration of the space between pulses. The width of the pulse itself is constant.
+ビットはパルス間の期間の変調によってエンコードされます。パルス自体の幅は一定です。
 
 <figure><img src="../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
 
-**2. Pulse Width Encoding**
+**2. パルス幅エンコーディング**
 
-Bits are encoded by modulation of the pulse width. The width of space after pulse burst is constant.
+ビットはパルス幅の変調によってエンコードされます。パルスバーストの後のスペースの幅は一定です。
 
 <figure><img src="../../.gitbook/assets/image (29) (1).png" alt=""><figcaption></figcaption></figure>
 
-**3. Phase Encoding**
+**3. フェーズエンコーディング**
 
-It is also known as Manchester encoding. The logical value is defined by the polarity of the transition between pulse burst and space. "Space to pulse burst" denotes logic "0", "pulse burst to space" denotes logic "1".
+これはマンチェスターエンコーディングとも呼ばれます。論理値はパルスバーストとスペースの間の極性によって定義されます。 "スペースからパルスバースト"は論理 "0" を示し、"パルスバーストからスペース"は論理 "1" を示します。
 
 <figure><img src="../../.gitbook/assets/image (25).png" alt=""><figcaption></figcaption></figure>
 
-**4. Combination of previous ones and other exotics**
+**4. 以前の方法とその他のエキゾチックな方法の組み合わせ**
 
 {% hint style="info" %}
-There are IR protocols that are **trying to become universal** for several types of devices. The most famous ones are RC5 and NEC. Unfortunately, the most famous **does not mean the most common**. In my environment, I met just two NEC remotes and no RC5 ones.
+いくつかのデバイスの種類に対して**普遍的になろうとしている**赤外線プロトコルがあります。最も有名なものはRC5とNECです。残念ながら、最も有名なものが最も一般的というわけではありません。私の環境では、NECリモコンは2つしか見かけず、RC5リモコンはありませんでした。
 
-Manufacturers love to use their own unique IR protocols, even within the same range of devices (for example, TV-boxes). Therefore, remotes from different companies and sometimes from different models from the same company, are unable to work with other devices of the same type.
+メーカーは、同じ種類のデバイス（たとえば、TVボックス）でも独自の赤外線プロトコルを使用することが好きです。したがって、異なる会社のリモコンや、同じ会社の異なるモデルからのリモコンは、同じタイプの他のデバイスとは連携できません。
 {% endhint %}
 
-### Exploring an IR signal
+### 赤外線信号の探索
 
-The most reliable way to see how the remote IR signal looks like is to use an oscilloscope. It does not demodulate or invert the received signal, it is just displayed "as is". This is useful for testing and debugging. I will show the expected signal on the example of the NEC IR protocol.
+リモコンの赤外線信号の見た目を確認する最も信頼性の高い方法は、オシロスコープを使用することです。これは受信信号を復調したり反転したりしないで、受信信号をそのまま表示するだけです。これはテストやデバッグに役立ちます。NECの赤外線プロトコルの例を使って、期待される信号を示します。
 
 <figure><img src="../../.gitbook/assets/image (18) (2).png" alt=""><figcaption></figcaption></figure>
 
-Usually, there is a preamble at the beginning of an encoded packet. This allows the receiver to determine the level of gain and background. There are also protocols without preamble, for example, Sharp.
+通常、エンコードされたパケットの先頭には前置詞があります。これにより、受信機は利得と背景のレベルを判断することができます。また、Sharpなどの前置詞のないプロトコルもあります。
 
-Then data is transmitted. The structure, preamble, and bit encoding method are determined by the specific protocol.
+次にデータが送信されます。構造、前置詞、ビットエンコーディング方法は、特定のプロトコルによって決まります。
 
-**NEC IR protocol** contains a short command and a repeat code, which is sent while the button is pressed. Both the command and the repeat code have the same preamble at the beginning.
+**NEC赤外線プロトコル**には、ボタンが押されている間送信される短いコマンドと繰り返しコードが含まれています。コマンドと繰り返しコードは、同じ前置詞を持っています。
 
-NEC **command**, in addition to the preamble, consists of an address byte and a command-number byte, by which the device understands what needs to be performed. Address and command-number bytes are duplicated with inverse values, to check the integrity of the transmission. There is an additional stop bit at the end of the command.
+NECの**コマンド**は、前置詞に加えて、デバイスが実行する必要がある内容を理解するためのアドレスバイトとコマンド番号バイトで構成されています。アドレスバイトとコマンド番号バイトは、逆の値で複製され、送信の整合性をチェックします。コマンドの最後には追加のストップビットがあります。
 
-The **repeat code** has a "1" after the preamble, which is a stop bit.
+**繰り返しコード**には、前置詞の後に「1」があり、これがストップビットです。
 
-For **logic "0" and "1"** NEC uses Pulse Distance Encoding: first, a pulse burst is transmitted after which there is a pause, its length sets the value of the bit.
+**論理 "0" と "1"** のためにNECはパルス間隔エンコーディングを使用します：まず、パルスバーストが送信され、その後に一時停止があり、その長さがビットの値を設定します。
+### エアコン
 
-### Air Conditioners
+他のリモコンとは異なり、**エアコンは押されたボタンのコードだけを送信するのではありません**。ボタンが押されたときには、**エアコンとリモコンが同期していることを保証するために、すべての情報を送信**します。\
+これにより、あるリモコンで20℃に設定された機械が、21℃に増加し、その後、まだ温度が20℃のままの別のリモコンを使用してさらに温度を上げると、それは21℃に「増加」します（21℃ではなく22℃と思ってしまうことを防ぎます）。
 
-Unlike other remotes, **air conditioners do not transmit just the code of the pressed button**. They also **transmit all the information** when a button is pressed to assure that the **air conditioned machine and the remote are synchronised**.\
-This will avoid that a machine set as 20ºC is increased to 21ºC with one remote, and then when another remote, which still has the temperature as 20ºC, is used to increase more the temperature, it will "increase" it to 21ºC (and not to 22ºC thinking it's in 21ºC).
+### 攻撃
 
-### Attacks
-
-You can attack Infrared with Flipper Zero:
+Flipper Zeroを使用して赤外線を攻撃することができます：
 
 {% content-ref url="flipper-zero/fz-infrared.md" %}
 [fz-infrared.md](flipper-zero/fz-infrared.md)
 {% endcontent-ref %}
 
-## References
+## 参考文献
 
 * [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
@@ -93,10 +92,10 @@ You can attack Infrared with Flipper Zero:
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
 
 </details>

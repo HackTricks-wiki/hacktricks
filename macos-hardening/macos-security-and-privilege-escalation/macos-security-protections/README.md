@@ -1,25 +1,24 @@
-# macOS Security Protections
+# macOSセキュリティ保護
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
 ## Gatekeeper
 
-**Gatekeeper** is a security feature developed for Mac operating systems, designed to ensure that users **run only trusted software** on their systems. It functions by **validating software** that a user downloads and attempts to open from **sources outside the App Store**, such as an app, a plug-in, or an installer package.
+**Gatekeeper**は、Macオペレーティングシステム向けに開発されたセキュリティ機能で、ユーザーがシステム上で信頼できるソフトウェアのみを実行することを保証するために設計されています。これは、ユーザーがApp Store以外のソースからダウンロードして開こうとするソフトウェア（アプリ、プラグイン、インストーラーパッケージなど）を**検証**することによって機能します。
 
-The key mechanism of Gatekeeper lies in its **verification** process. It checks if the downloaded software is **signed by a recognized developer**, ensuring the software's authenticity. Further, it ascertains whether the software is **notarised by Apple**, confirming that it is devoid of known malicious content and has not been tampered with after notarisation.
+Gatekeeperの主な仕組みは、**検証**プロセスにあります。ダウンロードしたソフトウェアが**認識された開発者によって署名されているか**をチェックし、ソフトウェアの信頼性を確認します。さらに、ソフトウェアが**Appleによって公証**されているかどうかを確認し、既知の悪意のあるコンテンツが含まれていないこと、および公証後に改ざんされていないことを確認します。
 
-Additionally, Gatekeeper reinforces user control and security by **prompting users to approve the opening** of downloaded software for the first time. This safeguard helps prevent users from inadvertently running potentially harmful executable code that they may have mistaken for a harmless data file.
-
+さらに、Gatekeeperは、ユーザーがダウンロードしたソフトウェアの初回の開封を**承認するようユーザーに促す**ことで、ユーザーの制御とセキュリティを強化します。この保護機能により、ユーザーは無害なデータファイルと間違えて害のある実行可能なコードを誤って実行することを防ぐことができます。
 ```bash
 # Check the status
 spctl --status
@@ -28,25 +27,23 @@ sudo spctl --master-enable
 # Disable Gatekeeper
 sudo spctl --master-disable
 ```
+### アプリケーションの署名
 
-### Application Signatures
+アプリケーションの署名は、Appleのセキュリティインフラストラクチャの重要な要素です。これは、ソフトウェアの作者（開発者）の身元を確認し、コードが最後に署名されてから改ざんされていないことを保証するために使用されます。
 
-Application signatures, also known as code signatures, are a critical component of Apple's security infrastructure. They're used to **verify the identity of the software author** (the developer) and to ensure that the code hasn't been tampered with since it was last signed.
+以下は、その仕組みです。
 
-Here's how it works:
+1. **アプリケーションの署名:** 開発者がアプリケーションを配布する準備ができたら、彼らは**プライベートキーを使用してアプリケーションに署名**します。このプライベートキーは、Apple Developer Programに登録する際にAppleが開発者に発行する**証明書**と関連付けられています。署名プロセスでは、アプリのすべての部分の暗号ハッシュを作成し、このハッシュを開発者のプライベートキーで暗号化します。
+2. **アプリケーションの配布:** 署名されたアプリケーションは、開発者の証明書と共にユーザーに配布されます。証明書には、対応する公開キーが含まれています。
+3. **アプリケーションの検証:** ユーザーがアプリケーションをダウンロードして実行しようとすると、Macのオペレーティングシステムは、開発者の証明書から公開キーを使用してハッシュを復号化します。その後、アプリケーションの現在の状態に基づいてハッシュを再計算し、これを復号化されたハッシュと比較します。一致する場合、開発者が署名した後にアプリケーションが変更されていないことを意味し、システムはアプリケーションの実行を許可します。
 
-1. **Signing the Application:** When a developer is ready to distribute their application, they **sign the application using a private key**. This private key is associated with a **certificate that Apple issues to the developer** when they enroll in the Apple Developer Program. The signing process involves creating a cryptographic hash of all parts of the app and encrypting this hash with the developer's private key.
-2. **Distributing the Application:** The signed application is then distributed to users along with the developer's certificate, which contains the corresponding public key.
-3. **Verifying the Application:** When a user downloads and attempts to run the application, their Mac operating system uses the public key from the developer's certificate to decrypt the hash. It then recalculates the hash based on the current state of the application and compares this with the decrypted hash. If they match, it means **the application hasn't been modified** since the developer signed it, and the system permits the application to run.
+アプリケーションの署名は、AppleのGatekeeperテクノロジーの重要な部分です。ユーザーが**インターネットからダウンロードしたアプリケーションを開こうとする**と、Gatekeeperはアプリケーションの署名を検証します。Appleが既知の開発者に発行した証明書で署名されており、コードが改ざんされていない場合、Gatekeeperはアプリケーションの実行を許可します。それ以外の場合、Gatekeeperはアプリケーションをブロックし、ユーザーに警告を表示します。
 
-Application signatures are an essential part of Apple's Gatekeeper technology. When a user attempts to **open an application downloaded from the internet**, Gatekeeper verifies the application signature. If it's signed with a certificate issued by Apple to a known developer and the code hasn't been tampered with, Gatekeeper permits the application to run. Otherwise, it blocks the application and alerts the user.
+macOS Catalina以降、Gatekeeperはさらなるセキュリティレイヤーを追加するために、アプリケーションがAppleによって**公証されているかどうかもチェック**します。公証プロセスでは、アプリケーションが既知のセキュリティの問題や悪意のあるコードを持っていないかをチェックし、これらのチェックに合格した場合、AppleはGatekeeperが検証できるアプリケーションにチケットを追加します。
 
-Starting from macOS Catalina, **Gatekeeper also checks whether the application has been notarized** by Apple, adding an extra layer of security. The notarization process checks the application for known security issues and malicious code, and if these checks pass, Apple adds a ticket to the application that Gatekeeper can verify.
+#### 署名の確認
 
-#### Check Signatures
-
-When checking some **malware sample** you should always **check the signature** of the binary as the **developer** that signed it may be already **related** with **malware.**
-
+**マルウェアのサンプル**を確認する場合は、常にバイナリの**署名を確認**する必要があります。署名した**開発者**は既に**マルウェア**と関連している可能性があるためです。
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -63,37 +60,35 @@ spctl --assess --verbose /Applications/Safari.app
 # Sign a binary
 codesign -s <cert-name-keychain> toolsdemo
 ```
+### ノタリゼーション
 
-### Notarization
+Appleのノタリゼーションプロセスは、ユーザーを潜在的に有害なソフトウェアから保護するための追加の保護策として機能します。これは、開発者が自分のアプリケーションをAppleのノタリーサービスに提出することを含みます。このサービスは、App Reviewとは異なるものであり、提出されたソフトウェアを悪意のあるコンテンツやコード署名の潜在的な問題の有無を調査する自動化されたシステムです。
 
-Apple's notarization process serves as an additional safeguard to protect users from potentially harmful software. It involves the **developer submitting their application for examination** by **Apple's Notary Service**, which should not be confused with App Review. This service is an **automated system** that scrutinizes the submitted software for the presence of **malicious content** and any potential issues with code-signing.
+ソフトウェアがこの検査を通過し、懸念事項を引き起こさない場合、ノタリーサービスはノタリゼーションチケットを生成します。その後、開発者はこのチケットを自分のソフトウェアに添付する必要があります。このプロセスは「ステープリング」として知られています。さらに、ノタリゼーションチケットはオンラインでも公開され、AppleのセキュリティテクノロジーであるGatekeeperがアクセスできるようになります。
 
-If the software **passes** this inspection without raising any concerns, the Notary Service generates a notarization ticket. The developer is then required to **attach this ticket to their software**, a process known as 'stapling.' Furthermore, the notarization ticket is also published online where Gatekeeper, Apple's security technology, can access it.
+ユーザーがソフトウェアを初めてインストールまたは実行する際、実行可能ファイルにステープルされているか、オンラインで見つかるかに関わらず、ノタリゼーションチケットの存在はGatekeeperにソフトウェアがAppleによってノタリゼーションされたことを通知します。その結果、Gatekeeperは初回起動ダイアログに説明的なメッセージを表示し、ソフトウェアがAppleによって悪意のあるコンテンツのチェックを受けたことを示します。このプロセスにより、ユーザーは自分のシステムにインストールまたは実行するソフトウェアのセキュリティに対する信頼性が向上します。
 
-Upon the user's first installation or execution of the software, the existence of the notarization ticket - whether stapled to the executable or found online - **informs Gatekeeper that the software has been notarized by Apple**. As a result, Gatekeeper displays a descriptive message in the initial launch dialog, indicating that the software has undergone checks for malicious content by Apple. This process thereby enhances user confidence in the security of the software they install or run on their systems.
+### クォリンティンファイル
 
-### Quarentine Files
+アプリケーションやファイルをダウンロードする際、特定のmacOSアプリケーション（ウェブブラウザやメールクライアントなど）は、ダウンロードされたファイルに一般的に「クォリンティンフラグ」として知られる拡張ファイル属性を添付します。この属性は、ファイルを信頼できないソース（インターネット）からのものとしてマークし、潜在的なリスクを持つ可能性があることを示すセキュリティ対策として機能します。ただし、すべてのアプリケーションがこの属性を添付するわけではありません。たとえば、一般的なBitTorrentクライアントソフトウェアは通常、このプロセスをバイパスします。
 
-Upon **downloading** an application or file, specific macOS **applications** such as web browsers or email clients **attach an extended file attribute**, commonly known as the "**quarantine flag**," to the downloaded file. This attribute acts as a security measure to **mark the file** as coming from an untrusted source (the internet), and potentially carrying risks. However, not all applications attach this attribute, for instance, common BitTorrent client software usually bypasses this process.
+クォリンティンフラグが存在する場合（一部のBitTorrentクライアントを介してダウンロードされたファイルなど）、ユーザーがファイルを実行しようとすると、macOSのGatekeeperセキュリティ機能に通知されます。
 
-**The presence of a quarantine flag signals macOS's Gatekeeper security feature when a user attempts to execute the file**.
-
-In the case where the **quarantine flag is not present** (as with files downloaded via some BitTorrent clients), Gatekeeper's **checks may not be performed**. Thus, users should exercise caution when opening files downloaded from less secure or unknown sources.
+クォリンティンフラグが存在しない場合（一部のBitTorrentクライアントを介してダウンロードされたファイルなど）、Gatekeeperのチェックは実行されない場合があります。したがって、ユーザーは安全性の低いまたは不明なソースからダウンロードされたファイルを開く際に注意を払う必要があります。
 
 {% hint style="info" %}
-**Checking** the **validity** of code signatures is a **resource-intensive** process that includes generating cryptographic **hashes** of the code and all its bundled resources. Furthermore, checking certificate validity involves doing an **online check** to Apple's servers to see if it has been revoked after it was issued. For these reasons, a full code signature and notarization check is **impractical to run every time an app is launched**.
+コード署名の妥当性をチェックすることは、コードとそのバンドルされたリソースの暗号ハッシュを生成するなど、リソースを多く消費するプロセスです。さらに、証明書の妥当性をチェックするには、発行後に取り消されていないかどうかをAppleのサーバーにオンラインで確認する必要があります。これらの理由から、完全なコード署名とノタリゼーションのチェックは、アプリが起動するたびに実行するのは現実的ではありません。
 
-Therefore, these checks are **only run when executing apps with the quarantined attribute.**
+したがって、これらのチェックは「クォリンティン属性を持つアプリを実行する場合にのみ実行されます。」
 {% endhint %}
 
 {% hint style="warning" %}
-**Note that Safari and other web browsers and applications are the ones that need to mark the downloaded files**
+**Safariやその他のウェブブラウザやアプリケーションがダウンロードしたファイルにマークする必要があることに注意してください。**
 
-Moreover, **files created by sandboxed processes** are also appended this attribute to prevent sandbox escaped.
+さらに、サンドボックス化されたプロセスによって作成されたファイルにも、サンドボックスからの脱出を防ぐためにこの属性が追加されます。
 {% endhint %}
 
-It's possible to **check it's status and enable/disable** (root required) with:
-
+次のコマンドで状態を確認し、有効/無効にすることができます（ルート権限が必要です）:
 ```bash
 spctl --status
 assessments enabled
@@ -102,17 +97,25 @@ spctl --enable
 spctl --disable
 #You can also allow nee identifies to execute code using the binary "spctl"
 ```
+次のコマンドを使用して、ファイルに拡張属性があるかどうかを確認することもできます:
 
-You can also **find if a file has the quarantine extended attribute** with:
+```bash
+xattr -p com.apple.quarantine <file>
+```
 
+このコマンドは、指定した `<file>` に拡張属性 `com.apple.quarantine` がある場合、その値を表示します。
 ```bash
 xattr portada.png
 com.apple.macl
 com.apple.quarantine
 ```
+次のコマンドで、**拡張属性**の**値**を確認します：
 
-Check the **value** of the **extended** **attributes** with:
+```bash
+xattr -l <file>
+```
 
+このコマンドは、指定した `<file>` の拡張属性の値を表示します。
 ```bash
 xattr -l portada.png
 com.apple.macl:
@@ -124,34 +127,29 @@ com.apple.macl:
 00000048
 com.apple.quarantine: 0081;607842eb;Brave;F643CD5F-6071-46AB-83AB-390BA944DEC5
 ```
-
-And **remove** that attribute with:
-
+そして、次のようにしてその属性を**削除**します：
 ```bash
 xattr -d com.apple.quarantine portada.png
 #You can also remove this attribute from every file with
 find . -iname '*' -print0 | xargs -0 xattr -d com.apple.quarantine
 ```
-
-And find all the quarantined files with:
+次のコマンドで、隔離されたファイルをすべて検索します：
 
 {% code overflow="wrap" %}
 ```bash
 find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
-{% endcode %}
-
 ## XProtect
 
-XProtect is a built-in **anti-malware** feature in macOS. It is part of Apple's security system that works silently in the background to keep your Mac safe from known malware and malicious plug-ins.
+XProtectは、macOSに組み込まれた**アンチマルウェア**機能です。これは、Appleのセキュリティシステムの一部であり、マルウェアや悪意のあるプラグインからMacを守るためにバックグラウンドで静かに動作します。
 
-XProtect functions by **checking any downloaded files against its database** of known malware and unsafe file types. When you download a file through certain apps, such as Safari, Mail, or Messages, XProtect automatically scans the file. If it matches any known malware in its database, XProtect will **prevent the file from running** and alert you to the threat.
+XProtectは、ダウンロードされたファイルを**既知のマルウェアと危険なファイルタイプのデータベース**と照合することで機能します。Safari、Mail、またはMessagesなどの特定のアプリを介してファイルをダウンロードすると、XProtectは自動的にファイルをスキャンします。データベース内の既知のマルウェアと一致する場合、XProtectはファイルの実行を**防止**し、脅威を警告します。
 
-The XProtect database is **updated regularly** by Apple with new malware definitions, and these updates are automatically downloaded and installed on your Mac. This ensures that XProtect is always up-to-date with the latest known threats.
+XProtectのデータベースは、Appleによって**定期的に更新**され、これらの更新は自動的にMacにダウンロードおよびインストールされます。これにより、XProtectは常に最新の既知の脅威と同期されます。
 
-However, it's worth noting that **XProtect isn't a full-featured antivirus solution**. It only checks for a specific list of known threats and doesn't perform on-access scanning like most antivirus software. Therefore, while XProtect provides a layer of protection against known malware, it's still recommended to exercise caution when downloading files from the internet or opening email attachments.
+ただし、XProtectは**完全なアンチウイルスソリューションではない**ことに注意してください。XProtectは特定の既知の脅威のリストのみをチェックし、ほとんどのアンチウイルスソフトウェアのようにオンアクセススキャンを実行しません。したがって、XProtectは既知のマルウェアに対する保護層を提供しますが、インターネットからファイルをダウンロードしたり、メールの添付ファイルを開く際には注意が必要です。
 
-You can get information about the latest XProtect update running:
+最新のXProtectの更新に関する情報を取得するには、次のコマンドを実行します：
 
 {% code overflow="wrap" %}
 ```bash
@@ -159,62 +157,62 @@ system_profiler SPInstallHistoryDataType 2>/dev/null | grep -A 4 "XProtectPlistC
 ```
 {% endcode %}
 
-## MRT - Malware Removal Tool
+## MRT - マルウェア除去ツール
 
-The Malware Removal Tool (MRT) is another part of macOS's security infrastructure. As the name suggests, MRT's main function is to **remove known malware from infected systems**.
+マルウェア除去ツール（MRT）は、macOSのセキュリティインフラの一部です。その名前からもわかるように、MRTの主な機能は、感染したシステムから既知のマルウェアを**除去すること**です。
 
-Once malware is detected on a Mac (either by XProtect or by some other means), MRT can be used to automatically **remove the malware**. MRT operates silently in the background and typically runs whenever the system is updated or when a new malware definition is downloaded (it looks like the rules MRT has to detect malware are inside the binary).
+マック上でマルウェアが検出されると（XProtectまたは他の手段によって）、MRTは自動的に**マルウェアを除去**するために使用されます。MRTはバックグラウンドで静かに動作し、通常はシステムが更新されるときや新しいマルウェアの定義がダウンロードされるときに実行されます（MRTがマルウェアを検出するためのルールはバイナリ内にあるようです）。
 
-While both XProtect and MRT are part of macOS's security measures, they perform different functions:
+XProtectとMRTは、どちらもmacOSのセキュリティ対策の一部ですが、異なる機能を果たしています：
 
-* **XProtect** is a preventative tool. It **checks files as they're downloaded** (via certain applications), and if it detects any known types of malware, it **prevents the file from opening**, thereby preventing the malware from infecting your system in the first place.
-* **MRT**, on the other hand, is a **reactive tool**. It operates after malware has been detected on a system, with the goal of removing the offending software to clean up the system.
+* **XProtect**は予防ツールです。ファイルが（特定のアプリケーションを介して）ダウンロードされるときに**ファイルをチェック**し、既知のマルウェアの種類を検出した場合は、**ファイルを開かないように**して、最初にシステムにマルウェアが感染するのを防ぎます。
+* 一方、**MRT**は**反応型のツール**です。マルウェアがシステムで検出された後、問題のあるソフトウェアを除去してシステムをクリーンアップすることを目的としています。
 
-## Processes Limitants
+## プロセス制限
 
-### SIP - System Integrity Protection
+### SIP - システム整合性保護
 
 {% content-ref url="macos-sip.md" %}
 [macos-sip.md](macos-sip.md)
 {% endcontent-ref %}
 
-### Sandbox
+### サンドボックス
 
-MacOS Sandbox **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
+MacOSサンドボックスは、サンドボックスプロファイルで指定された**許可されたアクションに制限されたアプリケーション**の実行を制限します。これにより、**アプリケーションが予期されたリソースにのみアクセスする**ことが保証されます。
 
 {% content-ref url="macos-sandbox/" %}
 [macos-sandbox](macos-sandbox/)
 {% endcontent-ref %}
 
-### TCC - **Transparency, Consent, and Control**
+### TCC - 透明性、同意、および制御
 
-**TCC (Transparency, Consent, and Control)** is a mechanism in macOS to **limit and control application access to certain features**, usually from a privacy perspective. This can include things such as location services, contacts, photos, microphone, camera, accessibility, full disk access, and a bunch more.
+**TCC（透明性、同意、および制御）**は、macOSのメカニズムであり、プライバシーの観点から**アプリケーションの特定の機能へのアクセスを制限および制御**するためのものです。これには、位置情報サービス、連絡先、写真、マイクロフォン、カメラ、アクセシビリティ、フルディスクアクセスなどが含まれます。
 
 {% content-ref url="macos-tcc/" %}
 [macos-tcc](macos-tcc/)
 {% endcontent-ref %}
 
-## Trust Cache
+## 信頼キャッシュ
 
-The Apple macOS trust cache, sometimes also referred to as the AMFI (Apple Mobile File Integrity) cache, is a security mechanism in macOS designed to **prevent unauthorized or malicious software from running**. Essentially, it is a list of cryptographic hashes that the operating system uses to v**erify the integrity and authenticity of the software**.
+Apple macOSの信頼キャッシュ、またはAMFI（Apple Mobile File Integrity）キャッシュは、macOSのセキュリティメカニズムであり、**許可されていないまたは悪意のあるソフトウェアの実行を防止**するために設計されています。基本的には、ソフトウェアの**整合性と信頼性を検証するためにオペレーティングシステムが使用する暗号ハッシュのリスト**です。
 
-When an application or executable file tries to run on macOS, the operating system checks the AMFI trust cache. If the **hash of the file is found in the trust cache**, the system **allows** the program to run because it recognises it as trusted.
+macOSでアプリケーションまたは実行可能ファイルが実行しようとすると、オペレーティングシステムはAMFI信頼キャッシュをチェックします。ファイルのハッシュが信頼キャッシュに見つかった場合、システムはそのプログラムを実行を**許可**します。なぜなら、それを信頼されたものと認識しているからです。
 
-## Launch Constraints
+## 起動制約
 
-It controls from where and what can launch an Apple signed binary:
+Appleの署名されたバイナリを起動できる場所と方法を制御します：
 
-* You can't launch an app directly if should be run by launchd
-* You can't run an app outside of the trusted location (like /System/)
+* launchdによって実行されるべきアプリを直接起動することはできません。
+* /System/のような信頼された場所の外部でアプリを実行することはできません。
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>

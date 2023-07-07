@@ -4,26 +4,25 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Basic Information
+## 基本情報
 
-**Linux control groups**, also known as cgroups, are a Linux kernel feature that allows you to **limit**, police, and prioritize **system resources** for a collection of processes. Cgroups provide a way to **manage and isolate the resource usage** (CPU, memory, disk I/O, network, etc.) of groups of processes in a system. This can be useful for many purposes, such as limiting the resources available to a particular group of processes, isolating certain types of workloads from others, or prioritizing the use of system resources between different groups of processes.
+**Linuxコントロールグループ**、またはcgroupsは、Linuxカーネルの機能であり、**システムリソース**を制限、監視、優先順位付けするためのものです。cgroupsは、システム内のプロセスグループのリソース使用量（CPU、メモリ、ディスクI/O、ネットワークなど）を**管理および分離**する方法を提供します。これは、特定のプロセスグループに利用可能なリソースを制限したり、特定のワークロードを他のワークロードから分離したり、異なるプロセスグループ間でシステムリソースの使用を優先するために役立ちます。
 
-There are **two versions of cgroups**, 1 and 2, and both are currently in use and can be configured simultaneously on a system. The most **significant difference** between cgroups version 1 and **version 2** is that the latter introduced a new hierarchical organization for cgroups, where groups can be arranged in a **tree-like structure** with parent-child relationships. This allows for a more flexible and fine-grained control over the allocation of resources between different groups of processes.
+cgroupsには、バージョン1と2の**2つのバージョン**があり、現在のところ両方が使用され、システム上で同時に設定できます。cgroupsバージョン1とバージョン2の**最も重要な違い**は、後者がcgroupsの新しい階層的な組織を導入したことです。これにより、グループを親子関係を持つ**ツリー構造**で配置することができます。これにより、異なるプロセスグループ間でリソースの割り当てをより柔軟かつ細かく制御することができます。
 
-In addition to the new hierarchical organization, cgroups version 2 also introduced **several other changes and improvements**, such as support for **new resource controllers**, better support for legacy applications, and improved performance.
+階層的な組織の導入に加えて、cgroupsバージョン2では、**その他の変更と改善**もいくつか導入されました。これには、新しいリソースコントローラのサポート、レガシーアプリケーションのサポートの向上、パフォーマンスの改善などが含まれます。
 
-Overall, cgroups **version 2 offers more features and better performance** than version 1, but the latter may still be used in certain scenarios where compatibility with older systems is a concern.
+全体的に、cgroupsバージョン2はバージョン1よりも多機能でパフォーマンスも優れていますが、互換性のある古いシステムとの互換性が問題となる場合には、バージョン1が使用される場合もあります。
 
-You can list the v1 and v2 cgroups for any process by looking at its cgroup file in /proc/\<pid>. You can start by looking at your shell’s cgroups with this command:
-
+任意のプロセスのv1およびv2 cgroupsをリストするには、/proc/\<pid>のcgroupファイルを参照することで行うことができます。次のコマンドでシェルのcgroupsを確認できます。
 ```shell-session
 $ cat /proc/self/cgroup
 12:rdma:/
@@ -38,69 +37,64 @@ $ cat /proc/self/cgroup
 1:name=systemd:/user.slice/user-1000.slice/session-2.scope
 0::/user.slice/user-1000.slice/session-2.scope
 ```
+システム上の出力がかなり短くなっている場合は心配しないでください。これはおそらくcgroups v2のみを持っていることを意味します。ここでの各行は数字で始まり、異なるcgroupです。以下は読み方のポイントです：
 
-Don’t be alarmed if the **output is significantly shorter** on your system; this just means that you probably **have only cgroups v2**. Every line of output here starts with a number and is a different cgroup. Here are some pointers on how to read it:
+- 数字2から12はcgroups v1用です。それらのコントローラは数字の隣にリストされています。
+- 数字1もバージョン1用ですが、コントローラはありません。このcgroupは管理目的のみです（この場合、systemdが設定しました）。
+- 最後の行、数字0はcgroups v2用です。ここではコントローラは表示されません。cgroups v1を持たないシステムでは、これが唯一の出力行になります。
+- 名前は階層的で、ファイルパスの一部のように見えます。この例では、いくつかのcgroupの名前は/user.sliceで、他のものは/user.slice/user-1000.slice/session-2.scopeです。
+- /testcgroupという名前は、cgroups v1ではプロセスのcgroupsが完全に独立していることを示すために作成されました。
+- sessionを含むuser.sliceの名前は、systemdによって割り当てられたログインセッションです。シェルのcgroupsを見ているときにそれらを見ることができます。システムサービスのcgroupsはsystem.sliceの下にあります。
 
-* **Numbers 2–12 are for cgroups v1**. The **controllers** for those are listed next to the number.
-* **Number 1** is also for **version 1**, but it does not have a controller. This cgroup is for **management purposes** only (in this case, systemd configured it).
-* The last line, **number 0**, is for **cgroups v2**. No controllers are visible here. On a system that doesn’t have cgroups v1, this will be the only line of output.
-* **Names are hierarchical and look like parts of file paths**. You can see in this example that some of the cgroups are named /user.slice and others /user.slice/user-1000.slice/session-2.scope.
-* The name /testcgroup was created to show that in cgroups v1, the cgroups for a process can be completely independent.
-* **Names under user.slice** that include session are login sessions, assigned by systemd. You’ll see them when you’re looking at a shell’s cgroups. The **cgroups** for your **system services** will be **under system.slice**.
+### cgroupsの表示
 
-### Viewing cgroups
-
-Cgroups are typically **accessed through the filesystem**. This is in contrast to the traditional Unix system call interface for interacting with the kernel.\
-To explore the cgroup setup of a shell, you can look in the `/proc/self/cgroup` file to find the shell's cgroup, and then navigate to the `/sys/fs/cgroup` (or `/sys/fs/cgroup/unified`) directory and look for a **directory with the same name as the cgroup**. Changing to this directory and looking around will allow you to see the various **settings and resource usage information for the cgroup**.
+通常、cgroupsは**ファイルシステムを介してアクセス**されます。これは、カーネルとの対話のための従来のUnixシステムコールインターフェースとは対照的です。\
+シェルのcgroupのセットアップを探索するには、`/proc/self/cgroup`ファイルを見て、シェルのcgroupを見つけ、次に`/sys/fs/cgroup`（または`/sys/fs/cgroup/unified`）ディレクトリに移動し、cgroupと同じ名前のディレクトリを探します。このディレクトリに移動して周りを見ることで、cgroupのさまざまな設定とリソース使用情報を確認できます。
 
 <figure><img src="../../../.gitbook/assets/image (10) (2).png" alt=""><figcaption></figcaption></figure>
 
-Among the many files that can be here, **the primary cgroup interface files begin with `cgroup`**. Start by looking at `cgroup.procs` (using cat is fine), which lists the processes in the cgroup. A similar file, `cgroup.threads`, also includes threads.
+ここにある多くのファイルの中で、**主要なcgroupインターフェースファイルは`cgroup`で始まります**。まず、`cgroup.procs`（catを使用しても問題ありません）を見て、cgroup内のプロセスのリストを確認します。同様のファイルである`cgroup.threads`にはスレッドも含まれます。
 
 <figure><img src="../../../.gitbook/assets/image (1) (1) (5).png" alt=""><figcaption></figcaption></figure>
 
-Most cgroups used for shells have these two controllers, which can control the **amount of memory** used and the **total number of processes in the cgroup**. To interact with a controller, look for the **files that match the controller prefix**. For example, if you want to see the number of threads running in the cgroup, consult pids.current:
+シェルに使用されるほとんどのcgroupには、これら2つのコントローラがあります。これらのコントローラは、使用するメモリの量とcgroup内のプロセスの総数を制御できます。コントローラと対応するファイルを操作するには、コントローラの接頭辞に一致するファイルを探します。たとえば、cgroup内で実行されているスレッドの数を確認したい場合は、pids.currentを参照します。
 
 <figure><img src="../../../.gitbook/assets/image (3) (5).png" alt=""><figcaption></figcaption></figure>
 
-A value of **max means that this cgroup has no specific limit**, but because cgroups are hierarchical, a cgroup back down the subdirectory chain might limit it.
+**maxの値は、このcgroupに特定の制限がないことを意味します**が、cgroupsは階層的であるため、サブディレクトリチェーンの下のcgroupが制限する可能性があります。
 
-### Manipulating and Creating cgroups
+### cgroupsの操作と作成
 
-To put a process into a cgroup, **write its PID to its `cgroup.procs` file as root:**
-
+プロセスをcgroupに入れるには、そのPIDをrootとして`cgroup.procs`ファイルに書き込みます：
 ```shell-session
 # echo pid > cgroup.procs
 ```
-
-This is how many changes to cgroups work. For example, if you want to **limit the maximum number of PIDs of a cgroup** (to, say, 3,000 PIDs), do it as follows:
-
+これはcgroupsの変更方法です。例えば、cgroupの最大PID数を制限したい場合（例えば、3,000 PIDに制限する場合）、以下のように行います：
 ```shell-session
 # echo 3000 > pids.max
 ```
+**cgroupsの作成は少しトリッキーです**。技術的には、cgroupツリーのどこかにサブディレクトリを作成するだけで簡単です。そうすると、カーネルは自動的にインターフェースファイルを作成します。プロセスがない場合、インターフェースファイルが存在していてもrmdirでcgroupを削除することができます。cgroupsに関するルールがあるため、トラブルになることがあります。これには次のものが含まれます：
 
-**Creating cgroups is trickier**. Technically, it’s as easy as creating a subdirectory somewhere in the cgroup tree; when you do so, the kernel automatically creates the interface files. If a cgroup has no processes, you can remove the cgroup with rmdir even with the interface files present. What can trip you up are the rules governing cgroups, including:
+* プロセスは、**外部レベル（"leaf"）のcgroupにのみ配置できます**。たとえば、/my-cgroupと/my-cgroup/my-subgroupという名前のcgroupがある場合、プロセスを/my-cgroupに配置することはできませんが、/my-cgroup/my-subgroupには配置できます。（例外は、cgroupにコントローラがない場合ですが、詳しくは掘り下げません。）
+* cgroupは、**親のcgroupに存在しないコントローラを持つことはできません**。
+* 子のcgroupには、**明示的にコントローラを指定する必要があります**。これは、`cgroup.subtree_control`ファイルを介して行います。たとえば、子のcgroupにcpuとpidsコントローラを持たせたい場合は、このファイルに+cpu +pidsと書き込みます。
 
-* You can put **processes only in outer-level (“leaf”) cgroups**. For example, if you have cgroups named /my-cgroup and /my-cgroup/my-subgroup, you can’t put processes in /my-cgroup, but /my-cgroup/my-subgroup is okay. (An exception is if the cgroups have no controllers, but let’s not dig further.)
-* A cgroup **can’t have a controller that isn’t in its parent cgroup**.
-* You must explicitly **specify controllers for child cgroups**. You do this through the `cgroup.subtree_control` file; for example, if you want a child cgroup to have the cpu and pids controllers, write +cpu +pids to this file.
+これらのルールの例外は、階層の一番下にある**ルートcgroup**です。このcgroupにプロセスを配置することができます。これを行う理由の1つは、プロセスをsystemdの制御から切り離すためです。
 
-An exception to these rules is the **root cgroup** found at the bottom of the hierarchy. You can **place processes in this cgroup**. One reason you might want to do this is to detach a process from systemd’s control.
-
-Even with no controllers enabled, you can see the CPU usage of a cgroup by looking at its cpu.stat file:
+コントローラが有効になっていなくても、cgroupのCPU使用率はcpu.statファイルを見ることで確認できます：
 
 <figure><img src="../../../.gitbook/assets/image (2) (6) (3).png" alt=""><figcaption></figcaption></figure>
 
-Because this is the accumulated CPU usage over the entire lifespan of the cgroup, you can see how a service consumes processor time even if it spawns many subprocesses that eventually terminate.
+これは、cgroupの生涯にわたる累積CPU使用率なので、多くのサブプロセスを生成して最終的に終了させるサービスがどれだけのプロセッサ時間を消費するかを確認できます。
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけて、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを発見してください。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

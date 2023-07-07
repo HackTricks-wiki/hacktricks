@@ -4,69 +4,60 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有する**ために、[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>
 
-### Word Sandbox bypass via Launch Agents
+### Launch Agentsを使用したWord Sandboxバイパス
 
-The application uses a **custom Sandbox** using the entitlement **`com.apple.security.temporary-exception.sbpl`** and this custom sandbox allows to write files anywhere as long as the filename started with `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+このアプリケーションは、**`com.apple.security.temporary-exception.sbpl`**という権限を使用した**カスタムサンドボックス**を使用しており、このカスタムサンドボックスでは、ファイル名が`~$`で始まる場合にはどこにでもファイルを書き込むことができます：`(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
 
-Therefore, escaping was as easy as **writing a `plist`** LaunchAgent in `~/Library/LaunchAgents/~$escape.plist`.
+したがって、エスケープは、**`plist`**形式のLaunchAgentを`~/Library/LaunchAgents/~$escape.plist`に書き込むだけで簡単でした。
 
-Check the [**original report here**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).
+[**元のレポートはこちら**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/)を確認してください。
 
-### Word Sandbox bypass via Login Items and zip
+### Login Itemsとzipを使用したWord Sandboxバイパス
 
-(Remember that from the first escape, Word can write arbitrary files whose name start with `~$`).
+（最初のエスケープから覚えておいてください、Wordは`~$`で始まる任意のファイルを書き込むことができます）。
 
-It was discovered that from within the sandbox it's possible to create a **Login Item** (apps that will be executed when the user logs in). However, these apps **won't execute unless** they are **notarized** and it's **not possible to add args** (so you cannot just run a reverse shell using **`bash`**).
+サンドボックス内からは、**ログインアイテム**（ユーザーがログインすると実行されるアプリ）を作成することができることがわかりました。ただし、これらのアプリは**ノータライズされていない限り実行されません**し、**引数を追加することはできません**（つまり、**`bash`**を使用して逆シェルを実行することはできません）。
 
-From the previous Sandbox bypass, Microsoft disabled the option to write files in `~/Library/LaunchAgents`. However, it was discovered that if you put a **zip file as a Login Item** the `Archive Utility` will just **unzip** it on its current location. So, because by default the folder `LaunchAgents` from `~/Library` is not created, it was possible to **zip a plist in `LaunchAgents/~$escape.plist`** and **place** the zip file in **`~/Library`** so when decompress it will reach the persitence destination.
+前のサンドボックスバイパスから、Microsoftは`~/Library/LaunchAgents`にファイルを書き込むオプションを無効にしました。しかし、**zipファイルをログインアイテムとして追加**すると、`Archive Utility`が現在の場所にそれを解凍するだけです。したがって、デフォルトでは`~/Library`の`LaunchAgents`フォルダが作成されないため、`LaunchAgents/~$escape.plist`にplistをzip化し、zipファイルを**`~/Library`**に配置すると、解凍時に永続化先に到達することができました。
 
-Check the [**original report here**](https://objective-see.org/blog/blog\_0x4B.html).
+[**元のレポートはこちら**](https://objective-see.org/blog/blog\_0x4B.html)を確認してください。
 
-### Word Sandbox bypass via Login Items and .zshenv
+### Login Itemsと.zshenvを使用したWord Sandboxバイパス
 
-(Remember that from the first escape, Word can write arbitrary files whose name start with `~$`).
+（最初のエスケープから覚えておいてください、Wordは`~$`で始まる任意のファイルを書き込むことができます）。
 
-However, the previous technique had a limitation, if the folder **`~/Library/LaunchAgents`** exists because some other software created it, it would fail. So a different Login Items chain was discovered for this.
+ただし、前のテクニックには制限があります。他のソフトウェアが作成したために**`~/Library/LaunchAgents`**フォルダが存在する場合、失敗する可能性があります。そのため、この問題に対して異なるLogin Itemsチェーンが見つかりました。
 
-An attacker could crate the the files **`.bash_profile`** and **`.zshenv`** with the payload to execute and then zip them and **write the zip in the victims** user folder: \~/\~$escape.zip.
+攻撃者は、実行するペイロードを含む**`.bash_profile`**と**`.zshenv`**ファイルを作成し、それらをzip化し、zipファイルを被害者のユーザーフォルダに書き込むことができました：\~/\~$escape.zip。
 
-Then, add the zip file to the **Login Items** and then the **`Terminal`** app. When the user relogins, the zip file would be uncompressed in the users file, overwriting **`.bash_profile`** and **`.zshenv`** and therefore, the terminal will execute one of these files (depending if bash or zsh is used).
+次に、zipファイルを**Login Items**に追加し、**`Terminal`**アプリを追加します。ユーザーが再ログインすると、zipファイルがユーザーファイルに解凍され、**`.bash_profile`**と**`.zshenv`**が上書きされるため、ターミナルはこれらのファイルのいずれかを実行します（bashまたはzshが使用されているかに応じて）。
 
-Check the [**original report here**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).
+[**元のレポートはこちら**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)を確認してください。
 
-### Word Sandbox Bypass with Open and env variables
+### Openと環境変数を使用したWord Sandboxバイパス
 
-From sandboxed processes it's still possible to invoke other processes using the **`open`** utility. Moreover, these processes will run **within their own sandbox**.
+サンドボックス化されたプロセスからは、**`open`**ユーティリティを使用して他のプロセスを呼び出すことができます。さらに、これらのプロセスは**独自のサンドボックス内で実行**されます。
 
-It was discovered that the open utility has the **`--env`** option to run an app with **specific env** variables. Therefore, it was possible to create the **`.zshenv` file** within a folder **inside** the **sandbox** and the use `open` with `--env` setting the **`HOME` variable** to that folder opening that `Terminal` app, which will execute the `.zshenv` file (for some reason it was also needed to set the variable `__OSINSTALL_ENVIROMENT`).
+openユーティリティには、**特定の環境変数**でアプリを実行するための**`--env`**オプションがあることがわかりました。したがって、サンドボックス内のフォルダ内に**`.zshenv`ファイル**を作成し、`open`を使用して`--env`を設定し、**`HOME`変数**をそのフォルダに設定してその`Terminal`アプリを開くことができました。これにより、`.zshenv`ファイルが実行されます（何らかの理由で`__OSINSTALL_ENVIROMENT`変数も設定する必要がありました）。
 
-Check the [**original report here**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).
+[**元のレポートはこちら**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/)を確認してください。
 
-### Word Sandbox Bypass with Open and stdin
+### Openとstdinを使用したWord Sandboxバイパス
 
-The **`open`** utility also supported the **`--stdin`** param (and after the previous bypass it was no longer possible to use `--env`).
+**`open`**ユーティリティは**`--stdin`**パラメータもサポートしていました（前のバイパスでは`--env`を使用することはできなくなりました）。
 
-The thing is that even if **`python`** was signed by Apple, it **won't execute** a script with the **`quarantine`** attribute. However, it was possible to pass it a script from stdin so it won't check if it was quarantined or not:&#x20;
-
-1. Drop a **`~$exploit.py`** file with arbitrary Python commands.
-2. Run _open_ **`–stdin='~$exploit.py' -a Python`**, which runs the Python app with our dropped file serving as its standard input. Python happily runs our code, and since it’s a child process of _launchd_, it isn’t bound to Word’s sandbox rules.
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+問題は、**`python`**がAppleによって署名されていても
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。これは私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください**。
+* 自分のハッキングテクニックを共有するために、[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>

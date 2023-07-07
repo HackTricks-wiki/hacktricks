@@ -1,36 +1,34 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
 
 
-# Basic Information
+# 基本情報
 
-**Seccomp **or Secure Computing mode, in summary, is a feature of Linux kernel which can act as **syscall filter**.\
-Seccomp has 2 modes.
+**Seccomp**またはセキュアコンピューティングモードは、要約すると、**シスコールフィルタ**として機能するLinuxカーネルの機能です。\
+Seccompには2つのモードがあります。
 
-**seccomp** (short for **secure computing mode**) is a computer security facility in the **Linux** **kernel**. seccomp allows a process to make a one-way transition into a "secure" state where **it cannot make any system calls except** `exit()`, `sigreturn()`, `read()` and `write()` to **already-open** file descriptors. Should it attempt any other system calls, the **kernel** will **terminate** the **process** with SIGKILL or SIGSYS. In this sense, it does not virtualize the system's resources but isolates the process from them entirely.
+**seccomp**（セキュアコンピューティングモードの略）は、**Linuxカーネル**のコンピュータセキュリティ機能です。seccompを使用すると、プロセスは「セキュア」な状態に一方向で移行し、**既に開かれている**ファイルディスクリプタに対して`exit()`、`sigreturn()`、`read()`、`write()`以外の**システムコールを行うことはできません**。他のシステムコールを試みると、**カーネル**はSIGKILLまたはSIGSYSで**プロセスを終了**します。この意味では、システムのリソースを仮想化するのではなく、プロセスをそれらから完全に分離します。
 
-seccomp mode is **enabled via the `prctl(2)` system call** using the `PR_SET_SECCOMP` argument, or (since Linux kernel 3.17) via the `seccomp(2)` system call. seccomp mode used to be enabled by writing to a file, `/proc/self/seccomp`, but this method was removed in favor of `prctl()`. In some kernel versions, seccomp disables the `RDTSC` x86 instruction, which returns the number of elapsed processor cycles since power-on, used for high-precision timing.
+seccompモードは、`prctl(2)`システムコールを使用して`PR_SET_SECCOMP`引数を介して有効にされます。または（Linuxカーネル3.17以降）`seccomp(2)`システムコールを介して有効にされます。seccompモードは、一部のカーネルバージョンでは、高精度タイミングに使用される、電源オンからの経過したプロセッササイクル数を返す`RDTSC` x86命令を無効にします。
 
-**seccomp-bpf** is an extension to seccomp that allows **filtering of system calls using a configurable policy** implemented using Berkeley Packet Filter rules. It is used by OpenSSH and vsftpd as well as the Google Chrome/Chromium web browsers on Chrome OS and Linux. (In this regard seccomp-bpf achieves similar functionality, but with more flexibility and higher performance, to the older systrace—which seems to be no longer supported for Linux.)
+**seccomp-bpf**は、Berkeley Packet Filterルールを使用して実装された設定可能なポリシーを使用してシステムコールをフィルタリングするseccompの拡張機能です。これは、OpenSSHやvsftpd、Chrome OSおよびLinux上のGoogle Chrome/Chromiumウェブブラウザなどで使用されています。（この点で、seccomp-bpfは、Linuxではもはやサポートされていないようですが、より柔軟性と高いパフォーマンスを持つ古いsystraceと同様の機能を実現します。）
 
-## **Original/Strict Mode**
+## **オリジナル/厳格モード**
 
-In this mode** **Seccomp **only allow the syscalls**  `exit()`, `sigreturn()`, `read()` and `write()` to already-open file descriptors. If any other syscall is made, the process is killed using SIGKILL
+このモードでは、**Seccompは`exit()`、`sigreturn()`、`read()`、`write()`のシスコールのみを許可**します。他のシスコールが行われると、プロセスはSIGKILLを使用して終了します。
 
 {% code title="seccomp_strict.c" %}
 ```c
@@ -46,29 +44,27 @@ In this mode** **Seccomp **only allow the syscalls**  `exit()`, `sigreturn()`, `
 
 int main(int argc, char **argv)
 {
-    int output = open("output.txt", O_WRONLY);
-    const char *val = "test";
-    
-    //enables strict seccomp mode
-    printf("Calling prctl() to set seccomp strict mode...\n");
-    prctl(PR_SET_SECCOMP, SECCOMP_MODE_STRICT);
-    
-    //This is allowed as the file was already opened
-    printf("Writing to an already open file...\n");
-    write(output, val, strlen(val)+1);
-    
-    //This isn't allowed
-    printf("Trying to open file for reading...\n");
-    int input = open("output.txt", O_RDONLY);
-    
-    printf("You will not see this message--the process will be killed first\n");
+int output = open("output.txt", O_WRONLY);
+const char *val = "test";
+
+//enables strict seccomp mode
+printf("Calling prctl() to set seccomp strict mode...\n");
+prctl(PR_SET_SECCOMP, SECCOMP_MODE_STRICT);
+
+//This is allowed as the file was already opened
+printf("Writing to an already open file...\n");
+write(output, val, strlen(val)+1);
+
+//This isn't allowed
+printf("Trying to open file for reading...\n");
+int input = open("output.txt", O_RDONLY);
+
+printf("You will not see this message--the process will be killed first\n");
 }
 ```
-{% endcode %}
-
 ## Seccomp-bpf
 
-This mode allows f**iltering of system calls using a configurable policy** implemented using Berkeley Packet Filter rules.
+このモードでは、Berkeley Packet Filter ルールを使用して設定可能なポリシーを実装することで、システムコールのフィルタリングが可能です。
 
 {% code title="seccomp_bpf.c" %}
 ```c
@@ -81,88 +77,82 @@ This mode allows f**iltering of system calls using a configurable policy** imple
 //gcc seccomp_bpf.c -o seccomp_bpf -lseccomp
 
 void main(void) {
-  /* initialize the libseccomp context */
-  scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_KILL);
-  
-  /* allow exiting */
-  printf("Adding rule : Allow exit_group\n");
-  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
-  
-  /* allow getting the current pid */
-  //printf("Adding rule : Allow getpid\n");
-  //seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getpid), 0);
-  
-  printf("Adding rule : Deny getpid\n");
-  seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EBADF), SCMP_SYS(getpid), 0);
-  /* allow changing data segment size, as required by glibc */
-  printf("Adding rule : Allow brk\n");
-  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(brk), 0);
-  
-  /* allow writing up to 512 bytes to fd 1 */
-  printf("Adding rule : Allow write upto 512 bytes to FD 1\n");
-  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 2,
-    SCMP_A0(SCMP_CMP_EQ, 1),
-    SCMP_A2(SCMP_CMP_LE, 512));
-  
-  /* if writing to any other fd, return -EBADF */
-  printf("Adding rule : Deny write to any FD except 1 \n");
-  seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EBADF), SCMP_SYS(write), 1,
-    SCMP_A0(SCMP_CMP_NE, 1));
-  
-  /* load and enforce the filters */
-  printf("Load rules and enforce \n");
-  seccomp_load(ctx);
-  seccomp_release(ctx);
-  //Get the getpid is denied, a weird number will be returned like
-  //this process is -9
-  printf("this process is %d\n", getpid());
+/* initialize the libseccomp context */
+scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_KILL);
+
+/* allow exiting */
+printf("Adding rule : Allow exit_group\n");
+seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
+
+/* allow getting the current pid */
+//printf("Adding rule : Allow getpid\n");
+//seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getpid), 0);
+
+printf("Adding rule : Deny getpid\n");
+seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EBADF), SCMP_SYS(getpid), 0);
+/* allow changing data segment size, as required by glibc */
+printf("Adding rule : Allow brk\n");
+seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(brk), 0);
+
+/* allow writing up to 512 bytes to fd 1 */
+printf("Adding rule : Allow write upto 512 bytes to FD 1\n");
+seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 2,
+SCMP_A0(SCMP_CMP_EQ, 1),
+SCMP_A2(SCMP_CMP_LE, 512));
+
+/* if writing to any other fd, return -EBADF */
+printf("Adding rule : Deny write to any FD except 1 \n");
+seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EBADF), SCMP_SYS(write), 1,
+SCMP_A0(SCMP_CMP_NE, 1));
+
+/* load and enforce the filters */
+printf("Load rules and enforce \n");
+seccomp_load(ctx);
+seccomp_release(ctx);
+//Get the getpid is denied, a weird number will be returned like
+//this process is -9
+printf("this process is %d\n", getpid());
 }
 ```
 {% endcode %}
 
-# Seccomp in Docker
+# DockerにおけるSeccomp
 
-**Seccomp-bpf** is supported by **Docker **to restrict the **syscalls **from the containers effectively decreasing the surface area. You can find the **syscalls blocked **by **default **in [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) and the **default seccomp profile **can be found here [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json).\
-You can run a docker container with a **different seccomp** policy with:
-
+**Seccomp-bpf**は、**Docker**でサポートされており、コンテナからの**syscalls**を制限することで、効果的に表面積を減らすことができます。デフォルトで**ブロックされるsyscalls**は、[https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/)で見つけることができ、デフォルトのseccompプロファイルは[https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)で見つけることができます。\
+異なるseccompポリシーを持つdockerコンテナを実行するには、次のコマンドを使用します：
 ```bash
 docker run --rm \
-             -it \
-             --security-opt seccomp=/path/to/seccomp/profile.json \
-             hello-world
+-it \
+--security-opt seccomp=/path/to/seccomp/profile.json \
+hello-world
 ```
-
-If you want for example to **forbid **a container of executing some **syscall **like` uname` you could download the default profile from [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) and just **remove the `uname` string from the list**.\
-If you want to make sure that **some binary doesn't work inside a a docker container** you could use strace to list the syscalls the binary is using and then forbid them.\
-In the following example the **syscalls **of `uname` are discovered:
-
+たとえば、`uname`のような特定のシステムコールを実行できないようにする場合、[https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)からデフォルトのプロファイルをダウンロードし、リストから`uname`の文字列を削除するだけです。\
+あるバイナリがDockerコンテナ内で動作しないようにするには、straceを使用してバイナリが使用しているシステムコールをリストアップし、それらを禁止します。\
+次の例では、`uname`のシステムコールが発見されます。
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 ```
-
 {% hint style="info" %}
-If you are using **Docker just to launch an application**, you can **profile** it with **`strace`** and **just allow the syscalls** it needs
+**アプリケーションを起動するためにDockerを使用している場合**は、**`strace`**を使用してそれを**プロファイル**し、必要なシスコールのみを**許可**することができます。
 {% endhint %}
 
-## Deactivate it in Docker
+## Dockerで無効にする
 
-Launch a container with the flag: **`--security-opt seccomp=unconfined`**
+フラグ**`--security-opt seccomp=unconfined`**を使用してコンテナを起動します。
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
-
-

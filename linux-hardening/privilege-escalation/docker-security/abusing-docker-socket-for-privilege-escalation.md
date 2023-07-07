@@ -1,59 +1,59 @@
-# Abusing Docker Socket for Privilege Escalation
+# Dockerソケットの悪用による特権エスカレーション
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけて、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを発見しましょう。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
-There are some occasions were you just have **access to the docker socket** and you want to use it to **escalate privileges**. Some actions might be very suspicious and you may want to avoid them, so here you can find different flags that can be useful to escalate privileges:
+特権エスカレーションを行いたい場合に、**Dockerソケットにアクセス**できる場合があります。いくつかのアクションは非常に怪しいかもしれず、それらを避けたい場合、特権エスカレーションに役立つさまざまなフラグを見つけることができます。
 
-### Via mount
+### マウントを介して
 
-You can **mount** different parts of the **filesystem** in a container running as root and **access** them.\
-You could also **abuse a mount to escalate privileges** inside the container.
+ルートとして実行されているコンテナ内で、**ファイルシステム**の異なる部分を**マウント**して**アクセス**することができます。\
+また、**マウントを悪用して特権エスカレーション**することもできます。
 
-* **`-v /:/host`** -> Mount the host filesystem in the container so you can **read the host filesystem.**
-  * If you want to **feel like you are in the host** but being on the container you could disable other defense mechanisms using flags like:
-    * `--privileged`
-    * `--cap-add=ALL`
-    * `--security-opt apparmor=unconfined`
-    * `--security-opt seccomp=unconfined`
-    * `-security-opt label:disable`
-    * `--pid=host`
-    * `--userns=host`
-    * `--uts=host`
-    * `--cgroupns=host`
-* \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> This is similar to the previous method, but here we are **mounting the device disk**. Then, inside the container run `mount /dev/sda1 /mnt` and you can **access** the **host filesystem** in `/mnt`
-  * Run `fdisk -l` in the host to find the `</dev/sda1>` device to mount
-* **`-v /tmp:/host`** -> If for some reason you can **just mount some directory** from the host and you have access inside the host. Mount it and create a **`/bin/bash`** with **suid** in the mounted directory so you can **execute it from the host and escalate to root**.
+* **`-v /:/host`** -> ホストのファイルシステムをコンテナにマウントして、**ホストのファイルシステムを読み取る**ことができます。
+* ホストのように**感じる**が、コンテナ内にいる場合には、次のようなフラグを使用して他の防御メカニズムを無効にすることができます：
+* `--privileged`
+* `--cap-add=ALL`
+* `--security-opt apparmor=unconfined`
+* `--security-opt seccomp=unconfined`
+* `-security-opt label:disable`
+* `--pid=host`
+* `--userns=host`
+* `--uts=host`
+* `--cgroupns=host`
+* \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> これは前の方法と似ていますが、ここでは**デバイスディスクをマウント**しています。その後、コンテナ内で `mount /dev/sda1 /mnt` を実行し、`/mnt` で**ホストのファイルシステムにアクセス**できます。
+* ホストで `fdisk -l` を実行して、マウントするための `</dev/sda1>` デバイスを見つけます。
+* **`-v /tmp:/host`** -> 何らかの理由でホストから**特定のディレクトリのみをマウント**でき、ホスト内でアクセスできる場合は、マウントしてマウントされたディレクトリに **suid** を持つ **`/bin/bash`** を作成し、ホストから実行して特権をエスカレーションさせることができます。
 
 {% hint style="info" %}
-Note that maybe you cannot mount the folder `/tmp` but you can mount a **different writable folder**. You can find writable directories using: `find / -writable -type d 2>/dev/null`
+おそらく `/tmp` フォルダをマウントすることはできないかもしれませんが、**別の書き込み可能なフォルダ**をマウントすることができます。次のコマンドを使用して書き込み可能なディレクトリを見つけることができます：`find / -writable -type d 2>/dev/null`
 
-**Note that not all the directories in a linux machine will support the suid bit!** In order to check which directories support the suid bit run `mount | grep -v "nosuid"` For example usually `/dev/shm` , `/run` , `/proc` , `/sys/fs/cgroup` and `/var/lib/lxcfs` don't support the suid bit.
+**Linuxマシンのすべてのディレクトリがsuidビットをサポートするわけではありません！** suidビットをサポートするディレクトリを確認するには、`mount | grep -v "nosuid"` を実行します。通常、`/dev/shm`、`/run`、`/proc`、`/sys/fs/cgroup`、`/var/lib/lxcfs`はsuidビットをサポートしていません。
 
-Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
+また、**`/etc`** または他の構成ファイルを含むフォルダを**マウント**できる場合は、ルートとしてDockerコンテナからそれらを変更して、ホストで**悪用**して特権をエスカレーションさせることができます（たとえば、`/etc/shadow` を変更することができます）。
 {% endhint %}
 
-### Escaping from the container
+### コンテナからの脱出
 
-* **`--privileged`** -> With this flag you [remove all the isolation from the container](docker-privileged.md#what-affects). Check techniques to [escape from privileged containers as root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
-* **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> To [escalate abusing capabilities](../linux-capabilities.md), **grant that capability to the container** and disable other protection methods that may prevent the exploit to work.
+* **`--privileged`** -> このフラグを使用すると、コンテナから[すべての分離が削除](docker-privileged.md#what-affects)されます。[特権コンテナからルートとして脱出する](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape)ためのテクニックを確認してください。
+* **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> [機能を悪用して特権をエスカレーション](../linux-capabilities.md)するために、その機能をコンテナに付与し、エクスプロイトが機能しない可能性のある他の保護方法を無効にします。
 
 ### Curl
 
-In this page we have discussed ways to escalate privileges using docker flags, you can find **ways to abuse these methods using curl** command in the page:
+このページでは、Dockerフラグを使用して特権をエスカレーションする方法について説明しましたが、これらの方法を**curlコマンドを使用して悪用**する方法については、次のページで見つけることができます：
 
 {% content-ref url="authz-and-authn-docker-access-authorization-plugin.md" %}
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
@@ -63,14 +63,9 @@ In this page we have discussed ways to escalate privileges using docker flags, y
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**した
+- **[💬](https://emojipedia.org/speech-balloon/)Discordグループ**に参加するか、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>

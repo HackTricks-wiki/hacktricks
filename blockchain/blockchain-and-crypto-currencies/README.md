@@ -1,293 +1,248 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
 
 
-# Basic Terminology
+# 基本用語
 
-* **Smart contract**: Smart contracts are simply **programs stored on a blockchain that run when predetermined conditions are met**. They typically are used to automate the **execution** of an **agreement** so that all participants can be immediately certain of the outcome, without any intermediary’s involvement or time loss. (From [here](https://www.ibm.com/topics/smart-contracts)).
-  * Basically, a smart contract is a **piece of code** that is going to be executed when people access and accept the contract. Smart contracts **run in blockchains** (so the results are stored inmutable) and can be read by the people before accepting them.
-* **dApps**: **Decentralised applications** are implemented on top of **smart** **contracts**. They usually have a front-end where the user can interact with the app, the **back-end** is public (so it can be audited) and is implemented as a **smart contract**. Sometimes the use of a database is needed, Ethereum blockchain allocates certain storage to each account.
-* **Tokens & coins**: A **coin** is a cryptocurrency that act as **digital** **money** and a **token** is something that **represents** some **value** but it's not a coin.
-  * **Utility Tokens**: These tokens allow the user to **access certain service later** (it's something that have some value in a specific environment).
-  * **Security Tokens**: These represents the **ownership** or some asset.
-* **DeFi**: **Decentralized Finance**.
-* **DEX: Decentralized Exchange Platforms**.
-* **DAOs**: **Decentralized Autonomous Organizations**.
+* **スマートコントラクト**: スマートコントラクトは、あらかじめ決められた条件が満たされたときに実行される**ブロックチェーン上に格納されたプログラム**です。通常、すべての参加者が中間業者の関与や時間のロスなしに結果を即座に確認できるように、**契約の実行を自動化**するために使用されます（[ここから](https://www.ibm.com/topics/smart-contracts)）。
+* 基本的に、スマートコントラクトは、契約にアクセスして受け入れるときに実行される**コードの一部**です。スマートコントラクトは**ブロックチェーン上で実行**されます（その結果は不変に保存されます）し、人々は受け入れる前にそれを読むことができます。
+* **dApps**: **分散型アプリケーション**は、**スマートコントラクト**の上に実装されます。通常、ユーザーがアプリと対話できるフロントエンドがあり、バックエンドは公開されています（監査が可能）し、スマートコントラクトとして実装されています。場合によっては、データベースの使用が必要ですが、Ethereumブロックチェーンは各アカウントに一定のストレージを割り当てます。
+* **トークンとコイン**: **コイン**は暗号通貨であり、**デジタルなお金**として機能し、**トークン**はある**価値を表す**ものですが、コインではありません。
+* **ユーティリティトークン**: これらのトークンは、**後で特定のサービスにアクセス**するために使用できるものです（特定の環境で価値を持つものです）。
+* **セキュリティトークン**: これらは**所有権**またはある資産を表します。
+* **DeFi**: **分散型金融**。
+* **DEX: 分散型取引所プラットフォーム**。
+* **DAO**: **分散型自治組織**。
 
-# Consensus Mechanisms
+# コンセンサスメカニズム
 
-For a blockchain transaction to be recognized, it must be **appended** to the **blockchain**. Validators (miners) carry out this appending; in most protocols, they **receive a reward** for doing so. For the blockchain to remain secure, it must have a mechanism to **prevent a malicious user or group from taking over a majority of validation**.
+ブロックチェーンのトランザクションが認識されるためには、**ブロックチェーンに追加**される必要があります。バリデータ（マイナー）がこれを行い、多くのプロトコルではそのために**報酬を受け取ります**。ブロックチェーンが安全であるためには、悪意のあるユーザーやグループがバリデーションの大部分を占めることを防ぐメカニズムが必要です。
 
-Proof of work, another commonly used consensus mechanism, uses a validation of computational prowess to verify transactions, requiring a potential attacker to acquire a large fraction of the computational power of the validator network.
+Proof of work（PoW）は、計算能力の検証を使用してトランザクションを検証し、潜在的な攻撃者がバリデータネットワークの計算能力の大部分を取得する必要があります。
 
-## Proof Of Work (PoW)
+## Proof Of Work（PoW）
 
-This uses a **validation of computational prowess** to verify transactions, requiring a potential attacker to acquire a large fraction of the computational power of the validator network.\
-The **miners** will **select several transactions** and then start **computing the Proof Of Work**. The **miner with the greatest computation resources** is more probably to **finish** **earlier** the Proof of Work and get the fees of all the transactions.
+これは、トランザクションを検証するために**計算能力の検証**を使用し、潜在的な攻撃者がバリデータネットワークの計算能力の大部分を取得する必要があります。\
+**マイナー**はいくつかのトランザクションを**選択**し、それから**Proof Of Workを計算**し始めます。**計算リソースが最も多いマイナー**がProof of Workを**早く終了**し、すべてのトランザクションの手数料を得る可能性が高くなります。
 
-## Proof Of Stake (PoS)
+## Proof Of Stake（PoS）
 
-PoS accomplishes this by **requiring that validators have some quantity of blockchain tokens**, requiring **potential attackers to acquire a large fraction of the tokens** on the blockchain to mount an attack.\
-In this kind of consensus, the more tokens a miner has, the more probably it will be that the miner will be asked to create the next block.\
-Compared with PoW, this greatly **reduced the energy consumption** the miners are expending.
+PoSは、バリデータが一定量のブロックチェーントークンを持っていることを要求することでこれを実現し、攻撃者が攻撃を行うためにはブロックチェーン上のトークンの大部分を取得する必要があります。\
+この種のコンセンサスでは、マイナーが持つトークンの量が多いほど、次のブロックを作成するように求められる可能性が高くなります。\
+PoWと比較して、これによりマイナーが消費するエネルギーが大幅に**削減**されます。
 
 # Bitcoin
 
-## Transactions
+## トランザクション
 
-A simple **transaction** is a **movement of money** from an address to another one.\
-An **address** in bitcoin is the hash of the **public** **key**, therefore, someone in order to make a transaction from an address he needs to know the private key associated to that public key (the address).\
-Then, when a **transaction** is performed, it's **signed** with the private key of the address to show that the transaction is **legit**.
+単純な**トランザクション**は、アドレスから別のアドレスへの**お金の移動**です。\
+ビットコインの**アドレス**は**公開鍵のハッシュ**であり、したがって、トランザクションを行うためには、その公開鍵（アドレス）に関連付けられた秘密鍵を知っている必要があります。\
+その後、トランザクションが実行されると、そのアドレスの秘密鍵で**署名**され、トランザクションが**正当**であることを示します。
 
-The first part of producing a digital signature in Bitcoin can be represented mathematically in the following way:\
+ビットコインでデジタル署名を生成するための最初の部分は、数学的に次のように表すことができます：\
 _**Sig**_ = _**Fsig**_(_**Fhash**_(_**m**_),_**dA**_)
 
-Where:
+ここで：
 
-* \_d\_A is the signing **private key**
-* _m_ is the **transaction**
-* Fhash is the hashing function
-* Fsig is the signing algorithm
-* Sig is the resulting signature
+* _d_Aは署名の**秘密鍵**です
+* _m_は**トランザクション**です
+* Fhashはハッシュ関数です
+* Fsigは署名アルゴリズムです
+* Sigは生成された署名です
 
-The signing function (Fsig) produces a signature (Sig) that comprises of two values: R and S:
+署名関数（Fsig）は、RとSの2つの値からなる署名（Sig）を生成します：
 
 * Sig = (R, S)
 
-Once R and S have been calculated, they are serialized into a byte stream that is encoded using an international standard encoding scheme that is known as the Distinguished Encoding Rules (or DER). In order to verify that the signature is valid, a signature verification algorithm is used. Verification of a digital signature requires the following:
+RとSが計算されたら、それらはバイトストリームにシリアル化され、国際標準のエンコーディングスキームでエンコードされます。これはDistinguished Encoding Rules（DER）として知られています。署名が有効であることを
+### マルチシグトランザクション
 
-* Signature (R and S)
-* Transaction hash
-* The public key that corresponds to the private key that was used to create the signature
+マルチシグアドレスは、1つ以上のECDSAプライベートキーに関連付けられたアドレスです。最も単純なタイプは、m-of-nアドレスです。これは、n個のプライベートキーに関連付けられており、このアドレスからビットコインを送信するには、少なくともm個のキーの署名が必要です。マルチシグトランザクションは、マルチシグアドレスから資金を送信するトランザクションのことです。
 
-Verification of a signature effectively means that only the owner of the private key (that generated the public key) could have produced the signature on the transaction. The signature verification algorithm will return ‘TRUE’ if the signature is indeed valid.
+### トランザクションのフィールド
 
-### Multisignature Transactions
+各ビットコインのトランザクションには、いくつかのフィールドがあります：
 
-A multi-signature **address** is an address that is associated with more than one ECDSA private key. The simplest type is an m-of-n address - it is associated with n private keys, and sending bitcoins from this address requires signatures from at least m keys. A multi-signature **transaction** is one that sends funds from a multi-signature address.
+- **Inputs**: ビットコインが送信される金額とアドレス
+- **Outputs**: 各アウトプットに転送されるアドレスと金額
+- **Fee**: トランザクションのマイナーに支払われる金額
+- **Script_sig**: トランザクションのスクリプト署名
+- **Script_type**: トランザクションのタイプ
 
-### Transactions Fields
+トランザクションには、次の2つの主要なタイプがあります：
 
-Each bitcoin transaction has several fields:
+- **P2PKH: "Pay To Public Key Hash"**: これがトランザクションが行われる方法です。送信者には有効な署名（プライベートキーから）と公開鍵を提供することが要求されます。トランザクションのアウトプットスクリプトは、署名と公開鍵を使用し、いくつかの暗号関数を介して公開鍵ハッシュと一致するかどうかをチェックします。一致する場合、資金は使用可能になります。この方法では、公開鍵をハッシュの形で隠すことで、追加のセキュリティが提供されます。
+- **P2SH: "Pay To Script Hash"**: トランザクションのアウトプットは、特定のパラメータで実行されるスクリプト（この場合、お金を送りたい人がスクリプトを送信する）です。マイナーが提供されたパラメータでアウトプットスクリプトを実行し、`true` になる場合、お金は指定したアウトプットに送信されます。 `P2SH` は、マルチシグウォレットに使用され、トランザクションを受け入れる前に複数の署名をチェックするロジックをアウトプットスクリプトとして作成します。 `P2SH` は、誰でも、または誰でもなく、資金を使えるようにするためにも使用できます。 P2SHトランザクションのアウトプットスクリプトが単に `1` である場合、パラメータを提供せずにアウトプットを使おうとすると、結果は `1` になり、誰でもがお金を使えるようになります。これは、出力が `0` を返すスクリプトにも適用され、誰もがお金を使えなくなります。
 
-* **Inputs**: The amount and address **from** where **bitcoins** are **being** transferred
-* **Outputs**: The address and amounts that each **transferred** to **each** **output**
-* **Fee:** The amount of **money** that is **payed** to the **miner** of the transaction
-* **Script\_sig**: Script signature of the transaction
-* **Script\_type**: Type of transaction
+## ライトニングネットワーク
 
-There are **2 main types** of transactions:
-
-* **P2PKH: "Pay To Public Key Hash"**: This is how transactions are made. You are requiring the **sender** to supply a valid **signature** (from the private key) and **public** **key**. The transaction output script will use the signature and public key and through some cryptographic functions will check **if it matches** with the public key hash, if it does, then the **funds** will be **spendable**. This method conceals your public key in the form of a hash for extra security.
-* **P2SH: "Pay To Script Hash":** The outputs of a transaction are just **scripts** (this means the person how want this money send a script) that, if are **executed with specific parameters, will result in a boolean of `true` or `false`**. If a miner runs the output script with the supplied parameters and results in `true`, the **money will be sent to your desired output**. `P2SH` is used for **multi-signature** wallets making the output scripts **logic that checks for multiple signatures before accepting the transaction**. `P2SH` can also be used to allow anyone, or no one, to spend the funds. If the output script of a P2SH transaction is just `1` for true, then attempting to spend the output without supplying parameters will just result in `1` making the money spendable by anyone who tries. This also applies to scripts that return `0`, making the output spendable by no one.
-
-## Lightning Network
-
-This protocol helps to **perform several transactions to a channe**l and **just** **sent** the **final** **state** to the blockchain to save it.\
-This **improves** bitcoin blockchain **speed** (it just on allow 7 payments per second) and it allows to create **transactions more difficult to trace** as the channel is created via nodes of the bitcoin blockchain:
+このプロトコルは、チャネルへの複数のトランザクションを実行し、最終的な状態をブロックチェーンに保存するだけで送信することを支援します。これにより、ビットコインブロックチェーンのスピードが向上します（1秒あたりの支払いは7回まで）し、チャネルはビットコインブロックチェーンのノードを介して作成されるため、トレースが困難なトランザクションを作成することができます。
 
 ![](<../../.gitbook/assets/image (611).png>)
 
-Normal use of the Lightning Network consists of **opening a payment channel** by committing a funding transaction to the relevant base blockchain (layer 1), followed by making **any number** of Lightning Network **transactions** that update the tentative distribution of the channel's funds **without broadcasting those to the blockchain**, optionally followed by closing the payment channel by **broadcasting** the **final** **version** of the settlement transaction to distribute the channel's funds.
+ライトニングネットワークの通常の使用方法は、関連するベースブロックチェーン（レイヤー1）に資金トランザクションをコミットすることによる支払いチャネルの開設、ブロックチェーンにブロードキャストせずにチャネルの資金の仮分配を更新する任意の数のライトニングネットワークトランザクションの作成、オプションで、決済トランザクションの最終バージョンをブロードキャストして支払いチャネルを閉じることです。
 
-Note that any of the both members of the channel can stop and send the final state of the channel to the blockchain at any time.
+チャネルの両メンバーはいつでも停止し、チャネルの最終状態をブロックチェーンに送信することができることに注意してください。
 
-# Bitcoin Privacy Attacks
+# ビットコインのプライバシー攻撃
 
-## Common Input
+## 共通のインプット
 
-Theoretically the inputs of one transaction can belong to different users, but in reality that is unusual as it requires extra steps. Therefore, very often it can be assumed that **2 input addresses in the same transaction belongs to the same owner**.
+理論的には、1つのトランザクションのインプットは異なるユーザーに属する可能性がありますが、実際にはそれは珍しいことです（追加の手順が必要です）。したがって、同じトランザクション内の2つのインプットアドレスは、通常、同じ所有者に属していると推定できます。
 
-## UTXO Change Address Detection
+## UTXOの変更アドレスの検出
 
-**UTXO** means **Unspent Transaction Outputs** (UTXOs). In a transaction that uses the output from a previous transaction as an input, the **whole output need to be spent** (to avoid double-spend attacks). Therefore, if the intention was to **send** just **part** of the money from that output to an address and **keep** the **other** **part**, **2 different outputs** will appear: the **intended** one and a **random new change address** where the rest of the money will be saved.
+**UTXO**は**未使用のトランザクションアウトプット**（UTXO）の略です。前のトランザクションのアウトプットを入力として使用するトランザクションでは、**アウトプット全体を使い切る必要があります**（二重支払い攻撃を防ぐため）。したがって、そのアウトプットからお金の一部をアドレスに送信し、残りのお金を**別の新しいランダムな変更アドレス**に保存する場合、**2つの異なるアウトプット**が表示されます：意図したアウトプットと残りのお金が保存されるランダムな新しい変更アドレス。
 
-Then, a watcher can make the assumption that **the new change address generated belong to the owner of the UTXO**.
+そのため、ウォッチャーは、**生成された新しい変更アドレスがUTXOの所有者に属していると推定**することができます。
 
-## Social Networks & Forums
+## ソーシャルネットワークとフォーラム
 
-Some people gives data about theirs bitcoin addresses in different webs on Internet. **This make pretty easy to identify the owner of an address**.
+一部の人々はインターネット上のさまざまなウェブサイトで自分のビットコインアドレスに関するデータを公開しています。**これにより、アドレスの所有者を特定することが非常に簡単になります**。
 
-## Transaction Graphs
+## トランザクショングラフ
 
-By representing the transactions in graphs, i**t's possible to know with certain probability to where the money of an account were**. Therefore, it's possible to know something about **users** that are **related** in the blockchain.
+トランザクションをグラフで表現することにより、アカウントのお金がどこにあるかをある程度の確率で知ることができます。したがって、ブロックチェーン上で関連する**ユーザー**について何かを知ることができます。
 
-## **Unnecessary input heuristic**
+## 不要なインプットヒューリスティック
 
-Also called the "optimal change heuristic". Consider this bitcoin transaction. It has two inputs worth 2 BTC and 3 BTC and two outputs worth 4 BTC and 1 BTC.
-
+または「最適なおつりヒューリスティック」とも呼ばれます。次のビットコインのトランザクションを考えてみましょう。このトランザクションには、2 BTCと3 BTCの2つのインプットと、4 BTCと1 BTCの2つのアウトプットがあります。
 ```
 2 btc --> 4 btc
 3 btc     1 btc
 ```
+仮定すると、出力の1つはおつりであり、もう1つの出力は支払いです。2つの解釈があります：支払いの出力は4 BTCの出力または1 BTCの出力のいずれかです。しかし、1 BTCの出力が支払い金額である場合、3 BTCの入力は不要です。なぜなら、ウォレットは2 BTCの入力のみを使って支払いを行い、より低いマイナー手数料を支払うことができるからです。これは、実際の支払い出力が4 BTCであり、1 BTCがおつりの出力であることを示しています。
 
-Assuming one of the outputs is change and the other output is the payment. There are two interpretations: the payment output is either the 4 BTC output or the 1 BTC output. But if the 1 BTC output is the payment amount then the 3 BTC input is unnecessary, as the wallet could have spent only the 2 BTC input and paid lower miner fees for doing so. This is an indication that the real payment output is 4 BTC and that 1 BTC is the change output.
-
-This is an issue for transactions which have more than one input. One way to fix this leak is to add more inputs until the change output is higher than any input, for example:
-
+これは、複数の入力を持つトランザクションに対して問題です。このリークを修正する方法の1つは、おつりの出力がどの入力よりも高くなるまで、さらに入力を追加することです。例えば：
 ```
 2 btc --> 4 btc
 3 btc     6 btc
 5 btc
 ```
+## 強制的なアドレス再利用
 
-## Forced address reuse
+**強制的なアドレス再利用**または**インセンティブ付きアドレス再利用**は、敵対者がブロックチェーン上で既に使用されたアドレスにビットコインの（しばしば小額の）支払いを行うことです。敵対者は、ユーザーまたは彼らのウォレットソフトウェアがこれらの支払いを他のアドレスを通じて他のアドレスを明らかにする大きなトランザクションの入力として使用することを期待しています。これらの支払いは、アドレスの所有者を意図しないアドレスの再利用に強制する手段として理解することができます。
 
-**Forced address reuse** or **incentivized address reuse** is when an adversary pays an (often small) amount of bitcoin to addresses that have already been used on the block chain. The adversary hopes that users or their wallet software **will use the payments as inputs to a larger transaction which will reveal other addresses via the the common-input-ownership** heuristic. These payments can be understood as a way to coerce the address owner into unintentional address reuse.
+この攻撃は、時には**ダスト攻撃**と誤って呼ばれることがあります。
 
-This attack is sometimes incorrectly called a **dust attack**.
+ウォレットの正しい動作は、既に使用された空のアドレスに着地したコインを使わないことです。
 
-The correct behaviour by wallets is to not spend coins that have landed on an already-used empty addresses.
+## その他のブロックチェーン分析
 
-## Other Blockchain Analysis
+* **正確な支払額**: おつりのないトランザクションを避けるためには、支払いはUTXOと等しくする必要があります（これは非常に予期しないことです）。したがって、**おつりのないアドレス間の転送である可能性が高い**です。
+* **丸められた数値**: トランザクションで出力の1つが「**丸められた数値**」である場合、これはおそらくその「丸められた数値」の価格を設定した人への**支払い**であり、他の部分は残りになります。
+* **ウォレットの指紋認証**: 慎重な分析者は、異なるウォレットソフトウェアが常にまったく同じ方法でトランザクションを作成しないため、特定のトランザクションを作成したソフトウェアを推測することがあります。ウォレットの指紋認証は、おつりの出力を検出するために使用できます。おつりの出力は、同じウォレットの指紋で使われるものです。
+* **金額とタイミングの相関**: トランザクションを実行した人がトランザクションの**時間**と/または**金額**を公開する場合、それは簡単に**発見可能**です。
 
-* **Exact Payment Amounts**: In order to avoid transactions with a change, the payment needs to be equal to the UTXO (which is highly unexpected). Therefore, a **transaction with no change address are probably transfer between 2 addresses of the same user**.
-* **Round Numbers**: In a transaction, if one of the outputs is a "**round number**", it's highly probable that this is a **payment to a human that put that** "round number" **price**, so the other part must be the leftover.
-* **Wallet fingerprinting:** A careful analyst sometimes deduce which software created a certain transaction, because the many **different wallet softwares don't always create transactions in exactly the same way**. Wallet fingerprinting can be used to detect change outputs because a change output is the one spent with the same wallet fingerprint.
-* **Amount & Timing correlations**: If the person that performed the transaction **discloses** the **time** and/or **amount** of the transaction, it can be easily **discoverable**.
+## トラフィック分析
 
-## Traffic analysis
+組織があなたのトラフィックを嗅ぎ取ると、ビットコインネットワークでの通信を見ることができます。\
+敵対者があなたのノードから出てきたトランザクションまたはブロックを見ると、それが以前に入っていなかったことをほぼ確実に知ることができます。したがって、インターネット接続が関与しているため、敵対者はIPアドレスを発見したビットコイン情報と関連付けることができます。
 
-Some organisation **sniffing your traffic** can see you communicating in the bitcoin network.\
-If the adversary sees a transaction or block **coming out of your node which did not previously enter**, then it can know with near-certainty that **the transaction was made by you or the block was mined by you**. As internet connections are involved, the adversary will be able to **link the IP address with the discovered bitcoin information**.
+インターネットトラフィックをすべて嗅ぎ取ることはできないが、ソースに近づくために**多くのビットコインノード**を持っている攻撃者は、トランザクションまたはブロックを発表しているIPアドレスを知ることができるかもしれません。\
+また、一部のウォレットは定期的に未確認のトランザクションを再放送するため、ネットワークを広く伝播し、マイニングされる可能性が高くなります。
 
-An attacker that isn't able to sniff all the Internet traffic but that has **a lot of Bitcoin nodes** in order to stay **closer** to the s**o**urces could be able to know the IP address that are announcing transactions or blocks.\
-Also, some wallets periodically rebroadcast their unconfirmed transactions so that they are more likely to propagate widely through the network and be mined.
+## アドレスの所有者に関する情報を見つけるためのその他の攻撃
 
-## Other attacks to find info about the owner of addresses
+その他の攻撃については、[https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy)を参照してください。
 
-For more attacks read [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy)
+# 匿名ビットコイン
 
-# Anonymous Bitcoins
+## 匿名でビットコインを入手する方法
 
-## Obtaining Bitcoins Anonymously
+* **現金取引**: 現金でビットコインを購入する。
+* **現金の代替**: ギフトカードなどを購入し、オンラインでビットコインと交換する。
+* **マイニング**: マイニングはビットコインを入手する最も匿名性の高い方法です。これは、[マイニングプール](https://en.bitcoin.it/wiki/Pooled\_mining)が一般的にハッシャーのIPアドレスを知っているため、ソロマイニングに当てはまります。
+* **窃盗**: 理論的には、匿名のビットコインを入手する別の方法は、それらを盗むことです。
 
-* **Cash trades:** Buy bitcoin using cash.
-* **Cash substitute:** Buy gift cards or similar and exchange them for bitcoin online.
-* **Mining:** Mining is the most anonymous way to obtain bitcoin. This applies to solo-mining as [mining pools](https://en.bitcoin.it/wiki/Pooled\_mining) generally know the hasher's IP address.
-* **Stealing:** In theory another way of obtaining anonymous bitcoin is to steal them.
+## ミキサー
 
-## Mixers
+ユーザーはビットコインをミキシングサービスに**送信し**、サービスが**異なるビットコインをユーザーに送り返します**（手数料を差し引いたもの）。理論的には、ブロックチェーンを観察している敵対者は、入金と出金のトランザクションを**リンクすることができません**。
 
-A user would **send bitcoins to a mixing service** and the service would **send different bitcoins back to the user**, minus a fee. In theory an adversary observing the blockchain would be **unable to link** the incoming and outgoing transactions.
-
-However, the user needs to trust the mixing service to return the bitcoin and also to not be saving logs about the relations between the money received and sent.\
-Some other services can be also used as mixers, like Bitcoin casinos where you can send bitcoins and retrieve them later.
+ただし、ユーザーはミキシングサービスがビットコインを返却し、また受け取ったお金と送金の関係についてログを保存していないことを信頼する必要があります。\
+ビットコインカジノなどの他のサービスもミキサーとして使用することができます。ここではビットコインを送信し、後で取り戻すことができます。
 
 ## CoinJoin
 
-**CoinJoin** will **mix several transactions of different users into just one** in order to make more **difficult** for an observer to find out **which input is related to which output**.\
-This offers a new level of privacy, however, **some** **transactions** where some input and output amounts are correlated or are very different from the rest of the inputs and outputs **can still be correlated** by the external observer.
+**CoinJoin**は、異なるユーザーの複数のトランザクションを**1つに混ぜ合わせる**ことで、外部の観察者が**どの入力がどの出力に関連しているか**を見つけにくくするためのものです。\
+これは新たなプライバシーのレベルを提供しますが、**一部のトランザクション**では、一部の入力と出力の金額が相関しているか、他の入力と出力と非常に異なる場合、外部の観察者によって**相関付け**される可能性があります。
 
-Examples of (likely) CoinJoin transactions IDs on bitcoin's blockchain are `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+ビットコインのブロックチェーン上での（おそらく）CoinJoinトランザクションIDの例は、`402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a`と`85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`です。
 
 [**https://coinjoin.io/en**](https://coinjoin.io/en)\
-**Similar to coinjoin but better and for ethereum you have** [**Tornado Cash**](https://tornado.cash) **(the money is given from miners, so it jus appear in your waller).**
+**CoinJoinに似ていますが、より優れており、Ethereumでは**[**Tornado Cash**](https://tornado.cash)**（お金はマイナーから提供されるため、ウォレットに表示されます）。**
 
 ## PayJoin
 
-The type of CoinJoin discussed in the previous section can be easily identified as such by checking for the multiple outputs with the same value.
+前のセクションで議論されたCoinJoinのタイプは、同じ値を持つ複数の出力をチェックすることで簡単に特定できます。
 
-PayJoin (also called pay-to-end-point or P2EP) is a special type of CoinJoin between two parties where one party pays the other. The transaction then **doesn't have the distinctive multiple outputs** with the same value, and so is not obviously visible as an equal-output CoinJoin. Consider this transaction:
-
+PayJoin（またはpay-to-end-pointまたはP2EPとも呼ばれる）は、2つの当事者間の特別なCoinJoinのタイプであり、一方の当事者が他方に支払いを行います。そのトランザクションには**同じ値を持つ複数の出力がない**ため、等しい出力のCoinJoinとして明らかに見えません。次のトランザクションを考えてみてください。
 ```
 2 btc --> 3 btc
 5 btc     4 btc
 ```
+単純なトランザクションとして解釈することができます。お釣りを払うためにどの出力が支払いであり、どの出力がお釣りであるかという問題は一旦無視します。このトランザクションの別の解釈方法は、2 BTCの入力が商人によって所有され、5 BTCが顧客によって所有されており、このトランザクションは顧客が商人に1 BTCを支払うものであるというものです。これらの2つの解釈のうち、どちらが正しいかはわかりません。その結果、コインジョイントトランザクションが生成され、共通の入力所有ヒューリスティックを破り、プライバシーが向上しますが、通常のビットコインのトランザクションと区別することはできません。
 
-It could be interpreted as a simple transaction paying to somewhere with leftover change (ignore for now the question of which output is payment and which is change). Another way to interpret this transaction is that the 2 BTC input is owned by a merchant and 5 BTC is owned by their customer, and that this transaction involves the customer paying 1 BTC to the merchant. There is no way to tell which of these two interpretations is correct. The result is a coinjoin transaction that breaks the common-input-ownership heuristic and improves privacy, but is also **undetectable and indistinguishable from any regular bitcoin transaction**.
+もしPayJoinトランザクションが適度に使用されるようになれば、共通の入力所有ヒューリスティックは実際には完全に間違っていることになります。検出不可能なため、現在それらが使用されているかどうかさえわかりません。トランザクション監視会社は主にそのヒューリスティックに依存しているため、2019年時点ではPayJoinのアイデアに大きな期待が寄せられています。
 
-If PayJoin transactions became even moderately used then it would make the **common-input-ownership heuristic be completely flawed in practice**. As they are undetectable we wouldn't even know whether they are being used today. As transaction surveillance companies mostly depend on that heuristic, as of 2019 there is great excitement about the PayJoin idea.
+# Bitcoinプライバシーの良い実践方法
 
-# Bitcoin Privacy Good Practices
+## ウォレットの同期
 
-## Wallet Synchronization
+Bitcoinウォレットは、自分の残高と履歴に関する情報をどうやって取得するかを考えなければなりません。2018年末時点で、最も実用的でプライバシーが高い既存の解決策は、**フルノードウォレット**（最大限のプライバシー）と**クライアントサイドのブロックフィルタリング**（非常に優れている）を使用することです。
 
-Bitcoin wallets must somehow obtain information about their balance and history. As of late-2018 the most practical and private existing solutions are to use a **full node wallet** (which is maximally private) and **client-side block filtering** (which is very good).
-
-* **Full node:** Full nodes download the entire blockchain which contains every on-chain [transaction](https://en.bitcoin.it/wiki/Transaction) that has ever happened in bitcoin. So an adversary watching the user's internet connection will not be able to learn which transactions or addresses the user is interested in.
-* **Client-side block filtering:** Client-side block filtering works by having **filters** created that contains all the **addresses** for every transaction in a block. The filters can test whether an **element is in the set**; false positives are possible but not false negatives. A lightweight wallet would **download** all the filters for every **block** in the **blockchain** and check for matches with its **own** **addresses**. Blocks which contain matches would be downloaded in full from the peer-to-peer network, and those blocks would be used to obtain the wallet's history and current balance.
+* **フルノード：** フルノードは、ビットコインでこれまでに行われたすべてのオンチェーントランザクションを含むブロックチェーン全体をダウンロードします。したがって、ユーザーのインターネット接続を監視している敵対者は、ユーザーが関心を持っているトランザクションやアドレスを知ることはできません。
+* **クライアントサイドのブロックフィルタリング：** クライアントサイドのブロックフィルタリングは、ブロック内のすべてのトランザクションのアドレスを含むフィルターを作成することで機能します。フィルターは、要素がセットに含まれているかどうかをテストできます。誤検出は可能ですが、誤検出はありません。軽量ウォレットは、ブロックチェーンのすべてのブロックのすべてのフィルターをダウンロードし、自分自身のアドレスと一致するかどうかをチェックします。一致するトランザクションを含むブロックはピアツーピアネットワークから完全にダウンロードされ、それらのブロックを使用してウォレットの履歴と現在の残高を取得します。
 
 ## Tor
 
-Bitcoin network uses a peer-to-peer network, which means that other peers can learn your IP address. This is why it's recommend to **connect through Tor every time you want to interact with the bitcoin network**.
+Bitcoinネットワークはピアツーピアネットワークを使用しているため、他のピアはあなたのIPアドレスを知ることができます。これが、ビットコインネットワークとやり取りする際には常にTorを介して接続することをお勧めする理由です。
 
-## Avoiding address reuse
+## アドレスの再利用を避ける
 
-**Addresses being used more than once is very damaging to privacy because that links together more blockchain transactions with proof that they were created by the same entity**. The most private and secure way to use bitcoin is to send a brand **new address to each person who pays you**. After the received coins have been spent the address should never be used again. Also, a brand new bitcoin address should be demanded when sending bitcoin. All good bitcoin wallets have a user interface which discourages address reuse.
+**アドレスを複数回使用することは、プライバシーに非常に悪影響を与えます。なぜなら、それによって同じエンティティによって作成されたブロックチェーントランザクションがさらにリンクされ、それが証明されるからです**。Bitcoinを使用する最もプライベートで安全な方法は、支払いを行う各個人に対して新しいアドレスを送信することです。受け取ったコインが使われた後は、そのアドレスを再利用しないでください。また、ビットコインを送信する際には、新しいビットコインアドレスを要求する必要があります。すべての優れたビットコインウォレットには、アドレスの再利用を desuお勧めするユーザーインターフェースがあります。
 
-## Multiple transactions
+## 複数のトランザクション
 
-**Paying** someone with **more than one on-chain transaction** can greatly reduce the power of amount-based privacy attacks such as amount correlation and round numbers. For example, if the user wants to pay 5 BTC to somebody and they don't want the 5 BTC value to be easily searched for, then they can send two transactions for the value of 2 BTC and 3 BTC which together add up to 5 BTC.
+**1つ以上のオンチェーントランザクションで誰かに支払う**ことは、金額に基づくプライバシー攻撃（金額の相関や丸め数など）の影響を大幅に減らすことができます。たとえば、ユーザーが誰かに5 BTCを支払いたいが、その5 BTCの価値が簡単に検索されることを望まない場合、2 BTCと3 BTCの2つのトランザクションを送信することができます。これらのトランザクションは合計で5 BTCになります。
 
-## Change avoidance
+## お釣りの回避
 
-Change avoidance is where transaction inputs and outputs are carefully chosen to not require a change output at all. **Not having a change output is excellent for privacy**, as it breaks change detection heuristics.
+お釣りの回避とは、トランザクションの入力と出力を慎重に選択し、お釣りの出力を一切必要としないようにすることです。**お釣りの出力がないことはプライバシーに優れています**。なぜなら、お釣りの検出ヒューリスティックを破るからです。
 
-## Multiple change outputs
+## 複数のお釣りの出力
 
-If change avoidance is not an option then **creating more than one change output can improve privacy**. This also breaks change detection heuristics which usually assume there is only a single change output. As this method uses more block space than usual, change avoidance is preferable.
+お釣りの回避ができない場合、**複数のお釣りの出力を作成することでプライバシーを向上**させることができます。これは通常、単一のお釣りの出力しかないと想定しているお釣りの検出ヒューリスティックを破ります。この方法は通常よりも多くのブロックスペースを使用するため、お釣りの回避が望ましいです。
 
 # Monero
 
-When Monero was developed, the gaping need for **complete anonymity** was what it sought to resolve, and to a large extent, it has filled that void.
+Moneroが開発されたとき、**完全な匿名性**への深刻なニーズを解決し、大いに満たしています。
 
 # Ethereum
 
-## Gas
+## ガス
 
-Gas refers to the unit that measures the **amount** of **computational** **effort** required to execute specific operations on the Ethereum network. Gas refers to the **fee** required to successfully conduct a **transaction** on Ethereum.
+ガスとは、Ethereumネットワーク上で特定の操作を実行するために必要な**計算の労力**の単位を指します。ガスはEthereum上でトランザクションを正常に実行するために必要な**手数料**を指します。
 
-Gas prices are denoted in **gwei**, which itself is a denomination of ETH - each gwei is equal to **0.000000001 ETH** (10-9 ETH). For example, instead of saying that your gas costs 0.000000001 ether, you can say your gas costs 1 gwei. The word 'gwei' itself means 'giga-wei', and it is equal to **1,000,000,000 wei**. Wei itself is the **smallest unit of ETH**.
+ガスの価格は**gwei**で表され、それ自体がETHの単位です。1 gweiは**0.000000001 ETH**（10^-9 ETH）に相当します。たとえば、ガスの費用が0.000000001イーサであると言う代わりに、ガスの費用が1 gweiであると言うことができます。'gwei'という言葉自体は'giga-wei'を意味し、**1,000,000,000 wei**に等しいです。Wei自体が**ETHの最小単位**です。
 
-To calculate the gas that a transaction is going to cost read this example:
+トランザクションのガスコストを計算するためには、次の例を参照してください。
 
-Let’s say Jordan has to pay Taylor 1 ETH. In the transaction the gas limit is 21,000 units and the base fee is 100 gwei. Jordan includes a tip of 10 gwei.
-
-Using the formula above we can calculate this as `21,000 * (100 + 10) = 2,310,000 gwei` or 0.00231 ETH.
-
-When Jordan sends the money, 1.00231 ETH will be deducted from Jordan's account. Taylor will be credited 1.0000 ETH. Miner receives the tip of 0.00021 ETH. Base fee of 0.0021 ETH is burned.
-
-Additionally, Jordan can also set a max fee (`maxFeePerGas`) for the transaction. The difference between the max fee and the actual fee is refunded to Jordan, i.e. `refund = max fee - (base fee + priority fee)`. Jordan can set a maximum amount to pay for the transaction to execute and not worry about overpaying "beyond" the base fee when the transaction is executed.
-
-As the base fee is calculated by the network based on demand for block space, this last param: maxFeePerGas helps to control the maximum fee that is going to be payed.
-
-## Transactions
-
-Notice that in the **Ethereum** network a transaction is performed between 2 addresses and these can be **user or smart contract addresses**.\
-**Smart Contracts** are stored in the distributed ledger via a **special** **transaction**.
-
-Transactions, which change the state of the EVM, need to be broadcast to the whole network. Any node can broadcast a request for a transaction to be executed on the EVM; after this happens, a **miner** will **execute** the **transaction** and propagate the resulting state change to the rest of the network.\
-Transactions require a **fee** and must be mined to become valid.
-
-A submitted transaction includes the following information:
-
-* `recipient` – the receiving address (if an externally-owned account, the transaction will transfer value. If a contract account, the transaction will execute the contract code)
-* `signature` – the identifier of the sender. This is generated when the sender's private key signs the transaction and confirms the sender has authorised this transaction
-* `value` – amount of ETH to transfer from sender to recipient (in WEI, a denomination of ETH)
-* `data` – optional field to include arbitrary data
-* `gasLimit` – the maximum amount of gas units that can be consumed by the transaction. Units of gas represent computational steps
-* `maxPriorityFeePerGas` - the maximum amount of gas to be included as a tip to the miner
-* `maxFeePerGas` - the maximum amount of gas willing to be paid for the transaction (inclusive of `baseFeePerGas` and `maxPriorityFeePerGas`)
-
-Note that there isn't any field for the origin address, this is because this can be extrapolated from the signature.
-
-# References
+ジョーダンがテイラーに1 ETHを支払わなければならないとします。トランザクションのガスリミットは21,000ユ
+# 参考文献
 
 * [https://en.wikipedia.org/wiki/Proof\_of\_stake](https://en.wikipedia.org/wiki/Proof\_of\_stake)
 * [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)
@@ -301,16 +256,14 @@ Note that there isn't any field for the origin address, this is because this can
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
-
-

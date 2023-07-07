@@ -1,80 +1,73 @@
+<details>
+
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
+
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+
+- 独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションである[**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見してください。
+
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+
+- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**に参加するか、[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローしてください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
+
+</details>
+
+
+## Windows XPでファイルの拡張子を表示する方法
+
+1. Windows Explorerを開きます。これは、スタートメニューから「マイコンピュータ」をクリックすることで行うことができます。ただし、これはInternet Explorerとは異なるものです。
+2. Explorerのメニューバー（メニューバーはウィンドウのタイトルの下にある、Explorerウィンドウの上部にある）で「ツール」メニューをクリックします。表示されるポップアップメニューで「フォルダーオプション」アイテムをクリックします。
+3. ダイアログボックスが表示されます。ウィンドウの上部にある「表示」タブをクリックします。
+4. 「既知のファイルの拡張子を非表示にする」設定を探し、その横のチェックボックスをオフにします。
+5. 「すべてのフォルダに適用」ボタンをクリックします。その後、「適用」、そして「OK」をクリックします。
+
+## Windows VistaおよびWindows 7でのファイル拡張子の表示
+
+1. スタートメニューをクリックします。これは画面の左下隅にある丸いアイコンです。
+2. 「folder options」と入力します（引用符なし）。スタートメニューの上部に表示される「Folder Options」という行をクリックします。
+3. 「Folder Options」というタイトルのダイアログボックスが表示されます。ウィンドウの上部にある「表示」タブをクリックします。
+4. 「既知のファイルの拡張子を非表示にする」のチェックボックスをオフにします。
+5. ダイアログボックスの下部にある「OK」ボタンをクリックします。
+
+## Windows 8でファイルの拡張子を表示する方法
+
+1. スタート画面を呼び出します。これを行う方法の1つは、マウスを画面の左下隅に移動することです。Windows 8では、スタート画面が表示されることを示す明示的な表示はありませんが、表示されます。
+2. 「folder options」と入力します（引用符なし）。スタート画面には空白のフィールドがないことを知っています。実際には何かを入力できることを示唆するものはありませんが、入力できます。単に入力します。
+3. 画面の左側には「検索結果が見つかりません」というがっかりするメッセージが表示されます。Windows 8のスタート画面の検索機能は、既に見つける場所を知っていて、それがどこにあるかを教えることができる場合にのみ、何かを見つけることができます。
+
+画面の右側にある「設定」という行をクリックします。
+4. 画面の左側には、「Folder Options」が可能な結果の1つとして表示されます。それをクリックします。
+5. 「Folder Options」というタイトルのウィンドウが表示されます。そのダイアログボックスの上部にある「表示」タブをクリックします。
+6. 「既知のファイルの拡張子を非表示にする」の行を探し、その横のボックスをクリックしてチェックを外します。
+7. 「OK」ボタンをクリックします。
+
+## Windows 10でファイルの拡張子を表示する方法
+
+1. 画面の下部にあるタスクバーのアイコンをクリックして、スタートメニューを呼び出します（アイコンはWindowsロゴの白いバージョンのものです）。
+2. 「folder options」と入力します（引用符なし）。画面には入力できる空白のフィールドはありませんが、入力することができます。単に入力します。
+3. 「Best match」リストに表示される「File Explorer Options」という項目をクリックします。
+4. 「File Explorer Options」というタイトルのダイアログボックスが表示されます。ウィンドウの上部にある「表示」タブをクリックします。
+5. 「既知のファイルの拡張子を非表示にする」の項目をスクロールして、その横のボックスをクリックしてチェックを外します。
+6. ダイアログボックスの下部にある「OK」ボタンをクリックします。
+
+以上です。これで、Explorerウィンドウでファイルの真の拡張子を表示できるようになります。
+
+著作権©2008-2018 Christopher Heng。[https://www.howtohaven.com/](https://www.howtohaven.com)からさらに「How To」ガイドやチュートリアルを入手してください。
+
+**この記事は[**https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml**](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)で見つけることができます。**
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- 独占的な[**NFT**](https://opensea.io/collection/the
+- **[💬](https://emojipedia.org/speech-balloon/)Discordグループ**に参加するか、[**テレグラムグループ**](https://t.me/peass)に参加するか、**Twitter**で私をフォローする[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **あなたのハッキングトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください**。
 
 </details>
-
-
-## How to Show File Extensions in Windows XP
-
-1. Open Windows Explorer. You can do this by clicking "My Computer" from the Start Menu. Note that this is NOT the same thing as Internet Explorer.
-2. Click the "Tools" menu on the menu bar in Explorer (the menu bar is at the top of the Explorer window, underneath the window title). Click the "Folder Options" item in the popup menu that appears.
-3. A dialog box appears. Click the "View" tab at the top of the window.
-4. Look for a setting "Hide file extensions for known file types" and uncheck the box beside it to disable it.
-5. Click the button "Apply to All Folders". Then click "Apply" and then "OK".
-
-## Displaying the File Extension in Windows Vista and Windows 7
-
-1. Click the Start menu. This is the round icon that is on the bottom left corner of your screen.
-2. Type "folder options" (without the quotes). Click the line "Folder Options" that appears at the top of the Start menu.
-3. A dialog box with the title "Folder Options" will appear. Click the "View" tab at the top of the window.
-4. Click to uncheck the box for "Hide extensions for known file types".
-5. Click the "OK" button at the bottom of the dialog box.
-
-## How to Show File Extensions in Windows 8
-
-1. Invoke the start screen. One way to do this is to move your mouse to the bottom left corner of your screen. In Windows 8, there's no indication that this will cause the start screen to appear, but it will.
-2. Type "folder options" (without the quotes). I know that there is no blank field in the start screen to suggest that you can actually type anything. Like many things in Windows 8, arcane knowledge is needed to operate the system.
-3.  On the left side of the screen, you will get the disappointing message "No apps match your search". The start screen search facility in Windows 8 can only find something for you if you already know where to find it and can tell it where it is.
-
-    Click the line "Settings" on the right side of the screen.
-4. The left side of the screen now shows "Folder Options" as one of the possible results. Click it.
-5. A window with the title "Folder Options" will appear. Click the "View" tab at the top of that dialog box.
-6. Look for the line "Hide extensions of known file types" and click the box beside it to remove the tick.
-7. Click the "OK" button.
-
-## How to Show File Extensions in Windows 10
-
-1. Click the icon on the task bar at the bottom of the screen to invoke the Start menu. (The icon is the one that looks like a white version of the Windows logo.)
-2. Type "folder options" (without the quotation marks). There is no blank field on the screen to suggest that you can type anything, but you can. Just type it.
-3. Click the "File Explorer Options" item that appears in the "Best match" list that appears.
-4. A dialog box with the title "File Explorer Options" will appear. Click the "View" tab at the top of the window.
-5. Scroll to find the item "Hide extensions for known file types" and click the box next to it to remove the tick.
-6. Click the "OK" button.
-
-That's it. You should now be able to see the true extensions of the files in your Explorer windows.
-
-Copyright © 2008-2018 by Christopher Heng. All rights reserved. Get more "How To" guides and tutorials from [https://www.howtohaven.com/](https://www.howtohaven.com).
-
-**This article can be found at** [**https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml**](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
-
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
-
-

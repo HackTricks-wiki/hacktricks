@@ -1,45 +1,45 @@
-# Cookies Policy
+# クッキーポリシー
 
-Last updated: 02/04/2023
+最終更新日：02/04/2023
 
-### Introduction
+### 紹介
 
-This Cookies Policy applies to the following websites owned and operated by HackTricks team ("HackTricks", "we", "us" or "our"):
+このクッキーポリシーは、HackTricksチーム（以下「HackTricks」、「私たち」、「我々」または「私たちの」）が所有および運営する以下のウェブサイトに適用されます。
 
 * hacktricks.xyz
 * [www.hacktricks.xyz](http://www.hacktricks.xyz/)
 * book.hacktricks.xyz
 * cloud.hacktricks.xyz
 
-By using any of these websites, you agree to the use of cookies in accordance with this Cookies Policy. If you do not agree, please disable cookies in your browser settings or refrain from using our websites.
+これらのウェブサイトのいずれかを使用することで、このクッキーポリシーに従ってクッキーの使用に同意するものとします。同意しない場合は、ブラウザの設定でクッキーを無効にするか、当社のウェブサイトの利用を控えてください。
 
-### What are cookies?
+### クッキーとは何ですか？
 
-Cookies are small text files that are stored on your computer or mobile device when you visit a website. They are widely used to make websites work, improve their functionality, and provide a more personalized user experience.
+クッキーは、ウェブサイトを訪れた際にコンピュータやモバイルデバイスに保存される小さなテキストファイルです。ウェブサイトの動作を可能にし、機能を向上させ、よりパーソナライズされたユーザーエクスペリエンスを提供するために広く使用されています。
 
-### How we use cookies
+### クッキーの使用方法
 
-We use cookies on our websites for the following purposes:
+当社のウェブサイトでは、以下の目的でクッキーを使用しています：
 
-1. Essential cookies: These cookies are necessary for the basic functionality of our websites, such as enabling user authentication, maintaining security, and remembering your preferences.
-2. Performance cookies: These cookies help us understand how visitors interact with our websites, by collecting and reporting information anonymously. This allows us to improve our website performance and user experience.
-3. Functionality cookies: These cookies enable our websites to remember choices you make, such as your language or region, to provide a more personalized experience.
-4. Targeting/advertising cookies: These cookies are used to deliver relevant ads and marketing communications based on your interests, browsing history, and interactions with our websites.
+1. 必須クッキー：これらのクッキーは、ユーザーの認証を可能にする、セキュリティを維持する、およびお好みを記憶するなど、ウェブサイトの基本的な機能に必要です。
+2. パフォーマンスクッキー：これらのクッキーは、訪問者がウェブサイトとどのように対話しているかを理解するために、匿名で情報を収集および報告することで役立ちます。これにより、ウェブサイトのパフォーマンスとユーザーエクスペリエンスを向上させることができます。
+3. 機能クッキー：これらのクッキーは、言語や地域などの選択肢を記憶し、よりパーソナライズされたエクスペリエンスを提供するために、当社のウェブサイトが選択肢を記憶することを可能にします。
+4. ターゲティング/広告クッキー：これらのクッキーは、興味、閲覧履歴、および当社のウェブサイトとの対話に基づいて関連する広告やマーケティングコミュニケーションを提供するために使用されます。
 
-Moreover, the pages book.hacktricks.xyz and cloud.hacktricks.xyz are hosted in Gitbook. You can find more information about Gitbooks cookies in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+さらに、book.hacktricks.xyzとcloud.hacktricks.xyzのページはGitbookでホストされています。Gitbookのクッキーに関する詳細情報は、[https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy)で確認できます。
 
-### Third-party cookies
+### サードパーティのクッキー
 
-In addition to our own cookies, we may also use third-party cookies to report website usage statistics, deliver advertisements, and enable social media sharing buttons. The use of third-party cookies is subject to their respective privacy policies.
+当社自身のクッキーに加えて、ウェブサイトの利用統計の報告、広告の配信、およびソーシャルメディア共有ボタンの有効化のために、サードパーティのクッキーも使用する場合があります。サードパーティのクッキーの使用は、それぞれのプライバシーポリシーに準拠します。
 
-Managing cookies
+クッキーの管理
 
-Most web browsers allow you to manage cookies through their settings. You can choose to block, delete, or limit the use of cookies on your device. However, please note that disabling cookies may affect the functionality and performance of our websites.
+ほとんどのウェブブラウザは、設定を通じてクッキーを管理することができます。デバイスでクッキーのブロック、削除、または使用制限を選択することができます。ただし、クッキーを無効にすると、ウェブサイトの機能とパフォーマンスに影響がある場合があります。
 
-Changes to this Cookies Policy
+このクッキーポリシーの変更
 
-We may update this Cookies Policy from time to time to reflect changes in our practices or relevant laws. We encourage you to periodically review this page for the latest information on our cookie practices.
+当社は、実践や関連する法律の変更を反映するために、このクッキーポリシーを定期的に更新する場合があります。クッキーの取り扱いに関する最新情報については、定期的にこのページをご確認ください。
 
-### Contact us
+### お問い合わせ
 
-If you have any questions or concerns about this Cookies Policy, please contact us at [support@hacktricks.xyz](mailto:support@hacktricks.xyz)
+このクッキーポリシーに関するご質問やご不明な点がございましたら、[support@hacktricks.xyz](mailto:support@hacktricks.xyz)までお問い合わせください。

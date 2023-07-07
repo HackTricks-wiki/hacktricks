@@ -4,67 +4,66 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有する**ために、[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>
 
-## Main Keychains
+## メインのキーチェーン
 
-* The **User Keychain** (`~/Library/Keychains/login.keycahin-db`), which is used to store **user-specific credentials** like application passwords, internet passwords, user-generated certificates, network passwords, and user-generated public/private keys.
-* The **System Keychain** (`/Library/Keychains/System.keychain`), which stores **system-wide credentials** such as WiFi passwords, system root certificates, system private keys, and system application passwords.
+* **ユーザーキーチェーン** (`~/Library/Keychains/login.keycahin-db`) は、アプリケーションのパスワード、インターネットのパスワード、ユーザーが生成した証明書、ネットワークのパスワード、ユーザーが生成した公開/秘密鍵など、**ユーザー固有の資格情報**を保存するために使用されます。
+* **システムキーチェーン** (`/Library/Keychains/System.keychain`) は、WiFiのパスワード、システムのルート証明書、システムの秘密鍵、システムのアプリケーションパスワードなど、**システム全体の資格情報**を保存します。
 
-### Password Keychain Access
+### パスワードキーチェーンへのアクセス
 
-These files, while they do not have inherent protection and can be **downloaded**, are encrypted and require the **user's plaintext password to be decrypted**. A tool like [**Chainbreaker**](https://github.com/n0fate/chainbreaker) could be used for decryption.
+これらのファイルは、**固有の保護はありません**が、暗号化されており、**ユーザーの平文パスワードを復号化するために必要**です。[**Chainbreaker**](https://github.com/n0fate/chainbreaker)のようなツールを使用して復号化することができます。
 
-## Keychain Entries Protections
+## キーチェーンエントリの保護
 
 ### ACLs
 
-Each entry in the keychain is governed by **Access Control Lists (ACLs)** which dictate who can perform various actions on the keychain entry, including:
+キーチェーンの各エントリは、**アクセス制御リスト（ACLs）**によって管理され、キーチェーンエントリで実行できるさまざまなアクションを指示します。これには以下が含まれます：
 
-* **ACLAuhtorizationExportClear**: Allows the holder to get the clear text of the secret.
-* **ACLAuhtorizationExportWrapped**: Allows the holder to get the clear text encrypted with another provided password.
-* **ACLAuhtorizationAny**: Allows the holder to perform any action.
+* **ACLAuhtorizationExportClear**：保持者が秘密のクリアテキストを取得できるようにします。
+* **ACLAuhtorizationExportWrapped**：保持者が別の提供されたパスワードで暗号化されたクリアテキストを取得できるようにします。
+* **ACLAuhtorizationAny**：保持者が任意のアクションを実行できるようにします。
 
-The ACLs are further accompanied by a **list of trusted applications** that can perform these actions without prompting. This could be:
+ACLにはさらに、これらのアクションをプロンプトなしで実行できる**信頼されたアプリケーションのリスト**が付属しています。これには以下が含まれます：
 
-* &#x20;**N`il`** (no authorization required, **everyone is trusted**)
-* An **empty** list (**nobody** is trusted)
-* **List** of specific **applications**.
+* **N`il`**（認証は必要ありません、**誰もが信頼されています**）
+* **空の**リスト（**誰も信頼されていません**）
+* 特定の**アプリケーション**の**リスト**。
 
-Also the entry might contain the key **`ACLAuthorizationPartitionID`,** which is use to identify the **teamid, apple,** and **cdhash.**
+また、エントリには**`ACLAuthorizationPartitionID`**というキーが含まれている場合があります。これは**teamid、apple、cdhash**を識別するために使用されます。
 
-* If the **teamid** is specified, then in order to **access the entry** value **withuot** a **prompt** the used application must have the **same teamid**.
-* If the **apple** is specified, then the app needs to be **signed** by **Apple**.
-* If the **cdhash** is indicated, then **app** must have the specific **cdhash**.
+* **teamid**が指定されている場合、エントリの値に**プロンプトなしでアクセス**するためには、使用されるアプリケーションに**同じteamid**が必要です。
+* **apple**が指定されている場合、アプリは**Appleによって署名**されている必要があります。
+* **cdhash**が指定されている場合、**アプリ**は特定の**cdhash**を持っている必要があります。
 
-### Creating a Keychain Entry
+### キーチェーンエントリの作成
 
-When a **new** **entry** is created using **`Keychain Access.app`**, the following rules apply:
+**`Keychain Access.app`**を使用して**新しいエントリ**を作成する場合、次のルールが適用されます：
 
-* All apps can encrypt.
-* **No apps** can export/decrypt (without prompting the user).
-* All apps can see the integrity check.
-* No apps can change ACLs.
-* The **partitionID** is set to **`apple`**.
+* すべてのアプリが暗号化できます。
+* **アプリは**エクスポート/復号化できません（ユーザーにプロンプトを表示せずに）。
+* すべてのアプリが整合性チェックを表示できます。
+* すべてのアプリがACLを変更できません。
+* **partitionID**は**`apple`**に設定されます。
 
-When an **application creates an entry in the keychain**, the rules are slightly different:
+**アプリケーションがキーチェーンにエントリを作成する**場合、ルールは若干異なります：
 
-* All apps can encrypt.
-* Only the **creating application** (or any other apps explicitly added) can export/decrypt (without prompting the user).
-* All apps can see the integrity check.
-* No apps can change the ACLs.
-* The **partitionID** is set to **`teamid:[teamID here]`**.
+* すべてのアプリが暗号化できます。
+* エントリのエクスポート/復号化（ユーザーにプロンプトを表示せずに）は、**作成したアプリケーション**（または明示的に追加された他のアプリ）のみができます。
+* すべてのアプリが整合性チェックを表示できます。
+* すべてのアプリがACLを変更できません。
+* **partitionID**は**`teamid:[ここにteamIDを入力]`**に設定されます。
 
-## Accessing the Keychain
+## キーチェーンへのアクセス
 
 ### `security`
-
 ```bash
 # Dump all metadata and decrypted secrets (a lot of pop-ups)
 security dump-keychain -a -d
@@ -75,60 +74,59 @@ security find-generic-password -a "Slack" -g
 # Change the specified entrys PartitionID entry
 security set-generic-password-parition-list -s "test service" -a "test acount" -S
 ```
-
 ### APIs
 
 {% hint style="success" %}
-The **keychain enumeration and dumping** of secrets that **won't generate a prompt** can be done with the tool [**LockSmith**](https://github.com/its-a-feature/LockSmith)
+**キーチェーンの列挙とシークレットのダンプ**は、[**LockSmith**](https://github.com/its-a-feature/LockSmith)というツールを使用して、**プロンプトを生成しない**で行うことができます。
 {% endhint %}
 
-List and get **info** about each keychain entry:
+各キーチェーンエントリについてのリストと**情報**を取得します：
 
-* The API **`SecItemCopyMatching`** gives info about each entry and there are some attributes you can set when using it:
-  * **`kSecReturnData`**: If true, it will try to decrypt the data (set to false to avoid potential pop-ups)
-  * **`kSecReturnRef`**: Get also reference to keychain item (set to true in case later you see you can decrypt without pop-up)
-  * **`kSecReturnAttributes`**: Get metadata about entries
-  * **`kSecMatchLimit`**: How many results to return
-  * **`kSecClass`**: What kind of keychain entry
+* API **`SecItemCopyMatching`** は各エントリに関する情報を提供し、使用する際に設定できるいくつかの属性があります：
+* **`kSecReturnData`**：trueの場合、データを復号化しようとします（ポップアップを回避するためにfalseに設定します）
+* **`kSecReturnRef`**：キーチェーンアイテムへの参照も取得します（ポップアップなしで復号化できることがわかった場合にtrueに設定します）
+* **`kSecReturnAttributes`**：エントリに関するメタデータを取得します
+* **`kSecMatchLimit`**：返す結果の数
+* **`kSecClass`**：どの種類のキーチェーンエントリか
 
-Get **ACLs** of each entry:
+各エントリの**ACL**を取得します：
 
-* With the API **`SecAccessCopyACLList`** you can get the **ACL for the keychain item**, and it will return a list of ACLs (like `ACLAuhtorizationExportClear` and the others previously mentioned)  where each list has:
-  * Description
-  * **Trusted Application List**. This could be:
-    * An app: /Applications/Slack.app
-    * A binary: /usr/libexec/airportd
-    * A group: group://AirPort
+* API **`SecAccessCopyACLList`** を使用すると、キーチェーンアイテムの**ACL**を取得できます。これにより、ACLのリスト（`ACLAuhtorizationExportClear`など、以前に言及したもの）が返されます。各リストには以下が含まれます：
+* 説明
+* **信頼されたアプリケーションリスト**。これは次のようなものです：
+* アプリ：/Applications/Slack.app
+* バイナリ：/usr/libexec/airportd
+* グループ：group://AirPort
 
-Export the data:
+データをエクスポートします：
 
-* The API **`SecKeychainItemCopyContent`** gets the plaintext
-* The API  **`SecItemExport`** exports the keys and certificates but might have to set passwords to export the content encrypted
+* API **`SecKeychainItemCopyContent`** は平文を取得します
+* API **`SecItemExport`** はキーと証明書をエクスポートしますが、コンテンツを暗号化してエクスポートするにはパスワードを設定する必要があるかもしれません
 
-And these are the **requirements** to be able to **export a secret without a prompt**:
+そして、**プロンプトなしでシークレットをエクスポート**するための**要件**は次のとおりです：
 
-* If **1+ trusted** apps listed:
-  * Need the appropriate **authorizations** (**`Nil`**, or be **part** of the allowed list of apps in the authorization to access the secret info)
-  * Need code signature to match **PartitionID**
-  * Need code signature to match that of one **trusted app** (or be a member of the right KeychainAccessGroup)
-* If **all applications trusted**:
-  * Need the appropriate **authorizations**
-  * Need code signature to match **PartitionID**
-    * If **no PartitionID**, then this isn't needed
+* **1つ以上の信頼された**アプリがリストされている場合：
+* 適切な**認証**が必要です（**`Nil`**、またはシークレット情報へのアクセスを許可するアプリの許可リストの一部であること）
+* コード署名が**PartitionID**と一致する必要があります
+* コード署名が**信頼されたアプリ**のものと一致する必要があります（または適切なKeychainAccessGroupのメンバーである必要があります）
+* **すべてのアプリケーションが信頼されている**場合：
+* 適切な**認証**が必要です
+* コード署名が**PartitionID**と一致する必要があります
+* **PartitionID**がない場合、これは必要ありません
 
 {% hint style="danger" %}
-Therefore, if there is **1 application listed**, you need to **inject code in that application**.
+したがって、**1つのアプリケーションがリストされている**場合、そのアプリケーションに**コードをインジェクトする**必要があります。
 
-If **apple** is indicated in the **partitionID**, you could access it with **`osascript`** so anything that is trusting all applications with apple in the partitionID. **`Python`** could also be used for this.
+**PartitionID**に**apple**が指定されている場合、**`osascript`**を使用してアクセスできます。つまり、PartitionIDにappleを含むすべてのアプリケーションを信頼しているものにアクセスできます。これには**`Python`**も使用できます。
 {% endhint %}
 
-### Two additional attributes
+### 2つの追加属性
 
-* **Invisible**: It's a boolean flag to **hide** the entry from the **UI** Keychain app
-* **General**: It's to store **metadata** (so it's NOT ENCRYPTED)
-  * Microsoft was storing in plain text all the refresh tokens to access sensitive endpoint.
+* **Invisible**：UIキーチェーンアプリからエントリを**非表示**にするためのブールフラグです
+* **General**：**メタデータ**を保存するためのものです（つまり、**暗号化されていません**）
+* Microsoftは、機密なエンドポイントにアクセスするためのすべてのリフレッシュトークンを平文で保存していました。
 
-## References
+## 参考文献
 
 * [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 
@@ -136,10 +134,10 @@ If **apple** is indicated in the **partitionID**, you could access it with **`os
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>

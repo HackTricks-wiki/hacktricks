@@ -1,49 +1,48 @@
-# Office file analysis
+# オフィスファイルの分析
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
 ![](<../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.io/)を使用して、世界で最も**高度なコミュニティツール**によって強化された**ワークフローを簡単に構築**および**自動化**します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-## Introduction
+## はじめに
 
-Microsoft has created **dozens of office document file formats**, many of which are popular for the distribution of phishing attacks and malware because of their ability to **include macros** (VBA scripts).
+マイクロソフトは、**数十種類のオフィスドキュメントファイル形式**を作成しています。そのうち多くは、**マクロ**（VBAスクリプト）を**含むことができる**ため、フィッシング攻撃やマルウェアの配布に人気があります。
 
-Broadly speaking, there are two generations of Office file format: the **OLE formats** (file extensions like RTF, DOC, XLS, PPT), and the "**Office Open XML**" formats (file extensions that include DOCX, XLSX, PPTX). **Both** formats are structured, compound file binary formats that **enable Linked or Embedded content** (Objects). OOXML files are zip file containers, meaning that one of the easiest ways to check for hidden data is to simply `unzip` the document:
-
+大まかに言えば、オフィスファイル形式には2つの世代があります：**OLE形式**（RTF、DOC、XLS、PPTなどのファイル拡張子）と「**Office Open XML**」形式（DOCX、XLSX、PPTXなどのファイル拡張子を含む）。**両方の**形式は、リンクまたは埋め込まれたコンテンツ（オブジェクト）を可能にする構造化された複合ファイルバイナリ形式です。OOXMLファイルはzipファイルのコンテナであるため、隠されたデータをチェックする最も簡単な方法の1つは、単にドキュメントを`unzip`することです：
 ```
-$ unzip example.docx 
+$ unzip example.docx
 Archive:  example.docx
-  inflating: [Content_Types].xml     
-  inflating: _rels/.rels             
-  inflating: word/_rels/document.xml.rels  
-  inflating: word/document.xml       
-  inflating: word/theme/theme1.xml   
- extracting: docProps/thumbnail.jpeg  
-  inflating: word/comments.xml       
-  inflating: word/settings.xml       
-  inflating: word/fontTable.xml      
-  inflating: word/styles.xml         
-  inflating: word/stylesWithEffects.xml  
-  inflating: docProps/app.xml        
-  inflating: docProps/core.xml       
-  inflating: word/webSettings.xml    
-  inflating: word/numbering.xml
+inflating: [Content_Types].xml
+inflating: _rels/.rels
+inflating: word/_rels/document.xml.rels
+inflating: word/document.xml
+inflating: word/theme/theme1.xml
+extracting: docProps/thumbnail.jpeg
+inflating: word/comments.xml
+inflating: word/settings.xml
+inflating: word/fontTable.xml
+inflating: word/styles.xml
+inflating: word/stylesWithEffects.xml
+inflating: docProps/app.xml
+inflating: docProps/core.xml
+inflating: word/webSettings.xml
+inflating: word/numbering.xml
 $ tree
 .
 ├── [Content_Types].xml
@@ -53,42 +52,75 @@ $ tree
 │   ├── core.xml
 │   └── thumbnail.jpeg
 └── word
-    ├── _rels
-    │   └── document.xml.rels
-    ├── comments.xml
-    ├── document.xml
-    ├── fontTable.xml
-    ├── numbering.xml
-    ├── settings.xml
-    ├── styles.xml
-    ├── stylesWithEffects.xml
-    ├── theme
-    │   └── theme1.xml
-    └── webSettings.xml
+├── _rels
+│   └── document.xml.rels
+├── comments.xml
+├── document.xml
+├── fontTable.xml
+├── numbering.xml
+├── settings.xml
+├── styles.xml
+├── stylesWithEffects.xml
+├── theme
+│   └── theme1.xml
+└── webSettings.xml
 ```
+以下は、ファイルとフォルダの階層によって一部の構造が作成されていることがわかります。残りの部分はXMLファイル内で指定されています。[_New Steganographic Techniques for the OOXML File Format_, 2011](http://download.springer.com/static/pdf/713/chp%3A10.1007%2F978-3-642-23300-5\_27.pdf?originUrl=http%3A%2F%2Flink.springer.com%2Fchapter%2F10.1007%2F978-3-642-23300-5\_27\&token2=exp=1497911340\~acl=%2Fstatic%2Fpdf%2F713%2Fchp%25253A10.1007%25252F978-3-642-23300-5\_27.pdf%3ForiginUrl%3Dhttp%253A%252F%252Flink.springer.com%252Fchapter%252F10.1007%252F978-3-642-23300-5\_27\*\~hmac=aca7e2655354b656ca7d699e8e68ceb19a95bcf64e1ac67354d8bca04146fd3d)では、データ隠蔽技術のいくつかのアイデアが詳細に説明されていますが、CTFチャレンジの作成者は常に新しいアイデアを考え出しています。
 
-As you can see, some of the structure is created by the file and folder hierarchy. The rest is specified inside the XML files. [_New Steganographic Techniques for the OOXML File Format_, 2011](http://download.springer.com/static/pdf/713/chp%3A10.1007%2F978-3-642-23300-5\_27.pdf?originUrl=http%3A%2F%2Flink.springer.com%2Fchapter%2F10.1007%2F978-3-642-23300-5\_27\&token2=exp=1497911340\~acl=%2Fstatic%2Fpdf%2F713%2Fchp%25253A10.1007%25252F978-3-642-23300-5\_27.pdf%3ForiginUrl%3Dhttp%253A%252F%252Flink.springer.com%252Fchapter%252F10.1007%252F978-3-642-23300-5\_27\*\~hmac=aca7e2655354b656ca7d699e8e68ceb19a95bcf64e1ac67354d8bca04146fd3d) details some ideas for data hiding techniques, but CTF challenge authors will always be coming up with new ones.
+再び、OLEおよびOOXMLドキュメントの調査と分析のためのPythonツールセットが存在します: [oletools](http://www.decalage.info/python/oletools)。特にOOXMLドキュメントについては、[OfficeDissector](https://www.officedissector.com)は非常に強力な分析フレームワーク（およびPythonライブラリ）です。後者には、使用方法に関する[クイックガイド](https://github.com/grierforensics/officedissector/blob/master/doc/html/\_sources/txt/ANALYZING\_OOXML.txt)も含まれています。
 
-Once again, a Python toolset exists for the examination and **analysis of OLE and OOXML documents**: [oletools](http://www.decalage.info/python/oletools). For OOXML documents in particular, [OfficeDissector](https://www.officedissector.com) is a very powerful analysis framework (and Python library). The latter includes a [quick guide to its usage](https://github.com/grierforensics/officedissector/blob/master/doc/html/\_sources/txt/ANALYZING\_OOXML.txt).
-
-Sometimes the challenge is not to find hidden static data, but to **analyze a VBA macro** to determine its behavior. This is a more realistic scenario and one that analysts in the field perform every day. The aforementioned dissector tools can indicate whether a macro is present, and probably extract it for you. A typical VBA macro in an Office document, on Windows, will download a PowerShell script to %TEMP% and attempt to execute it, in which case you now have a PowerShell script analysis task too. But malicious VBA macros are rarely complicated since VBA is [typically just used as a jumping-off platform to bootstrap code execution](https://www.lastline.com/labsblog/party-like-its-1999-comeback-of-vba-malware-downloaders-part-3/). In the case where you do need to understand a complicated VBA macro, or if the macro is obfuscated and has an unpacker routine, you don't need to own a license to Microsoft Office to debug this. You can use [Libre Office](http://libreoffice.org): [its interface](http://www.debugpoint.com/2014/09/debugging-libreoffice-macro-basic-using-breakpoint-and-watch/) will be familiar to anyone who has debugged a program; you can set breakpoints and create watch variables and capture values after they have been unpacked but before whatever payload behavior has executed. You can even start a macro of a specific document from a command line:
-
+時には、隠された静的データを見つけるのではなく、VBAマクロを分析してその動作を判断することが課題となります。これはより現実的なシナリオであり、フィールドのアナリストが毎日実行する作業の一つです。前述の解析ツールは、マクロが存在するかどうかを示し、おそらくそれを抽出することもできます。Windows上のOfficeドキュメントの典型的なVBAマクロは、PowerShellスクリプトを%TEMP%にダウンロードし、実行しようとします。その場合、PowerShellスクリプトの分析タスクも発生します。ただし、悪意のあるVBAマクロは通常複雑ではありません。なぜなら、VBAは[通常、コード実行の起点として使用されるだけだからです](https://www.lastline.com/labsblog/party-like-its-1999-comeback-of-vba-malware-downloaders-part-3/)。複雑なVBAマクロを理解する必要がある場合や、マクロが難読化されておりアンパッカールーチンがある場合、このためにMicrosoft Officeのライセンスを所有する必要はありません。[Libre Office](http://libreoffice.org)を使用することができます。[そのインターフェース](http://www.debugpoint.com/2014/09/debugging-libreoffice-macro-basic-using-breakpoint-and-watch/)は、プログラムのデバッグを行ったことがある人にとっては馴染みがあります。ブレークポイントを設定し、ウォッチ変数を作成し、値をキャプチャすることができます。これらの値はアンパックされた後であり、ペイロードの動作が実行される前です。特定のドキュメントのマクロをコマンドラインから起動することさえできます。
 ```
 $ soffice path/to/test.docx macro://./standard.module1.mymacro
 ```
-
 ## [oletools](https://github.com/decalage2/oletools)
 
+oletoolsは、OLEオブジェクトを分析するための一連のツールです。OLEオブジェクトは、Microsoft Officeファイル（.doc、.xls、.pptなど）に埋め込まれたバイナリデータです。oletoolsを使用すると、OLEオブジェクトを抽出し、分析することができます。
+
+### olevba
+
+olevbaは、VBA（Visual Basic for Applications）マクロを分析するためのツールです。VBAマクロは、Microsoft Officeファイルに埋め込まれた自動化スクリプトです。olevbaを使用すると、VBAマクロのコードを抽出し、分析することができます。これにより、悪意のあるコードやセキュリティ上の問題を特定することができます。
+
+### oledump
+
+oledumpは、OLEオブジェクトを分析するための強力なツールです。このツールを使用すると、OLEオブジェクトのヘッダ情報、ストリーム、VBAマクロ、埋め込まれたファイルなどを詳細に分析することができます。oledumpは、悪意のあるコードやデータの特定、ファイルの解析、フォレンジック調査などに役立ちます。
+
+### oledir
+
+oledirは、OLEオブジェクトのディレクトリ情報を表示するためのツールです。このツールを使用すると、OLEオブジェクト内のストリームや埋め込まれたファイルの一覧を取得することができます。oledirを使用すると、ファイルの構造を理解し、重要な情報を特定することができます。
+
+### oleid
+
+oleidは、OLEオブジェクトの識別情報を表示するためのツールです。このツールを使用すると、OLEオブジェクトのファイルタイプ、バージョン、セキュリティ属性などを確認することができます。oleidを使用すると、ファイルの信頼性やセキュリティ上のリスクを評価することができます。
+
+### olemeta
+
+olemetaは、OLEオブジェクトのメタデータを表示するためのツールです。このツールを使用すると、OLEオブジェクトの作成者、作成日時、最終更新日時などの情報を取得することができます。olemetaを使用すると、ファイルの起源や変更履歴を調査することができます。
+
+### oletimes
+
+oletimesは、OLEオブジェクトのタイムスタンプ情報を表示するためのツールです。このツールを使用すると、OLEオブジェクトの作成日時、最終アクセス日時、最終更新日時などの情報を確認することができます。oletimesを使用すると、ファイルの変更履歴やアクティビティを追跡することができます。
+
+### oleversion
+
+oleversionは、OLEオブジェクトのバージョン情報を表示するためのツールです。このツールを使用すると、OLEオブジェクトのバージョン番号や互換性情報を確認することができます。oleversionを使用すると、ファイルの互換性やセキュリティ上のリスクを評価することができます。
+
+### olevba-gui
+
+olevba-guiは、VBAマクロを分析するためのグラフィカルユーザーインターフェース（GUI）ツールです。このツールを使用すると、VBAマクロのコードを視覚的に分析することができます。olevba-guiを使用すると、悪意のあるコードやセキュリティ上の問題を素早く特定することができます。
+
+### oledump-gui
+
+oledump-guiは、OLEオブジェクトを分析するためのグラフィカルユーザーインターフェース（GUI）ツールです。このツールを使用すると、OLEオブジェクトのヘッダ情報、ストリーム、VBAマクロ、埋め込まれたファイルなどを視覚的に分析することができます。oledump-guiは、ファイルの解析やフォレンジック調査を簡単に行うことができます。
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
+## 自動実行
 
-## Automatic Execution
+`AutoOpen`、`AutoExec`、または`Document_Open`のようなマクロ関数は、**自動的に** **実行**されます。
 
-Macro functions like `AutoOpen`, `AutoExec` or `Document_Open` will be **automatically** **executed**.
-
-## References
+## 参考文献
 
 * [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 
@@ -96,10 +128,10 @@ Macro functions like `AutoOpen`, `AutoExec` or `Document_Open` will be **automat
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

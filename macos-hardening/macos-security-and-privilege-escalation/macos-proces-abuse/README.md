@@ -1,87 +1,86 @@
-# macOS Proces Abuse
+# macOSプロセスの悪用
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## MacOS Process Abuse
+## MacOSプロセスの悪用
 
-MacOS, like any other operating system, provides a variety of methods and mechanisms for **processes to interact, communicate, and share data**. While these techniques are essential for efficient system functioning, they can also be abused by threat actors to **perform malicious activities**.
+MacOSは、他のオペレーティングシステムと同様に、**プロセスが相互作用し、通信し、データを共有する**ためのさまざまな方法とメカニズムを提供しています。これらの技術はシステムの効率的な動作に不可欠ですが、脅威行為者によっても**悪用されることがあります**。
 
-### Library Injection
+### ライブラリインジェクション
 
-Library Injection is a technique wherein an attacker **forces a process to load a malicious library**. Once injected, the library runs in the context of the target process, providing the attacker with the same permissions and access as the process.
+ライブラリインジェクションは、攻撃者が**プロセスに悪意のあるライブラリを読み込ませる**技術です。インジェクションされると、ライブラリはターゲットプロセスのコンテキストで実行され、攻撃者にプロセスと同じ権限とアクセス権を提供します。
 
 {% content-ref url="macos-library-injection/" %}
 [macos-library-injection](macos-library-injection/)
 {% endcontent-ref %}
 
-### Function Hooking
+### 関数フック
 
-Function Hooking involves **intercepting function calls** or messages within a software code. By hooking functions, an attacker can **modify the behavior** of a process, observe sensitive data, or even gain control over the execution flow.
+関数フックは、ソフトウェアコード内の**関数呼び出し**またはメッセージを**傍受する**ことを意味します。関数をフックすることで、攻撃者はプロセスの動作を**変更**したり、機密データを観察したり、実行フローを制御したりすることができます。
 
 {% content-ref url="../mac-os-architecture/macos-function-hooking.md" %}
 [macos-function-hooking.md](../mac-os-architecture/macos-function-hooking.md)
 {% endcontent-ref %}
 
-### Inter Process Communication
+### プロセス間通信
 
-Inter Process Communication (IPC) refers to different methods by which separate processes **share and exchange data**. While IPC is fundamental for many legitimate applications, it can also be misused to subvert process isolation, leak sensitive information, or perform unauthorized actions.
+プロセス間通信（IPC）は、別々のプロセスが**データを共有し交換する**さまざまな方法を指します。IPCは多くの正当なアプリケーションにとって基本的ですが、プロセスの分離を逸脱させ、機密情報を漏洩させたり、不正な操作を行ったりするために悪用されることもあります。
 
 {% content-ref url="../mac-os-architecture/macos-ipc-inter-process-communication/" %}
 [macos-ipc-inter-process-communication](../mac-os-architecture/macos-ipc-inter-process-communication/)
 {% endcontent-ref %}
 
-### Electron Applications Injection
+### Electronアプリケーションのインジェクション
 
-Electron applications executed with specific env variables could be vulnerable to process injection:
+特定の環境変数で実行されるElectronアプリケーションは、プロセスのインジェクションの脆弱性がある場合があります。
 
 {% content-ref url="macos-electron-applications-injection.md" %}
 [macos-electron-applications-injection.md](macos-electron-applications-injection.md)
 {% endcontent-ref %}
 
-### .Net Applications Injection
+### .Netアプリケーションのインジェクション
 
-It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
+**.Netデバッグ機能**を悪用することで、.Netアプリケーションにコードをインジェクションすることができます（ランタイムの強化などのmacOSの保護機能では保護されていません）。
 
 {% content-ref url="macos-.net-applications-injection.md" %}
 [macos-.net-applications-injection.md](macos-.net-applications-injection.md)
 {% endcontent-ref %}
 
-### Python Injection
+### Pythonのインジェクション
 
-If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished.
+環境変数**`PYTHONINSPECT`**が設定されている場合、Pythonプロセスは終了後にPython CLIに移行します。
 
-Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary scode.
+**`PYTHONPATH`**や**`PYTHONHOME`**などの他の環境変数も、Pythonコマンドを実行して任意のコードを実行するのに役立つ場合があります。
 
-Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
+なお、**`pyinstaller`**でコンパイルされた実行可能ファイルは、埋め込まれたPythonを使用していても、これらの環境変数を使用しません。
 
-## Detection
+## 検出
 
 ### Shield
 
-[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) is an open source application that can **detect and block process injection** actions:
+[**Shield**](https://theevilbit.github.io/shield/)（[**Github**](https://github.com/theevilbit/Shield)）は、**プロセスインジェクションを検出およびブロック**することができるオープンソースのアプリケーションです。
 
-* Using **Environmental Variables**: It will monitor the presence of any of the following environmental variables: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** and **`ELECTRON_RUN_AS_NODE`**
-* Using **`task_for_pid`** calls: To find when one process wants to get the **task port of another** which allows to inject code in the process.
-* **Electron apps params**: Someone can use **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`** command line argument to start an Electron app in debugging mode, and thus inject code to it.
-* Using **symlinks** or **hardlinks**: Typically the most common abuse is to **place a link with our user privileges**, and **point it to a higher privilege** location. The detection is very simple for both hardlink and symlinks. If the process creating the link has a **different privilege level** than the target file, we create an **alert**. Unfortunately in the case of symlinks blocking is not possible, as we don’t have information about the destination of the link prior creation. This is a limitation of Apple’s EndpointSecuriy framework.
+* **環境変数の使用**：次の環境変数の存在を監視します：**`DYLD_INSERT_LIBRARIES`**、**`CFNETWORK_LIBRARY_PATH`**、**`RAWCAMERA_BUNDLE_PATH`**、**`ELECTRON_RUN_AS_NODE`**
+* **`task_for_pid`**の呼び出しの使用：プロセスが別のプロセスの**タスクポートを取得**しようとする場合に検出します。これにより、コードをプロセスにインジェクションすることができます。
+* **Electronアプリのパラメータ**：デバッグモードでElectronアプリを起動するために**`--inspect`**、**`--inspect-brk`**、**`--remote-debugging-port`**コマンドライン引数を使用することができ、それによってコードをインジェクションすることができます。
+* **シンボリックリンク**または**ハードリンク**の使用：一般的には、最も一般的な悪用方法は、**ユーザー権限でリンクを作成**し、それを**より高い権限**の場所に向けることです。ハードリンクとシンボリックリンクの両方に対して非常にシンプルな検出が行われます。リンクを作成するプロセスがターゲットファイルとは**異なる権限レベル**を持っている場合、**アラート**が作成されます。残念ながら、シンボリックリンクの場合、ブロックは不可能です。リンクの宛先に関する情報が作成前にはわからないためです。これはAppleのEndpointSecurityフレームワークの制約です。
+### 他のプロセスによる呼び出し
 
-### Calls made by other processes
+[**このブログ記事**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)では、関数**`task_name_for_pid`**を使用して、**プロセスにコードをインジェクションする他のプロセスに関する情報**を取得する方法が説明されています。
 
-In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) you can find how it's possible to use the function **`task_name_for_pid`** to get information about other **processes injecting code in a process** and then getting information about that other process.
+この関数を呼び出すには、呼び出し元のプロセスと**同じuid**であるか、**root**である必要があります（この関数はプロセスに関する情報を返し、コードをインジェクションする方法ではありません）。
 
-Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
-
-## References
+## 参考文献
 
 * [https://theevilbit.github.io/shield/](https://theevilbit.github.io/shield/)
 * [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
@@ -90,10 +89,10 @@ Note that to call that function you need to be **the same uid** as the one runni
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>

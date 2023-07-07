@@ -4,30 +4,29 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
-## Context
+## コンテキスト
 
-In Linux in order to run a program it must exist as a file, it must be accessible in some way through the file system hierarchy (this is just how `execve()` works). This file may reside on disk or in ram (tmpfs, memfd) but you need a filepath. This has made very easy to control what is run on a Linux system, it makes easy to detect threats and attacker's tools or to prevent them from trying to execute anything of theirs at all (_e. g._ not allowing unprivileged users to place executable files anywhere).
+Linuxでは、プログラムを実行するためには、ファイルとして存在する必要があります。ファイルシステムの階層を通じていくつかの方法でアクセスできる必要があります（これは単に`execve()`が動作する方法です）。このファイルはディスク上に存在するか、ram（tmpfs、memfd）に存在するかもしれませんが、ファイルパスが必要です。これにより、Linuxシステムで実行されるものを制御することが非常に簡単になり、脅威や攻撃者のツールを検出したり、それらが自分自身の何かを実行しようとするのを防止したりすることが容易になります（例：特権のないユーザーが実行可能なファイルをどこにでも配置できないようにする）。
 
-But this technique is here to change all of this. If you can not start the process you want... **then you hijack one already existing**.
+しかし、このテクニックはすべてを変えるためにここにあります。もし、あなたが実行したいプロセスを開始できない場合... **既に存在するプロセスを乗っ取ります**。
 
-This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting...**
+このテクニックにより、読み取り専用、noexec、ファイル名のホワイトリスト、ハッシュのホワイトリストなどの一般的な保護技術を**バイパス**することができます。
 
-## Dependencies
+## 依存関係
 
-The final script depends on the following tools to work, they need to be accessible in the system you are attacking (by default you will find all of them everywhere):
-
+最終的なスクリプトは、以下のツールに依存して動作します。攻撃対象のシステムでこれらのツールにアクセスできる必要があります（デフォルトでは、どこにでも見つけることができます）。
 ```
 dd
 bash | zsh | ash (busybox)
@@ -41,54 +40,53 @@ wc
 tr
 base64
 ```
+## 技術
 
-## The technique
+プロセスのメモリを任意に変更できる場合、それを乗っ取ることができます。これは既存のプロセスを乗っ取り、別のプログラムで置き換えるために使用することができます。これは、`ptrace()` シスコールを使用するか（シスコールの実行権限が必要であるか、またはシステムに gdb が利用可能である必要があります）、またはより興味深い方法として `/proc/$pid/mem` に書き込むことによって達成することができます。
 
-If you are able to modify arbitrarily the memory of a process then you can take over it. This can be used to hijack an already existing process and replace it with another program. We can achieve this either by using the `ptrace()` syscall (which requires you to have the ability to execute syscalls or to have gdb available on the system) or, more interestingly, writing to `/proc/$pid/mem`.
+ファイル `/proc/$pid/mem` は、プロセスのアドレス空間全体（たとえば x86-64 では `0x0000000000000000` から `0x7ffffffffffff000` まで）との一対一のマッピングです。これは、オフセット `x` でこのファイルから読み取るか書き込むことは、仮想アドレス `x` の内容を読み取るか変更することと同じです。
 
-The file `/proc/$pid/mem` is a one-to-one mapping of the entire address space of a process (_e. g._ from `0x0000000000000000` to `0x7ffffffffffff000` in x86-64). This means that reading from or writing to this file at an offset `x` is the same as reading from or modifying the contents at the virtual address `x`.
+さて、私たちは解決しなければならない基本的な問題が4つあります：
 
-Now, we have four basic problems to face:
+* 一般的に、ルートとファイルのプログラム所有者のみがそれを変更できます。
+* ASLR。
+* プログラムのアドレス空間にマップされていないアドレスに読み書きしようとすると、I/O エラーが発生します。
 
-* In general, only root and the program owner of the file may modify it.
-* ASLR.
-* If we try to read or write to an address not mapped in the address space of the program we will get an I/O error.
+これらの問題には、完璧ではないが良い解決策があります：
 
-This problems have solutions that, although they are not perfect, are good:
+* ほとんどのシェルインタプリタは、子プロセスで継承されるファイルディスクリプタを作成することを許可します。私たちは、書き込み権限を持つ `mem` ファイルを指す fd を作成することができます... したがって、その fd を使用する子プロセスはシェルのメモリを変更することができます。
+* ASLR は問題ではありません。プロセスの `maps` ファイルや procfs の他のファイルを調べることで、プロセスのアドレス空間に関する情報を得ることができます。
+* したがって、ファイル上で `lseek()` を行う必要があります。シェルからは、悪名高い `dd` を使用しない限り、これは行えません。
 
-* Most shell interpreters allow the creation of file descriptors that will then be inherited by child processes. We can create a fd pointing to the `mem` file of the sell with write permissions... so child processes that use that fd will be able to modify the shell's memory.
-* ASLR isn't even a problem, we can check the shell's `maps` file or any other from the procfs in order to gain information about the address space of the process.
-* So we need to `lseek()` over the file. From the shell this cannot be done unless using the infamous `dd`.
+### より詳細に
 
-### In more detail
+手順は比較的簡単で、理解するために専門知識は必要ありません：
 
-The steps are relatively easy and do not require any kind of expertise to understand them:
+* 実行したいバイナリとローダーを解析し、必要なマッピングを特定します。そして、カーネルが `execve()` を呼び出すたびに行うのとほぼ同じ手順を実行する "シェル" コードを作成します：
+* マッピングを作成します。
+* バイナリをそれらに読み込みます。
+* 権限を設定します。
+* 最後に、プログラムの引数でスタックを初期化し、ローダーが必要とする補助ベクターを配置します。
+* ローダーにジャンプし、残りの処理を任せます（プログラムに必要なライブラリをロードします）。
+* `syscall` ファイルから、シスコールの実行後にプロセスが戻るアドレスを取得します。
+* その場所（実行可能な場所）を私たちのシェルコードで上書きします（`mem` を介して書き込み不可のページを変更できます）。
+* 実行したいプログラムをプロセスの stdin に渡します（"シェル" コードによって `read()` されます）。
+* この時点で、ローダーがプログラムのために必要なライブラリをロードし、それにジャンプするかどうかはローダー次第です。
 
-* Parse the binary we want to run and the loader to find out what mappings they need. Then craft a "shell"code that will perform, broadly speaking, the same steps that the kernel does upon each call to `execve()`:
-  * Create said mappings.
-  * Read the binaries into them.
-  * Set up permissions.
-  * Finally initialize the stack with the arguments for the program and place the auxiliary vector (needed by the loader).
-  * Jump into the loader and let it do the rest (load libraries needed by the program).
-* Obtain from the `syscall` file the address to which the process will return after the syscall it is executing.
-* Overwrite that place, which will be executable, with our shellcode (through `mem` we can modify unwritable pages).
-* Pass the program we want to run to the stdin of the process (will be `read()` by said "shell"code).
-* At this point it is up to the loader to load the necessary libraries for our program and jump into it.
-
-**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
+**ツールは** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec) **をチェックしてください**
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業で働いていますか？ HackTricks であなたの会社を宣伝したいですか？または、PEASS の最新バージョンにアクセスしたり、HackTricks を PDF でダウンロードしたりしたいですか？ [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) をチェックしてください！**
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family) を発見しましょう、私たちの独占的な [**NFTs**](https://opensea.io/collection/the-peass-family) のコレクション
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式の PEASS & HackTricks スワッグ**](https://peass.creator-spring.com) を手に入れましょう
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **[💬](https://emojipedia.org/speech-balloon/) Discord グループ** に参加するか、[telegram グループ](https://t.me/peass) に参加するか、**Twitter** [🐦](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md) **@carlospolopm**（[**@hacktricks_live**](https://twitter.com/hacktricks_live)）をフォローしてください**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricks リポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud リポジトリ](https://github.com/carlospolop/hacktricks-cloud)** に PR を提出してください。
 
 </details>

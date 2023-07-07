@@ -1,87 +1,93 @@
-# PID Namespace
+# PID ネームスペース
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で会社を宣伝**したいですか？または、**PEASS の最新バージョンにアクセスしたり、HackTricks を PDF でダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式の PEASS & HackTricks スワッグ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discord グループ**](https://discord.gg/hRep4RUj7f)または[**telegram グループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PR を** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-## Basic Information
+## 基本情報
 
-The PID (Process IDentifier) namespace is a feature in the Linux kernel that provides process isolation by enabling a group of processes to have their own set of unique PIDs, separate from the PIDs in other namespaces. This is particularly useful in containerization, where process isolation is essential for security and resource management.
+PID（プロセス ID）ネームスペースは、Linux カーネルの機能であり、一連のプロセスが他のネームスペースとは異なる一意の PID セットを持つことでプロセスの分離を提供します。これは特にコンテナ化において重要なセキュリティとリソース管理のためにプロセスの分離が必要な場合に役立ちます。
 
-When a new PID namespace is created, the first process in that namespace is assigned PID 1. This process becomes the "init" process of the new namespace and is responsible for managing other processes within the namespace. Each subsequent process created within the namespace will have a unique PID within that namespace, and these PIDs will be independent of PIDs in other namespaces.
+新しい PID ネームスペースが作成されると、そのネームスペース内の最初のプロセスには PID 1 が割り当てられます。このプロセスは新しいネームスペースの "init" プロセスとなり、ネームスペース内の他のプロセスを管理する責任を持ちます。ネームスペース内で作成される各プロセスは、そのネームスペース内で一意の PID を持ち、これらの PID は他のネームスペースの PID とは独立しています。
 
-From the perspective of a process within a PID namespace, it can only see other processes in the same namespace. It is not aware of processes in other namespaces, and it cannot interact with them using traditional process management tools (e.g., `kill`, `wait`, etc.). This provides a level of isolation that helps prevent processes from interfering with one another.
+PID ネームスペース内のプロセスの視点からは、同じネームスペース内の他のプロセスしか見ることができません。他のネームスペースのプロセスには気付かず、従来のプロセス管理ツール（`kill`、`wait` など）を使用してそれらと対話することはできません。これにより、プロセス同士の干渉を防ぐ一定の分離レベルが提供されます。
 
-### How it works:
+### 動作原理:
 
-1. When a new process is created (e.g., by using the `clone()` system call), the process can be assigned to a new or existing PID namespace. **If a new namespace is created, the process becomes the "init" process of that namespace**.
-2. The **kernel** maintains a **mapping between the PIDs in the new namespace and the corresponding PIDs** in the parent namespace (i.e., the namespace from which the new namespace was created). This mapping **allows the kernel to translate PIDs when necessary**, such as when sending signals between processes in different namespaces.
-3. **Processes within a PID namespace can only see and interact with other processes in the same namespace**. They are not aware of processes in other namespaces, and their PIDs are unique within their namespace.
-4. When a **PID namespace is destroyed** (e.g., when the "init" process of the namespace exits), **all processes within that namespace are terminated**. This ensures that all resources associated with the namespace are properly cleaned up.
+1. 新しいプロセスが作成されると（たとえば、`clone()` システムコールを使用して）、そのプロセスは新しいまたは既存の PID ネームスペースに割り当てることができます。**新しいネームスペースが作成される場合、そのプロセスはそのネームスペースの "init" プロセスとなります**。
+2. **カーネル**は、新しいネームスペースの PID と親ネームスペース（新しいネームスペースが作成されたネームスペース）の対応する PID との間の**マッピングを維持**します。このマッピングにより、カーネルは必要に応じて PID を変換できます。たとえば、異なるネームスペースのプロセス間でシグナルを送信する場合などです。
+3. **PID ネームスペース内のプロセスは、同じネームスペース内の他のプロセスしか見ることができず、対話することができます**。他のネームスペースのプロセスには気付かず、それらの PID はネームスペース内で一意です。
+4. **PID ネームスペースが破棄されると**（たとえば、ネームスペースの "init" プロセスが終了すると）、**そのネームスペース内のすべてのプロセスが終了**します。これにより、ネームスペースに関連するすべてのリソースが適切にクリーンアップされます。
 
-## Lab:
+## ラボ:
 
-### Create different Namespaces
+### 異なるネームスペースの作成
 
 #### CLI
-
 ```bash
 sudo unshare -pf --mount-proc /bin/bash
 ```
-
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>エラー：bash: fork: メモリを割り当てることができません</summary>
 
-If you run the previous line without `-f` you will get that error.\
-The error is caused by the PID 1 process exits in the new namespace.
+前の行を`-f`なしで実行すると、このエラーが発生します。\
+このエラーは、新しい名前空間でPID 1プロセスが終了することによって引き起こされます。
 
-After bash start to run, bash will fork several new sub-processes to do somethings. If you run unshare without -f, bash will have the same pid as the current "unshare" process. The current "unshare" process call the unshare systemcall, create a new pid namespace, but the current "unshare" process is not in the new pid namespace. It is the desired behavior of linux kernel: process A creates a new namespace, the process A itself won't be put into the new namespace, only the sub-processes of process A will be put into the new namespace. So when you run:
-
+bashが実行されると、いくつかの新しいサブプロセスをフォークして何かを実行します。`-f`なしでunshareを実行すると、bashのPIDは現在の「unshare」プロセスと同じになります。現在の「unshare」プロセスはunshareシステムコールを呼び出し、新しいPID名前空間を作成しますが、現在の「unshare」プロセスは新しいPID名前空間にありません。これはLinuxカーネルの望ましい動作です：プロセスAが新しい名前空間を作成すると、プロセスA自体は新しい名前空間に配置されず、プロセスAのサブプロセスのみが新しい名前空間に配置されます。したがって、次のコマンドを実行すると：
 ```
 unshare -p /bin/bash
 ```
+unshareプロセスは/bin/bashを実行し、/bin/bashはいくつかのサブプロセスをフォークします。bashの最初のサブプロセスは新しい名前空間のPID 1になり、ジョブが完了するとサブプロセスは終了します。したがって、新しい名前空間のPID 1が終了します。
 
-The unshare process will exec /bin/bash, and /bin/bash forks several sub-processes, the first sub-process of bash will become PID 1 of the new namespace, and the subprocess will exit after it completes its job. So the PID 1 of the new namespace exits.
+PID 1プロセスには特別な機能があります。孤児プロセスの親プロセスになる必要があります。ルート名前空間のPID 1プロセスが終了すると、カーネルはパニックになります。サブ名前空間のPID 1プロセスが終了すると、Linuxカーネルはdisable\_pid\_allocation関数を呼び出し、その名前空間のPIDNS\_HASH\_ADDINGフラグをクリアします。Linuxカーネルが新しいプロセスを作成するとき、カーネルはalloc\_pid関数を呼び出して名前空間内でPIDを割り当てます。PIDNS\_HASH\_ADDINGフラグが設定されていない場合、alloc\_pid関数は-ENOMEMエラーを返します。これが「Cannot allocate memory」エラーが発生する理由です。
 
-The PID 1 process has a special function: it should become all the orphan processes' parent process. If PID 1 process in the root namespace exits, kernel will panic. If PID 1 process in a sub namespace exits, linux kernel will call the disable\_pid\_allocation function, which will clean the PIDNS\_HASH\_ADDING flag in that namespace. When linux kernel create a new process, kernel will call alloc\_pid function to allocate a PID in a namespace, and if the PIDNS\_HASH\_ADDING flag is not set, alloc\_pid function will return a -ENOMEM error. That's why you got the "Cannot allocate memory" error.
-
-You can resolve this issue by use the '-f' option:
-
+この問題は、'-f'オプションを使用することで解決できます：
 ```
 unshare -fp /bin/bash
 ```
+もし`-f`オプションを使ってunshareを実行すると、unshareは新しいpid namespaceを作成した後に新しいプロセスをフォークします。そして新しいプロセスで`/bin/bash`を実行します。新しいプロセスは新しいpid namespaceのpid 1となります。その後、bashはいくつかのサブプロセスをフォークしてジョブを実行します。bash自体が新しいpid namespaceのpid 1であるため、そのサブプロセスは問題なく終了することができます。
 
-If you run unshare with '-f' option, unshare will fork a new process after it create the new pid namespace. And run /bin/bash in the new process. The new process will be the pid 1 of the new pid namespace. Then bash will also fork several sub-processes to do some jobs. As bash itself is the pid 1 of the new pid namespace, its sub-processes can exit without any problem.
-
-Copied from [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
+[https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)から転載
 
 </details>
 
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+`--mount-proc`パラメータを使用して新しい`/proc`ファイルシステムのインスタンスをマウントすることで、新しいマウント名前空間はその名前空間固有のプロセス情報の正確で隔離されたビューを持つことが保証されます。
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
+### &#x20;自分のプロセスがどの名前空間にあるかを確認する
 
-### &#x20;Check which namespace are your process in
+To check which namespace your process is in, you can use the `lsns` command. This command displays information about the namespaces on the system, including the PID (Process ID) namespace.
 
+```bash
+$ lsns -p <PID>
+```
+
+Replace `<PID>` with the process ID of the process you want to check. This will show you the namespace(s) that the process is associated with.
+
+You can also use the `readlink` command to check the symbolic link of the `/proc/<PID>/ns/pid` file, which represents the PID namespace of a process.
+
+```bash
+$ readlink /proc/<PID>/ns/pid
+```
+
+Again, replace `<PID>` with the process ID you want to check. The output will be the path to the PID namespace file, indicating the namespace the process belongs to.
 ```bash
 ls -l /proc/self/ns/pid
 lrwxrwxrwx 1 root root 0 Apr  3 18:45 /proc/self/ns/pid -> 'pid:[4026532412]'
 ```
-
-### Find all PID namespaces
+### すべてのPID名前空間を見つける
 
 {% code overflow="wrap" %}
 ```bash
@@ -89,26 +95,24 @@ sudo find /proc -maxdepth 3 -type l -name pid -exec readlink {} \; 2>/dev/null |
 ```
 {% endcode %}
 
-Note that the root use from the initial (default) PID namespace can see all the processes, even the ones in new PID names paces, thats why we can see all the PID namespaces.
+初期（デフォルト）のPID名前空間からのrootユーザーは、新しいPID名前空間にあるプロセスを含めてすべてのプロセスを見ることができるため、すべてのPID名前空間を見ることができます。
 
-### Enter inside a PID namespace
-
+### PID名前空間に入る
 ```bash
 nsenter -t TARGET_PID --pid /bin/bash
 ```
+デフォルトの名前空間からPID名前空間に入ると、すべてのプロセスを見ることができます。そして、そのPID名前空間のプロセスは、PID名前空間上の新しいbashを見ることができます。
 
-When you enter inside a PID namespace from the default namespace, you will still be able to see all the processes. And the process from that PID ns will be able to see the new bash on the PID ns.
-
-Also, you can only **enter in another process PID namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/pid`)
+また、**rootでなければ他のプロセスのPID名前空間に入ることはできません**。そして、**`/proc/self/ns/pid`**のようなディスクリプタが指す名前空間にディスクリプタなしで入ることはできません。
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

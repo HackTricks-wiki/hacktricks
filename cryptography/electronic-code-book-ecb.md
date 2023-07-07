@@ -1,52 +1,46 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
 
 # ECB
 
-(ECB) Electronic Code Book - symmetric encryption scheme which **replaces each block of the clear text** by the **block of ciphertext**. It is the **simplest** encryption scheme. The main idea is to **split** the clear text into **blocks of N bits** (depends on the size of the block of input data, encryption algorithm) and then to encrypt (decrypt) each block of clear text using the only key.
+(ECB) Electronic Code Book - 対称暗号化方式で、**クリアテキストの各ブロック**を**暗号文のブロック**で置き換えます。これは**最も単純な**暗号化方式です。主なアイデアは、クリアテキストを**Nビットのブロック**（入力データのブロックサイズ、暗号化アルゴリズムに依存）に**分割**し、その後、唯一の鍵を使用して各クリアテキストのブロックを暗号化（復号化）することです。
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-Using ECB has multiple security implications:
+ECBの使用には、複数のセキュリティ上の問題があります：
 
-* **Blocks from encrypted message can be removed**
-* **Blocks from encrypted message can be moved around**
+* 暗号化されたメッセージから**ブロックを削除**することができます。
+* 暗号化されたメッセージから**ブロックを移動**することができます。
 
-# Detection of the vulnerability
+# 脆弱性の検出
 
-Imagine you login into an application several times and you **always get the same cookie**. This is because the cookie of the application is **`<username>|<password>`**.\
-Then, you generate to new users, both of them with the **same long password** and **almost** the **same** **username**.\
-You find out that the **blocks of 8B** where the **info of both users** is the same are **equals**. Then, you imagine that this might be because **ECB is being used**. 
-
-Like in the following example. Observe how these** 2 decoded cookies** has several times the block **`\x23U\xE45K\xCB\x21\xC8`**
-
+アプリケーションに複数回ログインし、**常に同じクッキー**を取得すると想像してください。これは、アプリケーションのクッキーが**`<username>|<password>`**であるためです。\
+次に、**同じ長いパスワード**と**ほぼ同じ** **ユーザー名**を持つ新しいユーザーを2人生成します。\
+**2つのデコードされたクッキー**には、ブロック**`\x23U\xE45K\xCB\x21\xC8`**が複数回含まれていることに注意してください。
 ```
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 ```
+これは、クッキーの**ユーザー名とパスワードに複数回文字 "a" が含まれていた**ためです（例えば）。**異なる**ブロックは、**少なくとも1つの異なる文字**（おそらく区切り記号 "|" またはユーザー名に必要な違い）を含んでいるブロックです。
 
-This is because the **username and password of those cookies contained several times the letter "a"** (for example). The **blocks** that are **different** are blocks that contained **at least 1 different character** (maybe the delimiter "|" or some necessary difference in the username).
+さて、攻撃者は単に、`<username><delimiter><password>` または `<password><delimiter><username>` の形式を見つける必要があります。そのために、彼は単に**類似した長いユーザー名とパスワードを持つ複数のユーザー名**を生成し、区切り記号の形式と長さを見つけるまで続けることができます。
 
-Now, the attacker just need to discover if the format is `<username><delimiter><password>` or `<password><delimiter><username>`. For doing that, he can just **generate several usernames **with s**imilar and long usernames and passwords until he find the format and the length of the delimiter:**
-
-| Username length: | Password length: | Username+Password length: | Cookie's length (after decoding): |
+| ユーザー名の長さ | パスワードの長さ | ユーザー名+パスワードの長さ | クッキーの長さ（デコード後） |
 | ---------------- | ---------------- | ------------------------- | --------------------------------- |
 | 2                | 2                | 4                         | 8                                 |
 | 3                | 3                | 6                         | 8                                 |
@@ -54,37 +48,31 @@ Now, the attacker just need to discover if the format is `<username><delimiter><
 | 4                | 4                | 8                         | 16                                |
 | 7                | 7                | 14                        | 16                                |
 
-# Exploitation of the vulnerability
+# 脆弱性の悪用
 
-## Removing entire blocks
-
-Knowing the format of the cookie (`<username>|<password>`), in order to impersonate the username `admin` create a new user called `aaaaaaaaadmin` and get the cookie and decode it:
-
+クッキーの形式を知っている（`<username>|<password>`）、ユーザー名 `admin` をなりすますために、`aaaaaaaaadmin` という新しいユーザーを作成し、クッキーを取得してデコードします：
 ```
 \x23U\xE45K\xCB\x21\xC8\xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
-
-We can see the pattern `\x23U\xE45K\xCB\x21\xC8` created previously with the username that contained only `a`.\
-Then, you can remove the first block of 8B and you will et a valid cookie for the username `admin`:
-
+以前に作成されたユーザー名には、`\x23U\xE45K\xCB\x21\xC8`というパターンが見られます。\
+次に、最初の8Bのブロックを削除すると、ユーザー名`admin`の有効なクッキーが得られます。
 ```
 \xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
+## ブロックの移動
 
-## Moving blocks
+多くのデータベースでは、`WHERE username='admin';` と `WHERE username='admin    ';` の検索は同じです。 _(余分なスペースに注意)_
 
-In many databases it is the same to search for `WHERE username='admin';` or for `WHERE username='admin    ';` _(Note the extra spaces)_
+したがって、ユーザー `admin` をなりすます別の方法は次のとおりです。
 
-So, another way to impersonate the user `admin` would be to:
+* `len(<username>) + len(<delimiter) % len(block)` となるようなユーザー名を生成します。ブロックサイズが `8B` の場合、`username       ` というユーザー名を生成できます。デリミタには `|` を使用し、チャンク `<username><delimiter>` は 2 つの 8B ブロックを生成します。
+* 次に、ユーザー名とスペースを含むブロックの正確な数を埋めるパスワードを生成します。例えば、`admin   ` というパスワードを生成します。
 
-* Generate a username that: `len(<username>) + len(<delimiter) % len(block)`. With a block size of `8B` you can generate username called: `username       `, with the delimiter `|` the chunk `<username><delimiter>` will generate 2 blocks of 8Bs.
-* Then, generate a password that will fill an exact number of blocks containing the username we want to impersonate and spaces, like: `admin   ` 
+このユーザーのクッキーは、3 つのブロックで構成されます。最初の 2 つはユーザー名 + デリミタのブロックであり、3 つ目はパスワードのブロックです（ユーザー名を偽装しています）：`username       |admin   `
 
-The cookie of this user is going to be composed by 3 blocks: the first 2 is the blocks of the username + delimiter and the third one of the password (which is faking the username): `username       |admin   `
+** その後、最初のブロックを最後のブロックと置き換えるだけで、ユーザー `admin` をなりすませることができます：`admin          |username`**
 
-** Then, just replace the first block with the last time and will be impersonating the user `admin`: `admin          |username`**
-
-# References
+# 参考文献
 
 * [http://cryptowiki.net/index.php?title=Electronic_Code_Book\_(ECB)](http://cryptowiki.net/index.php?title=Electronic_Code_Book_\(ECB\))
 
@@ -93,16 +81,14 @@ The cookie of this user is going to be composed by 3 blocks: the first 2 is the 
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricks で会社を宣伝**したいですか？または、**PEASS の最新バージョンや HackTricks の PDF をダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な [**NFT**](https://opensea.io/collection/the-peass-family) のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式の PEASS & HackTricks スワッグ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discord グループ**](https://discord.gg/hRep4RUj7f) または [**telegram グループ**](https://t.me/peass) に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)** をフォローしてください。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricks リポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud リポジトリ](https://github.com/carlospolop/hacktricks-cloud)に PR を提出してください。**
 
 </details>
-
-

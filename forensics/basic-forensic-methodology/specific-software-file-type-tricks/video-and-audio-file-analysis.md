@@ -1,33 +1,31 @@
-
-
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
 
 From: [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 
-Like image file formats, audio and video file trickery is a common theme in CTF forensics challenges not because hacking or data hiding ever happens this way in the real world, but just because audio and video are fun. As with image file formats, steganography might be used to embed a secret message in the content data, and again you should know to check the file metadata areas for clues. Your first step should be to take a look with the [mediainfo](https://mediaarea.net/en/MediaInfo) tool \(or `exiftool`\) and identify the content type and look at its metadata.
+画像ファイル形式と同様に、オーディオおよびビデオファイルのトリックは、CTFフォレンジックの課題で一般的です。これは、現実世界ではハッキングやデータの隠蔽がこの方法で行われるわけではなく、単にオーディオとビデオが楽しいからです。画像ファイル形式と同様に、ステガノグラフィーを使用してコンテンツデータに秘密のメッセージを埋め込むことがあり、再びファイルのメタデータ領域をチェックする必要があります。最初のステップは、[mediainfo](https://mediaarea.net/en/MediaInfo)ツール（または`exiftool`）で内容のタイプを確認し、メタデータを確認することです。
 
-[Audacity](http://www.audacityteam.org/) is the premier open-source audio file and waveform-viewing tool. CTF challenge authors love to encode text into audio waveforms, which you can see using the spectrogram view \(although a specialized tool called [Sonic Visualiser](http://www.sonicvisualiser.org/) is better for this task in particular\). Audacity can also enable you to slow down, reverse, and do other manipulations that might reveal a hidden message if you suspect there is one \(if you can hear garbled audio, interference, or static\). [Sox](http://sox.sourceforge.net/) is another useful command-line tool for converting and manipulating audio files.
+[Audacity](http://www.audacityteam.org/)は、最も優れたオープンソースのオーディオファイルおよび波形表示ツールです。CTFの課題作成者は、テキストをオーディオ波形にエンコードすることが好きで、これはスペクトログラムビューを使用して確認できます（ただし、この特定のタスクには[Sonic Visualiser](http://www.sonicvisualiser.org/)という専門ツールの方が優れています）。 Audacityは、ガーブル音、干渉、または静的がある場合に隠されたメッセージを明らかにする可能性がある、スローダウン、逆再生などの操作も可能です。 [Sox](http://sox.sourceforge.net/)は、オーディオファイルの変換と操作に役立つ別の便利なコマンドラインツールです。
 
-It's also common to check Least Significant Bits (LSB) for a secret message. Most audio and video media formats use discrete (fixed-size) "chunks" so that they can be streamed; the LSBs of those chunks are a common place to smuggle some data without visibly affecting the file.
+また、秘密のメッセージをLSB（Least Significant Bits）にエンコードすることも一般的です。ほとんどのオーディオおよびビデオメディア形式は、ストリーミングできるように個別の（固定サイズの）「チャンク」を使用するため、これらのチャンクのLSBは、ファイルに目に見える影響を与えずにデータを密輸するための一般的な場所です。
 
-Other times, a message might be encoded into the audio as [DTMF tones](http://dialabc.com/sound/detect/index.html) or morse code. For these, try working with [multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng) to decode them.
+他の場合では、メッセージはオーディオに[DTMFトーン](http://dialabc.com/sound/detect/index.html)やモールス符号としてエンコードされている場合があります。これらの場合は、[multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)を使用してデコードを試みてください。
 
-Video file formats are container formats, that contain separate streams of both audio and video that are multiplexed together for playback. For analyzing and manipulating video file formats, [FFmpeg](http://ffmpeg.org/) is recommended. `ffmpeg -i` gives an initial analysis of the file content. It can also de-multiplex or playback the content streams. The power of FFmpeg is exposed to Python using [ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html).
+ビデオファイル形式は、再生のためにオーディオとビデオの別々のストリームを含むコンテナ形式です。ビデオファイル形式の分析と操作には、[FFmpeg](http://ffmpeg.org/)が推奨されています。 `ffmpeg -i`は、ファイルの内容の初期分析を提供します。また、コンテンツストリームをデマルチプレクスまたは再生することもできます。FFmpegのパワーは、[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)を使用してPythonに公開されています。
 
 
 
@@ -35,16 +33,14 @@ Video file formats are container formats, that contain separate streams of both 
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
-
-

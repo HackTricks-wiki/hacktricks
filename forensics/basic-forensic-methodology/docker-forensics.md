@@ -1,33 +1,30 @@
-# Docker Forensics
+# Dockerフォレンジック
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
 
-## Container modification
+## コンテナの変更
 
-There are suspicions that some docker container was compromised:
-
+あるDockerコンテナが侵害された疑いがあります：
 ```bash
 docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-
-You can easily **find the modifications done to this container with regards to the image** with:
-
+このコンテナに関してイメージに対して行われた変更を簡単に**見つけることができます**。以下のコマンドを使用します:
 ```bash
 docker diff wordpress
 C /var
@@ -41,70 +38,56 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-
-In the previous command **C** means **Changed** and **A,** **Added**.\
-If you find that some interesting file like `/etc/shadow` was modified you can download it from the container to check for malicious activity with:
-
+前のコマンドで、**C**は**変更**を意味し、**A**は**追加**を意味します。\
+もし、`/etc/shadow`のような興味深いファイルが変更されていることがわかった場合、以下のコマンドを使用してコンテナからダウンロードし、悪意のある活動をチェックすることができます。
 ```bash
 docker cp wordpress:/etc/shadow.
 ```
-
-You can also **compare it with the original one** running a new container and extracting the file from it:
-
+新しいコンテナを実行し、そこからファイルを抽出して元のファイルと比較することもできます。
 ```bash
 docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-
-If you find that **some suspicious file was added** you can access the container and check it:
-
+もし**何らかの不審なファイルが追加された**ことがわかった場合、コンテナにアクセスして確認することができます。
 ```bash
 docker exec -it wordpress bash
 ```
+## 画像の変更
 
-## Images modifications
-
-When you are given an exported docker image (probably in `.tar` format) you can use [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) to **extract a summary of the modifications**:
-
+エクスポートされたDockerイメージ（おそらく`.tar`形式）が与えられた場合、[**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases)を使用して、**変更の概要を抽出**することができます。
 ```bash
 docker save <image> > image.tar #Export the image to a .tar file
 container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
 container-diff analyze -t metadata image.tar
 ```
-
-Then, you can **decompress** the image and **access the blobs** to search for suspicious files you may have found in the changes history:
-
+次に、イメージを**解凍**し、変更履歴で見つけた疑わしいファイルを検索するために**ブロブにアクセス**できます。
 ```bash
 tar -xf image.tar
 ```
+### 基本的な分析
 
-### Basic Analysis
-
-You can get **basic information** from the image running:
+実行中のイメージから**基本情報**を取得できます：
+```bash
+docker inspect <image>
+```
+次のコマンドを使用して、変更の要約履歴を取得することもできます:
 
 ```bash
-docker inspect <image> 
+git log --oneline
 ```
-
-You can also get a summary **history of changes** with:
-
 ```bash
 docker history --no-trunc <image>
 ```
-
-You can also generate a **dockerfile from an image** with:
-
+イメージから**dockerfileを生成**することもできます。以下のコマンドを使用します:
 ```bash
 alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock --rm alpine/dfimage"
 dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
-
 ### Dive
 
-In order to find added/modified files in docker images you can also use the [**dive**](https://github.com/wagoodman/dive) (download it from [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) utility:
-
+Dockerイメージ内の追加/変更されたファイルを見つけるために、[**dive**](https://github.com/wagoodman/dive)（[**リリース**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)からダウンロード）ユーティリティを使用することもできます。
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -113,35 +96,32 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
+これにより、Dockerイメージの異なるブロブをナビゲートし、変更/追加されたファイルを確認することができます。**赤色**は追加されたことを意味し、**黄色**は変更されたことを意味します。**Tab**キーを使用して他のビューに移動し、**スペース**キーを使用してフォルダを折りたたむ/展開することができます。
 
-This allows you to **navigate through the different blobs of docker images** and check which files were modified/added. **Red** means added and **yellow** means modified. Use **tab** to move to the other view and **space** to collapse/open folders.
-
-With die you won't be able to access the content of the different stages of the image. To do so you will need to **decompress each layer and access it**.\
-You can decompress all the layers from an image from the directory where the image was decompressed executing:
-
+dieを使用すると、イメージの異なるステージの内容にアクセスすることはできません。そのため、各レイヤーを解凍してアクセスする必要があります。\
+イメージのすべてのレイヤーを解凍するには、イメージが解凍されたディレクトリで次のコマンドを実行します：
 ```bash
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
+## メモリからの資格情報
 
-## Credentials from memory
+注意してください、ホスト内でDockerコンテナを実行すると、ホストからコンテナで実行されているプロセスを`ps -ef`コマンドで確認できます。
 
-Note that when you run a docker container inside a host **you can see the processes running on the container from the host** just running `ps -ef`
-
-Therefore (as root) you can **dump the memory of the processes** from the host and search for **credentials** just [**like in the following example**](../../linux-hardening/privilege-escalation/#process-memory).
+したがって（rootとして）ホストからプロセスのメモリをダンプし、[**以下の例のように**](../../linux-hardening/privilege-escalation/#process-memory)、資格情報を検索することができます。
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-- Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
+- **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 
-- Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
+- [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 
-- Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
+- [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 
-- **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+- [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
 
-- **Share your hacking tricks by submitting PRs to the [hacktricks repo](https://github.com/carlospolop/hacktricks) and [hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**.
+- **ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。**
 
 </details>
