@@ -1,8 +1,3 @@
----
-description: >-
-Bem-vindo ao wiki onde você encontrará cada truque/técnica/hack que aprendi em CTFs, aplicativos da vida real, pesquisas e notícias.
----
-
 # HackTricks
 
 <figure><img src=".gitbook/assets/hack tricks gif.gif" alt="" width="563"><figcaption></figcaption></figure>
@@ -45,9 +40,9 @@ Você pode conferir o **blog** deles em [**https://blog.stmcyber.com**](https://
 
 ![](.gitbook/assets/i3.png)
 
-**Intigriti** é a plataforma de ethical hacking e bug bounty **número 1 da Europa**.
+**Intigriti** é a plataforma de ethical hacking e **bug bounty número 1 da Europa.**
 
-Dica de bug bounty: **cadastre-se** no **Intigriti**, uma plataforma premium de bug bounty criada por hackers, para hackers! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje mesmo e comece a ganhar recompensas de até **$100.000**!
+Dica de bug bounty: **cadastre-se** no **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje mesmo e comece a ganhar recompensas de até **$100.000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -56,7 +51,7 @@ Dica de bug bounty: **cadastre-se** no **Intigriti**, uma plataforma premium de 
 <figure><img src=".gitbook/assets/image (9) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir e **automatizar fluxos de trabalho** com as ferramentas comunitárias **mais avançadas** do mundo.
+Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir e **automatizar fluxos de trabalho** com as ferramentas comunitárias mais avançadas do mundo.
 
 Acesse hoje mesmo:
 
@@ -66,7 +61,7 @@ Acesse hoje mesmo:
 
 <figure><img src=".gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-[Siga o HackenProof](https://bit.ly/3xrrDrL) **para saber mais sobre bugs web3**
+[Siga o HackenProof](https://bit.ly/3xrrDrL) **para aprender mais sobre bugs web3**
 
 🐞 Leia tutoriais de bugs web3
 
