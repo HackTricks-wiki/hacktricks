@@ -1,8 +1,3 @@
----
-description: >-
-Bienvenido al wiki donde encontrarás cada truco/técnica de hacking/cualquier cosa que haya aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias.
----
-
 # HackTricks
 
 <figure><img src=".gitbook/assets/hack tricks gif.gif" alt="" width="563"><figcaption></figcaption></figure>
@@ -10,16 +5,16 @@ Bienvenido al wiki donde encontrarás cada truco/técnica de hacking/cualquier c
 _Logos y diseño de movimiento de Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 {% hint style="info" %}
-**Bienvenido al wiki donde encontrarás cada truco/técnica de hacking/cualquier cosa que haya aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias.**
+**Bienvenido a la wiki donde encontrarás cada truco/técnica/herramienta de hacking que he aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias.**
 {% endhint %}
 
-Aquí puedes encontrar una pequeña **introducción**:
+Aquí puedes encontrar una pequeña **introducción:**
 
 ## [**Metodología de Pentesting**](generic-methodologies-and-resources/pentesting-methodology.md)
 
-Aquí encontrarás el **flujo típico** que **debes seguir al realizar pentesting** en una o más **máquinas**.
+Aquí encontrarás el **flujo típico** que **debes seguir al realizar un pentesting** en una o más **máquinas**.
 
-**Haz clic en el título para comenzar**.
+**Haz clic en el título para comenzar.**
 
 ## Patrocinadores Corporativos
 
