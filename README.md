@@ -1,9 +1,3 @@
----
-description: >-
-  Welcome to the wiki where you will find each hacking trick/technique/whatever
-  I have learnt from CTFs, real life apps, reading researches, and news.
----
-
 # HackTricks
 
 <figure><img src=".gitbook/assets/hack tricks gif.gif" alt="" width="563"><figcaption></figcaption></figure>
