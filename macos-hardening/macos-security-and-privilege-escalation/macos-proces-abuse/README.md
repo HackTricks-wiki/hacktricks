@@ -48,6 +48,22 @@ Electron applications executed with specific env variables could be vulnerable t
 [macos-electron-applications-injection.md](macos-electron-applications-injection.md)
 {% endcontent-ref %}
 
+### .Net Applications Injection
+
+It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
+
+{% content-ref url="macos-.net-applications-injection.md" %}
+[macos-.net-applications-injection.md](macos-.net-applications-injection.md)
+{% endcontent-ref %}
+
+### Python Injection
+
+If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished.
+
+Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary scode.
+
+Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
+
 ## Detection
 
 ### Shield
@@ -58,6 +74,12 @@ Electron applications executed with specific env variables could be vulnerable t
 * Using **`task_for_pid`** calls: To find when one process wants to get the **task port of another** which allows to inject code in the process.
 * **Electron apps params**: Someone can use **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`** command line argument to start an Electron app in debugging mode, and thus inject code to it.
 * Using **symlinks** or **hardlinks**: Typically the most common abuse is to **place a link with our user privileges**, and **point it to a higher privilege** location. The detection is very simple for both hardlink and symlinks. If the process creating the link has a **different privilege level** than the target file, we create an **alert**. Unfortunately in the case of symlinks blocking is not possible, as we don’t have information about the destination of the link prior creation. This is a limitation of Apple’s EndpointSecuriy framework.
+
+### Calls made by other processes
+
+In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) you can find how it's possible to use the function **`task_name_for_pid`** to get information about other **processes injecting code in a process** and then getting information about that other process.
+
+Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
 
 ## References
 

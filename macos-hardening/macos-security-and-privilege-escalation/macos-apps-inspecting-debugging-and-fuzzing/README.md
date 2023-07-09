@@ -86,6 +86,26 @@ It will be mounted in `/Volumes`
 
 ### Objective-C
 
+#### Metadata
+
+{% hint style="danger" %}
+Note that programs written in Objective-C **retain** their class declarations **when** **compiled** into [Mach-O binaries](../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Such class declarations **include** the name and type of:
+{% endhint %}
+
+* The class
+* The class methods
+* The class instance variables
+
+You can get this information using [**class-dump**](https://github.com/nygard/class-dump):
+
+```bash
+class-dump Kindle.app
+```
+
+Note that this names could be obfuscated to make the reversing of the binary more difficult.
+
+#### Function calling
+
 When a function is called in a binary that uses objective-C, the compiled code instead of calling that function, it will call **`objc_msgSend`**. Which will be calling the final function:
 
 ![](<../../../.gitbook/assets/image (560).png>)
@@ -105,6 +125,26 @@ The params this function expects are:
 | **5th argument**  | **r8**                                                          | **3rd argument to the method**                         |
 | **6th argument**  | **r9**                                                          | **4th argument to the method**                         |
 | **7th+ argument** | <p><strong>rsp+</strong><br><strong>(on the stack)</strong></p> | **5th+ argument to the method**                        |
+
+### Swift
+
+With Swift binaries, since there is Objective-C compatibility, sometimes you can extract declarations using [class-dump](https://github.com/nygard/class-dump/) but not always.
+
+With the **`jtool -l`** or **`otool -l`** command lines it's possible ti find several sections that start with **`__swift5`** prefix:
+
+```bash
+jtool2 -l /Applications/Stocks.app/Contents/MacOS/Stocks
+LC 00: LC_SEGMENT_64              Mem: 0x000000000-0x100000000    __PAGEZERO
+LC 01: LC_SEGMENT_64              Mem: 0x100000000-0x100028000    __TEXT
+    [...]
+    Mem: 0x100026630-0x100026d54        __TEXT.__swift5_typeref
+    Mem: 0x100026d60-0x100027061        __TEXT.__swift5_reflstr
+    Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
+    Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
+    [...]
+```
+
+You can find further information about the [**information stored in these section in this blog post**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
 ### Packed binaries
 
@@ -261,6 +301,10 @@ fs_usage -w -f network curl #This tracks network actions
 
 [**Taskexplorer**](https://objective-see.com/products/taskexplorer.html) is useful to see the **libraries** used by a binary, the **files** it's using and the **network** connections.\
 It also checks the binary processes against **virustotal** and show information about the binary.
+
+## PT\_DENY\_ATTACH <a href="#page-title" id="page-title"></a>
+
+In [**this blog post**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) you can find an example about how to **debug a running daemon** that used **`PT_DENY_ATTACH`** to prevent debugging even if SIP was disabled.
 
 ### lldb
 

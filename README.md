@@ -36,7 +36,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [RootedCON](https://www.rootedcon.com/)
 
-<figure><img src=".gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1) (3) (3).png" alt=""><figcaption></figcaption></figure>
 
 [**RootedCON**](https://www.rootedcon.com) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
 
@@ -106,18 +106,6 @@ In addition to the above WebSec is also a **committed supporter of HackTricks.**
 **Security Skills as a Service** platform bridges the current skill set gap by combining **global offensive security talent with smart automation**, providing real-time data you need to make informed decisions.
 
 {% embed url="https://www.syncubes.com/" %}
-
-### [HACK THE BOX](https://www.hackthebox.com/)
-
-<figure><img src=".gitbook/assets/image (2) (2).png" alt=""><figcaption></figcaption></figure>
-
-Hack The Box is an online platform designed to facilitate **learning and advancement in the field of cybersecurity**. Providing an array of real-life scenarios in a safe and controlled environment, Hack The Box allows users to test and grow their skills in penetration testing and ethical hacking.
-
-The platform features a range of challenges of varying difficulty levels, covering different aspects of cybersecurity. Users can engage in **virtual Capture The Flag (CTF) competitions**, solve individual problems, and even access a plethora of educational resources.
-
-Hack The Box serves a diverse audience, from **beginners taking their first steps** into the world of cybersecurity, to **seasoned professionals** looking to refine and update their knowledge. Its unique blend of challenge, learning, and community interaction makes it an invaluable resource for those interested in cybersecurity.
-
-{% embed url="https://www.hackthebox.com/" %}
 
 ## License
 

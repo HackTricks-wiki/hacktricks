@@ -16,7 +16,7 @@
 
 Mach uses **tasks** as the **smallest unit** for sharing resources, and each task can contain **multiple threads**. These **tasks and threads are mapped 1:1 to POSIX processes and threads**.
 
-Communication between tasks occurs via Mach Inter-Process Communication (IPC), utilizing one-way communication channels. **Messages are transferred between ports**, which act like **message queues** managed by the kernel.
+Communication between tasks occurs via Mach Inter-Process Communication (IPC), utilising one-way communication channels. **Messages are transferred between ports**, which act like **message queues** managed by the kernel.
 
 Port rights, which define what operations a task can perform, are key to this communication. The possible **port rights** are:
 
@@ -193,7 +193,7 @@ int main() {
     * Apps the **`com.apple.system-task-ports`** entitlement can get the **task port for any** process, except the kernel. In older versions it was called **`task_for_pid-allow`**. This is only granted to Apple applications.
     * **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
 
-### Shellcode Process Injection via Task port
+### Shellcode Process Injection via Task port&#x20;
 
 You can grab a shellcode from:
 
@@ -407,7 +407,7 @@ In macOS **threads** might be manipulated via **Mach** or using **posix `pthread
 
 It was possible to **inject a simple shellcode** to execute a command because it **didn't need to work with posix** compliant apis, only with Mach. **More complex injections** would need the **thread** to be also **posix compliant**.
 
-&#x20;Therefore, to **improve the shellcode** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load our dylib** from the system.
+Therefore, to **improve the shellcode** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load our dylib** from the system.
 
 You can find **example dylibs** in (for example the one that generates a log and then you can listen to it):
 
@@ -697,6 +697,12 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
 
+### Thread Injection via Task port <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
+
+{% content-ref url="../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md" %}
+[macos-thread-injection-via-task-port.md](../../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md)
+{% endcontent-ref %}
+
 ## XPC
 
 ### Basic Information
@@ -725,7 +731,7 @@ XPC services are **started** by **launchd** when required and **shut down** once
 
 ### System Wide XPC services
 
-**System-wide XPC services** are accessible to all users. These services, either launchd or Mach-type, need to be **defined in plist** files located in specified directories such as **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, or **`/Library/LaunchAgents`**.
+System-wide XPC services are accessible to all users. These services, either launchd or Mach-type, need to be **defined in plist** files located in specified directories such as **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`**, or **`/Library/LaunchAgents`**.
 
 These plists files will have a key called **`MachServices`** with the name of the service, and a key called **`Program`** with the path to the binary:
 
@@ -1046,6 +1052,8 @@ sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ## References
 
 * [https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
+* [https://knight.sc/malware/2019/03/15/code-injection-on-macos.html](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
+* [https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
 
 <details>
 

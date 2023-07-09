@@ -16,7 +16,7 @@
 
 Unlike Kernel Extensions, **System Extensions run in user space** instead of kernel space, reducing the risk of a system crash due to extension malfunction.
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 There are three types of system extensions: **DriverKit** Extensions, **Network** Extensions, and **Endpoint Security** Extensions.
 
@@ -88,6 +88,7 @@ At the end this was fixed by giving the new permission **`kTCCServiceEndpointSec
 ## References
 
 * [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
+* [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
 
 <details>
 

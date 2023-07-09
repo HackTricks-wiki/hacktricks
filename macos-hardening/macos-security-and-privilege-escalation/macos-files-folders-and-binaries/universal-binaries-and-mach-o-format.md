@@ -233,7 +233,8 @@ Contains the entrypoint in the **entryoff attribute.** At load time, **dyld** si
 
 ### **LC\_CODE\_SIGNATURE**
 
-Contains information about the **code signature of the Macho-O file**. It only contains an **offset** that **points** to the **signature blob**. This is typically at the very end of the file.
+Contains information about the **code signature of the Macho-O file**. It only contains an **offset** that **points** to the **signature blob**. This is typically at the very end of the file.\
+However, you can find some information about this section in [**this blog post**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) and this [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
 
 ### **LC\_LOAD\_DYLINKER**
 
