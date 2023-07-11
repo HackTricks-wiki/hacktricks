@@ -48,13 +48,14 @@ crunch 6 8 -t ,@@^^%%
 ```
 ### Cewl
 
-Cewl is a tool used for generating custom wordlists by scraping websites or documents. It can be helpful in brute-forcing passwords or performing dictionary attacks. Cewl works by analyzing the given input and extracting relevant words based on various criteria such as word length, frequency, and patterns.
+Cewlは、ウェブサイトや文書をスクレイピングしてカスタム・ワードリストを生成するためのツールである。パスワードのブルートフォースや辞書攻撃の実行に役立つ。Cewlは、与えられた入力を分析し、単語の長さ、頻度、パターンなどの様々な基準に基づいて関連する単語を抽出することによって動作する。
 
-To use Cewl, you need to provide it with a target URL or a file containing text. The tool then crawls the target website or analyzes the document to extract words. It can also follow links and recursively scrape multiple pages.
+Cewlを使用するには、ターゲットURLまたはテキストを含むファイルを提供する必要がある。その後、Cewlはターゲットとなるウェブサイトをクロールしたり、ドキュメントを分析して単語を抽出する。また、リンクをたどり、複数のページを再帰的にスクレイピングすることもできる。
 
-Cewl offers several options to customize the wordlist generation process. You can specify the minimum and maximum word length, exclude certain words or patterns, and even use regular expressions to filter the extracted words. Additionally, Cewl supports different output formats, allowing you to save the generated wordlist in various file types.
+Cewlには、単語リスト生成プロセスをカスタマイズするためのオプションがいくつか用意されている。単語の長さの最小値と最大値を指定したり、特定の単語やパターンを除外したり、正規表現を使って抽出された単語をフィルタリングすることもできます。さらに、Cewlは様々な出力形式をサポートしており、生成された単語リストを様々なファイル形式で保存することができます。
 
-Using Cewl can be beneficial during penetration testing or password cracking activities. By creating a wordlist tailored to the target, you can increase the chances of success in a brute-force attack. However, it's important to note that using Cewl for malicious purposes is illegal and unethical. Always ensure you have proper authorization before using such tools.
+Cewlの使用は、侵入テストやパスワード・クラッキングの際に有益である。ターゲットに合わせた単語リストを作成することで、ブルートフォース攻撃の成功確率を高めることができる。しかし、Cewlを悪意のある目的で使用することは違法であり、非倫理的であることに注意する必要があります。このようなツールを使用する前に、必ず適切な権限を持っていることを確認してください。
+
 ```bash
 cewl example.com -m 5 -w words.txt
 ```
@@ -124,29 +125,30 @@ msf> run
 ```
 ### AJP
 
-AJP (Apache JServ Protocol) is a protocol used by Apache Tomcat to communicate with web servers. It is similar to the HTTP protocol but is more efficient for communication between the web server and the application server.
+AJP（Apache JServ Protocol）は、Apache Tomcatがウェブサーバーと通信するために使用するプロトコルです。HTTPプロトコルに似ていますが、ウェブサーバーとアプリケーションサーバー間の通信により効率的です。
 
 #### Brute Forcing AJP
 
-To brute force AJP, you can use tools like `ajpfuzzer` or `ajp-buster`. These tools allow you to test for weak credentials or vulnerabilities in the AJP protocol.
+AJPをブルートフォースするには、`ajpfuzzer` や `ajp-buster` のようなツールを使うことができます。これらのツールは、AJPプロトコルの弱い認証情報や脆弱性をテストすることができます。
 
-Here is an example of how to use `ajpfuzzer`:
+以下は `ajpfuzzer` の使い方の例です：
 
 ```bash
 ajpfuzzer -H <target_host> -p <target_port> -u <username> -w <wordlist>
 ```
 
-Replace `<target_host>` with the IP address or hostname of the target server, `<target_port>` with the AJP port (usually 8009), `<username>` with the username you want to test, and `<wordlist>` with the path to a wordlist file containing possible passwords.
+`<target_host>` をターゲットサーバーのIPアドレスまたはホスト名に、`<target_port>` をAJPポート（通常は8009）に、`<username>` をテストしたいユーザー名に、`<wordlist>` を可能なパスワードを含むワードリストファイルへのパスに置き換えてください。
 
-Using `ajp-buster` is similar:
+`ajp-buster` の使い方も同様です：
 
 ```bash
 ajp-buster -H <target_host> -p <target_port> -U <username> -P <password>
 ```
 
-Replace `<target_host>` and `<target_port>` with the target server's IP address or hostname and AJP port, and `<username>` and `<password>` with the credentials you want to test.
+`<target_host>` と `<target_port>` をターゲットサーバーのIPアドレスまたはホスト名とAJPポートに、`<username>` と`<password>`をテストしたい認証情報に置き換えてください。
 
-Remember to always obtain proper authorization before performing any brute force attacks.
+総当たり攻撃を実行する前に、常に適切な認証を得ることを忘れないでください。
+
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
@@ -219,35 +221,34 @@ hydra -L /usr/share/brutex/wordlists/simple-users.txt  -P /usr/share/brutex/word
 ```
 # Elasticsearch
 
-Elasticsearch is a distributed, RESTful search and analytics engine built on top of Apache Lucene. It is commonly used for log and event data analysis, full-text search, and real-time analytics. Elasticsearch provides a scalable and efficient solution for storing, searching, and analyzing large volumes of data.
+Elasticsearchは、Apache Luceneの上に構築された分散型のRESTful検索・分析エンジンです。ログやイベントデータの分析、全文検索、リアルタイム分析によく使われています。Elasticsearch は、大量のデータを保存、検索、分析するためのスケーラブルで効率的なソリューションを提供します。
 
 ## Brute-Force Attacks
 
-Brute-force attacks are a common method used to gain unauthorized access to Elasticsearch instances. In a brute-force attack, an attacker systematically tries all possible combinations of usernames and passwords until the correct credentials are found.
+ブルートフォース攻撃は Elasticsearch インスタンスへの不正アクセスによく使われる方法です。ブルートフォース攻撃では、攻撃者は正しい認証情報が見つかるまで、ユーザ名とパスワードのすべての可能な組み合わせを系統的に試します。
 
-To protect against brute-force attacks, it is important to implement strong authentication mechanisms and enforce password complexity requirements. Additionally, rate limiting and account lockout policies can be implemented to prevent multiple failed login attempts.
+ブルートフォース攻撃から保護するためには、強力な認証メカニズムを実装し、パスワードの複雑性要件を強制することが重要です。さらに、ログイン試行が何度も失敗するのを防ぐために、レート制限とアカウント・ロックアウト・ポリシーを実装することができる。
 
 ## Tools for Brute-Force Attacks
+Elasticsearchに対してブルートフォースアタックを行うためのツールはいくつかあります。ポピュラーなツールには以下のようなものがあります：
 
-There are several tools available for conducting brute-force attacks against Elasticsearch. Some popular tools include:
+- **Patator**: Elasticsearch を含む様々なプロトコルをサポートする多目的ブルートフォースツールです。
+- **Hydra**: Elasticsearchに対してブルートフォースアタックを行うことができる強力なネットワークログインクラッカーです。
+- **Medusa**: Elasticsearch をサポートする、高速、並列、モジュール型のログインブルートフォースです。
 
-- **Patator**: A multi-purpose brute-forcing tool that supports various protocols, including Elasticsearch.
-- **Hydra**: A powerful network login cracker that can be used to perform brute-force attacks against Elasticsearch.
-- **Medusa**: A speedy, parallel, and modular login brute-forcer that supports Elasticsearch.
-
-It is important to note that using these tools for unauthorized access is illegal and unethical. They should only be used for legitimate purposes, such as penetration testing or security research.
+これらのツールを不正アクセスのために使用することは違法であり、非倫理的であることに注意することが重要です。これらのツールは、侵入テストやセキュリティ調査のような正当な目的にのみ使用してください。
 
 ## Prevention Techniques
 
-To prevent brute-force attacks against Elasticsearch, consider implementing the following techniques:
+Elasticsearchに対するブルートフォース攻撃を防ぐには、以下のテクニックの実装を検討してください：
 
-- **Strong Passwords**: Enforce the use of strong, complex passwords that are resistant to brute-force attacks.
-- **Account Lockout**: Implement an account lockout policy that temporarily locks user accounts after a certain number of failed login attempts.
-- **Rate Limiting**: Implement rate limiting mechanisms to restrict the number of login attempts within a specific time frame.
-- **Monitoring and Logging**: Monitor Elasticsearch logs for suspicious activity and implement logging mechanisms to track failed login attempts.
-- **Two-Factor Authentication**: Implement two-factor authentication to add an extra layer of security to the authentication process.
+- **Strong Passwords**: ブルートフォース攻撃に耐性のある、強力で複雑なパスワードの使用を強制する。
+- **Account Lockout**: ログインに一定回数失敗すると、ユーザーアカウントを一時的にロックするアカウントロックアウトポリシーを導入する。
+- **Rate Limiting**: 特定の時間枠内でのログイン試行回数を制限するレート制限メカニズムを導入する。
+- **Monitoring and Logging**: Elasticsearchのログに不審な動きがないか監視し、ログインの失敗を追跡するロギングメカニズムを実装する。
+- **Two-Factor Authentication**: 二要素認証を導入し、認証プロセスにさらなるセキュリティ層を追加する。
 
-By implementing these prevention techniques, you can significantly reduce the risk of brute-force attacks and enhance the security of your Elasticsearch instances.
+これらの防止テクニックを実装することで、ブルートフォース攻撃のリスクを大幅に減らし、Elasticsearchインスタンスのセキュリティを強化することができます。
 ```
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 9200 http-get /
 ```
@@ -297,44 +298,39 @@ medusa -h <IP> -u <username> -P  <passwords.txt> -M  http -m DIR:/path/to/auth -
 ```
 ### HTTP - ポストフォーム
 
-In this technique, the attacker uses a brute force attack to guess the credentials of a login form on a website. The attacker sends multiple HTTP POST requests with different combinations of usernames and passwords to the login endpoint of the website.
-
 この技術では、攻撃者はウェブサイトのログインフォームの資格情報を推測するためにブルートフォース攻撃を使用します。攻撃者は、異なるユーザ名とパスワードの組み合わせを使用して、ウェブサイトのログインエンドポイントに複数のHTTP POSTリクエストを送信します。
 
-The attacker can automate this process by using scripts or tools that can generate and send these requests automatically. By analyzing the responses received from the server, the attacker can determine if a particular combination of credentials is valid or not.
-
 攻撃者は、スクリプトやツールを使用して、このプロセスを自動化することができます。これらのリクエストを自動的に生成して送信することができます。サーバーから受け取ったレスポンスを分析することで、攻撃者は特定の資格情報の組み合わせが有効かどうかを判断することができます。
-
-It is important to note that brute forcing login forms is a time-consuming process and may trigger security mechanisms such as account lockouts or rate limiting. Therefore, it is recommended to use techniques like password spraying or credential stuffing, which are more efficient and less likely to be detected.
 
 ログインフォームのブルートフォース攻撃は時間がかかるため、アカウントのロックアウトやレート制限などのセキュリティメカニズムをトリガーする可能性があります。そのため、パスワードスプレー攻撃やクレデンシャルスタッフィング攻撃などのより効率的で検出されにくい技術を使用することを推奨します。
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-For http**s** you have to change from "http-post-form" to "**https-post-form"**
 
+http**s**の場合は、"http-post-form "から **"https-post-form"**に変更する必要があります。
 ### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 ```
-IMAP (Internet Message Access Protocol) is a protocol used for retrieving and managing email messages on a mail server. It allows users to access their email accounts remotely and perform various operations such as reading, deleting, and moving messages.
+IMAP（Internet Message Access Protocol）は、メールサーバー上の電子メールメッセージを取得・管理するためのプロトコルである。これにより、ユーザーは自分のメールアカウントにリモートでアクセスし、メッセージの閲覧、削除、移動など様々な操作を行うことができる。
 
 #### Brute Forcing IMAP Credentials
 
-Brute forcing is a common technique used to guess passwords by systematically trying all possible combinations until the correct one is found. In the context of IMAP, brute forcing can be used to gain unauthorized access to email accounts by guessing the correct username and password combination.
+ブルートフォースとは、パスワードを推測するために使われる一般的なテクニックです。IMAP のコンテキストでは、ブルートフォース攻撃は、正しいユーザ名とパスワードの組み合わせを推測することで、電子メールアカウントに不正にアクセスするために使用できます。
 
-To perform a brute force attack on IMAP credentials, you can use tools like Hydra or Medusa. These tools automate the process of trying different username and password combinations against the IMAP server.
+IMAP 認証情報に対してブルートフォース攻撃を行うには、Hydra や Medusa のようなツールを使うことができます。これらのツールは、IMAPサーバーに対して異なるユーザー名とパスワードの組み合わせを試すプロセスを自動化します。
 
-Here is an example command using Hydra to brute force IMAP credentials:
+以下は Hydra を使って IMAP 認証情報をブルートフォースするコマンドの例です：
 
 ```plaintext
 hydra -L users.txt -P passwords.txt imap://target.com
 ```
 
-In this command, `users.txt` and `passwords.txt` are files containing a list of usernames and passwords, respectively. `target.com` is the target IMAP server.
+このコマンドでは、`users.txt`と`passwords.txt`はそれぞれユーザー名とパスワードのリストを含むファイルである。`target.com`はターゲットIMAPサーバーである。
 
-It is important to note that brute forcing is an aggressive and time-consuming technique. It can be detected by intrusion detection systems (IDS) and may result in account lockouts or other security measures. Therefore, it is recommended to use brute forcing techniques responsibly and with proper authorization.
+ブルートフォースは攻撃的で時間のかかるテクニックであることに注意することが重要です。これは侵入検知システム(IDS)によって検知される可能性があり、アカウントのロックアウトやその他のセキュリティ対策につながる可能性があります。従って、ブルート・フォース技法は、適切な認可の下、責任を持って使用することを推奨します。
+
 ```bash
 hydra -l USERNAME -P /path/to/passwords.txt -f <IP> imap -V
 hydra -S -v -l USERNAME -P /path/to/passwords.txt -s 993 -f <IP> imap -V
@@ -442,11 +438,11 @@ MQTTのセキュリティを強化するためには、以下の対策を実施�
 ```
 ncrack mqtt://127.0.0.1 --user test –P /root/Desktop/pass.txt -v
 ```
-# モンゴ
+# Mongo DB
 
 MongoDBは、NoSQLデータベースであり、ブルートフォース攻撃の潜在的な標的です。ブルートフォース攻撃は、総当たり攻撃とも呼ばれ、パスワードや認証情報を推測するために連続的に試行する攻撃手法です。
 
-モンゴDBのブルートフォース攻撃を防ぐためには、以下の対策を講じることが重要です。
+MongoDBのブルートフォース攻撃を防ぐためには、以下の対策を講じることが重要です。
 
 - 強力なパスワードポリシーを実施する：長さ、複雑さ、一意性の要件を設定し、パスワードの再利用を防止します。
 - パスワードロックアウトポリシーを設定する：一定回数の誤ったパスワード試行後にアカウントをロックするように設定します。
@@ -454,7 +450,7 @@ MongoDBは、NoSQLデータベースであり、ブルートフォース攻撃�
 - IP制限を設定する：特定のIPアドレスからのアクセスのみを許可するように設定します。
 - ネットワークセキュリティグループを使用する：ネットワークセキュリティグループを使用して、不正なトラフィックをブロックします。
 
-これらの対策を実施することで、モンゴDBのブルートフォース攻撃を防ぐことができます。
+これらの対策を実施することで、MongoDBのブルートフォース攻撃を防ぐことができます。
 ```bash
 nmap -sV --script mongodb-brute -n -p 27017 <IP>
 use auxiliary/scanner/mongodb/mongodb_login
@@ -927,61 +923,61 @@ hydra –P /path/pass.txt redis://<IP>:<PORT> # 6379 is the default
 ```
 ### Rexec
 
-Rexec is a remote execution service that allows users to execute commands on a remote system. It is commonly used in network administration and troubleshooting scenarios. Rexec works by establishing a connection between the client and the server, and then sending the command to be executed over this connection.
+Rexecは、ユーザーがリモートシステム上でコマンドを実行できるようにするリモート実行サービスです。ネットワーク管理やトラブルシューティングの場面でよく使われる。Rexecは、クライアントとサーバー間の接続を確立し、この接続を介して実行するコマンドを送信することで動作します。
 
-Brute forcing Rexec involves attempting to guess the username and password combination to gain unauthorized access to the remote system. This can be done by systematically trying different combinations until the correct one is found.
+ブルートフォースRexecは、リモートシステムへ不正にアクセスするために、ユーザー名とパスワードの組み合わせを推測しようとするものである。これは、正しい組み合わせが見つかるまで、系統的に様々な組み合わせを試すことで可能です。
 
-To brute force Rexec, you can use tools like Hydra or Medusa, which are specifically designed for this purpose. These tools automate the process of trying different username and password combinations, making it faster and more efficient.
+Rexecをブルートフォースするには、HydraやMedusaのようなツールを使うことができる。これらのツールは、異なるユーザー名とパスワードの組み合わせを試すプロセスを自動化し、より速く、より効率的にします。
 
-When brute forcing Rexec, it is important to use a wordlist that contains commonly used usernames and passwords, as well as any specific information you may have about the target system. This can increase the chances of success.
+Rexecをブルートフォースする場合、よく使われるユーザー名とパスワード、そしてターゲットシステムについて知っているかもしれない特定の情報を含むワードリストを使うことが重要です。これは成功の可能性を高めることができる。
 
-It is worth noting that brute forcing Rexec is a time-consuming process and may not always be successful. Additionally, it is considered unethical and illegal to attempt to gain unauthorized access to systems without proper authorization. Always ensure you have the necessary permissions and legal rights before attempting any hacking activities.
+ブルートフォースRexecは時間のかかるプロセスであり、必ずしも成功するとは限らない。さらに、適切な権限なしにシステムへの不正アクセスを試みることは、非倫理的かつ違法と見なされます。ハッキングを試みる前に、必ず必要な権限と法的権利を持っていることを確認してください。
 ```bash
 hydra -l <username> -P <password_file> rexec://<Victim-IP> -v -V
 ```
 ### Rlogin
 
-Rlogin is a remote login protocol that allows users to log into a remote system over a network. It is commonly used in Unix-based systems. Rlogin uses the TCP port 513.
+Rloginはリモート・ログイン・プロトコルで、ユーザーがネットワーク経由でリモート・システムにログインできるようにする。Unixベースのシステムでよく使われる。RloginはTCPポート513を使用します。
 
 #### Brute Forcing Rlogin
 
-To perform a brute force attack on Rlogin, you can use tools like Hydra or Medusa. These tools allow you to automate the process of trying different username and password combinations until a successful login is found.
+Rloginに対して総当たり攻撃を行うには、HydraやMedusaのようなツールを使うことができる。これらのツールを使うと、ログインに成功するまで、さまざまなユーザー名とパスワードの組み合わせを試すプロセスを自動化できます。
 
-Here is an example command using Hydra to brute force Rlogin:
+以下は、Hydraを使ってRloginを総当たり攻撃するコマンドの例です：
 
 ```plaintext
 hydra -l <username> -P <password_list> rlogin://<target_ip>
 ```
 
-Replace `<username>` with the target username, `<password_list>` with the path to a file containing a list of passwords, and `<target_ip>` with the IP address of the target system.
+`<username>`はターゲットのユーザー名、`<password_list>`はパスワードのリストを含むファイルへのパス、`<target_ip>`はターゲット・システムのIPアドレスに置き換えてください。
 
-It is important to note that brute forcing is a time-consuming process and may be detected by intrusion detection systems. It is recommended to use a targeted approach, such as using a password list specific to the target system or using a password cracking tool like John the Ripper.
+ブルートフォースは時間のかかるプロセスであり、侵入検知システムによって検知される可能性があることに注意することが重要です。ターゲット・システムに特化したパスワード・リストを使用したり、John the Ripperのようなパスワード・クラッキング・ツールを使用するなど、ターゲットを絞ったアプローチを使用することを推奨します。
 
-#### Mitigating Rlogin Brute Force Attacks
+#### Rloginへのブルートフォース攻撃の軽減
 
-To protect against brute force attacks on Rlogin, you can implement the following measures:
+Rloginに対するブルートフォース攻撃から身を守るには、以下のような対策がある：
 
-- Use strong and unique passwords for all user accounts.
-- Limit the number of login attempts allowed before locking out the user or IP address.
-- Implement account lockout policies that temporarily lock user accounts after a certain number of failed login attempts.
-- Monitor and analyze logs for suspicious login activity.
-- Disable or restrict Rlogin access if it is not necessary for your system's functionality.
+- すべてのユーザーアカウントに強力で一意のパスワードを使用する。
+- ユーザーまたはIPアドレスをロックアウトする前に許可されるログイン試行回数を制限する。
+- 一定回数のログイン試行失敗後にユーザーアカウントを一時的にロックするアカウント・ロックアウト・ポリシーを導入する。
+- 不審なログイン操作のログを監視および分析する。
+- システムの機能に必要でない場合は、Rloginアクセスを無効にするか制限する。
 
-By following these best practices, you can reduce the risk of successful brute force attacks on Rlogin.
+これらのベストプラクティスに従うことで、Rloginでブルートフォース攻撃が成功するリスクを減らすことができる。
 ```bash
 hydra -l <username> -P <password_file> rlogin://<Victim-IP> -v -V
 ```
 ### Rsh
 
-Rsh (Remote Shell) is a network protocol that allows users to execute commands on a remote system. It is commonly used for remote administration tasks. However, it is important to note that Rsh is considered insecure due to its lack of encryption and authentication mechanisms.
+Rsh (Remote Shell) は、リモートシステム上でコマンドを実行できるネットワークプロトコルです。リモート管理タスクによく使われる。しかし、Rsh には暗号化や認証の仕組みがないため、安全ではないと考えられていることに注意する必要があります。
 
 #### Brute Forcing Rsh
 
-Brute forcing Rsh involves systematically trying different combinations of usernames and passwords until the correct credentials are found. This can be done using various tools and scripts that automate the process.
+Rshのブルートフォースでは、正しい認証情報が見つかるまで、ユーザー名とパスワードのさまざまな組み合わせを系統的に試します。これは、プロセスを自動化するさまざまなツールやスクリプトを使用して行うことができます。
 
-To brute force Rsh, you can use tools like Hydra or Medusa. These tools allow you to specify a list of usernames and passwords, and they will automatically try each combination until a successful login is achieved.
+Rshをブルートフォースするには、HydraやMedusaのようなツールを使用することができます。これらのツールでは、ユーザー名とパスワードのリストを指定することができ、ログインが成功するまで自動的にそれぞれの組み合わせを試します。
 
-It is important to note that brute forcing Rsh is highly discouraged, as it is illegal and unethical to gain unauthorized access to systems. Always ensure that you have proper authorization before attempting any penetration testing activities.
+Rshのブルートフォースは、システムに不正にアクセスするための違法かつ非倫理的な行為であるため、非常に推奨されていないことに注意することが重要です。ペネトレーションテスト活動を試みる前に、必ず適切な認可を得ていることを確認してください。
 ```bash
 hydra -L <Username_list> rsh://<Victim_IP> -v -V
 ```
@@ -989,7 +985,7 @@ hydra -L <Username_list> rsh://<Victim_IP> -v -V
 
 ### Rsync
 
-Rsync is a utility commonly used for file synchronization and transfer. It allows for efficient copying and updating of files between different systems. Rsync can be particularly useful during a penetration test for transferring files to and from a target system. By understanding how to use Rsync effectively, you can streamline the process of transferring files during your testing.
+Rsyncは、ファイルの同期や転送によく使われるユーティリティです。異なるシステム間でファイルのコピーや更新を効率的に行うことができます。Rsync は、侵入テスト中にターゲット システムとの間でファイルを転送する際に特に役立ちます。Rsync の効果的な使用方法を理解することで、テスト中のファイル転送プロセスを効率化できます。
 ```bash
 nmap -sV --script rsync-brute --script-args userdb=/var/usernames.txt,passdb=/var/passwords.txt -p 873 <IP>
 ```
@@ -1361,15 +1357,15 @@ mount /dev/mapper/mylucksopen /mnt
 ```
 #### 方法2
 
-Brute force is a common method used to crack passwords or gain unauthorized access to systems. It involves systematically trying all possible combinations of characters until the correct password is found. This method can be time-consuming and resource-intensive, but it can be effective if the password is weak or easily guessable.
+ブルートフォースとは、パスワードを解読したり、システムに不正アクセスしたりするために使われる一般的な方法である。これは、正しいパスワードが見つかるまで、可能な限りの文字の組み合わせを体系的に試すというものです。この方法は、時間とリソースを必要としますが、パスワードが弱かったり、容易に推測できる場合には効果的です。
 
-There are several tools available for performing brute force attacks, such as Hydra, Medusa, and John the Ripper. These tools allow you to specify the target system, the username, and the password list to use for the attack.
+Hydra、Medusa、John the Ripperなど、ブルートフォースアタックを実行するためのツールがいくつかある。これらのツールでは、攻撃に使用するターゲット・システム、ユーザー名、パスワード・リストを指定することができる。
 
-When performing a brute force attack, it is important to use a good password list that includes common passwords, dictionary words, and variations of the target's personal information. It is also recommended to use a tool that supports multi-threading, as this can significantly speed up the attack.
+ブルートフォース攻撃を行う際には、一般的なパスワード、辞書的な単語、ターゲットの個人情報のバリエーションを含む優れたパスワードリストを使用することが重要です。また、マルチスレッドに対応したツールを使用することをお勧めします。
 
-It is worth noting that brute force attacks are not always successful, especially if the target system has implemented security measures such as account lockouts or CAPTCHA. Additionally, brute force attacks can be detected by intrusion detection systems, so it is important to use caution and discretion when performing this type of attack.
+ブルートフォース攻撃は、特にターゲットシステムがアカウントロックアウトやCAPTCHAのようなセキュリティ対策を実装している場合、常に成功するわけではないことは注目に値する。さらに、ブルートフォース攻撃は侵入検知システムによって検知される可能性があるため、このタイプの攻撃を実行する際には慎重かつ思慮深く行動することが重要です。
 
-Overall, brute force attacks can be a powerful tool in a hacker's arsenal, but they should be used responsibly and ethically. It is important to obtain proper authorization before attempting any brute force attack and to ensure that the target system is owned or controlled by the person or organization requesting the attack.
+全体として、ブルートフォース攻撃はハッカーの強力な武器になり得ますが、責任を持って倫理的に使用されるべきです。ブルートフォース・アタックを試みる前に適切な承認を得ること、そしてターゲット・システムが攻撃を要求する個人または組織によって所有または管理されていることを確認することが重要です。
 ```bash
 cryptsetup luksDump backup.img #Check that the payload offset is set to 4096
 dd if=backup.img of=luckshash bs=512 count=4097 #Payload offset +1
@@ -1561,31 +1557,31 @@ Hashcatは、さまざまなハッシュ関数をクラックするためのさ�
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-# Cracking Linux Hashes - /etc/shadow file
+# Linux ハッシュをクラックする - /etc/shadow ファイル
 
 ## Introduction
 
-In Linux systems, user passwords are stored in the `/etc/shadow` file. This file contains hashed passwords, which are one-way encrypted representations of the original passwords. As a hacker, if you gain access to the `/etc/shadow` file, you can attempt to crack these hashes and obtain the original passwords.
+Linuxシステムでは、ユーザー・パスワードは`/etc/shadow`ファイルに保存される。このファイルには、元のパスワードを一方向暗号化したハッシュ・パスワードが格納されている。ハッカーとして`/etc/shadow`ファイルにアクセスすれば、これらのハッシュをクラックして元のパスワードを入手しようと試みることができる。
 
 ## Brute-Force Attack
 
-One common method to crack Linux hashes is through a brute-force attack. In this attack, the hacker systematically tries all possible combinations of characters until the correct password is found. This can be a time-consuming process, especially for complex passwords.
+Linuxのハッシュをクラックする一般的な方法のひとつに、ブルートフォース攻撃がある。この攻撃では、ハッカーは正しいパスワードが見つかるまで、可能な限りの文字の組み合わせを体系的に試行する。これは、特に複雑なパスワードの場合、時間のかかるプロセスとなる。
 
-## Dictionary Attack
+## 辞書攻撃
 
-Another approach is the dictionary attack, where the hacker uses a pre-generated list of commonly used passwords or words from a dictionary. The attacker compares each word's hash with the hashes in the `/etc/shadow` file, hoping to find a match. This method is faster than brute-force, but it relies on the user choosing a weak or common password.
+もう1つのアプローチは辞書攻撃で、ハッカーはよく使われるパスワードや辞書に載っている単語をあらかじめ生成したリストを使う。攻撃者は各単語のハッシュを/etc/shadowファイル内のハッシュと比較し、一致するものを見つけようとする。この方法はブルートフォースよりも速いが、ユーザーが弱いパスワードや一般的なパスワードを選ぶことに依存する。
 
-## Rainbow Tables
+## レインボーテーブル
 
-Rainbow tables are precomputed tables of hashes and their corresponding plaintext passwords. These tables can be used to quickly find the original password for a given hash. However, rainbow tables can be large in size and require significant storage space.
+レインボーテーブルとは、ハッシュとそれに対応する平文パスワードの事前計算テーブルである。このテーブルを使えば、与えられたハッシュの元のパスワードを素早く見つけることができる。しかし、レインボーテーブルはサイズが大きくなり、大きな記憶領域を必要とします。
 
 ## Online Hash Cracking Services
 
-There are online services available that offer hash cracking capabilities. These services utilize powerful hardware and algorithms to crack hashes quickly. However, using these services may raise ethical and legal concerns, so caution should be exercised.
+ハッシュ・クラッキング機能を提供するオンライン・サービスがある。これらのサービスは、強力なハードウェアとアルゴリズムを利用して、ハッシュを素早くクラックする。しかし、これらのサービスを利用することは倫理的、法的な問題を引き起こす可能性があるため、注意が必要である。
 
 ## Conclusion
 
-Cracking Linux hashes from the `/etc/shadow` file can be a challenging task. It requires knowledge of various cracking techniques and tools. As a hacker, it is important to understand the risks and legal implications associated with hash cracking activities.
+`etc/shadow`ファイルからLinuxのハッシュをクラックするのは、難しい作業になる。様々なクラッキング技術やツールの知識が必要となる。ハッカーとして、ハッシュ・クラッキング活動に関連するリスクと法的な意味を理解することは重要です。
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
@@ -1596,70 +1592,70 @@ Cracking Linux hashes from the `/etc/shadow` file can be a challenging task. It 
 
 ## Introduction
 
-In this section, we will discuss the process of cracking Windows hashes. Windows hashes are cryptographic representations of user passwords stored in the Windows operating system. By cracking these hashes, we can obtain the original plaintext passwords, which can be useful for various purposes, such as gaining unauthorized access to user accounts.
+このセクションでは、Windowsハッシュをクラックするプロセスについて説明する。Windowsハッシュは、Windowsオペレーティング・システムに保存されているユーザー・パスワードの暗号化表現である。このハッシュをクラックすることで、元の平文パスワードを得ることができ、ユーザーアカウントへの不正アクセスなど、様々な目的に利用できる。
 
 ## Methodologies
 
-There are several methodologies and tools available for cracking Windows hashes. Here, we will discuss two commonly used methods: brute-forcing and dictionary attacks.
+Windowsのハッシュをクラックする方法論やツールはいくつかある。ここでは、一般的に使用される2つの方法、すなわちブルートフォース攻撃と 辞書攻撃について説明する。
 
 ### Brute-Force Attacks
 
-Brute-force attacks involve systematically trying every possible combination of characters until the correct password is found. This method is time-consuming and resource-intensive, as it requires trying a large number of combinations. However, it can be effective if the password is weak and easily guessable.
+ブルートフォース攻撃は、正しいパスワードが見つかるまで、可能な限りの文字の組み合わせを体系的に試すものである。この方法は、多数の組み合わせを試す必要があるため、時間とリソースを消費します。しかし、パスワードが弱く、容易に推測できる場合には有効です。
 
-To perform a brute-force attack on Windows hashes, we can use tools like John the Ripper or Hashcat. These tools utilize powerful algorithms and techniques to speed up the cracking process.
+Windowsのハッシュに対してブルートフォース攻撃を行うには、John the RipperやHashcatのようなツールを使うことができる。これらのツールは、強力なアルゴリズムとテクニックを利用し、クラッキング・プロセスを高速化する。
 
-### Dictionary Attacks
+### 辞書攻撃
 
-Dictionary attacks involve using a pre-generated list of commonly used passwords, known as a dictionary, to crack the hashes. This method is more efficient than brute-forcing, as it reduces the number of combinations to try. However, it relies on the assumption that the user has chosen a password from the dictionary.
+辞書攻撃は、辞書として知られる、よく使われるパスワードのあらかじめ生成されたリストを使ってハッシュをクラックする。この方法は、試行する組み合わせの数を減らすことができるため、ブルートフォースよりも効率的です。しかし、ユーザーが辞書からパスワードを選択したという前提に依存します。
 
-To perform a dictionary attack on Windows hashes, we can use tools like Hashcat or Hydra. These tools allow us to specify a dictionary file and automate the cracking process.
+Windowsのハッシュに対する辞書攻撃を行うには、HashcatやHydraのようなツールを使うことができる。これらのツールでは、辞書ファイルを指定してクラッキング・プロセスを自動化することができる。
 
-## Resources
+## リソース
 
-There are various resources available to aid in the cracking of Windows hashes. These include:
+Windowsのハッシュを解読するのに役立つ様々なリソースがあります。以下のようなものがある：
 
-- Wordlists: These are collections of words, passwords, and common phrases that can be used in dictionary attacks.
-- Rainbow tables: These are precomputed tables that map hashes to their corresponding plaintext passwords, making the cracking process faster.
-- Online databases: Some websites provide databases of leaked passwords, which can be used to crack Windows hashes.
+- 単語リスト：辞書攻撃に使用できる単語、パスワード、一般的なフレーズのコレクションです。
+- レインボー・テーブル：ハッシュとそれに対応する平文パスワードの対応付けを事前に計算したテーブルで、クラッキング・プロセスを高速化する。
+- オンライン・データベース：一部のウェブサイトでは、流出したパスワードのデータベースを提供しており、Windowsのハッシュをクラックするのに利用できる。
 
-By utilizing these resources and employing the appropriate methodologies, we can increase our chances of successfully cracking Windows hashes and obtaining the original passwords. However, it is important to note that cracking Windows hashes without proper authorization is illegal and unethical.
+これらのリソースを活用し、適切な方法を採用することで、Windowsハッシュのクラックに成功し、オリジナルのパスワードを入手する可能性を高めることができる。しかし、適切な権限なしにWindowsのハッシュをクラックすることは違法であり、非倫理的であることに注意することが重要である。
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-# Cracking Common Application Hashes
+# 一般的なアプリケーションのハッシュをクラックする。
 
 ## Introduction
 
-In this section, we will discuss the process of cracking common application hashes. Hash cracking is a technique used to recover plaintext passwords from their hashed representations. By cracking the hashes, we can gain unauthorized access to various applications and systems.
+このセクションでは、一般的なアプリケーションのハッシュをクラックするプロセスについて説明します。ハッシュ・クラッキングは、ハッシュ化された表現から平文のパスワードを復元するために使用される技法です。ハッシュをクラックすることで、様々なアプリケーションやシステムに不正にアクセスすることができます。
 
 ## Types of Hashes
 
-There are several types of hashes commonly used in applications. Some of the most common ones include:
+アプリケーションでよく使われるハッシュにはいくつかの種類がある。最も一般的なものには以下のようなものがある：
 
-- **MD5**: This is a widely used hash function that produces a 128-bit hash value. It is commonly used in older applications and systems.
-- **SHA-1**: This is another widely used hash function that produces a 160-bit hash value. It is also commonly used in older applications and systems.
-- **SHA-256**: This is a more secure hash function that produces a 256-bit hash value. It is commonly used in modern applications and systems.
+- **MD5**: これは広く使われているハッシュ関数で、128ビットのハッシュ値を生成する。古いアプリケーションやシステムでよく使われている。
+- **SHA-1**: これも広く使われているハッシュ関数で、160ビットのハッシュ値を生成する。古いアプリケーションやシステムでもよく使われている。
+- **SHA-256**: これはより安全なハッシュ関数で、256ビットのハッシュ値を生成する。最近のアプリケーションやシステムでよく使われている。
 
-## Hash Cracking Techniques
+## ハッシュ・クラッキングのテクニック
 
-There are various techniques that can be used to crack hashes. Some of the most common ones include:
+ハッシュをクラックするためには、様々なテクニックがある。最も一般的なものには次のようなものがある：
 
-- **Brute Force**: This technique involves trying all possible combinations of characters until the correct password is found. It is a time-consuming process but can be effective for cracking weak passwords.
-- **Dictionary Attack**: This technique involves using a pre-generated list of commonly used passwords, known as a dictionary, to crack the hash. It is faster than brute force but may not be effective against complex passwords.
-- **Rainbow Tables**: This technique involves using precomputed tables of hash values and their corresponding plaintext passwords to crack the hash. It is faster than brute force and dictionary attacks but requires a large amount of storage.
+- **総当たり**: このテクニックでは、正しいパスワードが見つかるまで、可能な限りの文字の組み合わせを試すことになる。時間のかかる作業だが、弱いパスワードの解読には効果的だ。
+- **辞書攻撃**: このテクニックでは、辞書として知られる、よく使われるパスワードの事前生成リストを使用してハッシュをクラックする。ブルートフォースよりも速いですが、複雑なパスワードには効果がないかもしれません。
+- **レインボーテーブル**: この手法では、ハッシュ値とそれに対応する平文パスワードの事前計算されたテーブルを使用してハッシュをクラックする。ブルートフォース攻撃や辞書攻撃よりも速いが、大量のストレージを必要とする。
 
-## Tools for Hash Cracking
+## ハッシュ・クラッキングのツール
 
-There are several tools available for cracking hashes. Some of the most popular ones include:
+ハッシュをクラックするためのツールはいくつかある。代表的なものには以下のようなものがある：
 
-- **John the Ripper**: This is a powerful password cracking tool that supports various hash types and cracking techniques.
-- **Hashcat**: This is another popular password cracking tool that supports a wide range of hash types and cracking techniques.
-- **Hydra**: This is a versatile online password cracking tool that supports various protocols and can be used for hash cracking.
+- **John the Ripper**: これは、様々なハッシュタイプとクラッキング技術をサポートする強力なパスワードクラッキングツールです。
+- **Hashcat**: これも人気のあるパスワードクラッキングツールで、幅広いハッシュタイプとクラッキングテクニックをサポートしている。
+- **Hydra**: これは、様々なプロトコルをサポートし、ハッシュクラッキングに使用することができ、汎用性の高いオンラインパスワードクラッキングツールです。
 
 ## Conclusion
 
-Cracking common application hashes is an essential skill for hackers and penetration testers. By understanding the different types of hashes, cracking techniques, and tools available, you can effectively gain unauthorized access to applications and systems. However, it is important to note that hash cracking should only be performed with proper authorization and for legitimate purposes.
+一般的なアプリケーション・ハッシュのクラックは、ハッカーや侵入テスト担当者にとって不可欠なスキルです。様々なタイプのハッシュ、クラッキング技術、そして利用可能なツールを理解することで、アプリケーションやシス テムへの不正アクセスを効果的に行うことができます。しかし、ハッシュ・クラッキングは、適切な承認を得て、正当な目的でのみ実行されるべきであることに注意することが重要です。
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
