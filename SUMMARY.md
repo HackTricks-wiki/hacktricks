@@ -319,6 +319,7 @@
   * [iOS Universal Links](mobile-pentesting/ios-pentesting/ios-universal-links.md)
   * [iOS UIPasteboard](mobile-pentesting/ios-pentesting/ios-uipasteboard.md)
   * [iOS WebViews](mobile-pentesting/ios-pentesting/ios-webviews.md)
+* [Cordova Apps](mobile-pentesting/cordova-apps.md)
 
 ## 👽 Network Services Pentesting
 
