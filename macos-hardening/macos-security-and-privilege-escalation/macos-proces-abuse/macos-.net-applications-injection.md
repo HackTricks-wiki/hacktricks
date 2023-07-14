@@ -1,13 +1,13 @@
-# Injeção de Aplicações .NET no macOS
+# Injeção em Aplicações .Net no macOS
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Você trabalha em uma **empresa de cibersegurança**? Gostaria de ver sua **empresa anunciada no HackTricks**? Ou gostaria de ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -16,12 +16,12 @@
 
 ### **Estabelecer uma sessão de depuração** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-[**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) é responsável por lidar com a **comunicação** entre o depurador e o depurado do .NET.\
-Ele cria 2 pipes nomeados por processo .Net em [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) chamando [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (um terminará em **`-in`** e o outro em **`-out`** e o restante do nome será o mesmo).
+[**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) é responsável por lidar com a **comunicação** entre o depurador e o depurado.\
+Ele cria dois pipes nomeados por processo .Net em [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) chamando [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (um terminará em **`-in`** e o outro em **`-out`** e o restante do nome será o mesmo).
 
-Portanto, se você for para o diretório de usuários **`$TMPDIR`**, poderá encontrar **fifos de depuração** que poderá usar para depurar aplicativos .Net:
+Portanto, se você acessar o diretório **`$TMPDIR`** do usuário, poderá encontrar **fifos de depuração** que podem ser usados para depurar aplicações .Net:
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 A função [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) lidará com a comunicação de um depurador.
 
@@ -62,7 +62,7 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion
 // Finally set the number of bytes which follow this header
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-Depois de construído, **enviamos isso para o alvo** usando a chamada do sistema `write`:
+Uma vez construído, **enviamos isso para o alvo** usando a chamada de sistema `write`:
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 ```
@@ -74,7 +74,7 @@ memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
 // Send over the session request data
 write(wr, &sDataBlock, sizeof(SessionRequestData));
 ```
-Ao enviar nossa solicitação de sessão, **leia do pipe `out` um cabeçalho** que indicará **se** nossa solicitação para estabelecer se uma sessão de depuração foi **bem-sucedida** ou não:
+Ao enviar nossa solicitação de sessão, **leia do pipe `out` um cabeçalho** que indicará **se** nossa solicitação para estabelecer uma sessão de depuração foi **bem-sucedida** ou não:
 ```c
 read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
@@ -122,9 +122,9 @@ return false;
 return true;
 }
 ```
-### Escrever na memória
-
 O código de prova de conceito (POC) pode ser encontrado [aqui](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
+
+### Escrever na memória
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
 
@@ -164,35 +164,35 @@ O código POC usado para fazer isso pode ser encontrado [aqui](https://gist.gith
 
 ### Execução de código .NET Core <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-O primeiro passo é identificar, por exemplo, uma região de memória com **`rwx`** em execução para salvar o shellcode a ser executado. Isso pode ser facilmente feito com:
+A primeira coisa é identificar, por exemplo, uma região de memória com permissões **`rwx`** em execução para salvar o shellcode a ser executado. Isso pode ser facilmente feito com:
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-Então, para acionar a execução, seria necessário saber algum lugar onde um ponteiro de função é armazenado para sobrescrevê-lo. É possível sobrescrever um ponteiro dentro da **Tabela de Funções Dinâmicas (DFT)**, que é usada pelo tempo de execução do .NET Core para fornecer funções auxiliares para a compilação JIT. Uma lista de ponteiros de função suportados pode ser encontrada em [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h).
+Em seguida, para acionar a execução, seria necessário saber algum lugar onde um ponteiro de função é armazenado para sobrescrevê-lo. É possível sobrescrever um ponteiro dentro da **Dynamic Function Table (DFT)**, que é usada pelo tempo de execução do .NET Core para fornecer funções auxiliares para a compilação JIT. Uma lista de ponteiros de função suportados pode ser encontrada em [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h).
 
-Nas versões x64, isso é direto usando a técnica de **caça de assinaturas** estilo mimikatz para procurar em **`libcorclr.dll`** uma referência ao símbolo **`_hlpDynamicFuncTable`**, que podemos desreferenciar:
+Nas versões x64, isso é direto usando a técnica de **caça de assinaturas** semelhante ao mimikatz para procurar em **`libcorclr.dll`** uma referência ao símbolo **`_hlpDynamicFuncTable`**, que podemos desreferenciar:
 
 <figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
-Tudo o que resta a fazer é encontrar um endereço a partir do qual iniciar nossa pesquisa de assinatura. Para fazer isso, aproveitamos outra função de depurador exposta, **`MT_GetDCB`**. Isso retorna vários bits de informações úteis sobre o processo de destino, mas para o nosso caso, estamos interessados em um campo retornado contendo o **endereço de uma função auxiliar**, **`m_helperRemoteStartAddr`**. Usando este endereço, sabemos exatamente **onde `libcorclr.dll` está localizado** na memória do processo de destino e podemos iniciar nossa pesquisa pela DFT.
+Tudo o que resta a fazer é encontrar um endereço a partir do qual iniciar nossa busca por assinaturas. Para fazer isso, aproveitamos outra função de depuração exposta, **`MT_GetDCB`**. Isso retorna várias informações úteis sobre o processo de destino, mas, para o nosso caso, estamos interessados em um campo retornado contendo o **endereço de uma função auxiliar**, **`m_helperRemoteStartAddr`**. Usando esse endereço, sabemos exatamente **onde `libcorclr.dll` está localizado** na memória do processo de destino e podemos iniciar nossa busca pela DFT.
 
-Sabendo deste endereço, é possível sobrescrever o ponteiro de função com o nosso shellcode.
+Sabendo desse endereço, é possível sobrescrever o ponteiro da função com o nosso shellcode.
 
-O código POC completo usado para injetar no PowerShell pode ser encontrado [aqui](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
+O código completo do POC usado para injetar no PowerShell pode ser encontrado [aqui](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
 ## Referências
 
-* Esta técnica foi retirada de [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
+* Essa técnica foi retirada de [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
-* Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
+* Você trabalha em uma **empresa de cibersegurança**? Gostaria de ver sua **empresa anunciada no HackTricks**? Ou gostaria de ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
