@@ -5,7 +5,7 @@
 _Logos e design de movimento do Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 {% hint style="info" %}
-**Bem-vindo ao wiki onde você encontrará cada truque/técnica/hack que aprendi em CTFs, aplicativos da vida real, pesquisas e notícias.**
+**Bem-vindo ao wiki onde você encontrará todos os truques/técnicas/hacks que aprendi em CTFs, aplicativos da vida real, pesquisas e notícias.**
 {% endhint %}
 
 Aqui você pode encontrar uma pequena **introdução:**
@@ -22,7 +22,7 @@ Aqui você encontrará o **fluxo típico** que **você deve seguir ao fazer pent
 
 ![](<.gitbook/assets/image (642) (1) (1) (1).png>)
 
-[**STM Cyber**](https://www.stmcyber.com) é uma ótima empresa de cibersegurança cujo slogan é **HACKEIE O INVIOLÁVEL**. Eles realizam suas próprias pesquisas e desenvolvem suas próprias ferramentas de hacking para **oferecer vários serviços valiosos de cibersegurança** como pentesting, equipes de Red e treinamento.
+[**STM Cyber**](https://www.stmcyber.com) é uma ótima empresa de cibersegurança cujo slogan é **HACKEIE O INVIOLÁVEL**. Eles realizam suas próprias pesquisas e desenvolvem suas próprias ferramentas de hacking para **oferecer vários serviços valiosos de cibersegurança**, como pentesting, equipes de Red e treinamento.
 
 Você pode conferir o **blog** deles em [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
@@ -40,7 +40,7 @@ Você pode conferir o **blog** deles em [**https://blog.stmcyber.com**](https://
 
 ![](.gitbook/assets/i3.png)
 
-**Intigriti** é a plataforma de ethical hacking e **bug bounty número 1 da Europa.**
+**Intigriti** é a plataforma de ethical hacking e **bug bounty número 1 da Europa**.
 
 Dica de bug bounty: **cadastre-se** no **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje mesmo e comece a ganhar recompensas de até **$100.000**!
 
@@ -51,7 +51,7 @@ Dica de bug bounty: **cadastre-se** no **Intigriti**, uma plataforma premium de 
 <figure><img src=".gitbook/assets/image (9) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir e **automatizar fluxos de trabalho** com as ferramentas comunitárias mais avançadas do mundo.
+Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir e **automatizar fluxos de trabalho** com as ferramentas comunitárias **mais avançadas** do mundo.
 
 Acesse hoje mesmo:
 
@@ -59,15 +59,22 @@ Acesse hoje mesmo:
 
 ### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
-<figure><img src=".gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-[Siga o HackenProof](https://bit.ly/3xrrDrL) **para aprender mais sobre bugs web3**
+**HackenProof é o lar de todos os bug bounties de criptografia.**
 
-🐞 Leia tutoriais de bugs web3
+**Seja recompensado sem atrasos**\
+Os bounties do HackenProof são lançados apenas quando seus clientes depositam o orçamento de recompensa. Você receberá a recompensa após a verificação do bug.
 
-🔔 Receba notificações sobre novos bug bounties
+**Adquira experiência em pentesting web3**\
+Protocolos de blockchain e contratos inteligentes são a nova Internet! Domine a segurança web3 em seus dias de ascensão.
 
-💬 Participe de discussões na comunidade
+**Torne-se uma lenda hacker web3**\
+Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leaderboard semanal.
+
+[**Cadastre-se no HackenProof**](https://hackenproof.com/register) e comece a ganhar com seus hacks!
+
+{% embed url="https://hackenproof.com/register" %}
 
 \---
 
