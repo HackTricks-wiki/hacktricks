@@ -22,7 +22,7 @@ Aquí encontrarás el **flujo típico** que **debes seguir al realizar un pentes
 
 ![](<.gitbook/assets/image (642) (1) (1) (1).png>)
 
-[**STM Cyber**](https://www.stmcyber.com) es una excelente empresa de ciberseguridad cuyo lema es **HACK THE UNHACKABLE**. Realizan su propia investigación y desarrollan sus propias herramientas de hacking para **ofrecer varios servicios valiosos de ciberseguridad** como pentesting, equipos Red y entrenamiento.
+[**STM Cyber**](https://www.stmcyber.com) es una excelente empresa de ciberseguridad cuyo lema es **HACK THE UNHACKABLE**. Realizan su propia investigación y desarrollan sus propias herramientas de hacking para **ofrecer varios servicios valiosos de ciberseguridad** como pentesting, equipos Red y capacitación.
 
 Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
@@ -59,15 +59,22 @@ Obtén acceso hoy mismo:
 
 ### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
-<figure><img src=".gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-[Sigue a HackenProof](https://bit.ly/3xrrDrL) **para obtener más información sobre errores web3**
+**HackenProof es el hogar de todos los bug bounties de criptomonedas.**
 
-🐞 Lee tutoriales sobre errores web3
+**Recibe recompensas sin demoras**\
+Los bounties de HackenProof se lanzan solo cuando sus clientes depositan el presupuesto de recompensa. Recibirás la recompensa después de que se verifique el bug.
 
-🔔 Recibe notificaciones sobre nuevos bug bounties
+**Obtén experiencia en pentesting web3**\
+¡Los protocolos blockchain y los contratos inteligentes son el nuevo Internet! Domina la seguridad web3 en sus días de crecimiento.
 
-💬 Participa en discusiones comunitarias
+**Conviértete en una leyenda del hacker web3**\
+Gana puntos de reputación con cada bug verificado y conquista la cima de la clasificación semanal.
+
+[**Regístrate en HackenProof**](https://hackenproof.com/register) ¡y comienza a ganar con tus hacks!
+
+{% embed url="https://hackenproof.com/register" %}
 
 \---
 
@@ -77,7 +84,7 @@ Obtén acceso hoy mismo:
 
 [**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** negocios **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar servicios de **seguridad ofensiva** con un enfoque **moderno**.
 
-WebSec es una **empresa de seguridad integral** que lo hace todo; Pentesting, Auditorías de Seguridad, Entrenamientos de Conciencia, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
+WebSec es una empresa de seguridad **todo en uno**, lo que significa que hacen de todo: Pentesting, Auditorías de Seguridad, Entrenamientos de Conciencia, Campañas de Phishing, Revisión de Código, Desarrollo de Exploits, Externalización de Expertos en Seguridad y mucho más.
 
 Otra cosa genial de WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta tal punto que **garantizan los mejores resultados de calidad**, como se indica en su sitio web "**Si no podemos hackearlo, ¡no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
 
