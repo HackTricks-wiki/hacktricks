@@ -59,15 +59,22 @@ _Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://w
 
 ### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
-<figure><img src=".gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-[**HackenProofをフォロー**](https://bit.ly/3xrrDrL)して、web3のバグについて詳しく学びましょう。
+**HackenProofはすべての暗号バグバウンティの場所です。**
 
-🐞 web3のバグチュートリアルを読む
+**遅延なしで報酬を受け取る**\
+HackenProofの報酬は、顧客が報酬予算を入金した後に発表されます。バグが検証された後に報酬を受け取ることができます。
 
-🔔 新しいバグバウンティについて通知を受ける
+**Web3ペネトレーションテストの経験を積む**\
+ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！上昇期のWeb3セキュリティをマスターしましょう。
 
-💬 コミュニティディスカッションに参加する
+**Web3ハッカーレジェンドになる**\
+各検証済みのバグで評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
+
+[**HackenProofでサインアップ**](https://hackenproof.com/register)して、ハッキングから報酬を得ましょう！
+
+{% embed url="https://hackenproof.com/register" %}
 
 \---
 
@@ -75,11 +82,11 @@ _Hacktricksのロゴとモーションデザインは_ [_@ppiernacho_](https://w
 
 <figure><img src=".gitbook/assets/logo.svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl)は、**アムステルダム**を拠点とするプロのサイバーセキュリティ企業であり、**最新のサイバーセキュリティ脅威から**世界中のビジネスを**保護**するために、**攻撃的なセキュリティサービス**を提供しています。
+[**WebSec**](https://websec.nl)は、**アムステルダム**を拠点とするプロのサイバーセキュリティ企業であり、**最新のサイバーセキュリティの脅威から**世界中のビジネスを**保護**するために**攻撃的なセキュリティサービス**を提供しています。
 
-WebSecは**オールインワンのセキュリティ企業**であり、ペネトレーションテスト、**セキュリティ**監査、セキュリティ意識向上トレーニング、フィッシングキャンペーン、コードレビュー、エクスプロイト開発、セキュリティエキスパートの外部委託など、すべてを行います。
+WebSecは**オールインワンのセキュリティ企業**であり、ペネトレーションテスト、**セキュリティ**監査、セキュリティ意識向上トレーニング、フィッシングキャンペーン、コードレビュー、エクスプロイト開発、セキュリティエキスパートの外部委託など、すべてを行っています。
 
-WebSecのもう一つの素晴らしい点は、業界平均とは異なり、WebSecは**自分たちのスキルに非常に自信を持っている**ということです。彼らのウェブサイトには「**ハックできなければ、支払いはありません！**」と明記されており、最高品質の結果を保証しています。詳細については、彼らの[**ウェブサイト**](https://websec.nl/en/)と[**ブログ**](https://websec.nl/blog/)をご覧ください！
+WebSecのもう一つの素晴らしい点は、業界平均とは異なり、WebSecは**自分たちのスキルに非常に自信を持っている**ということです。彼らのウェブサイトには「**ハックできなければ、支払いはありません！**」と記載されており、最高品質の結果を保証しています。詳細については、彼らの[**ウェブサイト**](https://websec.nl/en/)と[**ブログ**](https://websec.nl/blog/)をご覧ください！
 
 上記に加えて、WebSecはHackTricksを**熱心にサポート**しています。
 
@@ -89,44 +96,42 @@ WebSecのもう一つの素晴らしい点は、業界平均とは異なり、We
 
 <figure><img src=".gitbook/assets/image (1) (1) (2) (4) (1).png" alt=""><figcaption></figcaption></figure>
 
-[**DragonJARは、コロンビアに拠点を置く主要な攻撃的なサイバーセキュリティ企業**](https://www.dragonjar.org/)です。DragonJARは、さまざまな分野やほとんどの技術における**ペネトレーションテスト**など、包括的な攻撃的なサイバーセキュリティサービス、**レッドチーム**の攻撃シミュレーション、**物理**セキュリティテスト、**ストレステスト**、ソーシャルエンジニアリング、ソース**コードのセキュリティレビュー**、サイバーセキュリティトレーニングを提供しています。さらに、彼らは10年以上開催されてきた**DragonJAR Security Conference**を主催しており、スペイン語での最新のセキュリティ研究のショーケースとして、その地域で非常に重要な存在となっています。
-
-[**DragonJAR es una empresa líder en ciberseguridad ofensiva**](https://www.dragonjar.org/) **ubicada en Colombia**, DragonJAR ofrece [servicios integrales de seguridad informática ofensiva, como **pentesting**](https://www.dragonjar.org/servicios-de-seguridad-informatica) en diversas áreas y prácticamente **cualquier tecnología**, simulaciones de ataque **Red Team**, pruebas de seguridad **física**, **pruebas de estrés**, ingeniería social, revisión de seguridad en **código fuente** y capacitación en seguridad informática. Asimismo, organiza la **DragonJAR Security Conference**, [un congreso internacional de seguridad informática](https://www.dragonjarcon.org/) que se ha realizado durante más de una década, convirtiéndose en el escaparate para las últimas investigaciones de seguridad en español y de gran relevancia en la región.
+[**DragonJARは、コロンビアに拠点を置く主要な攻撃的なサイバーセキュリティ企業**](https://www.dragonjar.org/)です。DragonJARは、さまざまな分野やほとんどの技術における**ペネトレーションテスト**など、包括的な攻撃的なサイバーセキュリティサービス、**レッドチーム**の攻撃シミュレーション、**物理**セキュリティテスト、**ストレステスト**、ソーシャルエンジニアリング、ソース**コードのセキュリティレビュー**、サイバーセキュリティトレーニングを提供しています。さらに、彼ら
 ### [SYN CUBES](https://www.syncubes.com/)
 
 <figure><img src=".gitbook/assets/image (10) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
-**セキュリティスキルをサービスとして提供する**プラットフォームは、**グローバルな攻撃的なセキュリティの専門知識とスマートな自動化**を組み合わせ、情報をリアルタイムで提供し、意思決定に必要なデータを提供します。
+**セキュリティスキルをサービスとして提供する**プラットフォームは、**グローバルな攻撃的なセキュリティの専門知識とスマートな自動化**を組み合わせ、情報をリアルタイムで提供し、情報に基づいた意思決定を行うためのデータを提供します。
 
 {% embed url="https://www.syncubes.com/" %}
 
 ## ライセンス
 
-**Copyright © Carlos Polop 2023. それ以外の場所では（書籍にコピーされた外部情報は元の著者に帰属します）、Carlos Polopによる**[**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **のテキストは**[**Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**でライセンスされています。**\
+**Copyright © Carlos Polop 2023. 他の指定がない限り（書籍にコピーされた外部情報は元の著者に帰属します）、Carlos Polopによる**[**HACK TRICKS**](https://github.com/carlospolop/hacktricks)**のテキストは**[**Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**でライセンスされています。**\
 **商業目的で使用する場合は、私に連絡してください。**
 
 ## **免責事項**
 
 {% hint style="danger" %}
-この書籍『HackTricks』は教育および情報提供の目的でのみ使用されることを意図しています。この書籍内のコンテンツは「現状のまま」提供され、著者および出版者は、この書籍内に含まれる情報、製品、サービス、または関連するグラフィックの完全性、正確性、信頼性、適合性、または利用可能性について、明示または黙示を問わず、いかなる種類の表明または保証も行いません。したがって、そのような情報に依存する場合は、自己の責任において行ってください。
+この書籍『HackTricks』は教育および情報提供の目的でのみ使用することを意図しています。この書籍の内容は「現状のまま」提供され、著者および出版者は、この書籍内に含まれる情報、製品、サービス、または関連するグラフィックの完全性、正確性、信頼性、適合性、または利用可能性について、明示または黙示を問わず、いかなる種類の表明または保証も行いません。したがって、そのような情報に依存することは、完全に自己の責任です。
 
 著者および出版者は、この書籍の使用に起因する、間接的または結果的な損失または損害、またはデータの損失または利益の損失を含む、いかなる損失または損害に対しても、一切の責任を負いません。
 
 さらに、この書籍で説明されている技術やヒントは、教育および情報提供の目的でのみ提供されるものであり、いかなる違法または悪意のある活動にも使用してはなりません。著者および出版者は、違法または非倫理的な活動を是認または支持するものではなく、この書籍内に含まれる情報の使用は、ユーザー自身のリスクと裁量によるものです。
 
-ユーザーは、この書籍内に含まれる情報に基づいて行われるすべての行動について、自己の責任を負い、これらの技術やヒントを実装しようとする場合は常に専門の助言と支援を求めるべきです。
+ユーザーは、この書籍に含まれる情報に基づいて行われるすべての行動について、自己の責任を負い、これらの技術やヒントを実装しようとする場合は常に専門の助言と支援を求めるべきです。
 
-この書籍を使用することで、ユーザーは、著者および出版者を、この書籍またはその中に含まれる情報の使用によって生じるいかなる損害、損失、または害に対しても、一切の責任と責任から解放することに同意します。
+この書籍の使用により生じるいかなる損害、損失、または害に対しても、ユーザーは著者および出版者を一切の責任から免責し、解放することに同意します。
 {% endhint %}
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？**[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)**をチェックしてください！**
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks)**と**[**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。**
+* **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？またはPEASSの最新バージョンにアクセスしたいですか、またはHackTricksをPDFでダウンロードしたいですか？** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)**をチェックしてください！**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを発見してください。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
