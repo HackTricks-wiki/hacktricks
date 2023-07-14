@@ -48,7 +48,7 @@ lsof -i TCP -sTCP:ESTABLISHED
 
 DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
 
-<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (6).png" alt=""><figcaption></figcaption></figure>
 
 ### Via Browser apps
 
