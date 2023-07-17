@@ -4,11 +4,11 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
-* **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* **ハッキングのトリックを共有するために、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
 
 </details>
 
@@ -16,7 +16,7 @@
 
 **LAPS**を使用すると、ドメインに参加しているコンピュータの**ローカル管理者パスワード**（**ランダム化**、一意で**定期的に変更**される）を管理できます。これらのパスワードはActive Directoryに集中的に保存され、ACLを使用して認可されたユーザーに制限されます。パスワードは、クライアントからサーバーへの転送時にKerberos v5とAESを使用して保護されます。
 
-LAPSを使用すると、ドメインの**コンピュータオブジェクト**には**2つの新しい属性**が表示されます：**`ms-msc-AdmPwd`**と**`ms-mcs-AdmPwdExpirationTime`**。これらの属性には、**平文の管理者パスワードと有効期限**が含まれています。そのため、ドメイン環境では、これらの属性を**読み取ることができるユーザー**を確認することが興味深いかもしれません。
+LAPSを使用すると、ドメインの**コンピュータ**オブジェクトには**2つの新しい属性**が表示されます：**`ms-mcs-AdmPwd`**と**`ms-mcs-AdmPwdExpirationTime`**。これらの属性には**平文の管理者パスワードと有効期限**が含まれています。そのため、ドメイン環境では、これらの属性を**読み取ることができるユーザー**を確認することが興味深いかもしれません。
 
 ### アクティベートされているかどうかを確認する
 ```bash
@@ -35,7 +35,7 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 
 `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol`から**LAPSポリシーの生データ**をダウンロードし、[**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser)パッケージの**`Parse-PolFile`**を使用して、このファイルを人間が読める形式に変換することができます。
 
-さらに、**ネイティブのLAPS PowerShellコマンドレット**を使用することもできます（アクセス権を持つマシンにインストールされている場合）。
+さらに、**ネイティブのLAPS PowerShellコマンドレット**を使用することもできます（アクセス可能なマシンにインストールされている場合）。
 ```powershell
 Get-Command *AdmPwd*
 
@@ -118,18 +118,18 @@ Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="2326099
 
 ### バックドア
 
-LAPSの元のソースコードは[ここ](https://github.com/GreyCorbel/admpwd)で見つけることができます。そのため、コード内にバックドアを設置することが可能です（たとえば、`Main/AdmPwd.PS/Main.cs` の `Get-AdmPwdPassword` メソッド内に）新しいパスワードを何らかの方法で**外部に漏洩させるか、どこかに保存する**ことができます。
+LAPSの元のソースコードは[ここ](https://github.com/GreyCorbel/admpwd)で見つけることができます。そのため、コード内（たとえば `Main/AdmPwd.PS/Main.cs` の `Get-AdmPwdPassword` メソッド内）に、新しいパスワードを何らかの方法で**外部に送信したり、どこかに保存したりする**バックドアを設置することが可能です。
 
-その後、新しい `AdmPwd.PS.dll` をコンパイルし、マシンに `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` としてアップロードします（修正日時も変更します）。
+その後、新しい `AdmPwd.PS.dll` をコンパイルし、マシンの `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` にアップロードします（修正日時も変更します）。
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricks で **会社を宣伝**したいですか？または **PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricks で会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
-* **ハッキングのトリックを共有するには、[hacktricks repo](https://github.com/carlospolop/hacktricks)と[hacktricks-cloud repo](https://github.com/carlospolop/hacktricks-cloud)**にPRを提出してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **ハッキングのトリックを共有するには、[hacktricksのリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudのリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出**してください。
 
 </details>
