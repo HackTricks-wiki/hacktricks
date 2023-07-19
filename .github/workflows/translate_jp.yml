@@ -10,6 +10,7 @@ on:
       - '.github/**'
   workflow_dispatch:
 
+concurrency: jp
 
 jobs:
   run-translation:
