@@ -552,6 +552,8 @@ https://github.com/l0ss/Grouper2
 
 {% embed url="http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/" %}
 
+{% embed url="https://medium.com/@freegames16/evading-windows-defender-with-nim-56007c0372ff" %}
+
 ### Other tools
 
 ```bash
