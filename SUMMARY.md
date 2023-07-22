@@ -75,6 +75,7 @@
   * [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 * [Exfiltration](generic-methodologies-and-resources/exfiltration.md)
 * [Tunneling and Port Forwarding](generic-methodologies-and-resources/tunneling-and-port-forwarding.md)
+* [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 * [Search Exploits](generic-methodologies-and-resources/search-exploits.md)
 * [Shells (Linux, Windows, MSFVenom)](generic-methodologies-and-resources/shells/README.md)
   * [MSFVenom - CheatSheet](generic-methodologies-and-resources/shells/msfvenom.md)
