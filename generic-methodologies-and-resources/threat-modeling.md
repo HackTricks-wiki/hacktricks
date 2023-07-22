@@ -46,13 +46,15 @@ An advance cross-platform and multi-feature GUI web spider/crawler for cyber sec
 Download: [**https://github.com/3nock/SpiderSuite**](https://github.com/3nock/SpiderSuite)
 ```
 
-### Microsoft Threat Modeling Tool
+#### Usage
 
-This is a free tool from Microsoft that helps in finding threats in the design phase of software projects. It uses the STRIDE methodology and is particularly suitable for those developing on Microsoft's stack.
+1. Pick a URL and Crawl
 
-```
-Download: [**https://aka.ms/threatmodelingtool**](https://aka.ms/threatmodelingtool)
-```
+![](<../.gitbook/assets/threatmodel_spidersuite_1.png>)
+
+2. View Graph
+
+![](<../.gitbook/assets/threatmodel_spidersuite_2.png>)
 
 ### OWASP Threat Dragon
 
@@ -60,5 +62,75 @@ An open-source project from OWASP, Threat Dragon is both a web and desktop appli
 
 ```
 Download: [**https://github.com/OWASP/threat-dragon/releases**](https://github.com/OWASP/threat-dragon/releases)
+```
+
+#### Usage
+
+1. Create New Project
+
+![](<../.gitbook/assets/create_new_project_1.jpg>)
+
+Sometimes it could look like this:
+
+![](<../.gitbook/assets/1_threatmodel_create_project.jpg>)
+
+2. Launch The New Project
+
+![](<../.gitbook/assets/threatmodel_spidersuite_2.png>)
+
+3. Launch New Project
+
+![](<../.gitbook/assets/launch_new_project_2.jpg>)
+
+4. Launch New Project
+
+![](<../.gitbook/assets/threatmodel_spidersuite_2.jpg>)
+
+5. Save The New Project
+
+![](<../.gitbook/assets/save_new_project.jpg>)
+
+6. Create your model
+
+You can use tools like SpiderSuite Crawler to give you inspiration, a basic model would look something like this
+
+![](<../.gitbook/assets/0_basic_threat_model.jpg>)
+
+Just a little bit of explanation about the entities:
+- Process (The entity itself such as Webserver or web functionality)
+- Actor (A Person such as a Website Visitor, User or Administrator)
+- Data Flow Line (Indicator of Interaction)
+- Trust Boundary (Different network segments or scopes.)
+- Store (Things where data are stored at such as Databases)
+
+7. Create a Threat (Step 1)
+
+First you have to pick the layer you whish to add a threat to
+
+![](<../.gitbook/assets/3_threatmodel_chose-threat-layer.jpg>)
+
+Now you can create the threat
+
+![](<../.gitbook/assets/4_threatmodel_create-threat.jpg>)
+
+Keep in mind that there is a difference between Actor Threats and Process Threats.
+If you would add a threat to an Actor then you will only be able to choose "Spoofing" and "Repudiation.
+However in our example we add threat to a Process entity so we will see this in the threat creation box:
+
+![](<../.gitbook/assets/2_threatmodel_type-option.jpg>)
+
+8. Done
+
+Now your finished model should look something like this.
+And this is how you make a simple threat model with OWASP Threat Dragon.
+
+![](<../.gitbook/assets/threat_model_finished.jpg>)
+
+# Microsoft Threat Modeling Tool
+
+This is a free tool from Microsoft that helps in finding threats in the design phase of software projects. It uses the STRIDE methodology and is particularly suitable for those developing on Microsoft's stack.
+
+```
+Download: [**https://aka.ms/threatmodelingtool**](https://aka.ms/threatmodelingtool)
 ```
 
