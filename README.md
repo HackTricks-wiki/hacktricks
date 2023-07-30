@@ -59,7 +59,7 @@ Obtén acceso hoy mismo:
 
 ### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof es el hogar de todos los bug bounties de criptomonedas.**
 

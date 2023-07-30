@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof es el hogar de todas las recompensas por errores de criptografía.**
 
@@ -31,7 +31,7 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 
 ## Conceptos básicos de MacOS
 
-Si no estás familiarizado con macOS, debes comenzar aprendiendo los conceptos básicos de macOS:&#x20;
+Si no estás familiarizado con macOS, debes comenzar aprendiendo los conceptos básicos de macOS:
 
 * **Archivos y permisos especiales** de macOS:
 
@@ -65,7 +65,7 @@ Si no estás familiarizado con macOS, debes comenzar aprendiendo los conceptos b
 
 ### MacOS MDM
 
-En las empresas, los sistemas **macOS** probablemente estén **gestionados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona eso**:
+En las empresas, los sistemas **macOS** probablemente estén **gestionados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona**:
 
 {% content-ref url="../macos-red-teaming/macos-mdm/" %}
 [macos-mdm](../macos-red-teaming/macos-mdm/)
@@ -173,7 +173,7 @@ En primer lugar, tenga en cuenta que **la mayoría de los trucos sobre escalada 
 * [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
 * [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof es el hogar de todas las recompensas por errores de criptografía.**
 
