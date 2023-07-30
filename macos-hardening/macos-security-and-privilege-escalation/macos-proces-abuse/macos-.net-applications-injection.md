@@ -25,7 +25,7 @@ Portanto, se você acessar o diretório **`$TMPDIR`** do usuário, poderá encon
 
 A função [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) lidará com a comunicação de um depurador.
 
-A primeira coisa que um depurador precisa fazer é **criar uma nova sessão de depuração**. Isso é feito **enviando uma mensagem via o pipe `out`** começando com uma estrutura `MessageHeader`, que podemos obter do código-fonte do .NET:
+A primeira coisa que um depurador precisa fazer é **criar uma nova sessão de depuração**. Isso é feito **enviando uma mensagem através do pipe `out`** começando com uma estrutura `MessageHeader`, que podemos obter do código-fonte do .NET:
 ```c
 struct MessageHeader
 {
@@ -164,7 +164,7 @@ O código POC usado para fazer isso pode ser encontrado [aqui](https://gist.gith
 
 ### Execução de código .NET Core <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-A primeira coisa é identificar, por exemplo, uma região de memória com permissões **`rwx`** em execução para salvar o shellcode a ser executado. Isso pode ser facilmente feito com:
+A primeira coisa é identificar, por exemplo, uma região de memória com **`rwx`** em execução para salvar o shellcode a ser executado. Isso pode ser facilmente feito com:
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
@@ -173,7 +173,7 @@ Em seguida, para acionar a execução, seria necessário saber algum lugar onde 
 
 Nas versões x64, isso é direto usando a técnica de **caça de assinaturas** semelhante ao mimikatz para procurar em **`libcorclr.dll`** uma referência ao símbolo **`_hlpDynamicFuncTable`**, que podemos desreferenciar:
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 Tudo o que resta a fazer é encontrar um endereço a partir do qual iniciar nossa busca por assinaturas. Para fazer isso, aproveitamos outra função de depuração exposta, **`MT_GetDCB`**. Isso retorna várias informações úteis sobre o processo de destino, mas, para o nosso caso, estamos interessados em um campo retornado contendo o **endereço de uma função auxiliar**, **`m_helperRemoteStartAddr`**. Usando esse endereço, sabemos exatamente **onde `libcorclr.dll` está localizado** na memória do processo de destino e podemos iniciar nossa busca pela DFT.
 

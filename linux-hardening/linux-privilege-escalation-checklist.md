@@ -14,7 +14,7 @@
 
 <figure><img src="../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof é o lar de todas as recompensas por bugs de criptografia.**
 
@@ -58,7 +58,7 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 ### [Processos](privilege-escalation/#processes)
 
 * [ ] Existe algum software desconhecido em execução?
-* [ ] Existe algum software em execução com **privilégios maiores do que deveria**?
+* [ ] Existe algum software em execução com **privilégios maiores do que deveria ter**?
 * [ ] Procure por **exploits de processos em execução** (especialmente a versão em execução).
 * [ ] Você pode **modificar o binário** de algum processo em execução?
 * [ ] **Monitore os processos** e verifique se algum processo interessante está sendo executado com frequência.
@@ -78,13 +78,13 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 * [ ] Alguma **pasta gravável no PATH do systemd**?
 ### [Timers](privilege-escalation/#timers)
 
-* [ ] Algum **timer gravável**?
+* [ ] Existe algum **timer gravável**?
 
 ### [Sockets](privilege-escalation/#sockets)
 
-* [ ] Algum arquivo **.socket gravável**?
+* [ ] Existe algum arquivo **.socket gravável**?
 * [ ] É possível **comunicar-se com algum socket**?
-* [ ] **Sockets HTTP** com informações interessantes?
+* [ ] Existem **sockets HTTP** com informações interessantes?
 
 ### [D-Bus](privilege-escalation/#d-bus)
 
@@ -93,13 +93,13 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 ### [Rede](privilege-escalation/#network)
 
 * [ ] Enumere a rede para saber onde você está
-* [ ] **Portas abertas** que você não conseguia acessar antes de obter um shell dentro da máquina?
+* [ ] Existem **portas abertas** que você não conseguia acessar antes de obter um shell na máquina?
 * [ ] É possível **capturar tráfego** usando `tcpdump`?
 
 ### [Usuários](privilege-escalation/#users)
 
 * [ ] Enumeração de usuários/grupos genéricos
-* [ ] Você tem um **UID muito grande**? A máquina está **vulnerável**?
+* [ ] Você possui um **UID muito grande**? A máquina está **vulnerável**?
 * [ ] É possível [**elevar privilégios graças a um grupo**](privilege-escalation/interesting-groups-linux-pe/) ao qual você pertence?
 * [ ] Dados da **Área de Transferência**?
 * [ ] Política de Senhas?
@@ -114,7 +114,7 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 * [ ] É possível executar **qualquer comando com sudo**? É possível usá-lo para LER, ESCREVER ou EXECUTAR qualquer coisa como root? ([**GTFOBins**](https://gtfobins.github.io))
 * [ ] Existe algum **binário SUID explorável**? ([**GTFOBins**](https://gtfobins.github.io))
 * [ ] Os comandos [**sudo** são **limitados** por **caminho**? É possível **burlar** as restrições](privilege-escalation/#sudo-execution-bypassing-paths)?
-* [ ] [**Comando Sudo/SUID sem caminho indicado**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
+* [ ] [**Binário Sudo/SUID sem caminho indicado**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
 * [ ] [**Binário SUID especificando caminho**](privilege-escalation/#suid-binary-with-command-path)? Bypass
 * [ ] [**Vulnerabilidade LD\_PRELOAD**](privilege-escalation/#ld\_preload)
 * [ ] [**Ausência de biblioteca .so em binário SUID**](privilege-escalation/#suid-binary-so-injection) de uma pasta gravável?
@@ -123,7 +123,7 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 * [ ] É possível [**modificar /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
 * [ ] Comando [**OpenBSD DOAS**](privilege-escalation/#doas)
 
-### [Capabilities](privilege-escalation/#capabilities)
+### [Capacidades](privilege-escalation/#capabilities)
 
 * [ ] Algum binário possui alguma **capacidade inesperada**?
 
@@ -143,12 +143,12 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 
 ### [Arquivos Interessantes](privilege-escalation/#interesting-files)
 
-* [ ] Arquivos **de perfil** - Ler dados sensíveis? Escrever para privilégios elevados?
+* [ ] **Arquivos de perfil** - Ler dados sensíveis? Escrever para privilégios elevados?
 * [ ] Arquivos **passwd/shadow** - Ler dados sensíveis? Escrever para privilégios elevados?
-* [ ] Verifique **pastas comumente interessantes** em busca de dados sensíveis
+* [ ] Verificar pastas comumente interessantes para dados sensíveis
 * [ ] **Localização/Estrutura de arquivos estranha**, você pode ter acesso ou alterar arquivos executáveis
 * [ ] **Modificado** nos últimos minutos
-* [ ] Arquivos **DB Sqlite**
+* [ ] Arquivos **Banco de Dados Sqlite**
 * [ ] Arquivos **ocultos**
 * [ ] **Scripts/Binários no PATH**
 * [ ] Arquivos **Web** (senhas?)
@@ -168,7 +168,7 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 * [ ] É possível [**abusar do NFS para elevar privilégios**](privilege-escalation/#nfs-privilege-escalation)?
 * [ ] É necessário [**escapar de um shell restritivo**](privilege-escalation/#escaping-from-restricted-shells)?
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof é o lar de todas as recompensas por bugs de criptografia.**
 
@@ -192,7 +192,7 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 * Você trabalha em uma **empresa de segurança cibernética**? Gostaria de ver sua **empresa anunciada no HackTricks**? Ou gostaria de ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Confira os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial PEASS & HackTricks**](https://peass.creator-spring.com)
-* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo Telegram**](https://t.me/peass) ou **siga-me no Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo do Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo do Telegram**](https://t.me/peass) ou **siga-me no Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Compartilhe suas técnicas de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
