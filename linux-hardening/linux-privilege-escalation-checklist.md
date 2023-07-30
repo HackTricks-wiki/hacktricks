@@ -14,14 +14,14 @@
 
 <figure><img src="../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProofはすべての暗号バグバウンティのホームです。**
 
 **遅延なしで報酬を受け取る**\
 HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
 
-**Web3ペントestingの経験を積む**\
+**Web3ペンテストの経験を積む**\
 ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！その成長期におけるweb3セキュリティをマスターしましょう。
 
 **Web3ハッカーレジェンドになる**\
@@ -39,7 +39,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 * [ ] [**PATH**](privilege-escalation/#path)をチェックする、**書き込み可能なフォルダ**はありますか？
 * [ ] [**環境変数**](privilege-escalation/#env-info)をチェックする、**機密情報**はありますか？
 * [ ] スクリプトを使用して[**カーネルの脆弱性**](privilege-escalation/#kernel-exploits)を検索する（DirtyCowなど）。
-* [ ] [**sudoのバージョン**が脆弱かどうかをチェックする](privilege-escalation/#sudo-version)
+* [ ] [**sudoのバージョン**が脆弱性を持っているかどうかをチェックする](privilege-escalation/#sudo-version)
 * [ ] [**Dmesg**の署名検証に失敗しました](privilege-escalation/#dmesg-signature-verification-failed)
 * [ ] システムの列挙（日付、システム統計、CPU情報、プリンターなど）をさらに行う
 * [ ] [より多くの防御策を列挙する](privilege-escalation/#enumerate-possible-defenses)
@@ -58,24 +58,24 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 ### [プロセス](privilege-escalation/#processes)
 
 * [ ] 不明なソフトウェアが実行されていますか？
-* [ ] ソフトウェアが適切な権限よりも高い権限で実行されていますか？
-* [ ] 実行中のプロセスの脆弱性を検索する（特に実行中のバージョン）。
-* [ ] 実行中のプロセスのバイナリを変更できますか？
-* [ ] プロセスを監視し、頻繁に実行されている興味深いプロセスがあるかどうかをチェックする。
-* [ ] 興味深いプロセスのメモリ（パスワードが保存されている可能性のある場所）を読むことができますか？
+* [ ] ソフトウェアが**必要以上の権限で実行**されていますか？
+* [ ] 実行中のプロセスの**脆弱性のエクスプロイト**を検索する（特に実行中のバージョン）。
+* [ ] 実行中のプロセスのバイナリを**変更**できますか？
+* [ ] プロセスを**監視**し、頻繁に実行されている興味深いプロセスがあるかどうかをチェックする。
+* [ ] 興味深いプロセスのメモリ（パスワードが保存されている可能性のある場所）を**読み取る**ことができますか？
 
 ### [スケジュールされた/クロンジョブ？](privilege-escalation/#scheduled-jobs)
 
 * [ ] クロンによって[**PATH** ](privilege-escalation/#cron-path)が変更され、書き込みができますか？
 * [ ] クロンジョブに[**ワイルドカード** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)がありますか？
-* [ ] 実行されている[**変更可能なスクリプト** ](privilege-escalation/#cron-script-overwriting-and-symlink)または変更可能なフォルダ内にありますか？
-* [ ] いくつかのスクリプトが非常に頻繁に実行されていることが検出されましたか？（1分、2分、または5分ごと）
+* [ ] 実行されている**スクリプト**があるか、または**変更可能なフォルダ**に存在しますか？
+* [ ] いくつかのスクリプトが非常に頻繁に実行されていることを検出しましたか？（1分、2分、または5分ごと）
 
 ### [サービス](privilege-escalation/#services)
 
-* [ ] 書き込み可能な.serviceファイルはありますか？
-* [ ] サービスによって実行される書き込み可能なバイナリはありますか？
-* [ ] systemd PATH内の書き込み可能なフォルダはありますか？
+* [ ] **書き込み可能な.service**ファイルはありますか？
+* [ ] **サービス**によって実行される**書き込み可能なバイナリ**はありますか？
+* [ ] systemd PATHに**書き込み可能なフォルダ**はありますか？
 ### [タイマー](privilege-escalation/#timers)
 
 * [ ] **書き込み可能なタイマー**はありますか？
@@ -103,7 +103,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 * 所属しているグループによって特権を**エスカレーション**できますか？
 * **クリップボード**のデータはありますか？
 * パスワードポリシーはありますか？
-* 以前に発見したすべての既知のパスワードを使用して、**各**可能な**ユーザー**でログインしようとします。パスワードなしでもログインを試みます。
+* 以前に発見したすべての既知のパスワードを使用して、**各**可能な**ユーザー**でログインしようとしてみてください。パスワードなしでもログインしてみてください。
 
 ### [書き込み可能なPATH](privilege-escalation/#writable-path-abuses)
 
@@ -111,13 +111,13 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 
 ### [SUDOとSUIDコマンド](privilege-escalation/#sudo-and-suid)
 
-* **sudoで任意のコマンドを実行**できますか？それを使用してルートとして何かを**読み取り、書き込み、実行**できますか？ ([**GTFOBins**](https://gtfobins.github.io))
+* **sudoで任意のコマンドを実行**できますか？それを使用してrootとして何かを**読み取り、書き込み、実行**できますか？ ([**GTFOBins**](https://gtfobins.github.io))
 * **悪用可能なSUIDバイナリ**はありますか？ ([**GTFOBins**](https://gtfobins.github.io))
 * [**sudoコマンドがパスで制限**されていますか？制限を**バイパス**できますか](privilege-escalation/#sudo-execution-bypassing-paths)?
 * [**パスが指定されていないSudo/SUIDバイナリ**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
-* [**パスが指定されたSUIDバイナリ**](privilege-escalation/#suid-binary-with-command-path)? バイパス
+* [**パスが指定されているSUIDバイナリ**](privilege-escalation/#suid-binary-with-command-path)? バイパス
 * [**LD\_PRELOADの脆弱性**](privilege-escalation/#ld\_preload)
-* 書き込み可能なフォルダからの**SUIDバイナリにおける.soライブラリの不足**](privilege-escalation/#suid-binary-so-injection)はありますか？
+* 書き込み可能なフォルダからの**SUIDバイナリに.soライブラリがない**ですか？
 * [**SUDOトークンが利用可能**](privilege-escalation/#reusing-sudo-tokens)ですか？[**SUDOトークンを作成**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)できますか？
 * [**sudoersファイルを読み取るまたは変更**](privilege-escalation/#etc-sudoers-etc-sudoers-d)できますか？
 * [**/etc/ld.so.conf.d/**を[**変更**](privilege-escalation/#etc-ld-so-conf-d)できますか？
@@ -138,7 +138,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 
 ### [SSH](privilege-escalation/#ssh)
 
-* **Debian**の[**OpenSSL予測可能なPRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
+* **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
 * [**SSHの興味深い設定値**](privilege-escalation/#ssh-interesting-configuration-values)
 
 ### [興味深いファイル](privilege-escalation/#interesting-files)
@@ -146,12 +146,12 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 * **プロファイルファイル** - 機密データを読み取る？特権エスカレーションに書き込む？
 * **passwd/shadowファイル** - 機密データを読み取る？特権エスカレーションに書き込む？
 * 機密データが含まれる可能性のある**一般的に興味深いフォルダ**をチェックします
-* **奇妙な場所/所有ファイル**、実行可能ファイルにアクセスまたは変更できるかもしれません
-* 最後の数分で**変更**されました
+* **奇妙な場所/所有ファイル**、アクセスまたは実行可能なファイルを変更できるかもしれません
+* 最後の数分で**変更**されましたか？
 * **Sqlite DBファイル**
 * **隠しファイル**
 * **PATH内のスクリプト/バイナリ**
-* **Webファイル**（パスワード？）
+* **Webファイル**（パスワードはありますか？）
 * **バックアップ**はありますか？
 * パスワードを含む既知のファイル：**Linpeas**と**LaZagne**を使用します
 * **一般的な検索**
@@ -168,7 +168,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 * 特権をエスカレーションするために**NFSを悪用**できますか？
 * 制限のあるシェルから**脱出**する必要がありますか？
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProofはすべての暗号バグバウンティの場所です。**
 
@@ -176,9 +176,9 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
 
 **Web3ペントestingの経験を積む**\
-ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！成長するWeb3セキュリティをマスターしましょう。
+ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！その成長する日々におけるweb3セキュリティをマスターしましょう。
 
-**Web3ハッカーレジェンドになる**\
+**web3ハッカーレジェンドになる**\
 各検証済みのバグで評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
 
 [**HackenProofでサインアップ**](https://hackenproof.com/register)してハッキングから報酬を得ましょう！
@@ -187,8 +187,8 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>
 * [💬 Discordグループ](https://discord.gg/hRep4RUj7f)に参加するか、[telegramグループ](https://t.me/peass)に参加するか、[Twitter](https://twitter.com/hacktricks_live)で私をフォローしてください。
-* ハッキングのトリックを共有するために、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
+* ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>

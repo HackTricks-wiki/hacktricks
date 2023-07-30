@@ -12,9 +12,9 @@
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
-**HackenProofはすべての暗号バグバウンティの場です。**
+**HackenProofはすべての暗号バグバウンティの場所です。**
 
 **遅延なしで報酬を受け取る**\
 HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
@@ -31,7 +31,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 
 ## 基本的なMacOS
 
-MacOSに慣れていない場合は、MacOSの基本を学ぶことから始めるべきです：&#x20;
+MacOSに慣れていない場合は、MacOSの基本を学ぶことから始めるべきです：
 
 * 特別なMacOSの**ファイルと権限:**
 
@@ -65,13 +65,13 @@ MacOSに慣れていない場合は、MacOSの基本を学ぶことから始め�
 
 ### MacOS MDM
 
-企業では、**macOSシステムはおそらくMDMで管理**されることが多いです。したがって、攻撃者の視点からは、**それがどのように機能するか**を知ることが興味深いです：
+企業では、**MacOSシステムはおそらくMDMで管理**されることが多いです。したがって、攻撃者の観点からは、**それがどのように機能するか**を知ることが興味深いです：
 
 {% content-ref url="../macos-red-teaming/macos-mdm/" %}
 [macos-mdm](../macos-red-teaming/macos-mdm/)
 {% endcontent-ref %}
 
-### MacOS - インスペクション、デバッグ、およびFuzzing
+### MacOS - 検査、デバッグ、およびFuzzing
 
 {% content-ref url="macos-apps-inspecting-debugging-and-fuzzing/" %}
 [macos-apps-inspecting-debugging-and-fuzzing](macos-apps-inspecting-debugging-and-fuzzing/)
@@ -87,7 +87,7 @@ MacOSに慣れていない場合は、MacOSの基本を学ぶことから始め�
 
 ### ファイルの権限
 
-**rootとして実行されているプロセスが**ユーザーによって制御可能なファイルを書き込む場合、ユーザーはこれを悪用して**特権をエスカレーション**することができます。\
+**rootとして実行されるプロセスが**ユーザーによって制御可能なファイルを書き込む場合、ユーザーはこれを悪用して**特権をエスカレーション**することができます。\
 これは次の状況で発生する可能性があります：
 
 * 使用されるファイルはすでにユーザーによって作成されています（ユーザーが所有しています）
@@ -147,7 +147,7 @@ ls /tmp/snap/Users/admin_user # This will work
 ```
 {% endcode %}
 
-より詳しい説明は[**元のレポート**](https://theevilbit.github.io/posts/cve\_2020\_9771/)にあります。
+より詳しい説明は[**元のレポート**](https://theevilbit.github.io/posts/cve\_2020\_9771/)で見つけることができます。
 
 ### 機密情報
 
@@ -157,7 +157,7 @@ ls /tmp/snap/Users/admin_user # This will work
 
 ### Linux Privesc
 
-まず、Linux/Unixに影響を与える特権昇格のトリックのほとんどは、MacOSマシンにも影響を与えることに注意してください。したがって、以下を参照してください：
+まず、Linux/Unixに影響を与える特権昇格に関するほとんどのトリックは、**MacOSマシンにも影響を与える**ことに注意してください。したがって、次を参照してください：
 
 {% content-ref url="../../linux-hardening/privilege-escalation/" %}
 [privilege-escalation](../../linux-hardening/privilege-escalation/)
@@ -173,7 +173,7 @@ ls /tmp/snap/Users/admin_user # This will work
 * [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
 * [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProofはすべての暗号バグバウンティの場です。**
 
@@ -195,9 +195,9 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを発見してください。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[NFT](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
 * **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>
