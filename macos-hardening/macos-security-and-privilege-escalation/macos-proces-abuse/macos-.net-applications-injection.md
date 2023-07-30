@@ -189,7 +189,7 @@ Then in order to trigger the execution it would be needed to know some place whe
 
 In x64 versions this is straightforward using the mimikatz-esque **signature hunting** technique to search through **`libcorclr.dll`** for a reference to the symbol **`_hlpDynamicFuncTable`**, which we can dereference:
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 All that is left to do is to find an address from which to start our signature search. To do this, we leverage another exposed debugger function, **`MT_GetDCB`**. This returns a number of useful bits of information on the target process, but for our case, we are interested in a field returned containing the **address of a helper function**, **`m_helperRemoteStartAddr`**. Using this address, we know just **where `libcorclr.dll` is located** within the target process memory and we can start our search for the DFT.
 

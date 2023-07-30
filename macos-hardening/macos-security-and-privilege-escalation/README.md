@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof is home to all crypto bug bounties.**
 
@@ -31,7 +31,7 @@ Gain reputation points with each verified bug and conquer the top of the weekly 
 
 ## Basic MacOS
 
-If you are not familiar with macOS, you should start learning the basics of macOS:&#x20;
+If you are not familiar with macOS, you should start learning the basics of macOS:
 
 * Special macOS **files & permissions:**
 
@@ -174,7 +174,7 @@ First of all, please note that **most of the tricks about privilege escalation a
 * [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
 * [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof is home to all crypto bug bounties.**
 
