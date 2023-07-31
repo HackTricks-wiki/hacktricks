@@ -7,12 +7,12 @@
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof es el hogar de todas las recompensas por errores de criptografía.**
 
@@ -33,11 +33,11 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 
 El ataque ASREPRoast busca **usuarios sin el atributo de requerimiento de preautenticación de Kerberos (**[_**DONT\_REQ\_PREAUTH**_](https://support.microsoft.com/en-us/help/305144/how-to-use-the-useraccountcontrol-flags-to-manipulate-user-account-pro)_**)**_.
 
-Esto significa que cualquier persona puede enviar una solicitud AS\_REQ al DC en nombre de cualquiera de esos usuarios y recibir un mensaje AS\_REP. Este último tipo de mensaje contiene un fragmento de datos cifrados con la clave de usuario original, derivada de su contraseña. Luego, utilizando este mensaje, la contraseña del usuario se puede descifrar sin conexión.
+Esto significa que cualquier persona puede enviar una solicitud AS\_REQ al DC en nombre de cualquiera de esos usuarios y recibir un mensaje AS\_REP. Este último tipo de mensaje contiene un fragmento de datos cifrados con la clave de usuario original, derivada de su contraseña. Luego, utilizando este mensaje, la contraseña del usuario podría ser descifrada sin conexión.
 
-Además, **no se necesita una cuenta de dominio para realizar este ataque**, solo una conexión al DC. Sin embargo, **con una cuenta de dominio**, se puede utilizar una consulta LDAP para **recuperar usuarios sin preautenticación de Kerberos** en el dominio. **De lo contrario, los nombres de usuario deben adivinarse**.
+Además, **no se necesita una cuenta de dominio para realizar este ataque**, solo una conexión al DC. Sin embargo, **con una cuenta de dominio**, se puede utilizar una consulta LDAP para **recuperar usuarios sin preautenticación de Kerberos** en el dominio. **De lo contrario, los nombres de usuario deben ser adivinados**.
 
-#### Enumeración de usuarios vulnerables (se requieren credenciales de dominio)
+#### Enumeración de usuarios vulnerables (se necesitan credenciales de dominio)
 ```bash
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -76,7 +76,7 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 
 [**Más información sobre el ataque de robo de AS-REP en ired.team**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof es el hogar de todas las recompensas por errores criptográficos.**
 

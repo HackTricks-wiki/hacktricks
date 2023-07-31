@@ -53,14 +53,14 @@ Además, después de encontrar las credenciales adecuadas, podrías ser capaz de
 
 #### Autenticación de dispositivos de JAMF
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 El binario **`jamf`** contenía el secreto para abrir el llavero que en el momento del descubrimiento era **compartido** entre todos y era: **`jk23ucnq91jfu9aj`**.\
 Además, jamf **persiste** como un **LaunchDaemon** en **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
 #### Toma de control de dispositivos de JAMF
 
-La URL del **JSS** (Jamf Software Server) que **`jamf`** utilizará se encuentra en **`/Library/Preferences/com.jamfsoftware.jamf.plist`**. \
+La **URL** de **JSS** (Jamf Software Server) que **`jamf`** utilizará se encuentra en **`/Library/Preferences/com.jamfsoftware.jamf.plist`**. \
 Este archivo básicamente contiene la URL:
 
 {% code overflow="wrap" %}
@@ -118,7 +118,7 @@ Y también sobre los **protocolos de red** **"especiales"** de **MacOS**:
 
 ## Active Directory
 
-En algunas ocasiones te encontrarás con que la **computadora MacOS está conectada a un AD**. En este escenario, debes intentar **enumerar** el directorio activo como estás acostumbrado. Encuentra **ayuda** en las siguientes páginas:
+En algunas ocasiones te encontrarás con que el **ordenador MacOS está conectado a un AD**. En este escenario, debes intentar **enumerar** el directorio activo como estás acostumbrado. Encuentra **ayuda** en las siguientes páginas:
 
 {% content-ref url="../../network-services-pentesting/pentesting-ldap.md" %}
 [pentesting-ldap.md](../../network-services-pentesting/pentesting-ldap.md)
@@ -139,8 +139,8 @@ dscl "/Active Directory/[Domain]/All Domains" ls /
 También hay algunas herramientas preparadas para MacOS para enumerar automáticamente el AD y jugar con Kerberos:
 
 * [**Machound**](https://github.com/XMCyber/MacHound): MacHound es una extensión de la herramienta de auditoría Bloodhound que permite recopilar e ingestar relaciones de Active Directory en hosts de MacOS.
-* [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost es un proyecto Objective-C diseñado para interactuar con las API de Heimdal krb5 en macOS. El objetivo del proyecto es permitir una mejor prueba de seguridad en torno a Kerberos en dispositivos macOS utilizando API nativas sin requerir ningún otro marco o paquete en el objetivo.
-* [**Orchard**](https://github.com/its-a-feature/Orchard): Herramienta de JavaScript para Automatización (JXA) para enumerar Active Directory.
+* [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost es un proyecto Objective-C diseñado para interactuar con las API de Heimdal krb5 en macOS. El objetivo del proyecto es permitir pruebas de seguridad más efectivas en torno a Kerberos en dispositivos macOS utilizando API nativas sin requerir ningún otro marco o paquete en el objetivo.
+* [**Orchard**](https://github.com/its-a-feature/Orchard): Herramienta de JavaScript para Automatización (JXA) para enumeración de Active Directory.
 
 ### Información del dominio
 ```bash
@@ -187,19 +187,19 @@ Más información en [https://its-a-feature.github.io/posts/2018/01/Active-Direc
 
 ## Accediendo al Keychain
 
-El Keychain probablemente contiene información sensible que, si se accede sin generar una solicitud, podría ayudar a avanzar en un ejercicio de red teaming:
+El Keychain probablemente contiene información sensible que, si se accede sin generar una solicitud, podría ayudar a avanzar en un ejercicio de red team:
 
 {% content-ref url="macos-keychain.md" %}
 [macos-keychain.md](macos-keychain.md)
 {% endcontent-ref %}
 
-## Servicios externos
+## Servicios Externos
 
 El red teaming en MacOS es diferente al red teaming regular de Windows, ya que generalmente **MacOS está integrado con varias plataformas externas directamente**. Una configuración común de MacOS es acceder a la computadora utilizando **credenciales sincronizadas de OneLogin y acceder a varios servicios externos** (como github, aws...) a través de OneLogin:
 
 ![](<../../.gitbook/assets/image (563).png>)
 
-## Técnicas de red teaming misceláneas
+## Técnicas Misceláneas de Red Team
 
 ### Safari
 
@@ -223,6 +223,6 @@ Cuando se descarga un archivo en Safari, si es un archivo "seguro", se **abrirá
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

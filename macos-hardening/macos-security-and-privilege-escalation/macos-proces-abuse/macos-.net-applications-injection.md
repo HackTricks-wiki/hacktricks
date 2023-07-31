@@ -171,15 +171,15 @@ vmmap -pages 35829 | grep "rwx/rwx"
 ```
 Entonces, para activar la ejecución, sería necesario conocer algún lugar donde se almacena un puntero de función para sobrescribirlo. Es posible sobrescribir un puntero dentro de la **Tabla de Funciones Dinámicas (DFT)**, que es utilizada por el tiempo de ejecución de .NET Core para proporcionar funciones auxiliares para la compilación JIT. Una lista de punteros de función admitidos se puede encontrar en [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h).
 
-En las versiones x64, esto es sencillo utilizando la técnica de **búsqueda de firmas** similar a mimikatz para buscar en **`libcorclr.dll`** una referencia al símbolo **`_hlpDynamicFuncTable`**, al cual podemos desreferenciar:
+En las versiones x64, esto es sencillo utilizando la técnica de **búsqueda de firmas** al estilo de mimikatz para buscar en **`libcorclr.dll`** una referencia al símbolo **`_hlpDynamicFuncTable`**, al cual podemos desreferenciar:
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 Lo único que queda por hacer es encontrar una dirección desde la cual comenzar nuestra búsqueda de firmas. Para hacer esto, aprovechamos otra función de depuración expuesta, **`MT_GetDCB`**. Esto devuelve una serie de bits de información útiles sobre el proceso objetivo, pero en nuestro caso, nos interesa un campo que contiene la **dirección de una función auxiliar**, **`m_helperRemoteStartAddr`**. Utilizando esta dirección, sabemos exactamente **dónde se encuentra `libcorclr.dll`** en la memoria del proceso objetivo y podemos comenzar nuestra búsqueda de la DFT.
 
-Conociendo esta dirección, es posible sobrescribir el puntero de función con nuestro propio código shell.
+Conociendo esta dirección, es posible sobrescribir el puntero de función con nuestro propio código malicioso.
 
-El código POC completo utilizado para la inyección en PowerShell se puede encontrar [aquí](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
+El código completo de POC utilizado para la inyección en PowerShell se puede encontrar [aquí](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
 ## Referencias
 

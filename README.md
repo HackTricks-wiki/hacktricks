@@ -59,7 +59,7 @@ Obtén acceso hoy mismo:
 
 ### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
-<figure><img src=".gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof es el hogar de todos los bug bounties de criptomonedas.**
 
@@ -117,11 +117,11 @@ Este libro, 'HackTricks', está destinado únicamente a fines educativos e infor
 
 Los autores y editores no serán responsables en ningún caso de ninguna pérdida o daño, incluyendo, entre otros, pérdida o daño indirecto o consecuente, o cualquier pérdida o daño que surja de la pérdida de datos o beneficios derivados del uso de este libro.
 
-Además, las técnicas y consejos descritos en este libro se proporcionan únicamente con fines educativos e informativos, y no deben utilizarse para actividades ilegales o maliciosas. Los autores y editores no aprueban ni respaldan ninguna actividad ilegal o éticamente incorrecta, y cualquier uso de la información contenida en este libro es responsabilidad y discreción del usuario.
+Además, las técnicas y consejos descritos en este libro se proporcionan únicamente con fines educativos e informativos, y no deben utilizarse para actividades ilegales o maliciosas. Los autores y editores no aprueban ni respaldan ninguna actividad ilegal o éticamente cuestionable, y cualquier uso de la información contenida en este libro es bajo tu propio riesgo y discreción.
 
 El usuario es el único responsable de cualquier acción tomada basada en la información contenida en este libro, y siempre debe buscar asesoramiento y asistencia profesional al intentar implementar cualquiera de las técnicas o consejos descritos en él.
 
-Al utilizar este libro, el usuario acepta liberar a los autores y editores de cualquier responsabilidad y responsabilidad por cualquier daño, pérdida o daño que pueda resultar del uso de este libro o de cualquiera de la información contenida en él.
+Al utilizar este libro, el usuario acepta liberar a los autores y editores de cualquier responsabilidad por cualquier daño, pérdida o perjuicio que pueda resultar del uso de este libro o de cualquiera de la información contenida en él.
 {% endhint %}
 
 <details>

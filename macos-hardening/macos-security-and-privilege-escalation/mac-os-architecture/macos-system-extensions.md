@@ -16,7 +16,7 @@
 
 A diferencia de las extensiones del kernel, las **extensiones del sistema se ejecutan en el espacio de usuario** en lugar del espacio del kernel, lo que reduce el riesgo de un bloqueo del sistema debido a un mal funcionamiento de la extensión.
 
-<figure><img src="../../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Existen tres tipos de extensiones del sistema: extensiones de **DriverKit**, extensiones de **Network** y extensiones de **Endpoint Security**.
 
@@ -26,9 +26,9 @@ DriverKit es un reemplazo de las extensiones del kernel que **proporciona soport
 
 ### **Extensiones de Network**
 
-Las extensiones de Network proporcionan la capacidad de personalizar los comportamientos de la red. Existen varios tipos de extensiones de Network:
+Las extensiones de Network proporcionan la capacidad de personalizar los comportamientos de red. Existen varios tipos de extensiones de Network:
 
-* **Proxy de aplicación**: se utiliza para crear un cliente VPN que implementa un protocolo VPN personalizado orientado a flujos. Esto significa que maneja el tráfico de red en función de las conexiones (o flujos) en lugar de los paquetes individuales.
+* **Proxy de aplicación**: se utiliza para crear un cliente VPN que implementa un protocolo VPN personalizado orientado al flujo. Esto significa que maneja el tráfico de red en función de las conexiones (o flujos) en lugar de los paquetes individuales.
 * **Túnel de paquetes**: se utiliza para crear un cliente VPN que implementa un protocolo VPN personalizado orientado a paquetes individuales. Esto significa que maneja el tráfico de red en función de los paquetes individuales.
 * **Filtro de datos**: se utiliza para filtrar "flujos" de red. Puede monitorear o modificar datos de red a nivel de flujo.
 * **Filtro de paquetes**: se utiliza para filtrar paquetes de red individuales. Puede monitorear o modificar datos de red a nivel de paquete.
@@ -56,14 +56,14 @@ Los eventos que el marco de seguridad de punto final puede monitorear se clasifi
 
 ### Arquitectura del marco de seguridad de punto final
 
-<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (8).png" alt=""><figcaption></figcaption></figure>
 
 La comunicación en el espacio de usuario con el marco de seguridad de punto final se realiza a través de la clase IOUserClient. Se utilizan dos subclases diferentes, según el tipo de llamante:
 
-* **EndpointSecurityDriverClient**: requiere el permiso `com.apple.private.endpoint-security.manager`, que solo tiene el proceso del sistema `endpointsecurityd`.
-* **EndpointSecurityExternalClient**: requiere el permiso `com.apple.developer.endpoint-security.client`. Esto normalmente sería utilizado por software de seguridad de terceros que necesita interactuar con el marco de seguridad de punto final.
+* **EndpointSecurityDriverClient**: esto requiere el permiso `com.apple.private.endpoint-security.manager`, que solo lo tiene el proceso del sistema `endpointsecurityd`.
+* **EndpointSecurityExternalClient**: esto requiere el permiso `com.apple.developer.endpoint-security.client`. Esto normalmente sería utilizado por software de seguridad de terceros que necesita interactuar con el marco de seguridad de punto final.
 
-Las extensiones de seguridad de punto final:**`libEndpointSecurity.dylib`** es la biblioteca en C que utilizan las extensiones del sistema para comunicarse con el kernel. Esta biblioteca utiliza I/O Kit (`IOKit`) para comunicarse con la KEXT de seguridad de punto final.
+Las extensiones de seguridad de punto final:**`libEndpointSecurity.dylib`** es la biblioteca C que utilizan las extensiones del sistema para comunicarse con el kernel. Esta biblioteca utiliza I/O Kit (`IOKit`) para comunicarse con la KEXT de seguridad de punto final.
 
 **`endpointsecurityd`** es un demonio del sistema clave que participa en la gestión y el lanzamiento de extensiones del sistema de seguridad de punto final, especialmente durante el proceso de inicio temprano. Solo las extensiones del sistema marcadas con **`NSEndpointSecurityEarlyBoot`** en su archivo `Info.plist` reciben este tratamiento de inicio temprano.
 
@@ -80,7 +80,7 @@ tccutil reset All
 ```
 Para obtener **más información** sobre este bypass y otros relacionados, consulta la charla [#OBTS v5.0: "El talón de Aquiles de EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
-Al final, esto se solucionó otorgando el nuevo permiso **`kTCCServiceEndpointSecurityClient`** a la aplicación de seguridad gestionada por **`tccd`**, de modo que `tccutil` no borre sus permisos y evite que se ejecute.
+Al final, esto se solucionó otorgando el nuevo permiso **`kTCCServiceEndpointSecurityClient`** a la aplicación de seguridad gestionada por **`tccd`** para que `tccutil` no borre sus permisos y evite que se ejecute.
 
 ## Referencias
 

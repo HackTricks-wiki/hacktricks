@@ -14,7 +14,7 @@
 
 <figure><img src="../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof es el hogar de todas las recompensas por errores de criptografía.**
 
@@ -36,7 +36,7 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 ### [Información del sistema](privilege-escalation/#system-information)
 
 * [ ] Obtener información del **sistema operativo**
-* [ ] Verificar la [**RUTA**](privilege-escalation/#path), ¿alguna carpeta **escribible**?
+* [ ] Verificar la [**ruta**](privilege-escalation/#path), ¿alguna carpeta **escribible**?
 * [ ] Verificar las [**variables de entorno**](privilege-escalation/#env-info), ¿algún detalle sensible?
 * [ ] Buscar [**exploits del kernel**](privilege-escalation/#kernel-exploits) **usando scripts** (DirtyCow?)
 * [ ] Verificar si la versión de **sudo es vulnerable**](privilege-escalation/#sudo-version)
@@ -66,25 +66,25 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 
 ### [¿Tareas programadas/Cron jobs?](privilege-escalation/#scheduled-jobs)
 
-* [ ] ¿Se está modificando la [**RUTA**](privilege-escalation/#cron-path) por algún cron y puedes **escribir** en ella?
+* [ ] ¿Se está modificando la [**ruta**](privilege-escalation/#cron-path) por algún cron y puedes **escribir** en ella?
 * [ ] ¿Algún [**comodín**](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection) en un trabajo cron?
-* [ ] ¿Algún script [**modificable**](privilege-escalation/#cron-script-overwriting-and-symlink) se está **ejecutando** o está dentro de una **carpeta modificable**?
+* [ ] ¿Algún [**script modificable**](privilege-escalation/#cron-script-overwriting-and-symlink) se está **ejecutando** o está dentro de una **carpeta modificable**?
 * [ ] ¿Has detectado que algún **script** podría estar o se está **ejecutando con mucha frecuencia**](privilege-escalation/#frequent-cron-jobs)? (cada 1, 2 o 5 minutos)
 
 ### [Servicios](privilege-escalation/#services)
 
 * [ ] ¿Algún archivo **.service** escribible?
 * [ ] ¿Algún binario **escribible** ejecutado por un **servicio**?
-* [ ] ¿Algún carpeta **escribible en la RUTA de systemd**?
+* [ ] ¿Algún carpeta **escribible en la ruta de systemd**?
 ### [Temporizadores](privilege-escalation/#timers)
 
-* [ ] ¿Algún temporizador **editable**?
+* [ ] ¿Algún **temporizador escribible**?
 
 ### [Sockets](privilege-escalation/#sockets)
 
-* [ ] ¿Algún archivo **.socket** editable?
+* [ ] ¿Algún archivo **.socket escribible**?
 * [ ] ¿Puedes **comunicarte con algún socket**?
-* [ ] ¿Hay sockets **HTTP** con información interesante?
+* [ ] ¿Hay **sockets HTTP** con información interesante?
 
 ### [D-Bus](privilege-escalation/#d-bus)
 
@@ -105,7 +105,7 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 * [ ] ¿Política de contraseñas?
 * [ ] Intenta **usar** todas las **contraseñas conocidas** que hayas descubierto previamente para iniciar sesión **con cada** usuario **posible**. Intenta iniciar sesión también sin contraseña.
 
-### [Ruta editable](privilege-escalation/#writable-path-abuses)
+### [Ruta escribible](privilege-escalation/#writable-path-abuses)
 
 * [ ] Si tienes **permisos de escritura en alguna carpeta de la ruta**, es posible que puedas elevar privilegios
 
@@ -117,7 +117,7 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 * [ ] [**Binario Sudo/SUID sin ruta indicada**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
 * [ ] [**Binario SUID especificando ruta**](privilege-escalation/#suid-binary-with-command-path)? Burla
 * [ ] [**Vulnerabilidad LD\_PRELOAD**](privilege-escalation/#ld\_preload)
-* [ ] [**Falta de biblioteca .so en el binario SUID**](privilege-escalation/#suid-binary-so-injection) desde una carpeta editable?
+* [ ] [**Falta de biblioteca .so en el binario SUID**](privilege-escalation/#suid-binary-so-injection) desde una carpeta escribible?
 * [ ] [**Tokens SUDO disponibles**](privilege-escalation/#reusing-sudo-tokens)? [**¿Puedes crear un token SUDO**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
 * [ ] ¿Puedes [**leer o modificar archivos sudoers**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
 * [ ] ¿Puedes [**modificar /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
@@ -156,7 +156,7 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 * [ ] **Archivos conocidos que contienen contraseñas**: Usa **Linpeas** y **LaZagne**
 * [ ] **Búsqueda genérica**
 
-### [**Archivos editables**](privilege-escalation/#writable-files)
+### [**Archivos escribibles**](privilege-escalation/#writable-files)
 
 * [ ] ¿Modificar biblioteca de Python para ejecutar comandos arbitrarios?
 * [ ] ¿Puedes **modificar archivos de registro**? Explotar Logtotten
@@ -168,7 +168,7 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 * [ ] ¿Puedes [**abusar de NFS para elevar privilegios**](privilege-escalation/#nfs-privilege-escalation)?
 * [ ] ¿Necesitas [**escapar de una shell restrictiva**](privilege-escalation/#escaping-from-restricted-shells)?
 
-<figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof es el hogar de todas las recompensas por errores de cifrado.**
 
@@ -190,8 +190,8 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
-* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
+* Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección de [**NFTs**](https://opensea.io/collection/the-peass-family) exclusivos
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
