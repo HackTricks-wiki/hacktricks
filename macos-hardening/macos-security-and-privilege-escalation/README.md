@@ -1,18 +1,18 @@
-# macOSセキュリティと特権エスカレーション
+# macOSのセキュリティと特権エスカレーション
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProofはすべての暗号バグバウンティの場所です。**
 
@@ -20,12 +20,12 @@
 HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
 
 **Web3ペンテストの経験を積む**\
-ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！成長するWeb3セキュリティをマスターしましょう。
+ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！上昇期のWeb3セキュリティをマスターしましょう。
 
 **Web3ハッカーレジェンドになる**\
 各検証済みのバグで評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
 
-[**HackenProofにサインアップ**](https://hackenproof.com/register)してハッキングから報酬を得ましょう！
+[**HackenProofにサインアップ**](https://hackenproof.com/register)して、ハッキングから報酬を得ましょう！
 
 {% embed url="https://hackenproof.com/register" %}
 
@@ -33,7 +33,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 
 MacOSに慣れていない場合は、MacOSの基本を学ぶことから始めるべきです：
 
-* 特別なMacOSの**ファイルと権限:**
+* 特別なMacOSの**ファイルと権限：**
 
 {% content-ref url="macos-files-folders-and-binaries/" %}
 [macos-files-folders-and-binaries](macos-files-folders-and-binaries/)
@@ -65,7 +65,7 @@ MacOSに慣れていない場合は、MacOSの基本を学ぶことから始め�
 
 ### MacOS MDM
 
-企業では、**MacOSシステムはおそらくMDMで管理**されることが多いです。したがって、攻撃者の観点からは、**それがどのように機能するか**を知ることが興味深いです：
+企業では、**MacOSシステムはおそらくMDMで管理**されることが多いです。したがって、攻撃者の視点からは、**それがどのように機能するか**を知ることが興味深いです：
 
 {% content-ref url="../macos-red-teaming/macos-mdm/" %}
 [macos-mdm](../macos-red-teaming/macos-mdm/)
@@ -77,7 +77,7 @@ MacOSに慣れていない場合は、MacOSの基本を学ぶことから始め�
 [macos-apps-inspecting-debugging-and-fuzzing](macos-apps-inspecting-debugging-and-fuzzing/)
 {% endcontent-ref %}
 
-## MacOSセキュリティ保護
+## MacOSのセキュリティ保護
 
 {% content-ref url="macos-security-protections/" %}
 [macos-security-protections](macos-security-protections/)
@@ -157,7 +157,7 @@ ls /tmp/snap/Users/admin_user # This will work
 
 ### Linux Privesc
 
-まず、Linux/Unixに影響を与える特権昇格に関するほとんどのトリックは、**MacOSマシンにも影響を与える**ことに注意してください。したがって、次を参照してください：
+まず、Linux/Unixに影響を与える特権昇格に関するほとんどのトリックは、**MacOSのマシンにも影響を与える**ことに注意してください。したがって、以下を参照してください：
 
 {% content-ref url="../../linux-hardening/privilege-escalation/" %}
 [privilege-escalation](../../linux-hardening/privilege-escalation/)
@@ -173,7 +173,7 @@ ls /tmp/snap/Users/admin_user # This will work
 * [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
 * [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProofはすべての暗号バグバウンティの場です。**
 
@@ -181,7 +181,7 @@ ls /tmp/snap/Users/admin_user # This will work
 HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
 
 **Web3ペントestingの経験を積む**\
-ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！成長するWeb3セキュリティをマスターしましょう。
+ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！上昇期のweb3セキュリティをマスターしましょう。
 
 **Web3ハッカーレジェンドになる**\
 各検証済みのバグで評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
@@ -195,8 +195,8 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[NFT](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを発見してください。
+* [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
 * **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 

@@ -14,15 +14,15 @@
 
 <figure><img src="../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProofはすべての暗号バグバウンティのホームです。**
 
 **遅延なしで報酬を受け取る**\
 HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
 
-**Web3ペンテストの経験を積む**\
-ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！その成長期におけるweb3セキュリティをマスターしましょう。
+**Web3ペントestingの経験を積む**\
+ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！上昇中のWeb3セキュリティをマスターしましょう。
 
 **Web3ハッカーレジェンドになる**\
 各検証済みのバグごとに評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
@@ -39,7 +39,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 * [ ] [**PATH**](privilege-escalation/#path)をチェックする、**書き込み可能なフォルダ**はありますか？
 * [ ] [**環境変数**](privilege-escalation/#env-info)をチェックする、**機密情報**はありますか？
 * [ ] スクリプトを使用して[**カーネルの脆弱性**](privilege-escalation/#kernel-exploits)を検索する（DirtyCowなど）。
-* [ ] [**sudoのバージョン**が脆弱性を持っているかどうかをチェックする](privilege-escalation/#sudo-version)
+* [ ] [**sudoのバージョン**が脆弱かどうかをチェックする](privilege-escalation/#sudo-version)
 * [ ] [**Dmesg**の署名検証に失敗しました](privilege-escalation/#dmesg-signature-verification-failed)
 * [ ] システムの列挙（日付、システム統計、CPU情報、プリンターなど）をさらに行う
 * [ ] [より多くの防御策を列挙する](privilege-escalation/#enumerate-possible-defenses)
@@ -111,7 +111,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 
 ### [SUDOとSUIDコマンド](privilege-escalation/#sudo-and-suid)
 
-* **sudoで任意のコマンドを実行**できますか？それを使用してrootとして何かを**読み取り、書き込み、実行**できますか？ ([**GTFOBins**](https://gtfobins.github.io))
+* **sudoで任意のコマンドを実行**できますか？それを使用してルートとして何かを**読み取り、書き込み、実行**できますか？ ([**GTFOBins**](https://gtfobins.github.io))
 * **悪用可能なSUIDバイナリ**はありますか？ ([**GTFOBins**](https://gtfobins.github.io))
 * [**sudoコマンドがパスで制限**されていますか？制限を**バイパス**できますか](privilege-escalation/#sudo-execution-bypassing-paths)?
 * [**パスが指定されていないSudo/SUIDバイナリ**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
@@ -138,7 +138,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 
 ### [SSH](privilege-escalation/#ssh)
 
-* **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
+* **Debian** [**OpenSSL予測可能なPRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
 * [**SSHの興味深い設定値**](privilege-escalation/#ssh-interesting-configuration-values)
 
 ### [興味深いファイル](privilege-escalation/#interesting-files)
@@ -146,7 +146,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 * **プロファイルファイル** - 機密データを読み取る？特権エスカレーションに書き込む？
 * **passwd/shadowファイル** - 機密データを読み取る？特権エスカレーションに書き込む？
 * 機密データが含まれる可能性のある**一般的に興味深いフォルダ**をチェックします
-* **奇妙な場所/所有ファイル**、アクセスまたは実行可能なファイルを変更できるかもしれません
+* **奇妙な場所/所有ファイル**、実行可能ファイルにアクセスまたは変更できるかもしれません
 * 最後の数分で**変更**されましたか？
 * **Sqlite DBファイル**
 * **隠しファイル**
@@ -158,9 +158,9 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 
 ### [**書き込み可能なファイル**](privilege-escalation/#writable-files)
 
-* **Pythonライブラリ**を変更して任意のコマンドを実行できますか？
-* **ログファイル**を変更できますか？**Logtotten**の脆弱性
-* **/etc/sysconfig/network-scripts/**を変更できますか？Centos/Redhatの脆弱性
+* **Pythonライブラリを変更**して任意のコマンドを実行できますか？
+* **ログファイルを変更**できますか？**Logtotten**の脆弱性
+* **/etc/sysconfig/network-scripts/**を**変更**できますか？Centos/Redhatの脆弱性
 * ini、int.d、systemd、またはrc.dファイルに**書き込み**できますか？
 
 ### [**その他のトリック**](privilege-escalation/#other-tricks)
@@ -168,7 +168,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 * 特権をエスカレーションするために**NFSを悪用**できますか？
 * 制限のあるシェルから**脱出**する必要がありますか？
 
-<figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProofはすべての暗号バグバウンティの場所です。**
 
@@ -176,9 +176,9 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
 
 **Web3ペントestingの経験を積む**\
-ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！その成長する日々におけるweb3セキュリティをマスターしましょう。
+ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！成長するWeb3セキュリティをマスターしましょう。
 
-**web3ハッカーレジェンドになる**\
+**Web3ハッカーレジェンドになる**\
 各検証済みのバグで評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
 
 [**HackenProofでサインアップ**](https://hackenproof.com/register)してハッキングから報酬を得ましょう！
@@ -187,7 +187,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 
 <details>
 
-<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>
+<summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule
 * [💬 Discordグループ](https://discord.gg/hRep4RUj7f)に参加するか、[telegramグループ](https://t.me/peass)に参加するか、[Twitter](https://twitter.com/hacktricks_live)で私をフォローしてください。
 * ハッキングのトリックを共有するには、[hacktricksリポジトリ](https://github.com/carlospolop/hacktricks)と[hacktricks-cloudリポジトリ](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 

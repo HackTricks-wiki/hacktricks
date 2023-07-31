@@ -12,7 +12,7 @@
 
 </details>
 
-## MDMの乱用
+## MDMの悪用
 
 * JAMF Pro: `jamf checkJSSConnection`
 * Kandji
@@ -25,25 +25,25 @@ MacOS環境でのレッドチーミングには、MDMの動作原理について
 [macos-mdm](macos-mdm/)
 {% endcontent-ref %}
 
-### MDMをC2として乱用する
+### MDMをC2として悪用する
 
-MDMは、プロファイルのインストール、クエリ、削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更などの権限を持っています...
+MDMは、プロファイルのインストール、クエリ、削除、アプリケーションのインストール、ローカル管理者アカウントの作成、ファームウェアパスワードの設定、FileVaultキーの変更などの権限を持っています。
 
 独自のMDMを実行するには、[**https://mdmcert.download/**](https://mdmcert.download/)で取得しようとすることができる**ベンダーによって署名されたCSR**が必要です。また、Appleデバイス用の独自のMDMを実行するには、[**MicroMDM**](https://github.com/micromdm/micromdm)を使用することができます。
 
-ただし、登録されたデバイスにアプリケーションをインストールするには、開発者アカウントによって署名されている必要があります...ただし、MDMの登録時に**デバイスは信頼されたCAとしてMDMのSSL証明書を追加**するため、今では何でも署名できます。
+ただし、登録されたデバイスにアプリケーションをインストールするには、開発者アカウントによって署名されている必要があります...ただし、MDMの登録時に**デバイスはMDMのSSL証明書を信頼できるCAとして追加**するため、今では何でも署名できます。
 
 デバイスをMDMに登録するには、ルートとして**`mobileconfig`**ファイルをインストールする必要があります。これは**pkg**ファイルを介して配信することができます（zipで圧縮し、Safariからダウンロードすると解凍されます）。
 
 **MythicエージェントOrthrus**は、この技術を使用しています。
 
-### JAMF PROの乱用
+### JAMF PROの悪用
 
 JAMFは、**カスタムスクリプト**（システム管理者によって開発されたスクリプト）、**ネイティブペイロード**（ローカルアカウントの作成、EFIパスワードの設定、ファイル/プロセスの監視...）、**MDM**（デバイスの設定、デバイスの証明書...）を実行できます。
 
 #### JAMFの自己登録
 
-`https://<company-name>.jamfcloud.com/enroll/`のようなページにアクセスして、**自己登録が有効になっているかどうか**を確認します。有効な場合、**資格情報を入力するように求められる**場合があります。
+`https://<company-name>.jamfcloud.com/enroll/`のようなページにアクセスして、**自己登録が有効になっているかどうか**を確認します。有効な場合、**資格情報を要求**する場合があります。
 
 [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py)スクリプトを使用してパスワードスプレー攻撃を実行できます。
 
@@ -53,10 +53,10 @@ JAMFは、**カスタムスクリプト**（システム管理者によって開
 
 #### JAMFデバイス認証
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 **`jamf`**バイナリには、キーチェーンを開くための秘密が含まれており、発見当時は**誰でも共有**されていました。秘密は**`jk23ucnq91jfu9aj`**でした。\
-さらに、jamfは**LaunchDaemon**として**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に永続化されます。
+さらに、jamfは**LaunchDaemon**として**`/Library/LaunchAgents/com.jamf.management.agent.plist`**に**永続化**されます。
 
 #### JAMFデバイスの乗っ取り
 
@@ -78,7 +78,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 ```
 {% endcode %}
 
-したがって、攻撃者は、インストール時にこのファイルを上書きする悪意のあるパッケージ（`pkg`）をドロップすることができます。これにより、TyphonエージェントからのMythic C2リスナーへのURLが設定され、JAMFをC2として悪用することができるようになります。
+したがって、攻撃者は、インストール時にこのファイルを上書きし、URLをTyphonエージェントのMythic C2リスナーに設定する悪意のあるパッケージ（`pkg`）をドロップすることができます。これにより、JAMFをC2として悪用することができるようになります。
 
 {% code overflow="wrap" %}
 ```bash
@@ -155,9 +155,9 @@ MacOSのユーザーには3つのタイプがあります：
 * **モバイルユーザー** - ローカルのバックアップを持つActive Directoryユーザーで、資格情報とファイルが保存されます。
 
 ユーザーとグループに関するローカル情報は、_ /var/db/dslocal/nodes/Default _フォルダに保存されます。\
-たとえば、_mark_というユーザーの情報は _/var/db/dslocal/nodes/Default/users/mark.plist_ に保存され、_admin_というグループの情報は _/var/db/dslocal/nodes/Default/groups/admin.plist_ に保存されます。
+たとえば、ユーザー名が _mark_ の情報は _/var/db/dslocal/nodes/Default/users/mark.plist_ に保存され、グループ _admin_ の情報は _/var/db/dslocal/nodes/Default/groups/admin.plist_ に保存されます。
 
-MacHoundは、BloodhoundデータベースにHasSessionとAdminToのエッジに加えて、**3つの新しいエッジ**を追加します：
+MacHoundはBloodhoundデータベースにHasSessionとAdminToのエッジに加えて、**3つの新しいエッジ**を追加します：
 
 * **CanSSH** - ホストへのSSHが許可されているエンティティ
 * **CanVNC** - ホストへのVNCが許可されているエンティティ
@@ -223,6 +223,6 @@ Safariでファイルをダウンロードすると、それが「安全な」�
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

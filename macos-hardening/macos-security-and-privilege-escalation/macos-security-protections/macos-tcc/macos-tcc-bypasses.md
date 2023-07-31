@@ -4,9 +4,9 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンを入手したい**ですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
@@ -16,7 +16,7 @@
 
 ### 書き込みバイパス
 
-これはバイパスではなく、TCCの動作方法です：**書き込みを保護しません**。ターミナルがユーザーのデスクトップを読み取る権限がなくても、**書き込むことができます**：
+これはバイパスではなく、TCCの動作方法です：**書き込みを保護しません**。ターミナルがユーザーのデスクトップを読み取る権限がなくても、**書き込むことはできます**：
 ```shell-session
 username@hostname ~ % ls Desktop
 ls: Desktop: Operation not permitted
@@ -30,7 +30,7 @@ asd
 
 ### SSHバイパス
 
-デフォルトでは、**SSH**経由でのアクセスは**「フルディスクアクセス」**を持ちます。これを無効にするには、リストに表示されているが無効になっている必要があります（リストから削除してもこれらの特権は削除されません）：
+デフォルトでは、**SSH**経由でのアクセスは**「フルディスクアクセス」**を持っています。これを無効にするには、リストに表示されているが無効になっている必要があります（リストから削除してもこれらの特権は削除されません）：
 
 ![](<../../../../.gitbook/assets/image (569).png>)
 
@@ -145,13 +145,13 @@ $> ls ~/Documents
 
 ### CVE-2021-XXXX - トランスロケーション
 
-ライブラリ`libsecurity_translocate`を使用したバイナリ`/usr/libexec/lsd`は、`com.apple.private.nullfs_allow`という権限を持っており、これにより**nullfs**マウントを作成でき、`com.apple.private.tcc.allow`という権限を持っており、**`kTCCServiceSystemPolicyAllFiles`**ですべてのファイルにアクセスできます。
+ライブラリ`libsecurity_translocate`を使用したバイナリ`/usr/libexec/lsd`は、`com.apple.private.nullfs_allow`というエンタイトルメントを持っており、これにより**nullfs**マウントを作成し、`com.apple.private.tcc.allow`というエンタイトルメントを持っていて、**`kTCCServiceSystemPolicyAllFiles`**ですべてのファイルにアクセスできます。
 
-"Library"に検疫属性を追加し、**`com.apple.security.translocation`** XPCサービスを呼び出すことで、Libraryを**`$TMPDIR/AppTranslocation/d/d/Library`**にマッピングし、Library内のすべてのドキュメントに**アクセス**できるようになりました。
+"Library"に検疫属性を追加し、**`com.apple.security.translocation`** XPCサービスを呼び出すことで、Libraryを**`$TMPDIR/AppTranslocation/d/d/Library`**にマップし、Library内のすべてのドキュメントに**アクセス**することができました。
 
 ### SQLトレース
 
-環境変数**`SQLITE_AUTO_TRACE`**が設定されている場合、ライブラリ**`libsqlite3.dylib`**はすべてのSQLクエリを**ログ**に記録します。多くのアプリケーションがこのライブラリを使用しているため、すべてのSQLiteクエリをログに記録することが可能でした。
+環境変数**`SQLITE_AUTO_TRACE`**が設定されている場合、ライブラリ**`libsqlite3.dylib`**はすべてのSQLクエリを**ログ**に記録します。多くのアプリケーションがこのライブラリを使用していたため、すべてのSQLiteクエリをログに記録することができました。
 
 いくつかのAppleアプリケーションは、TCCで保護された情報にアクセスするためにこのライブラリを使用していました。
 ```bash
@@ -164,7 +164,7 @@ rootとしてこのサービスを有効にすると、**ARDエージェント�
 
 ## プラグインによるバイパス
 
-プラグインは通常、ライブラリやplist形式の追加コードであり、**メインアプリケーションによってロード**され、そのコンテキストで実行されます。したがって、メインアプリケーションがTCCの制限されたファイルにアクセスできる場合（許可された権限やエンタイトルメントを介して）、**カスタムコードもそれを持つ**ことになります。
+プラグインは通常、ライブラリやplist形式の追加のコードであり、**メインアプリケーションによってロード**され、そのコンテキストで実行されます。したがって、メインアプリケーションがTCCの制限されたファイルにアクセスできる場合（許可された権限やエンタイトルメントを介して）、**カスタムコードもそれを持つ**ことになります。
 
 ### CVE-2020-27937 - Directory Utility
 
@@ -178,7 +178,7 @@ rootとしてこのサービスを有効にすると、**ARDエージェント�
 
 バイナリ**`/usr/sbin/coreaudiod`**は、エンタイトルメント`com.apple.security.cs.disable-library-validation`と`com.apple.private.tcc.manager`を持っていました。最初のエンタイトルメントは**コードインジェクションを許可**し、2番目のエンタイトルメントは**TCCの管理権限を与え**ます。
 
-このバイナリは、フォルダー`/Library/Audio/Plug-Ins/HAL`から**サードパーティのプラグインをロード**することができました。したがって、このPoCを使用して**プラグインをロードし、TCCの権限を悪用**することができました。
+このバイナリは、フォルダー`/Library/Audio/Plug-Ins/HAL`から**サードパーティのプラグインをロード**することができました。したがって、このPoCを使用して**プラグインをロードし、TCCの権限を悪用**することが可能でした。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
@@ -249,11 +249,11 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-詳細については、[**元のレポートをチェックしてください**](https://wojciechregula.blog/post/how-to-rob-a-firefox/)。
+詳細な情報については、[**元のレポートをチェックしてください**](https://wojciechregula.blog/post/how-to-rob-a-firefox/)。
 
 ### CVE-2020-10006
 
-バイナリ `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` には、**`com.apple.private.tcc.allow`** と **`com.apple.security.get-task-allow`** の権限があり、プロセス内にコードを注入して TCC 権限を使用することができました。
+バイナリ `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` には、**`com.apple.private.tcc.allow`** と **`com.apple.security.get-task-allow`** の権限があり、プロセス内にコードを注入し、TCC の特権を使用することができました。
 
 ### CVE-2023-26818 - Telegram
 
@@ -265,7 +265,7 @@ Telegram には、`com.apple.security.cs.allow-dyld-environment-variables` と `
 
 ### ターミナルスクリプト
 
-ターミナルには、**Full Disk Access (FDA)** を与えることが一般的です。少なくとも、テック人々が使用するコンピュータではそうです。そして、それを使用して **`.terminal`** スクリプトを呼び出すことができます。
+テック系の人々が使用するコンピュータでは、ターミナルに **Full Disk Access (FDA)** を与えることが一般的です。そして、それを使用して **`.terminal`** スクリプトを呼び出すことができます。
 
 **`.terminal`** スクリプトは、次のようなコマンドを **`CommandString`** キーで実行する plist ファイルです：
 ```xml
@@ -296,12 +296,12 @@ task.arguments = @[@"-a", @"/System/Applications/Utilities/Terminal.app",
 exploit_location]; task.standardOutput = pipe;
 [task launch];
 ```
-## マウントによるバイパス
+## マウントによる
 
 ### CVE-2020-9771 - mount\_apfs TCC バイパスと特権エスカレーション
 
 **どのユーザーでも**（特権を持たないユーザーでも）タイムマシンのスナップショットを作成し、マウントすることができ、そのスナップショットの**すべてのファイルにアクセス**することができます。\
-必要なのは、使用されるアプリケーション（例：`Terminal`）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つための特権のみであり、これは管理者によって許可される必要があります。
+必要なのは、使用されるアプリケーション（例：`Terminal`）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つための**特権**のみであり、これは管理者によって許可される必要があります。
 
 {% code overflow="wrap" %}
 ```bash
@@ -363,17 +363,17 @@ os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 **`/var/db/locationd/clients.plist`**には、**位置情報サービスにアクセスを許可されたクライアント**を示す第3のTCCデータベースがあります。\
 フォルダ**`/var/db/locationd/`はDMGのマウントから保護されていなかった**ため、独自のplistをマウントすることが可能でした。
 
-## スタートアップアプリによる方法
+## スタートアップアプリによる
 
 {% content-ref url="../../../macos-auto-start-locations.md" %}
 [macos-auto-start-locations.md](../../../macos-auto-start-locations.md)
 {% endcontent-ref %}
 
-## grepによる方法
+## grepによる
 
-いくつかの場合、ファイルには電子メール、電話番号、メッセージなどの機密情報が保管されていますが、これらはAppleの脆弱性としてカウントされます。
+いくつかの場合、ファイルには電子メール、電話番号、メッセージなどの機密情報が保護されていない場所に保存されることがあります（これはAppleの脆弱性としてカウントされます）。
 
-<figure><img src="../../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
 
 ## 参考
 

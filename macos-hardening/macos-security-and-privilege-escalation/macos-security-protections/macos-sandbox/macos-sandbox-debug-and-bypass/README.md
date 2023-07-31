@@ -4,24 +4,24 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです
+* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
 ## サンドボックスの読み込みプロセス
 
-<figure><img src="../../../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2) (1) (2).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
 前の画像では、**`com.apple.security.app-sandbox`**という権限を持つアプリケーションが実行されると、**サンドボックスがどのように読み込まれるか**がわかります。
 
 コンパイラは`/usr/lib/libSystem.B.dylib`をバイナリにリンクします。
 
 その後、**`libSystem.B`**は他のいくつかの関数を呼び出し、**`xpc_pipe_routine`**がアプリの権限を**`securityd`**に送信します。Securitydはプロセスがサンドボックス内に隔離されるべきかどうかをチェックし、隔離される場合は隔離されます。\
-最後に、サンドボックスは**`__sandbox_ms`**を呼び出し、**`__mac_syscall`**を呼び出します。
+最後に、サンドボックスは**`__sandbox_ms`**を呼び出してアクティブ化され、**`__mac_syscall`**が呼び出されます。
 
 ## バイパスの可能性
 
@@ -46,6 +46,39 @@ system("cat ~/Desktop/del.txt");
 }
 ```
 {% tab title="entitlements.xml" %}
+
+このファイルは、macOSアプリケーションのエンタイトルメント（権限）を定義するために使用されます。エンタイトルメントは、アプリケーションが実行する特定の操作やリソースにアクセスするための許可を与えるものです。このファイルには、アプリケーションが必要とするエンタイトルメントのリストが含まれています。
+
+エンタイトルメントは、アプリケーションがmacOSのセキュリティ保護機能をバイパスするために使用されることがあります。攻撃者は、特定のエンタイトルメントを要求することで、アプリケーションのセキュリティ制約を回避し、特権の昇格を行うことができます。
+
+エンタイトルメントファイルは、XML形式で記述されており、各エンタイトルメントは`<key>`と`<true/>`のタグで定義されます。攻撃者は、このファイルを改ざんすることで、アプリケーションに不正なエンタイトルメントを与えることができます。
+
+エンタイトルメントファイルは、アプリケーションバンドル内の`Contents`ディレクトリに配置されます。攻撃者は、アプリケーションバンドルを解析し、エンタイトルメントファイルを特定することができます。
+
+エンタイトルメントファイルの例を以下に示します。
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.network.client</key>
+    <true/>
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+</dict>
+</plist>
+```
+
+この例では、アプリケーションがネットワーククライアントとして動作し、ユーザーが選択したファイルを読み書きし、オーディオ入力デバイスにアクセスするためのエンタイトルメントが与えられています。
+
+攻撃者は、エンタイトルメントファイルを改ざんすることで、アプリケーションに不正なエンタイトルメントを与えることができます。これにより、アプリケーションは本来の制約を回避し、攻撃者が望む操作やリソースにアクセスすることが可能になります。
+
+エンタイトルメントファイルの改ざんを防ぐためには、アプリケーションの署名を検証し、改ざんがないことを確認する必要があります。また、エンタイトルメントの要求に対しては、最小限の必要な権限のみを与えるようにすることが重要です。
+
+{% endtab %}
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
@@ -58,11 +91,11 @@ system("cat ~/Desktop/del.txt");
 
 Info.plistファイルは、macOSアプリケーションの設定情報を含むXMLファイルです。このファイルには、アプリケーションのバンドルID、バージョン、アイコン、起動時の動作などの情報が含まれています。
 
-Sandboxをバイパスするために、Info.plistファイルを編集することができます。例えば、アプリケーションが必要とする特定のリソースへのアクセスを許可するために、`com.apple.security.files.user-selected.read-write`などの特定のエンタイトルメントを追加することができます。
+Sandboxをバイパスするために、Info.plistファイルを編集することができます。例えば、`com.apple.security.app-sandbox`キーを`false`に設定することで、アプリケーションをサンドボックスから外すことができます。
 
-また、Info.plistファイルを編集して、アプリケーションが特定のプライバシー設定を要求しないようにすることもできます。これにより、アプリケーションがユーザーの許可なしにプライバシーに関連する情報にアクセスすることができます。
+ただし、この方法は推奨されません。サンドボックスはセキュリティの重要な要素であり、アプリケーションを保護するために使用されます。サンドボックスをバイパスすることは、セキュリティ上の脆弱性を引き起こす可能性があります。
 
-ただし、注意が必要です。Info.plistファイルを編集することは、アプリケーションの署名を無効にする可能性があるため、アプリケーションが正常に動作しなくなる可能性があります。
+Info.plistファイルを編集する場合は、慎重に行い、セキュリティのリスクを理解した上で行ってください。
 
 {% endtab %}
 ```xml
@@ -93,8 +126,8 @@ codesign -s <cert-name> --entitlements entitlements.xml sand
 {% endcode %}
 
 {% hint style="danger" %}
-アプリは**`~/Desktop/del.txt`**というファイルを**読み取ろうとします**が、**Sandboxは許可しません**。\
-Sandboxをバイパスした後に読み取ることができるように、そこにファイルを作成してください：
+アプリは、**Sandboxが許可しない**ファイル**`~/Desktop/del.txt`**を**読み取ろうとします**。\
+Sandboxがバイパスされると、それを読み取ることができるように、そこにファイルを作成してください。
 ```bash
 echo "Sandbox Bypassed" > ~/Desktop/del.txt
 ```
@@ -176,12 +209,12 @@ libsystem_kernel.dylib`:
 サンドボックスがバイパスされました！
 プロセス2517はステータス= 0（0x00000000）で終了しました
 {% hint style="warning" %}
-**サンドボックスがバイパスされていても、TCC** はユーザーにデスクトップからのファイルの読み取りを許可するかどうか尋ねます。
+**Sandboxがバイパスされていても、TCC**はユーザーにデスクトップからのファイル読み取りを許可するかどうか尋ねます。
 {% endhint %}
 
 ### 他のプロセスの乱用
 
-もしサンドボックス内のプロセスが、より制限の少ないサンドボックス（または制限のないサンドボックス）で実行されている他のプロセスを**乗っ取る**ことができれば、それらのサンドボックスから脱出することができます。
+もしサンドボックス内のプロセスが他の制約の少ないサンドボックス（または制約のないサンドボックス）で実行されている場合、それらのサンドボックスに脱出することができます：
 
 {% content-ref url="../../../macos-proces-abuse/" %}
 [macos-proces-abuse](../../../macos-proces-abuse/)
@@ -189,13 +222,13 @@ libsystem_kernel.dylib`:
 
 ### インターポストバイパス
 
-**インターポスト**についての詳細は、以下を参照してください。
+**インターポスト**の詳細については、次を参照してください：
 
 {% content-ref url="../../../mac-os-architecture/macos-function-hooking.md" %}
 [macos-function-hooking.md](../../../mac-os-architecture/macos-function-hooking.md)
 {% endcontent-ref %}
 
-#### `_libsecinit_initializer`をインターポストしてサンドボックスを防ぐ
+#### サンドボックスを防ぐために `_libsecinit_initializer` をインターポストする
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -219,7 +252,7 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 _libsecinit_initializer called
 Sandbox Bypassed!
 ```
-#### サンドボックスを回避するために `__mac_syscall` をインターポストする
+#### サンドボックスを防ぐために `__mac_syscall` をインターポストする
 
 {% code title="interpose.c" %}
 ```c
@@ -253,7 +286,7 @@ __attribute__((used)) static const struct interpose_sym interposers[] __attribut
 { (const void *)my_mac_syscall, (const void *)__mac_syscall },
 };
 ```
-{% code %}
+{% endcode %}
 ```bash
 DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 
@@ -301,7 +334,7 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
