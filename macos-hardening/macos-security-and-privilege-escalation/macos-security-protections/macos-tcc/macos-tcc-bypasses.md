@@ -393,7 +393,7 @@ The folder **`/var/db/locationd/` wasn't protected from DMG mounting** so it was
 
 In several occasions files will store sensitive information like emails, phone numbers, messages... in non protected locations (which count as a vulnerability in Apple).
 
-<figure><img src="../../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
 
 ## Reference
 

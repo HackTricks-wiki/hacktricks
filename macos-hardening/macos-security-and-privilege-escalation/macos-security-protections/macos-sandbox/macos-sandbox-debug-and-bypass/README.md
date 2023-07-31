@@ -14,7 +14,7 @@
 
 ## Sandbox loading process
 
-<figure><img src="../../../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (2) (1) (2).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
 In the previous image it's possible to observe **how the sandbox will be loaded** when an application with the entitlement **`com.apple.security.app-sandbox`** is run.
 

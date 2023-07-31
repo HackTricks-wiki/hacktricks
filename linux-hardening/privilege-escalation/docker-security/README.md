@@ -15,7 +15,7 @@ Get Access Today:
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
@@ -57,9 +57,9 @@ Containers can have **security vulnerabilities** either because of the base imag
 
 For more [**information read this**](https://docs.docker.com/engine/scan/).
 
-#### How to scan images <a href="#how-to-scan-images" id="how-to-scan-images"></a>
+* **`docker scan`**
 
-The `docker scan` command allows you to scan existing Docker images using the image name or ID. For example, run the following command to scan the hello-world image:
+The **`docker scan`** command allows you to scan existing Docker images using the image name or ID. For example, run the following command to scan the hello-world image:
 
 ```bash
 docker scan hello-world
@@ -75,6 +75,18 @@ Licenses:          enabled
 ✓ Tested 0 dependencies for known issues, no vulnerable paths found.
 
 Note that we do not currently have vulnerability data for your image.
+```
+
+* [**`trivy`**](https://github.com/aquasecurity/trivy)
+
+```bash
+trivy -q -f json <ontainer_name>:<tag>
+```
+
+* [**`clair-scanner`**](https://github.com/arminc/clair-scanner)
+
+```bash
+clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 ```
 
 ### Docker Image Signing
@@ -117,6 +129,8 @@ tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 
 When I changed Docker host, I had to move the root keys and repository keys to operate from the new host.
 
+***
+
 ![](<../../../.gitbook/assets/image (9) (1) (2).png>)
 
 \
@@ -131,18 +145,18 @@ Get Access Today:
 
 <summary>Summary of Container Security Features</summary>
 
-#### Namespaces
+**Namespaces**
 
 Namespaces are useful to isolate a project from the other ones, isolating process communications, network, mounts... It's useful to isolate the docker process from other processes (and even the /proc folder) so it cannot escape abusing other processes.
 
 It could be possible "escape" or more exactly **create new namespaces** using the binary **`unshare`** (that uses the **`unshare`** syscall). Docker by default prevents it, but kubernetes doesn't (at the time of this writtiing).\
 Ayway, this is helpful to create new namespaces, but **not to get back to the host defaults namespaces** (unless you have access to some `/proc` inside the host namespaces, where you could use **`nsenter`** to enter in the host namespaces.).
 
-#### CGroups
+**CGroups**
 
 This allows to limit resources and doesn't affect the security of the isolation of the process (except for the `release_agent` that could be used to escape).
 
-#### Capabilities Drop
+**Capabilities Drop**
 
 I find this to be one of the **most important** features regarding the process isolation security. This is because without the capabilities, even if the process is running as root **you won't be able to do some privileged actions** (because the called **`syscall`** will return permission error because the process doesn't have the needed capabilities).
 
@@ -154,12 +168,12 @@ Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,ca
 ```
 {% endcode %}
 
-#### Seccomp
+**Seccomp**
 
 It's enabled by default in Docker. It helps to **limit even more the syscalls** that the process can call.\
 The **default Docker Seccomp profile** can be found in [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
 
-#### AppArmor
+**AppArmor**
 
 Docker has a template that you can activate: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
@@ -293,14 +307,6 @@ docker run -it --security-opt=no-new-privileges:true nonewpriv
 
 For more **`--security-opt`** options check: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
 
-![](<../../../.gitbook/assets/image (9) (1) (2).png>)
-
-\
-Use [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## Other Security Considerations
 
 ### Managing Secrets
@@ -334,7 +340,7 @@ If you need your **secret in your running container**, and not just when buildin
 
 With Docker Compose, add the secrets key-value pair to a service and specify the secret file. Hat tip to [Stack Exchange answer](https://serverfault.com/a/936262/535325) for the Docker Compose secrets tip that the example below is adapted from.
 
-Example docker-compose.yml with secrets:
+Example `docker-compose.yml` with secrets:
 
 ```yaml
 version: "3.7"
@@ -425,7 +431,7 @@ If you have access to the docker socket or have access to a user in the **docker
 * Do you work in a **cybersecurity company**? Do you want to see your **company advertised in HackTricks**? or do you want to have access to the **latest version of the PEASS or download HackTricks in PDF**? Check the [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)!
 * Discover [**The PEASS Family**](https://opensea.io/collection/the-peass-family), our collection of exclusive [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Get the [**official PEASS & HackTricks swag**](https://peass.creator-spring.com)
-* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
+* **Join the** [**💬**](https://emojipedia.org/speech-balloon/) [**Discord group**](https://discord.gg/hRep4RUj7f) or the [**telegram group**](https://t.me/peass) or **follow** me on **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Share your hacking tricks by submitting PRs to the** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **and** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

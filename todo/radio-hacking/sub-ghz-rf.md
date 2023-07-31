@@ -23,7 +23,7 @@ In Europe 433.92MHz is commonly used and in U.S. and Japan it's the 315MHz.
 
 ## **Brute-force Attack**
 
-<figure><img src="../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (4) (3) (2).png" alt=""><figcaption></figcaption></figure>
 
 If instead of sending each code 5 times (sent like this to make sure the receiver gets it) so just send it once, the time is reduced to 6mins:
 

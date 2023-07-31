@@ -33,7 +33,25 @@ Software:
 
 ## .Net decompiler
 
-[https://github.com/icsharpcode/ILSpy](https://github.com/icsharpcode/ILSpy)\
+### [dotPeek](https://www.jetbrains.com/decompiler/)
+
+dotPeek is a decompiler that **decompiles and examines multiple formats**, including **libraries** (.dll), **Windows metadata file**s (.winmd), and **executables** (.exe). Once decompiled, an assembly can be saved as a Visual Studio project (.csproj).
+
+The merit here is that if a lost source code requires restoration from a legacy assembly, this action can save time. Further, dotPeek provides handy navigation throughout the decompiled code, making it one of the perfect tools for **Xamarin algorithm analysis.**&#x20;
+
+### [.Net Reflector](https://www.red-gate.com/products/reflector/)
+
+With a comprehensive add-in model and an API that extends the tool to suit your exact needs, .NET reflector saves time and simplifies development. Let's take a look at the plethora of reverse engineering services this tool provides:
+
+* Provides an insight into how the data flows through a library or component
+* Provides insight into the implementation and usage of .NET languages and frameworks
+* Finds undocumented and unexposed functionality to get more out of the APIs and technologies used.
+* Finds dependencies and different assemblies
+* Tracks down the exact location of errors in your code, third-party components, and libraries.&#x20;
+* Debugs into the source of all the .NET code you work with.
+
+### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
+
 [ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): You can have it in any OS (you can install it directly from VSCode, no need to download the git. Click on **Extensions** and **search ILSpy**).\
 If you need to **decompile**, **modify** and **recompile** again you can use: [**https://github.com/0xd4d/dnSpy/releases**](https://github.com/0xd4d/dnSpy/releases) (**Right Click -> Modify Method** to change something inside a function).\
 You cloud also try [https://www.jetbrains.com/es-es/decompiler/](https://www.jetbrains.com/es-es/decompiler/)
