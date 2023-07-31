@@ -4,7 +4,7 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* Você trabalha em uma **empresa de cibersegurança**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
+* Você trabalha em uma **empresa de segurança cibernética**? Você quer ver sua **empresa anunciada no HackTricks**? ou você quer ter acesso à **última versão do PEASS ou baixar o HackTricks em PDF**? Verifique os [**PLANOS DE ASSINATURA**](https://github.com/sponsors/carlospolop)!
 * Descubra [**A Família PEASS**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
@@ -53,7 +53,7 @@ Além disso, depois de encontrar as credenciais corretas, você pode ser capaz d
 
 #### Autenticação de dispositivo JAMF
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 O binário **`jamf`** continha o segredo para abrir o keychain que, na época da descoberta, era **compartilhado** entre todos e era: **`jk23ucnq91jfu9aj`**.\
 Além disso, o jamf **persiste** como um **LaunchDaemon** em **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
@@ -76,7 +76,9 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <integer>4</integer>
 [...]
 ```
-Portanto, um invasor poderia inserir um pacote malicioso (`pkg`) que **sobrescreve este arquivo** quando instalado, definindo a **URL para um ouvinte Mythic C2 de um agente Typhon** para agora poder abusar do JAMF como C2.
+{% endcode %}
+
+Portanto, um invasor poderia inserir um pacote malicioso (`pkg`) que **sobrescreve esse arquivo** quando instalado, definindo a **URL para um ouvinte Mythic C2 de um agente Typhon** para agora poder abusar do JAMF como C2.
 
 {% code overflow="wrap" %}
 ```bash
@@ -155,7 +157,7 @@ Os três tipos de usuários do MacOS são:
 As informações locais sobre usuários e grupos são armazenadas na pasta _/var/db/dslocal/nodes/Default_.\
 Por exemplo, as informações sobre o usuário chamado _mark_ são armazenadas em _/var/db/dslocal/nodes/Default/users/mark.plist_ e as informações sobre o grupo _admin_ estão em _/var/db/dslocal/nodes/Default/groups/admin.plist_.
 
-Além de usar as arestas HasSession e AdminTo, **MacHound adiciona três novas arestas** ao banco de dados Bloodhound:
+Além de usar as arestas HasSession e AdminTo, o **MacHound adiciona três novas arestas** ao banco de dados Bloodhound:
 
 * **CanSSH** - entidade permitida a fazer SSH para o host
 * **CanVNC** - entidade permitida a fazer VNC para o host

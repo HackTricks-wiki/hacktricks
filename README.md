@@ -5,7 +5,7 @@
 _Logos e design de movimento do Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 {% hint style="info" %}
-**Bem-vindo ao wiki onde você encontrará todos os truques/técnicas/hacks que aprendi em CTFs, aplicativos da vida real, pesquisas e notícias.**
+**Bem-vindo ao wiki onde você encontrará todos os truques/técnicas de hacking/qualquer coisa que eu tenha aprendido em CTFs, aplicativos da vida real, pesquisas e notícias.**
 {% endhint %}
 
 Aqui você pode encontrar uma pequena **introdução:**
@@ -40,7 +40,7 @@ Você pode conferir o **blog** deles em [**https://blog.stmcyber.com**](https://
 
 ![](.gitbook/assets/i3.png)
 
-**Intigriti** é a plataforma de ethical hacking e **bug bounty número 1 da Europa**.
+**Intigriti** é a plataforma de ethical hacking e **bug bounty número 1 da Europa.**
 
 Dica de bug bounty: **cadastre-se** no **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje mesmo e comece a ganhar recompensas de até **$100.000**!
 
@@ -59,7 +59,7 @@ Acesse hoje mesmo:
 
 ### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
-<figure><img src=".gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof é o lar de todos os bug bounties de criptografia.**
 
@@ -121,7 +121,7 @@ Os autores e editores não serão responsáveis, em nenhuma circunstância, por 
 
 Além disso, as técnicas e dicas descritas neste livro são fornecidas apenas para fins educacionais e informativos e não devem ser usadas para atividades ilegais ou maliciosas. Os autores e editores não apoiam ou apoiam quaisquer atividades ilegais ou antiéticas, e qualquer uso das informações contidas neste livro é de responsabilidade e critério do usuário.
 
-O usuário é o único responsável por quaisquer ações tomadas com base nas informações contidas neste livro e deve sempre procurar aconselhamento profissional e assistência ao tentar implementar qualquer uma das técnicas ou dicas descritas aqui.
+O usuário é o único responsável por quaisquer ações tomadas com base nas informações contidas neste livro e deve sempre procurar aconselhamento profissional e assistência ao tentar implementar qualquer uma das técnicas ou dicas aqui descritas.
 
 Ao usar este livro, o usuário concorda em liberar os autores e editores de qualquer responsabilidade por quaisquer danos, perdas ou danos que possam resultar do uso deste livro ou de qualquer uma das informações contidas nele.
 {% endhint %}

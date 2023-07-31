@@ -14,7 +14,7 @@
 
 <figure><img src="../.gitbook/assets/image (7) (2).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof é o lar de todas as recompensas por bugs de criptografia.**
 
@@ -40,7 +40,7 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 * [ ] Verifique as [**variáveis de ambiente**](privilege-escalation/#env-info), algum detalhe sensível?
 * [ ] Procure por [**exploits do kernel**](privilege-escalation/#kernel-exploits) **usando scripts** (DirtyCow?)
 * [ ] **Verifique** se a [**versão do sudo é vulnerável**](privilege-escalation/#sudo-version)
-* [ ] [**Dmesg** verificação de assinatura falhou](privilege-escalation/#dmesg-signature-verification-failed)
+* [ ] [**Dmesg** falha na verificação de assinatura](privilege-escalation/#dmesg-signature-verification-failed)
 * [ ] Mais enumeração do sistema ([data, estatísticas do sistema, informações da CPU, impressoras](privilege-escalation/#more-system-enumeration))
 * [ ] [Enumerar mais defesas](privilege-escalation/#enumerate-possible-defenses)
 
@@ -52,13 +52,13 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 
 ### [**Software Instalado**](privilege-escalation/#installed-software)
 
-* [ ] Verifique se há [**software útil**](privilege-escalation/#useful-software) **instalado**
-* [ ] Verifique se há [**software vulnerável**](privilege-escalation/#vulnerable-software-installed) **instalado**
+* [ ] Verifique se há **software útil** instalado
+* [ ] Verifique se há **software vulnerável** instalado
 
 ### [Processos](privilege-escalation/#processes)
 
 * [ ] Existe algum software desconhecido em execução?
-* [ ] Existe algum software em execução com **privilégios maiores do que deveria ter**?
+* [ ] Existe algum software em execução com **privilégios maiores do que deveria**?
 * [ ] Procure por **exploits de processos em execução** (especialmente a versão em execução).
 * [ ] Você pode **modificar o binário** de algum processo em execução?
 * [ ] **Monitore os processos** e verifique se algum processo interessante está sendo executado com frequência.
@@ -68,7 +68,7 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 
 * [ ] O [**PATH** ](privilege-escalation/#cron-path)está sendo modificado por algum cron e você pode **escrever** nele?
 * [ ] Algum [**curinga** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)em um cron job?
-* [ ] Algum [**script modificável** ](privilege-escalation/#cron-script-overwriting-and-symlink)está sendo **executado** ou está dentro de uma **pasta modificável**?
+* [ ] Algum **script modificável** está sendo **executado** ou está dentro de uma **pasta modificável**?
 * [ ] Você detectou que algum **script** pode estar sendo [**executado** com muita **frequência**](privilege-escalation/#frequent-cron-jobs)? (a cada 1, 2 ou 5 minutos)
 
 ### [Serviços](privilege-escalation/#services)
@@ -143,15 +143,15 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 
 ### [Arquivos Interessantes](privilege-escalation/#interesting-files)
 
-* [ ] **Arquivos de perfil** - Ler dados sensíveis? Escrever para privilégios elevados?
+* [ ] Arquivos de **perfil** - Ler dados sensíveis? Escrever para privilégios elevados?
 * [ ] Arquivos **passwd/shadow** - Ler dados sensíveis? Escrever para privilégios elevados?
-* [ ] Verificar pastas comumente interessantes para dados sensíveis
+* [ ] Verifique pastas comumente interessantes para dados sensíveis
 * [ ] **Localização/Estrutura de arquivos estranha**, você pode ter acesso ou alterar arquivos executáveis
 * [ ] **Modificado** nos últimos minutos
-* [ ] Arquivos **Banco de Dados Sqlite**
+* [ ] Arquivos de banco de dados **Sqlite**
 * [ ] Arquivos **ocultos**
 * [ ] **Scripts/Binários no PATH**
-* [ ] Arquivos **Web** (senhas?)
+* [ ] Arquivos **web** (senhas?)
 * [ ] **Backups**?
 * [ ] **Arquivos conhecidos que contêm senhas**: Use **Linpeas** e **LaZagne**
 * [ ] **Busca genérica**
@@ -168,12 +168,12 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 * [ ] É possível [**abusar do NFS para elevar privilégios**](privilege-escalation/#nfs-privilege-escalation)?
 * [ ] É necessário [**escapar de um shell restritivo**](privilege-escalation/#escaping-from-restricted-shells)?
 
-<figure><img src="../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof é o lar de todas as recompensas por bugs de criptografia.**
 
 **Seja recompensado sem atrasos**\
-As recompensas do HackenProof são lançadas apenas quando os clientes depositam o orçamento da recompensa. Você receberá a recompensa após a verificação do bug.
+As recompensas do HackenProof são lançadas apenas quando os clientes depositam o orçamento de recompensa. Você receberá a recompensa após a verificação do bug.
 
 **Adquira experiência em pentesting web3**\
 Protocolos blockchain e contratos inteligentes são a nova Internet! Domine a segurança web3 em seus dias de ascensão.

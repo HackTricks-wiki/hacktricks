@@ -16,7 +16,7 @@
 
 Ao contrário das Extensões do Kernel, as **Extensões do Sistema são executadas no espaço do usuário** em vez do espaço do kernel, reduzindo o risco de falhas do sistema devido a mau funcionamento da extensão.
 
-<figure><img src="../../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Existem três tipos de extensões do sistema: Extensões do DriverKit, Extensões de Rede e Extensões de Segurança de Endpoint.
 
@@ -36,7 +36,7 @@ As Extensões de Rede fornecem a capacidade de personalizar comportamentos de re
 
 ## Framework de Segurança de Endpoint
 
-O Endpoint Security é um framework fornecido pela Apple no macOS que fornece um conjunto de APIs para segurança do sistema. É destinado ao uso por **fornecedores de segurança e desenvolvedores para construir produtos que possam monitorar e controlar a atividade do sistema** para identificar e proteger contra atividades maliciosas.
+O Framework de Segurança de Endpoint é um framework fornecido pela Apple no macOS que fornece um conjunto de APIs para segurança do sistema. É destinado ao uso por **fornecedores de segurança e desenvolvedores para construir produtos que possam monitorar e controlar a atividade do sistema** para identificar e proteger contra atividades maliciosas.
 
 Este framework fornece uma **coleção de APIs para monitorar e controlar a atividade do sistema**, como execuções de processos, eventos do sistema de arquivos, eventos de rede e kernel.
 
@@ -47,7 +47,7 @@ O núcleo deste framework é implementado no kernel, como uma Extensão do Kerne
 * **EndpointSecurityClientManager**: Isso gerencia a comunicação com os clientes do espaço do usuário, acompanhando quais clientes estão conectados e precisam receber notificações de eventos.
 * **EndpointSecurityMessageManager**: Isso envia mensagens e notificações de eventos para os clientes do espaço do usuário.
 
-Os eventos que o framework de Segurança de Endpoint pode monitorar são categorizados em:
+Os eventos que o Framework de Segurança de Endpoint pode monitorar são categorizados em:
 
 * Eventos de arquivo
 * Eventos de processo
@@ -56,25 +56,25 @@ Os eventos que o framework de Segurança de Endpoint pode monitorar são categor
 
 ### Arquitetura do Framework de Segurança de Endpoint
 
-<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (8).png" alt=""><figcaption></figcaption></figure>
 
-A comunicação do **espaço do usuário** com o framework de Segurança de Endpoint ocorre por meio da classe IOUserClient. Duas subclasses diferentes são usadas, dependendo do tipo de chamador:
+A comunicação do **espaço do usuário** com o Framework de Segurança de Endpoint ocorre por meio da classe IOUserClient. Duas subclasses diferentes são usadas, dependendo do tipo de chamador:
 
 * **EndpointSecurityDriverClient**: Isso requer a permissão `com.apple.private.endpoint-security.manager`, que é detida apenas pelo processo do sistema `endpointsecurityd`.
-* **EndpointSecurityExternalClient**: Isso requer a permissão `com.apple.developer.endpoint-security.client`. Isso seria usado normalmente por software de segurança de terceiros que precisa interagir com o framework de Segurança de Endpoint.
+* **EndpointSecurityExternalClient**: Isso requer a permissão `com.apple.developer.endpoint-security.client`. Isso seria usado normalmente por software de segurança de terceiros que precisa interagir com o Framework de Segurança de Endpoint.
 
-As Extensões de Segurança de Endpoint:**`libEndpointSecurity.dylib`** é a biblioteca C que as extensões do sistema usam para se comunicar com o kernel. Essa biblioteca usa o I/O Kit (`IOKit`) para se comunicar com a KEXT de Segurança de Endpoint.
+As Extensões de Segurança de Endpoint:**`libEndpointSecurity.dylib`** é a biblioteca C que as extensões do sistema usam para se comunicar com o kernel. Essa biblioteca usa o I/O Kit (`IOKit`) para se comunicar com a Extensão de Segurança de Endpoint KEXT.
 
 **`endpointsecurityd`** é um daemon do sistema chave envolvido no gerenciamento e lançamento de extensões de segurança de endpoint, especialmente durante o processo de inicialização inicial. Somente as extensões do sistema marcadas com **`NSEndpointSecurityEarlyBoot`** em seu arquivo `Info.plist` recebem esse tratamento de inicialização inicial.
 
 Outro daemon do sistema, **`sysextd`**, **valida as extensões do sistema** e as move para os locais adequados do sistema. Em seguida, ele solicita ao daemon relevante que carregue a extensão. O **`SystemExtensions.framework`** é responsável por ativar e desativar as extensões do sistema.
 ## Bypassando o ESF
 
-O ESF é usado por ferramentas de segurança que tentarão detectar um red teamer, então qualquer informação sobre como isso poderia ser evitado parece interessante.
+O ESF é usado por ferramentas de segurança que tentarão detectar um red teamer, então qualquer informação sobre como isso poderia ser evitado é interessante.
 
 ### CVE-2021-30965
 
-A questão é que o aplicativo de segurança precisa ter **permissões de Acesso Total ao Disco**. Portanto, se um atacante pudesse remover isso, ele poderia impedir que o software fosse executado:
+A questão é que o aplicativo de segurança precisa ter **permissões de Acesso Total ao Disco**. Portanto, se um invasor pudesse remover isso, ele poderia impedir que o software fosse executado:
 ```bash
 tccutil reset All
 ```
@@ -95,6 +95,6 @@ No final, isso foi corrigido dando a nova permissão **`kTCCServiceEndpointSecur
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo Telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>

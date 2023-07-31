@@ -321,6 +321,7 @@
   * [iOS UIPasteboard](mobile-pentesting/ios-pentesting/ios-uipasteboard.md)
   * [iOS WebViews](mobile-pentesting/ios-pentesting/ios-webviews.md)
 * [Cordova Apps](mobile-pentesting/cordova-apps.md)
+* [Xamarin Apps](mobile-pentesting/xamarin-apps.md)
 
 ## 👽 Network Services Pentesting
 

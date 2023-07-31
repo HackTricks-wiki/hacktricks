@@ -12,7 +12,7 @@
 
 </details>
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof é o lar de todas as recompensas por bugs de criptografia.**
 
@@ -147,7 +147,7 @@ ls /tmp/snap/Users/admin_user # This will work
 ```
 {% endcode %}
 
-Uma explicação mais detalhada pode ser [**encontrada no relatório original**](https://theevilbit.github.io/posts/cve\_2020\_9771/)**.**
+Uma explicação mais detalhada pode ser encontrada no [**relatório original**](https://theevilbit.github.io/posts/cve\_2020\_9771/)**.**
 
 ### Informações Sensíveis
 
@@ -157,7 +157,7 @@ Uma explicação mais detalhada pode ser [**encontrada no relatório original**]
 
 ### Linux Privesc
 
-Antes de mais nada, observe que **a maioria dos truques de escalonamento de privilégios que afetam o Linux/Unix também afetarão as máquinas MacOS**. Portanto, veja:
+Antes de tudo, observe que **a maioria dos truques de escalonamento de privilégios que afetam o Linux/Unix também afetarão as máquinas MacOS**. Portanto, veja:
 
 {% content-ref url="../../linux-hardening/privilege-escalation/" %}
 [privilege-escalation](../../linux-hardening/privilege-escalation/)
@@ -173,7 +173,7 @@ Antes de mais nada, observe que **a maioria dos truques de escalonamento de priv
 * [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
 * [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
 
-<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 **HackenProof é o lar de todas as recompensas por bugs de criptografia.**
 
@@ -181,7 +181,7 @@ Antes de mais nada, observe que **a maioria dos truques de escalonamento de priv
 As recompensas do HackenProof são lançadas apenas quando os clientes depositam o orçamento de recompensa. Você receberá a recompensa após a verificação do bug.
 
 **Adquira experiência em pentesting web3**\
-Protocolos de blockchain e contratos inteligentes são a nova Internet! Domine a segurança web3 em seus dias de ascensão.
+Protocolos blockchain e contratos inteligentes são a nova Internet! Domine a segurança web3 em seus dias de ascensão.
 
 **Torne-se a lenda do hacker web3**\
 Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leaderboard semanal.
@@ -198,6 +198,6 @@ Ganhe pontos de reputação com cada bug verificado e conquiste o topo do leader
 * Descubra [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nossa coleção exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Adquira o [**swag oficial do PEASS & HackTricks**](https://peass.creator-spring.com)
 * **Junte-se ao** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo Discord**](https://discord.gg/hRep4RUj7f) ou ao [**grupo telegram**](https://t.me/peass) ou **siga-me** no **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e para o** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Compartilhe seus truques de hacking enviando PRs para o** [**repositório hacktricks**](https://github.com/carlospolop/hacktricks) **e** [**repositório hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
