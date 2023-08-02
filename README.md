@@ -2,21 +2,21 @@
 
 <figure><img src=".gitbook/assets/hack tricks gif.gif" alt="" width="563"><figcaption></figcaption></figure>
 
-_Hacktricks logos & motion design by_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_由 [_@ppiernacho_](https://www.instagram.com/ppieranacho/) 设计的 Hacktricks 图标和动画。_
 
 {% hint style="info" %}
-**Welcome to the wiki where you will find each hacking trick/technique/whatever I have learnt from CTFs, real life apps, reading researches, and news.**
+**欢迎来到 wiki，在这里您可以找到我从 CTF、现实生活中的应用程序、阅读研究和新闻中学到的每一种黑客技巧/技术/内容。**
 {% endhint %}
 
-Here you can find a little **introduction:**
+在这里您可以找到一些**简介:**
 
-## [**Pentesting Methodology**](generic-methodologies-and-resources/pentesting-methodology.md)
+## [**渗透测试方法**](generic-methodologies-and-resources/pentesting-methodology.md)
 
-Here you will find the **typical flow** that **you should follow when pentesting** one or more **machines**.
+在这里，您将找到对一台或多台**机器进行渗透测试时应遵循的典型流程**。
 
-**Click on the title to start!**
+**点击标题即可开始！**
 
-## Corporate Sponsors
+## 企业赞助商
 
 ### [STM Cyber](https://www.stmcyber.com)
 
