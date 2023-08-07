@@ -76,6 +76,39 @@ Example: **`Whisker.exe add /target:computername$ /domain:constoso.local /dc:dc1
 More options on the [**Readme**](https://github.com/eladshamir/Whisker).
 {% endhint %}
 
+## [pywhisker](https://github.com/ShutdownRepo/pywhisker) <a href="#7e2e" id="7e2e"></a>
+
+pyWhisker is a Python equivalent of the original Whisker made by Elad Shamir and written in C#. This tool allows users to manipulate the msDS-KeyCredentialLink attribute of a target user/computer to obtain full control over that object.
+
+It's based on Impacket and on a Python equivalent of Michael Grafnetter's DSInternals called PyDSInternals made by podalirius.
+This tool, along with Dirk-jan's PKINITtools allow for a complete primitive exploitation on UNIX-based systems only.
+
+
+pyWhisker can be used to operate various actions on the msDs-KeyCredentialLink attribute of a target
+
+- *list*: list all current KeyCredentials ID and creation time
+- *info*: print all info contained in a KeyCredential structure
+- *add*: add a new KeyCredential to the msDs-KeyCredentialLink
+- *remove*: remove a KeyCredential from the msDs-KeyCredentialLink
+- *clear*: remove all KeyCredentials from the msDs-KeyCredentialLink
+- *export*: export all KeyCredentials from the msDs-KeyCredentialLink in JSON
+- *import*: overwrite the msDs-KeyCredentialLink with KeyCredentials from a JSON file
+
+
+pyWhisker supports the following authentications:
+- (NTLM) Cleartext password
+- (NTLM) Pass-the-hash
+- (Kerberos) Cleartext password
+- (Kerberos) Pass-the-key / Overpass-the-hash
+- (Kerberos) Pass-the-cache (type of Pass-the-ticket)
+
+![](https://github.com/ShutdownRepo/pywhisker/blob/main/.assets/add_pfx.png)
+
+
+{% hint style="info" %}
+More options on the [**Readme**](https://github.com/ShutdownRepo/pywhisker).
+{% endhint %}
+
 ## [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
 In several cases, the group "Everyone" / "Authenticated Users" / "Domain Users" or some other **wide group** contains almost all the users in the domain has some `GenericWrite`/`GenericAll` DACLs **over other objects** in the domain. [**ShadowSpray**](https://github.com/Dec0ne/ShadowSpray/) tries to **abuse** therefore **ShadowCredentials** over all of them
