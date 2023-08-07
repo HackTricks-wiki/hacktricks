@@ -1,0 +1,81 @@
+name: Translator to CN (Chinese)
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'scripts/**'
+      - '.gitignore'
+      - '.github/**'
+  workflow_dispatch:
+
+concurrency: cn
+
+jobs:
+  run-translation:
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      LANGUAGE: Chinese
+      BRANCH: cn
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 #Needed to download everything to be able to access the master & language branches
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip3 install openai tqdm tiktoken
+          
+      - name: Update & install wget & translator.py
+        run: |
+          sudo apt-get update
+          sudo apt-get install wget -y
+          mkdir scripts
+          cd scripts
+          wget https://raw.githubusercontent.com/carlospolop/hacktricks-cloud/master/scripts/translator.py
+          cd ..
+
+      - name: Download language branch #Make sure we have last version
+        run: |
+          git config --global user.name 'Translator'
+          git config --global user.email 'github-actions@github.com'
+          git checkout "$BRANCH"
+          git pull
+          git checkout master
+      
+      - name: Run translation script on changed files
+        run: |
+          echo "Starting translations"
+          echo "Commit: $GITHUB_SHA"
+
+          # Export the OpenAI API key as an environment variable
+          export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+
+          # Run the translation script on each changed file
+          git diff --name-only HEAD~1 | grep -v "SUMMARY.md" | while read -r file; do
+            if echo "$file" | grep -qE '\.md$'; then
+              echo -n "$file , " >> /tmp/file_paths.txt
+            else
+              echo "Skipping $file"
+            fi
+          done
+
+          echo "Translating $(cat /tmp/file_paths.txt)"
+          python scripts/translator.py --language "$LANGUAGE" --branch "$BRANCH" --api-key "$OPENAI_API_KEY" -f "$(cat /tmp/file_paths.txt)" -t 3
+
+      - name: Commit and push changes
+        run: |
+          git checkout "$BRANCH"
+          git add -A
+          git commit -m "Translated $BRANCH files" || true
+          git push --set-upstream origin "$BRANCH"
