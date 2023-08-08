@@ -649,7 +649,7 @@
   * [XSS Tools](pentesting-web/xss-cross-site-scripting/xss-tools.md)
 * [XSSI (Cross-Site Script Inclusion)](pentesting-web/xssi-cross-site-script-inclusion.md)
 * [XS-Search/XS-Leaks](pentesting-web/xs-search.md)
-  * [Connection Pool Example](pentesting-web/xs-search/connection-pool-example.md)
+  * [Connection Pool Examples](pentesting-web/xs-search/connection-pool-example.md)
   * [Connection Pool by Destination Example](pentesting-web/xs-search/connection-pool-by-destination-example.md)
   * [Cookie Bomb + Onerror XS Leak](pentesting-web/xs-search/cookie-bomb-+-onerror-xs-leak.md)
   * [URL Max Length - Client Side](pentesting-web/xs-search/url-max-length-client-side.md)
