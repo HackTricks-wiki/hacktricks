@@ -77,20 +77,24 @@ Note that we do not currently have vulnerability data for your image.
 ```bash
 trivy -q -f json <ontainer_name>:<tag>
 ```
+* [**`snyk`**](https://docs.snyk.io/snyk-cli/getting-started-with-the-cli)
+```bash
+snyk container test <image> --json-file-output=<output file> --severity-threshold=high
+```
 * [**`clair-scanner`**](https://github.com/arminc/clair-scanner)
 ```bash
 clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 ```
 ### Dockerイメージの署名
 
-Dockerコンテナイメージは、公開またはプライベートレジストリに保存することができます。イメージが改ざんされていないことを確認するために、コンテナイメージには署名が必要です。コンテンツの提供者は、コンテナイメージの署名とレジストリへのプッシュを管理します。
+Dockerコンテナイメージは、公開またはプライベートレジストリに保存することができます。イメージが改ざんされていないことを確認するために、コンテナイメージには署名が必要です。コンテンツの発行者は、コンテナイメージの署名とレジストリへのプッシュを管理します。
 
 以下は、Dockerコンテンツの信頼性に関する詳細です：
 
 - Dockerコンテンツの信頼性は、[Notaryオープンソースプロジェクト](https://github.com/docker/notary)の実装です。Notaryオープンソースプロジェクトは、[The Update Framework (TUF)プロジェクト](https://theupdateframework.github.io)に基づいています。
-- Dockerコンテンツの信頼性は、`export DOCKER_CONTENT_TRUST=1`で有効になります。Dockerバージョン1.10以降、コンテンツの信頼性はデフォルトで有効になっていません。
+- Dockerコンテンツの信頼性は、`export DOCKER_CONTENT_TRUST=1`で有効になります。Dockerバージョン1.10以降、コンテンツの信頼性はデフォルトでは有効になっていません。
 - コンテンツの信頼性が有効になっている場合、署名されたイメージのみをプルすることができます。イメージをプッシュする際には、タグキーを入力する必要があります。
-- パブリッシャーが初めてdocker pushを使用してイメージをプッシュするときには、ルートキーとタグキーのパスフレーズを入力する必要があります。他のキーは自動的に生成されます。
+- 発行者が初めてdocker pushを使用してイメージをプッシュする場合、ルートキーとタグキーのパスフレーズを入力する必要があります。他のキーは自動的に生成されます。
 - Dockerは、Yubikeyを使用したハードウェアキーのサポートも追加しており、詳細は[こちら](https://blog.docker.com/2015/11/docker-content-trust-yubikey/)で確認できます。
 
 以下は、コンテンツの信頼性が有効になっており、イメージが署名されていない場合に表示されるエラーメッセージです。
@@ -118,7 +122,7 @@ cp ~/.ssh/id_rsa.pub /path/to/backup/location
 cp ~/.ssh/known_hosts /path/to/backup/location
 ```
 
-これにより、プライベートキーと関連するファイルがバックアップされます。
+これにより、プライベートキーと既知のホスト情報がバックアップされます。
 ```bash
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
@@ -165,20 +169,20 @@ Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,ca
 
 **Seccomp**
 
-デフォルトでDockerには有効になっています。これにより、プロセスが呼び出すことができるシスコールをさらに制限するのに役立ちます。\
+デフォルトでDockerには有効になっています。これにより、プロセスが呼び出すことができるシステムコールをさらに制限するのに役立ちます。\
 デフォルトのDocker Seccompプロファイルは、[https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)で見つけることができます。
 
 **AppArmor**
 
 Dockerには、アクティベートできるテンプレートがあります：[https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
-これにより、機能の制限、シスコール、ファイルとフォルダへのアクセスが制限されます...
+これにより、機能の制限、システムコール、ファイルとフォルダへのアクセスが制限されます...
 
 </details>
 
 ### Namespaces
 
-**Namespaces**は、Linuxカーネルの機能であり、一連の**プロセス**が一連の**リソース**を見る一方、別の一連の**プロセス**が異なる一連のリソースを見るようにカーネルリソースを分割します。この機能は、一連のリソースとプロセスに同じ名前空間を持たせることで機能し、ただし、これらの名前空間は異なるリソースを参照します。リソースは複数のスペースに存在する場合があります。
+**Namespaces**は、Linuxカーネルの機能であり、一連の**プロセス**が一連の**リソース**を見る一方、別の一連の**プロセス**が異なる一連のリソースを見るようにカーネルリソースを分割する機能です。この機能は、一連のリソースとプロセスに同じ名前空間を持たせることで機能し、ただし、これらの名前空間は異なるリソースを参照します。リソースは複数のスペースに存在する場合があります。
 
 Dockerは、コンテナの分離を実現するために、次のLinuxカーネルのNamespacesを使用しています：
 
@@ -196,8 +200,8 @@ Dockerは、コンテナの分離を実現するために、次のLinuxカーネ
 
 ### cgroups
 
-Linuxカーネルの機能である**cgroups**は、一連のプロセスに対してCPU、メモリ、IO、ネットワーク帯域幅などのリソースを制限する機能を提供します。 Dockerでは、cgroup機能を使用してリソース制御が可能なコンテナを作成することができます。\
-以下は、ユーザースペースのメモリを500mに制限し、カーネルメモリを50mに制限し、CPUシェアを512に設定し、blkioweightを400に設定したコンテナの例です。 CPUシェアは、コンテナのCPU使用率を制御する比率です。デフォルト値は1024で、0から1024の範囲です。 CPUリソースの競合が発生した場合、3つのコンテナが同じCPUシェア1024を持っている場合、各コンテナは最大33%のCPUを使用できます。 blkio-weightは、コンテナのIOを制御する比率です。デフォルト値は500で、10から1000の範囲です。
+Linuxカーネルの機能である**cgroups**は、一連のプロセスに対してCPU、メモリ、IO、ネットワーク帯域幅などのリソースを制限する機能を提供します。Dockerでは、cgroup機能を使用してリソース制御を行うことができるコンテナを作成することができます。\
+以下は、ユーザースペースのメモリを500mに制限し、カーネルメモリを50mに制限し、CPUシェアを512に設定し、blkioweightを400に設定したコンテナの例です。CPUシェアは、コンテナのCPU使用率を制御する比率です。デフォルト値は1024で、0から1024の範囲です。CPUリソースの競合が発生した場合、3つのコンテナが同じCPUシェア1024を持っている場合、各コンテナは最大33%のCPUを使用できます。blkio-weightは、コンテナのIOを制御する比率です。デフォルト値は500で、10から1000の範囲です。
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
 ```
@@ -215,7 +219,7 @@ ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the 
 
 ### Capabilities
 
-Capabilitiesは、rootユーザーに許可される機能をより細かく制御することができます。DockerはLinuxカーネルの機能を使用して、ユーザーの種類に関係なく、コンテナ内で実行できる操作を制限します。
+Capabilitiesは、rootユーザーに許可される可能性のある機能をより細かく制御することができます。DockerはLinuxカーネルの機能を使用して、ユーザーの種類に関係なく、コンテナ内で実行できる操作を制限します。
 
 Dockerコンテナが実行されると、プロセスは分離から脱出するために使用できる機能を削除します。これにより、プロセスが機密なアクションを実行して脱出することができないようになります。
 
@@ -223,27 +227,27 @@ Dockerコンテナが実行されると、プロセスは分離から脱出す�
 [linux-capabilities.md](../linux-capabilities.md)
 {% endcontent-ref %}
 
-### DockerのSeccomp
+### DockerにおけるSeccomp
 
-これは、Dockerがコンテナ内で使用できるシスコールを制限するセキュリティ機能です。
+これは、コンテナ内で使用できるシスコールを制限するセキュリティ機能です。
 
 {% content-ref url="seccomp.md" %}
 [seccomp.md](seccomp.md)
 {% endcontent-ref %}
 
-### DockerのAppArmor
+### DockerにおけるAppArmor
 
-AppArmorは、カーネルの拡張機能であり、コンテナを制限されたリソースとパープログラムプロファイルのセットに制約します。
+AppArmorは、カーネルの拡張機能であり、コンテナを制限されたリソースのセットに制約するためのプログラムごとのプロファイルを提供します。
 
 {% content-ref url="apparmor.md" %}
 [apparmor.md](apparmor.md)
 {% endcontent-ref %}
 
-### DockerのSELinux
+### DockerにおけるSELinux
 
-[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux)は、ラベリングシステムです。すべてのプロセスとすべてのファイルシステムオブジェクトにはラベルがあります。SELinuxポリシーは、システム上の他のすべてのラベルとプロセスラベルが許可される操作に関するルールを定義します。
+[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux)は、ラベリングシステムです。すべてのプロセスとすべてのファイルシステムオブジェクトにはラベルがあります。SELinuxポリシーは、システム上の他のすべてのラベルとのプロセスラベルが許可される操作に関するルールを定義します。
 
-コンテナエンジンは、通常`container_t`という単一の制約されたSELinuxラベルでコンテナプロセスを起動し、コンテナ内のコンテナを`container_file_t`というラベルで設定します。SELinuxポリシールールは基本的に、`container_t`プロセスが`container_file_t`とラベル付けされたファイルのみを読み取り/書き込み/実行できるということを示しています。
+コンテナエンジンは、通常`container_t`という単一の制約付きSELinuxラベルでコンテナプロセスを起動し、コンテナ内のコンテナを`container_file_t`というラベルでラベル付けします。SELinuxポリシールールは基本的に、`container_t`プロセスが`container_file_t`とラベル付けされたファイルを読み取り/書き込み/実行できるということを示しています。
 
 {% content-ref url="../selinux.md" %}
 [selinux.md](../selinux.md)
@@ -257,11 +261,27 @@ AppArmorは、カーネルの拡張機能であり、コンテナを制限され
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
 {% endcontent-ref %}
 
-## おもしろいDockerフラグ
+## コンテナからのDoS
+
+コンテナが使用できるリソースを適切に制限していない場合、侵害されたコンテナは実行されているホストをDoS攻撃する可能性があります。
+
+* CPU DoS
+```bash
+# stress-ng
+sudo apt-get install -y stress-ng && stress-ng --vm 1 --vm-bytes 1G --verify -t 5m
+
+# While loop
+docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
+```
+* バンド幅 DoS
+```bash
+nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444; done
+```
+## Dockerの興味深いフラグ
 
 ### --privilegedフラグ
 
-次のページでは、`--privileged`フラグが何を意味するかを学ぶことができます。
+次のページでは、**`--privileged`フラグが意味するもの**について学ぶことができます：
 
 {% content-ref url="docker-privileged.md" %}
 [docker-privileged.md](docker-privileged.md)
@@ -271,9 +291,9 @@ AppArmorは、カーネルの拡張機能であり、コンテナを制限され
 
 #### no-new-privileges
 
-低特権ユーザーとしてアクセスを取得した攻撃者が実行されているコンテナがある場合、ミス構成されたsuidバイナリを持つと、攻撃者はコンテナ内で特権をエスカレートさせる可能性があります。これにより、攻撃者はコンテナから脱出することができるかもしれません。
+低い特権ユーザーとしてアクセスを取得した攻撃者が実行中のコンテナがある場合、**誤って設定されたsuidバイナリ**を悪用して、コンテナ内で特権をエスカレートする可能性があります。これにより、攻撃者はコンテナから脱出することができます。
 
-`no-new-privileges`オプションを有効にしてコンテナを実行すると、この種の特権エスカレーションを防ぐことができます。
+**`no-new-privileges`**オプションを有効にしてコンテナを実行すると、このような特権エスカレーションを**防ぐことができます**。
 ```
 docker run -it --security-opt=no-new-privileges:true nonewpriv
 ```
@@ -387,12 +407,12 @@ file: ./my_secret_file.txt
 * Dockerデーモンを公開する場合は、クライアントとサーバーの認証にHTTPSを使用してください。
 * Dockerfileでは、ADDの代わりにCOPYを使用してください。ADDは自動的にzipファイルを展開し、URLからファイルをコピーすることができます。COPYにはこれらの機能がありません。可能な限り、リモートURLやZipファイルを介した攻撃に対して脆弱にならないように、ADDの使用を避けてください。
 * 各マイクロサービスには**個別のコンテナ**を使用してください。
-* コンテナ内に**sshを配置しないでください**。コンテナへのsshは「docker exec」を使用して行うことができます。
+* コンテナ内にsshを配置しないでください。コンテナへのsshは「docker exec」を使用して行うことができます。
 * **より小さな**コンテナ**イメージ**を使用してください。
 
 ## Dockerの脱獄/特権エスカレーション
 
-もし**Dockerコンテナ内にいる**か、**dockerグループのユーザーにアクセス権がある**場合、**脱獄して特権をエスカレーション**することができます。
+もし**Dockerコンテナ内にいる**か、**dockerグループのユーザーにアクセス権がある**場合、**脱獄して特権をエスカレーション**することができます:
 
 {% content-ref url="docker-breakout-privilege-escalation/" %}
 [docker-breakout-privilege-escalation](docker-breakout-privilege-escalation/)
@@ -400,7 +420,7 @@ file: ./my_secret_file.txt
 
 ## Docker認証プラグインのバイパス
 
-もしdockerソケットにアクセス権限があるか、**dockerグループのユーザーにアクセス権限があるが、docker認証プラグインによって制限されている場合**、それを**バイパス**できるかどうかを確認してください。
+もしdockerソケットにアクセス権限があるか、**dockerグループのユーザーであるが、docker認証プラグインによって制限されている場合**、それを**バイパス**できるかどうかを確認してください:
 
 {% content-ref url="authz-and-authn-docker-access-authorization-plugin.md" %}
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
@@ -409,13 +429,13 @@ file: ./my_secret_file.txt
 ## Dockerのハードニング
 
 * ツール[**docker-bench-security**](https://github.com/docker/docker-bench-security)は、Dockerコンテナを本番環境で展開する際の数十の一般的なベストプラクティスをチェックするスクリプトです。テストはすべて自動化されており、[CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/)に基づいています。\
-ツールを実行するには、Dockerを実行しているホストからまたは十分な権限を持つコンテナから実行する必要があります。実行方法については、READMEを参照してください：[**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security)。
+ツールを実行するには、Dockerを実行しているホストからまたは十分な権限を持つコンテナから実行する必要があります。実行方法については、READMEを参照してください: [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security)。
 
 ## 参考文献
 
 * [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 * [https://twitter.com/\_fel1x/status/1151487051986087936](https://twitter.com/\_fel1x/status/1151487051986087936)
-* [https://ajxchapman.github.io/containers/2020/11/19/privileged-container-escape.html](https://
+* [https://ajxchapman.github.io/containers/2020/11/19/privileged-container-escape.html](https://ajxchapman.github.io/containers/2020
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
