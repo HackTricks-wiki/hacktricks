@@ -14,7 +14,7 @@ Obtén acceso hoy mismo:
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS & HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -76,6 +76,10 @@ Note that we do not currently have vulnerability data for your image.
 * [**`trivy`**](https://github.com/aquasecurity/trivy)
 ```bash
 trivy -q -f json <ontainer_name>:<tag>
+```
+* [**`snyk`**](https://docs.snyk.io/snyk-cli/getting-started-with-the-cli)
+```bash
+snyk container test <image> --json-file-output=<output file> --severity-threshold=high
 ```
 * [**`clair-scanner`**](https://github.com/arminc/clair-scanner)
 ```bash
@@ -187,8 +191,8 @@ Para **más información sobre los namespaces**, consulta la siguiente página:
 
 ### cgroups
 
-La característica del kernel de Linux llamada **cgroups** proporciona la capacidad de **restringir recursos como la CPU, la memoria, la E/S y el ancho de banda de la red** para un conjunto de procesos. Docker permite crear contenedores utilizando la característica de cgroups, lo que permite controlar los recursos específicos del contenedor.\
-A continuación se muestra un ejemplo de un contenedor creado con una limitación de memoria del espacio de usuario de 500m, una limitación de memoria del kernel de 50m, una cuota de CPU de 512 y un peso de blkioweight de 400. La cuota de CPU es una proporción que controla el uso de CPU del contenedor. Tiene un valor predeterminado de 1024 y un rango entre 0 y 1024. Si tres contenedores tienen la misma cuota de CPU de 1024, cada contenedor puede utilizar hasta el 33% de la CPU en caso de conflicto de recursos de CPU. El peso de blkioweight es una proporción que controla la E/S del contenedor. Tiene un valor predeterminado de 500 y un rango entre 10 y 1000.
+La característica del kernel de Linux llamada **cgroups** proporciona la capacidad de **restringir recursos como la CPU, la memoria, la E/S y el ancho de banda de red** para un conjunto de procesos. Docker permite crear contenedores utilizando la característica de cgroups, lo que permite controlar los recursos específicos del contenedor.\
+A continuación se muestra un contenedor creado con una memoria de espacio de usuario limitada a 500m, una memoria de kernel limitada a 50m, una cuota de CPU de 512 y un peso de blkioweight de 400. La cuota de CPU es una proporción que controla el uso de CPU del contenedor. Tiene un valor predeterminado de 1024 y un rango entre 0 y 1024. Si tres contenedores tienen la misma cuota de CPU de 1024, cada contenedor puede utilizar hasta el 33% de la CPU en caso de conflicto de recursos de CPU. El peso de blkioweight es una proporción que controla la E/S del contenedor. Tiene un valor predeterminado de 500 y un rango entre 10 y 1000.
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
 ```
@@ -242,12 +246,28 @@ Los motores de contenedores lanzan **procesos de contenedor con una única etiqu
 
 ### AuthZ y AuthN
 
-Un complemento de autorización **aprueba** o **deniega** **solicitudes** al **daemon** de Docker en función tanto del **contexto de autenticación** actual como del **contexto de comando**. El **contexto de autenticación** contiene todos los **detalles del usuario** y el **método de autenticación**. El **contexto de comando** contiene todos los datos **relevantes** de la **solicitud**.
+Un complemento de autorización **aprueba** o **deniega** las **solicitudes** al **daemon** de Docker en función tanto del **contexto de autenticación** actual como del **contexto de comando**. El **contexto de autenticación** contiene todos los **detalles del usuario** y el **método de autenticación**. El **contexto de comando** contiene todos los datos relevantes de la solicitud.
 
 {% content-ref url="authz-and-authn-docker-access-authorization-plugin.md" %}
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
 {% endcontent-ref %}
 
+## DoS desde un contenedor
+
+Si no limitas adecuadamente los recursos que un contenedor puede utilizar, un contenedor comprometido podría realizar un ataque de denegación de servicio (DoS) en el host donde se está ejecutando.
+
+* DoS de CPU
+```bash
+# stress-ng
+sudo apt-get install -y stress-ng && stress-ng --vm 1 --vm-bytes 1G --verify -t 5m
+
+# While loop
+docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
+```
+* Denegación de servicio de ancho de banda
+```bash
+nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444; done
+```
 ## Interesantes banderas de Docker
 
 ### Banderas --privileged
@@ -332,16 +352,9 @@ secrets:
 my_secret:
 file: ./my_secret_file.txt
 ```
-A continuación se muestra el contenido traducido al español:
-
-```markdown
-Luego, inicie Compose como de costumbre con `docker-compose up --build my_service`.
-
-Si estás utilizando [Kubernetes](https://kubernetes.io/docs/concepts/configuration/secret/), tiene soporte para secretos. [Helm-Secrets](https://github.com/futuresimple/helm-secrets) puede ayudar a facilitar la gestión de secretos en K8s. Además, K8s tiene Controles de Acceso Basados en Roles (RBAC), al igual que Docker Enterprise. RBAC facilita la gestión y seguridad del acceso a los secretos para los equipos.
-
 ### gVisor
 
-**gVisor** es un kernel de aplicación, escrito en Go, que implementa una parte sustancial de la superficie del sistema Linux. Incluye un tiempo de ejecución de la Iniciativa de Contenedor Abierto (OCI) llamado `runsc` que proporciona un **límite de aislamiento entre la aplicación y el kernel del host**. El tiempo de ejecución `runsc` se integra con Docker y Kubernetes, lo que facilita la ejecución de contenedores en un entorno aislado.
+**gVisor** es un kernel de aplicación, escrito en Go, que implementa una parte sustancial de la superficie del sistema Linux. Incluye un tiempo de ejecución de la [Iniciativa de Contenedor Abierto (OCI)](https://www.opencontainers.org) llamado `runsc` que proporciona un **límite de aislamiento entre la aplicación y el kernel del host**. El tiempo de ejecución `runsc` se integra con Docker y Kubernetes, lo que facilita la ejecución de contenedores en un entorno aislado.
 
 {% embed url="https://github.com/google/gvisor" %}
 
@@ -353,32 +366,32 @@ Si estás utilizando [Kubernetes](https://kubernetes.io/docs/concepts/configurat
 
 ### Consejos resumidos
 
-* **No uses la bandera `--privileged` ni montes un** [**socket de Docker dentro del contenedor**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** El socket de Docker permite generar contenedores, por lo que es una forma sencilla de tomar el control total del host, por ejemplo, ejecutando otro contenedor con la bandera `--privileged`.
+* **No utilices la bandera `--privileged` ni montes un** [**socket de Docker dentro del contenedor**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** El socket de Docker permite generar contenedores, por lo que es una forma sencilla de tomar el control total del host, por ejemplo, ejecutando otro contenedor con la bandera `--privileged`.
 * No **ejecutes como root dentro del contenedor. Utiliza un** [**usuario diferente**](https://docs.docker.com/develop/develop-images/dockerfile\_best-practices/#user) **y** [**espacios de nombres de usuario**](https://docs.docker.com/engine/security/userns-remap/)**.** El usuario root en el contenedor es el mismo que en el host a menos que se remapee con espacios de nombres de usuario. Solo está ligeramente restringido por, principalmente, los espacios de nombres de Linux, las capacidades y los grupos de control.
 * [**Elimina todas las capacidades**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) y habilita solo las necesarias** (`--cap-add=...`). Muchas cargas de trabajo no necesitan ninguna capacidad y agregarlas aumenta el alcance de un posible ataque.
 * [**Utiliza la opción de seguridad "no-new-privileges"**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) para evitar que los procesos obtengan más privilegios, por ejemplo, a través de binarios suid.
 * [**Limita los recursos disponibles para el contenedor**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Los límites de recursos pueden proteger la máquina de ataques de denegación de servicio.
 * **Ajusta los perfiles de** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(o SELinux)** para restringir las acciones y las llamadas al sistema disponibles para el contenedor al mínimo necesario.
-* **Utiliza** [**imágenes oficiales de Docker**](https://docs.docker.com/docker-hub/official\_images/) **y exige firmas** o crea tus propias imágenes basadas en ellas. No heredes ni uses imágenes con puertas traseras. También guarda las claves raíz y las contraseñas en un lugar seguro. Docker tiene planes para gestionar las claves con UCP.
+* **Utiliza** [**imágenes oficiales de Docker**](https://docs.docker.com/docker-hub/official\_images/) **y exige firmas** o crea tus propias imágenes basadas en ellas. No heredes ni utilices imágenes con puertas traseras. También guarda las claves raíz y las contraseñas en un lugar seguro. Docker tiene planes para gestionar las claves con UCP.
 * **Reconstruye regularmente** tus imágenes para **aplicar parches de seguridad al host y a las imágenes**.
 * Gestiona tus **secretos de manera inteligente** para que sea difícil para el atacante acceder a ellos.
 * Si **expones el demonio de Docker, utiliza HTTPS** con autenticación de cliente y servidor.
 * En tu Dockerfile, **prefiere COPY en lugar de ADD**. ADD extrae automáticamente archivos comprimidos y puede copiar archivos desde URL. COPY no tiene estas capacidades. Siempre que sea posible, evita usar ADD para no ser susceptible a ataques a través de URL remotas y archivos Zip.
 * Ten **contenedores separados para cada microservicio**.
-* **No incluyas SSH** dentro del contenedor, se puede utilizar "docker exec" para acceder por SSH al contenedor.
+* **No incluyas ssh** dentro del contenedor, se puede utilizar "docker exec" para acceder por ssh al contenedor.
 * Utiliza **imágenes de contenedor más pequeñas**.
 
 ## Escape de Docker / Escalada de privilegios
 
-Si estás **dentro de un contenedor de Docker** o tienes acceso a un usuario en el **grupo docker**, puedes intentar **escapar y escalar privilegios**:
+Si estás **dentro de un contenedor de Docker** o tienes acceso a un usuario en el **grupo de Docker**, puedes intentar **escapar y escalar privilegios**:
 
 {% content-ref url="docker-breakout-privilege-escalation/" %}
 [docker-breakout-privilege-escalation](docker-breakout-privilege-escalation/)
 {% endcontent-ref %}
 
-## Bypass de Plugin de Autenticación de Docker
+## Bypass del plugin de autenticación de Docker
 
-Si tienes acceso al socket de Docker o tienes acceso a un usuario en el **grupo docker pero tus acciones están limitadas por un plugin de autenticación de Docker**, verifica si puedes **bypass**:
+Si tienes acceso al socket de Docker o tienes acceso a un usuario en el **grupo de Docker pero tus acciones están limitadas por un plugin de autenticación de Docker**, verifica si puedes **burlarlo**:
 
 {% content-ref url="authz-and-authn-docker-access-authorization-plugin.md" %}
 [authz-and-authn-docker-access-authorization-plugin.md](authz-and-authn-docker-access-authorization-plugin.md)
@@ -386,8 +399,8 @@ Si tienes acceso al socket de Docker o tienes acceso a un usuario en el **grupo 
 
 ## Reforzamiento de Docker
 
-* La herramienta [**docker-bench-security**](https://github.com/docker/docker-bench-security) es un script que verifica docenas de mejores prácticas comunes para implementar contenedores de Docker en producción. Las pruebas son todas automatizadas y se basan en el [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
-Debes ejecutar la herramienta desde el host que ejecuta Docker o desde un contenedor con suficientes privilegios. Descubre **cómo ejecutarlo en el archivo README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
+* La herramienta [**docker-bench-security**](https://github.com/docker/docker-bench-security) es un script que verifica docenas de prácticas recomendadas comunes para implementar contenedores de Docker en producción. Las pruebas son todas automatizadas y se basan en el [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
+Debes ejecutar la herramienta desde el host que ejecuta Docker o desde un contenedor con suficientes privilegios. Descubre **cómo ejecutarla en el archivo README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Referencias
 
@@ -402,7 +415,6 @@ Debes ejecutar la herramienta desde el host que ejecuta Docker o desde un conten
 * [https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57](https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57)
 
 <details>
-```
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
