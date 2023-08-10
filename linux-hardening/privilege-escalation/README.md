@@ -1339,7 +1339,7 @@ Notice that if `Host` is `*` every time the user jumps to a different machine, t
 The file `/etc/ssh_config` can **override** this **options** and allow or denied this configuration.\
 The file `/etc/sshd_config` can **allow** or **denied** ssh-agent forwarding with the keyword `AllowAgentForwarding` (default is allow).
 
-If you find that Forward Agent is configured in an environment read the following page as **you may be able to abuse it to escalate privileges:**:
+If you find that Forward Agent is configured in an environment read the following page as **you may be able to abuse it to escalate privileges**:
 
 {% content-ref url="ssh-forward-agent-exploitation.md" %}
 [ssh-forward-agent-exploitation.md](ssh-forward-agent-exploitation.md)
