@@ -45,7 +45,7 @@ uint32_t	align;		/* 2の累乗としてのアライメント */
 };
 </code></pre>
 
-ヘッダーには**マジック**バイトがあり、その後にファイルが含む**アーキテクチャ**の数（`nfat_arch`）と、各アーキテクチャには`fat_arch`構造体があります。
+ヘッダーには**マジック**バイトが続き、ファイルが含む**アーキテクチャ**の数（`nfat_arch`）と、各アーキテクチャには`fat_arch`構造体があります。
 
 次のコマンドで確認します：
 
@@ -74,7 +74,7 @@ capabilities PTR_AUTH_VERSION USERSPACE 0
 </strong>    align 2^14 (16384)
 </code></pre>
 
-または、[Mach-O View](https://sourceforge.net/projects/machoview/)ツールを使用します：
+または[Mach-O View](https://sourceforge.net/projects/machoview/)ツールを使用することもできます：
 
 <figure><img src="../../../.gitbook/assets/image (5) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -82,7 +82,7 @@ capabilities PTR_AUTH_VERSION USERSPACE 0
 
 ## **Mach-Oヘッダー**
 
-ヘッダーには、ファイルをMach-Oファイルとして識別するためのマジックバイトや、ターゲットアーキテクチャに関する情報など、ファイルに関する基本情報が含まれています。次のコマンドで確認できます：`mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
+ヘッダーには、ファイルを識別するためのマジックバイトや、ターゲットアーキテクチャに関する情報など、ファイルに関する基本情報が含まれています。次のコマンドで確認できます：`mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
 #define MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
@@ -195,7 +195,7 @@ uint32_t	reserved3;	/* reserved */
 
 もし、**セクションオフセット**（0x37DC）に**アーキテクチャが始まるオフセット**（この場合は`0x18000`）を**追加**すると、`0x37DC + 0x18000 = 0x1B7DC`となります。
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 また、**コマンドライン**からも**ヘッダ情報**を取得することが可能です。
 ```bash
@@ -203,23 +203,23 @@ otool -lv /bin/ls
 ```
 このコマンドによって読み込まれる一般的なセグメントは次のとおりです：
 
-* **`__PAGEZERO`**：カーネルに対して、**アドレスゼロをマップ**しないように指示します。このセグメントは、読み取り、書き込み、実行ができないようにするために、構造体内のmaxprotとminprot変数がゼロに設定されます。
-* この割り当ては、**NULLポインタの逆参照の脆弱性を緩和**するために重要です。
-* **`__TEXT`**：**実行可能なコード**と**読み取り専用のデータ**を含んでいます。このセグメントの一般的なセクション：
+* **`__PAGEZERO`**：カーネルに対して、**アドレスゼロをマップ**するように指示します。このページは**読み取り、書き込み、実行ができない**ようになっています。構造体内のmaxprotとminprot変数はゼロに設定されており、このページには**読み書き実行権限がない**ことを示しています。
+* この割り当ては、**NULLポインタの逆参照の脆弱性を軽減**するために重要です。
+* **`__TEXT`**：**実行可能な**コードと**読み取り専用の**データが含まれています。このセグメントの一般的なセクション：
 * `__text`：コンパイルされたバイナリコード
 * `__const`：定数データ
 * `__cstring`：文字列定数
 * `__stubs`と`__stubs_helper`：ダイナミックライブラリの読み込みプロセス中に関与します。
-* **`__DATA`**：**書き込み可能な**データを含んでいます。
+* **`__DATA`**：**書き込み可能な**データが含まれています。
 * `__data`：初期化されたグローバル変数
 * `__bss`：初期化されていない静的変数
 * `__objc_*`（\_\_objc\_classlist、\_\_objc\_protolistなど）：Objective-Cランタイムで使用される情報
-* **`__LINKEDIT`**：リンカ（dyld）のための情報を含んでいます。「シンボル、文字列、および再配置テーブルエントリ」など。
-* **`__OBJC`**：Objective-Cランタイムで使用される情報を含んでいます。ただし、この情報は\_\_DATAセグメント内のさまざまな\_\_objc\_\*セクションにも見つかる場合があります。
+* **`__LINKEDIT`**：リンカ（dyld）のための情報を含みます。「シンボル、文字列、および再配置テーブルエントリ」などです。
+* **`__OBJC`**：Objective-Cランタイムで使用される情報を含みます。ただし、この情報は\_\_DATAセグメント内のさまざまな\_\_objc\_\*セクションにも見つかる場合があります。
 
 ### **`LC_MAIN`**
 
-**entryoff属性**にエントリーポイントが含まれています。ロード時に、**dyld**はこの値を（メモリ内の）**バイナリのベースに追加**し、バイナリのコードの実行を開始するためにこの命令にジャンプします。
+**entryoff属性**にエントリーポイントが含まれています。ロード時に、**dyld**は単純にこの値を（メモリ内の）**バイナリのベースに追加**し、バイナリのコードの実行を開始するためにこの命令にジャンプします。
 
 ### **LC\_CODE\_SIGNATURE**
 
@@ -228,13 +228,13 @@ Macho-Oファイルの**コード署名に関する情報**が含まれていま
 
 ### **LC\_LOAD\_DYLINKER**
 
-プロセスのアドレス空間に共有ライブラリをマップする**動的リンカの実行可能ファイルへのパス**が含まれています。**値は常に`/usr/lib/dyld`**に設定されます。重要な点として、macOSではdylibのマッピングは**カーネルモードではなくユーザーモード**で行われることに注意してください。
+プロセスのアドレス空間に共有ライブラリをマップする**動的リンカの実行可能ファイルへのパス**が含まれています。**値は常に`/usr/lib/dyld`**に設定されています。重要な点として、macOSではdylibのマッピングは**カーネルモードではなくユーザーモード**で行われることに注意してください。
 
 ### **`LC_LOAD_DYLIB`**
 
-このロードコマンドは、Mach-Oバイナリが必要とする**動的ライブラリの依存関係**を記述します。Mach-Oバイナリが必要とする各ライブラリには、LC\_LOAD\_DYLIBロードコマンドがあります。
+このロードコマンドは、Mach-Oバイナリが必要とする**動的ライブラリの依存関係**を記述します。Mach-Oバイナリが必要とする**各ライブラリ**に対してLC\_LOAD\_DYLIBロードコマンドがあります。
 
-* このロードコマンドは、実際の依存する動的ライブラリを記述する**`dylib_command`**型の構造体です。
+* このロードコマンドは、**`dylib_command`**型の構造体（実際の依存する動的ライブラリを記述するstruct dylibを含む）です。
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -298,7 +298,7 @@ size -m /bin/ls
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**

@@ -21,7 +21,7 @@ otool -tv /bin/ps #Decompile application
 ```
 ### objdump
 
-`objdump`は、バイナリファイルの解析とデバッグに使用されるユーティリティです。このツールは、オブジェクトファイルや実行可能ファイルのセクション、シンボル、リロケーションエントリなどの情報を表示します。
+objdumpは、バイナリファイルの解析とデバッグに使用されるユーティリティです。objdumpを使用すると、実行可能ファイルやオブジェクトファイルのセクション、シンボル、リロケーションエントリなどの情報を表示することができます。
 
 #### 使用法
 
@@ -31,11 +31,12 @@ objdump [オプション] <ファイル>
 
 #### オプション
 
-- `-d`：逆アセンブルされたコードを表示します。
-- `-t`：シンボルテーブルを表示します。
-- `-r`：リロケーションエントリを表示します。
-- `-s`：セクションの内容を表示します。
-- `-x`：ヘッダ情報を表示します。
+- `-d` : ディスアセンブルされたコードを表示します。
+- `-t` : シンボルテーブルを表示します。
+- `-r` : リロケーションエントリを表示します。
+- `-s` : セクションの内容を表示します。
+- `-h` : セクションヘッダを表示します。
+- `-x` : ヘッダ情報を表示します。
 
 #### 例
 
@@ -43,11 +44,37 @@ objdump [オプション] <ファイル>
 objdump -d binary
 ```
 
-このコマンドは、`binary`という名前のバイナリファイルの逆アセンブルされたコードを表示します。
+このコマンドは、バイナリファイルのディスアセンブルされたコードを表示します。
 
-#### 注意事項
+```
+objdump -t binary
+```
 
-`objdump`は、バイナリファイルの解析に使用されるため、慎重に使用する必要があります。不正な目的で使用しないようにしてください。
+このコマンドは、バイナリファイルのシンボルテーブルを表示します。
+
+```
+objdump -r binary
+```
+
+このコマンドは、バイナリファイルのリロケーションエントリを表示します。
+
+```
+objdump -s binary
+```
+
+このコマンドは、バイナリファイルのセクションの内容を表示します。
+
+```
+objdump -h binary
+```
+
+このコマンドは、バイナリファイルのセクションヘッダを表示します。
+
+```
+objdump -x binary
+```
+
+このコマンドは、バイナリファイルのヘッダ情報を表示します。
 ```bash
 objdump -m --dylibs-used /bin/ls #List dynamically linked libraries
 objdump -m -h /bin/ls # Get headers information
@@ -74,23 +101,13 @@ ARCH=x86_64 jtool2 --sig /System/Applications/Automator.app/Contents/MacOS/Autom
 ```
 ### Codesign
 
-Codesign（コードサイン）は、macOSにおいてアプリケーションの信頼性とセキュリティを確保するための重要な手法です。Codesignは、アプリケーションが信頼できるソースから提供され、改ざんされていないことを確認するために使用されます。
+Codesign（コードサイン）は、macOSにおけるアプリケーションの署名プロセスです。アプリケーションをコードサインすることで、そのアプリケーションが信頼できるものであることを証明し、ユーザーに安全性を提供します。
 
-Codesignによって、アプリケーションにはデジタル署名が付与されます。この署名には、アプリケーションの開発者や配布元の情報が含まれています。また、アプリケーションが改ざんされていないことを確認するためのチェックサムも含まれています。
+コードサインには、開発者証明書を使用します。開発者証明書は、Apple Developer Programに登録することで入手できます。アプリケーションをコードサインするには、開発者証明書を使用してアプリケーションにデジタル署名を付与する必要があります。
 
-Codesignによってアプリケーションが署名されると、macOSはそのアプリケーションを実行する際に署名を検証します。もし署名が有効でない場合、macOSはアプリケーションの実行をブロックします。
+コードサインされたアプリケーションは、macOSにおいて信頼されたアプリケーションとして扱われます。ユーザーは、コードサインされたアプリケーションが改ざんされていないことや、信頼できる開発者によって作成されたものであることを確認できます。
 
-Codesignは、アプリケーションの信頼性を確保するだけでなく、プライバシーとセキュリティの向上にも役立ちます。署名されたアプリケーションは、システムの特権を要求することができますが、その際にはユーザーに対して警告が表示されます。
-
-アプリケーションのCodesignを確認するには、ターミナルで以下のコマンドを実行します。
-
-```bash
-codesign -dv /path/to/application.app
-```
-
-このコマンドによって、アプリケーションの署名情報やチェックサムが表示されます。また、署名が有効であるかどうかも確認できます。
-
-Codesignは、macOSアプリケーションのセキュリティを向上させるための重要な手法です。アプリケーションの署名を確認することで、信頼性のあるアプリケーションのみを実行することができます。
+コードサインは、アプリケーションのセキュリティを向上させるだけでなく、特権エスカレーション攻撃などの悪意のある活動を防ぐための重要な手段です。
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -110,11 +127,11 @@ codesign -s <cert-name-keychain> toolsdemo
 ### SuspiciousPackage
 
 [**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html)は、インストールする前に**.pkg**ファイル（インストーラ）を検査し、中身を確認するのに役立つツールです。\
-これらのインストーラには、マルウェアの作者が通常悪用する`preinstall`と`postinstall`のBashスクリプトが含まれています。
+これらのインストーラには、マルウェアの作者が通常悪用する`preinstall`と`postinstall`のbashスクリプトが含まれています。
 
 ### hdiutil
 
-このツールは、Appleディスクイメージ（**.dmg**）ファイルを実行する前に検査するためにマウントすることができます。
+このツールは、Appleのディスクイメージ（**.dmg**）ファイルを実行する前に検査するためにマウントすることができます。
 ```bash
 hdiutil attach ~/Downloads/Firefox\ 58.0.2.dmg
 ```
@@ -143,18 +160,18 @@ Objective-Cを使用するバイナリで関数が呼び出されると、コン
 この関数が期待するパラメータは次のとおりです：
 
 * 最初のパラメータ（**self**）は、「メッセージを受け取るクラスのインスタンスを指すポインタ」です。簡単に言えば、メソッドが呼び出されるオブジェクトです。メソッドがクラスメソッドの場合、これはクラスオブジェクト（全体として）のインスタンスになります。一方、インスタンスメソッドの場合、selfはクラスのインスタンスとしてインスタンス化されたオブジェクトを指します。
-* 2番目のパラメータ（**op**）は、「メッセージを処理するメソッドのセレクタ」です。簡単に言えば、これは単に**メソッドの名前**です。
+* 2番目のパラメータ（**op**）は、「メッセージを処理するメソッドのセレクタ」です。簡単に言えば、これはメソッドの**名前**です。
 * 残りのパラメータは、メソッドで必要な**値**です（op）。
 
 | **引数**          | **レジスタ**                                                    | **(for) objc\_msgSend**                                |
 | ----------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
 | **1番目の引数**   | **rdi**                                                         | **self: メソッドが呼び出されるオブジェクト**         |
 | **2番目の引数**   | **rsi**                                                         | **op: メソッドの名前**                                 |
-| **3番目の引数**   | **rdx**                                                         | **メソッドへの第1引数**                               |
-| **4番目の引数**   | **rcx**                                                         | **メソッドへの第2引数**                               |
-| **5番目の引数**   | **r8**                                                          | **メソッドへの第3引数**                               |
-| **6番目の引数**   | **r9**                                                          | **メソッドへの第4引数**                               |
-| **7番目以降の引数** | <p><strong>rsp+</strong><br><strong>(スタック上)</strong></p> | **メソッドへの第5引数以降**                           |
+| **3番目の引数**   | **rdx**                                                         | **メソッドへの最初の引数**                             |
+| **4番目の引数**   | **rcx**                                                         | **メソッドへの2番目の引数**                             |
+| **5番目の引数**   | **r8**                                                          | **メソッドへの3番目の引数**                             |
+| **6番目の引数**   | **r9**                                                          | **メソッドへの4番目の引数**                             |
+| **7番目以降の引数** | <p><strong>rsp+</strong><br><strong>(スタック上)</strong></p> | **メソッドへの5番目以降の引数**                         |
 
 ### Swift
 
@@ -172,7 +189,7 @@ Mem: 0x100027064-0x1000274cc        __TEXT.__swift5_fieldmd
 Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 [...]
 ```
-詳細な情報は、[**このブログ記事**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)で、これらのセクションに格納された情報について説明されています。
+詳細な情報は、[**このブログ記事**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)に保存されている情報について調べることができます。
 
 ### パックされたバイナリ
 
@@ -187,20 +204,20 @@ Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 {% endhint %}
 
 {% hint style="warning" %}
-MacOS上で`cloudconfigurationd`などの**システムバイナリ**を**インストゥルメント**するには、**SIPを無効にする必要があります**（署名を削除するだけでは機能しません）。
+macOS上のシステムバイナリ（`cloudconfigurationd`など）を**インストゥルメント**するには、**SIPを無効にする必要があります**（署名を削除するだけでは機能しません）。
 {% endhint %}
 
 ### 統合ログ
 
 MacOSは、アプリケーションを実行する際に非常に役立つログを生成します。これにより、アプリケーションが**何をしているか**を理解することができます。
 
-さらに、一部のログには、一部の**ユーザー**や**コンピューター**の**識別可能な情報**を**非表示**にするためのタグ`<private>`が含まれています。ただし、**この情報を開示するための証明書をインストール**することも可能です。[**こちら**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)の説明に従ってください。
+さらに、一部のログには、一部の**ユーザー**または**コンピューター**の**識別可能な情報**を**非表示**にするためのタグ`<private>`が含まれています。ただし、**この情報を開示するための証明書をインストールすることが可能**です。[**こちら**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log)の説明に従ってください。
 
 ### Hopper
 
 #### 左パネル
 
-Hopperの左パネルでは、バイナリのシンボル（**ラベル**）、手続きと関数のリスト（**Proc**）、および文字列（**Str**）を表示することができます。これらはすべての文字列ではありませんが、Mac-Oファイルのいくつかの部分（_cstringや`objc_methname`など）で定義されています。
+Hopperの左パネルでは、バイナリのシンボル（**ラベル**）、手続きと関数のリスト（**Proc**）、および文字列（**Str**）を表示することができます。これらはすべての文字列ではありませんが、Mac-Oファイルのいくつかの部分（_cstringや`objc_methname`など）で定義されているものです。
 
 #### 中央パネル
 
@@ -225,7 +242,7 @@ dtruss -c -p 1000 #get syscalls of PID 1000
 ```
 ### ktrace
 
-これは、**SIPが有効化されていても**使用することができます。
+これは、**SIPが有効化されている場合でも**使用することができます。
 ```bash
 ktrace trace -s -S -t c -c ls | grep "ls("
 ```
@@ -233,7 +250,7 @@ ktrace trace -s -S -t c -c ls | grep "ls("
 
 これにより、ユーザーは非常に**低レベル**でアプリケーションにアクセスでき、プログラムを**トレース**し、実行フローを変更する方法を提供します。Dtraceは、カーネル全体に**配置されたプローブ**を使用し、システムコールの開始と終了などの場所にあります。
 
-DTraceは、各システムコールごとにプローブを作成するために**`dtrace_probe_create`**関数を使用します。これらのプローブは、各システムコールの**エントリーポイントと終了ポイント**で発火することができます。DTraceとのやり取りは、ルートユーザーにのみ利用可能な/dev/dtraceを介して行われます。
+DTraceは、各システムコールごとにプローブを作成するために**`dtrace_probe_create`**関数を使用します。これらのプローブは、各システムコールの**エントリーポイントと終了ポイント**で発火することができます。DTraceとのやり取りは、ルートユーザーのみが利用できる/dev/dtraceを介して行われます。
 
 dtraceの利用可能なプローブは、次のコマンドで取得できます：
 ```bash
@@ -245,7 +262,7 @@ ID   PROVIDER            MODULE                          FUNCTION NAME
 43    profile                                                     profile-97
 44    profile                                                     profile-199
 ```
-プローブ名は、プロバイダー、モジュール、関数、および名前（`fbt:mach_kernel:ptrace:entry`）の4つの部分で構成されています。名前の一部を指定しない場合、Dtraceはその部分をワイルドカードとして適用します。
+プローブ名は、プロバイダー、モジュール、関数、および名前（`fbt:mach_kernel:ptrace:entry`）の4つの部分で構成されています。名前の一部を指定しない場合、DTraceはその部分をワイルドカードとして適用します。
 
 プローブをアクティブにし、それらが発生したときに実行するアクションを指定するには、D言語を使用する必要があります。
 
@@ -255,72 +272,12 @@ ID   PROVIDER            MODULE                          FUNCTION NAME
 
 `man -k dtrace`を実行して、**利用可能なDTraceスクリプト**の一覧を表示します。例：`sudo dtruss -n binary`
 
-* 行中
+* 行中で
 ```bash
 #Count the number of syscalls of each running process
 sudo dtrace -n 'syscall:::entry {@[execname] = count()}'
 ```
-# MacOSアプリの検査、デバッグ、およびファジング
-
-このセクションでは、MacOSアプリの検査、デバッグ、およびファジングについて説明します。これらのテクニックは、アプリケーションのセキュリティと特権エスカレーションのテストに役立ちます。
-
-## アプリの検査
-
-アプリの検査は、アプリのセキュリティホールや脆弱性を特定するために行われます。以下の手法が使用されます。
-
-### 静的解析
-
-静的解析は、アプリのバイナリコードを分析してセキュリティ上の問題を特定する手法です。以下のツールが使用されます。
-
-- [Hopper](https://www.hopperapp.com/)
-- [Radare2](https://rada.re/r/)
-- [Ghidra](https://ghidra-sre.org/)
-
-### 動的解析
-
-動的解析は、アプリを実行して実行時の挙動を分析する手法です。以下のツールが使用されます。
-
-- [lldb](https://lldb.llvm.org/)
-- [frida](https://frida.re/)
-
-## デバッグ
-
-デバッグは、アプリの実行中に問題を特定し、修正するために行われます。以下の手法が使用されます。
-
-### ブレークポイントの設定
-
-ブレークポイントは、特定のコード行でプログラムの実行を一時停止するために使用されます。以下の手法が使用されます。
-
-- `lldb`を使用したブレークポイントの設定
-- `frida`を使用したブレークポイントの設定
-
-### メモリの解析
-
-メモリの解析は、アプリのメモリ内の情報を調査する手法です。以下の手法が使用されます。
-
-- `lldb`を使用したメモリの解析
-- `frida`を使用したメモリの解析
-
-## ファジング
-
-ファジングは、アプリにランダムなデータを入力して、予期しない動作やセキュリティ上の問題を特定する手法です。以下の手法が使用されます。
-
-### ファジングツールの使用
-
-ファジングツールは、自動的にランダムなデータを生成してアプリに入力するツールです。以下のツールが使用されます。
-
-- [AFL](https://github.com/google/AFL)
-- [honggfuzz](https://github.com/google/honggfuzz)
-- [Peach Fuzzer](https://peachfuzzer.com/)
-
-### クラッシュの解析
-
-ファジング中に発生したクラッシュを解析することで、セキュリティ上の問題を特定することができます。以下の手法が使用されます。
-
-- `lldb`を使用したクラッシュの解析
-- `frida`を使用したクラッシュの解析
-
-以上がMacOSアプリの検査、デバッグ、およびファジングに関する情報です。これらのテクニックを使用して、アプリのセキュリティを向上させることができます。
+* スクリプト
 ```bash
 syscall:::entry
 /pid == $1/
@@ -366,6 +323,12 @@ sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 
 [**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor)は、ファイルのイベント（作成、変更、削除など）を監視し、そのようなイベントに関する詳細な情報を提供します。
 
+### Apple Instruments
+
+[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html)は、Xcodeの開発者ツールの一部であり、アプリケーションのパフォーマンスを監視し、メモリリークを特定し、ファイルシステムのアクティビティを追跡するために使用されます。
+
+![](<../../../.gitbook/assets/image (15).png>)
+
 ### fs\_usage
 
 プロセスが実行するアクションを追跡することができます。
@@ -391,27 +354,31 @@ lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
+{% hint style="warning" %}
+lldb内で、`process save-core`を使用してプロセスをダンプします。
+{% endhint %}
+
 | **(lldb) コマンド**            | **説明**                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **run (r)**                   | 実行を開始し、ブレークポイントがヒットするかプロセスが終了するまで続行します。                                                                                                                                                                                                                                                                                                                     |
-| **continue (c)**              | デバッグ対象のプロセスの実行を続行します。                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **run (r)**                   | ブレークポイントがヒットするか、プロセスが終了するまで実行を開始します。                                                                                                                                                                                                                                                                                                                     |
+| **continue (c)**              | デバッグ対象のプロセスの実行を継続します。                                                                                                                                                                                                                                                                                                                                                                               |
 | **nexti (n / ni)**            | 次の命令を実行します。このコマンドは関数呼び出しをスキップします。                                                                                                                                                                                                                                                                                                                                                 |
 | **stepi (s / si)**            | 次の命令を実行します。nextiコマンドとは異なり、このコマンドは関数呼び出しに入ります。                                                                                                                                                                                                                                                                                                                       |
-| **finish (f)**                | 現在の関数（"フレーム"）の残りの命令を実行し、停止します。                                                                                                                                                                                                                                                                                                                                                           |
-| **control + c**               | 実行を一時停止します。プロセスが実行されている場合（rまたはc）、プロセスは現在の実行位置で停止します。                                                                                                                                                                                                                                                                                                             |
+| **finish (f)**                | 現在の関数（"フレーム"）の残りの命令を実行し、停止します。                                                                                                                                                                                                                                                                                                                                   |
+| **control + c**               | 実行を一時停止します。プロセスが実行（r）または継続（c）されている場合、プロセスは現在実行中の場所で停止します。                                                                                                                                                                                                                                                                             |
 | **breakpoint (b)**            | <p>b main</p><p>b -[NSDictionary objectForKey:]</p><p>b 0x0000000100004bd9</p><p>br l #ブレークポイントリスト</p><p>br e/dis &#x3C;num> #ブレークポイントの有効化/無効化</p><p>breakpoint delete &#x3C;num><br>b set -n main --shlib &#x3C;lib_name></p>                                                                                                                                                                               |
-| **help**                      | <p>help breakpoint #ブレークポイントコマンドのヘルプを取得</p><p>help memory write #メモリへの書き込みのヘルプを取得</p>                                                                                                                                                                                                                                                                                                     |
-| **reg**                       | <p>reg read</p><p>reg read $rax</p><p>reg write $rip 0x100035cc0</p>                                                                                                                                                                                                                                                                                                                                                  |
+| **help**                      | <p>help breakpoint #ブレークポイントコマンドのヘルプを取得する</p><p>help memory write #メモリへの書き込みのヘルプを取得する</p>                                                                                                                                                                                                                                                                                                         |
+| **reg**                       | <p>reg read</p><p>reg read $rax</p><p>reg write $rip 0x100035cc0</p>                                                                                                                                                                                                                                                                                                                                                      |
 | **x/s \<reg/memory address>** | メモリをヌル終端文字列として表示します。                                                                                                                                                                                                                                                                                                                                                                           |
-| **x/i \<reg/memory address>** | メモリをアセンブリ命令として表示します。                                                                                                                                                                                                                                                                                                                                                                           |
-| **x/b \<reg/memory address>** | メモリをバイトとして表示します。                                                                                                                                                                                                                                                                                                                                                                                   |
-| **print object (po)**         | <p>これにより、パラメータで参照されるオブジェクトが表示されます</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>AppleのObjective-CのほとんどのAPIやメソッドはオブジェクトを返すため、「print object」（po）コマンドを使用して表示する必要があります。 poが有意義な出力を生成しない場合は、<code>x/b</code>を使用します</p> |
+| **x/i \<reg/memory address>** | メモリをアセンブリ命令として表示します。                                                                                                                                                                                                                                                                                                                                                                               |
+| **x/b \<reg/memory address>** | メモリをバイトとして表示します。                                                                                                                                                                                                                                                                                                                                                                                               |
+| **print object (po)**         | <p>これにより、パラメータで参照されるオブジェクトが表示されます</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>AppleのObjective-CのほとんどのAPIやメソッドはオブジェクトを返すため、「print object」（po）コマンドを使用して表示する必要があります。 poが有意義な出力を生成しない場合は、<code>x/b</code>を使用してください。</p> |
 | **memory**                    | <p>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #そのアドレスにAAAAを書き込む<br>memory write -f s $rip+0x11f+7 "AAAA" #そのアドレスにAAAAを書き込む</p>                                                                                                                                                                                                                            |
-| **disassembly**               | <p>dis #現在の関数を逆アセンブルする<br>dis -c 6 #6行を逆アセンブルする<br>dis -c 0x100003764 -e 0x100003768 #一つのアドレスから他のアドレスまで逆アセンブルする<br>dis -p -c 4 #現在のアドレスから逆アセンブルを開始する</p>                                                                                                                                                                                                                                 |
-| **parray**                    | parray 3 (char \*\*)$x1 # x1レジスタの3つのコンポーネントの配列をチェックします                                                                                                                                                                                                                                                                                                                                 |
+| **disassembly**               | <p>dis #現在の関数を逆アセンブルする<br>dis -c 6 #6行を逆アセンブルする<br>dis -c 0x100003764 -e 0x100003768 #一つのアドレスからもう一つのアドレスまで逆アセンブルする<br>dis -p -c 4 #現在のアドレスから逆アセンブルを開始する</p>                                                                                                                                                                                                                                 |
+| **parray**                    | parray 3 (char \*\*)$x1 # x1レジスタの3つのコンポーネントの配列をチェックします                                                                                                                                                                                                                                                                                                                                                           |
 
 {% hint style="info" %}
-**`objc_sendMsg`**関数を呼び出す際、**rsi**レジスタにはヌル終端（"C"）文字列としての**メソッド名**が格納されます。lldbを使用して名前を表示するには、次のようにします：
+**`objc_sendMsg`**関数を呼び出す際、**rsi**レジスタにはメソッドの名前がヌル終端（"C"）文字列として保持されます。lldbを使用して名前を表示するには、次のようにします：
 
 `(lldb) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"`
 
@@ -423,14 +390,14 @@ lldb -n malware.bin --waitfor
 
 ### アンチダイナミック解析
 
-#### VMの検出
+#### VM検出
 
 * **`sysctl hw.model`**コマンドは、ホストがMacOSである場合は「Mac」を返しますが、VMの場合は異なる値を返します。
 * **`hw.logicalcpu`**および**`hw.physicalcpu`**の値を操作することで、一部のマルウェアはVMであるかどうかを検出しようとします。
 * 一部のマルウェアは、MACアドレス（00:50:56）に基づいてマシンがVMwareであるかどうかも検出できます。
 * 次のような単純なコードで、プロセスがデバッグされているかどうかを検出することもできます：
 * `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
-* **`ptrace`**システムコールを**`PT_DENY_ATTACH`**フラグとともに呼び出すこともできます。これにより、デバッガがアタッチおよびトレースを行うことができなくなります。
+* また、**`ptrace`**システムコールを**`PT_DENY_ATTACH`**フラグとともに呼び出すこともできます。これにより、デバッガがアタッチおよびトレースを防止します。
 * **`sysctl`**または**`ptrace`**関数が**インポート**されているかどうかを確認できます（ただし、マルウェアは動的にインポートする可能性があります）
 * この記事によれば、"[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)"：\
 "_メッセージ「Process # exited with **status = 45 (0x0000002d)**」は、デバッグ対象が**PT\_DENY\_ATTACH**を使用していることを示す兆候です_"
@@ -455,7 +422,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.
 ```
 ### スリープ
 
-MacOSでのフジング中にMacがスリープしないようにすることが重要です。
+MacOSでのフジング中には、Macがスリープしないようにすることが重要です。
 
 * systemsetup -setsleep Never
 * pmset、システム環境設定
@@ -474,7 +441,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 ```
 ### 内部ハンドラ
 
-**次のページ**をチェックして、指定されたスキームやプロトコルを処理するアプリを見つける方法を見つけてください：
+**次のページをチェックアウト**して、指定されたスキームやプロトコルを処理するアプリを見つける方法を確認してください：
 
 {% content-ref url="../macos-file-extension-apps.md" %}
 [macos-file-extension-apps.md](../macos-file-extension-apps.md)
@@ -482,7 +449,7 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 
 ### ネットワークプロセスの列挙
 
-ネットワークデータを管理しているプロセスを見つけるために興味深いです：
+ネットワークデータを管理しているプロセスを見つけるのに興味深いです：
 ```bash
 dtrace -n 'syscall::recv*:entry { printf("-> %s (pid=%d)", execname, pid); }' >> recv.log
 #wait some time
@@ -499,19 +466,17 @@ cat procs.txt
 ```bash
 lldb -o "target create `which some-binary`" -o "settings set target.env-vars DYLD_INSERT_LIBRARIES=/usr/lib/libgmalloc.dylib" -o "run arg1 arg2" -o "bt" -o "reg read" -o "dis -s \$pc-32 -c 24 -m -F intel" -o "quit"
 ```
-{% endcode %}
-
-### Fuzzers
+### ファズツール
 
 #### [AFL++](https://github.com/AFLplusplus/AFLplusplus)
 
-CLIツールに対して動作します。
+CLIツールに対応しています。
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 
-macOSのGUIツールと "**just works"** します。ただし、一部のmacOSアプリは、ユニークなファイル名、正しい拡張子、サンドボックスからのファイルの読み取りが必要など、特定の要件を持っています（`~/Library/Containers/com.apple.Safari/Data`からのファイルなど）。
+macOSのGUIツールとの互換性があります。ただし、一部のmacOSアプリは固有の要件を持っています。例えば、ユニークなファイル名、正しい拡張子、サンドボックスからのファイルの読み取り(`~/Library/Containers/com.apple.Safari/Data`)が必要です。
 
-いくつかの例：
+以下にいくつかの例を示します:
 
 {% code overflow="wrap" %}
 ```bash
@@ -539,7 +504,7 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 ```
 {% endcode %}
 
-### より多くのMacOSの情報をフジングする
+### より多くのMacOS情報のFuzzing
 
 * [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
 * [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
@@ -556,10 +521,10 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** **HackTricksであなたの会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* あなたは**サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの**会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

