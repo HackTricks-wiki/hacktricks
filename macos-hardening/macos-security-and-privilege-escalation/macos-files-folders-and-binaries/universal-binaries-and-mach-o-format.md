@@ -45,7 +45,7 @@ uint32_t	align;		/* alineación como una potencia de 2 */
 };
 </code></pre>
 
-El encabezado tiene los bytes **magic** seguidos del **número** de **arquitecturas** que el archivo **contiene** (`nfat_arch`) y cada arquitectura tendrá una estructura `fat_arch`.
+El encabezado tiene los bytes **mágicos** seguidos del **número** de **arquitecturas** que el archivo **contiene** (`nfat_arch`) y cada arquitectura tendrá una estructura `fat_arch`.
 
 Verifícalo con:
 
@@ -127,7 +127,7 @@ O utilizando [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 ## **Comandos de carga de Mach-O**
 
-Esto especifica la **estructura del archivo en memoria**. Contiene la **ubicación de la tabla de símbolos**, el contexto del hilo principal al comienzo de la ejecución y las **bibliotecas compartidas** requeridas.\
+Esto especifica el **diseño del archivo en memoria**. Contiene la **ubicación de la tabla de símbolos**, el contexto del hilo principal al comienzo de la ejecución y las **bibliotecas compartidas** requeridas.\
 Los comandos básicamente instruyen al cargador dinámico **(dyld) cómo cargar el binario en memoria.**
 
 Todos los comandos de carga comienzan con una estructura **load\_command**, definida en el **`loader.h`** mencionado anteriormente:
@@ -195,7 +195,7 @@ Ejemplo de **encabezado de sección**:
 
 Si **agregas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 También es posible obtener la **información de los encabezados** desde la **línea de comandos** con:
 ```bash
@@ -210,11 +210,11 @@ Segmentos comunes cargados por este comando:
 * `__const`: Datos constantes
 * `__cstring`: Constantes de cadena
 * `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
-* **`__DATA`**: Contiene datos que son **modificables**.
+* **`__DATA`**: Contiene datos que son **escribibles**.
 * `__data`: Variables globales (que han sido inicializadas)
 * `__bss`: Variables estáticas (que no han sido inicializadas)
 * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Información utilizada por el tiempo de ejecución de Objective-C
-* **`__LINKEDIT`**: Contiene información para el enlazador (dyld) como "entradas de tabla de símbolos, cadenas y reubicación".
+* **`__LINKEDIT`**: Contiene información para el enlazador (dyld) como "símbolo, cadena y entradas de tabla de reubicación".
 * **`__OBJC`**: Contiene información utilizada por el tiempo de ejecución de Objective-C. Aunque esta información también puede encontrarse en el segmento \_\_DATA, dentro de varias secciones \_\_objc\_\*.
 
 ### **`LC_MAIN`**
@@ -228,7 +228,7 @@ Sin embargo, puedes encontrar información sobre esta sección en [**esta public
 
 ### **LC\_LOAD\_DYLINKER**
 
-Contiene la **ruta del ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre se establece en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo de kernel.
+Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas compartidas en el espacio de direcciones del proceso. El **valor siempre se establece en `/usr/lib/dyld`**. Es importante tener en cuenta que en macOS, el mapeo de dylib ocurre en **modo de usuario**, no en modo de kernel.
 
 ### **`LC_LOAD_DYLIB`**
 
