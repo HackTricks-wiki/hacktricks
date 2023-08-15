@@ -288,6 +288,12 @@ sudo dtrace -s syscalls_info.d -c "cat /etc/hosts"
 
 [**FileMonitor**](https://objective-see.com/products/utilities.html#FileMonitor) allows to monitor file events (such as creation, modifications, and deletions) providing detailed information about such events.
 
+### Apple Instruments
+
+[**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) are part of Xcode’s Developer tools – used for monitoring application performance, identifying memory leaks and tracking filesystem activity.
+
+![](<../../../.gitbook/assets/image (15).png>)
+
 ### fs\_usage
 
 Allows to follow actions performed by processes:
@@ -316,6 +322,10 @@ lldb -p 1122
 lldb -n malware.bin
 lldb -n malware.bin --waitfor
 ```
+
+{% hint style="warning" %}
+Inside lldb, dump a process with `process save-core`
+{% endhint %}
 
 | **(lldb) Command**            | **Description**                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -21,7 +21,7 @@ It creates a 2 of names pipes per .Net process in [dbgtransportsession.cpp#L127]
 
 So, if you go to the users **`$TMPDIR`** you will be able to find **debugging fifos** you could use to debug .Net applications:
 
-<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 The function [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) will handle the communication from a debugger.
 
