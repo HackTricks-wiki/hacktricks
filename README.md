@@ -1,10 +1,10 @@
 # HackTricks
 
-<figure><img src=".gitbook/assets/hack tricks gif.gif" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 _Logos y diseño de movimiento de Hacktricks por_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
-{% hint style="info" %}
+{% hint style="success" %}
 **Bienvenido a la wiki donde encontrarás cada truco/técnica/herramienta de hacking que he aprendido de CTFs, aplicaciones de la vida real, investigaciones y noticias.**
 {% endhint %}
 
@@ -53,7 +53,7 @@ Consejo de caza de bugs: **regístrate** en **Intigriti**, una plataforma premiu
 <figure><img src=".gitbook/assets/image (9) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.
 
 Obtén acceso hoy mismo:
 
@@ -86,7 +86,7 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 
 [**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** negocios **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar servicios de **seguridad ofensiva** con un enfoque **moderno**.
 
-WebSec es una empresa de seguridad **todo en uno**, lo que significa que hacen de todo; Pruebas de penetración, Auditorías de seguridad, Entrenamientos de concienciación, Campañas de phishing, Revisión de código, Desarrollo de exploits, Externalización de expertos en seguridad y mucho más.
+WebSec es una **empresa de seguridad integral** que lo hace todo; Pruebas de penetración, Auditorías de **seguridad**, Entrenamientos de concienciación, Campañas de phishing, Revisión de código, Desarrollo de exploits, Externalización de expertos en seguridad y mucho más.
 
 Otra cosa genial de WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta tal punto que **garantizan los mejores resultados de calidad**, como se indica en su sitio web "**Si no podemos hackearlo, ¡no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
 
