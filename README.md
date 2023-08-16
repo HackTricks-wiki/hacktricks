@@ -8,13 +8,15 @@ _Hacktricks logos & motion design by_ [_@ppiernacho_](https://www.instagram.com/
 **Welcome to the wiki where you will find each hacking trick/technique/whatever I have learnt from CTFs, real life apps, reading researches, and news.**
 {% endhint %}
 
-Here you can find a little **introduction:**
+To get started follow this page where you will find the **typical flow** that **you should follow when pentesting** one or more **machines:**
 
-## [**Pentesting Methodology**](generic-methodologies-and-resources/pentesting-methodology.md)
+{% content-ref url="generic-methodologies-and-resources/pentesting-methodology.md" %}
+[pentesting-methodology.md](generic-methodologies-and-resources/pentesting-methodology.md)
+{% endcontent-ref %}
 
-Here you will find the **typical flow** that **you should follow when pentesting** one or more **machines**.
+## Platinum Sponsors
 
-**Click on the title to start!**
+_Your company could be here_
 
 ## Corporate Sponsors
 
