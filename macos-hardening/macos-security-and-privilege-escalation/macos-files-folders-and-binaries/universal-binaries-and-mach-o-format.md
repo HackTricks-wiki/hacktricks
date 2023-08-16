@@ -76,7 +76,7 @@ capabilities PTR_AUTH_VERSION USERSPACE 0
 
 o utilizando la herramienta [Mach-O View](https://sourceforge.net/projects/machoview/):
 
-<figure><img src="../../../.gitbook/assets/image (5) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (5) (1) (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 Como podrás pensar, generalmente un binario universal compilado para 2 arquitecturas **duplica el tamaño** de uno compilado para solo 1 arquitectura.
 
@@ -137,7 +137,7 @@ uint32_t cmd;           /* type of load command */
 uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-Hay alrededor de **50 tipos diferentes de comandos de carga** que el sistema maneja de manera diferente. Los más comunes son: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` y `LC_CODE_SIGNATURE`.
+Hay aproximadamente **50 tipos diferentes de comandos de carga** que el sistema maneja de manera diferente. Los más comunes son: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` y `LC_CODE_SIGNATURE`.
 
 ### **LC\_SEGMENT/LC\_SEGMENT\_64**
 
@@ -195,7 +195,7 @@ Ejemplo de **encabezado de sección**:
 
 Si **agregas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 También es posible obtener la **información de los encabezados** desde la **línea de comandos** con:
 ```bash
@@ -210,7 +210,7 @@ Segmentos comunes cargados por este comando:
 * `__const`: Datos constantes
 * `__cstring`: Constantes de cadena
 * `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
-* **`__DATA`**: Contiene datos que son **escribibles**.
+* **`__DATA`**: Contiene datos que son **modificables**.
 * `__data`: Variables globales (que han sido inicializadas)
 * `__bss`: Variables estáticas (que no han sido inicializadas)
 * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Información utilizada por el tiempo de ejecución de Objective-C

