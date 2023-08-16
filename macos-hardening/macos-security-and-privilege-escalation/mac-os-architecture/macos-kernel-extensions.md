@@ -22,31 +22,31 @@
 
 * **リカバリーモード**に入ると、カーネル拡張のロードが**許可される**必要があります。
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-* カーネル拡張は、**カーネルコード署名証明書**で**署名されている必要があります**。この証明書は**Apple**によってのみ発行されます。Appleは、**企業**と**必要性**を詳細に検討します。
-* カーネル拡張はまた、**ノタリゼーション**を受ける必要があります。Appleは、マルウェアを検出するためにそれを検証できます。
-* その後、**ルートユーザー**がカーネル拡張をロードでき、パッケージ内のファイルはルートに所属する必要があります。
-* ロードプロセス中、パッケージはルートなしの保護された場所に準備される必要があります：`/Library/StagedExtensions`（`com.apple.rootless.storage.KernelExtensionManagement`権限が必要）
-* 最後に、ロードを試みると、[**ユーザーに確認の要求が表示されます**](https://developer.apple.com/library/archive/technotes/tn2459/\_index.html)。承認されると、コンピュータを**再起動**してロードする必要があります。
+* カーネル拡張は、**カーネルコード署名証明書**で**署名されている必要があります**。この証明書は**Apple**によってのみ発行されます。Appleは、**企業**と**必要性**を詳細に検証します。
+* カーネル拡張はまた、Appleがマルウェアを検出するために**検証**される必要があります。
+* その後、カーネル拡張をロードできるのは**ルートユーザ**であり、パッケージ内のファイルはルートに所属する必要があります。
+* ロードプロセス中、パッケージは保護されたルート以外の場所に準備される必要があります：`/Library/StagedExtensions`（`com.apple.rootless.storage.KernelExtensionManagement`権限が必要です）。
+* 最後に、ロードを試みると、[**ユーザに確認の要求が表示されます**](https://developer.apple.com/library/archive/technotes/tn2459/\_index.html)。承認されると、コンピュータを**再起動**してロードします。
 
 ### ロードプロセス
 
-Catalinaでは、次のようになります：興味深いことに、**検証プロセス**は**ユーザーランド**で行われます。ただし、**`com.apple.private.security.kext-management`**権限を持つアプリケーションのみがカーネルに**拡張のロードを要求**できます：kextcache、kextload、kextutil、kextd、syspolicyd
+Catalinaでは、次のようになります：興味深いことに、**検証プロセス**は**ユーザランド**で行われます。ただし、**`com.apple.private.security.kext-management`**権限を持つアプリケーションのみがカーネルに**カーネル拡張のロードを要求**できます：kextcache、kextload、kextutil、kextd、syspolicyd
 
-1. **`kextutil`** CLIは、拡張をロードするための検証プロセスを**開始**します。
+1. **`kextutil`** CLIは、カーネル拡張をロードするための検証プロセスを**開始**します。
 
 * **`kextd`**との間でMachサービスを使用して通信します。
 
 2. **`kextd`**は、署名などのさまざまなチェックを行います。
 
-* **`syspolicyd`**との通信を行い、拡張をロードできるかどうかを確認します。
+* **`syspolicyd`**との通信を行い、カーネル拡張をロードできるかどうかを確認します。
 
-3. **`syspolicyd`**は、拡張が以前にロードされていないかどうかを**ユーザーに尋ねます**。
+3. **`syspolicyd`**は、カーネル拡張が以前にロードされていないかどうかを**ユーザに尋ねます**。
 
 * **`syspolicyd`**は結果を**`kextd`**に伝えます。
 
-4. **`kextd`**は最終的にカーネルに拡張をロードするよう指示できます。
+4. **`kextd`**は最終的にカーネルにカーネル拡張をロードするよう指示できます。
 
 kextdが利用できない場合、kextutilも同じチェックを実行できます。
 

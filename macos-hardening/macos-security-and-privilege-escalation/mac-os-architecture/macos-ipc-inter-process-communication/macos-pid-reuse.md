@@ -20,15 +20,14 @@ macOSの**XPCサービス**が、**PID**ではなく**監査トークン**に基
 
 ### エクスプロイトの例
 
-関数**`shouldAcceptNewConnection`**またはそれを呼び出す関数が、**`processIdentifier`**を呼び出しており、**`auditToken`**を呼び出していない場合、それはおそらくプロセスのPIDを検証していることを意味します。\
-たとえば、次の画像（参照から取得）のようになります。
+関数**`shouldAcceptNewConnection`**またはそれを呼び出す関数が、**`processIdentifier`**を呼び出さずに呼び出している場合、それはおそらくプロセスのPIDを検証していることを意味します。例えば、次の画像（参照から取得）のようになります。
 
-<figure><img src="../../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 次のエクスプロイトの例（再度、参照から取得）を確認して、エクスプロイトの2つのパートを見てください。
 
 * **複数のフォークを生成**するパート
-* 各フォークは、メッセージをXPCサービスに**送信**しながら、メッセージを送信した後に**`posix_spawn`**を実行します。
+* 各フォークは、メッセージをXPCサービスに**送信**しながら、メッセージを送信した直後に**`posix_spawn`**を実行します。
 
 {% hint style="danger" %}
 エクスプロイトが機能するためには、export OBJC\_DISABLE\_INITIALIZE\_FORK\_SAFETY=YESをエクスポートするか、エクスプロイトに以下を追加することが重要です。
@@ -151,8 +150,8 @@ return 0;
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンやHackTricksのPDFをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
