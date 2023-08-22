@@ -21,11 +21,11 @@
 
 したがって、ユーザーの**`$TMPDIR`**に移動すると、.Netアプリケーションをデバッグするために使用できる**デバッグ用のFIFO**を見つけることができます。
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 関数[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259)は、デバッガからの通信を処理します。
 
-デバッガが最初に行う必要があることは、**新しいデバッグセッションを作成する**ことです。これは、.NETソースから取得できる`MessageHeader`構造体で始まる`out`パイプを介してメッセージを送信することで行われます。
+デバッガが最初に行う必要があることは、**新しいデバッグセッションを作成する**ことです。これは、.NETのソースから取得できる`MessageHeader`構造体で始まる`out`パイプを介してメッセージを送信することで行われます。
 ```c
 struct MessageHeader
 {
@@ -179,7 +179,7 @@ x64バージョンでは、**シグネチャハンティング**テクニック�
 
 このアドレスを知ることで、関数ポインタを自分のシェルコードで上書きすることが可能です。
 
-PowerShellに注入するために使用される完全なPOCコードは、[こちら](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6)で見つけることができます。
+PowerShellにインジェクトするために使用される完全なPOCコードは、[こちら](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6)で見つけることができます。
 
 ## 参考文献
 
@@ -189,10 +189,10 @@ PowerShellに注入するために使用される完全なPOCコードは、[こ
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>
