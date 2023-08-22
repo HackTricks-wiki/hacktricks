@@ -12,7 +12,7 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
 
@@ -73,7 +73,7 @@ Eventos de tickets de plata (más sigilosos que los tickets de oro):
 | Tareas programadas                        | HOST                                                                     |
 | Compartir archivos de Windows, también psexec | CIFS                                                                   |
 | Operaciones LDAP, incluido DCSync          | LDAP                                                                     |
-| Herramientas de administración remota de servidores de Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                       |
+| Herramientas de administración remota del servidor de Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                       |
 | Tickets de oro                            | krbtgt                                                                   |
 
 Usando **Rubeus**, puedes **solicitar todos** estos tickets utilizando el parámetro:
@@ -158,7 +158,7 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 [dcsync.md](dcsync.md)
 {% endcontent-ref %}
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **¡estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
 
@@ -170,7 +170,7 @@ Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

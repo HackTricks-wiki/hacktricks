@@ -53,7 +53,7 @@ Además, después de encontrar las credenciales adecuadas, podrías ser capaz de
 
 #### Autenticación de dispositivos de JAMF
 
-<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 El binario **`jamf`** contenía el secreto para abrir el llavero que en el momento del descubrimiento era **compartido** entre todos y era: **`jk23ucnq91jfu9aj`**.\
 Además, jamf **persiste** como un **LaunchDaemon** en **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
@@ -102,9 +102,9 @@ Con esta información, **crea una máquina virtual** con el **UUID** de hardware
 
 <figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-También puedes monitorear la ubicación `/Library/Application Support/Jamf/tmp/` en busca de **scripts personalizados** que los administradores puedan querer ejecutar a través de Jamf, ya que se **colocan aquí, se ejecutan y se eliminan**. Estos scripts **pueden contener credenciales**.
+También puedes monitorear la ubicación `/Library/Application Support/Jamf/tmp/` para los **scripts personalizados** que los administradores puedan querer ejecutar a través de Jamf, ya que se **colocan aquí, se ejecutan y se eliminan**. Estos scripts **pueden contener credenciales**.
 
-Sin embargo, las **credenciales** podrían pasarse a estos scripts como **parámetros**, por lo que tendrías que monitorear `ps aux | grep -i jamf` (sin siquiera ser root).
+Sin embargo, las **credenciales** pueden pasarse a estos scripts como **parámetros**, por lo que tendrías que monitorear `ps aux | grep -i jamf` (incluso sin ser root).
 
 El script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) puede escuchar la adición de nuevos archivos y nuevos argumentos de proceso.
 
@@ -118,7 +118,7 @@ Y también sobre los **protocolos de red** **"especiales"** de **MacOS**:
 
 ## Active Directory
 
-En algunas ocasiones te encontrarás con que el **ordenador MacOS está conectado a un AD**. En este escenario, debes intentar **enumerar** el directorio activo como estás acostumbrado. Encuentra **ayuda** en las siguientes páginas:
+En algunas ocasiones te encontrarás con que la **computadora MacOS está conectada a un AD**. En este escenario, debes intentar **enumerar** el directorio activo como estás acostumbrado. Encuentra **ayuda** en las siguientes páginas:
 
 {% content-ref url="../../network-services-pentesting/pentesting-ldap.md" %}
 [pentesting-ldap.md](../../network-services-pentesting/pentesting-ldap.md)
@@ -139,8 +139,8 @@ dscl "/Active Directory/[Domain]/All Domains" ls /
 También hay algunas herramientas preparadas para MacOS para enumerar automáticamente el AD y jugar con Kerberos:
 
 * [**Machound**](https://github.com/XMCyber/MacHound): MacHound es una extensión de la herramienta de auditoría Bloodhound que permite recopilar e ingestar relaciones de Active Directory en hosts de MacOS.
-* [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost es un proyecto Objective-C diseñado para interactuar con las API de Heimdal krb5 en macOS. El objetivo del proyecto es permitir pruebas de seguridad más efectivas en torno a Kerberos en dispositivos macOS utilizando API nativas sin requerir ningún otro marco o paquete en el objetivo.
-* [**Orchard**](https://github.com/its-a-feature/Orchard): Herramienta de JavaScript para Automatización (JXA) para enumeración de Active Directory.
+* [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost es un proyecto Objective-C diseñado para interactuar con las API de Heimdal krb5 en macOS. El objetivo del proyecto es permitir una mejor prueba de seguridad en torno a Kerberos en dispositivos macOS utilizando API nativas sin requerir ningún otro marco o paquete en el objetivo.
+* [**Orchard**](https://github.com/its-a-feature/Orchard): Herramienta de JavaScript para Automatización (JXA) para enumerar Active Directory.
 
 ### Información del dominio
 ```bash

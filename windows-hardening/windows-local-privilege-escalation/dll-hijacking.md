@@ -12,9 +12,9 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo inhackeable, ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -228,9 +228,9 @@ break;
 return TRUE;
 }
 ```
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo inhackeable, ¡**estamos contratando!** (_se requiere fluidez en polaco escrito y hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo inhackeable, ¡**estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 

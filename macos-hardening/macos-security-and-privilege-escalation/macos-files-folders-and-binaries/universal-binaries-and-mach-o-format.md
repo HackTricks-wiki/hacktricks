@@ -39,8 +39,8 @@ struct fat_header {
 struct fat_arch {
 cpu_type_t	cputype;	/* especificador de CPU (int) */
 cpu_subtype_t	cpusubtype;	/* especificador de máquina (int) */
-uint32_t	offset;		/* desplazamiento del archivo a este archivo de objeto */
-uint32_t	size;		/* tamaño de este archivo de objeto */
+uint32_t	offset;		/* desplazamiento del archivo a este objeto */
+uint32_t	size;		/* tamaño de este objeto */
 uint32_t	align;		/* alineación como una potencia de 2 */
 };
 </code></pre>
@@ -137,7 +137,7 @@ uint32_t cmd;           /* type of load command */
 uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-Hay aproximadamente **50 tipos diferentes de comandos de carga** que el sistema maneja de manera diferente. Los más comunes son: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` y `LC_CODE_SIGNATURE`.
+Hay alrededor de **50 tipos diferentes de comandos de carga** que el sistema maneja de manera diferente. Los más comunes son: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` y `LC_CODE_SIGNATURE`.
 
 ### **LC\_SEGMENT/LC\_SEGMENT\_64**
 
@@ -195,22 +195,22 @@ Ejemplo de **encabezado de sección**:
 
 Si **agregas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-También es posible obtener la **información de los encabezados** desde la **línea de comandos** con:
+También es posible obtener **información de encabezados** desde la **línea de comandos** con:
 ```bash
 otool -lv /bin/ls
 ```
 Segmentos comunes cargados por este comando:
 
-* **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no se pueda leer, escribir o ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**.
+* **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no se pueda leer, escribir ni ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que no hay **derechos de lectura-escritura-ejecución en esta página**.
 * Esta asignación es importante para **mitigar las vulnerabilidades de referencia a puntero nulo**.
 * **`__TEXT`**: Contiene **código ejecutable** y **datos** que son **de solo lectura**. Secciones comunes de este segmento:
 * `__text`: Código binario compilado
 * `__const`: Datos constantes
 * `__cstring`: Constantes de cadena
 * `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
-* **`__DATA`**: Contiene datos que son **modificables**.
+* **`__DATA`**: Contiene datos que son **escribibles**.
 * `__data`: Variables globales (que han sido inicializadas)
 * `__bss`: Variables estáticas (que no han sido inicializadas)
 * `__objc_*` (\_\_objc\_classlist, \_\_objc\_protolist, etc): Información utilizada por el tiempo de ejecución de Objective-C

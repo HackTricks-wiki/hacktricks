@@ -17,11 +17,11 @@
 ### **Establecer una sesión de depuración** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
 [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) es responsable de manejar la **comunicación** entre el depurador y el depurado.\
-Crea dos tuberías con nombre por proceso .Net en [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) llamando a [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (uno terminará en **`-in`** y el otro en **`-out`** y el resto del nombre será el mismo).
+Crea dos tuberías con nombres por proceso .Net en [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) llamando a [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) (uno terminará en **`-in`** y el otro en **`-out`** y el resto del nombre será el mismo).
 
-Entonces, si vas al directorio **`$TMPDIR`** del usuario, podrás encontrar **fifos de depuración** que podrías usar para depurar aplicaciones .Net:
+Entonces, si vas al directorio **`$TMPDIR`** de los usuarios, podrás encontrar **fifos de depuración** que podrías usar para depurar aplicaciones .Net:
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 La función [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) manejará la comunicación desde un depurador.
 
@@ -66,7 +66,7 @@ Una vez construido, **enviamos esto al objetivo** utilizando la llamada al siste
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 ```
-Siguiendo nuestro encabezado, necesitamos enviar una estructura `sessionRequestData`, que contiene un GUID para identificar nuestra sesión:
+Siguiendo nuestro encabezado, necesitamos enviar una estructura `sessionRequestData` que contiene un GUID para identificar nuestra sesión:
 ```c
 // All '9' is a GUID.. right??
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
