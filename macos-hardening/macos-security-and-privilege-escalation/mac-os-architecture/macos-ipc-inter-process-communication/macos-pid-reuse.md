@@ -23,7 +23,7 @@ This function will make the **allowed binary own the PID** but the **malicious X
 If you find the function **`shouldAcceptNewConnection`** or a function called by it **calling** **`processIdentifier`** and not calling **`auditToken`**. It highly probable means that it's v**erifying the process PID** and not the audit token.\
 Like for example in this image (taken from the reference):
 
-<figure><img src="../../../../.gitbook/assets/image (4) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Check this example exploit (again, taken from the reference) to see the 2 parts of the exploit:
 
