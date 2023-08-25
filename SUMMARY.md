@@ -303,6 +303,7 @@
   * [Reversing Native Libraries](mobile-pentesting/android-app-pentesting/reversing-native-libraries.md)
   * [Smali - Decompiling/\[Modifying\]/Compiling](mobile-pentesting/android-app-pentesting/smali-changes.md)
   * [Spoofing your location in Play Store](mobile-pentesting/android-app-pentesting/spoofing-your-location-in-play-store.md)
+  * [Tapjacking](mobile-pentesting/android-app-pentesting/tapjacking.md)
   * [Webview Attacks](mobile-pentesting/android-app-pentesting/webview-attacks.md)
 * [iOS Pentesting Checklist](mobile-pentesting/ios-pentesting-checklist.md)
 * [iOS Pentesting](mobile-pentesting/ios-pentesting/README.md)
