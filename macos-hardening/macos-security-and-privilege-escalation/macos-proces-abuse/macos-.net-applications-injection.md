@@ -21,7 +21,7 @@ Crea dos tuberías con nombres por proceso .Net en [dbgtransportsession.cpp#L127
 
 Entonces, si vas al directorio **`$TMPDIR`** de los usuarios, podrás encontrar **fifos de depuración** que podrías usar para depurar aplicaciones .Net:
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 La función [**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) manejará la comunicación desde un depurador.
 
