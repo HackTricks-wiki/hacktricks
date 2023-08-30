@@ -59,6 +59,20 @@ Get Access Today:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
+### [Intruder](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)
+
+<figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+Stay a step ahead in the cybersecurity game.
+
+[**Intruder**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) makes vulnerability management easy. Keep track of your attack surface, see where your company is vulnerable, and prioritize issues that leave your systems most exposed so you can focus on what matters most.
+
+Run thousands of checks with a single platform that covers your entire tech stack from internal infrastructure to web apps, APIs and cloud systems. Integrate seamlessly with [AWS, GCP, Azure](https://www.intruder.io/cloud-vulnerability-scanning-for-aws-google-cloud-and-azure) and streamline DevOps so your team can implement fixes faster.
+
+Intruder never rests. Round-the-clock protection monitors your systems 24/7. Want to learn more? Visit their site and take it for a spin with [**a free trial**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks).
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
 ### [HACKENPROOF](https://bit.ly/3xrrDrL)
 
 <figure><img src=".gitbook/assets/image (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
