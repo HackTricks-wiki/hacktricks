@@ -4,7 +4,7 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ会社**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
@@ -21,11 +21,11 @@
 
 したがって、ユーザーの**`$TMPDIR`**に移動すると、.Netアプリケーションをデバッグするために使用できる**デバッグ用のFIFO**を見つけることができます。
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 関数[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259)は、デバッガからの通信を処理します。
 
-デバッガが最初に行う必要があることは、**新しいデバッグセッションを作成する**ことです。これは、.NETのソースから取得できる`MessageHeader`構造体で始まる`out`パイプを介してメッセージを送信することで行われます。
+デバッガが最初に行う必要があることは、**新しいデバッグセッションを作成する**ことです。これは、`.NET`のソースから取得できる`MessageHeader`構造体で始まる`out`パイプを介してメッセージを送信することで行われます。
 ```c
 struct MessageHeader
 {
@@ -160,11 +160,11 @@ return true;
 
 }
 ```
-この操作を行うために使用されるPOCコードは[こちら](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5)で見つけることができます。
+このために使用されるPOCコードは[こちら](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5)で見つけることができます。
 
 ### .NET Coreコードの実行 <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-最初に、実行するためのシェルコードを保存するために**`rwx`**で実行されているメモリ領域を特定する必要があります。これは簡単に次のコードで行うことができます:
+最初に、実行するためのシェルコードを保存するために**`rwx`**で実行されているメモリ領域を特定する必要があります。これは簡単に次のコマンドで行うことができます:
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
