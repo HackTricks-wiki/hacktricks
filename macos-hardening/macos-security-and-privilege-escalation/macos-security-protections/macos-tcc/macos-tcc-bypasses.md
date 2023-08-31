@@ -141,17 +141,17 @@ $> ls ~/Documents
 
 ノートはTCCで保護された場所にアクセスできますが、ノートが作成されると、これは**保護されていない場所に作成されます**。したがって、ノートに保護されたファイルをコピーするようにノートに依頼し、その後ファイルにアクセスすることができます：
 
-<figure><img src="../../../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (6) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2021-XXXX - トランスロケーション
 
-ライブラリ`libsecurity_translocate`を使用したバイナリ`/usr/libexec/lsd`は、`com.apple.private.nullfs_allow`というエンタイトルメントを持っており、これにより**nullfs**マウントを作成し、`com.apple.private.tcc.allow`というエンタイトルメントを持っていて、**`kTCCServiceSystemPolicyAllFiles`**ですべてのファイルにアクセスできます。
+ライブラリ`libsecurity_translocate`を使用したバイナリ`/usr/libexec/lsd`は、`com.apple.private.nullfs_allow`というエンタイトルメントを持っており、これにより**nullfs**マウントを作成でき、`com.apple.private.tcc.allow`というエンタイトルメントを持っており、**`kTCCServiceSystemPolicyAllFiles`**ですべてのファイルにアクセスできます。
 
-"Library"に検疫属性を追加し、**`com.apple.security.translocation`** XPCサービスを呼び出すことで、Libraryを**`$TMPDIR/AppTranslocation/d/d/Library`**にマップし、Library内のすべてのドキュメントに**アクセス**することができました。
+"Library"に検疫属性を追加し、**`com.apple.security.translocation`** XPCサービスを呼び出すことで、Libraryを**`$TMPDIR/AppTranslocation/d/d/Library`**にマッピングし、Library内のすべてのドキュメントに**アクセス**することができました。
 
 ### SQLトレース
 
-環境変数**`SQLITE_AUTO_TRACE`**が設定されている場合、ライブラリ**`libsqlite3.dylib`**はすべてのSQLクエリを**ログ**に記録します。多くのアプリケーションがこのライブラリを使用していたため、すべてのSQLiteクエリをログに記録することができました。
+環境変数**`SQLITE_AUTO_TRACE`**が設定されている場合、ライブラリ**`libsqlite3.dylib`**はすべてのSQLクエリを**ログ**に記録し始めます。多くのアプリケーションがこのライブラリを使用しているため、すべてのSQLiteクエリをログに記録することができました。
 
 いくつかのAppleアプリケーションは、TCCで保護された情報にアクセスするためにこのライブラリを使用していました。
 ```bash
@@ -164,7 +164,7 @@ rootとしてこのサービスを有効にすると、**ARDエージェント�
 
 ## プラグインによるバイパス
 
-プラグインは通常、ライブラリやplist形式の追加のコードであり、**メインアプリケーションによってロード**され、そのコンテキストで実行されます。したがって、メインアプリケーションがTCCの制限されたファイルにアクセスできる場合（許可された権限やエンタイトルメントを介して）、**カスタムコードもそれを持つ**ことになります。
+プラグインは通常、ライブラリやplist形式の追加コードであり、**メインアプリケーションによってロード**され、そのコンテキストで実行されます。したがって、メインアプリケーションがTCCの制限されたファイルにアクセスできる場合（許可された権限やエンタイトルメントを介して）、**カスタムコードもそれを持つ**ことになります。
 
 ### CVE-2020-27937 - Directory Utility
 
@@ -249,11 +249,11 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-詳細な情報については、[**元のレポートをチェックしてください**](https://wojciechregula.blog/post/how-to-rob-a-firefox/)。
+詳細については、[**元のレポートをチェックしてください**](https://wojciechregula.blog/post/how-to-rob-a-firefox/)。
 
 ### CVE-2020-10006
 
-バイナリ `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` には、**`com.apple.private.tcc.allow`** と **`com.apple.security.get-task-allow`** の権限があり、プロセス内にコードを注入し、TCC の特権を使用することができました。
+バイナリ `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` には、**`com.apple.private.tcc.allow`** と **`com.apple.security.get-task-allow`** の権限があり、プロセス内にコードを注入して TCC 権限を使用することができました。
 
 ### CVE-2023-26818 - Telegram
 
@@ -265,7 +265,7 @@ Telegram には、`com.apple.security.cs.allow-dyld-environment-variables` と `
 
 ### ターミナルスクリプト
 
-テック系の人々が使用するコンピュータでは、ターミナルに **Full Disk Access (FDA)** を与えることが一般的です。そして、それを使用して **`.terminal`** スクリプトを呼び出すことができます。
+ターミナルには、**Full Disk Access (FDA)** を与えることが一般的です。少なくとも、テック系の人々が使用するコンピュータではそうです。そして、それを使用して **`.terminal`** スクリプトを呼び出すことができます。
 
 **`.terminal`** スクリプトは、次のようなコマンドを **`CommandString`** キーで実行する plist ファイルです：
 ```xml
@@ -363,15 +363,15 @@ os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 **`/var/db/locationd/clients.plist`**には、**位置情報サービスにアクセスを許可されたクライアント**を示す第3のTCCデータベースがあります。\
 フォルダ**`/var/db/locationd/`はDMGのマウントから保護されていなかった**ため、独自のplistをマウントすることが可能でした。
 
-## スタートアップアプリによる
+## スタートアップアプリによる方法
 
 {% content-ref url="../../../macos-auto-start-locations.md" %}
 [macos-auto-start-locations.md](../../../macos-auto-start-locations.md)
 {% endcontent-ref %}
 
-## grepによる
+## grepによる方法
 
-いくつかの場合、ファイルには電子メール、電話番号、メッセージなどの機密情報が保護されていない場所に保存されることがあります（これはAppleの脆弱性としてカウントされます）。
+いくつかの場合、ファイルには電子メール、電話番号、メッセージなどの機密情報が保護されていない場所に保存されることがあります（これはAppleの脆弱性と見なされます）。
 
 <figure><img src="../../../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
 
