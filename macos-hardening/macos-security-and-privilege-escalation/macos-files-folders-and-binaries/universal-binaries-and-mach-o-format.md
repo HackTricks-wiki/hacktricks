@@ -39,8 +39,8 @@ struct fat_header {
 struct fat_arch {
 cpu_type_t	cputype;	/* especificador de CPU (int) */
 cpu_subtype_t	cpusubtype;	/* especificador de máquina (int) */
-uint32_t	offset;		/* desplazamiento del archivo a este objeto */
-uint32_t	size;		/* tamaño de este objeto */
+uint32_t	offset;		/* desplazamiento del archivo a este archivo de objeto */
+uint32_t	size;		/* tamaño de este archivo de objeto */
 uint32_t	align;		/* alineación como una potencia de 2 */
 };
 </code></pre>
@@ -76,9 +76,9 @@ capabilities PTR_AUTH_VERSION USERSPACE 0
 
 o utilizando la herramienta [Mach-O View](https://sourceforge.net/projects/machoview/):
 
-<figure><img src="../../../.gitbook/assets/image (5) (1) (1) (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (5) (1) (1) (3) (1).png" alt=""><figcaption></figcaption></figure>
 
-Como podrás pensar, generalmente un binario universal compilado para 2 arquitecturas **duplica el tamaño** de uno compilado para solo 1 arquitectura.
+Como podrás pensar, por lo general un binario universal compilado para 2 arquitecturas **duplica el tamaño** de uno compilado para solo 1 arquitectura.
 
 ## **Encabezado Mach-O**
 
@@ -127,7 +127,7 @@ O utilizando [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 ## **Comandos de carga de Mach-O**
 
-Esto especifica el **diseño del archivo en memoria**. Contiene la **ubicación de la tabla de símbolos**, el contexto del hilo principal al comienzo de la ejecución y las **bibliotecas compartidas** requeridas.\
+Esto especifica el **diseño del archivo en memoria**. Contiene la **ubicación de la tabla de símbolos**, el contexto del hilo principal al comienzo de la ejecución y qué **bibliotecas compartidas** se requieren.\
 Los comandos básicamente instruyen al cargador dinámico **(dyld) cómo cargar el binario en memoria.**
 
 Todos los comandos de carga comienzan con una estructura **load\_command**, definida en el **`loader.h`** mencionado anteriormente:
@@ -195,9 +195,9 @@ Ejemplo de **encabezado de sección**:
 
 Si **agregas** el **desplazamiento de sección** (0x37DC) + el **desplazamiento** donde comienza la **arquitectura**, en este caso `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-También es posible obtener **información de encabezados** desde la **línea de comandos** con:
+También es posible obtener la **información de los encabezados** desde la **línea de comandos** con:
 ```bash
 otool -lv /bin/ls
 ```
@@ -219,7 +219,7 @@ Segmentos comunes cargados por este comando:
 
 ### **`LC_MAIN`**
 
-Contiene el punto de entrada en el atributo **entryoff**. En el momento de carga, **dyld** simplemente **suma** este valor a la **base del binario** en memoria y luego **salta** a esta instrucción para comenzar la ejecución del código del binario.
+Contiene el punto de entrada en el atributo **entryoff**. En el momento de carga, **dyld** simplemente **suma** este valor a la **base del binario** en memoria y luego **salta** a esta instrucción para iniciar la ejecución del código del binario.
 
 ### **LC\_CODE\_SIGNATURE**
 

@@ -12,7 +12,7 @@
 
 </details>
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
 Si estás interesado en una **carrera de hacking** y hackear lo imposible - ¡**estamos contratando**! (_se requiere fluidez en polaco escrito y hablado_).
 
@@ -51,7 +51,7 @@ kerberos::golden /user:Administrator /domain:jurassic.park /sid:S-1-5-21-1339291
 ```
 {% endcode %}
 
-El servicio **CIFS** es el que te permite **acceder al sistema de archivos de la víctima**. Puedes encontrar otros servicios aquí: [**https://adsecurity.org/?page\_id=183**](https://adsecurity.org/?page\_id=183)**.** Por ejemplo, puedes usar el servicio **HOST** para crear una _**schtask**_ en una computadora. Luego puedes verificar si esto ha funcionado intentando listar las tareas de la víctima: `schtasks /S <nombre de host>` o puedes usar los servicios **HOST y** **RPCSS** para ejecutar consultas **WMI** en una computadora, pruébalo haciendo: `Get-WmiObject -Class win32_operatingsystem -ComputerName <nombre de host>`
+El servicio **CIFS** es el que te permite **acceder al sistema de archivos de la víctima**. Puedes encontrar otros servicios aquí: [**https://adsecurity.org/?page\_id=183**](https://adsecurity.org/?page\_id=183)**.** Por ejemplo, puedes usar el servicio **HOST** para crear una _**schtask**_ en una computadora. Luego puedes verificar si esto ha funcionado intentando listar las tareas de la víctima: `schtasks /S <nombre de host>` o puedes usar los servicios **HOST y RPCSS** para ejecutar consultas **WMI** en una computadora, pruébalo haciendo: `Get-WmiObject -Class win32_operatingsystem -ComputerName <nombre de host>`
 
 ### Mitigación
 
@@ -158,9 +158,9 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 [dcsync.md](dcsync.md)
 {% endcontent-ref %}
 
-<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
+<img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" data-size="original">
 
-Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **¡estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
+Si estás interesado en una **carrera de hacking** y hackear lo imposible - **¡estamos contratando!** (_se requiere fluidez en polaco, tanto escrito como hablado_).
 
 {% embed url="https://www.stmcyber.com/careers" %}
 
@@ -170,7 +170,7 @@ Si estás interesado en una **carrera de hacking** y hackear lo inhackeable - **
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**oficial PEASS & HackTricks swag**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 

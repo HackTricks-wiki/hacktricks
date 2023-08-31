@@ -23,7 +23,7 @@ Esta función hará que el binario **permitido sea dueño del PID**, pero el **m
 Si encuentras la función **`shouldAcceptNewConnection`** o una función llamada por ella que **llame a** **`processIdentifier`** y no llame a **`auditToken`**, es muy probable que esté verificando el PID del proceso y no el token de auditoría.\
 Como por ejemplo en esta imagen (tomada de la referencia):
 
-<figure><img src="../../../../.gitbook/assets/image (4) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4) (1) (1) (1) (2).png" alt=""><figcaption></figcaption></figure>
 
 Comprueba este ejemplo de exploit (de nuevo, tomado de la referencia) para ver las 2 partes del exploit:
 

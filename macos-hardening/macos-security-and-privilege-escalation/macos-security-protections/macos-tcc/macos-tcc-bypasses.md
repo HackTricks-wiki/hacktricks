@@ -6,7 +6,7 @@
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
@@ -54,7 +54,7 @@ Con el permiso **`com.apple.private.icloud-account-access`** es posible comunica
 
 **iMovie** y **Garageband** tenían este permiso y otros que lo permitían.
 
-Para obtener más **información** sobre la explotación para **obtener tokens de iCloud** a partir de ese permiso, consulta la charla: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Para obtener más **información** sobre la explotación para **obtener tokens de iCloud** de ese permiso, consulta la charla: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / Automatización
 
@@ -66,7 +66,7 @@ Para obtener más información sobre Apple Scripts, consulta:
 [macos-apple-scripts.md](macos-apple-scripts.md)
 {% endcontent-ref %}
 
-Por ejemplo, si una aplicación tiene **permiso de Automatización sobre `iTerm`**, por ejemplo en este caso **`Terminal`** tiene acceso a iTerm:
+Por ejemplo, si una aplicación tiene **permiso de Automatización sobre `iTerm`**, por ejemplo en este caso **`Terminal`** tiene acceso sobre iTerm:
 
 <figure><img src="../../../../.gitbook/assets/image (2) (2) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -141,7 +141,7 @@ $> ls ~/Documents
 
 Las notas tenían acceso a ubicaciones protegidas por TCC, pero cuando se crea una nota, esta se crea en una ubicación **no protegida**. Por lo tanto, podrías pedirle a las notas que copien un archivo protegido en una nota (en una ubicación no protegida) y luego acceder al archivo:
 
-<figure><img src="../../../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (6) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### CVE-2021-XXXX - Translocación
 
@@ -249,7 +249,7 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Para obtener más información sobre cómo explotar esto fácilmente, consulta el [**informe original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Para obtener más información sobre cómo explotar esto fácilmente, [consulte el informe original](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
@@ -257,7 +257,7 @@ El binario `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` tenía los
 
 ### CVE-2023-26818 - Telegram
 
-Telegram tenía los permisos `com.apple.security.cs.allow-dyld-environment-variables` y `com.apple.security.cs.disable-library-validation`, por lo que era posible abusar de ellos para **obtener acceso a sus permisos**, como grabar con la cámara. Puedes encontrar el **código malicioso en el informe**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+Telegram tenía los permisos `com.apple.security.cs.allow-dyld-environment-variables` y `com.apple.security.cs.disable-library-validation`, por lo que era posible abusar de ellos para **obtener acceso a sus permisos**, como grabar con la cámara. Puede [encontrar el payload en el informe](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
 
 ## Mediante invocaciones abiertas
 
@@ -265,7 +265,7 @@ Es posible invocar `open` en un entorno sandbox.
 
 ### Scripts de Terminal
 
-Es bastante común darle al Terminal **Acceso completo al disco (FDA)**, al menos en computadoras utilizadas por personas técnicas. Y es posible invocar scripts **`.terminal`** utilizando esto.
+Es bastante común darle al terminal **Acceso completo al disco (FDA)**, al menos en computadoras utilizadas por personas técnicas. Y es posible invocar scripts **`.terminal`** utilizando esto.
 
 Los scripts **`.terminal`** son archivos plist como este, con el comando a ejecutar en la clave **`CommandString`**:
 ```xml
@@ -389,7 +389,7 @@ En varias ocasiones, los archivos almacenarán información sensible como correo
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
 * Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
-* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **Comparte tus trucos de hacking enviando PR al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
+* **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
+* **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
 </details>
