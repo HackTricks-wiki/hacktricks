@@ -61,7 +61,7 @@ Obtén acceso hoy mismo:
 
 ### [Intruder](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)
 
-<figure><img src=".gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
 Mantente un paso adelante en el juego de la ciberseguridad.
 
@@ -98,7 +98,7 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 
 [**WebSec**](https://websec.nl) es una empresa profesional de ciberseguridad con sede en **Ámsterdam** que ayuda a **proteger** negocios **en todo el mundo** contra las últimas amenazas de ciberseguridad al proporcionar servicios de seguridad ofensiva con un enfoque **moderno**.
 
-WebSec es una empresa de seguridad **todo en uno**, lo que significa que lo hacen todo; Pruebas de penetración, Auditorías de seguridad, Entrenamientos de concienciación, Campañas de phishing, Revisión de código, Desarrollo de exploits, Externalización de expertos en seguridad y mucho más.
+WebSec es una empresa de seguridad **todo en uno**, lo que significa que hacen de todo; Pruebas de penetración, Auditorías de seguridad, Entrenamientos de concienciación, Campañas de phishing, Revisión de código, Desarrollo de exploits, Externalización de expertos en seguridad y mucho más.
 
 Otra cosa genial sobre WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta tal punto que **garantizan los mejores resultados de calidad**, como se indica en su sitio web "**Si no podemos hackearlo, ¡no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
 
@@ -113,7 +113,7 @@ Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks
 
 ## Licencia
 
-**Copyright © Carlos Polop 2023. Excepto donde se especifique lo contrario (la información externa copiada en el libro pertenece a los autores originales), el texto de** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **de Carlos Polop está bajo licencia** [**Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
+**Derechos de autor © Carlos Polop 2023. A menos que se especifique lo contrario (la información externa copiada en el libro pertenece a los autores originales), el texto de** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **de Carlos Polop está bajo licencia** [**Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
 **Si deseas utilizarlo con fines comerciales, contáctame.**
 
 ## **Descargo de responsabilidad**
