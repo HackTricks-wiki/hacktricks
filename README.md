@@ -61,7 +61,7 @@ Get Access Today:
 
 ### [Intruder](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)
 
-<figure><img src=".gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
 Stay a step ahead in the cybersecurity game.
 
