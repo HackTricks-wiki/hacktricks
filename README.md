@@ -24,17 +24,17 @@ _あなたの会社もここに掲載されるかもしれません。_
 
 <figure><img src=".gitbook/assets/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) は、**HACK THE UNHACKABLE** というスローガンを掲げる優れたサイバーセキュリティ企業です。彼らは独自の研究を行い、独自のハッキングツールを開発して、ペンテスト、レッドチーム、トレーニングなどの貴重なサイバーセキュリティサービスを提供しています。
+[**STM Cyber**](https://www.stmcyber.com)は、**HACK THE UNHACKABLE**というスローガンを掲げる優れたサイバーセキュリティ企業です。彼らは独自の研究を行い、独自のハッキングツールを開発して、ペンテスト、レッドチーム、トレーニングなどの貴重なサイバーセキュリティサービスを提供しています。
 
-[**https://blog.stmcyber.com**](https://blog.stmcyber.com) で彼らの**ブログ**をチェックできます。
+[**https://blog.stmcyber.com**](https://blog.stmcyber.com)で彼らの**ブログ**をチェックできます。
 
-**STM Cyber** はまた、HackTricks のようなオープンソースのサイバーセキュリティプロジェクトもサポートしています :)
+**STM Cyber**は、HackTricksのようなオープンソースのサイバーセキュリティプロジェクトもサポートしています :)
 
 ### [RootedCON](https://www.rootedcon.com/)
 
 <figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) は、**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**でも最も重要なイベントの一つです。技術的な知識を促進することを使命としており、この会議は技術とサイバーセキュリティの専門家が集まる活気ある場です。
+[**RootedCON**](https://www.rootedcon.com)は、**スペイン**で最も関連性の高いサイバーセキュリティイベントであり、**ヨーロッパ**でも最も重要なイベントの一つです。技術的な知識を促進することを使命としており、この会議は技術とサイバーセキュリティの専門家が集まる活気ある場です。
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -42,9 +42,9 @@ _あなたの会社もここに掲載されるかもしれません。_
 
 <figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** は、**ヨーロッパで最も優れた**エシカルハッキングと**バグバウンティプラットフォーム**です。
+**Intigriti**は、**ヨーロッパで最も優れた**エシカルハッキングと**バグバウンティプラットフォーム**です。
 
-**バグバウンティのヒント**: **ハッカーによって作成されたプレミアムなバグバウンティプラットフォーム**である **Intigriti** に**サインアップ**してみてください！今日から [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) で報酬を最大 **$100,000** まで獲得できます！
+**バグバウンティのヒント**：ハッカーによって作成されたプレミアムな**バグバウンティプラットフォーム**である**Intigriti**に**サインアップ**してください！今すぐ[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加し、最大**$100,000**のバウンティを獲得しましょう！
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -53,23 +53,23 @@ _あなたの会社もここに掲載されるかもしれません。_
 <figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化できます。
+[**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**しましょう。
 
-今すぐアクセスを取得：
+今日アクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ### [Intruder](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)
 
-<figure><img src=".gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
 サイバーセキュリティゲームで一歩先を行く。
 
-[**Intruder**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) は脆弱性管理を簡単にします。攻撃対象の範囲を把握し、企業が脆弱性を抱えている箇所を確認し、システムが最も公開されている問題に優先順位を付けることで、最も重要なことに集中できます。
+[**Intruder**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)は、脆弱性管理を簡単にします。攻撃対象の範囲を把握し、企業が脆弱性を抱えている箇所を確認し、システムが最も公開されている問題に優先順位を付けることで、最も重要なことに集中できます。
 
-内部インフラストラクチャからWebアプリ、API、クラウドシステムまで、一つのプラットフォームで数千のチェックを実行できます。[AWS、GCP、Azure](https://www.intruder.io/cloud-vulnerability-scanning-for-aws-google-cloud-and-azure) とシームレスに統合し、DevOps を効率化してチームが修正を迅速に実装できるようにします。
+内部インフラストラクチャからWebアプリ、API、クラウドシステムまで、すべての技術スタックをカバーする単一のプラットフォームで数千のチェックを実行します。[AWS、GCP、Azure](https://www.intruder.io/cloud-vulnerability-scanning-for-aws-google-cloud-and-azure)とシームレスに統合し、DevOpsを効率化してチームが修正を迅速に実装できるようにします。
 
-Intruder は休むことなく監視し続けます。24時間365日、システムを監視し続けます。詳細を知りたいですか？サイトを訪れ、[**無料トライアル**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) を試してみてください。
+Intruderは休むことはありません。24時間体制でシステムを監視します。詳細を知りたいですか？サイトを訪れ、[**無料トライアル**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)で試してみてください。
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
@@ -77,18 +77,18 @@ Intruder は休むことなく監視し続けます。24時間365日、システ
 
 <figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
-**HackenProof はすべての暗号バグバウンティの場所です。**
+**HackenProofはすべての暗号バグバウンティの場所です。**
 
 **遅延なしで報酬を受け取る**\
-HackenProof の報酬は、顧客が報酬予算を入金した後に発表されます。バグが検証された後に報酬を受け取ることができます。
+HackenProofのバウンティは、顧客が報酬予算を入金した後に開始されます。バグが検証された後に報酬を受け取ることができます。
 
-**Web3 ペンテストの経験を積む**\
-ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！上昇期の web3 セキュリティをマスターしましょう。
+**Web3ペンテストの経験を積む**\
+ブロックチェーンプロトコルとスマートコントラクトは新しいインターネットです！上昇期のweb3セキュリティをマスターしましょう。
 
-**Web3 ハッカーレジェンドになる**\
+**Web3ハッカーレジェンドになる**\
 各検証済みのバグで評判ポイントを獲得し、週間リーダーボードのトップを制覇しましょう。
 
-[**HackenProof にサインアップ**](https://hackenproof.com/register) して、ハッキングから報酬を得ましょう！
+[**HackenProofでサインアップ**](https://hackenproof.com/register)して、ハッキングから報酬を得ましょう！
 
 {% embed url="https://hackenproof.com/register" %}
 
@@ -96,11 +96,11 @@ HackenProof の報酬は、顧客が報酬予算を入金した後に発表さ�
 
 <figure><img src=".gitbook/assets/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) は、**アムステルダム**を拠点とするプロのサイバーセキュリティ企業であり、**最新のサイバーセキュリティ脅威からビジネスを保護**するために、**攻撃型セキュリティサービス**を提供しています。
+[**WebSec**](https://websec.nl)は、**アムステルダム**を拠点とするプロのサイバーセキュリティ企業であり、**最新のサイバーセキュリティ脅威から**世界中のビジネスを**保護**するために**攻撃的なセキュリティサービス**を提供しています。
 
-WebSec は**オールインワンのセキュリティ企業**であり、ペンテスト、セキュリティ監査、セキュリティ意識向上トレーニング、フィッシングキャンペーン、コードレビュー、エクスプロイト開発、セキュリティエキスパートの外部委託など、すべてを提供しています。
+WebSecは**オールインワンのセキュリティ企業**であり、ペンテスト、セキュリティ監査、セキュリティ意識向上トレーニング、フィッシングキャンペーン、コードレビュー、エクスプロイト開発、セキュリティエキスパートの外部委託など、すべてを行っています。
 
-WebSec のもう一つの素晴らしい点は、業界平均とは異なり、WebSec は**自分たちのスキルに非常に自信を持っている**ということです。彼らのウェブサイトには「**私たちがハックできなければ、お金はいただきません！**」と記載されています。詳細については、彼らの [**ウェブサイト**](https://websec.nl/en/) と [**ブログ**](https://websec.nl/blog/) をご覧ください
+WebSecのもう一つの素晴らしい点は、業界平均とは異なり、WebSecは**自分たちのスキルに非常に自信を持っている**ということです。彼らのウェブサイトには「**私たちがハックできなければ、お金はいただきません！**」と記載されています。詳細については、彼らの[**ウェブサイト**](https://websec.nl/en/)と[**ブログ**](https://websec.nl/blog/)をご
 ### [DragonJAR](https://www.dragonjar.org/)
 
 <figure><img src=".gitbook/assets/image (1) (1) (2) (4) (1).png" alt=""><figcaption></figcaption></figure>
@@ -125,7 +125,7 @@ WebSec のもう一つの素晴らしい点は、業界平均とは異なり、W
 
 さらに、この書籍で説明されている技術やヒントは、教育および情報提供の目的でのみ提供されるものであり、いかなる違法または悪意のある活動にも使用してはなりません。著者および出版者は、違法または非倫理的な活動を是認または支持するものではなく、この書籍内に含まれる情報の使用は、ユーザー自身のリスクと裁量によるものです。
 
-ユーザーは、この書籍内に含まれる情報に基づいて行われるすべての行動について、自己の責任を負い、ここに記載されている技術やヒントを実装しようとする場合は常に専門の助言と支援を求めるべきです。
+ユーザーは、この書籍に含まれる情報に基づいて行われるすべての行動について、自己の責任を負い、ここに記載されている技術やヒントを実装しようとする場合は常に専門の助言と支援を求めるべきです。
 
 この書籍を使用することで、ユーザーは、この書籍またはその中に含まれる情報の使用によって生じるいかなる損害、損失、または害に対しても、著者および出版者を一切の責任から免責し、解放することに同意します。
 {% endhint %}
@@ -135,8 +135,8 @@ WebSec のもう一つの素晴らしい点は、業界平均とは異なり、W
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロードしたりしたいですか？** [**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop) **をチェックしてください！**
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、当社の独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)、当社の独占的な[**NFT**](https://opensea.io/collection/the-peass-family)コレクションを発見してください。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
 * **ハッキングのトリックを共有するには、** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
