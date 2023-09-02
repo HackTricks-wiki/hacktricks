@@ -12,6 +12,14 @@
 
 </details>
 
+<figure><img src="../.gitbook/assets/image (674).png" alt=""><figcaption></figcaption></figure>
+
+Find vulnerabilities that matter most so you can fix them faster. Intruder tracks your attack surface, runs proactive threat scans, finds issues across your whole tech stack, from APIs to web apps and cloud systems. [**Try it for free**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) today.
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
+
 ## MMC20.Application
 
 **DCOM** (Distributed Component Object Model) objects are **interesting** due to the ability to **interact** with the objects **over the network**. Microsoft has some good documentation on DCOM [here](https://msdn.microsoft.com/en-us/library/cc226801.aspx) and on COM [here](https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363\(v=vs.85\).aspx). You can find a solid list of DCOM applications using PowerShell, by running `Get-CimInstance Win32_DCOMApplication`.
@@ -153,6 +161,13 @@ The Powershell script [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Emp
 
 * The first method was copied from [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/), for more info follow the link
 * The second section was copied from [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/), for more info follow the link
+
+<figure><img src="../.gitbook/assets/image (674).png" alt=""><figcaption></figcaption></figure>
+
+Find vulnerabilities that matter most so you can fix them faster. Intruder tracks your attack surface, runs proactive threat scans, finds issues across your whole tech stack, from APIs to web apps and cloud systems. [**Try it for free**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) today.
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
 
 <details>
 

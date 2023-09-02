@@ -12,6 +12,14 @@
 
 </details>
 
+<figure><img src="../.gitbook/assets/image (674).png" alt=""><figcaption></figcaption></figure>
+
+Find vulnerabilities that matter most so you can fix them faster. Intruder tracks your attack surface, runs proactive threat scans, finds issues across your whole tech stack, from APIs to web apps and cloud systems. [**Try it for free**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) today.
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
+
 With [**Flipper Zero**](https://flipperzero.one/) you can:
 
 * **Listen/Capture/Replay radio frequencies:** [**Sub-GHz**](fz-sub-ghz.md)****
@@ -24,6 +32,13 @@ With [**Flipper Zero**](https://flipperzero.one/) you can:
 * **Play Snake**
 
 **Other Flipper Zero resources in** [**https://github.com/djsime1/awesome-flipperzero**](https://github.com/djsime1/awesome-flipperzero)****
+
+<figure><img src="../.gitbook/assets/image (674).png" alt=""><figcaption></figcaption></figure>
+
+Find vulnerabilities that matter most so you can fix them faster. Intruder tracks your attack surface, runs proactive threat scans, finds issues across your whole tech stack, from APIs to web apps and cloud systems. [**Try it for free**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) today.
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
 
 <details>
 
