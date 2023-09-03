@@ -12,6 +12,14 @@
 
 </details>
 
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
+
+Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, realiza escaneos proactivos de amenazas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
+
 ## Herramientas de Reversión basadas en ImGui
 
 Software:
@@ -22,9 +30,9 @@ Software:
 
 En línea:
 
-* Utiliza [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) para **descompilar** de wasm (binario) a wat (texto claro)
-* Utiliza [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) para **compilar** de wat a wasm
-* También puedes probar a utilizar [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) para descompilar
+* Usa [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) para **descompilar** de wasm (binario) a wat (texto claro)
+* Usa [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) para **compilar** de wat a wasm
+* También puedes intentar usar [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) para descompilar
 
 Software:
 
@@ -41,7 +49,7 @@ El mérito aquí es que si se requiere la restauración de un código fuente per
 
 ### [.Net Reflector](https://www.red-gate.com/products/reflector/)
 
-Con un modelo de complemento integral y una API que amplía la herramienta para adaptarse a tus necesidades exactas, .NET reflector ahorra tiempo y simplifica el desarrollo. Echemos un vistazo a la multitud de servicios de ingeniería inversa que esta herramienta proporciona:
+Con un modelo de complemento integral y una API que extiende la herramienta para adaptarse a tus necesidades exactas, .NET reflector ahorra tiempo y simplifica el desarrollo. Echemos un vistazo a la multitud de servicios de ingeniería inversa que esta herramienta proporciona:
 
 * Proporciona una visión de cómo fluye los datos a través de una biblioteca o componente
 * Proporciona información sobre la implementación y el uso de lenguajes y marcos de trabajo .NET
@@ -53,12 +61,12 @@ Con un modelo de complemento integral y una API que amplía la herramienta para 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [Complemento de ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier sistema operativo (puedes instalarlo directamente desde VSCode, no es necesario descargar el git. Haz clic en **Extensiones** y **busca ILSpy**).\
-Si necesitas **descompilar**, **modificar** y **volver a compilar**, puedes usar: [**https://github.com/0xd4d/dnSpy/releases**](https://github.com/0xd4d/dnSpy/releases) (**Haz clic derecho -> Modificar Método** para cambiar algo dentro de una función).\
+Si necesitas **descompilar**, **modificar** y **volver a compilar**, puedes usar: [**https://github.com/0xd4d/dnSpy/releases**](https://github.com/0xd4d/dnSpy/releases) (**Clic derecho -> Modificar Método** para cambiar algo dentro de una función).\
 También puedes probar [https://www.jetbrains.com/es-es/decompiler/](https://www.jetbrains.com/es-es/decompiler/)
 
 ### Registro de DNSpy
 
-Para hacer que **DNSpy registre alguna información en un archivo**, puedes utilizar estas líneas de código .Net:
+Para hacer que **DNSpy registre alguna información en un archivo**, puedes usar estas líneas de .Net:
 ```bash
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -121,7 +129,7 @@ Luego, si tu aplicación .Net está siendo **ejecutada** por **IIS**, puedes **r
 ```
 iisreset /noforce
 ```
-Luego, para comenzar a depurar, debes cerrar todos los archivos abiertos y dentro de la pestaña **Depurar**, seleccionar **Adjuntar a proceso...**:
+Luego, para comenzar a depurar, debes cerrar todos los archivos abiertos y seleccionar **Adjuntar a proceso...** en la pestaña **Depurar**:
 
 ![](<../../.gitbook/assets/image (280).png>)
 
@@ -196,7 +204,7 @@ Luego, al mirar esto, puedes ver cuándo se detuvo la ejecución en la DLL que d
 ### Depuración de un shellcode con blobrunner
 
 [**Blobrunner**](https://github.com/OALabs/BlobRunner) asignará el **shellcode** a un espacio de memoria, te indicará la **dirección de memoria** donde se asignó el shellcode y detendrá la ejecución.\
-Luego, debes **adjuntar un depurador** (Ida o x64dbg) al proceso y establecer un **punto de interrupción en la dirección de memoria indicada** y **reanudar** la ejecución. De esta manera, estarás depurando el shellcode.
+Luego, debes **adjuntar un depurador** (Ida o x64dbg) al proceso y colocar un **punto de interrupción en la dirección de memoria indicada** y **reanudar** la ejecución. De esta manera estarás depurando el shellcode.
 
 La página de lanzamientos de GitHub contiene archivos zip con las versiones compiladas: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **crea un proyecto C/C++ en Visual Studio Code, copia y pega el código y compílalo**.
@@ -207,7 +215,7 @@ Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguien
 
 ### Depuración de un shellcode con jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)es muy similar a blobrunner. Asignará el **shellcode** a un espacio de memoria y comenzará un **bucle eterno**. Luego, debes **adjuntar el depurador** al proceso, **iniciar, esperar de 2 a 5 segundos y detener** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno, ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)es muy similar a blobrunner. Asignará el **shellcode** a un espacio de memoria y comenzará un **bucle eterno**. Luego debes **adjuntar el depurador** al proceso, **iniciar, esperar 2-5 segundos y detener** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno, ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
 
 ![](<../../.gitbook/assets/image (397).png>)
 
@@ -215,7 +223,7 @@ Puedes descargar una versión compilada de [jmp2it en la página de lanzamientos
 
 ### Depuración de shellcode usando Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) es la interfaz gráfica de radare. Con Cutter, puedes emular el shellcode e inspeccionarlo dinámicamente.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) es la interfaz gráfica de radare. Con Cutter puedes emular el shellcode e inspeccionarlo dinámicamente.
 
 Ten en cuenta que Cutter te permite "Abrir archivo" y "Abrir shellcode". En mi caso, cuando abrí el shellcode como archivo, lo descompiló correctamente, pero cuando lo abrí como shellcode, no lo hizo:
 
@@ -264,7 +272,16 @@ apt-get install libz3-dev
 ```
 Y [instala keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-Si estás jugando un **CTF, este truco para encontrar la bandera** podría ser muy útil: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Si estás jugando un **CTF, este método para encontrar la bandera** podría ser muy útil: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+
+
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
+
+Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, realiza escaneos de amenazas proactivas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
 
 ## Rust
 
@@ -283,7 +300,7 @@ Si tienes que revertir un binario de Delphi, te sugiero que uses el complemento 
 
 Simplemente presiona **ATL+f7** (importar complemento de Python en IDA) y selecciona el complemento de Python.
 
-Este complemento ejecutará el binario y resolverá los nombres de las funciones dinámicamente al inicio de la depuración. Después de iniciar la depuración, presiona nuevamente el botón de inicio (el verde o f9) y se detendrá en un punto de interrupción al comienzo del código real.
+Este complemento ejecutará el binario y resolverá los nombres de las funciones dinámicamente al inicio de la depuración. Después de iniciar la depuración, presiona nuevamente el botón de inicio (el verde o f9) y se detendrá en el inicio del código real.
 
 También es muy interesante porque si presionas un botón en la aplicación gráfica, el depurador se detendrá en la función ejecutada por ese botón.
 
@@ -402,7 +419,7 @@ En el código anterior se puede ver que estamos comparando **uVar1** (el lugar d
 * Luego, se compara con el **valor 8** (botón **START**): En el desafío, esto verifica si el código es válido para obtener la bandera.
 * En este caso, se compara la variable **`DAT_030000d8`** con 0xf3 y si el valor es el mismo, se ejecuta algún código.
 * En cualquier otro caso, se verifica una variable llamada `cont` (`DAT_030000d4`). Es una variable de control porque se le suma 1 justo después de ingresar el código.
-* Si es menor que 8, se realiza algo que implica **agregar** valores a la variable **`DAT_030000d8`** (básicamente se suman los valores de los botones presionados en esta variable siempre y cuando `cont` sea menor que 8).
+* Si es menor que 8, se realiza algo que implica **agregar** valores a la variable `DAT_030000d8` (básicamente se suman los valores de los botones presionados en esta variable siempre y cuando `cont` sea menor que 8).
 
 Entonces, en este desafío, sabiendo los valores de los botones, necesitabas **presionar una combinación con una longitud menor a 8 para que la suma resultante sea 0xf3**.
 
@@ -416,6 +433,13 @@ Entonces, en este desafío, sabiendo los valores de los botones, necesitabas **p
 
 * [https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering)
 * [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Desofuscación binaria)
+
+
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
+
+Encuentra las vulnerabilidades que más importan para que puedas solucionarlas más rápido. Intruder rastrea tu superficie de ataque, realiza escaneos de amenazas proactivas, encuentra problemas en toda tu pila tecnológica, desde APIs hasta aplicaciones web y sistemas en la nube. [**Pruébalo gratis**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks) hoy.
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
 <details>
 
