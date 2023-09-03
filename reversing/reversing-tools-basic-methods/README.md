@@ -6,11 +6,19 @@
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
-* **ハッキングのトリックを共有**するには、[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
+* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
+
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
+
+重要な脆弱性を見つけて修正を迅速化しましょう。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリ、クラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
 
 ## ImGuiベースのリバースエンジニアリングツール
 
@@ -35,9 +43,9 @@
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeekは、**ライブラリ**（.dll）、**Windowsメタデータファイル**（.winmd）、および**実行可能ファイル**（.exe）など、複数の形式を**デコンパイル**および調査するデコンパイラです。デコンパイルされたアセンブリは、Visual Studioプロジェクト（.csproj）として保存することができます。
+dotPeekは、**ライブラリ**（.dll）、**Windowsメタデータファイル**（.winmd）、**実行可能ファイル**（.exe）など、複数の形式を**デコンパイル**および調査するデコンパイラです。デコンパイルされたアセンブリは、Visual Studioプロジェクト（.csproj）として保存できます。
 
-ここでの利点は、失われたソースコードを復元するために、古いアセンブリからの復元が必要な場合、このアクションが時間を節約できることです。さらに、dotPeekはデコンパイルされたコード全体で便利なナビゲーションを提供するため、**Xamarinアルゴリズム分析**に最適なツールの1つです。
+ここでの利点は、失われたソースコードを復元する場合に、時間を節約できることです。さらに、dotPeekはデコンパイルされたコード全体で便利なナビゲーションを提供するため、**Xamarinアルゴリズム分析**に最適なツールの1つです。
 
 ### [.Net Reflector](https://www.red-gate.com/products/reflector/)
 
@@ -51,13 +59,13 @@ dotPeekは、**ライブラリ**（.dll）、**Windowsメタデータファイ�
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Visual Studio Code用のILSpyプラグイン](https://github.com/icsharpcode/ilspy-vscode)：どのOSでも使用できます（VSCodeから直接インストールできます。gitをダウンロードする必要はありません。**Extensions**をクリックして**ILSpy**を検索します）。
-**デコンパイル**、**変更**、**再コンパイル**が必要な場合は、[**https://github.com/0xd4d/dnSpy/releases**](https://github.com/0xd4d/dnSpy/releases)を使用できます（関数内の何かを変更するには、**右クリック->メソッドの変更**）。
-[https://www.jetbrains.com/es-es/decompiler/](https://www.jetbrains.com/es-es/decompiler/)も試してみることができます。
+[Visual Studio Code用のILSpyプラグイン](https://github.com/icsharpcode/ilspy-vscode)：どのOSでも使用できます（VSCodeから直接インストールできます。gitをダウンロードする必要はありません。**Extensions**をクリックして**ILSpy**を検索します）。\
+**デコンパイル**、**変更**、**再コンパイル**が必要な場合は、[**https://github.com/0xd4d/dnSpy/releases**](https://github.com/0xd4d/dnSpy/releases)を使用できます（関数内の何かを変更するには、**右クリック->メソッドの変更**）。\
+[https://www.jetbrains.com/es-es/decompiler/](https://www.jetbrains.com/es-es/decompiler/)も試すことができます。
 
 ### DNSpyログ
 
-**DNSpyが情報をファイルに記録する**ようにするには、次の.Netの行を使用できます：
+**DNSpyが情報をファイルに記録するようにする**ために、次の.Netの行を使用できます：
 ```bash
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -65,7 +73,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```
 ### DNSpy デバッグ
 
-DNSpyを使用してコードをデバッグするには、次の手順を実行する必要があります：
+DNSpyを使用してコードをデバッグするには、次の手順を実行する必要があります。
 
 まず、**デバッグに関連する** **アセンブリ属性**を変更します：
 
@@ -90,41 +98,71 @@ This guide will introduce you to some of the basic reversing tools commonly used
 3. [Ghidra](#ghidra)
 4. [Radare2](#radare2)
 5. [x64dbg](#x64dbg)
-6. [Hopper](#hopper)
-7. [Binary Ninja](#binary-ninja)
-8. [Conclusion](#conclusion)
 
 ## IDA Pro
 
-IDA Pro is one of the most popular and powerful disassemblers/debuggers available. It supports a wide range of architectures and file formats, making it a versatile tool for reverse engineering. IDA Pro provides a user-friendly interface and a powerful analysis engine, allowing users to navigate through disassembled code, analyze functions, and identify vulnerabilities.
+IDA Pro is a widely used disassembler and debugger that is known for its powerful analysis capabilities. It supports a wide range of executable formats and architectures, making it a versatile tool for reverse engineering.
+
+Some key features of IDA Pro include:
+
+- Interactive disassembly and debugging
+- Graphical representation of code flow
+- Support for multiple platforms and file formats
+- Extensibility through plugins and scripts
+
+IDA Pro is a commercial tool, but a free version called IDA Free is also available with limited functionality.
 
 ## OllyDbg
 
-OllyDbg is a popular debugger used for analyzing and modifying binary code. It provides a dynamic analysis environment, allowing users to step through code, set breakpoints, and inspect registers and memory. OllyDbg also includes features for patching binaries, searching for specific instructions, and analyzing malware.
+OllyDbg is a popular debugger that is commonly used for analyzing and modifying binary code. It provides a user-friendly interface and a wide range of features that make it suitable for both beginners and experienced reverse engineers.
+
+Key features of OllyDbg include:
+
+- Dynamic analysis of running processes
+- Breakpoint and tracing functionality
+- Patching and modification of code
+- Plugin support for extending functionality
+
+OllyDbg is a freeware tool that is widely used in the reverse engineering community.
 
 ## Ghidra
 
-Ghidra is a free and open-source software reverse engineering suite developed by the National Security Agency (NSA). It provides a wide range of features for analyzing and understanding binary code, including disassembly, decompilation, and scriptable analysis. Ghidra supports a variety of platforms and file formats, making it a powerful tool for reverse engineering.
+Ghidra is a powerful open-source software reverse engineering framework developed by the National Security Agency (NSA). It provides a wide range of analysis tools and features that make it suitable for both beginners and advanced users.
+
+Some key features of Ghidra include:
+
+- Decompilation of binary code
+- Symbolic execution and data flow analysis
+- Scripting support for automation
+- Collaboration features for team-based analysis
+
+Ghidra is free to use and is available for Windows, macOS, and Linux.
 
 ## Radare2
 
-Radare2 is a command-line based reverse engineering framework that supports a wide range of architectures and file formats. It provides a set of tools for disassembling, debugging, analyzing, and patching binary code. Radare2 is highly extensible and scriptable, allowing users to automate tasks and create custom analysis tools.
+Radare2 is a command-line based reverse engineering framework that is known for its versatility and extensibility. It provides a wide range of tools and features for analyzing and manipulating binary code.
+
+Key features of Radare2 include:
+
+- Disassembly and debugging capabilities
+- Support for multiple architectures and file formats
+- Scripting support for automation
+- Plugin system for extending functionality
+
+Radare2 is an open-source tool that is available for Windows, macOS, and Linux.
 
 ## x64dbg
 
-x64dbg is a powerful open-source debugger for Windows that supports both x86 and x64 architectures. It provides a user-friendly interface and a wide range of features for analyzing and debugging binary code. x64dbg includes features such as dynamic analysis, breakpoints, memory dumping, and plugin support.
+x64dbg is a user-friendly debugger that is commonly used for analyzing and debugging 64-bit Windows executables. It provides a simple and intuitive interface, making it suitable for both beginners and experienced reverse engineers.
 
-## Hopper
+Some key features of x64dbg include:
 
-Hopper is a reverse engineering tool for macOS and Linux that supports a wide range of architectures and file formats. It provides a user-friendly interface and a powerful disassembly engine, allowing users to analyze and understand binary code. Hopper also includes features for debugging, patching binaries, and scripting.
+- Dynamic analysis of running processes
+- Breakpoint and tracing functionality
+- Patching and modification of code
+- Plugin support for extending functionality
 
-## Binary Ninja
-
-Binary Ninja is a commercial reverse engineering platform that supports a wide range of architectures and file formats. It provides a user-friendly interface and a powerful analysis engine, allowing users to analyze and manipulate binary code. Binary Ninja includes features such as advanced graph visualization, scripting, and plugin support.
-
-## Conclusion
-
-These are just a few of the many reversing tools available for analyzing and manipulating binary code. By familiarizing yourself with these tools and their capabilities, you will be better equipped to tackle reverse engineering challenges and uncover vulnerabilities in software. Remember to always use these tools responsibly and ethically, and to respect the laws and regulations governing their use. Happy reversing!
+x64dbg is an open-source tool that is available for Windows.
 
 ---
 
@@ -132,9 +170,9 @@ These are just a few of the many reversing tools available for analyzing and man
 
 ## はじめに
 
-リバースエンジニアリングの分野では、優れたリバースエンジニアリングツールのセットを持つことが重要です。これらのツールは、ソフトウェアの内部動作を分析し理解するのに役立ち、脆弱性を発見したり、機能を変更したり、プログラムの動作をより深く理解することができます。
+リバースエンジニアリングの分野では、優れたリバースエンジニアリングツールセットを持つことが重要です。これらのツールは、ソフトウェアの内部動作を分析し理解するのに役立ち、脆弱性を発見したり、機能を変更したり、プログラムの動作をより深く理解することができます。
 
-このガイドでは、ハッカーやセキュリティ専門家がよく使用するいくつかの基本的なリバースエンジニアリングツールを紹介します。これらのツールに慣れることで、さまざまな目的でソフトウェアを分析し操作するための準備が整います。
+このガイドでは、ハッカーやセキュリティ専門家がよく使用するいくつかの基本的なリバースエンジニアリングツールを紹介します。これらのツールに慣れることで、さまざまな目的のためにソフトウェアを分析し操作するための準備が整います。
 
 ## 目次
 
@@ -143,41 +181,71 @@ These are just a few of the many reversing tools available for analyzing and man
 3. [Ghidra](#ghidra)
 4. [Radare2](#radare2)
 5. [x64dbg](#x64dbg)
-6. [Hopper](#hopper)
-7. [Binary Ninja](#binary-ninja)
-8. [結論](#結論)
 
 ## IDA Pro
 
-IDA Proは、最も人気のある強力なディスアセンブラ/デバッガの1つです。さまざまなアーキテクチャとファイル形式をサポートしており、リバースエンジニアリングのための多目的なツールです。IDA Proは、ユーザーフレンドリーなインターフェースと強力な解析エンジンを提供し、ユーザーは逆アセンブルされたコードをナビゲートし、関数を分析し、脆弱性を特定することができます。
+IDA Proは、強力な解析機能で知られる広く使用されている逆アセンブラおよびデバッガです。さまざまな実行可能形式とアーキテクチャをサポートしており、リバースエンジニアリングのための多目的なツールとして使用できます。
+
+IDA Proの主な特徴は次のとおりです：
+
+- インタラクティブな逆アセンブリとデバッグ
+- コードフローのグラフィカルな表示
+- 複数のプラットフォームとファイル形式のサポート
+- プラグインとスクリプトによる拡張性
+
+IDA Proは商用ツールですが、機能が制限された無料版であるIDA Freeも利用できます。
 
 ## OllyDbg
 
-OllyDbgは、バイナリコードの分析と修正に使用される人気のあるデバッガです。動的な分析環境を提供し、ユーザーはコードをステップ実行したり、ブレークポイントを設定したり、レジスタやメモリを調査したりすることができます。OllyDbgには、バイナリのパッチ適用、特定の命令の検索、マルウェアの分析などの機能も備わっています。
+OllyDbgは、バイナリコードの解析と修正によく使用される人気のあるデバッガです。ユーザーフレンドリーなインターフェースと幅広い機能を提供しており、初心者から経験豊富なリバースエンジニアまで対応しています。
+
+OllyDbgの主な特徴は次のとおりです：
+
+- 実行中のプロセスの動的解析
+- ブレークポイントとトレース機能
+- コードのパッチと修正
+- 機能の拡張のためのプラグインサポート
+
+OllyDbgは、リバースエンジニアリングコミュニティで広く使用されているフリーウェアツールです。
 
 ## Ghidra
 
-Ghidraは、国家安全保障局（NSA）によって開発された無料のオープンソースのソフトウェアリバースエンジニアリングスイートです。ディスアセンブル、デコンパイル、スクリプト可能な解析など、バイナリコードの分析と理解のためのさまざまな機能を提供します。Ghidraは、さまざまなプラットフォームとファイル形式をサポートしており、リバースエンジニアリングのための強力なツールです。
+Ghidraは、アメリカ国家安全保障局（NSA）によって開発された強力なオープンソースのソフトウェアリバースエンジニアリングフレームワークです。初心者から上級者まで対応するさまざまな分析ツールと機能を提供しています。
+
+Ghidraの主な特徴は次のとおりです：
+
+- バイナリコードの逆コンパイル
+- シンボリック実行とデータフロー解析
+- 自動化のためのスクリプトサポート
+- チームベースの分析のためのコラボレーション機能
+
+Ghidraは無料で使用でき、Windows、macOS、Linuxに対応しています。
 
 ## Radare2
 
-Radare2は、コマンドラインベースのリバースエンジニアリングフレームワークで、さまざまなアーキテクチャとファイル形式をサポートしています。バイナリコードのディスアセンブル、デバッグ、分析、パッチ適用などのツールセットを提供します。Radare2は高度に拡張可能でスクリプト可能であり、ユーザーはタスクを自動化し、カスタムの解析ツールを作成することができます。
+Radare2は、多機能性と拡張性で知られるコマンドラインベースのリバースエンジニアリングフレームワークです。バイナリコードの分析と操作のためのさまざまなツールと機能を提供しています。
+
+Radare2の主な特徴は次のとおりです：
+
+- 逆アセンブリとデバッグの機能
+- 複数のアーキテクチャとファイル形式のサポート
+- 自動化のためのスクリプトサポート
+- 機能の拡張のためのプラグインシステム
+
+Radare2はオープンソースツールであり、Windows、macOS、Linuxに対応しています。
 
 ## x64dbg
 
-x64dbgは、Windows用の強力なオープンソースデバッガで、x86およびx64アーキテクチャの両方をサポートしています。ユーザーフレンドリーなインターフェースとバイナリコードの分析とデバッグのためのさまざまな機能を提供します。x64dbgには、動的な分析、ブレークポイント、メモリのダンプ、プラグインサポートなどの機能が含まれています。
+x64dbgは、64ビットWindows実行可能ファイルの解析とデバッグによく使用される使いやすいデバッガです。シンプルで直感的なインターフェースを提供しており、初心者から経験豊富なリバースエンジニアまで対応しています。
 
-## Hopper
+x64dbgの主な特徴は次のとおりです：
 
-Hopperは、macOSとLinux向けのリバースエンジニアリングツールで、さまざまなアーキテクチャとファイル形式をサポートしています。ユーザーフレンドリーなインターフェースと強力なディスアセンブリエンジンを提供し、ユーザーはバイナリコードを分析し理解することができます。Hopperには、デバッグ、バイナリのパッチ適用、スクリプトなどの機能も備わっています。
+- 実行中のプロセスの動的解析
+- ブレークポイントとトレース機能
+- コードのパッチと修正
+- 機能の拡張のためのプラグインサポート
 
-## Binary Ninja
-
-Binary Ninjaは、さまざまなアーキテクチャとファイル形式をサポートする商用リバースエンジニアリングプラットフォームです。ユーザーフレンドリーなインターフェースと強力な解析エンジンを提供し、ユーザーはバイナリコードを分析し操作することができます。Binary Ninjaには、高度なグラフ可視化、スクリプト、プラグインサポートなどの機能が含まれています。
-
-## 結論
-
-これらは、バイナリコードの分析と操作に使用できる多くのリバースエンジニアリングツールのうちのいくつかです。これらのツールとその機能に慣れることで、リバースエンジニアリングの課題に取り組み、ソフトウェアの脆弱性を発見するための準備が整います。これらのツールを常に責任を持って、倫理的に使用し、使用に関する法律と規制を尊重することを忘れないでください。リバースエンジニアリングを楽しんでください！
+x64dbgはオープンソースツールであり、Windowsに対応しています。
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -239,22 +307,22 @@ iisreset /noforce
 
 ![](<../../.gitbook/assets/image (136).png>)
 
-その後、デバッグを開始すると、各DLLがロードされるたびに実行が停止します。rundll32がDLLをロードすると、実行が停止します。
+それから、デバッグを開始すると、各DLLがロードされるたびに実行が停止します。rundll32がDLLをロードすると、実行が停止します。
 
-しかし、ロードされたDLLのコードにどのようにアクセスできるのでしょうか？この方法では、方法がわかりません。
+しかし、ロードされたDLLのコードにどうやってアクセスできるのでしょうか？この方法では、私はわかりません。
 
 ### x64dbg/x32dbgを使用する
 
 * **rundll32をロード**します（64ビットはC:\Windows\System32\rundll32.exe、32ビットはC:\Windows\SysWOW64\rundll32.exe）。
 * **コマンドラインを変更**します（ _ファイル --> コマンドラインの変更_ ）し、dllのパスと呼び出したい関数を設定します。例："C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii\_2.dll",DLLMain
 * _オプション --> 設定_ を変更し、"**DLLエントリ**"を選択します。
-* それから**実行を開始**します。デバッガは各DLLメインで停止します。いずれかの時点で、自分のDLLのDLLエントリで停止します。そこから、ブレークポイントを設定したい場所を検索します。
+* それから**実行を開始**します。デバッガは各dllメインで停止します。いずれかの時点で、あなたは自分のdllのdllエントリで停止します。そこから、ブレークポイントを設定したい場所を検索するだけです。
 
-win64dbgで実行が何らかの理由で停止されると、win64dbgウィンドウの上部にいる**どのコードにいるか**が表示されます：
+win64dbgで実行が何らかの理由で停止された場合、win64dbgウィンドウの**上部**にあるコードを確認できます：
 
 ![](<../../.gitbook/assets/image (137).png>)
 
-そのため、デバッグしたいDLLで実行が停止した場所を確認できます。
+そのため、デバッグしたいdllで実行が停止した場所を確認できます。
 
 ## GUIアプリ/ビデオゲーム
 
@@ -272,8 +340,8 @@ win64dbgで実行が何らかの理由で停止されると、win64dbgウィン�
 
 ### blobrunnerを使用したシェルコードのデバッグ
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner)は、シェルコードをメモリのスペースに割り当て、シェルコードが割り当てられたメモリアドレスを示し、実行を停止します。\
-その後、プロセスにデバッガ（Idaまたはx64dbg）をアタッチし、指定されたメモリアドレスにブレークポイントを設定し、実行を再開します。これにより、シェルコードをデバッグできます。
+[**Blobrunner**](https://github.com/OALabs/BlobRunner)は、シェルコードをメモリ内のスペースに**割り当て**、シェルコードが割り当てられた**メモリアドレス**を示し、実行を**停止**します。\
+その後、プロセスにデバッガ（Idaまたはx64dbg）を**アタッチ**し、指定されたメモリアドレスに**ブレークポイント**を設定し、実行を**再開**します。これにより、シェルコードをデバッグできます。
 
 リリースのGitHubページには、コンパイルされたリリースが含まれるzipファイルがあります：[https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 以下のリンクに、Blobrunnerのわずかに変更されたバージョンがあります。コンパイルするには、Visual Studio CodeでC/C++プロジェクトを作成し、コードをコピーして貼り付け、ビルドします。
@@ -284,7 +352,7 @@ win64dbgで実行が何らかの理由で停止されると、win64dbgウィン�
 
 ### jmp2itを使用したシェルコードのデバッグ
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)は、blobrunnerと非常に似ています。シェルコードをメモリのスペースに割り当て、**永遠のループ**を開始します。その後、デバッガをプロセスにアタッチし、**再生を開始し、2〜5秒待って停止**し、**永遠のループ**の中にいます。永遠のループの次の命令にジャンプすると、シェルコードを呼び出す命令になり、最終的にシェルコードを実行します。
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)は、blobrunnerと非常に似ています。シェルコードをメモリ内のスペースに**割り当て**し、**永遠のループ**を開始します。その後、プロセスにデバッガを**アタッチ**し、**再生を開始し、2〜5秒待って停止**し、自分自身が**永遠のループ**の中にいることに気付くでしょう。永遠のループの次の命令にジャンプすると、シェルコードを呼び出す命令になるため、最終的にシェルコードを実行することができます。
 
 ![](<../../.gitbook/assets/image (397).png>)
 
@@ -298,7 +366,7 @@ Cutterでは、「ファイルを開く」と「シェルコードを開く」�
 
 ![](<../../.gitbook/assets/image (400).png>)
 
-特定の場所でエミュレーションを開始するには、そこにブレークポイントを設定し、おそらくCutterが自動的にそこからエミュレーションを開始します：
+特定の場所でエミュレーションを開始するには、そこにブレークポイントを設定し、おそらくCutterが自動的にそこからエミュレーションを開始するようにします：
 
 ![](<../../.gitbook/assets/image (399).png>)
 
@@ -321,7 +389,7 @@ scDbgには、グラフィカルなランチャーもあります。ここで、
 
 ![](<../../.gitbook/assets/image (398).png>)
 
-**Create Dump**オプションは、シェルコードがメモリ内で動的に変更された場合に、最終的なシェルコードをダンプします（デコードされたシェルコードをダウンロードするのに便利です）。**start offset**は、特定のオフセットでシェルコードを開始するのに役立ちます。**Debug Shell**オプションは、scDbgターミナルを使用してシェルコードをデバッグするのに便利です（ただし、前述のオプションのいずれかを使用する方が、Idaやx64dbgを使用できるため、より良いと思います）。
+**Create Dump**オプションは、シェルコードがメモリ内で動的に変更された場合に、最終的なシェルコードをダンプします（デコードされたシェルコードをダウンロードするのに便利です）。**start offset**は、特定のオフセットでシェルコードを開始するのに役立ちます。**Debug Shell**オプションは、scDbgターミナルを使用してシェルコードをデバッグするのに便利です（ただし、前述のオプションのいずれかを使用する方が、Idaやx64dbgを使用できるため、より良いです）。
 
 ### CyberChefを使用した逆アセンブル
 
@@ -341,24 +409,33 @@ apt-get install libz3-dev
 ```
 そして、[keystoneをインストール](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md)します（`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`）
 
-もしCTFをプレイしている場合、フラグを見つけるためのこの回避策は非常に役立つでしょう：[https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+もしCTFをプレイしている場合、このフラグを見つけるための回避策は非常に役立つかもしれません：[https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+
+
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
+
+最も重要な脆弱性を見つけて修正を迅速化しましょう。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリまで、クラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
 
 ## Rust
 
-**エントリーポイント**を見つけるには、次のように`::main`で関数を検索します：
+**エントリーポイント**を見つけるには、`::main`という関数を検索します。例えば：
 
 ![](<../../.gitbook/assets/image (612).png>)
 
 この場合、バイナリの名前はauthenticatorと呼ばれているため、これが興味深いmain関数であることは明らかです。\
-呼び出されている関数の**名前**を持っている場合、それらを**インターネット**で検索して、それらの**入力**と**出力**について学びます。
+呼び出される**関数の名前**を持っている場合、それらを**インターネット**で検索して、その**入力**と**出力**について学びます。
 
 ## **Delphi**
 
-Delphiでコンパイルされたバイナリには、[https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)を使用できます
+Delphiでコンパイルされたバイナリには、[https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)を使用できます。
 
-Delphiバイナリをリバースエンジニアリングする場合は、IDAプラグイン[https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)を使用することをお勧めします
+Delphiバイナリをリバースエンジニアリングする場合は、IDAプラグイン[https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)を使用することをおすすめします。
 
-単に**ATL+f7**（IDAでPythonプラグインをインポート）を押し、Pythonプラグインを選択します。
+**ATL+f7**（IDAでPythonプラグインをインポート）を押して、Pythonプラグインを選択します。
 
 このプラグインはバイナリを実行し、デバッグの開始時に関数名を動的に解決します。デバッグを開始した後、再びStartボタン（緑色のボタンまたはf9）を押すと、実際のコードの最初にブレークポイントがヒットします。
 
@@ -366,9 +443,9 @@ Delphiバイナリをリバースエンジニアリングする場合は、IDA�
 
 ## Golang
 
-Golangバイナリをリバースエンジニアリングする場合は、IDAプラグイン[https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)を使用することをお勧めします
+Golangのバイナリをリバースエンジニアリングする場合は、IDAプラグイン[https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)を使用することをおすすめします。
 
-単に**ATL+f7**（IDAでPythonプラグインをインポート）を押し、Pythonプラグインを選択します。
+**ATL+f7**（IDAでPythonプラグインをインポート）を押して、Pythonプラグインを選択します。
 
 これにより、関数の名前が解決されます。
 
@@ -389,11 +466,11 @@ GBAゲームの**バイナリ**を取得した場合、さまざまなツール�
 * [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidraプラグイン
 * [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidraプラグイン
 
-[**no$gba**](https://problemkaputt.de/gba.htm)では、_**Options --> Emulation Setup --> Controls**_\*\* \*\*でGame Boy Advanceの**ボタン**を押す方法が確認できます
+[**no$gba**](https://problemkaputt.de/gba.htm)では、_**Options --> Emulation Setup --> Controls**_\*\* \*\*でGame Boy Advanceの**ボタン**を押す方法がわかります
 
 ![](<../../.gitbook/assets/image (578).png>)
 
-押されたとき、各**キーには値**があり、それを識別することができます：
+押されると、各**キーには値**があり、それを識別することができます。
 ```
 A = 1
 B = 2
@@ -476,7 +553,7 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 前のコードでは、**uVar1**（**押されたボタンの値**が格納される場所）といくつかの値を比較しています：
 
 * 最初に、**値4**（**SELECT**ボタン）と比較されます：このボタンはチャレンジでは画面をクリアします。
-* 次に、**値8**（**START**ボタン）と比較されます：このボタンはコードがフラグを取得するために有効かどうかをチェックします。
+* 次に、**値8**（**START**ボタン）と比較されます：このボタンはチャレンジでフラグを取得するためのコードが有効かどうかをチェックします。
 * この場合、変数**`DAT_030000d8`**は0xf3と比較され、値が同じであればいくつかのコードが実行されます。
 * それ以外の場合、いくつかのcont（`DAT_030000d4`）がチェックされます。これはcontであるため、コードに入った直後に1が追加されます。\
 8未満の場合、**`DAT_030000d8`**に値を**追加**する何かが行われます（基本的には、contが8未満の間、押されたキーの値をこの変数に追加しています）。
@@ -494,14 +571,20 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 * [https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse\_ReverseEngineering)
 * [https://github.com/malrev/ABD](https://github.com/malrev/ABD)（バイナリの逆コンパイル）
 
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
+
+最も重要な脆弱性を見つけて、修正を迅速に行いましょう。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリまで、クラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
 * **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**Telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォロー**してください。
 * **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出**してください。
 
 </details>

