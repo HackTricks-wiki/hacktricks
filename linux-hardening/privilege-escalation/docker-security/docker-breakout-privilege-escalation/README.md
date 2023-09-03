@@ -12,7 +12,7 @@
 
 </details>
 
-![](<../../../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.io/) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
@@ -357,7 +357,7 @@ Sin embargo, puedes encontrar **otros archivos sensibles** para verificar en est
 
 ### Montajes arbitrarios
 
-En varias ocasiones, encontrarás que el **contenedor tiene algún volumen montado desde el host**. Si este volumen no se configuró correctamente, es posible que puedas **acceder/modificar datos sensibles**: leer secretos, cambiar las claves autorizadas de SSH...
+En varias ocasiones, encontrarás que el **contenedor tiene algún volumen montado desde el host**. Si este volumen no está configurado correctamente, es posible que puedas **acceder/modificar datos sensibles**: leer secretos, cambiar las claves autorizadas de SSH...
 ```bash
 docker run --rm -it -v /:/host ubuntu bash
 ```
@@ -422,7 +422,7 @@ Si puedes acceder a los procesos del host, podrás acceder a mucha información 
 ```
 docker run --rm -it --pid=host ubuntu bash
 ```
-Por ejemplo, podrás listar los procesos usando algo como `ps auxn` y buscar detalles sensibles en los comandos.
+Por ejemplo, podrás listar los procesos utilizando algo como `ps auxn` y buscar detalles sensibles en los comandos.
 
 Luego, como puedes **acceder a cada proceso del host en /proc/, simplemente puedes robar sus secretos de entorno** ejecutando:
 ```bash
@@ -468,10 +468,10 @@ También podrás acceder a los **servicios de red enlazados a localhost** dentro
 ```
 docker run --rm -it --ipc=host ubuntu bash
 ```
-Si solo tienes `hostIPC=true`, es probable que no puedas hacer mucho. Si algún proceso en el host o cualquier proceso dentro de otro pod está utilizando los **mecanismos de comunicación interproceso** del host (memoria compartida, matrices de semáforos, colas de mensajes, etc.), podrás leer/escribir en esos mismos mecanismos. El primer lugar donde debes buscar es `/dev/shm`, ya que se comparte entre cualquier pod con `hostIPC=true` y el host. También debes verificar los otros mecanismos IPC con `ipcs`.
+Si solo tienes `hostIPC=true`, es probable que no puedas hacer mucho. Si algún proceso en el host o cualquier proceso dentro de otro pod está utilizando los **mecanismos de comunicación interproceso** del host (memoria compartida, matrices de semáforos, colas de mensajes, etc.), podrás leer/escribir en esos mismos mecanismos. El primer lugar donde debes buscar es `/dev/shm`, ya que es compartido entre cualquier pod con `hostIPC=true` y el host. También debes verificar los otros mecanismos de IPC con `ipcs`.
 
 * **Inspeccionar /dev/shm** - Busca cualquier archivo en esta ubicación de memoria compartida: `ls -la /dev/shm`
-* **Inspeccionar las instalaciones IPC existentes** - Puedes verificar si se están utilizando instalaciones IPC con `/usr/bin/ipcs`. Verifícalo con: `ipcs -a`
+* **Inspeccionar las instalaciones de IPC existentes** - Puedes verificar si se están utilizando instalaciones de IPC con `/usr/bin/ipcs`. Verifícalo con: `ipcs -a`
 
 ### Recuperar capacidades
 
@@ -481,11 +481,11 @@ unshare -UrmCpf bash
 # Check them with
 cat /proc/self/status | grep CapEff
 ```
-### Abuso de espacio de nombres de usuario a través de enlaces simbólicos
+### Abuso de namespace de usuario a través de symlink
 
-La segunda técnica explicada en la publicación [https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) indica cómo se puede abusar de los enlaces de montaje con espacios de nombres de usuario para afectar archivos dentro del host (en ese caso específico, eliminar archivos).
+La segunda técnica explicada en el artículo [https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/](https://labs.f-secure.com/blog/abusing-the-access-to-mount-namespaces-through-procpidroot/) indica cómo se puede abusar de los enlaces simbólicos con los espacios de nombres de usuario para afectar archivos dentro del host (en ese caso específico, eliminar archivos).
 
-![](<../../../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 Utilice [**Trickest**](https://trickest.io/) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
 Obtenga acceso hoy mismo:
@@ -496,7 +496,7 @@ Obtenga acceso hoy mismo:
 
 ### Exploit de Runc (CVE-2019-5736)
 
-En caso de que pueda ejecutar `docker exec` como root (probablemente con sudo), intente escalar privilegios escapando de un contenedor abusando de CVE-2019-5736 (exploit [aquí](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Esta técnica básicamente **sobrescribe** el binario _**/bin/sh**_ del **host** **desde un contenedor**, por lo que cualquier persona que ejecute docker exec puede activar la carga útil.
+En caso de que pueda ejecutar `docker exec` como root (probablemente con sudo), puede intentar escalar privilegios escapando de un contenedor abusando de CVE-2019-5736 (exploit [aquí](https://github.com/Frichetten/CVE-2019-5736-PoC/blob/master/main.go)). Esta técnica básicamente **sobrescribe** el binario _**/bin/sh**_ del **host** **desde un contenedor**, por lo que cualquier persona que ejecute docker exec puede activar la carga útil.
 
 Cambie la carga útil según sea necesario y compile main.go con `go build main.go`. El binario resultante debe colocarse en el contenedor de Docker para su ejecución.\
 Al ejecutarlo, tan pronto como muestre `[+] Overwritten /bin/sh successfully`, debe ejecutar lo siguiente desde la máquina host:
@@ -515,7 +515,7 @@ Existen otras CVE a las que el contenedor puede ser vulnerable, puede encontrar 
 
 ### Superficie de escape de Docker
 
-* **Espacios de nombres:** El proceso debe estar **completamente separado de otros procesos** a través de espacios de nombres, por lo que no podemos escapar interactuando con otros procesos debido a los espacios de nombres (por defecto, no se puede comunicar a través de IPC, sockets Unix, servicios de red, D-Bus, `/proc` de otros procesos).
+* **Namespaces:** El proceso debe estar **completamente separado de otros procesos** a través de los espacios de nombres, por lo que no podemos escapar interactuando con otros procesos debido a los espacios de nombres (por defecto, no se puede comunicar a través de IPC, sockets Unix, servicios de red, D-Bus, `/proc` de otros procesos).
 * **Usuario root**: Por defecto, el usuario que ejecuta el proceso es el usuario root (sin embargo, sus privilegios están limitados).
 * **Capacidades**: Docker deja las siguientes capacidades: `cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep`
 * **Syscalls**: Estos son los syscalls que el **usuario root no podrá llamar** (debido a la falta de capacidades + Seccomp). Los otros syscalls podrían ser utilizados para intentar escapar.
@@ -542,7 +542,7 @@ Existen otras CVE a las que el contenedor puede ser vulnerable, puede encontrar 
 0x140 -- kexec_file_load
 0x141 -- bpf
 ```
-{% tab title="llamadas al sistema arm64" %}
+{% tab title="syscalls arm64" %}
 ```
 0x029 -- pivot_root
 0x059 -- acct
@@ -626,7 +626,7 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 
 
 
-![](<../../../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 Use [**Trickest**](https://trickest.io/) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
 Get Access Today:

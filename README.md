@@ -34,7 +34,7 @@ Puedes consultar su **blog** en [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro candente para profesionales de la tecnología y la ciberseguridad en todas las disciplinas.
+[**RootedCON**](https://www.rootedcon.com) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro en ebullición para profesionales de la tecnología y la ciberseguridad en todas las disciplinas.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -50,10 +50,10 @@ Consejo de caza de bugs: **regístrate** en **Intigriti**, una plataforma premiu
 
 ### [Trickest](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks)
 
-<figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.
 
 Obtén acceso hoy mismo:
 
@@ -69,7 +69,7 @@ Mantente un paso adelante en el juego de la ciberseguridad.
 
 Ejecuta miles de comprobaciones con una sola plataforma que cubre toda tu infraestructura tecnológica, desde la infraestructura interna hasta las aplicaciones web, las API y los sistemas en la nube. Intégrate perfectamente con [AWS, GCP, Azure](https://www.intruder.io/cloud-vulnerability-scanning-for-aws-google-cloud-and-azure) y agiliza DevOps para que tu equipo pueda implementar correcciones más rápido.
 
-Intruder nunca descansa. La protección las 24 horas del día, los 7 días de la semana, monitorea tus sistemas constantemente. ¿Quieres obtener más información? Visita su sitio web y pruébalo con [**una prueba gratuita**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks).
+Intruder nunca descansa. La protección las 24 horas del día, los 7 días de la semana, monitorea tus sistemas constantemente. ¿Quieres saber más? Visita su sitio web y pruébalo con [**una prueba gratuita**](https://www.intruder.io/?utm\_source=referral\&utm\_campaign=hacktricks).
 
 {% embed url="https://www.intruder.io/?utm_campaign=hacktricks&utm_source=referral" %}
 
@@ -100,7 +100,7 @@ Gana puntos de reputación con cada error verificado y conquista la cima de la c
 
 WebSec es una empresa de seguridad **todo en uno**, lo que significa que hacen de todo; Pruebas de penetración, Auditorías de seguridad, Entrenamientos de concienciación, Campañas de phishing, Revisión de código, Desarrollo de exploits, Externalización de expertos en seguridad y mucho más.
 
-Otra cosa genial sobre WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta tal punto que **garantizan los mejores resultados de calidad**, como se indica en su sitio web "**Si no podemos hackearlo, ¡no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
+Otra cosa genial de WebSec es que, a diferencia del promedio de la industria, WebSec tiene **mucha confianza en sus habilidades**, hasta tal punto que **garantizan los mejores resultados de calidad**, como se indica en su sitio web "**Si no podemos hackearlo, ¡no lo pagas!**". Para obtener más información, echa un vistazo a su [**sitio web**](https://websec.nl/en/) y [**blog**](https://websec.nl/blog/)!
 
 Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks**.
 
@@ -113,7 +113,7 @@ Además de lo anterior, WebSec también es un **apoyo comprometido de HackTricks
 
 ## Licencia
 
-**Derechos de autor © Carlos Polop 2023. A menos que se especifique lo contrario (la información externa copiada en el libro pertenece a los autores originales), el texto de** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **de Carlos Polop está bajo licencia** [**Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
+**Derechos de autor © Carlos Polop 2023. A menos que se especifique lo contrario (la información externa copiada en el libro pertenece a los autores originales), el texto en** [**HACK TRICKS**](https://github.com/carlospolop/hacktricks) **de Carlos Polop está bajo licencia** [**Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)**](https://creativecommons.org/licenses/by-nc/4.0/)**.**\
 **Si deseas utilizarlo con fines comerciales, contáctame.**
 
 ## **Descargo de responsabilidad**

@@ -1,9 +1,9 @@
 # Kerberoast
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y automatizar fácilmente flujos de trabajo con las herramientas comunitarias más avanzadas del mundo.\
+Utilice [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 Obtenga acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -23,7 +23,7 @@ Obtenga acceso hoy mismo:
 ## Kerberoast
 
 El objetivo de **Kerberoasting** es recolectar **tickets TGS para servicios que se ejecutan en nombre de cuentas de usuario** en el AD, no en cuentas de computadora. Por lo tanto, **parte** de estos tickets TGS están **encriptados** con **claves** derivadas de las contraseñas de usuario. Como consecuencia, sus credenciales podrían ser **descifradas sin conexión**.\
-Puede saber que se está utilizando una **cuenta de usuario** como un **servicio** porque la propiedad **"ServicePrincipalName"** no es **nula**.
+Puede saber que una **cuenta de usuario** se está utilizando como un **servicio** porque la propiedad **"ServicePrincipalName"** no es **nula**.
 
 Por lo tanto, para realizar Kerberoasting, solo se necesita una cuenta de dominio que pueda solicitar TGS, lo cual puede ser cualquiera ya que no se requieren privilegios especiales.
 
@@ -65,11 +65,9 @@ Get-NetUser -SPN | select serviceprincipalname #Powerview
 
 En esta técnica, el objetivo es solicitar un Service Ticket (TGS) a un servidor de dominio y luego extraerlo de la memoria del sistema. El TGS contiene información sensible, como la clave de sesión del servicio, que puede ser utilizada para realizar ataques de fuerza bruta y obtener las contraseñas de los usuarios.
 
-Para llevar a cabo esta técnica, se pueden utilizar herramientas como Mimikatz o Rubeus. Estas herramientas permiten solicitar un TGS para un servicio específico y luego extraerlo de la memoria del sistema. Una vez que se ha obtenido el TGS, se puede utilizar para realizar ataques de fuerza bruta y obtener la contraseña del servicio.
+Para llevar a cabo esta técnica, se pueden utilizar herramientas como Mimikatz o Rubeus. Estas herramientas permiten solicitar un TGS para un servicio específico y luego extraerlo de la memoria del sistema. Una vez que se ha obtenido el TGS, se puede utilizar para realizar ataques de fuerza bruta y obtener las contraseñas de los usuarios.
 
-Es importante tener en cuenta que esta técnica requiere privilegios de administrador en el sistema objetivo, ya que es necesario acceder a la memoria del sistema para extraer el TGS. Además, es posible que se requiera acceso físico al sistema o privilegios de red para solicitar el TGS al servidor de dominio.
-
-Para protegerse contra esta técnica, se recomienda implementar medidas de seguridad como la limitación de privilegios de administrador, el monitoreo de eventos de seguridad y la implementación de soluciones de detección de ataques de fuerza bruta. Además, es importante mantener el sistema operativo y las aplicaciones actualizadas para mitigar posibles vulnerabilidades que puedan ser explotadas en esta técnica.
+Es importante tener en cuenta que esta técnica requiere privilegios de administrador en el sistema objetivo y puede ser detectada por soluciones de seguridad que monitorean la memoria del sistema en busca de comportamientos sospechosos. Por lo tanto, se recomienda utilizar esta técnica con precaución y solo en entornos controlados y autorizados.
 ```powershell
 #Get TGS in memory from a single user
 Add-Type -AssemblyName System.IdentityModel
@@ -111,15 +109,15 @@ Cuando se solicita un TGS, se genera el evento de Windows `4769 - Se solicitó u
 
 
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, utilizando las herramientas comunitarias más avanzadas del mundo.\
+Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** utilizando las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-### Descifrado
+### Cracking
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
@@ -162,13 +160,13 @@ Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al repositorio [hacktricks](https://github.com/carlospolop/hacktricks) y al repositorio [hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)**.
 
 </details>
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\

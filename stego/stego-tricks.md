@@ -84,7 +84,7 @@ cmp original.jpg stego.jpg -b -l
 Si encuentras que una **línea de texto** es **más grande** de lo que debería ser, entonces es posible que se incluya alguna **información oculta** dentro de los **espacios** utilizando caracteres invisibles.󐁈󐁥󐁬󐁬󐁯󐀠󐁴󐁨\
 Para **extraer** los **datos**, puedes utilizar: [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder)
 
-![](<../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 \
 Utiliza [**Trickest**](https://trickest.io/) para construir y **automatizar flujos de trabajo** fácilmente, utilizando las herramientas comunitarias más avanzadas del mundo.\
@@ -172,7 +172,7 @@ ffmpeg se puede utilizar para verificar la integridad de los archivos de audio, 
 
 ### Wavsteg \[WAV] <a href="#wavsteg" id="wavsteg"></a>
 
-WavSteg es una herramienta de Python3 que puede ocultar datos, utilizando el bit menos significativo, en archivos wav. También puede buscar y extraer datos de archivos wav.\
+WavSteg es una herramienta en Python3 que puede ocultar datos, utilizando el bit menos significativo, en archivos wav. También puede buscar y extraer datos de archivos wav.\
 Puedes obtenerlo desde [Github](https://github.com/ragibson/Steganography#WavSteg)\
 Comandos útiles:\
 `python3 WavSteg.py -r -b 1 -s archivo_de_sonido -o archivo_de_salida` : Extrae a un archivo de salida (tomando solo 1 bit menos significativo)\

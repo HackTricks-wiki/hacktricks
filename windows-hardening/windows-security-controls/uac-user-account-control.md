@@ -12,7 +12,7 @@
 
 </details>
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 Usa [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
@@ -175,7 +175,7 @@ También, utilizando [esta](https://en.wikipedia.org/wiki/Windows\_10\_version\_
 
 **Todas** las técnicas utilizadas aquí para eludir UAC **requieren** una **shell interactiva completa** con la víctima (una shell nc.exe común no es suficiente).
 
-Puedes obtenerlo utilizando una sesión de **meterpreter**. Migra a un **proceso** que tenga el valor de **Sesión** igual a **1**:
+Puedes obtener una sesión de **meterpreter**. Migra a un **proceso** que tenga el valor de **Session** igual a **1**:
 
 ![](<../../.gitbook/assets/image (96).png>)
 
@@ -183,11 +183,11 @@ Puedes obtenerlo utilizando una sesión de **meterpreter**. Migra a un **proceso
 
 ### Bypass de UAC con GUI
 
-Si tienes acceso a una **GUI, simplemente puedes aceptar la solicitud de UAC** cuando la recibas, realmente no necesitas eludirla. Por lo tanto, si obtienes acceso a una GUI, podrás eludir UAC.
+Si tienes acceso a una **GUI, simplemente puedes aceptar la solicitud de UAC** cuando la recibas, realmente no necesitas eludirla. Por lo tanto, si tienes acceso a una GUI, podrás eludir UAC.
 
 Además, si obtienes una sesión de GUI que alguien estaba usando (potencialmente a través de RDP), hay **herramientas que se ejecutarán como administrador** desde donde podrías ejecutar un **cmd** por ejemplo, **como administrador** directamente sin que UAC te lo solicite nuevamente, como [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Esto podría ser un poco más **sigiloso**.
 
-### Bypass de UAC por fuerza bruta ruidosa
+### Bypass de UAC ruidoso por fuerza bruta
 
 Si no te importa ser ruidoso, siempre puedes **ejecutar algo como** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) que **solicita elevar los permisos hasta que el usuario los acepte**.
 
@@ -195,20 +195,20 @@ Si no te importa ser ruidoso, siempre puedes **ejecutar algo como** [**https://g
 
 Si echas un vistazo a **UACME**, notarás que **la mayoría de los bypass de UAC abusan de una vulnerabilidad de Dll Hijacking** (principalmente escribiendo la dll maliciosa en _C:\Windows\System32_). [Lee esto para aprender cómo encontrar una vulnerabilidad de Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking.md).
 
-1. Encuentra un binario que se **autoeleve** (verifica que cuando se ejecute, se ejecute con un nivel de integridad alto).
-2. Con procmon, encuentra eventos de "**NOMBRE NO ENCONTRADO**" que puedan ser vulnerables a **Dll Hijacking**.
+1. Encuentra un binario que se **autoeleve** (verifica que cuando se ejecute se ejecute en un nivel de integridad alto).
+2. Con procmon, encuentra eventos de "**NAME NOT FOUND**" que puedan ser vulnerables a **Dll Hijacking**.
 3. Probablemente necesitarás **escribir** la DLL dentro de algunas **rutas protegidas** (como C:\Windows\System32) donde no tienes permisos de escritura. Puedes eludir esto utilizando:
-1. **wusa.exe**: Windows 7, 8 y 8.1. Permite extraer el contenido de un archivo CAB dentro de rutas protegidas (porque esta herramienta se ejecuta con un nivel de integridad alto).
+1. **wusa.exe**: Windows 7, 8 y 8.1. Permite extraer el contenido de un archivo CAB dentro de rutas protegidas (porque esta herramienta se ejecuta desde un nivel de integridad alto).
 2. **IFileOperation**: Windows 10.
 4. Prepara un **script** para copiar tu DLL dentro de la ruta protegida y ejecutar el binario vulnerable y autoelevado.
 
 ### Otra técnica de bypass de UAC
 
-Consiste en observar si un binario **autoelevado** intenta **leer** del **registro** el **nombre/ruta** de un **binario** o **comando** que se va a **ejecutar** (esto es más interesante si el binario busca esta información dentro de **HKCU**).
+Consiste en observar si un binario **autoelevado** intenta **leer** del **registro** el **nombre/ruta** de un **binario** o **comando** a ser **ejecutado** (esto es más interesante si el binario busca esta información dentro de **HKCU**).
 
-![](<../../.gitbook/assets/image (9) (1) (2).png>)
+<figure><img src="/.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Utiliza [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
+Usa [**Trickest**](https://trickest.com/?utm\_campaign=hacktrics\&utm\_medium=banner\&utm\_source=hacktricks) para construir y **automatizar flujos de trabajo** con las herramientas comunitarias más avanzadas del mundo.\
 Obtén acceso hoy mismo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
@@ -219,7 +219,7 @@ Obtén acceso hoy mismo:
 
 * ¿Trabajas en una **empresa de ciberseguridad**? ¿Quieres ver tu **empresa anunciada en HackTricks**? ¿O quieres tener acceso a la **última versión de PEASS o descargar HackTricks en PDF**? ¡Consulta los [**PLANES DE SUSCRIPCIÓN**](https://github.com/sponsors/carlospolop)!
 * Descubre [**The PEASS Family**](https://opensea.io/collection/the-peass-family), nuestra colección exclusiva de [**NFTs**](https://opensea.io/collection/the-peass-family)
-* Obtén el [**merchandising oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
+* Obtén el [**swag oficial de PEASS y HackTricks**](https://peass.creator-spring.com)
 * **Únete al** [**💬**](https://emojipedia.org/speech-balloon/) [**grupo de Discord**](https://discord.gg/hRep4RUj7f) o al [**grupo de Telegram**](https://t.me/peass) o **sígueme** en **Twitter** [**🐦**](https://github.com/carlospolop/hacktricks/tree/7af18b62b3bdc423e11444677a6a73d4043511e9/\[https:/emojipedia.org/bird/README.md)[**@carlospolopm**](https://twitter.com/hacktricks\_live)**.**
 * **Comparte tus trucos de hacking enviando PRs al** [**repositorio de hacktricks**](https://github.com/carlospolop/hacktricks) **y al** [**repositorio de hacktricks-cloud**](https://github.com/carlospolop/hacktricks-cloud).
 
